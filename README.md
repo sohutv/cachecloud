@@ -1,4 +1,4 @@
-##<a name="index"/>目录&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;具体细节请看后面[wiki文档](https://github.com/sohutv/cachecloud/wiki "Cachecloud Wiki")
+##<a name="index"/>目录&nbsp;&nbsp;(具体细节[wiki文档](https://github.com/sohutv/cachecloud/wiki "Cachecloud Wiki"))
 * [一、CacheCloud是做什么的](#cc1)
 * [二、CacheCloud提供哪些功能](#cc2)
 * [三、CacheCloud解决什么问题](#cc3)
