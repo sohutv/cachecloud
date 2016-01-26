@@ -116,7 +116,7 @@ Redis的开发人员如同使用Mysql一样，不需要运维Mysql服务器，�
 <a name="cc7-4"/>
 ####4、添加机器
 #####(1). 运行脚本:
-cachecloud项目中的cachecloud-init.sh(目录：cachecloud-web\src\main\resources\script\cachecloud-init.sh)脚本是用来初始化服务器的cachecloud环境，主要工作如下：
+cachecloud项目中的cachecloud-init.sh脚本是用来初始化服务器的cachecloud环境，主要工作如下：
 
 +  **(a). 创建cachecloud项目用户**：因为cachecloud项目的部分功能(redis启动、服务器监控)是通过ssh完成的，所以这里的用户和密码要和项目中的相对应，具体详见第三节。
 
