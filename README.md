@@ -108,7 +108,8 @@ Redis的开发人员如同使用Mysql一样，不需要运维Mysql服务器，�
         /etc/init.d/cachecloud-web start
 #####(3). 登录确认
 
-#####(a) 访问：http://127.0.0.1:9999/manage/login (9999是tomcat的端口号，具体要参考第三节中的online.properties和local.properties中的web.port)
+#####(a) 访问：http://127.0.0.1:9999
+(9999是tomcat的端口号，具体要参考第三节中的online.properties和local.properties中的web.port)
 #####(b) 如果访问正常，请使用用户名:admin、密码:admin访问系统，跳转到应用列表下：
 <img src="http://i2.itc.cn/20160125/3084_365af079_a76e_4bc9_6107_2d2c13bb8dbb_1.jpg">
 
