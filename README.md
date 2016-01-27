@@ -139,8 +139,9 @@ cachecloud项目中的cachecloud-init.sh脚本是用来初始化服务器的cach
 +  (e). 请确保/opt/有足够的硬盘空间，因为/opt/cachecloud/data要存储RDB和AOF的持久化文件，如果硬盘过小，会造成持久化失败。（如果硬盘确实很小，建议建立一个软链接到/opt/cachecloud/data,且保证软链接的目录也是username用户，一定要保证/opt/cachecloud的目录结构）
 +  (f). 脚本中目前使用的是redis-3.0.6，如有需要请自行替换，建议使用3.0 release以后的版本。
     
-
-
+#####(4). 添加机器 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;进入管理员界面(http://ip:port/manage/total/list)，进入机器管理，点击添加机器，添加机器信息是开通应用的基础。
+<img src="http://i2.itc.cn/20160127/3084_c9d9d17b_4e86_a17f_5442_cf9cc08c68f3_1.jpg"/>
 
 
  
