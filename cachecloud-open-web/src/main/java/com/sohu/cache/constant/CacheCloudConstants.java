@@ -1,13 +1,28 @@
 package com.sohu.cache.constant;
 
+import java.util.ResourceBundle;
+
 /**
- * 
+ * cachecloud常量
  * @author leifu
  * @Date 2014年11月26日
  * @Time 上午10:38:34
  */
 public class CacheCloudConstants {
 	
+    /**
+     * 机器统一的用户名、密码
+     */
+    public static String USERNAME;
+    public static String PASSWORD;
+    
+    static {
+        ResourceBundle resourceBundle = ResourceBundle.getBundle("application");
+        USERNAME = resourceBundle.getString("shell.auth.simple.user.name");
+        PASSWORD = resourceBundle.getString("shell.auth.simple.user.password");
+    }
+    
+    
     /**
      * cachecloud普通用户登录session
      */

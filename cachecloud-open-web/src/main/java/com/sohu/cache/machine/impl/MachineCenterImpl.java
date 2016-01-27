@@ -1,6 +1,7 @@
 package com.sohu.cache.machine.impl;
 
 import com.google.common.base.Strings;
+import com.sohu.cache.constant.CacheCloudConstants;
 import com.sohu.cache.constant.MachineConstant;
 import com.sohu.cache.dao.InstanceDao;
 import com.sohu.cache.dao.InstanceStatsDao;
@@ -118,7 +119,7 @@ public class MachineCenterImpl implements MachineCenter {
         MachineStats machineStats = null;
         try {
             int sshPort = SSHUtil.getSshPort(ip);
-            machineStats = SSHUtil.getMachineInfo(ip, sshPort, MachineProtocol.USERNAME, MachineProtocol.PASSWORD);
+            machineStats = SSHUtil.getMachineInfo(ip, sshPort, CacheCloudConstants.USERNAME, CacheCloudConstants.PASSWORD);
             machineStats.setHostId(hostId);
             if (machineStats != null) {
                 infoMap.put(MachineConstant.Ip.getValue(), machineStats.getIp());

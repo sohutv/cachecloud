@@ -7,12 +7,7 @@ package com.sohu.cache.protocol;
  * @time: 2014/8/26 16:18
  */
 public interface MachineProtocol {
-    /**
-     * 机器统一的用户名、密码
-     */
-    public static final String USERNAME = "cachecloud";
-    public static final String PASSWORD = "cachecloud";
-
+    
     /**
      * 统一的目录结构
      */

@@ -4,6 +4,7 @@ import static com.sohu.cache.constant.BaseConstant.WORD_SEPARATOR;
 import static com.sohu.cache.constant.EmptyObjectConstant.EMPTY_STRING;
 import static com.sohu.cache.constant.SymbolConstant.COMMA;
 
+import com.sohu.cache.constant.CacheCloudConstants;
 import com.sohu.cache.entity.MachineStats;
 import com.sohu.cache.exception.IllegalParamException;
 import com.sohu.cache.exception.SSHException;
@@ -402,7 +403,7 @@ public class SSHUtil {
      */
     public static boolean scpFileToRemote(String ip, String localPath, String remoteDir) throws SSHException {
         int sshPort = SSHUtil.getSshPort(ip);
-        return scpFileToRemote(ip, sshPort, MachineProtocol.USERNAME, MachineProtocol.PASSWORD, localPath, remoteDir);
+        return scpFileToRemote(ip, sshPort, CacheCloudConstants.USERNAME, CacheCloudConstants.PASSWORD, localPath, remoteDir);
     }
 
     /**
@@ -415,7 +416,7 @@ public class SSHUtil {
      */
     public static String execute(String ip, String cmd) throws SSHException {
         int sshPort = SSHUtil.getSshPort(ip);
-        return execute(ip, sshPort, MachineProtocol.USERNAME, MachineProtocol.PASSWORD, cmd);
+        return execute(ip, sshPort, CacheCloudConstants.USERNAME, CacheCloudConstants.PASSWORD, cmd);
     }
 
     /**

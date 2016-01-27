@@ -1,5 +1,6 @@
 package com.sohu.cache.machine;
 
+import com.sohu.cache.constant.CacheCloudConstants;
 import com.sohu.cache.exception.SSHException;
 import com.sohu.cache.protocol.MachineProtocol;
 import com.sohu.cache.ssh.SSHUtil;
@@ -49,7 +50,7 @@ public class PortGenerator {
         String maxPortStr = "";
         try {
             int sshPort = SSHUtil.getSshPort(ip);
-            maxPortStr = SSHUtil.execute(ip, sshPort, MachineProtocol.USERNAME, MachineProtocol.PASSWORD, REDIS_PORT_CMD);
+            maxPortStr = SSHUtil.execute(ip, sshPort, CacheCloudConstants.USERNAME, CacheCloudConstants.PASSWORD, REDIS_PORT_CMD);
         } catch (SSHException e) {
             logger.error("cannot get max port of redis by ssh, ip: {}", ip, e);
         }
@@ -91,7 +92,7 @@ public class PortGenerator {
         String maxPortStr = "";
         try {
             int sshPort = SSHUtil.getSshPort(ip);
-            maxPortStr = SSHUtil.execute(ip, sshPort, MachineProtocol.USERNAME, MachineProtocol.PASSWORD, MEMCACHED_PORT_CMD);
+            maxPortStr = SSHUtil.execute(ip, sshPort, CacheCloudConstants.USERNAME, CacheCloudConstants.PASSWORD, MEMCACHED_PORT_CMD);
         } catch (SSHException e) {
             logger.error("cannot get max port of memcached by ssh, ip: {}", ip, e);
         }
