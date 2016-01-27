@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+
+    <!--数据库的字段名到pojo类的属性名的自动映射-->
+    <settings>
+        <!-- 使用jdbc的getGeneratedKeys自动获取主键主键策略:默认false -->
+        <setting name="useGeneratedKeys" value="true"/>
+        <!-- 使用列别名代替列名,默认true -->
+        <setting name="useColumnLabel" value="true"/>
+        <!-- 开启自动驼峰-下划线命名规则,默认false: Table(create_time) -> Entity(createTime) -->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+    </settings>
+
+</configuration>

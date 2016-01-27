@@ -1,0 +1,114 @@
+/***
+Coming Soon Page
+***/
+body {
+	background-color: #ddd;
+	padding: 0;
+	margin: 0;
+}
+
+.coming-soon-header {
+	padding: 20px;
+	margin-top: 80px;
+}
+
+.coming-soon-content {
+	padding: 20px;
+	margin-top: 10px;
+}
+
+.coming-soon-countdown {
+	padding: 20px;
+}  
+
+.coming-soon-content h1,
+.coming-soon-content p {
+	color: #fff;
+}
+
+.coming-soon-content h1 {
+	font-size: 42px;
+	line-height: 50px;
+	margin-bottom: 15px;	
+	font-weight: 300;
+}
+
+.coming-soon-content p {
+	font-size: 13px;
+}
+
+
+.coming-soon-content input {
+	background: #fff !important;
+}
+
+.coming-soon-footer {
+   text-align: left !important;
+   font-size: 12px;
+   color: #fefefe;
+   padding: 20px 20px 20px 20px;
+}
+
+/*Countdown*/
+#defaultCountdown { 
+	width: 100%;
+	margin: 10px 0; 
+	overflow: hidden;
+}
+
+#defaultCountdown span.countdown_row {
+	overflow: hidden;
+}
+
+#defaultCountdown span.countdown_row span { 
+	font-size: 16px;
+	font-weight: 300;
+	line-height: 20px;
+	margin-right: 2px;
+}
+
+#defaultCountdown span.countdown_row > span {
+	float: left;
+}
+
+#defaultCountdown span.countdown_section {
+	color: #fff;
+	padding: 7px 15px !important;
+	margin-bottom: 2px;
+	font-weight: 300;
+	background: url(../../img/bg-white.png) repeat;
+	text-align: center;
+}
+
+#defaultCountdown span.countdown_amount {
+	display: inline-block;
+	font-size: 38px !important;
+	padding: 15px !important;
+	font-weight: 300;
+}
+
+/*Responsive*/
+@media (max-width: 1024px) {
+	#defaultCountdown span.countdown_amount {
+		padding: 10px;
+	}
+}
+
+@media (max-width: 767px) {
+
+	.coming-soon-header,
+	.coming-soon-countdown, 
+	.coming-soon-content,
+	.coming-soon-footer {
+		margin-top: 0px;
+		padding: 10px;
+	}  
+}
+
+@media (max-width: 320px) {
+
+	.coming-soon-content .btn-subscribe span {
+		display: none;
+	}
+
+}

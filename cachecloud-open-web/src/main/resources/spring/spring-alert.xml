@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        " default-autowire="byName">
+
+	<bean id="baseAlertService" class="com.sohu.cache.alert.impl.BaseAlertService"/>
+
+	<!-- 应用报警 -->
+    <bean id="appAlertService" class="com.sohu.cache.alert.impl.AppAlertServiceImpl" parent="baseAlertService"/>
+
+	<!-- 实例报警 -->
+    <bean id="instanceAlertService" class="com.sohu.cache.alert.impl.InstanceAlertServiceImpl" parent="baseAlertService"/>
+
+</beans>

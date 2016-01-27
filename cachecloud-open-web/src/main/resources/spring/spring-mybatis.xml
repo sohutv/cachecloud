@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                     http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                     http://www.springframework.org/schema/context
+                     http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:property-placeholder location="classpath:application.properties"/>
+
+    <!--cache data source-->
+    <bean name="cacheCloudDB" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${jdbc.driver}"/>
+        <property name="jdbcUrl" value="${cachecloud.db.url}"/>
+        <property name="user" value="${cachecloud.db.user}"/>
+        <property name="password" value="${cachecloud.db.password}"/>
+        <property name="initialPoolSize" value="10"/>
+        <property name="maxPoolSize" value="${cachecloud.maxPoolSize}"/>
+        <property name="testConnectionOnCheckin" value="false"/>
+        <property name="testConnectionOnCheckout" value="true"/>
+        <property name="preferredTestQuery" value="${jdbc.validationQuery}"/>
+    </bean>
+
+    <bean id="mysqlSessionFactory" class="com.sohu.cache.app.AliasesResourceSqlSessionFactoryBean">
+        <property name="dataSource" ref="cacheCloudDB"/>
+        <!-- mybatis配置文件的位置 -->
+        <property name="configLocation" value="classpath:mybatis-config.xml"/>
+        <!-- domain的包路径，类似MyBatis的typeAliases配置 -->
+        <property name="typeAliasesPackage" value="com.sohu.cache.entity"/>
+        <property name="typeAliasesClassResources">
+            <array>
+                <value>classpath:com/sohu/cache/entity/*</value>
+            </array>
+        </property>
+        <!-- mapper配置文件的路径，类似MyBatis的mappers配置 -->
+        <property name="mapperLocations" value="classpath:mapper/*.xml"/>
+    </bean>
+
+    <!-- 扫描接口类的包路径 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="mysqlSessionFactory"/>
+        <property name="basePackage" value="com.sohu.cache.dao"/>
+    </bean>
+</beans>

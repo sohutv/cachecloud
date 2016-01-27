@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.sohu.tv</groupId>
+    <artifactId>cachecloud-open-parent</artifactId>
+    <name>cachecloud-open-parent</name>
+    <packaging>pom</packaging>
+    <version>1.0-SNAPSHOT</version>
+    <modules>
+        <module>cachecloud-open-web</module>
+        <module>cachecloud-open-client</module>
+  	</modules>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring.version>4.2.4.RELEASE</spring.version>
+        <quartz.version>2.2.1</quartz.version>
+        <logback.version>1.1.1</logback.version>
+        <mysql.java.version>5.1.29</mysql.java.version>
+        <junit.version>4.11</junit.version>
+        <servlet.api.version>3.1</servlet.api.version>
+        <jetty.version>9.2.3.v20140905</jetty.version>
+        <mybatis.spring.version>1.2.3</mybatis.spring.version>
+        <mybatis.version>3.2.8</mybatis.version>
+        <xmemcached.version>2.0.0</xmemcached.version>
+        <jedis.version>2.8.0</jedis.version>
+        <mongodb.driver.version>2.12.1</mongodb.driver.version>
+        <jackson.version>2.3.2</jackson.version>
+        <httpcoponents.version>4.3.2</httpcoponents.version>
+        <apache.commons.collections>4.0</apache.commons.collections>
+        <maven.compiler.plugin>3.1</maven.compiler.plugin>
+        <maven.compiler.target>1.7</maven.compiler.target>
+        <maven.war.plugin>2.4</maven.war.plugin>
+        <maven.surefire.plugin>2.16</maven.surefire.plugin>
+        <maven.clean.plugin>2.5</maven.clean.plugin>
+        <toolkit.version>0.0.5-SNAPSHOT</toolkit.version>
+        <ganymed.ssh.version>build210</ganymed.ssh.version>
+        <commons.collections.version>3.2.1</commons.collections.version>
+        <guava.version>15.0</guava.version>
+        <commons-lang.version>2.3</commons-lang.version>
+        <json-lib.version>2.2.1</json-lib.version>
+        <slf4j.version>1.7.6</slf4j.version>
+        <commons.configuration.version>1.6</commons.configuration.version>
+        <velocity.version>1.7</velocity.version>
+        <velocity-tool.version>2.0</velocity-tool.version>
+        <velocity-tools-generic.version>2.1.0-SNAPSHOT</velocity-tools-generic.version>
+        <hadoop>2.5.1</hadoop>
+        <extremecomponents.version>1.0.1</extremecomponents.version>
+        <fastjson.version>1.1.41</fastjson.version>
+        <maven.deloy.plugin>2.8.1</maven.deloy.plugin>
+        <maven-source-plugin>2.2.1</maven-source-plugin>
+        <maven-resources-plugin>2.6</maven-resources-plugin>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.quartz-scheduler</groupId>
+                <artifactId>quartz</artifactId>
+                <version>${quartz.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>slf4j-api</artifactId>
+                        <groupId>org.slf4j</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback.version}</version>
+                <scope>compile</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql.java.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>3.1.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis-spring</artifactId>
+                <version>${mybatis.spring.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis</artifactId>
+                <version>${mybatis.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context-support</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis-spring-boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.googlecode.xmemcached</groupId>
+                <artifactId>xmemcached</artifactId>
+                <version>${xmemcached.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>redis.clients</groupId>
+                <artifactId>jedis</artifactId>
+                <version>${jedis.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpcoponents.version}</version>
+            </dependency>
+
+            <!-- toolkit -->
+            <dependency>
+                <groupId>common.toolkit</groupId>
+                <artifactId>common-toolkit</artifactId>
+                <version>${toolkit.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>spring-beans</artifactId>
+                        <groupId>org.springframework</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <!-- SSH远程 -->
+            <dependency>
+                <groupId>ch.ethz.ganymed</groupId>
+                <artifactId>ganymed-ssh2</artifactId>
+                <version>${ganymed.ssh.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-collections4</artifactId>
+                <version>${apache.commons.collections}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+            
+            <dependency>
+				<groupId>commons-lang</groupId>
+				<artifactId>commons-lang</artifactId>
+				<version>${commons-lang.version}</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>net.sf.json-lib</groupId>
+				<artifactId>json-lib</artifactId>
+				<version>${json-lib.version}</version>
+			</dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>commons-configuration</groupId>
+                <artifactId>commons-configuration</artifactId>
+                <version>${commons.configuration.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.velocity</groupId>
+                <artifactId>velocity</artifactId>
+                <version>${velocity.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.velocity</groupId>
+                <artifactId>velocity-tools</artifactId>
+                <version>${velocity-tool.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.velocity</groupId>
+                <artifactId>velocity-tools-generic</artifactId>
+                <version>${velocity-tools-generic.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-client</artifactId>
+                <version>${hadoop}</version>
+            </dependency>
+            
+            <dependency>
+			  <groupId>com.alibaba</groupId>
+			  <artifactId>fastjson</artifactId>
+			  <version>${fastjson.version}</version>
+			</dependency>
+            
+        </dependencies>
+    </dependencyManagement>
+
+    <developers>
+
+        <developer>
+            <name>yijunzhang</name>
+            <email>yijunzhang@sohu-inc.com</email>
+            <organization>sohu-tv</organization>
+            <roles>
+                <role>developer</role>
+            </roles>
+        </developer>
+
+        <developer>
+            <name>leifu</name>
+            <email>leifu@sohu-inc.com</email>
+            <organization>sohu-tv</organization>
+            <roles>
+                <role>developer</role>
+            </roles>
+        </developer>
+
+        <developer>
+            <name>lingguo</name>
+            <email>lingguo@sohu-inc.com</email>
+            <organization>sohu-tv</organization>
+            <roles>
+                <role>developer</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-maven-plugin</artifactId>
+                    <configuration>
+                        <webAppConfig>
+                            <allowDuplicateFragmentNames>true</allowDuplicateFragmentNames>
+                        </webAppConfig>
+                        <httpConnector>
+                            <port>8585</port>
+                        </httpConnector>
+                    </configuration>
+                    <version>${jetty.version}</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven.compiler.plugin}</version>
+                    <configuration>
+                        <source>${maven.compiler.target}</source>
+                        <target>${maven.compiler.target}</target>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven.surefire.plugin}</version>
+                    <configuration>
+                        <skipTests>true</skipTests>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>${maven.clean.plugin}</version>
+                    <configuration>
+                        <filesets>
+                            <fileset>
+                                <directory>${basedir}/src/main/webapp/WEB-INF/classes</directory>
+                            </fileset>
+                            <fileset>
+                                <directory>${basedir}/src/main/webapp/WEB-INF/lib</directory>
+                            </fileset>
+                        </filesets>
+                    </configuration>
+                </plugin>
+                
+                <plugin>
+	            	<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>${maven.deloy.plugin}</version>
+				</plugin>
+				
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>${maven-source-plugin}</version>
+					<configuration>
+						<attach>true</attach>
+					</configuration>
+					<executions>
+						<execution>
+							<phase>compile</phase>
+							<goals>
+								<goal>jar</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				
+				<plugin>
+	                <groupId>org.apache.maven.plugins</groupId>
+	                <artifactId>maven-resources-plugin</artifactId>
+	                <version>${maven-resources-plugin}</version>
+	                <configuration>
+	                    <encoding>UTF-8</encoding>
+	                </configuration>
+	            </plugin>
+                
+            </plugins>
+        </pluginManagement>
+    </build>
+    
+	<repositories>
+	<repository>
+		<id>central</id>
+		<url>http://repo1.maven.org/maven2</url>
+		<snapshots>
+			<enabled>false</enabled>
+		</snapshots>
+	</repository>
+
+	<repository>
+		<id>com.springsource.repository.maven.release</id>
+		<url>http://repo.springsource.org/release/</url>
+		<snapshots>
+			<enabled>false</enabled>
+		</snapshots>
+	</repository>
+	<repository>
+		<id>nexus</id>
+		<name>local private nexus</name>
+		<url>http://maven.oschina.net/content/groups/public/</url>
+		<releases>
+			<enabled>true</enabled>
+		</releases>
+		<snapshots>
+			<enabled>false</enabled>
+		</snapshots>
+	</repository>
+
+</repositories>  
+    
+
+</project>

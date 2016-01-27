@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        " default-autowire="byName">
+
+    <bean id="appService" class="com.sohu.cache.web.service.impl.AppServiceImpl"/>
+
+    <bean id="memFaultService" class="com.sohu.cache.web.service.impl.MemFaultServiceImpl"/>
+
+    <bean id="userService" class="com.sohu.cache.web.service.impl.UserServiceImpl"/>
+
+	<!-- 邮件报警 -->
+    <bean id="emailComponent" class="com.sohu.cache.web.component.EmailComponentImpl">
+    	<property name="adminEmail" value="${mobil.owner.email}"></property>
+    </bean>
+
+	<!-- 短信报警 -->
+	<bean id="mobileAlertComponent" class="com.sohu.cache.web.component.MobileAlertComponentImpl">
+		<property name="adminPhones" value="${mobil.owner.phone}"></property>
+	</bean>
+	
+	<!-- 应用相关审核变更通知 -->
+    <bean id="appEmailUtil" class="com.sohu.cache.web.util.AppEmailUtil"/>
+	
+</beans>

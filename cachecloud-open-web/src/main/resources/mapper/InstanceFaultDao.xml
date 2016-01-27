@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sohu.cache.dao.InstanceFaultDao">
+    <sql id="instance_fault_column">
+		app_id,inst_id,ip,port,status,create_time,type,reason
+    </sql>
+
+    <insert id="insert" parameterType="InstanceFault" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
+        insert into instance_fault(app_id,inst_id,ip,port,status,create_time,type,reason)
+        VALUE (#{appId},#{instId},#{ip},#{port},#{status},#{createTime},#{type},#{reason})
+    </insert>
+
+    <select id="getListByInstId" resultType="InstanceFault">
+        select
+          id, <include refid="instance_fault_column"/>
+        from instance_fault
+        where inst_id = #{instId}
+        order by create_time desc
+    </select>
+
+    <select id="getListByAppId" resultType="InstanceFault">
+        select
+        id, <include refid="instance_fault_column"/>
+        from instance_fault
+        where app_id = #{appId}
+        order by create_time desc
+    </select>
+
+
+</mapper>
+
+

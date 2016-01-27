@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sohu.cache.dao.QuartzDao">
+    <sql id="quartz_triggers_columns">
+        t.SCHED_NAME,t.TRIGGER_NAME,t.TRIGGER_GROUP,t.JOB_NAME,t.JOB_GROUP,t.DESCRIPTION,t.NEXT_FIRE_TIME,t.PREV_FIRE_TIME,t.PRIORITY,
+        t.TRIGGER_STATE,t.TRIGGER_TYPE,t.START_TIME,t.END_TIME,t.CALENDAR_NAME,t.MISFIRE_INSTR
+    </sql>
+
+    <!--查询job分组下的所有trigger-->
+    <select id="getTriggersByJobGroup" resultType="TriggerInfo" parameterType="String">
+        SELECT <include refid="quartz_triggers_columns"/>
+        FROM QRTZ_TRIGGERS t
+        WHERE JOB_GROUP = #{jobGroup};
+    </select>
+
+    <!--返回所有trigger-->
+    <select id="getAllTriggers" resultType="TriggerInfo">
+        SELECT <include refid="quartz_triggers_columns"/>, ifnull(ct.CRON_EXPRESSION,'') cron
+        FROM QRTZ_TRIGGERS t
+        LEFT JOIN QRTZ_CRON_TRIGGERS ct
+        on (t.SCHED_NAME = ct.SCHED_NAME and t.TRIGGER_NAME = ct.TRIGGER_NAME and t.TRIGGER_GROUP=ct.TRIGGER_GROUP)
+    </select>
+
+    <!--查询trigger：模糊匹配trigger name或trigger group-->
+    <select id="searchTriggerByNameOrGroup" resultType="TriggerInfo" parameterType="String">
+        SELECT <include refid="quartz_triggers_columns"/>, ifnull(ct.CRON_EXPRESSION,'') cron
+        FROM QRTZ_TRIGGERS t
+        LEFT JOIN QRTZ_CRON_TRIGGERS ct
+        on (t.SCHED_NAME = ct.SCHED_NAME and t.TRIGGER_NAME = ct.TRIGGER_NAME and t.TRIGGER_GROUP=ct.TRIGGER_GROUP)
+        WHERE t.TRIGGER_NAME REGEXP #{queryString}
+        OR t.TRIGGER_GROUP REGEXP #{queryString};
+    </select>
+
+</mapper>

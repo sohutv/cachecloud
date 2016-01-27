@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.sohu.tv</groupId>
+		<artifactId>cachecloud-open-client</artifactId>
+		<version>1.0-SNAPSHOT</version>
+	</parent>
+	<groupId>com.sohu.tv</groupId>
+	<artifactId>cachecloud-open-client-redis</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<name>cachecloud-open-client-redis</name>
+
+	<properties>
+		<cachecloud-open-client-basic.version>1.0-SNAPSHOT</cachecloud-open-client-basic.version>
+        <jedis.version>2.8.0</jedis.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+            <version>${jedis.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.sohu.tv</groupId>
+			<artifactId>cachecloud-open-client-basic</artifactId>
+			<version>${cachecloud-open-client-basic.version}</version>
+		</dependency>
+	</dependencies>
+
+	<developers>
+		<developer>
+			<name>leifu</name>
+			<email>leifu@sohu-inc.com</email>
+			<organization>sohu-tv</organization>
+			<roles>
+				<role>developer</role>
+			</roles>
+		</developer>
+		<developer>
+			<name>yongfeigao</name>
+			<email>yongfeigao@sohu-inc.com</email>
+			<organization>sohu-tv</organization>
+			<roles>
+				<role>developer</role>
+			</roles>
+		</developer>
+		<developer>
+			<name>haibogu</name>
+			<email>haibogu@sohu-inc.com</email>
+			<organization>sohu-tv</organization>
+			<roles>
+				<role>developer</role>
+			</roles>
+		</developer>
+		<developer>
+			<name>yijunzhang</name>
+			<email>yijunzhang@sohu-inc.com</email>
+			<organization>sohu-tv</organization>
+			<roles>
+				<role>developer</role>
+			</roles>
+		</developer>
+	</developers>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>${project.basedir}/src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>${maven.compiler.target}</source>
+					<target>${maven.compiler.target}</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<configuration>
+					<attach>true</attach>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>compile</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.AppAuditDao">
+    <sql id="columns">
+    	app_id,user_id,user_name,type,param1,param2,param3,info,status,modify_time
+    </sql>
+
+    <select id="selectWaitAppAudits" resultType="com.sohu.cache.entity.AppAudit">
+        select id,<include refid="columns"/>,create_time
+        from app_audit
+        <where>
+            <choose>
+                <when test="status != null">status=#{status}</when>
+                <otherwise>status in (0,2)</otherwise>
+            </choose>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="getAppAudit" resultType="com.sohu.cache.entity.AppAudit">
+        select id,<include refid="columns"/>,create_time,refuse_reason
+        from app_audit
+        where id=#{id}
+    </select>
+
+    <insert id="insertAppAudit" parameterType="com.sohu.cache.entity.AppAudit" keyProperty="id" useGeneratedKeys="true">
+        insert into app_audit(<include refid="columns"/>)
+        values(#{appId},#{userId},#{userName},#{type},#{param1},#{param2},#{param3},#{info},#{status},#{modifyTime})
+    </insert>
+
+    <update id="updateAppAudit" parameterType="com.sohu.cache.entity.AppAudit">
+        update app_audit
+        set
+          status = #{status},
+         modify_time = current_timestamp()
+        where id=#{id}
+    </update>
+    
+    <update id="updateRefuseReason" parameterType="com.sohu.cache.entity.AppAudit">
+        update app_audit
+        set
+          refuse_reason = #{refuseReason}, modify_time = current_timestamp()
+        where id=#{id}
+    </update>
+    
+    <select id="getAppAuditByAppId" resultType="com.sohu.cache.entity.AppAudit">
+        select id,<include refid="columns"/>,create_time,refuse_reason
+        from app_audit
+        where app_id=#{appId}
+    </select>
+    
+</mapper>

@@ -1,0 +1,312 @@
+package com.sohu.cache.stats.instance.impl;
+
+import com.sohu.cache.constant.RedisConstant;
+import com.sohu.cache.dao.InstanceDao;
+import com.sohu.cache.dao.InstanceStatsDao;
+import com.sohu.cache.entity.InstanceCommandStats;
+import com.sohu.cache.entity.InstanceInfo;
+import com.sohu.cache.entity.InstanceStats;
+import com.sohu.cache.entity.StandardStats;
+import com.sohu.cache.memcached.MemcachedCenter;
+import com.sohu.cache.redis.RedisCenter;
+import com.sohu.cache.stats.instance.InstanceStatsCenter;
+import com.sohu.cache.util.ConstUtils;
+import com.sohu.cache.util.TypeUtil;
+import com.sohu.cache.web.util.DateUtil;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
+
+import java.lang.reflect.Type;
+import java.util.*;
+
+/**
+ * Created by yijunzhang on 14-9-17.
+ */
+public class InstanceStatsCenterImpl implements InstanceStatsCenter {
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    private InstanceDao instanceDao;
+
+    private InstanceStatsDao instanceStatsDao;
+
+    private RedisCenter redisCenter;
+
+    private MemcachedCenter memcachedCenter;
+
+    @Override
+    public InstanceInfo getInstanceInfo(long instanceId) {
+        return instanceDao.getInstanceInfoById(instanceId);
+    }
+
+    @Override
+    public InstanceStats getInstanceStats(long instanceId) {
+        InstanceStats instanceStats = instanceStatsDao.getInstanceStatsByInsId(instanceId);
+        if (instanceStats == null) {
+            logger.error("instanceStats id={} is null", instanceId);
+            return null;
+        }
+        InstanceInfo instanceInfo = instanceDao.getInstanceInfoById(instanceId);
+        int type = instanceInfo.getType();
+        boolean isRun = isRun(type, instanceInfo.getIp(), instanceInfo.getPort());
+        instanceStats.setRun(isRun);
+        if (isRun) {
+            Map<String, Object> infoMap = getInfoMap(type, instanceInfo.getIp(), instanceInfo.getPort());
+            instanceStats.setInfoMap(infoMap);
+            if (infoMap == null || infoMap.isEmpty()) {
+                instanceStats.setRun(false);
+            }
+        }
+        return instanceStats;
+    }
+
+    private boolean isRun(int type, String ip, int port) {
+        if (type == ConstUtils.CACHE_TYPE_MEMCACHED) {
+            return memcachedCenter.isRun(ip, port);
+        } else {
+            return redisCenter.isRun(ip, port);
+        }
+    }
+
+    private Map<String, Object> getInfoMap(int type, String ip, int port) {
+        if (type == ConstUtils.CACHE_TYPE_MEMCACHED) {
+            return memcachedCenter.getInfoStats(ip, port);
+        } else {
+            Map<RedisConstant, Map<String, Object>> infoMap = redisCenter.getInfoStats(ip, port);
+            Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+            if (infoMap != null) {
+                for (RedisConstant redisConstant : infoMap.keySet()) {
+                    resultMap.put(redisConstant.getValue(), infoMap.get(redisConstant));
+                }
+            }
+            return resultMap;
+        }
+    }
+
+    @Override
+    public List<InstanceCommandStats> getCommandStatsList(Long instanceId, long beginTime, long endTime,
+            String commandName) {
+        if (instanceId == null) {
+            return Collections.emptyList();
+        }
+        InstanceInfo instanceInfo = instanceDao.getInstanceInfoById(instanceId);
+        List<InstanceCommandStats> resultList = new ArrayList<InstanceCommandStats>();
+        String ip = instanceInfo.getIp();
+        int port = instanceInfo.getPort();
+        int type = instanceInfo.getType();
+        List<Map<String, Object>> objectList;
+        if (type == ConstUtils.CACHE_TYPE_MEMCACHED) {
+            objectList = this.queryDiffMapList(beginTime, endTime, ip, port, ConstUtils.MEMCACHED);
+        } else {
+            objectList = this.queryDiffMapList(beginTime, endTime, ip, port, ConstUtils.REDIS);
+        }
+        if (objectList != null) {
+            for (Map<String, Object> map : objectList) {
+                InstanceCommandStats stats = parseCommand(instanceId, commandName, map, true, type);
+                if (stats != null) {
+                    resultList.add(stats);
+                }
+            }
+        }
+
+        return resultList;
+    }
+
+    @Override
+    public Map<Integer, Map<String, List<InstanceCommandStats>>> getStandardStatsList(Long appId, long beginTime,
+            long endTime, List<String> commands) {
+        if (appId == null) {
+            return Collections.emptyMap();
+        }
+        List<InstanceInfo> list = instanceDao.getInstListByAppId(appId);
+        if (list == null || list.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<Integer, Map<String, List<InstanceCommandStats>>> resultMap = new LinkedHashMap<Integer, Map<String, List<InstanceCommandStats>>>();
+        for (InstanceInfo instance : list) {
+            int instanceId = instance.getId();
+            String ip = instance.getIp();
+            int port = instance.getPort();
+            int type = instance.getType();
+            Boolean isMaster = redisCenter.isMaster(ip, port);
+            if (BooleanUtils.isNotTrue(isMaster)){
+                continue;
+            }
+            List<Map<String, Object>> objectList;
+            if (TypeUtil.isMemcacheType(type)) {
+                objectList = this.queryDiffMapList(beginTime, endTime, ip, port, ConstUtils.MEMCACHED);
+            } else {
+                objectList = this.queryDiffMapList(beginTime, endTime, ip, port, ConstUtils.REDIS);
+            }
+            if (objectList != null) {
+                Map<String, List<InstanceCommandStats>> commandMap = new LinkedHashMap<String, List<InstanceCommandStats>>();
+                for (String commandName : commands) {
+                    List<InstanceCommandStats> resultList = new ArrayList<InstanceCommandStats>(objectList.size());
+                    for (Map<String, Object> map : objectList) {
+                        InstanceCommandStats stats = parseCommand(instanceId, commandName, map, false, type);
+                        if (stats != null) {
+                            resultList.add(stats);
+                        }
+                    }
+                    commandMap.put(commandName, resultList);
+                }
+                resultMap.put(instanceId, commandMap);
+            }
+        }
+        return resultMap;
+    }
+
+    private InstanceCommandStats parseCommand(long instanceId, String command,
+            Map<String, Object> commandMap, boolean isCommand, int type) {
+        Long collectTime = MapUtils.getLong(commandMap, ConstUtils.COLLECT_TIME, null);
+        if (collectTime == null) {
+            return null;
+        }
+        Long count;
+        if (isCommand) {
+            if (TypeUtil.isMemcacheType(type)) {
+                count = MapUtils.getLong(commandMap, "cmd_" + command.toLowerCase(), null);
+            } else {
+                count = MapUtils.getLong(commandMap, "cmdstat_" + command.toLowerCase(), null);
+            }
+        } else {
+            count = MapUtils.getLong(commandMap, command.toLowerCase(), null);
+        }
+        if (count == null) {
+            return null;
+        }
+        InstanceCommandStats stats = new InstanceCommandStats();
+        stats.setCommandCount(count);
+        stats.setCommandName(command);
+        stats.setCollectTime(collectTime);
+        stats.setCreateTime(DateUtil.getDateByFormat(String.valueOf(collectTime), "yyyyMMddHHmm"));
+        stats.setModifyTime(DateUtil.getDateByFormat(String.valueOf(collectTime), "yyyyMMddHHmm"));
+        stats.setInstanceId(instanceId);
+
+        return stats;
+    }
+
+    @Override
+    public String executeCommand(String host, int port, String command) {
+        if (StringUtils.isBlank(host) || port == 0) {
+            return "host or port is null";
+        }
+        InstanceInfo instanceInfo = instanceDao.getAllInstByIpAndPort(host, port);
+        if (instanceInfo == null) {
+            return "instance not exist";
+        }
+        if (TypeUtil.isRedisType(instanceInfo.getType())) {
+            return redisCenter.executeCommand(instanceInfo.getAppId(), host, port, command);
+        } else if (TypeUtil.isMemcacheType(instanceInfo.getType())) {
+            return memcachedCenter.executeCommand(host, port, command);
+        }
+        return "not support type";
+    }
+
+    @Override
+    public String executeCommand(Long instanceId, String command) {
+        InstanceInfo instanceInfo = getInstanceInfo(instanceId);
+        return executeCommand(instanceInfo.getIp(), instanceInfo.getPort(), command);
+    }
+
+    @Override
+    public List<InstanceStats> getInstanceStats() {
+        return instanceStatsDao.getInstanceStats();
+    }
+
+    @Override
+    public List<InstanceStats> getInstanceStats(String ip) {
+        List<InstanceStats> instanceStatsList = instanceStatsDao.getInstanceStatsByIp(ip);
+        return instanceStatsList;
+    }
+
+    @Override
+    public boolean saveStandardStats(Map<String, Object> infoMap, String ip, int port, String dbType) {
+        Assert.isTrue(infoMap != null && infoMap.size() > 0);
+        Assert.isTrue(StringUtils.isNotBlank(ip));
+        Assert.isTrue(port > 0);
+        Assert.isTrue(infoMap.containsKey(ConstUtils.COLLECT_TIME), ConstUtils.COLLECT_TIME + " not in infoMap");
+        long collectTime = MapUtils.getLong(infoMap, ConstUtils.COLLECT_TIME);
+        StandardStats ss = new StandardStats();
+        ss.setCollectTime(collectTime);
+        ss.setIp(ip);
+        ss.setPort(port);
+        ss.setDbType(dbType);
+        if (infoMap.containsKey(RedisConstant.DIFF.getValue())) {
+            Map<String, Object> diffMap = (Map<String, Object>) infoMap.get(RedisConstant.DIFF.getValue());
+            ss.setDiffMap(diffMap);
+            infoMap.remove(RedisConstant.DIFF.getValue());
+        } else {
+            ss.setDiffMap(new HashMap<String, Object>(0));
+        }
+        ss.setInfoMap(infoMap);
+
+        int mergeCount = instanceStatsDao.mergeStandardStats(ss);
+        return mergeCount > 0;
+    }
+
+    @Override
+    public Map<String, Object> queryStandardInfoMap(long collectTime, String ip, int port, String dbType) {
+        Assert.isTrue(StringUtils.isNotBlank(ip));
+        Assert.isTrue(port > 0);
+        Assert.isTrue(collectTime > 0);
+        StandardStats ss = instanceStatsDao.getStandardStats(collectTime, ip, port, dbType);
+        if (ss != null) {
+            Map<String, Object> infoMap = ss.getInfoMap();
+            Map<String, Object> diffMap = ss.getDiffMap();
+            infoMap.put(RedisConstant.DIFF.getValue(), diffMap);
+            return infoMap;
+        } else {
+            return Collections.emptyMap();
+        }
+    }
+
+    @Override
+    public List<Map<String, Object>> queryDiffMapList(long beginTime, long endTime, String ip, int port,
+            String dbType) {
+        Assert.isTrue(StringUtils.isNotBlank(ip));
+        Assert.isTrue(port > 0);
+        Assert.isTrue(beginTime > 0);
+        Assert.isTrue(endTime > 0);
+        List<StandardStats> list = instanceStatsDao.getDiffJsonList(beginTime, endTime, ip, port, dbType);
+        if (list == null || list.isEmpty()) {
+            return new ArrayList<Map<String, Object>>(0);
+        }
+        List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>(list.size());
+        for (StandardStats ss : list) {
+            Map<String, Object> diffMap = ss.getDiffMap();
+            diffMap.put(ConstUtils.COLLECT_TIME, ss.getCollectTime());
+            resultList.add(diffMap);
+        }
+        return resultList;
+    }
+
+    @Override
+    public void cleanUpStandardStats(int day) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.DAY_OF_MONTH, -Math.abs(day));
+        Date deleteTime = calendar.getTime();
+        int deleteCount = instanceStatsDao.deleteStandardStatsByCreatedTime(deleteTime);
+        logger.warn("cleanUpStandardStats: {} day deleteCount={}", day, deleteCount);
+    }
+
+    public void setInstanceDao(InstanceDao instanceDao) {
+        this.instanceDao = instanceDao;
+    }
+
+    public void setInstanceStatsDao(InstanceStatsDao instanceStatsDao) {
+        this.instanceStatsDao = instanceStatsDao;
+    }
+
+    public void setRedisCenter(RedisCenter redisCenter) {
+        this.redisCenter = redisCenter;
+    }
+
+    public void setMemcachedCenter(MemcachedCenter memcachedCenter) {
+        this.memcachedCenter = memcachedCenter;
+    }
+}

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.MachineStatsDao">
+
+    <sql id="machine_statistics_columns">
+        ip,host_id,cpu_usage,`load`,traffic,memory_usage_ratio,memory_free,memory_total,modify_time
+    </sql>
+
+    <sql id="instance_info_columns">
+        instance.id, instance.parent_id, instance.app_id, instance.host_id, instance.ip, instance.PORT, instance.STATUS, instance.mem, instance.conn, instance.cmd, instance.type
+    </sql>
+
+    <!--保存机器当前最新的统计信息-->
+    <insert id="mergeMachineStats" parameterType="MachineStats">
+        insert into machine_statistics
+          (<include refid="machine_statistics_columns"/>)
+        values
+          (#{ip},#{hostId},#{cpuUsage},#{load},#{traffic},#{memoryUsageRatio},#{memoryFree},#{memoryTotal},#{modifyTime})
+        on duplicate key update
+           host_id = #{hostId},
+           cpu_usage = #{cpuUsage},
+           `load` = #{load},
+           traffic = #{traffic},
+           memory_usage_ratio = #{memoryUsageRatio},
+           memory_free = #{memoryFree},
+           memory_total = #{memoryTotal},
+           modify_time = #{modifyTime}
+    </insert>
+
+    <!--查询机器下的所有实例的静态信息-->
+    <select id="getInstInfoOfMachine" resultType="InstanceInfo">
+        SELECT
+           <include refid="instance_info_columns"/>
+        FROM
+            machine_info AS machine,
+            instance_info AS instance
+        WHERE
+            machine.id = instance.host_id
+        AND machine.ip = instance.ip
+        AND machine.available = 1
+        AND machine.ip = #{ip}
+    </select>
+
+    <!--查询机器下的所有实例的最新状态信息-->
+    <select id="getInstStatOfMachine" resultType="InstanceStats" parameterType="long">
+        SELECT istat.*
+        FROM machine_statistics as mstat, instance_statistics AS istat
+        WHERE mstat.host_id = #{hostId}
+        AND mstat.host_id = istat.host_id
+        ORDER BY istat.max_memory DESC;
+    </select>
+
+    <!--查询当前机器资源池中所有有效的机器-->
+    <!--<select id="getAllMachines" resultType="MachineInfo">-->
+        <!--SELECT minfo.*-->
+        <!--FROM machine_info as minfo-->
+        <!--WHERE minfo.available = 1;-->
+    <!--</select>-->
+
+    <select id="getMachineStats" resultType="MachineStats">
+        select
+          id,<include refid="machine_statistics_columns"/>
+        from machine_statistics
+        <choose>
+            <when test="ipLike != '' and ipLike != null">
+                where ip like '%${ipLike}%'
+            </when>
+        </choose>
+    </select>
+    
+    <select id="getAllMachineStats" resultType="MachineStats">
+        select
+          id,<include refid="machine_statistics_columns"/>
+        from machine_statistics
+    </select>
+
+    <!--根据机器的ip查询机器的最新状态信息-->
+    <select id="getMachineStatsByIp" resultType="MachineStats">
+        select
+          id,<include refid="machine_statistics_columns"/>
+        from machine_statistics
+        where ip = #{ip};
+    </select>
+
+    <!--根据机器的hostId查询机器的最新状态信息-->
+    <select id="getMachineStatsByHostId" resultType="MachineStats" parameterType="long">
+        select
+          id,<include refid="machine_statistics_columns"/>
+        from machine_statistics
+        where host_id = #{hostId};
+    </select>
+    
+    <!-- 删除机器统计信息 -->
+    <delete id="deleteMachineStatsByIp" parameterType="string">
+    	delete from machine_statistics where ip = #{ip};
+    </delete>
+
+
+</mapper>

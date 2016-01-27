@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sohu.cache.dao.AppToUserDao">
+    <sql id="app_to_user_column">
+    	id,user_id,app_id
+    </sql>
+    
+    <insert id="save" parameterType="AppToUser">
+    	insert into app_to_user
+    		(<include refid="app_to_user_column"/>)
+		values
+			(#{id},#{userId},#{appId})    	
+    </insert>
+    
+    <!-- 获取用户的app -->
+    <select id="getByUserId" resultType="AppToUser" parameterType="long">
+    	select           
+        	<include refid="app_to_user_column"/>
+        from app_to_user where user_id=#{userId}
+    </select>
+    
+    <!-- 获取app的用户 -->
+    <select id="getByAppId" resultType="AppToUser" parameterType="long">
+    	select           
+        	<include refid="app_to_user_column"/>
+        from app_to_user where app_id=#{appId}
+    </select>
+    
+    
+    <delete id="deleteByAppId" parameterType="long">
+    	delete from app_to_user where app_id=#{appId}
+    </delete>
+    
+    <select id="deleteAppToUser" parameterType="AppToUser">
+        delete from app_to_user where app_id=#{appId} and user_id=#{userId}
+    </select>
+    
+</mapper>
+
+

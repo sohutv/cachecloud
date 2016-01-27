@@ -1,0 +1,483 @@
+/***
+Inbox Page
+***/
+.inbox {
+  margin-bottom: 20px;
+}
+
+.inbox .inbox {
+  margin-bottom: 0px;
+}
+
+.inbox .tab-content {
+  overflow: inherit;
+}
+
+.inbox .inbox-loading {
+  display: none;
+  font-size: 22px;
+  font-weight: 300;
+}
+
+/*Imbox Menu*/
+.inbox .inbox-nav {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.inbox .inbox-nav li {
+  position: relative;
+}
+
+.inbox .inbox-nav li a {
+  color: #4d82a3;
+  display: block;
+  font-size: 15px;
+  border-left: none;
+  text-align: left !important;
+  padding: 8px 14px;
+  margin-bottom: 1px;
+  background: #f4f9fd;
+}
+
+.inbox .inbox-nav li.active a,
+.inbox .inbox-nav li.active:hover a {
+  color: #fff;
+  border-left: none;
+  background: #169ef4 !important;
+  text-decoration: none;
+}
+
+.inbox .inbox-nav li.active b {
+  top: 0;
+  right: -4px;
+  width: 8px;
+  height: 35px;
+  position: absolute;
+  display: inline-block;
+  background: url(../../img/inbox-nav-arrow-blue.png) no-repeat;
+}
+
+.inbox .inbox-nav li:hover a {
+  color: #4d82a3;
+  background: #eef4f7 !important;
+  text-decoration: none;
+}
+
+.inbox .inbox-nav li.compose-btn a {
+  color: #fff;
+  text-shadow: none;
+  text-align: center;
+  margin-bottom: 18px;
+  background: #35aa47;
+}
+
+.inbox .inbox-nav li.compose-btn i,
+.inbox .inbox-nav li.compose-btn:hover i {
+  top: 1px;
+  color: #fff;
+  font-size: 15px;
+  position: relative;
+  background: none !important;
+}
+
+.inbox .inbox-nav li.compose-btn a:hover {
+  background-color: #1d943b !important;
+}
+
+/*Inbox Content*/
+.inbox .inbox-header {
+  overflow: hidden;
+}
+
+.inbox .inbox-header h1 {
+  margin: 0;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.inbox .pagination-control {
+  text-align: right;
+}
+
+.inbox .pagination-control .pagination-info {
+  display: inline-block;
+  padding-right: 10px;
+  font-size: 14px;
+  line-height: 14px;
+}
+
+.inbox tr {
+  color: #777;
+  font-size: 13px;
+}
+
+.inbox tr label {
+  display: inline-block;
+  margin-bottom: 0;
+}
+
+.inbox tr.unread td{
+  font-weight: 600;
+}
+
+.inbox td i.icon-paper-clip {
+  top: 2px;
+  color: #d8e0e5;
+  font-size: 17px;
+  position: relative;
+}
+
+.inbox tr i.icon-star,
+.inbox tr i.icon-trash {
+  cursor: pointer;  
+}
+
+.inbox tr i.icon-star {
+  color: #eceef0;
+}
+
+.inbox tr i.icon-star:hover {
+  color: #fd7b12;
+}
+
+.inbox tr i.inbox-started {
+  color: #fd7b12;  
+}
+
+.inbox .table th, 
+.inbox .table td {
+  border: none;
+}
+
+.inbox .table th {  
+  background: #eef4f7;
+  border-bottom: solid 5px #fff;
+}
+
+.inbox th.text-right {
+  text-align: right;
+}
+
+.inbox th label.inbox-select-all {
+  color: #828f97;
+  font-size: 13px;
+  padding: 1px 4px 0;
+}
+
+.inbox ul.inbox-nav {
+  margin-bottom: 0;
+}
+
+.inbox ul.inbox-nav li {
+  padding: 0;
+}
+
+.inbox ul.inbox-nav li span {
+  color: #828f97;
+  font-size: 12px;
+  margin-right: 10px;
+}
+
+.inbox ul.inbox-nav i {
+  color: #fff;
+  padding: 1px 0;
+  font-size: 15px;
+  cursor: pointer; 
+  background: #d0dde4 !important;
+}
+
+.inbox ul.inbox-nav i:hover {
+  background: #169ef4 !important;
+}
+
+.inbox td.text-right {
+  width: 100px;
+  text-align: right;
+}
+
+.inbox td.inbox-small-cells {
+  width: 10px;
+}
+
+.inbox .table-hover tbody tr:hover>td, 
+.inbox .table-hover tbody tr:hover>th, 
+.inbox .table-striped tbody>tr:nth-child(odd)>td, 
+.inbox .table-striped tbody>tr:nth-child(odd)>th {
+  background: #f8fbfd;  
+  cursor: pointer;
+}
+
+.inbox .table-hover tbody tr:hover>td, 
+.inbox .table-hover tbody tr:hover>th {
+  background: #eef4f7;
+}
+
+/*Inbox Drafts*/
+.inbox .inbox-drafts {
+  padding: 8px 0;
+  text-align: center;
+  border-top: solid 1px #eee;
+  border-bottom: solid 1px #eee;
+}
+
+/*Inbox View*/
+.inbox-view-header {
+  margin-bottom: 20px;
+}
+
+.inbox-view-header h1 {
+  color: #666;
+  font-size: 22px;
+  line-height: 24px;
+  margin-bottom: 0 !important;
+}
+
+.inbox-view-header h1 a {
+  top: -2px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 2px 7px;
+  line-height: 16px;
+  position: relative;
+  background: #b0bcc4;
+  display: inline-block;
+}
+
+.inbox-view-header h1 a:hover {
+  background: #aab5bc;
+  text-decoration: none;
+}
+
+.inbox-view-header i.icon-print {
+  color: #94a4ab;
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-block;
+  padding: 6px 8px !important;
+  background: #edf1f4 !important;
+}
+
+.inbox-view-header i.icon-print:hover {
+  background: #e7ebef !important;
+}
+
+.inbox-view-info {
+  color: #666;  
+  padding: 5px 0;
+  margin-bottom: 10px;
+  border-top: solid 1px #eee;
+  border-bottom: solid 1px #eee;
+}
+
+.inbox-view-info strong {
+  color: #666;
+  margin: 0 10px 0 5px;
+}
+
+.inbox-view-info .inbox-info-btn {
+  text-align: right;
+}
+
+.inbox-view-info .inbox-info-btn ul {
+  text-align: left;
+}
+
+.inbox-view-info button {
+  top: 2px;
+  color: #94a4ab;
+  font-size: 13px;
+  margin-left: 4px; 
+  padding: 3px 10px;
+  position: relative;
+  background: #edf1f4;
+}
+
+.inbox-view-info button:hover {
+  color: #94a4ab;
+  background: #e7ebef;
+}
+
+.inbox-view {
+  color: #666;
+  padding: 15px 0 0;
+}
+
+.inbox-view a {
+  color: #169ce9;
+}
+
+.inbox-attached {
+  line-height: 16px;
+}
+
+.inbox-attached a {
+  margin: 0 2px;
+}
+
+.inbox-attached img {
+  height: auto;
+  max-width: 250px;
+  margin-bottom: 5px;
+}
+
+.inbox-attached span {
+  margin-right: 3px;
+}
+
+.inbox-attached strong {
+  color: #555;
+  display: block;
+  font-size: 13px;
+}
+
+.inbox-attached .margin-bottom-25 {
+  margin-bottom: 25px;
+}
+
+.inbox-attached .margin-bottom-15 {
+  margin-bottom: 15px;
+}
+
+
+/*Inbox Compose*/
+.inbox-compose {
+  margin-top: 1px;
+  border: solid 1px #eee;
+}
+
+.inbox-compose-btn {
+  padding: 8px 4px;
+  background: #f0f6fa;
+}
+
+.inbox-compose-attachment {
+  padding: 8px 8px;
+}
+
+.inbox-compose-attachment .btn {
+  padding: 4px 10px;
+}
+
+.inbox-compose-btn button {
+  color: #fff;
+  font-size: 14px;
+  margin-left: 4px;
+  padding: 4px 10px;
+  background: #c0cfdd;
+}
+
+.inbox-compose-btn button:hover {
+  color: #fff;
+  background: #4d90fe;
+}
+
+.inbox-compose-btn button i {
+  margin-right: 3px;
+}
+
+.inbox-compose .inbox-form-group {
+  margin-bottom: 0;
+  position: relative;
+  border-bottom: solid 1px #eee;
+}
+
+.inbox-compose .controls {
+  margin-left: 85px;
+}
+
+.inbox-compose .inbox-form-group > label {
+  width: 80px;
+  float: left;
+  color: #979797;
+  text-align: right;
+}
+
+.inbox-compose .controls > input {
+  border: none !important;
+}
+.inbox-compose .controls-to {
+  padding-right: 55px;
+}
+
+.inbox-compose .controls-cc {
+  padding-right: 20px;
+}
+
+.inbox-compose .controls-bcc {
+  padding-right: 20px;
+}
+
+.inbox-compose .inbox-form-group a.close {
+  top: 13px;
+  right: 10px;
+  position: absolute;
+}
+
+.inbox-compose .mail-to .inbox-cc-bcc {
+  display: inline-block;
+  top: 7px;
+  right: 10px;
+  color: #979797;
+  font-size: 14px;
+  cursor: pointer;
+  position: absolute;
+}
+
+.inbox-compose .mail-to .inbox-bcc {
+  margin-left: 5px;
+}
+
+.inbox-compose .mail-to inbox-cc:hover,
+.inbox-compose .mail-to inbox-bcc:hover {
+  color: #777;
+}
+
+.inbox-compose .wysihtml5 {
+  padding: 0px !important;
+  margin: 0px !important;
+  border: 0 !important;
+}
+
+.inbox-compose .wysihtml5-sandbox {
+  padding: 0px !important;
+  margin: 0px !important;
+  display: block !important;
+  border: 0 !important;
+  margin-top: 5px;
+  width: 100% !important;
+  border-left: none;
+  border-right: none;
+  border-color: #eee;
+}
+
+.inbox-compose .wysihtml5-toolbar {  
+  border: 0;
+  border-bottom: 1px solid #eee;
+}
+
+.inbox-compose .wysihtml5-toolbar > li {
+  height: 34px;
+  margin-right: 0;
+  margin-bottom: 0;
+}
+
+.inbox-compose .wysihtml5-toolbar > li > a,
+.inbox-compose .wysihtml5-toolbar > li > div > a {
+  background: #fff;
+}
+
+.inbox-compose .wysihtml5-toolbar .dropdown.open .dropdown-toggle,
+ul.wysihtml5-toolbar a.btn.wysihtml5-command-active {
+  background: #eee !important;
+}
+
+@media (max-width: 480px) {
+
+  .inbox-compose .inbox-form-group > label {
+    margin-top: 7px;
+  }
+
+}

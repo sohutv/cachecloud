@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.MachineDao">
+    <sql id="machine_info_columns">
+        ssh_user,ssh_passwd,ip,room,mem,cpu,virtual,real_ip,service_time,fault_count,warn,available,type,groupId,extra_desc
+    </sql>
+
+    <sql id="machine_info_fields">
+        #{sshUser},#{sshPasswd},#{ip},#{room},#{mem},#{cpu},#{virtual},#{realIp},#{serviceTime},
+        #{faultCount},#{warn},#{available},#{type},#{groupId},#{extraDesc}
+    </sql>
+
+    <!--返回特定分组下的机器资源-->
+    <select id="getMachinesByGroupId" resultType="MachineInfo" parameterType="int">
+        select
+            id, modify_time, <include refid="machine_info_columns"/>
+        from machine_info
+        where available = 1
+        and groupId = #{groupId}
+    </select>
+
+    <!--返回所有可用的机器资源-->
+    <select id="getAllMachines" resultType="MachineInfo">
+        select
+        id, modify_time, <include refid="machine_info_columns"/>
+        from machine_info
+        where available = 1
+    </select>
+
+    <!--通过ip查找机器-->
+    <select id="getMachineInfoByIp" resultType="MachineInfo">
+        select
+          id, modify_time, <include refid="machine_info_columns"/>
+        from machine_info
+        where ip = #{ip};
+    </select>
+
+    <!--保存机器信息-->
+    <select id="saveMachineInfo" parameterType="MachineInfo">
+        insert into machine_info
+          (<include refid="machine_info_columns"/>)
+        values
+          (<include refid="machine_info_fields"/>)
+    </select>
+
+    <!--根据ip删除一台机器的信息-->
+    <delete id="removeMachineInfoByIp" parameterType="string">
+        DELETE FROM machine_info
+        WHERE ip = #{ip}
+    </delete>
+</mapper>

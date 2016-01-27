@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sohu.cache.dao.AppUserDao">
+	<!-- 
+	字典sql
+        set @tn='app_user';
+        select
+            group_concat(column_name)
+        from
+            information_schema.columns
+        where
+            table_schema = 'cache-cloud' and table_name = @tn;
+	-->
+	<sql id="user_column">
+		id,name,ch_name,email,mobile,type
+    </sql>
+    
+    <select id="get" resultType="AppUser" parameterType="long">
+        select           
+        	<include refid="user_column"/>
+        from app_user
+        where id = #{id};
+    </select>
+    
+    <select id="getByName" resultType="AppUser" parameterType="string">
+        select           
+        	<include refid="user_column"/>
+        from app_user
+        where name = #{name};
+    </select>
+    
+    <insert id="save" parameterType="AppUser" keyProperty="id" useGeneratedKeys="true">
+    	insert into app_user
+    		(<include refid="user_column"/>)
+		values
+			(#{id},#{name},#{chName},#{email},#{mobile},#{type})    	
+    </insert>
+    
+    <delete id="delete" parameterType="long">
+    	delete from app_user where id=#{id}
+    </delete>
+    
+    <update id="update" parameterType="AppUser">
+    	update app_user 
+    		set name=#{name}, ch_name=#{chName}, email=#{email}, mobile=#{mobile},type=#{type} 
+    	where id=#{id}
+    </update>
+    
+    <select id="getUserList" resultType="AppUser" parameterType="string">
+    	select           
+        	<include refid="user_column"/>
+        from app_user where 1=1
+        <choose>
+        	<when test="chName != '' and chName != null">
+        	 	and ch_name=#{chName}
+        	</when>
+        </choose>
+    </select>
+    
+    
+</mapper>
+
+
