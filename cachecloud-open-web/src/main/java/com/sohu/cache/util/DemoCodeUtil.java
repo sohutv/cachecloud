@@ -26,7 +26,7 @@ public class DemoCodeUtil {
         
         dependencyRedis.add("&lt;dependency&gt;                                                     ");
         dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&lt;groupId&gt;com.sohu.tv&lt;/groupId&gt;                                   ");
-        dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&lt;artifactId&gt;cachecloud-client-redis&lt;/artifactId&gt;                       ");
+        dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&lt;artifactId&gt;cachecloud-open-client-redis&lt;/artifactId&gt;                       ");
         dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&lt;version&gt;" + goodVersion + "&lt;/version&gt;                                           ");
 
         dependencyRedis.add("&lt;/dependency&gt;                                                    ");
