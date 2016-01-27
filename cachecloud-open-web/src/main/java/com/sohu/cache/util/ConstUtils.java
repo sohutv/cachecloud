@@ -53,7 +53,7 @@ public class ConstUtils {
     public static final String APP_KEY = "app_key";
     public static final String HOST_ID_KEY = "host_id_key";
 
-    //mongodb收集数据的时间字段
+    //mysql收集数据的时间字段
     public static final String COLLECT_TIME = "CollectTime";
 
     // 触发时间

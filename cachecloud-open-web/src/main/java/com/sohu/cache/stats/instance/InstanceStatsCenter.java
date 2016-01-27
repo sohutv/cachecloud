@@ -87,7 +87,7 @@ public interface InstanceStatsCenter {
     List<InstanceStats> getInstanceStats(String ip);
 
     /**
-     * 将一个对象（如统计信息）保存到mongodb里
+     * 将一个对象（如统计信息）保存到mysql里
      *
      * @param infoMap 统计信息对象
      * @param ip      ip

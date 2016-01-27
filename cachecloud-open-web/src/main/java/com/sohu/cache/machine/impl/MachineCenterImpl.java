@@ -66,8 +66,6 @@ public class MachineCenterImpl implements MachineCenter {
 
     private MachineDao machineDao;
 
-    private final String MONGODB_MACHINE = ConstUtils.MACHINE;
-
     private RedisCenter redisCenter;
 
     private MemcachedCenter memcachedCenter;
@@ -106,8 +104,8 @@ public class MachineCenterImpl implements MachineCenter {
     }
     
     /**
-     * 收集当前host的状态信息，保存到mongodb；
-     * 这里将hostId作为参数传入，mongodb中集合名为：ip:hostId
+     * 收集当前host的状态信息，保存到mysql；
+     * 这里将hostId作为参数传入，mysql中集合名为：ip:hostId
      *
      * @param hostId      机器id
      * @param collectTime 收集时间，格式：yyyyMMddHHmm
@@ -139,7 +137,7 @@ public class MachineCenterImpl implements MachineCenter {
                 infoMap.put(MachineConstant.Traffic.getValue(), machineStats.getTraffic());
                 infoMap.put(MachineConstant.DiskUsage.getValue(), machineStats.getDiskUsageMap());
                 infoMap.put(ConstUtils.COLLECT_TIME, collectTime);
-                instanceStatsCenter.saveStandardStats(infoMap, ip, (int) hostId, MONGODB_MACHINE);
+                instanceStatsCenter.saveStandardStats(infoMap, ip, (int) hostId, ConstUtils.MACHINE);
                 machineStats.setMemoryFree(Long.valueOf(machineStats.getMemoryFree()) * ConstUtils._1024 + "");
                 machineStats.setMemoryTotal(Long.valueOf(machineStats.getMemoryTotal()) * ConstUtils._1024 + "");
                 machineStatsDao.mergeMachineStats(machineStats);

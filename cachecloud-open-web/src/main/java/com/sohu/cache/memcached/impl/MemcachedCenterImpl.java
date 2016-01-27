@@ -167,7 +167,7 @@ public class MemcachedCenterImpl implements MemcachedCenter {
             long lastMin = ScheduleUtil.getLastCollectTime(collectTime);
             Map<String, Object> lastInfoMap = instanceStatsCenter.queryStandardInfoMap(lastMin, host, port, ConstUtils.MEMCACHED);
 
-            // 计算当前分钟和上一分钟的统计值，作为差值放到本次统计结果中，存到mongodb中。
+            // 计算当前分钟和上一分钟的统计值，作为差值放到本次统计结果中，存到mysql中。
             Map<String, Object> currentOrganizedMap = organizeInfoMap(infoMap);
             Map<String, Object> lastOrganizedMap = organizeInfoMap(lastInfoMap);
             //上一次统计指标为空,取消差值计算
@@ -179,7 +179,7 @@ public class MemcachedCenterImpl implements MemcachedCenter {
                 logger.error("[memcached-lastInfoMap] : lastCollectTime = {} appId={} host:port = {}:{} is null", lastMin, appId, host, port);
                 diffInfoMap = new HashMap<String, Object>();
             }
-            // mongodb中存储的是info得到的所有信息，以及与上一分钟相比的差值diff
+            // mysql中存储的是info得到的所有信息，以及与上一分钟相比的差值diff
             instanceStatsCenter.saveStandardStats(infoMap, host, port, ConstUtils.MEMCACHED);
 
             InstanceInfo instanceInfo = instanceDao.getInstByIpAndPort(host, port);
@@ -225,7 +225,7 @@ public class MemcachedCenterImpl implements MemcachedCenter {
     }
 
     /**
-     * 收集当前实例的统计信息，存入mongodb
+     * 收集当前实例的统计信息，存入mysql
      *
      * @param appId
      * @param collectTime

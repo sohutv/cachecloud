@@ -32,7 +32,7 @@ public interface MemcachedCenter {
     public boolean unDeployMemcachedCollection(long appId, String host, int port);
 
     /**
-     * 收集memcached实例的统计信息，存入到mongodb中
+     * 收集memcached实例的统计信息，存入到mysql中
      *
      * @param appId
      * @param collectTime
