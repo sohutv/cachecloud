@@ -89,7 +89,7 @@ public class RedisStandaloneBuilder {
                         }
                         
                         //收集上报数据
-                        ClientDataCollectReportExecutor.getInstance();
+//                        ClientDataCollectReportExecutor.getInstance();
 
                         jedisPool = new JedisPool(poolConfig, instanceArr[0], Integer.valueOf(instanceArr[1]), timeout);
                         return jedisPool;

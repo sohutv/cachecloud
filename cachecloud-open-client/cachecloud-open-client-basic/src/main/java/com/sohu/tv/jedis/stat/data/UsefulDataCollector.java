@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sohu.tv.cachecloud.client.basic.util.DateUtils;
 import com.sohu.tv.jedis.stat.constant.ClientReportConstant;
 import com.sohu.tv.jedis.stat.enums.ClientExceptionType;
 import com.sohu.tv.jedis.stat.enums.ValueSizeDistriEnum;
@@ -25,7 +26,6 @@ import com.sohu.tv.jedis.stat.model.ExceptionModel;
 import com.sohu.tv.jedis.stat.model.UsefulDataModel;
 import com.sohu.tv.jedis.stat.model.ValueLengthModel;
 import com.sohu.tv.jedis.stat.utils.AtomicLongMap;
-import com.sohu.tv.jedis.stat.utils.DateUtils;
 import com.sohu.tv.jedis.stat.utils.NamedThreadFactory;
 import com.sohu.tv.jedis.stat.utils.NumberUtil;
 

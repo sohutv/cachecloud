@@ -131,7 +131,7 @@ public class RedisClusterBuilder {
                     }
                     
                     //收集上报数据
-                    ClientDataCollectReportExecutor.getInstance();
+//                    ClientDataCollectReportExecutor.getInstance();
                     
                     jedisCluster = new JedisCluster(nodeList, connectionTimeout, soTimeout, maxRedirections, jedisPoolConfig);
                     return jedisCluster;

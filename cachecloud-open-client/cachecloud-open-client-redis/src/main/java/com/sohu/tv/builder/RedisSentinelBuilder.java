@@ -127,7 +127,7 @@ public class RedisSentinelBuilder {
                         }
                         
                         //收集上报数据
-                        ClientDataCollectReportExecutor.getInstance();
+//                        ClientDataCollectReportExecutor.getInstance();
                         
                         sentinelPool = new JedisSentinelPool(masterName, sentinelSet, poolConfig, connectionTimeout, soTimeout, null, Protocol.DEFAULT_DATABASE);
                         return sentinelPool;
