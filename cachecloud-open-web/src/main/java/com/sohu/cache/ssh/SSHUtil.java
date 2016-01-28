@@ -36,16 +36,12 @@ public class SSHUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(SSHUtil.class);
     
-    private final static String USERNAME = "";
-    private final static String PASSWORD = "";
-
     private final static String COMMAND_TOP = "top -b -n 1 | head -5";
     private final static String COMMAND_DF_LH = "df -lh";
     private final static String LOAD_AVERAGE_STRING = "load average: ";
     private final static String CPU_USAGE_STRING = "Cpu(s):";
     private final static String MEM_USAGE_STRING = "Mem:";
     private final static String SWAP_USAGE_STRING = "Swap:";
-    private final static String COMMAND_TSAR = "tsar --traffic -D | tail -n 5";
 
     /**
      * Get HostPerformanceEntity[cpuUsage, memUsage, load] by ssh.<br>
@@ -67,8 +63,6 @@ public class SSHUtil {
             }
         }
         port = IntegerUtil.defaultIfSmallerThan0(port, MachineProtocol.SSH_PORT_DEFAULT);
-        userName = StringUtil.defaultIfBlank(userName, USERNAME);
-        password = StringUtil.defaultIfBlank(password, PASSWORD);
         Connection conn = null;
         try {
             conn = new Connection(ip, port);
@@ -209,44 +203,8 @@ public class SSHUtil {
             }
             systemPerformanceEntity.setDiskUsageMap(diskUsageMap);
 
-            // 使用tsar统计当前网络流量
+            // 使用tsar统计当前网络流量 @TODO 
             Double traffic = 0.0;
-            session = conn.openSession();
-            session.execCommand(COMMAND_TSAR);
-            //stderr
-            printSessionStdErr(conn.getHostname(),COMMAND_TSAR, session);
-            read = new BufferedReader(new InputStreamReader(new StreamGobbler(session.getStdout())));
-            /**
-             * 内容一般是这样的，这里仅取了倒数5行，使用倒数第5行的当前网络流量值：
-             * Time           -------------traffic------------
-             Time            bytin  bytout   pktin  pktout
-             15/09/14-16:25 894.00    0.00    7.00    0.00
-             15/09/14-16:30 955.00    0.00    9.00    0.00
-             15/09/14-16:35 793.00   38.00    7.00    0.00
-             15/09/14-16:40 776.00   45.00    6.00    0.00
-             15/09/14-16:45 943.00  104.00    8.00    0.00
-             15/09/14-16:50 939.00    8.00    7.00    0.00
-
-             MAX            1053.00  104.00   10.00    0.00
-             MEAN           900.42   16.25    7.75    0.00
-             MIN            776.00    0.00    6.00    0.00
-             */
-            while ((line = read.readLine()) != null) {
-                // 第一行即为当前的网络流量，将in和out加起来
-                if (StringUtils.isBlank(line)) {
-                    continue;
-                }
-                String[] lineArray = line.split("\\s+");    // 以任意空白符分隔
-                if (lineArray.length < 3) {
-                    continue;
-                }
-                Double bytin = Double.valueOf(lineArray[1]);
-                Double bytout = Double.valueOf(lineArray[2]);
-                traffic = bytin + bytout;
-                if(traffic > 0){
-                    break;
-                }
-            }
             systemPerformanceEntity.setTraffic(traffic.toString());
 
         } catch (Exception e) {
@@ -319,8 +277,6 @@ public class SSHUtil {
             if (StringUtil.isBlank(ip)) {
                 throw new IllegalParamException("Param ip is empty!");
             }
-            username = StringUtil.defaultIfBlank(username, USERNAME);
-            password = StringUtil.defaultIfBlank(password, PASSWORD);
             conn = new Connection(ip, port);
             conn.connect(null, 6000, 6000);
             boolean isAuthenticated = conn.authenticateWithPassword(username, password);
@@ -360,7 +316,6 @@ public class SSHUtil {
     }
 
     /**
-     * 将
      * @param ip
      * @param port
      * @param username
