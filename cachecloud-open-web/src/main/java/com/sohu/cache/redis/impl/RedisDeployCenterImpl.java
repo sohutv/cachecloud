@@ -16,16 +16,13 @@ import com.sohu.cache.redis.enums.RedisClusterConfigEnum;
 import com.sohu.cache.redis.enums.RedisConfigEnum;
 import com.sohu.cache.redis.enums.RedisSentinelConfigEnum;
 import com.sohu.cache.schedule.SchedulerCenter;
-import com.sohu.cache.util.*;
-
+import com.sohu.cache.util.ConstUtils;
+import com.sohu.cache.util.IdempotentConfirmer;
+import com.sohu.cache.util.TypeUtil;
 import org.apache.commons.lang.StringUtils;
-import org.quartz.JobKey;
-import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
-
-import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisSentinelPool;
 import redis.clients.jedis.Protocol;
@@ -867,7 +864,6 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
                 }
             }
         }
-        delayReBuildMasterSlave(appId);
         return true;
     }
 
@@ -901,59 +897,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         } else {
             logger.warn("{}:{} clusterFailover Done! ", slaveHost, slavePort);
         }
-        delayReBuildMasterSlave(appId);
         return true;
-    }
-
-    /**
-     * 重新build master与slave关系
-     */
-    public boolean rebuildMasterSlave(long appId) {
-        final List<InstanceInfo> instanceList = instanceDao.getInstListByAppId(appId);
-        if (instanceList.isEmpty()) {
-            logger.warn("{} instanceInfoList isEmpty", appId);
-            return true;
-        }
-        //主从识别
-        for (InstanceInfo instanceInfo : instanceList) {
-            int instanceType = instanceInfo.getType();
-            if (TypeUtil.isRedisSentinel(instanceType)) {
-                continue;
-            }
-            int parentId = instanceInfo.getParentId();
-            String host = instanceInfo.getIp();
-            int port = instanceInfo.getPort();
-            Boolean isMaster = redisCenter.isMaster(host, port);
-            if (isMaster != null && isMaster) {
-                if (parentId > 0) {
-                    instanceInfo.setParentId(0);
-                    instanceDao.update(instanceInfo);
-                    logger.info("update {}:{} parentId=0", instanceInfo.getIp(), instanceInfo.getPort());
-                }
-            } else if (!isMaster) {
-                HostAndPort hap = redisCenter.getMaster(host, port);
-                if (hap != null) {
-                    InstanceInfo masterInfo = instanceDao.getInstByIpAndPort(hap.getHost(), hap.getPort());
-                    if (masterInfo != null && masterInfo.getId() != parentId) {
-                        instanceInfo.setParentId(masterInfo.getId());
-                        instanceDao.update(instanceInfo);
-                        logger.info("update {}:{} parentId={}", instanceInfo.getIp(), instanceInfo.getPort(),
-                                masterInfo.getId());
-                    }
-                }
-            }
-        }
-        return true;
-    }
-
-    private void delayReBuildMasterSlave(long appId) {
-        Assert.isTrue(appId > 0);
-        Map<String, Object> dataMap = new HashMap<String, Object>();
-        dataMap.put(ConstUtils.APP_KEY, appId);
-        JobKey jobKey = JobKey.jobKey("rebuildMasterSlaveJobDetail", "rebuildMasterSlaveGroup");
-        TriggerKey triggerKey = TriggerKey.triggerKey("rebuildMasterSlaveTrigger-" + appId, "rebuildMasterSlaveGroup");
-        //延迟60秒执行
-        schedulerCenter.deployJobByDelay(jobKey, triggerKey, dataMap, 60, false);
     }
 
     private String getNodeId(final Jedis jedis) {

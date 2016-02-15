@@ -103,12 +103,4 @@ public interface RedisDeployCenter {
      */
     public boolean clusterFailover(long appId, int slaveInstanceId) throws Exception;
 
-    /**
-     * 重新构造应用{appId}的主从关系
-     * @param appId
-     * @return
-     * @throws Exception
-     */
-    public boolean rebuildMasterSlave(long appId) throws Exception;
-
 }

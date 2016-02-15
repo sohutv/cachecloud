@@ -106,7 +106,6 @@
                 <ref bean="machineJobDetail"/>
                 <ref bean="machineMonitorJobDetail"/>
                 <ref bean="cleanUpStatisticsJobDetail"/>
-                <ref bean="rebuildMasterSlaveJobDetail"/>
                 <ref bean="inspectorJobDetail"/>
             </array>
         </property>
@@ -152,13 +151,6 @@
         <property name="durability" value="true" />
     </bean>
 
-    <bean id="rebuildMasterSlaveJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="name" value="rebuildMasterSlaveJobDetail"></property>
-        <property name="group" value="rebuildMasterSlaveGroup"></property>
-        <property name="jobClass" value="com.sohu.cache.schedule.jobs.RebuildMasterSlaveJob"></property>
-        <property name="durability" value="true"/>
-    </bean>
-    
     <bean id="errorStatisticsJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="name" value="errorStatisticsJobDetail"></property>
         <property name="group" value="errorStatisticsGroup"></property>
