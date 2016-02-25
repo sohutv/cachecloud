@@ -468,7 +468,7 @@ CREATE TABLE `app_desc` (
   `intro` varchar(255) NOT NULL COMMENT '应用描述',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `passed_time` datetime NOT NULL COMMENT '审批通过时间',
-  `type` int(10) NOT NULL DEFAULT '0' COMMENT 'cache类型，1. memcached, 2. redis-cluster, 3. memcacheq, 4. 非cache-cloud ,5. redis-sentinel ,6.redis-standalone ',
+  `type` int(10) NOT NULL DEFAULT '0' COMMENT 'cache类型，2. redis-cluster,5. redis-sentinel ,6.redis-standalone ',
   `officer` varchar(20) NOT NULL COMMENT '负责人，中文',
   `ver_id` int(11) NOT NULL COMMENT '版本',
   `is_test` tinyint(4) DEFAULT '0' COMMENT '是否测试：1是0否',
@@ -641,7 +641,7 @@ CREATE TABLE `instance_fault` (
   `port` int(11) NOT NULL COMMENT '端口',
   `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态:0:心跳停止,1:心跳恢复',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `type` mediumint(4) NOT NULL COMMENT '类型：1. memcached, 2. redis-cluster, 3. memcacheq, 4. 非cache-cloud 5. redis-sentinel 6.redis-standalone',
+  `type` mediumint(4) NOT NULL COMMENT '类型：2. redis-cluster, 5. redis-sentinel 6.redis-standalone',
   `reason` mediumtext NOT NULL COMMENT '故障原因描述',
   PRIMARY KEY (`id`),
   KEY `idx_ip_port` (`ip`,`port`),
@@ -676,7 +676,7 @@ DROP TABLE IF EXISTS `instance_info`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `instance_info` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'memcached instance id',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'instance id',
   `parent_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '对等实例的id',
   `app_id` bigint(20) NOT NULL COMMENT '应用id，与app_desc关联',
   `host_id` bigint(20) NOT NULL COMMENT '对应的主机id，与instance_host关联',
@@ -686,7 +686,7 @@ CREATE TABLE `instance_info` (
   `mem` int(11) NOT NULL COMMENT '内存大小',
   `conn` int(11) NOT NULL COMMENT '连接数',
   `cmd` varchar(255) NOT NULL COMMENT '启动实例的命令/redis-sentinel的masterName',
-  `type` mediumint(11) NOT NULL COMMENT '类型：1. memcached, 2. redis-cluster, 3. memcacheq, 4. 非cache-cloud 5. redis-sentinel 6.redis-standalone',
+  `type` mediumint(11) NOT NULL COMMENT '类型：2. redis-cluster, 5. redis-sentinel 6.redis-standalone',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uidx_inst_ipport` (`ip`,`port`),
   KEY `app_id` (`app_id`)

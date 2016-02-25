@@ -23,7 +23,6 @@
         <jetty.version>9.2.3.v20140905</jetty.version>
         <mybatis.spring.version>1.2.3</mybatis.spring.version>
         <mybatis.version>3.2.8</mybatis.version>
-        <xmemcached.version>2.0.0</xmemcached.version>
         <jedis.version>2.8.0</jedis.version>
         <mongodb.driver.version>2.12.1</mongodb.driver.version>
         <jackson.version>2.3.2</jackson.version>
@@ -114,12 +113,6 @@
                 <groupId>org.mybatis.spring.boot</groupId>
                 <artifactId>mybatis-spring-boot-starter</artifactId>
                 <version>${mybatis-spring-boot.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.googlecode.xmemcached</groupId>
-                <artifactId>xmemcached</artifactId>
-                <version>${xmemcached.version}</version>
             </dependency>
 
             <dependency>
