@@ -6,7 +6,6 @@
         " default-autowire="byName">
 
     <!--初始化加载已有实例，测试时禁用-->
-    <bean class="com.sohu.cache.init.MemcachedInitLoad" init-method="init"/>
     <bean class="com.sohu.cache.init.RedisInitLoad" init-method="init" />
     <bean class="com.sohu.cache.init.MachineInitLoad" init-method="init" />
 </beans>

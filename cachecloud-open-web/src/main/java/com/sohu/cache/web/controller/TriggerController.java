@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * trigger操作
- * User: lingguo
- * Date: 14-5-19
- * Time: 下午7:46
+ * @author leifu
+ * @Date 2014年05月19日
+ * @Time 下午5:15:36
  */
 @Controller
 @RequestMapping(value = "/cache/triggers")
@@ -39,9 +39,7 @@ public class TriggerController {
 
         String triggerName = ObjectConvert.linkIpAndPort(host, port);
         String triggerGroup = "";
-        if (type == ConstUtils.CACHE_TYPE_MEMCACHED) {
-            triggerGroup = ConstUtils.MEMCACHED_TRIGGER_GROUP + appId;
-        } else if (type == ConstUtils.CACHE_TYPE_REDIS_CLUSTER) {
+        if (type == ConstUtils.CACHE_TYPE_REDIS_CLUSTER) {
             triggerGroup = ConstUtils.REDIS_TRIGGER_GROUP + appId;
         }
 
@@ -63,9 +61,7 @@ public class TriggerController {
 
         String triggerName = ObjectConvert.linkIpAndPort(host, port);
         String triggerGroup = "";
-        if (type == ConstUtils.CACHE_TYPE_MEMCACHED) {
-            triggerGroup = ConstUtils.MEMCACHED_TRIGGER_GROUP + appId;
-        } else if (type == ConstUtils.CACHE_TYPE_REDIS_CLUSTER) {
+        if (type == ConstUtils.CACHE_TYPE_REDIS_CLUSTER) {
             triggerGroup = ConstUtils.REDIS_TRIGGER_GROUP + appId;
         }
 

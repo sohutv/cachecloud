@@ -49,10 +49,10 @@ public class InstanceStats {
     /* 当前的连接数 */
     private int currConnections;
 
-    /* 未命中数：如果是redis，则是keyspace的命中；如果是memcached，则是get的未命中 */
+    /* 未命中数*/
     private long misses;
 
-    /* 命中数：如果是redis，则是keyspace的命中；如果是memcached，则是get的命中 */
+    /* 命中数 */
     private long hits;
 
     /* 开始收集时间 */

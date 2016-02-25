@@ -31,23 +31,6 @@ public class InstanceStatsCenterTest extends BaseTest {
     }
 
     @Test
-    public void testGetStandardStatsList(){
-        long appId1 = 10004;
-        watch.start("memcached");
-        Map<Integer, Map<String, List<InstanceCommandStats>>> map = instanceStatsCenter.getStandardStatsList(appId1, 201506170000L,
-                201506172359L, Arrays.asList("get_hits"));
-        watch.stop();
-        System.out.println(map.size());
-        long appId2 = 10129;
-        watch.start("redis-cluster");
-        map = instanceStatsCenter.getStandardStatsList(appId2, 201506170000L,
-                201506172359L, Arrays.asList("total_net_input_bytes","total_net_output_bytes"));
-        watch.stop();
-        System.out.println(watch.prettyPrint());
-        System.out.println(map.size());
-    }
-
-    @Test
     public void getInstanceStats() {
         InstanceStats instanceStats = instanceStatsCenter.getInstanceStats(51L);
         System.out.println(instanceStats);

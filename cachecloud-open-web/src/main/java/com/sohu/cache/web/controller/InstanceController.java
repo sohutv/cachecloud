@@ -10,8 +10,6 @@ import com.sohu.cache.web.vo.RedisSlowLog;
 import com.sohu.cache.web.chart.key.ChartKeysUtil;
 import com.sohu.cache.web.chart.model.SplineChartEntity;
 import com.sohu.cache.web.util.DateUtil;
-import com.sohu.cache.web.vo.MemcacheStatItemVO;
-import com.sohu.cache.web.vo.MemcacheStatSlabVO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang.time.DateUtils;
@@ -108,43 +106,6 @@ public class InstanceController {
             model.addAttribute("appId", instanceInfo.getAppId());
             model.addAttribute("appDetail", appStatsCenter.getAppDetail(instanceInfo.getAppId()));
             InstanceStats instanceStats = instanceStatsCenter.getInstanceStats(instanceId);
-            if (instanceStats != null && instanceStats.getInfoMap() != null) {
-                Map<String, Object> infoMap = instanceStats.getInfoMap();
-                if (instanceInfo.getType() == ConstUtils.CACHE_TYPE_MEMCACHED) {
-                    if (infoMap.containsKey("items")) {
-                        Map<String, String> items = (Map<String, String>) infoMap.get("items");
-                        Map<Integer, MemcacheStatItemVO> itemsVo = new TreeMap<Integer, MemcacheStatItemVO>();
-                        for (String key : items.keySet()) {
-                            String[] keySplit = key.split(":");
-                            if (keySplit.length == 3) {
-                                if (itemsVo.containsKey(NumberUtils.toInt(keySplit[1]))) {
-                                    continue;
-                                } else {
-                                    itemsVo.put(NumberUtils.toInt(keySplit[1]), new MemcacheStatItemVO(items, keySplit[1]));
-                                }
-                            }
-                        }
-                        infoMap.put("itemsVo", itemsVo);
-                    }
-                    if (infoMap.containsKey("slabs")) {
-                        Map<String, String> slabs = (Map<String, String>) infoMap.get("slabs");
-                        Map<Integer, MemcacheStatSlabVO> slabsVo = new TreeMap<Integer, MemcacheStatSlabVO>();
-                        for (String key : slabs.keySet()) {
-                            String[] keySplit = key.split(":");
-                            if (keySplit.length == 2) {
-                                if (slabsVo.containsKey(NumberUtils.toInt(keySplit[1]))) {
-                                    continue;
-                                } else {
-                                    slabsVo.put(NumberUtils.toInt(keySplit[0]), new MemcacheStatSlabVO(slabs, keySplit[0]));
-                                }
-                            }
-                        }
-                        infoMap.put("slabsVo", slabsVo);
-                    }
-
-                }
-            }
-
             model.addAttribute("instanceStats", instanceStats);
             List<AppCommandStats> topLimitAppCommandStatsList = appStatsCenter.getTopLimitAppCommandStatsList(instanceInfo.getAppId(), Long.parseLong(startDateParam) * 10000, Long.parseLong(endDateParam) * 10000, 5);
             model.addAttribute("appCommandStats", topLimitAppCommandStatsList);

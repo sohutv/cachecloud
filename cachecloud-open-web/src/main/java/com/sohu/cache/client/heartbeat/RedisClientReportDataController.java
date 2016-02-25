@@ -33,8 +33,8 @@ import com.sohu.tv.jedis.stat.model.ClientReportBean;
  */
 @Controller
 @RequestMapping(value = "/cachecloud/client")
-public class CacheCloudClientReportDataController {
-    private final Logger logger = LoggerFactory.getLogger(CacheCloudClientReportDataController.class);
+public class RedisClientReportDataController {
+    private final Logger logger = LoggerFactory.getLogger(RedisClientReportDataController.class);
 
     @Resource(name = "appService")
     private AppService appService;

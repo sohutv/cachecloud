@@ -22,7 +22,7 @@ public interface InstanceStatsCenter {
     InstanceInfo getInstanceInfo(long instanceId);
 
     /**
-     * 根据实例id获取实例的实施统计&是否在线&(memcache/redis)实时统计信息
+     * 根据实例id获取实例的实施统计&是否在线&redis实时统计信息
      *
      * @param instanceId 实例id
      * @return 实例实时状态信息

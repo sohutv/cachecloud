@@ -7,7 +7,6 @@ import com.sohu.cache.entity.InstanceCommandStats;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.entity.InstanceStats;
 import com.sohu.cache.entity.StandardStats;
-import com.sohu.cache.memcached.MemcachedCenter;
 import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.stats.instance.InstanceStatsCenter;
 import com.sohu.cache.util.ConstUtils;
@@ -20,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
-import java.lang.reflect.Type;
 import java.util.*;
 
 /**
@@ -34,8 +32,6 @@ public class InstanceStatsCenterImpl implements InstanceStatsCenter {
     private InstanceStatsDao instanceStatsDao;
 
     private RedisCenter redisCenter;
-
-    private MemcachedCenter memcachedCenter;
 
     @Override
     public InstanceInfo getInstanceInfo(long instanceId) {
@@ -64,26 +60,18 @@ public class InstanceStatsCenterImpl implements InstanceStatsCenter {
     }
 
     private boolean isRun(int type, String ip, int port) {
-        if (type == ConstUtils.CACHE_TYPE_MEMCACHED) {
-            return memcachedCenter.isRun(ip, port);
-        } else {
-            return redisCenter.isRun(ip, port);
-        }
+        return redisCenter.isRun(ip, port);
     }
 
     private Map<String, Object> getInfoMap(int type, String ip, int port) {
-        if (type == ConstUtils.CACHE_TYPE_MEMCACHED) {
-            return memcachedCenter.getInfoStats(ip, port);
-        } else {
-            Map<RedisConstant, Map<String, Object>> infoMap = redisCenter.getInfoStats(ip, port);
-            Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
-            if (infoMap != null) {
-                for (RedisConstant redisConstant : infoMap.keySet()) {
-                    resultMap.put(redisConstant.getValue(), infoMap.get(redisConstant));
-                }
+        Map<RedisConstant, Map<String, Object>> infoMap = redisCenter.getInfoStats(ip, port);
+        Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+        if (infoMap != null) {
+            for (RedisConstant redisConstant : infoMap.keySet()) {
+                resultMap.put(redisConstant.getValue(), infoMap.get(redisConstant));
             }
-            return resultMap;
         }
+        return resultMap;
     }
 
     @Override
@@ -97,12 +85,7 @@ public class InstanceStatsCenterImpl implements InstanceStatsCenter {
         String ip = instanceInfo.getIp();
         int port = instanceInfo.getPort();
         int type = instanceInfo.getType();
-        List<Map<String, Object>> objectList;
-        if (type == ConstUtils.CACHE_TYPE_MEMCACHED) {
-            objectList = this.queryDiffMapList(beginTime, endTime, ip, port, ConstUtils.MEMCACHED);
-        } else {
-            objectList = this.queryDiffMapList(beginTime, endTime, ip, port, ConstUtils.REDIS);
-        }
+        List<Map<String, Object>> objectList = this.queryDiffMapList(beginTime, endTime, ip, port, ConstUtils.REDIS);;
         if (objectList != null) {
             for (Map<String, Object> map : objectList) {
                 InstanceCommandStats stats = parseCommand(instanceId, commandName, map, true, type);
@@ -135,12 +118,7 @@ public class InstanceStatsCenterImpl implements InstanceStatsCenter {
             if (BooleanUtils.isNotTrue(isMaster)){
                 continue;
             }
-            List<Map<String, Object>> objectList;
-            if (TypeUtil.isMemcacheType(type)) {
-                objectList = this.queryDiffMapList(beginTime, endTime, ip, port, ConstUtils.MEMCACHED);
-            } else {
-                objectList = this.queryDiffMapList(beginTime, endTime, ip, port, ConstUtils.REDIS);
-            }
+            List<Map<String, Object>> objectList = this.queryDiffMapList(beginTime, endTime, ip, port, ConstUtils.REDIS);;
             if (objectList != null) {
                 Map<String, List<InstanceCommandStats>> commandMap = new LinkedHashMap<String, List<InstanceCommandStats>>();
                 for (String commandName : commands) {
@@ -167,11 +145,7 @@ public class InstanceStatsCenterImpl implements InstanceStatsCenter {
         }
         Long count;
         if (isCommand) {
-            if (TypeUtil.isMemcacheType(type)) {
-                count = MapUtils.getLong(commandMap, "cmd_" + command.toLowerCase(), null);
-            } else {
-                count = MapUtils.getLong(commandMap, "cmdstat_" + command.toLowerCase(), null);
-            }
+            count = MapUtils.getLong(commandMap, "cmdstat_" + command.toLowerCase(), null);
         } else {
             count = MapUtils.getLong(commandMap, command.toLowerCase(), null);
         }
@@ -200,8 +174,6 @@ public class InstanceStatsCenterImpl implements InstanceStatsCenter {
         }
         if (TypeUtil.isRedisType(instanceInfo.getType())) {
             return redisCenter.executeCommand(instanceInfo.getAppId(), host, port, command);
-        } else if (TypeUtil.isMemcacheType(instanceInfo.getType())) {
-            return memcachedCenter.executeCommand(host, port, command);
         }
         return "not support type";
     }
@@ -306,7 +278,4 @@ public class InstanceStatsCenterImpl implements InstanceStatsCenter {
         this.redisCenter = redisCenter;
     }
 
-    public void setMemcachedCenter(MemcachedCenter memcachedCenter) {
-        this.memcachedCenter = memcachedCenter;
-    }
 }

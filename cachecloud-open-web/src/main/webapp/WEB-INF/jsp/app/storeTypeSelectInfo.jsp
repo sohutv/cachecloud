@@ -68,14 +68,6 @@
 			
 			</div>
 			
-			<h3>Memcache中数据剔除方案</h3>
-			<div class="bs-docs-example">
-				Memcached的所有的item都是
-				<code>lazy</code>
-				剔除的，<strong>只有当再次被访问时才会进行内存回收</strong>，不触及则认为是可用的。包括数据统计项
-			</div>
-			
-			<h3>Memcache中内存申请流程图</h3>
 		</div>
 	</div>
 	<jsp:include page="/WEB-INF/include/foot.jsp"/>

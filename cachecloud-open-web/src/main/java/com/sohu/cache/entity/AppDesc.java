@@ -52,7 +52,7 @@ public class AppDesc implements Serializable {
 
     /**
      * cache类型
-     * 1. memcached, 2. redis-cluster, 3. memcacheq, 4. 非cache-cloud ,5. redis-sentinel ,6.redis-standalone
+     * 2. redis-cluster,5. redis-sentinel,6.redis-standalone
      */
     private int type;
 
@@ -275,14 +275,8 @@ public class AppDesc implements Serializable {
     public String getTypeDesc() {
         if (type <= 0) {
             return "";
-        } else if (type == 1) {
-            return "memcached";
         } else if (type == 2) {
             return "redis-cluster";
-        } else if (type == 3) {
-            return "memcacheq";
-        } else if (type == 4) {
-            return "非cache-cloud";
         } else if (type == 5) {
             return "redis-sentinel";
         } else if (type == 6) {

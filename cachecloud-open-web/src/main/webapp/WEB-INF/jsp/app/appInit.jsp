@@ -65,7 +65,7 @@
 													存储种类:
 												</label>
 												<div class="col-md-5">
-													<select name="type" class="form-control select2_category" onchange="changeStoreOption(this.value)">
+													<select name="type" class="form-control select2_category">
 														<option value="2">
 															Redis-cluster
 														</option>

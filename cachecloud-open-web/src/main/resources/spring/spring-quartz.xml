@@ -101,7 +101,6 @@
         </property>
         <property name="jobDetails">
             <array>
-                <ref bean="memcachedJobDetail"/>
                 <ref bean="redisJobDetail"/>
                 <ref bean="machineJobDetail"/>
                 <ref bean="machineMonitorJobDetail"/>
@@ -110,14 +109,6 @@
             </array>
         </property>
 
-    </bean>
-
-    <bean id="memcachedJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="name" value="memcachedJob"></property>
-        <property name="group" value="memcached"></property>
-        <property name="jobClass" value="com.sohu.cache.schedule.jobs.MemcachedJob"></property>
-        <property name="requestsRecovery" value="true"/>
-        <property name="durability" value="true"/>
     </bean>
 
     <bean id="redisJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">

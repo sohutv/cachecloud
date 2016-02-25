@@ -6,7 +6,6 @@ import com.sohu.cache.dao.AppStatsDao;
 import com.sohu.cache.dao.InstanceDao;
 import com.sohu.cache.dao.InstanceStatsDao;
 import com.sohu.cache.entity.*;
-import com.sohu.cache.memcached.MemcachedCenter;
 import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.stats.app.AppStatsCenter;
 import com.sohu.cache.util.ConstUtils;
@@ -41,8 +40,6 @@ public class AppStatsCenterImpl implements AppStatsCenter {
 
     private RedisCenter redisCenter;
 
-    private MemcachedCenter memcachedCenter;
-    
     private UserService userService;
     
     private final static String COLLECT_DATE_FORMAT = "yyyyMMddHHmm";
@@ -125,17 +122,7 @@ public class AppStatsCenterImpl implements AppStatsCenter {
                 logger.error("get app and it's instances error， appId = {}", appId);
                 return null;
             }
-            if (appDesc.getType() == ConstUtils.CACHE_TYPE_MEMCACHED) {
-                for (InstanceInfo instance : instanceInfoList) {
-                    machineSet.add(instance.getHostId());
-                    totalMemory += instance.getMem();
-                    if (instance.getParentId() == 0) {      // 主
-                        masterCount++;
-                    } else {                                // 从
-                        slaveCount++;
-                    }
-                }
-            } else if (appDesc.getType() == ConstUtils.CACHE_TYPE_REDIS_CLUSTER) {
+            if (appDesc.getType() == ConstUtils.CACHE_TYPE_REDIS_CLUSTER) {
                 for (InstanceInfo instance : instanceInfoList) {
                     machineSet.add(instance.getHostId());
                     totalMemory += instance.getMem();
@@ -315,8 +302,6 @@ public class AppStatsCenterImpl implements AppStatsCenter {
         }
         if (TypeUtil.isRedisType(appDesc.getType())) {
             return redisCenter.executeCommand(appDesc, command);
-        } else if (TypeUtil.isMemcacheType(appDesc.getType())) {
-            return memcachedCenter.executeCommand(appDesc, command);
         }
         return "not support app";
     }
@@ -345,7 +330,4 @@ public class AppStatsCenterImpl implements AppStatsCenter {
         this.userService = userService;
     }
 
-    public void setMemcachedCenter(MemcachedCenter memcachedCenter) {
-        this.memcachedCenter = memcachedCenter;
-    }
 }

@@ -28,14 +28,6 @@ public class TypeUtil {
         return false;
     }
 
-    public static boolean isMemcacheType(int type) {
-        if (type == ConstUtils.CACHE_TYPE_MEMCACHED
-                || type == ConstUtils.CACHE_TYPE_MEMCACHEQ) {
-            return true;
-        }
-        return false;
-    }
-
     public static boolean isRedisDataType(int type) {
         if (type == ConstUtils.CACHE_TYPE_REDIS_CLUSTER
                 || type == ConstUtils.CACHE_REDIS_STANDALONE) {

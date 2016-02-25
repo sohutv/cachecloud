@@ -87,7 +87,7 @@
 													<input type="checkbox" name="applyReason" value="提升DevOps的能力"/>提升DevOps的能力<br/>
 													<input type="checkbox" name="applyReason" value="云产品的开发经验和思维方式"/>云产品的开发经验和思维方式<br/>
 													<input type="checkbox" name="applyReason" value="体验到自动化带来的好处,体现到自己的系统中"/>体验到自动化带来的好处,体现到自己的系统中<br/>
-													<input type="checkbox" name="applyReason" value="Redis/Memcache深入掌握"/>Redis/memcache 深入掌握 <br/>
+													<input type="checkbox" name="applyReason" value="Redis深入掌握"/>Redis深入掌握 <br/>
 												</div>
 											</div>
 											

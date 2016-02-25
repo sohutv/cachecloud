@@ -11,7 +11,6 @@ import com.sohu.cache.entity.*;
 import com.sohu.cache.exception.SSHException;
 import com.sohu.cache.machine.MachineCenter;
 import com.sohu.cache.machine.PortGenerator;
-import com.sohu.cache.memcached.MemcachedCenter;
 import com.sohu.cache.protocol.MachineProtocol;
 import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.schedule.SchedulerCenter;
@@ -69,8 +68,6 @@ public class MachineCenterImpl implements MachineCenter {
 
     private RedisCenter redisCenter;
 
-    private MemcachedCenter memcachedCenter;
-    
     /**
      * 邮箱报警
      */
@@ -295,12 +292,7 @@ public class MachineCenterImpl implements MachineCenter {
     @Override
     public Integer getAvailablePort(final String ip, final int type) {
 
-        Integer availablePort = null;
-        if (TypeUtil.isMemcacheType(type)) {
-            availablePort = PortGenerator.getMemcachedPort(ip);
-        } else if (TypeUtil.isRedisType(type)) {
-            availablePort = PortGenerator.getRedisPort(ip);
-        }
+        Integer availablePort = PortGenerator.getRedisPort(ip);
         // 去实例表中再check一下，该端口是否从来没被使用过
         while (instanceDao.getCountByIpAndPort(ip, availablePort) > 0) {
             availablePort++;
@@ -467,13 +459,6 @@ public class MachineCenterImpl implements MachineCenter {
                 } else {
                     info.setStatus(0);
                 }
-            } else {
-                boolean isRun = memcachedCenter.isRun(host, port);
-                if (isRun) {
-                    info.setStatus(1);
-                } else {
-                    info.setStatus(0);
-                }
             }
         }
         return list;
@@ -481,10 +466,6 @@ public class MachineCenterImpl implements MachineCenter {
 
     public void setRedisCenter(RedisCenter redisCenter) {
         this.redisCenter = redisCenter;
-    }
-
-    public void setMemcachedCenter(MemcachedCenter memcachedCenter) {
-        this.memcachedCenter = memcachedCenter;
     }
 
     public void setSchedulerCenter(SchedulerCenter schedulerCenter) {

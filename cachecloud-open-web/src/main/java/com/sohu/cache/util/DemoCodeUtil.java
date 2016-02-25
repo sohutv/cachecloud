@@ -114,24 +114,12 @@ public class DemoCodeUtil {
     public static List<String> getCode(AppDesc appDesc) {
         List<String> list = null;
         switch (appDesc.getType()) {
-            case ConstUtils.CACHE_NO_CACHE_CLOUD: {
-                list = new ArrayList<String>();
-                break;
-            }
             case ConstUtils.CACHE_REDIS_SENTINEL: {
                 list = new ArrayList<String>(redisSentinel);
                 break;
             }
             case ConstUtils.CACHE_REDIS_STANDALONE: {
                 list = new ArrayList<String>(redisStandalone);
-                break;
-            }
-            case ConstUtils.CACHE_TYPE_MEMCACHED: {
-                list = new ArrayList<String>();
-                break;
-            }
-            case ConstUtils.CACHE_TYPE_MEMCACHEQ: {
-                list = new ArrayList<String>();
                 break;
             }
             case ConstUtils.CACHE_TYPE_REDIS_CLUSTER: {
@@ -153,24 +141,12 @@ public class DemoCodeUtil {
     public static List<String> getDependency(AppDesc appDesc) {
         List<String> list = null;
         switch (appDesc.getType()) {
-            case ConstUtils.CACHE_NO_CACHE_CLOUD: {
-                list = new ArrayList<String>();
-                break;
-            }
             case ConstUtils.CACHE_REDIS_SENTINEL: {
                 list = dependencyRedis;
                 break;
             }
             case ConstUtils.CACHE_REDIS_STANDALONE: {
                 list = dependencyRedis;
-                break;
-            }
-            case ConstUtils.CACHE_TYPE_MEMCACHED: {
-                list = new ArrayList<String>();
-                break;
-            }
-            case ConstUtils.CACHE_TYPE_MEMCACHEQ: {
-                list = new ArrayList<String>();
                 break;
             }
             case ConstUtils.CACHE_TYPE_REDIS_CLUSTER: {

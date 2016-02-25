@@ -7,22 +7,13 @@ package com.sohu.cache.util;
  */
 public class ConstUtils {
     // cache的类型区分
-    public static final int CACHE_TYPE_MEMCACHED = 1;
     public static final int CACHE_TYPE_REDIS_CLUSTER = 2;
-    public static final int CACHE_TYPE_MEMCACHEQ = 3;
-    public static final int CACHE_NO_CACHE_CLOUD = 4;
     public static final int CACHE_REDIS_SENTINEL = 5;
     public static final int CACHE_REDIS_STANDALONE = 6;
 
     // 数据源名称
     public static final String REDIS = "redis";
-    public static final String MEMCACHED = "memcached";
     public static final String MACHINE = "machine";
-
-    // memcached job/trigger name/group
-    public static final String MEMCACHED_JOB_NAME = "memcachedJob";
-    public static final String MEMCACHED_JOB_GROUP = "memcached";
-    public static final String MEMCACHED_TRIGGER_GROUP = "memcached-";
 
     // redis job/trigger name/group
     public static final String REDIS_JOB_NAME = "redisJob";
@@ -40,7 +31,6 @@ public class ConstUtils {
     public static final String MACHINE_MONITOR_TRIGGER_GROUP = "machineMonitor-";
 
     // 心跳检测的频率，由server返回给client
-    public static final int HEARTBEAT_INTERVAL_MEMCACHED = 10;
     public static final int HEARTBEAT_INTERVAL_REDIS = 10;
 
     // http 超时设置

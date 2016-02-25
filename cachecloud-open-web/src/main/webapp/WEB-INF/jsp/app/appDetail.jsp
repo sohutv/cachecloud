@@ -21,10 +21,7 @@
                     <td>应用类型</td>
                     <td>
                     	<c:choose>
-                    		<c:when test="${appDetail.appDesc.type == 1}">memcached</c:when>
         		            <c:when test="${appDetail.appDesc.type == 2}">redis-cluster</c:when>
-            		        <c:when test="${appDetail.appDesc.type == 3}">memcacheq</c:when>
-            		        <c:when test="${appDetail.appDesc.type == 4}">非cache-cloud</c:when>
 		        		    <c:when test="${appDetail.appDesc.type == 5}">redis-sentinel</c:when>
 		        		    <c:when test="${appDetail.appDesc.type == 6}">redis-standalone</c:when>
                     	</c:choose>

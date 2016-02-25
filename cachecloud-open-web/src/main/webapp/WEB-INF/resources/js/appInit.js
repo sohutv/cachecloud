@@ -1,14 +1,4 @@
 
-//memcache选项相关的需要有后端数据源,不能持久化，不能热备
-function changeStoreOption(type){
-	//memcache或者memcacheq
-	if(type == 1 || type == 3){
-		document.getElementById("hasBackStore").value = 1;
-		document.getElementById("needPersistence").value = 0;
-		document.getElementById("needHotBackUp").value = 0;
-	}
-}
-
 //验证是数字
 function testisNum(id){
    var value =document.getElementById(id).value;

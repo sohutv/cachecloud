@@ -11,7 +11,6 @@ import com.sohu.cache.dao.AppDao;
 import com.sohu.cache.dao.InstanceDao;
 import com.sohu.cache.entity.*;
 import com.sohu.cache.machine.MachineCenter;
-import com.sohu.cache.memcached.MemcachedCenter;
 import com.sohu.cache.redis.*;
 import com.sohu.cache.stats.app.AppDeployCenter;
 import com.sohu.cache.util.ConstUtils;
@@ -45,8 +44,6 @@ public class AppDeployCenterImpl implements AppDeployCenter {
     private AppEmailUtil appEmailUtil;
 
     private AppAuditDao appAuditDao;
-
-    private MemcachedCenter memcachedCenter;
 
     private MachineCenter machineCenter;
 
@@ -149,8 +146,6 @@ public class AppDeployCenterImpl implements AppDeployCenter {
             } else {
                 logger.error("nodeInfoList={} is error");
             }
-        } else if (TypeUtil.isMemcacheType(type)) {
-            isAudited = deployMemcache(appId, nodes.get(0));
         } else {
             logger.error("unknown type : {}", type);
             return false;
@@ -185,15 +180,6 @@ public class AppDeployCenterImpl implements AppDeployCenter {
                     boolean isShutdown = redisCenter.shutdown(ip, port);
                     if (!isShutdown) {
                         logger.error("{}:{} redis not shutdown!", ip, port);
-                        return false;
-                    }
-                } else {
-                    //取消收集
-                    memcachedCenter.unDeployMemcachedCollection(appId, ip, port);
-                    //关闭实例节点
-                    boolean isShutdown = memcachedCenter.shutdown(ip,port);
-                    if (!isShutdown) {
-                        logger.error("{}:{} memcached not shutdown!", ip, port);
                         return false;
                     }
                 }
@@ -250,12 +236,6 @@ public class AppDeployCenterImpl implements AppDeployCenter {
         String host = nodeInfo[0];
         int memory = NumberUtils.createInteger(nodeInfo[1]);
         return redisDeployCenter.deployStandaloneInstance(appId, host, memory);
-    }
-
-    private boolean deployMemcache(long appId, String[] nodeInfo) {
-        String host = nodeInfo[0];
-        int memory = NumberUtils.createInteger(nodeInfo[1]);
-        return memcachedCenter.deployMemcached(appId, host, memory);
     }
 
     @Override
@@ -433,9 +413,7 @@ public class AppDeployCenterImpl implements AppDeployCenter {
             if (appDesc == null) {
                 return false;
             }
-            if (TypeUtil.isMemcacheType(appDesc.getType())) {
-                return memcachedCenter.cleanAppData(appDesc, appUser);
-            } else if (TypeUtil.isRedisType(appDesc.getType())) {
+            if (TypeUtil.isRedisType(appDesc.getType())) {
                 return redisCenter.cleanAppData(appDesc, appUser);
             } else {
                 return false;
@@ -543,10 +521,6 @@ public class AppDeployCenterImpl implements AppDeployCenter {
 
     public void setAppAuditDao(AppAuditDao appAuditDao) {
         this.appAuditDao = appAuditDao;
-    }
-
-    public void setMemcachedCenter(MemcachedCenter memcachedCenter) {
-        this.memcachedCenter = memcachedCenter;
     }
 
     public void setInstanceDao(InstanceDao instanceDao) {

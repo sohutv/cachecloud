@@ -17,7 +17,7 @@ public interface TriggerCenter {
     /**
      * 增加一个新的trigger
      *
-     * @param jobGroup  trigger所属的job分组：memcached/redis/machine/machineMonitor
+     * @param jobGroup  trigger所属的job分组：redis/machine/machineMonitor
      * @param ip
      * @param port
      * @return
@@ -50,7 +50,7 @@ public interface TriggerCenter {
     /**
      * 查询某一job类型下的所有trigger
      *
-     * @param jobGroup job类型：redis/memcached/machine/machineMonitor
+     * @param jobGroup job类型：redis/machine/machineMonitor
      * @return
      */
     public List<TriggerInfo> getTriggersByJobGroup(String jobGroup);

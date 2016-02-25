@@ -64,12 +64,4 @@ public class AppStatsCenterImplTest extends BaseTest {
         System.out.println(value);
     }
 
-    @Test
-    public void executeCommandMemcacheTest() {
-        long appId = 10004L;
-        String command = "get 11";
-        String value = appStatsCenter.executeCommand(appId, command);
-        System.out.println(value);
-    }
-    
 }

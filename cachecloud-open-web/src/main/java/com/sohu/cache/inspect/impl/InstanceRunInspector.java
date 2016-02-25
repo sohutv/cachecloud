@@ -1,7 +1,6 @@
 package com.sohu.cache.inspect.impl;
 
 import com.sohu.cache.alert.impl.BaseAlertService;
-import com.sohu.cache.constant.CacheCloudConstants;
 import com.sohu.cache.constant.InstanceStatusEnum;
 import com.sohu.cache.dao.AppDao;
 import com.sohu.cache.dao.InstanceDao;
@@ -11,7 +10,6 @@ import com.sohu.cache.entity.InstanceFault;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.inspect.InspectParamEnum;
 import com.sohu.cache.inspect.Inspector;
-import com.sohu.cache.memcached.MemcachedCenter;
 import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.util.TypeUtil;
 import org.apache.commons.collections4.MapUtils;
@@ -45,11 +43,6 @@ public class InstanceRunInspector extends BaseAlertService implements Inspector 
 
     private InstanceFaultDao instanceFaultDao;
 
-    /**
-     * memcache相关
-     */
-    private MemcachedCenter memcachedCenter;
-
     @Override
     public boolean inspect(Map<InspectParamEnum, Object> paramMap) {
         String host = MapUtils.getString(paramMap, InspectParamEnum.SPLIT_KEY);
@@ -73,20 +66,6 @@ public class InstanceRunInspector extends BaseAlertService implements Inspector 
                     alertInstanceInfo(info);
                 }
 
-            } else if (TypeUtil.isMemcacheType(type)) {
-                boolean isRun = memcachedCenter.isRun(host, port);
-                Boolean isUpdate = updateInstanceByRun(isRun, info);
-                if (isUpdate == null) {
-                    continue;
-                } else if (isUpdate) {
-                    memcachedCenter.deployMemcachedCollection(appId, host, port);
-                } else {
-                    memcachedCenter.unDeployMemcachedCollection(appId, host, port);
-                }
-                // 错误
-                if (isUpdate != null) {
-                    alertInstanceInfo(info);
-                }
             }
         }
 
@@ -209,7 +188,4 @@ public class InstanceRunInspector extends BaseAlertService implements Inspector 
         this.instanceFaultDao = instanceFaultDao;
     }
 
-    public void setMemcachedCenter(MemcachedCenter memcachedCenter) {
-        this.memcachedCenter = memcachedCenter;
-    }
 }

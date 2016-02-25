@@ -7,7 +7,6 @@ import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.entity.MachineInfo;
 import com.sohu.cache.entity.TriggerInfo;
 import com.sohu.cache.machine.MachineCenter;
-import com.sohu.cache.memcached.MemcachedCenter;
 import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.schedule.TriggerCenter;
 import com.sohu.cache.util.ConstUtils;
@@ -33,7 +32,6 @@ public class TriggerCenterImpl implements TriggerCenter {
     private Scheduler clusterScheduler;
     private QuartzDao quartzDao;
     private RedisCenter redisCenter;
-    private MemcachedCenter memcachedCenter;
     private MachineCenter machineCenter;
     private InstanceDao instanceDao;
     private MachineDao machineDao;
@@ -41,7 +39,7 @@ public class TriggerCenterImpl implements TriggerCenter {
     /**
      * 增加一个新trigger
      *
-     * @param jobGroup  trigger所属的job分组：memcached/redis/machine/machineMonitor
+     * @param jobGroup  trigger所属的job分组：redis/machine/machineMonitor
      * @param ip
      * @param port
      * @return
@@ -53,10 +51,7 @@ public class TriggerCenterImpl implements TriggerCenter {
         Assert.isTrue(port > 0, "port is invalid, port: " + port);
 
         boolean opResult = false;
-        if (jobGroup.equals(ConstUtils.MEMCACHED_JOB_GROUP)) {
-            InstanceInfo instanceInfo = instanceDao.getInstByIpAndPort(ip, port);
-            opResult = memcachedCenter.deployMemcachedCollection(instanceInfo.getAppId(), ip, port);
-        } else if (jobGroup.equals(ConstUtils.REDIS_JOB_GROUP)) {
+        if (jobGroup.equals(ConstUtils.REDIS_JOB_GROUP)) {
             InstanceInfo instanceInfo = instanceDao.getInstByIpAndPort(ip, port);
             opResult = redisCenter.deployRedisCollection(instanceInfo.getAppId(), ip, port);
         } else if (jobGroup.equals(ConstUtils.MACHINE_JOB_GROUP)) {
@@ -125,7 +120,7 @@ public class TriggerCenterImpl implements TriggerCenter {
     /**
      * 查询特定job类型下的所有trigger
      *
-     * @param jobGroup job类型：redis/memcached/machine/machineMonitor
+     * @param jobGroup job类型：redis/machine/machineMonitor
      * @return
      */
     @Override
@@ -190,10 +185,6 @@ public class TriggerCenterImpl implements TriggerCenter {
 
     public void setRedisCenter(RedisCenter redisCenter) {
         this.redisCenter = redisCenter;
-    }
-
-    public void setMemcachedCenter(MemcachedCenter memcachedCenter) {
-        this.memcachedCenter = memcachedCenter;
     }
 
     public void setMachineCenter(MachineCenter machineCenter) {
