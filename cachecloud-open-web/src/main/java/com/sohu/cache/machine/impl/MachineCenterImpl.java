@@ -2,6 +2,7 @@ package com.sohu.cache.machine.impl;
 
 import com.google.common.base.Strings;
 import com.sohu.cache.constant.CacheCloudConstants;
+import com.sohu.cache.constant.InstanceStatusEnum;
 import com.sohu.cache.constant.MachineConstant;
 import com.sohu.cache.dao.InstanceDao;
 import com.sohu.cache.dao.InstanceStatsDao;
@@ -455,9 +456,9 @@ public class MachineCenterImpl implements MachineCenter {
             if (TypeUtil.isRedisType(type)) {
                 boolean isRun = redisCenter.isRun(host, port);
                 if (isRun) {
-                    info.setStatus(1);
+                    info.setStatus(InstanceStatusEnum.GOOD_STATUS.getStatus());
                 } else {
-                    info.setStatus(0);
+                    info.setStatus(InstanceStatusEnum.ERROR_STATUS.getStatus());
                 }
             }
         }

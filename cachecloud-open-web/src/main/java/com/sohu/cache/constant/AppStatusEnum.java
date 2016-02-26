@@ -1,24 +1,46 @@
 package com.sohu.cache.constant;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 应用发布状态
+ * 
  * @author leifu
  * @Time 2014年6月28日
  */
 public enum AppStatusEnum {
-	STATUS_INITIALIZE(0), /* 应用刚刚初始化，还没有分配云资源 */
-	STATUS_ALLOCATED(1), /* 应用被分配了资源 */
-	STATUS_PUBLISHED(2), /* 应用已经发布 */
-	STATUS_OFFLINE(3); /* 应用下线 */
+    STATUS_INITIALIZE(0, "未分配"),
+    STATUS_ALLOCATED(1, "已申请未审批"),
+    STATUS_PUBLISHED(2, "运行中"),
+    STATUS_OFFLINE(3, "已下线");
 
-	private int value;
+    private int status;
 
-	private AppStatusEnum(int value) {
-		this.value = value;
-	}
+    private String info;
 
-	public int value() {
-		return value;
-	}
+    private static Map<Integer, AppStatusEnum> MAP = new HashMap<Integer, AppStatusEnum>();
+    static {
+        for (AppStatusEnum appStatusEnum : AppStatusEnum.values()) {
+            MAP.put(appStatusEnum.getStatus(), appStatusEnum);
+        }
+    }
+
+    private AppStatusEnum(int status, String info) {
+        this.status = status;
+        this.info = info;
+    }
+
+    public static AppStatusEnum getByStatus(int status) {
+        return MAP.get(status);
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public String getInfo() {
+        return info;
+    }
 
 }

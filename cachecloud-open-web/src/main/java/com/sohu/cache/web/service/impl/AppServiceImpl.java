@@ -126,7 +126,7 @@ public class AppServiceImpl implements AppService {
         appAuditDao.updateAppAudit(id, status);
         AppDesc appDesc = appDao.getAppDescById(appId);
         if (AppCheckEnum.APP_PASS.value().equals(status)) {
-            appDesc.setStatus(AppStatusEnum.STATUS_PUBLISHED.value());
+            appDesc.setStatus(AppStatusEnum.STATUS_PUBLISHED.getStatus());
             appDesc.setPassedTime(new Date());
             appDao.update(appDesc);
         }
@@ -160,7 +160,7 @@ public class AppServiceImpl implements AppService {
         if (resultList != null && resultList.size() > 0) {
             for (InstanceInfo instanceInfo : resultList) {
                 int type = instanceInfo.getType();
-                if(instanceInfo.getStatus() != 1){
+                if(instanceInfo.getStatus() != InstanceStatusEnum.GOOD_STATUS.getStatus()){
                     continue;
                 }
                 if (TypeUtil.isRedisType(type)) {

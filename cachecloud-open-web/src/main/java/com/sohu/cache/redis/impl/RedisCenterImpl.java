@@ -20,6 +20,7 @@ import com.sohu.cache.stats.instance.InstanceStatsCenter;
 import com.sohu.cache.util.*;
 import com.sohu.cache.web.util.DateUtil;
 import com.sohu.cache.web.vo.RedisSlowLog;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -30,6 +31,7 @@ import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
+
 import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisDataException;
 import redis.clients.util.JedisClusterCRC16;
@@ -820,7 +822,7 @@ public class RedisCenterImpl implements RedisCenter {
             }
             Set<HostAndPort> clusterHosts = new LinkedHashSet<HostAndPort>();
             for (InstanceInfo instance : instanceList) {
-                if (instance == null || instance.getStatus() == 2) {
+                if (instance == null || instance.getStatus() == InstanceStatusEnum.OFFLINE_STATUS.getStatus()) {
                     continue;
                 }
                 clusterHosts.add(new HostAndPort(instance.getIp(), instance.getPort()));

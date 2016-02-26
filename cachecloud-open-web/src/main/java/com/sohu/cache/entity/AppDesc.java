@@ -5,6 +5,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import com.sohu.cache.constant.AppStatusEnum;
+import com.sohu.cache.util.ConstUtils;
+
 /**
  * 应用的信息，包括分片、类型以及各分片的ip
  * <p/>
@@ -51,8 +54,7 @@ public class AppDesc implements Serializable {
     private Date passedTime;
 
     /**
-     * cache类型
-     * 2. redis-cluster,5. redis-sentinel,6.redis-standalone
+     * 类型
      */
     private int type;
 
@@ -275,11 +277,11 @@ public class AppDesc implements Serializable {
     public String getTypeDesc() {
         if (type <= 0) {
             return "";
-        } else if (type == 2) {
+        } else if (type == ConstUtils.CACHE_TYPE_REDIS_CLUSTER) {
             return "redis-cluster";
-        } else if (type == 5) {
+        } else if (type == ConstUtils.CACHE_REDIS_SENTINEL) {
             return "redis-sentinel";
-        } else if (type == 6) {
+        } else if (type == ConstUtils.CACHE_REDIS_STANDALONE) {
             return "redis-standalone";
         }
         return "";
@@ -304,16 +306,11 @@ public class AppDesc implements Serializable {
     }
 
     public String getStatusDesc() {
-        //0未分配，1是申请了未审批，2是审批并发布, 3应用下线
-        if (status == 0) {
-            return "未分配";
-        } else if (status == 1) {
-            return "已申请未审批";
-        } else if (status == 2) {
-            return "运行中";
-        } else {
-            return "已下线";
+        AppStatusEnum appStatusEnum = AppStatusEnum.getByStatus(status);
+        if (appStatusEnum != null) {
+            return appStatusEnum.getInfo();
         }
+        return "";
     }
 
 }

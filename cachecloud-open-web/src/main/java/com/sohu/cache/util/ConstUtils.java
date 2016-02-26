@@ -30,9 +30,6 @@ public class ConstUtils {
     public static final String MACHINE_MONITOR_JOB_GROUP = "machineMonitor";
     public static final String MACHINE_MONITOR_TRIGGER_GROUP = "machineMonitor-";
 
-    // 心跳检测的频率，由server返回给client
-    public static final int HEARTBEAT_INTERVAL_REDIS = 10;
-
     // http 超时设置
     public static final int HTTP_CONNECTION_TIMEOUT = 3000;
     public static final int HTTP_SOCKET_TIMEOUT = 3000;

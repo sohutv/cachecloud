@@ -5,6 +5,7 @@ import com.sohu.cache.constant.AppAuditLogTypeEnum;
 import com.sohu.cache.constant.AppAuditType;
 import com.sohu.cache.constant.AppCheckEnum;
 import com.sohu.cache.constant.AppStatusEnum;
+import com.sohu.cache.constant.InstanceStatusEnum;
 import com.sohu.cache.dao.AppAuditDao;
 import com.sohu.cache.dao.AppAuditLogDao;
 import com.sohu.cache.dao.AppDao;
@@ -184,12 +185,12 @@ public class AppDeployCenterImpl implements AppDeployCenter {
                     }
                 }
                 //更新实例下线
-                instanceInfo.setStatus(2);
+                instanceInfo.setStatus(InstanceStatusEnum.OFFLINE_STATUS.getStatus());
                 instanceDao.update(instanceInfo);
             }
         }
         //更新应用信息
-        appDesc.setStatus(AppStatusEnum.STATUS_OFFLINE.value());
+        appDesc.setStatus(AppStatusEnum.STATUS_OFFLINE.getStatus());
         appService.update(appDesc);
         return true;
     }
@@ -395,7 +396,7 @@ public class AppDeployCenterImpl implements AppDeployCenter {
                     InstanceInfo instanceInfo = instanceDao.getInstByIpAndPort(host, port);
                     if (instanceInfo != null) {
                         //更新实例下线
-                        instanceInfo.setStatus(2);
+                        instanceInfo.setStatus(InstanceStatusEnum.OFFLINE_STATUS.getStatus());
                         instanceDao.update(instanceInfo);
                     }
                 }
@@ -463,8 +464,8 @@ public class AppDeployCenterImpl implements AppDeployCenter {
                     // 改变审核状态
                     appAuditDao.updateAppAudit(appAuditId, AppCheckEnum.APP_ALLOCATE_RESOURCE.value());
                     InstanceInfo instanceInfo = instanceDao.getAllInstByIpAndPort(host, port);
-                    if (instanceInfo != null && instanceInfo.getStatus() != 1) {
-                        instanceInfo.setStatus(1);
+                    if (instanceInfo != null && instanceInfo.getStatus() != InstanceStatusEnum.GOOD_STATUS.getStatus()) {
+                        instanceInfo.setStatus(InstanceStatusEnum.GOOD_STATUS.getStatus());
                         instanceDao.update(instanceInfo);
                     }
                 }
@@ -497,7 +498,7 @@ public class AppDeployCenterImpl implements AppDeployCenter {
         instanceInfo.setHostId(machineInfo.getId());
         instanceInfo.setConn(0);
         instanceInfo.setMem(maxMemory);
-        instanceInfo.setStatus(1);
+        instanceInfo.setStatus(InstanceStatusEnum.GOOD_STATUS.getStatus());
         instanceInfo.setPort(port);
         instanceInfo.setType(ConstUtils.CACHE_TYPE_REDIS_CLUSTER);
         instanceInfo.setParentId(parentId);

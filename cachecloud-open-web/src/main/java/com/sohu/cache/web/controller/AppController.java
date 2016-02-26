@@ -625,7 +625,7 @@ public class AppController extends BaseController {
             appDesc.setCreateTime(now);
             appDesc.setPassedTime(now);
             appDesc.setVerId(1);
-            appDesc.setStatus((short) AppStatusEnum.STATUS_ALLOCATED.value());
+            appDesc.setStatus((short) AppStatusEnum.STATUS_ALLOCATED.getStatus());
             appDeployCenter.createApp(appDesc, appUser, memSize);
         }
         return new ModelAndView("redirect:/admin/app/list");

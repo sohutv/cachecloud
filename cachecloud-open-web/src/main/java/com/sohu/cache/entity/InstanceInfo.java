@@ -1,6 +1,7 @@
 package com.sohu.cache.entity;
 
-import org.apache.commons.lang.StringUtils;
+import com.sohu.cache.constant.InstanceStatusEnum;
+import com.sohu.cache.util.ConstUtils;
 
 import java.io.Serializable;
 
@@ -63,9 +64,6 @@ public class InstanceInfo implements Serializable {
      */
     private String cmd;
 
-    /**
-     * 类型：2. redis-cluster, 5. redis-sentinel 6.redis-standalone
-     */
     private int type;
 
     private String typeDesc;
@@ -169,11 +167,11 @@ public class InstanceInfo implements Serializable {
     public String getTypeDesc() {
         if (type <= 0) {
             return "";
-        } else if (type == 2) {
+        } else if (type == ConstUtils.CACHE_TYPE_REDIS_CLUSTER) {
             return "redis-cluster";
-        } else if (type == 5) {
+        } else if (type == ConstUtils.CACHE_REDIS_SENTINEL) {
             return "redis-sentinel";
-        } else if (type == 6) {
+        } else if (type == ConstUtils.CACHE_REDIS_STANDALONE) {
             return "redis-standalone";
         }
         return "";
@@ -221,14 +219,11 @@ public class InstanceInfo implements Serializable {
     }
 
     public String getStatusDesc() {
-        //是否启用 0:节点异常,1:正常启用,2:节点下线
-        if (status == 0) {
-            return "心跳停止";
-        } else if (status == 1) {
-            return "运行中";
-        } else {
-            return "已下线";
+        InstanceStatusEnum instanceStatusEnum = InstanceStatusEnum.getByStatus(status);
+        if (instanceStatusEnum != null) {
+            return instanceStatusEnum.getInfo();
         }
+        return "";
     }
 
     /**
@@ -237,7 +232,7 @@ public class InstanceInfo implements Serializable {
      * @return
      */
     public boolean isOffline() {
-        if (status == 2) {
+        if (status == InstanceStatusEnum.OFFLINE_STATUS.getStatus()) {
             return true;
         }
         return false;
@@ -254,7 +249,7 @@ public class InstanceInfo implements Serializable {
     }
 
     public String getRoleDesc() {
-        if (type == 5) {
+        if (type == ConstUtils.CACHE_REDIS_SENTINEL) {
             return "sentinel";
         } else {
             return roleDesc;

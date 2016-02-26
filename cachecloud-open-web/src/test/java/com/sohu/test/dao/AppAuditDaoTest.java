@@ -43,7 +43,7 @@ public class AppAuditDaoTest extends BaseTest{
         appAudit.setParam1(String.valueOf(memSize));
         appAudit.setParam2(appDesc.getTypeDesc());
         appAudit.setInfo("应用申请:类型:" + appDesc.getTypeDesc() + ";初始申请空间:" + memSize + ";");
-        appAudit.setStatus(AppStatusEnum.STATUS_INITIALIZE.value());
+        appAudit.setStatus(AppStatusEnum.STATUS_INITIALIZE.getStatus());
         appAudit.setType(AppAuditType.APP_AUDIT.getValue());
         appAuditDao.insertAppAudit(appAudit);
 

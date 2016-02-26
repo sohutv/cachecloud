@@ -1,13 +1,16 @@
 package com.sohu.cache.inspect.impl;
 
 import com.sohu.cache.alert.impl.BaseAlertService;
+import com.sohu.cache.constant.InstanceStatusEnum;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.inspect.InspectParamEnum;
 import com.sohu.cache.inspect.Inspector;
 import com.sohu.cache.util.IdempotentConfirmer;
 import com.sohu.cache.util.TypeUtil;
+
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
+
 import redis.clients.jedis.Jedis;
 
 import java.util.Collections;
@@ -33,7 +36,7 @@ public class RedisIsolationPersistenceInspector extends BaseAlertService impleme
             final int type = info.getType();
             int status = info.getStatus();
             //非正常节点
-            if (status != 1) {
+            if (status != InstanceStatusEnum.GOOD_STATUS.getStatus()) {
                 continue;
             }
             if (TypeUtil.isRedisDataType(type)) {

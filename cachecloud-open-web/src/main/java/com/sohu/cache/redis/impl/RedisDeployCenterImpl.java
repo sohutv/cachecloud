@@ -1,6 +1,7 @@
 package com.sohu.cache.redis.impl;
 
 import com.sohu.cache.constant.CacheCloudConstants;
+import com.sohu.cache.constant.InstanceStatusEnum;
 import com.sohu.cache.dao.AppDao;
 import com.sohu.cache.dao.InstanceDao;
 import com.sohu.cache.dao.MachineDao;
@@ -19,10 +20,12 @@ import com.sohu.cache.schedule.SchedulerCenter;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.IdempotentConfirmer;
 import com.sohu.cache.util.TypeUtil;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
+
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisSentinelPool;
 import redis.clients.jedis.Protocol;
@@ -375,7 +378,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         instanceInfo.setHostId(machineInfo.getId());
         instanceInfo.setConn(0);
         instanceInfo.setMem(maxMemory);
-        instanceInfo.setStatus(1);
+        instanceInfo.setStatus(InstanceStatusEnum.GOOD_STATUS.getStatus());
         instanceInfo.setPort(port);
         instanceInfo.setType(type);
         instanceInfo.setParentId(parentId);

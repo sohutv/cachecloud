@@ -1,5 +1,6 @@
 package com.sohu.cache.stats.instance.impl;
 
+import com.sohu.cache.constant.InstanceStatusEnum;
 import com.sohu.cache.dao.InstanceDao;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.exception.SSHException;
@@ -63,7 +64,7 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
             isRun = false;
         }
         if (isRun) {
-            instanceInfo.setStatus(1);
+            instanceInfo.setStatus(InstanceStatusEnum.GOOD_STATUS.getStatus());
             instanceDao.update(instanceInfo);
             if (TypeUtil.isRedisType(type)) {
                 redisCenter.deployRedisCollection(instanceInfo.getAppId(), instanceInfo.getIp(), instanceInfo.getPort());
@@ -95,7 +96,7 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
         }
 
         if (isShutdown) {
-            instanceInfo.setStatus(2);
+            instanceInfo.setStatus(InstanceStatusEnum.OFFLINE_STATUS.getStatus());
             instanceDao.update(instanceInfo);
             if (TypeUtil.isRedisType(type)) {
                 redisCenter.unDeployRedisCollection(instanceInfo.getAppId(), instanceInfo.getIp(), instanceInfo.getPort());

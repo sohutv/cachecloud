@@ -61,7 +61,7 @@ public class TotalManageController extends BaseController {
                 appDetailList.add(appDetail);
                 totalApplyMem += appDetail.getMem();
                 totalUsedMem += appDetail.getMemUsePercent() * appDetail.getMem() / 100.0;
-                if (appDesc.getStatus() == AppStatusEnum.STATUS_PUBLISHED.value()) {
+                if (appDesc.getStatus() == AppStatusEnum.STATUS_PUBLISHED.getStatus()) {
                     totalRunningApps++;
                 }
                 totalApps++;
