@@ -145,18 +145,13 @@ public class AppClientDataShowController extends BaseController {
             logger.error(e.getMessage(), e);
         }
 
-        // 2.1 获取异常总数
-        int totalRows = clientReportExceptionService.getAppExceptionCount(appId, timeBetween.getStartTime(), timeBetween.getEndTime(), type, clientIp);
-        // 2.2 分页参数
+        // 2. 分页查询异常
+        int totalCount = clientReportExceptionService.getAppExceptionCount(appId, timeBetween.getStartTime(), timeBetween.getEndTime(), type, clientIp);
         int pageNo = NumberUtils.toInt(request.getParameter("pageNo"), 1);
-        int start = Page.getStartOfPage(pageNo);
-        Page page = new Page(start, totalRows);
-        model.addAttribute("pageNo", pageNo);
-        model.addAttribute("totalRows", totalRows);
-        model.addAttribute("totalPages", totalRows == 0 ? 0 : page.getTotalPageCount());
-        model.addAttribute("numberOfPages", page.getTotalPageCount() >= 10 ? 10 : page.getTotalPageCount());
-
-        // 2.3 查询指定时间客户端异常
+        int pageSize = NumberUtils.toInt(request.getParameter("pageSize"), 10);
+        Page page = new Page(pageNo,pageSize, totalCount);
+        model.addAttribute("page", page);
+        
         List<AppClientExceptionStat> appClientExceptionList = clientReportExceptionService.getAppExceptionList(appId,
                 timeBetween.getStartTime(), timeBetween.getEndTime(), type, clientIp, page);
         model.addAttribute("appClientExceptionList", appClientExceptionList);

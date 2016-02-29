@@ -33,5 +33,12 @@ public interface AppClientVersionDao {
      * @return
      */
     List<AppClientVersion> getAppAllClientVersion(@Param("appId") long appId);
+    
+    /**
+     * 获取所有版本，暂时不分页
+     * @return
+     */
+    List<AppClientVersion> getAll(@Param("appId") long appId);
+
 
 }

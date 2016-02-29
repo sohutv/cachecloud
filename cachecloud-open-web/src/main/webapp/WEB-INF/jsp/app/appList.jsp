@@ -64,7 +64,7 @@
             <div class="page-header">
                 <h4>联系我们: </h4>
             </div>
-            <div id="contact" class="page-body">              
+            <div id="contact" class="page-body">
             	<jsp:include page="/WEB-INF/include/contact.jsp"/>
             </div>
         </div>
@@ -79,18 +79,14 @@
             </div>
             <c:if test="${currentUser.type == 0}">
 				<div style="float:right">
-					<form method="post" action="/admin/app/list.do" id="ec" name="ec">
-						<label style="font-weight:bold;text-align:left;">
-						 	应用名:&nbsp;&nbsp;
-						</label>
-						<input type="text" size="10" name="appName" id="appName" value="${appSearch.appName}"/>
-						
-						<label style="font-weight:bold;text-align:left;">
-							存储种类:
-						</label>
-						<select name="appType">
+					<form class="form-inline" method="post" action="/admin/app/list.do" id="appList" name="ec">
+					  <div class="form-group">
+					    <input type="text" class="form-control" id="appName" name="appName" value="${appSearch.appName}" placeholder="应用名">
+					  </div>
+					  <div class="form-group">
+						<select name="appType" class="form-control">
 							<option value="">
-								全部
+								全部类型
 							</option>
 							<option value="2" <c:if test="${appSearch.appType == 2}">selected</c:if>>
 								Redis-cluster
@@ -101,14 +97,18 @@
 							<option value="6" <c:if test="${appSearch.appType == 6}">selected</c:if>>
 								redis-standalone
 							</option>
+		                    <option value="1" <c:if test="${appSearch.appType == 1}">selected</c:if>>
+		                        Memcached
+		                    </option>
+		                    <option value="3" <c:if test="${appSearch.appType == 3}">selected</c:if>>
+		                        MemcacheQ
+		                    </option>
 						</select>
-						
-						<label style="font-weight:bold;text-align:left;">
-							状态:
-						</label>
-						<select name="appStatus">
+					 </div>
+					 <div class="form-group">
+						<select name="appStatus" class="form-control">
 							<option value="">
-								全部
+								全部状态
 							</option>
 							<option value="0" <c:if test="${appSearch.appStatus == 0}">selected</c:if>>
 								未分配
@@ -123,145 +123,190 @@
 		                       	 已下线
 		                    </option>
 						</select>
-						
-						<!-- 
-						<label style="font-weight:bold;text-align:left;">
-							排序:
-						</label>
-						<select name="orderBy">
-							<option value="">
-								全部
+					 </div>
+					 <div class="form-group">
+						<select name="pageSize" class="form-control">
+							<option value="10" <c:if test="${page.pageSize == 10}">selected</c:if>>
+								10行
 							</option>
-							<option value="${constant_hit_percentage_high_to_low}" <c:if test="${appSearch.orderBy == constant_hit_percentage_high_to_low}">selected</c:if>>
-								命中率低到高
-							</option>
-							<option value="${constant_hit_percentage_low_to_high}" <c:if test="${appSearch.orderBy == constant_hit_percentage_low_to_high}">selected</c:if>>
-								命中率高到低
-							</option>
+		                    <option value="20" <c:if test="${page.pageSize == 20}">selected</c:if>>
+		                       	 20行
+		                    </option>
+		                    <option value="50" <c:if test="${page.pageSize == 50}">selected</c:if>>
+		                       	 50行
+		                    </option>
+		                    <option value="100" <c:if test="${page.pageSize == 100}">selected</c:if>>
+		                       	 100行
+		                    </option>
 						</select>
-						-->
-						<label>&nbsp;<input type="submit" class="btn-4" value="查询"/></label>
-						
+					 </div>
+					 
+					 
+					  <input type="hidden" name="pageNo" id="pageNo">
+					  <button type="submit" class="btn btn-default">查询</button>
 					</form>
 				</div>
 		    </c:if>
-            <table class="table table-striped table-hover">
-                <thead>
-                <tr>
-                    <td>应用ID</td>
-                    <td>应用名</td>
-                    <td>应用类型</td>
-                    <td>内存详情</td>
-                    <td>命中率</td>
-                    <td>已运行时间</td>
-                    <td>申请状态</td>
-                    <td>操作</td>
-                </tr>
-                </thead>
-                <tbody>
-                	<c:forEach items="${appDetailList}" var="appDetail">
-                		 <tr>
-		                    <td>
-		                    	<c:choose>
-		                    		<c:when test="${appDetail.appDesc.status == 0 or appDetail.appDesc.status == 1}">
-		                   				${appDetail.appDesc.appId}
-		                    		</c:when>
-		                    		<c:when test="${appDetail.appDesc.status == 2 or appDetail.appDesc.status == 3}">
-		                    			<a target="_blank" href="/admin/app/index.do?appId=${appDetail.appDesc.appId}">${appDetail.appDesc.appId}</a>
-		                    		</c:when>
-		                    	</c:choose>
-		                    </td>
-		                    <td>
-		                    	<c:choose>
-		                    		<c:when test="${appDetail.appDesc.status == 0 or appDetail.appDesc.status == 1}">
-		                    			${appDetail.appDesc.name}
-		                    		</c:when>
-		                    		<c:when test="${appDetail.appDesc.status == 2 or appDetail.appDesc.status == 3}">
-		                    			<a target="_blank" href="/admin/app/index.do?appId=${appDetail.appDesc.appId}">${appDetail.appDesc.name}</a>
-		                    		</c:when>
-		                    	</c:choose>
-		                    </td>
-		                    <td>
-		                    	<c:choose>
-		        		            <c:when test="${appDetail.appDesc.type == 2}">redis-cluster</c:when>
-    		        		        <c:when test="${appDetail.appDesc.type == 5}">redis-sentinel</c:when>
-    		        		        <c:when test="${appDetail.appDesc.type == 6}">redis-standalone</c:when>
-		                    	</c:choose>
-		                    </td>
-		                    <td>
-		                        <div class="progress margin-custom-bottom0">
-		                        	<c:choose>
-			                    		<c:when test="${appDetail.memUsePercent >= 80}">
-											<div class="progress-bar progress-bar-danger"
-												role="progressbar" aria-valuenow="${appDetail.memUsePercent}" aria-valuemax="100"
-												aria-valuemin="0" style="width: ${appDetail.memUsePercent}%">
-				                    	</c:when>
-			                    		<c:otherwise>
-											<div class="progress-bar progress-bar-success"
-												role="progressbar" aria-valuenow="${appDetail.memUsePercent}" aria-valuemax="100"
-												aria-valuemin="0" style="width: ${appDetail.memUsePercent}%">				                    		</c:otherwise>
-			                    	</c:choose>
-										<label style="color: #000000">
-											<fmt:formatNumber value="${appDetail.mem * appDetail.memUsePercent / 100 / 1024}" pattern="0.00"/>G&nbsp;&nbsp;Used/<fmt:formatNumber value="${appDetail.mem / 1024 * 1.0}" pattern="0.00"/>G&nbsp;&nbsp;Total
-										</label>
-									</div>
-								</div>
-		                    </td>
-		                    <td>
-		                    	<c:choose>
-		                    		<c:when test="${appDetail.hitPercent <= 0}">
-		                    			无
-		                    		</c:when>
-		                    		<c:when test="${appDetail.hitPercent <= 30}">
-		                    			<label class="label label-danger">${appDetail.hitPercent}%</label>
-		                    		</c:when>
-		                    		<c:when test="${appDetail.hitPercent >= 30 && appDetail.hitPercent < 50}">
-		                    			<label class="label label-warning">${appDetail.hitPercent}%</label>
-		                    		</c:when>
-		                    		<c:when test="${appDetail.hitPercent >= 50 && appDetail.hitPercent < 90}">
-		                    			<label class="label label-info">${appDetail.hitPercent}%</label>
-		                    		</c:when>
-		                    		<c:otherwise>
-		                    			<label class="label label-success">${appDetail.hitPercent}%</label>
-		                    		</c:otherwise>
-		                    	</c:choose>
-		                    </td>
-		                    <td>${appDetail.appDesc.appRunDays}天</td>
-		                    <td>
-		                    	<c:choose>
-		                    		<c:when test="${appDetail.appDesc.status == 0}">
-		                    			<font color="red">未申请</font>
-		                    		</c:when>
-		                    		<c:when test="${appDetail.appDesc.status == 1}">
-		                    			<font color="red">申请中</font>
-		                    		</c:when>
-		                    		<c:when test="${appDetail.appDesc.status == 2}">
-		                    			运行中
-		                    		</c:when>
-                                    <c:when test="${appDetail.appDesc.status == 3}">
-                                        <font color="red">已下线</font>
-                                    </c:when>
-		                    	</c:choose>
-		                    </td>
-		                    <td>
-		                    	<c:choose>
-		                    		<c:when test="${appDetail.appDesc.status == 2 && appDetail.appDesc.isTest == 1}">
-		                    			<button type="button" id="appCleanDataBtn${appDetail.appDesc.appId}" onclick="if(window.confirm('确认要清除应用appid=${appDetail.appDesc.appId}的数据?!')){cleanAppData('${appDetail.appDesc.appId}');return true;}else{return false;}">清空数据</button>
-		                    		</c:when>
-		                    	</c:choose>
-		                    </td>
+		</div>
+	</div>
+	<div class="row">
+			<br/>
+			<div class="col-md-12">
+	            <table class="table table-striped table-hover" style="margin-top: 0px">
+	                <thead>
+		                <tr>
+		                    <td>应用ID</td>
+		                    <td>应用名</td>
+		                    <td>应用类型</td>
+		                    <td>内存详情</td>
+		                    <td>命中率</td>
+		                    <td>已运行时间</td>
+		                    <td>申请状态</td>
+		                    <td>操作</td>
 		                </tr>
-                	</c:forEach>
-	               
-                </tbody>
-            </table>
+	                </thead>
+	                <tbody>
+	                	<c:forEach items="${appDetailList}" var="appDetail">
+	                		 <tr>
+			                    <td>
+			                    	<c:choose>
+			                    		<c:when test="${appDetail.appDesc.status == 0 or appDetail.appDesc.status == 1}">
+			                   				${appDetail.appDesc.appId}
+			                    		</c:when>
+			                    		<c:when test="${appDetail.appDesc.status == 2 or appDetail.appDesc.status == 3}">
+			                    			<a target="_blank" href="/admin/app/index.do?appId=${appDetail.appDesc.appId}">${appDetail.appDesc.appId}</a>
+			                    		</c:when>
+			                    	</c:choose>
+			                    </td>
+			                    <td>
+			                    	<c:choose>
+			                    		<c:when test="${appDetail.appDesc.status == 0 or appDetail.appDesc.status == 1}">
+			                    			${appDetail.appDesc.name}
+			                    		</c:when>
+			                    		<c:when test="${appDetail.appDesc.status == 2 or appDetail.appDesc.status == 3}">
+			                    			<a target="_blank" href="/admin/app/index.do?appId=${appDetail.appDesc.appId}">${appDetail.appDesc.name}</a>
+			                    		</c:when>
+			                    	</c:choose>
+			                    </td>
+			                    <td>
+			                    	<c:choose>
+			        		            <c:when test="${appDetail.appDesc.type == 2}">redis-cluster</c:when>
+	    		        		        <c:when test="${appDetail.appDesc.type == 5}">redis-sentinel</c:when>
+	    		        		        <c:when test="${appDetail.appDesc.type == 6}">redis-standalone</c:when>
+			                    	</c:choose>
+			                    </td>
+			                    <td>
+			                        <div class="progress margin-custom-bottom0">
+			                        	<c:choose>
+				                    		<c:when test="${appDetail.memUsePercent >= 80}">
+												<div class="progress-bar progress-bar-danger"
+													role="progressbar" aria-valuenow="${appDetail.memUsePercent}" aria-valuemax="100"
+													aria-valuemin="0" style="width: ${appDetail.memUsePercent}%">
+					                    	</c:when>
+				                    		<c:otherwise>
+												<div class="progress-bar progress-bar-success"
+													role="progressbar" aria-valuenow="${appDetail.memUsePercent}" aria-valuemax="100"
+													aria-valuemin="0" style="width: ${appDetail.memUsePercent}%">				                    		</c:otherwise>
+				                    	</c:choose>
+											<label style="color: #000000">
+												<fmt:formatNumber value="${appDetail.mem * appDetail.memUsePercent / 100 / 1024}" pattern="0.00"/>G&nbsp;&nbsp;Used/<fmt:formatNumber value="${appDetail.mem / 1024 * 1.0}" pattern="0.00"/>G&nbsp;&nbsp;Total
+											</label>
+										</div>
+									</div>
+			                    </td>
+			                    <td>
+			                    	<c:choose>
+			                    		<c:when test="${appDetail.hitPercent <= 0}">
+			                    			无
+			                    		</c:when>
+			                    		<c:when test="${appDetail.hitPercent <= 30}">
+			                    			<label class="label label-danger">${appDetail.hitPercent}%</label>
+			                    		</c:when>
+			                    		<c:when test="${appDetail.hitPercent >= 30 && appDetail.hitPercent < 50}">
+			                    			<label class="label label-warning">${appDetail.hitPercent}%</label>
+			                    		</c:when>
+			                    		<c:when test="${appDetail.hitPercent >= 50 && appDetail.hitPercent < 90}">
+			                    			<label class="label label-info">${appDetail.hitPercent}%</label>
+			                    		</c:when>
+			                    		<c:otherwise>
+			                    			<label class="label label-success">${appDetail.hitPercent}%</label>
+			                    		</c:otherwise>
+			                    	</c:choose>
+			                    </td>
+			                    <td>${appDetail.appDesc.appRunDays}天</td>
+			                    <td>
+			                    	<c:choose>
+			                    		<c:when test="${appDetail.appDesc.status == 0}">
+			                    			<font color="red">未申请</font>
+			                    		</c:when>
+			                    		<c:when test="${appDetail.appDesc.status == 1}">
+			                    			<font color="red">申请中</font>
+			                    		</c:when>
+			                    		<c:when test="${appDetail.appDesc.status == 2}">
+			                    			运行中
+			                    		</c:when>
+	                                    <c:when test="${appDetail.appDesc.status == 3}">
+	                                        <font color="red">已下线</font>
+	                                    </c:when>
+			                    	</c:choose>
+			                    </td>
+			                    <td>
+			                    	<c:choose>
+			                    		<c:when test="${appDetail.appDesc.status == 2 && appDetail.appDesc.isTest == 1}">
+			                    			<button type="button" id="appCleanDataBtn${appDetail.appDesc.appId}" onclick="if(window.confirm('确认要清除应用appid=${appDetail.appDesc.appId}的数据?!')){cleanAppData('${appDetail.appDesc.appId}');return true;}else{return false;}">清空数据</button>
+			                    		</c:when>
+			                    	</c:choose>
+			                    </td>
+			                </tr>
+	                	</c:forEach>
+	                </tbody>
+	            </table>
+            </div>
+            <div style="margin-bottom: 10px;float: right;margin-right: 15px">
+				<span>
+					<ul id='ccPagenitor' style="margin-bottom: 0px;margin-top: 0px"></ul>
+					<div id="pageDetail" style="float:right;padding-top:7px;padding-left:8px;color:#4A64A4;display: none">共${page.totalPages}页,${page.totalCount}条</div>		
+				</span>
+			</div>
         </div>
     </div>
 
-</div>
 <jsp:include page="/WEB-INF/include/foot.jsp"/>
 
 <script type="text/javascript" src="/resources/js/mem-cloud.js"></script>
-<script type="text/javascript" src="/resources/js/chart.js"/>
+
+<script src="/resources/bootstrap/paginator/bootstrap-paginator.js"></script>
+<script src="/resources/bootstrap/paginator/custom-pagenitor.js"></script>
+<script type="text/javascript">
+    $(function(){
+    	var userType = '${currentUser.type}';
+    	if (userType == 0) {
+    		//分页点击函数
+        	var pageClickedFunc = function (e, originalEvent, type, page){
+        		//form传参用pageSize
+        		document.getElementById("pageNo").value=page;
+        		document.getElementById("appList").submit();
+        	};
+        	//分页组件
+            var element = $('#ccPagenitor');
+            //当前page号码
+            var pageNo = '${page.pageNo}';
+            //总页数
+            var totalPages = '${page.totalPages}';
+            //显示总页数
+            var numberOfPages = '${page.numberOfPages}';
+    		var options = generatePagenitorOption(pageNo, numberOfPages, totalPages, pageClickedFunc);
+    		if(totalPages > 0){
+    			element.bootstrapPaginator(options);
+    			document.getElementById("pageDetail").style.display = "";
+    		}else{
+    			element.html("未查询到相关记录！");
+    		}
+    	}
+    	
+    });
+</script>
+
+
 </body>
 </html>

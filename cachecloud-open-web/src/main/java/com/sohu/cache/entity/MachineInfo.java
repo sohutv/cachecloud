@@ -1,7 +1,6 @@
 package com.sohu.cache.entity;
 
 import com.sohu.cache.constant.CacheCloudConstants;
-import com.sohu.cache.protocol.MachineProtocol;
 
 import java.util.Date;
 

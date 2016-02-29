@@ -15,6 +15,7 @@ import com.sohu.cache.protocol.MachineProtocol;
 import com.sohu.cache.schedule.SchedulerCenter;
 import com.sohu.cache.ssh.SSHUtil;
 import com.sohu.cache.util.ConstUtils;
+
 import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,31 +42,6 @@ public class MachineDeployCenterImpl implements MachineDeployCenter {
     private SchedulerCenter schedulerCenter;
 
     private MachineStatsDao machineStatsDao;
-
-    /**
-     * 将初始化脚本推送到指定的机器上
-     *
-     * @param ip    机器的ip
-     * @return  是否推送成功，URL会抛出RunTime异常；
-     */
-    public boolean pushInitScript(String ip) {
-        try {
-            URL url = ClassLoader.getSystemResource("script/cachecloud-init.sh");
-            File file = new File(url.toURI());
-            if (file.exists()) {
-                SSHUtil.scpFileToRemote(ip, file.getAbsolutePath(), MachineProtocol.CACHECLOUD_DIR);
-            }
-        } catch (URISyntaxException e) {
-            logger.error("get local cachecloud-init.sh error.", e);
-            return false;
-        } catch (SSHException e) {
-            logger.error("push cachecloud-init.sh to server: {} error.", ip, e);
-            return false;
-        }
-
-        logger.info("cachecloud-init.sh is pushed to server: {}", ip);
-        return true;
-    }
 
     /**
      * 将机器加入资源池并统计、监控

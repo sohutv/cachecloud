@@ -45,6 +45,19 @@ public class ScheduleUtil {
     }
 
     /**
+     * 小时cron:分钟和秒都随机
+     * @param id
+     * @return
+     */
+    public static String getRandomHourCron(long id) {
+        Random random = new Random();
+        long second = (id + random.nextInt(Integer.MAX_VALUE)) % 60;
+        long minute = (id + random.nextInt(Integer.MAX_VALUE)) % 60;
+        String resultCron = second + " " + minute + " 0/1 ? * *";
+        return resultCron;
+    }
+    
+    /**
      * 计算前一分钟的时间，并格式化
      *
      * @param collectTime 基准时间

@@ -59,6 +59,7 @@ public class RedisInitLoad extends AsyncLoad{
             int port = instanceInfo.getPort();
             Long appId = instanceInfo.getAppId();
             redisCenter.deployRedisCollection(appId, host, port);
+            redisCenter.deployRedisSlowLogCollection(appId, host, port);
         }
         logger.info("init redis type={} deploy instance done.", type);
     }
@@ -70,4 +71,5 @@ public class RedisInitLoad extends AsyncLoad{
     public void setRedisCenter(RedisCenter redisCenter) {
         this.redisCenter = redisCenter;
     }
+    
 }

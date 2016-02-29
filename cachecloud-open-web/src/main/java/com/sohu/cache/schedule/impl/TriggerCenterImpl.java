@@ -54,6 +54,9 @@ public class TriggerCenterImpl implements TriggerCenter {
         if (jobGroup.equals(ConstUtils.REDIS_JOB_GROUP)) {
             InstanceInfo instanceInfo = instanceDao.getInstByIpAndPort(ip, port);
             opResult = redisCenter.deployRedisCollection(instanceInfo.getAppId(), ip, port);
+        } else if (jobGroup.equals(ConstUtils.REDIS_SLOWLOG_JOB_GROUP)) {
+            InstanceInfo instanceInfo = instanceDao.getInstByIpAndPort(ip, port);
+            opResult = redisCenter.deployRedisSlowLogCollection(instanceInfo.getAppId(), ip, port);
         } else if (jobGroup.equals(ConstUtils.MACHINE_JOB_GROUP)) {
             MachineInfo machineInfo = machineDao.getMachineInfoByIp(ip);
             opResult = machineCenter.deployMachineCollection(machineInfo.getId(), ip);

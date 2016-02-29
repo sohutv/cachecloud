@@ -1,9 +1,5 @@
 package com.sohu.cache.web.util;
 
-import java.util.Arrays;
-
-import org.apache.velocity.app.VelocityEngine;
-
 import com.sohu.cache.constant.AppCheckEnum;
 import com.sohu.cache.constant.CacheCloudConstants;
 import com.sohu.cache.entity.AppAudit;
@@ -11,6 +7,9 @@ import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.web.component.EmailComponent;
 import com.sohu.cache.web.service.UserService;
+import org.apache.velocity.app.VelocityEngine;
+
+import java.util.Arrays;
 
 /**
  * 邮件通知应用的申请流程(方法内是具体的文案)
@@ -19,11 +18,11 @@ import com.sohu.cache.web.service.UserService;
  * @Time 2014年10月16日
  */
 public class AppEmailUtil {
-    
+
     private EmailComponent emailComponent;
 
     private UserService userService;
-    
+
     private VelocityEngine velocityEngine;
 
     /**
@@ -69,6 +68,20 @@ public class AppEmailUtil {
         }
         emailComponent.sendMail("【CacheCloud】状态通知", mailContent.toString(), Arrays.asList(appUser.getEmail()), Arrays.asList(emailComponent.getAdminEmail().split(CacheCloudConstants.COMMA)));
     }
+    
+    /**
+     * 下线应用通知
+     * @param appUser
+     * @param appId
+     * @param isSuccess
+     */
+    public void noticeOfflineApp(AppUser appUser, Long appId, boolean isSuccess) {
+        StringBuilder mailContent = new StringBuilder();
+        mailContent.append(appUser.getChName()).append(",对应用appid=").append(appId);
+        mailContent.append("进行下线,操作结果是").append(isSuccess?"成功":"失败");
+        mailContent.append(",请知晓!");
+        emailComponent.sendMail("【CacheCloud】状态通知", mailContent.toString(), Arrays.asList(appUser.getEmail()), Arrays.asList(emailComponent.getAdminEmail().split(CacheCloudConstants.COMMA)));
+    }
 
     public void setEmailComponent(EmailComponent emailComponent) {
         this.emailComponent = emailComponent;
@@ -78,8 +91,7 @@ public class AppEmailUtil {
         this.userService = userService;
     }
 
-	public void setVelocityEngine(VelocityEngine velocityEngine) {
-		this.velocityEngine = velocityEngine;
-	}
-	
+    public void setVelocityEngine(VelocityEngine velocityEngine) {
+        this.velocityEngine = velocityEngine;
+    }
 }

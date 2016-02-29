@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
 import com.sohu.cache.entity.AppClientExceptionStat;
+import com.sohu.cache.entity.ClientInstanceException;
 import com.sohu.cache.web.util.Page;
 
 /**
@@ -48,5 +49,13 @@ public interface AppClientExceptionStatDao {
      */
     int getAppExceptionCount(@Param("appId") Long appId, @Param("startTime") long startTime,
             @Param("endTime") long endTime, @Param("type") int type, @Param("clientIp") String clientIp);
+
+    /**
+     * 大于collectTime后实例的异常统计
+     * @param ip
+     * @param collectTime
+     * @return
+     */
+    List<ClientInstanceException> getInstanceExceptionStat(@Param("ip") String ip, @Param("collectTime") long collectTime);
 
 }

@@ -2,6 +2,8 @@ package com.sohu.cache.redis;
 
 import java.util.List;
 
+import com.sohu.cache.web.enums.RedisOperateEnum;
+
 /**
  * redis 部署配置
  * Created by yijunzhang on 14-7-1.
@@ -77,7 +79,17 @@ public interface RedisDeployCenter {
      * @return
      */
     public boolean addSlave(long appId, int masterInstanceId, String slaveHost) throws Exception;
-
+    
+    /**
+     * 填充集群中失败的slots，添加一个master节点
+     * @param appId
+     * @param instanceId
+     * @param masterHost
+     * @return
+     * @throws Exception
+     */
+    public RedisOperateEnum addSlotsFailMaster(long appId, int instanceId, String masterHost) throws Exception;
+    
     /**
      * 创建一个redis实例
      *
@@ -102,5 +114,7 @@ public interface RedisDeployCenter {
      * @return
      */
     public boolean clusterFailover(long appId, int slaveInstanceId) throws Exception;
+
+
 
 }

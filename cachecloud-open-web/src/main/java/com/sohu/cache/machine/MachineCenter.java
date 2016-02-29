@@ -134,11 +134,9 @@ public interface MachineCenter {
 
     /**
      * 获取指定机器某个redis端口的最近日志
-     * @param host
-     * @param port
      * @param maxLineNum
      * @return
      */
-    String showInstanceRecentLog(String host, int port, int maxLineNum);
+    String showInstanceRecentLog(InstanceInfo instanceInfo, int maxLineNum);
     
 }

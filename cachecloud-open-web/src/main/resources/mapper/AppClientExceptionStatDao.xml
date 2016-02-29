@@ -56,5 +56,25 @@
         	</when>
         </choose>
     </select>
+    
+    
+    <select id="getInstanceExceptionStat" resultType="ClientInstanceException">
+    	select app_id,instance_id,instance_host,instance_port,count(1) as exceptionCount from app_client_exception_minute_stat 
+    	<where>
+	    	<choose>
+	        	<when test="collectTime > 0">
+	        	 	and collect_time>=#{collectTime}
+	        	</when>
+	        </choose>
+	        <choose>
+	        	<when test="ip != '' and ip != null">
+	        	 	and instance_host=#{ip}
+	        	</when>
+	        </choose>
+    	</where>
+    	group by instance_id order by exceptionCount desc;
+    </select>
+    
+    
 
 </mapper>

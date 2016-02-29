@@ -7,6 +7,7 @@ import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.util.TypeUtil;
 import com.sohu.cache.web.enums.SuccessEnum;
 import com.sohu.cache.web.service.AppService;
+import com.sohu.cache.web.util.Page;
 
 import org.springframework.util.Assert;
 
@@ -65,6 +66,18 @@ public class AppServiceImpl implements AppService {
     private MachineDao machineDao;
     
     private MachineStatsDao machineStatsDao;
+    
+    @Override
+    public int getAppDescCount(AppUser appUser, AppSearch appSearch) {
+        int count = 0;
+        // 管理员获取全部应用
+        if (AppUserTypeEnum.ADMIN_USER.value().equals(appUser.getType())) {
+            count = appDao.getAllAppCount(appSearch);
+        } else {
+            count = appDao.getUserAppCount(appUser.getId());
+        }
+        return count;
+    }
     
     @Override
     public List<AppDesc> getAppDescList(AppUser appUser, AppSearch appSearch) {
@@ -401,6 +414,11 @@ public class AppServiceImpl implements AppService {
         appAuditDao.insertAppAudit(appAudit);
         return appAudit;
     }
+    
+    @Override
+    public List<AppDesc> getAllAppDesc() {
+        return appDao.getAllAppDescList(null);
+    }
 
     public void setAppDao(AppDao appDao) {
         this.appDao = appDao;
@@ -441,5 +459,6 @@ public class AppServiceImpl implements AppService {
     public void setAppUserDao(AppUserDao appUserDao) {
         this.appUserDao = appUserDao;
     }
+
 
 }

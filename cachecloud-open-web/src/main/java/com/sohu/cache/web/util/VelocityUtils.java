@@ -5,7 +5,6 @@ package com.sohu.cache.web.util;
 
 import com.sohu.cache.entity.AppAudit;
 import com.sohu.cache.entity.AppDesc;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -45,7 +44,8 @@ public class VelocityUtils {
      * @param templatePath  模板路径
      * @param customCharset 编码
      */
-    public synchronized static String createText(VelocityEngine engine, AppDesc appDesc, AppAudit appAudit, String templatePath, String customCharset) {
+    public synchronized static String createText(VelocityEngine engine, AppDesc appDesc, AppAudit appAudit,
+                                                 String templatePath, String customCharset) {
         if (!StringUtils.isEmpty(customCharset)) {
             charset = customCharset;
         }
@@ -99,11 +99,10 @@ public class VelocityUtils {
         }
         return null;
     }
-    
+
     public static void main(String[] args) throws Exception{
         ClassPathResource resource = new ClassPathResource("classpath:templates/appAudit.vm");
         logger.info("VelocityUtils: {}",resource.getFile().getPath());
     }
-
 
 }

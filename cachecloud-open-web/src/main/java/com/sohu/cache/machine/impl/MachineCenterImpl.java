@@ -69,6 +69,7 @@ public class MachineCenterImpl implements MachineCenter {
 
     private RedisCenter redisCenter;
 
+    
     /**
      * 邮箱报警
      */
@@ -96,8 +97,7 @@ public class MachineCenterImpl implements MachineCenter {
         dataMap.put(ConstUtils.HOST_ID_KEY, hostId);
         JobKey jobKey = JobKey.jobKey(ConstUtils.MACHINE_JOB_NAME, ConstUtils.MACHINE_JOB_GROUP);
         TriggerKey triggerKey = TriggerKey.triggerKey(ip, ConstUtils.MACHINE_TRIGGER_GROUP + hostId);
-        boolean result = schedulerCenter.deployJobByCron(jobKey, triggerKey, dataMap, ScheduleUtil.getMinuteCronByAppId
-                (hostId), false);
+        boolean result = schedulerCenter.deployJobByCron(jobKey, triggerKey, dataMap, ScheduleUtil.getHourCronByHostId                (hostId), false);
 
         return result;
     }
@@ -198,7 +198,9 @@ public class MachineCenterImpl implements MachineCenter {
             logger.error(e.getMessage(), e);
         }
         
+
         double memoryThreshold = ConstUtils.MEMORY_USAGE_RATIO_THRESHOLD;
+
         /**
          * 当机器的状态超过预设的阀值时，向上汇报或者报警
          */
@@ -464,6 +466,29 @@ public class MachineCenterImpl implements MachineCenter {
         }
         return list;
     }
+    
+    @Override
+    public String showInstanceRecentLog(InstanceInfo instanceInfo, int maxLineNum) {
+        String host = instanceInfo.getIp();
+        int port = instanceInfo.getPort();
+        int type = instanceInfo.getType();
+        String logType = "";
+        if (TypeUtil.isRedisCluster(type) || TypeUtil.isRedisDataType(type)) {
+            logType = "redis-";
+        } else if (TypeUtil.isRedisSentinel(type)) {
+            logType = "redis-sentinel-";
+        }
+
+        String remoteFilePath = MachineProtocol.LOG_DIR + logType + port + "-*.log";
+        StringBuilder command = new StringBuilder();
+        command.append("/usr/bin/tail -n").append(maxLineNum).append(" ").append(remoteFilePath);
+        try {
+            return SSHUtil.execute(host, command.toString());
+        } catch (SSHException e) {
+            logger.error(e.getMessage(), e);
+            return "";
+        }
+    }
 
     public void setRedisCenter(RedisCenter redisCenter) {
         this.redisCenter = redisCenter;
@@ -501,8 +526,5 @@ public class MachineCenterImpl implements MachineCenter {
         this.instanceStatsCenter = instanceStatsCenter;
     }
 
-    @Override
-    public String showInstanceRecentLog(String host, int port, int maxLineNum) {
-        return null;
-    }
+    
 }

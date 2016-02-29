@@ -55,6 +55,13 @@ public interface AppDao {
 	 * @return
 	 */
     public List<AppDesc> getAppDescList(@Param("userId") long userId);
+    
+    /**
+     * 获取应用拥有的应用个数
+     * @param userId
+     * @return
+     */
+    public int getUserAppCount(@Param("userId") long userId);
 
     /**
      * 获取所有应用
@@ -64,9 +71,19 @@ public interface AppDao {
     public List<AppDesc> getAllAppDescList(AppSearch appSearch);
 
     /**
+     * 获取应用个数
+     * @param appSearch
+     * @return
+     */
+    public int getAllAppCount(AppSearch appSearch);
+
+    
+    /**
      * 更新内存报警阀值
      * @param appId
      * @param memAlertValue
      */
     public void updateMemAlertValue(@Param("appId") long appId, @Param("memAlertValue") int memAlertValue);
+
+
 }

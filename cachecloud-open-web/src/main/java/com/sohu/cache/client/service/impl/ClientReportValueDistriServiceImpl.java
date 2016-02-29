@@ -78,7 +78,7 @@ public class ClientReportValueDistriServiceImpl implements
 		// 实例信息
 		InstanceInfo instanceInfo = instanceDao.getInstByIpAndPort(host, port);
 		if (instanceInfo == null) {
-			logger.warn("instanceInfo is empty, host is {}, port is {}", host, port);
+			//logger.warn("instanceInfo is empty, host is {}, port is {}", host, port);
 			return;
 		}
 		long appId = instanceInfo.getAppId();

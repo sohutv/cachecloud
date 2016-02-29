@@ -12,6 +12,7 @@ import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.TypeUtil;
 import com.sohu.cache.web.vo.AppDetailVO;
 import com.sohu.cache.web.service.UserService;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -305,6 +306,18 @@ public class AppStatsCenterImpl implements AppStatsCenter {
         }
         return "not support app";
     }
+    
+    @Override
+    public List<InstanceSlowLog> getInstanceSlowLogByAppId(long appId, Date startDate, Date endDate, int limit) {
+        AppDesc appDesc = appDao.getAppDescById(appId);
+        if (appDesc == null) {
+            return null;
+        }
+        if (TypeUtil.isRedisType(appDesc.getType())) {
+            return redisCenter.getInstanceSlowLogByAppId(appId, startDate, endDate, limit);
+        }
+        return Collections.emptyList();
+    }
 
     public void setAppDao(AppDao appDao) {
         this.appDao = appDao;
@@ -330,4 +343,5 @@ public class AppStatsCenterImpl implements AppStatsCenter {
         this.userService = userService;
     }
 
+    
 }

@@ -4,8 +4,10 @@ import com.sohu.cache.constant.AppTopology;
 import com.sohu.cache.entity.AppCommandGroup;
 import com.sohu.cache.entity.AppCommandStats;
 import com.sohu.cache.entity.AppStats;
+import com.sohu.cache.entity.InstanceSlowLog;
 import com.sohu.cache.web.vo.AppDetailVO;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -113,4 +115,13 @@ public interface AppStatsCenter {
     public String executeCommand(long appId, String command);
 
 
+    /**
+     * 按照appId获取实例所有慢查询日志
+     * @param appId
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    public List<InstanceSlowLog> getInstanceSlowLogByAppId(long appId, Date startDate, Date endDate, int limit);
+    
 }

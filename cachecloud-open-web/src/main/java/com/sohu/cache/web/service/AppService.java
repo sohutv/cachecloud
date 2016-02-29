@@ -12,6 +12,13 @@ import com.sohu.cache.web.enums.SuccessEnum;
  * @Time 2014年10月21日
  */
 public interface AppService {
+    
+    /**
+     * 查询指定用户下的应用个数
+     * @param appUser
+     * @return
+     */
+    int getAppDescCount(AppUser appUser, AppSearch appSearch);
 
     /**
      * 查询指定用户下的所有的应用
@@ -176,5 +183,8 @@ public interface AppService {
      */
     AppAudit saveRegisterUserApply(AppUser appUser, AppAuditType registerUserApply);
 
-
+    /**
+     * 获取所有应用
+     */
+    List<AppDesc> getAllAppDesc();
 }

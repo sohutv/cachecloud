@@ -1,5 +1,7 @@
 package com.sohu.cache.web.vo;
 
+import java.util.Date;
+
 
 /**
  * Created by yijunzhang on 14-10-14.
@@ -22,6 +24,11 @@ public class RedisSlowLog {
     private long executionTime;
 
     private String command;
+    
+    /**
+     * 执行日期时间
+     */
+    private Date date;
 
     public long getId() {
         return id;
@@ -55,13 +62,18 @@ public class RedisSlowLog {
         this.command = command;
     }
 
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
     @Override
     public String toString() {
-        return "RedisSlowLog{" +
-                "id=" + id +
-                ", timeStamp='" + timeStamp + '\'' +
-                ", executionTime=" + executionTime +
-                ", command=" + command +
-                '}';
+        return "RedisSlowLog [id=" + id + ", timeStamp=" + timeStamp + ", executionTime=" + executionTime
+                + ", command=" + command + ", date=" + date + "]";
     }
+
 }

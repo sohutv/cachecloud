@@ -1,6 +1,8 @@
 package com.sohu.cache.constant;
 
+import java.util.HashSet;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 /**
  * cachecloud常量
@@ -22,6 +24,12 @@ public class CacheCloudConstants {
         PASSWORD = resourceBundle.getString("shell.auth.simple.user.password");
     }
     
+    public static Set<String> SUPER_MANAGER = new HashSet<String>();
+
+    static {
+        SUPER_MANAGER.add("yijunzhang");
+        SUPER_MANAGER.add("leifu");
+    }
     
     /**
      * cachecloud普通用户登录session

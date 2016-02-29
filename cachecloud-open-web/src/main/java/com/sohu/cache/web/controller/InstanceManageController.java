@@ -1,9 +1,12 @@
 package com.sohu.cache.web.controller;
 
+import java.util.Arrays;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -89,5 +92,21 @@ public class InstanceManageController extends BaseController {
             model.addAttribute("success", SuccessEnum.FAIL.value());
         }
         return new ModelAndView();
+    }
+    
+    /**
+     * 查看redis节点日志
+     * @param appId
+     * @param slaveInstanceId
+     */
+    @RequestMapping("/log")
+    public ModelAndView doShowLog(HttpServletRequest request, HttpServletResponse response, Model model, int instanceId) {
+        int pageSize = NumberUtils.toInt(request.getParameter("pageSize"), 0);
+        if (pageSize == 0) {
+            pageSize = 100;
+        }
+        String instanceLogStr = instanceDeployCenter.showInstanceRecentLog(instanceId, pageSize);
+        model.addAttribute("instanceLogList", Arrays.asList(instanceLogStr.split("\n")));
+        return new ModelAndView("manage/instance/log");
     }
 }

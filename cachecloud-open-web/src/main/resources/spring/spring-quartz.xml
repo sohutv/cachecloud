@@ -104,6 +104,7 @@
                 <ref bean="redisJobDetail"/>
                 <ref bean="machineJobDetail"/>
                 <ref bean="machineMonitorJobDetail"/>
+                <ref bean="redisSlowLogJobDetail"/>
                 <ref bean="cleanUpStatisticsJobDetail"/>
                 <ref bean="inspectorJobDetail"/>
             </array>
@@ -131,6 +132,14 @@
         <property name="name" value="machineMonitorJob"/>
         <property name="group" value="machineMonitor"/>
         <property name="jobClass" value="com.sohu.cache.schedule.jobs.MachineMonitorJob"/>
+        <property name="requestsRecovery" value="true"/>
+        <property name="durability" value="true"/>
+    </bean>
+    
+    <bean id="redisSlowLogJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="name" value="redisSlowLogJob"/>
+        <property name="group" value="redisSlowLog"/>
+        <property name="jobClass" value="com.sohu.cache.schedule.jobs.RedisSlowLogJob"/>
         <property name="requestsRecovery" value="true"/>
         <property name="durability" value="true"/>
     </bean>

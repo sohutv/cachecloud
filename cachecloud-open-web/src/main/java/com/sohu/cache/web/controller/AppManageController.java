@@ -1,5 +1,6 @@
 package com.sohu.cache.web.controller;
 
+import com.sohu.cache.web.enums.RedisOperateEnum;
 import com.sohu.cache.constant.AppCheckEnum;
 import com.sohu.cache.constant.CacheCloudConstants;
 import com.sohu.cache.entity.*;
@@ -475,7 +476,7 @@ public class AppManageController extends BaseController {
 			HttpServletResponse response, Model model, Long appId) {
 		AppUser userInfo = getUserInfo(request);
 		logger.warn("user {} hope to offline appId: {}", userInfo.getName(), appId);
-		if (CacheCloudConstants.SUPER_ADMIN_NAME.equals(userInfo.getName())) {
+		if (CacheCloudConstants.SUPER_MANAGER.contains(userInfo.getName())) {
 			boolean result = appDeployCenter.offLineApp(appId);
 			model.addAttribute("appId", appId);
 			model.addAttribute("result", result);
@@ -485,10 +486,12 @@ public class AppManageController extends BaseController {
 				model.addAttribute("msg", "操作失败");
 			}
 		    logger.warn("user {} offline appId: {}, result is {}", userInfo.getName(), appId, result);
+		    appEmailUtil.noticeOfflineApp(userInfo, appId, result);
 		} else {
 		    logger.warn("user {} hope to offline appId: {}, hasn't provilege", userInfo.getName(), appId);
 			model.addAttribute("result", false);
 			model.addAttribute("msg", "权限不足");
+	        appEmailUtil.noticeOfflineApp(userInfo, appId, false);
 		}
 		return new ModelAndView();
 	}
@@ -597,6 +600,13 @@ public class AppManageController extends BaseController {
 			model.addAttribute("appDesc", appDesc);
 			//实例信息和统计
 			fillAppInstanceStats(appId, model);
+			
+			//只有cluster类型才需要计算slot相关
+            if (TypeUtil.isRedisCluster(appDesc.getType())) {
+                // 计算丢失的slot区间
+                Map<String,String> lossSlotsSegmentMap = redisCenter.getClusterLossSlots(appId);
+                model.addAttribute("lossSlotsSegmentMap", lossSlotsSegmentMap);
+            }
 		}
 		return new ModelAndView("manage/appOps/appInstance");
 	}
@@ -687,7 +697,30 @@ public class AppManageController extends BaseController {
 	    logger.warn("user {} addSentinel: appId:{}, sentinelHost:{} result is {}", appUser.getName(), appId, sentinelHost, success);
 		write(response, String.valueOf(success == true ? SuccessEnum.SUCCESS.value() : SuccessEnum.FAIL.value()));
 	}
+	
+	/**
+	 * 为失联的slot添加master节点
+	 * @param appId
+	 * @param sentinelHost
+	 */
+	@RequestMapping(value = "/addFailSlotsMaster")
+    public void addFailSlotsMaster(HttpServletRequest request, HttpServletResponse response, Model model, long appId, String failSlotsMasterHost, int instanceId) {
+        AppUser appUser = getUserInfo(request);
+        logger.warn("user {} addFailSlotsMaster: appId:{}, instanceId {}, newMasterHost:{}", appUser.getName(), appId, instanceId, failSlotsMasterHost);
+        RedisOperateEnum redisOperateEnum = RedisOperateEnum.FAIL;
+        if (appId > 0 && StringUtils.isNotBlank(failSlotsMasterHost)) {
+            try {
+                redisOperateEnum = redisDeployCenter.addSlotsFailMaster(appId, instanceId, failSlotsMasterHost);
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+        logger.warn("user {} addFailSlotsMaster: appId:{}, instanceId {}, newMasterHost:{} result is {}", appUser.getName(), appId, instanceId, failSlotsMasterHost, redisOperateEnum.getValue());
+        write(response, String.valueOf(redisOperateEnum.getValue()));
+    }
 
+	
+	
 	/**
 	 * sentinelFailOver操作
 	 * 
@@ -711,16 +744,5 @@ public class AppManageController extends BaseController {
 	    logger.warn("user {} sentinelFailOver, appId:{}, result is {}", appUser.getName(), appId, success);
 		write(response, String.valueOf(success == true ? SuccessEnum.SUCCESS.value() : SuccessEnum.FAIL.value()));
 	}
-
-    /**
-     * 查看redis节点日志
-     * @param appId
-     * @param slaveInstanceId
-     */
-    @RequestMapping("/showLog")
-    public void showLog(HttpServletRequest request, HttpServletResponse response, Model model, Long appId, int instanceId) {
-        String recentLog = instanceDeployCenter.showInstanceRecentLog(instanceId, 100);
-        write(response, recentLog);
-    }
 
 }

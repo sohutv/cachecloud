@@ -51,6 +51,34 @@
         from app_desc,app_to_user where app_to_user.user_id=#{userId} and app_to_user.app_id=app_desc.app_id
     </select>
     
+    <select id="getUserAppCount" resultType="int" parameterType="long">
+    	select count(app_desc.app_id) from app_desc,app_to_user where app_to_user.user_id=#{userId} and app_to_user.app_id=app_desc.app_id
+    </select>
+    
+    <select id="getAllAppCount" resultType="int" parameterType="AppSearch">
+    	select count(app_id) from app_desc where 1=1
+        <choose>
+            <when test="appName != null and appName != ''">
+            	and name like '${appName}%'
+       	 	</when>
+        </choose>
+        <choose>
+            <when test="appType != null and appType > 0">
+            	and type = ${appType}
+       	 	</when>
+        </choose>
+        <choose>
+            <when test="appStatus != null and appStatus >= 0">
+            	and status = ${appStatus}
+       	 	</when>
+        </choose>
+        <choose>
+            <when test="appId != null and appId > 0">
+            	and app_id = ${appId}
+       	 	</when>
+        </choose>
+    </select>
+    
     <select id="getAllAppDescList" resultType="AppDesc" parameterType="AppSearch">
     	select           
         	<include refid="app_desc_fields"/>
@@ -75,6 +103,19 @@
             	and app_id = ${appId}
        	 	</when>
         </choose>
+        <choose>
+        	<when test="page != null">
+        		<choose>
+		        	<when test="page.totalCount > page.pageSize">
+            			limit #{page.start},#{page.pageSize};
+		        	</when>
+		        	<otherwise>
+		        	    limit #{page.totalCount}
+		        	</otherwise>
+		        </choose>
+        	</when>
+        </choose>
+        
     </select>
     
     

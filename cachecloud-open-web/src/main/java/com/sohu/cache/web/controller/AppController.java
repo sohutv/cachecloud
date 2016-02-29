@@ -16,6 +16,7 @@ import com.sohu.cache.web.chart.model.SimpleChartData;
 import com.sohu.cache.web.enums.SuccessEnum;
 import com.sohu.cache.web.util.AppEmailUtil;
 import com.sohu.cache.web.util.DateUtil;
+import com.sohu.cache.web.util.Page;
 
 import net.sf.json.JSONArray;
 
@@ -94,7 +95,7 @@ public class AppController extends BaseController {
     @RequestMapping("/addBecomeContributor")
     public ModelAndView doAddBecomeContributor(HttpServletRequest request,
                         HttpServletResponse response, Model model, String groupName, String applyReason){
-    	appEmailUtil.noticeBecomeContributor(groupName, applyReason, getUserInfo(request));
+        appEmailUtil.noticeBecomeContributor(groupName, applyReason, getUserInfo(request));
         model.addAttribute("success", SuccessEnum.SUCCESS.value());
         return new ModelAndView("");    
     }
@@ -116,23 +117,27 @@ public class AppController extends BaseController {
         if (appId == null) {
             return new ModelAndView("redirect:/admin/app/list");
         }
-        // 时间的转换..
+        
+        // 日期转换
         String startDateParam = request.getParameter("startDate");
         String endDateParam = request.getParameter("endDate");
-        Date startDate;
-        Date endDate;
         if (StringUtils.isBlank(startDateParam) || StringUtils.isBlank(endDateParam)) {
-            // 如果为空默认取昨天和今天
-            startDate = new Date();
-            endDate = DateUtils.addDays(startDate, 1);
+            Date startDate = new Date();
             startDateParam = DateUtil.formatDate(startDate, "yyyy-MM-dd");
-            endDateParam = DateUtil.formatDate(endDate, "yyyy-MM-dd");
-        } else {
-            endDate = DateUtil.parseYYYY_MM_dd(endDateParam);
-            startDate = DateUtil.parseYYYY_MM_dd(startDateParam);
+            endDateParam = DateUtil.formatDate(DateUtils.addDays(startDate, 1), "yyyy-MM-dd");
         }
+        String slowLogStartDateParam = request.getParameter("slowLogStartDate");
+        String slowLogEndDateParam = request.getParameter("slowLogEndDate");
+        if (StringUtils.isBlank(slowLogStartDateParam) || StringUtils.isBlank(slowLogEndDateParam)) {
+            Date startDate = new Date();
+            slowLogEndDateParam = DateUtil.formatDate(startDate, "yyyy-MM-dd");
+            slowLogStartDateParam = DateUtil.formatDate(DateUtils.addDays(startDate, -7), "yyyy-MM-dd");
+        }
+        
         model.addAttribute("startDate", startDateParam);
         model.addAttribute("endDate", endDateParam);
+        model.addAttribute("slowLogStartDate", slowLogStartDateParam);
+        model.addAttribute("slowLogEndDate", slowLogEndDateParam);
         model.addAttribute("appId", appId);
         model.addAttribute("tabTag", tabTag);
         model.addAttribute("firstCommand", firstCommand);
@@ -510,7 +515,6 @@ public class AppController extends BaseController {
     
 
     /**
-     * 获取top5命令
      *
      * @param appId
      * @throws ParseException
@@ -536,6 +540,7 @@ public class AppController extends BaseController {
 
     /**
      * 应用各个命令分布情况
+
      *
      * @param appId 应用id
      * @throws ParseException
@@ -558,7 +563,8 @@ public class AppController extends BaseController {
         write(response, result);
         return null;
     }
-
+    
+    
     /**
      * 应用列表
      *
@@ -567,17 +573,30 @@ public class AppController extends BaseController {
      */
     @RequestMapping(value = "/list")
     public ModelAndView doAppList(HttpServletRequest request,
-                                  HttpServletResponse response, Model model, Long userId, AppSearch appSearch) {
-        // 获取该用户能够读取的应用列表,没有返回申请页面
+                                  HttpServletResponse response, Model model, AppSearch appSearch) {
+        // 1.获取该用户能够读取的应用列表,没有返回申请页面
         AppUser currentUser = getUserInfo(request);
+        model.addAttribute("currentUser", currentUser);
         int userAppCount = appService.getUserAppCount(currentUser.getId());
         if (userAppCount == 0 && !AppUserTypeEnum.ADMIN_USER.value().equals(currentUser.getType())) {
             return new ModelAndView("redirect:/admin/app/init");
         }
         
-        List<AppDesc> apps = appService.getAppDescList(currentUser, appSearch);
-        List<AppDetailVO> appDetailList = new ArrayList<AppDetailVO>();
+        // 2.1 分页相关
+        int totalCount = appService.getAppDescCount(currentUser, appSearch);
+        int pageNo = NumberUtils.toInt(request.getParameter("pageNo"), 1);
+        int pageSize = NumberUtils.toInt(request.getParameter("pageSize"), 10);
+        Page page = new Page(pageNo,pageSize, totalCount);
+        model.addAttribute("page", page);
 
+        // 2.2 查询指定时间客户端异常
+        appSearch.setPage(page);
+        List<AppDesc> apps = appService.getAppDescList(currentUser, appSearch);
+        // 2.3 应用列表
+        List<AppDetailVO> appDetailList = new ArrayList<AppDetailVO>();
+        model.addAttribute("appDetailList", appDetailList);
+
+        // 3. 全局统计
         long totalApplyMem = 0;
         long totalUsedMem = 0;
         long totalApps = 0;
@@ -593,9 +612,6 @@ public class AppController extends BaseController {
         model.addAttribute("totalApps", totalApps);
         model.addAttribute("totalApplyMem", totalApplyMem);
         model.addAttribute("totalUsedMem", totalUsedMem);
-        model.addAttribute("apps", apps);
-        model.addAttribute("appDetailList", appDetailList);
-        model.addAttribute("currentUser", currentUser);
 
         return new ModelAndView("app/appList");
     }
@@ -834,7 +850,11 @@ public class AppController extends BaseController {
             AppDesc appDesc = appService.getByAppId(appId);
             List<String> code = DemoCodeUtil.getCode(appDesc);
             List<String> dependency = DemoCodeUtil.getDependency(appDesc);
+//            List<String> springConfig = DemoCodeUtil.getSpringConfig(appDesc);
             
+//            if(CollectionUtils.isNotEmpty(springConfig) && springConfig.size() > 0){
+//                model.addAttribute("springConfig", springConfig);
+//            }
             model.addAttribute("dependency",dependency);
             model.addAttribute("code", code);
             model.addAttribute("status", 1);
@@ -842,6 +862,60 @@ public class AppController extends BaseController {
             model.addAttribute("status", 0);
         }
         return new ModelAndView("app/appDemo");
+    }
+
+    /**
+     * 应用历史慢查询
+     * @param appId
+     * @return
+     * @throws ParseException 
+     */
+    @RequestMapping("/slowLog")
+    public ModelAndView appSlowLog(HttpServletRequest request,
+                                  HttpServletResponse response, Model model, Long appId) throws ParseException {
+        // 应用基本信息
+        AppDesc appDesc = appService.getByAppId(appId);
+        model.addAttribute("appDesc", appDesc);
+        
+        // 开始和结束日期
+        String slowLogStartDateParam = request.getParameter("slowLogStartDate");
+        String slowLogEndDateParam = request.getParameter("slowLogEndDate");
+        Date startDate;
+        Date endDate;
+        if (StringUtils.isBlank(slowLogStartDateParam) || StringUtils.isBlank(slowLogEndDateParam)) {
+            endDate = new Date();
+            startDate = DateUtils.addDays(endDate, -7);
+        } else {
+            startDate = DateUtil.parseYYYY_MM_dd(slowLogStartDateParam);
+            endDate = DateUtil.parseYYYY_MM_dd(slowLogEndDateParam);
+        }
+        model.addAttribute("slowLogStartDate", slowLogStartDateParam);
+        model.addAttribute("slowLogEndDate", slowLogEndDateParam);
+        
+        // 应用慢查询日志
+        int limit = 10;
+        List<InstanceSlowLog> appInstanceSlowLogList = appStatsCenter.getInstanceSlowLogByAppId(appId, startDate, endDate, limit);
+        model.addAttribute("appInstanceSlowLogList", appInstanceSlowLogList);
+        
+        // 各个实例对应的慢查询日志
+        Map<String, List<InstanceSlowLog>> instaceSlowLogMap = new HashMap<String, List<InstanceSlowLog>>();
+        Map<String, Long> instanceHostPortIdMap = new HashMap<String, Long>();
+        for(InstanceSlowLog instanceSlowLog : appInstanceSlowLogList) {
+            String hostPort = instanceSlowLog.getIp() + ":" + instanceSlowLog.getPort();
+            instanceHostPortIdMap.put(hostPort, instanceSlowLog.getInstanceId());
+            if(instaceSlowLogMap.containsKey(hostPort)) {
+                instaceSlowLogMap.get(hostPort).add(instanceSlowLog);
+            } else {
+                List<InstanceSlowLog> list = new ArrayList<InstanceSlowLog>();
+                list.add(instanceSlowLog);
+                instaceSlowLogMap.put(hostPort, list);
+            }
+        }
+        model.addAttribute("instaceSlowLogMap", instaceSlowLogMap);
+        model.addAttribute("instanceHostPortIdMap", instanceHostPortIdMap);
+
+        
+        return new ModelAndView("app/slowLog");
     }
     
     /**

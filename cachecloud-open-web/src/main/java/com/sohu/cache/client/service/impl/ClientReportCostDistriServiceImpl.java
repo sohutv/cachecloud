@@ -1,5 +1,6 @@
 package com.sohu.cache.client.service.impl;
 
+import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -48,6 +49,8 @@ public class ClientReportCostDistriServiceImpl implements ClientReportCostDistri
 
     @Override
     public void execute(String clientIp, long collectTime, long reportTime, Map<String, Object> map) {
+        double mean = 0.0;
+        AppClientCostTimeTotalStat appClientCostTimeTotalStat = null;
         try {
             Integer count = MapUtils.getInteger(map, ClientReportConstant.COST_COUNT, 0);
             String command = MapUtils.getString(map, ClientReportConstant.COST_COMMAND, "");
@@ -71,12 +74,12 @@ public class ClientReportCostDistriServiceImpl implements ClientReportCostDistri
             // 实例信息
             InstanceInfo instanceInfo = instanceDao.getInstByIpAndPort(host, port);
             if (instanceInfo == null) {
-                logger.warn("instanceInfo is empty, host is {}, port is {}", host, port);
+//                logger.warn("instanceInfo is empty, host is {}, port is {}", host, port);
                 return;
             }
             long appId = instanceInfo.getAppId();
             // 耗时分布详情
-            Double mean = MapUtils.getDouble(map, ClientReportConstant.COST_TIME_MEAN, 0.0);
+            mean = MapUtils.getDouble(map, ClientReportConstant.COST_TIME_MEAN, 0.0);
             Integer median = MapUtils.getInteger(map, ClientReportConstant.COST_TIME_MEDIAN, 0);
             Integer ninetyPercentMax = MapUtils.getInteger(map, ClientReportConstant.COST_TIME_90_MAX, 0);
             Integer ninetyNinePercentMax = MapUtils.getInteger(map, ClientReportConstant.COST_TIME_99_MAX, 0);
@@ -92,7 +95,7 @@ public class ClientReportCostDistriServiceImpl implements ClientReportCostDistri
             stat.setCount(count);
             stat.setInstanceHost(host);
             stat.setInstancePort(port);
-            stat.setMean(mean);
+            stat.setMean(NumberUtils.toDouble(new DecimalFormat("#.00").format(mean)));
             stat.setMedian(median);
             stat.setNinetyPercentMax(ninetyPercentMax);
             stat.setNinetyNinePercentMax(ninetyNinePercentMax);
@@ -102,11 +105,13 @@ public class ClientReportCostDistriServiceImpl implements ClientReportCostDistri
             appClientCostTimeStatDao.save(stat);
             
             //上卷到应用
-            AppClientCostTimeTotalStat appClientCostTimeTotalStat = AppClientCostTimeTotalStat.getFromAppClientCostTimeStat(stat);
+            appClientCostTimeTotalStat = AppClientCostTimeTotalStat.getFromAppClientCostTimeStat(stat);
             appClientCostTimeTotalStatDao.save(appClientCostTimeTotalStat);
             
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
+            logger.error("wrong mean is {}", mean);
+            logger.error("appClientCostTimeTotalStat: {}", appClientCostTimeTotalStat);
         }
     }
 

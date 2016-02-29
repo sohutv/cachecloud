@@ -59,6 +59,28 @@
 			</a>
 		</li>
 		
+		<li <c:if test="${clientExceptionActive == 1}">class="active"</c:if>>
+			<a href="/manage/client/exception">
+				<i class="fa fa-map-marker"></i> 
+				<span class="title">客户端异常统计</span>
+				<c:if test="${clientExceptionActive == 1}">
+					<span class="selected"></span>
+					<span class="arrow"></span>
+				</c:if>
+			</a>
+		</li>
+		
+		<li <c:if test="${clientVersionActive == 1}">class="active"</c:if>>
+			<a href="/manage/client/version">
+				<i class="fa fa-map-marker"></i> 
+				<span class="title">客户端版本统计</span>
+				<c:if test="${clientVersionActive == 1}">
+					<span class="selected"></span>
+					<span class="arrow"></span>
+				</c:if>
+			</a>
+		</li>
+		
 		<li <c:if test="${noticeActive == 1}">class="active"</c:if>>
 			<a href="/manage/notice/initNotice.do">
 				<i class="fa fa-map-marker"></i> 

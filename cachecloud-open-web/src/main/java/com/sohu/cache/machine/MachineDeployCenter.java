@@ -16,14 +16,6 @@ import java.util.List;
 public interface MachineDeployCenter {
 
     /**
-     * 将初始化脚本推送到指定的机器上
-     *
-     * @param ip    机器的ip
-     * @return  是否推送成功
-     */
-    public boolean pushInitScript(String ip);
-
-    /**
      * 增加一台机器，并初始化，包括：
      *  - 将机器信息保存入库；
      *  - 加入定时监控任务中；

@@ -20,7 +20,9 @@ import com.sohu.cache.schedule.SchedulerCenter;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.IdempotentConfirmer;
 import com.sohu.cache.util.TypeUtil;
+import com.sohu.cache.web.enums.RedisOperateEnum;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -710,6 +712,127 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         }
         return true;
     }
+    
+    @Override
+    public RedisOperateEnum addSlotsFailMaster(long appId, int lossSlotsInstanceId, String newMasterHost) throws Exception {
+        // 1.参数、应用、实例信息确认
+        Assert.isTrue(appId > 0);
+        Assert.isTrue(lossSlotsInstanceId > 0);
+        Assert.isTrue(StringUtils.isNotBlank(newMasterHost));
+        AppDesc appDesc = appDao.getAppDescById(appId);
+        Assert.isTrue(appDesc != null);
+        int type = appDesc.getType();
+        if (!TypeUtil.isRedisCluster(type)) {
+            logger.error("{} is not redis cluster type", appDesc);
+            return RedisOperateEnum.FAIL;
+        }
+        //获取失联slots的实例信息
+        InstanceInfo lossSlotsInstanceInfo = instanceDao.getInstanceInfoById(lossSlotsInstanceId);
+        Assert.isTrue(lossSlotsInstanceInfo != null);
+
+        // 2.获取集群中一个健康的master作为clusterInfo Nodes的数据源
+        InstanceInfo sourceMasterInstance = redisCenter.getHealthyInstanceInfo(appId);
+        // 并未找到一个合适的实例可以
+        if (sourceMasterInstance == null) {
+            logger.warn("appId {} does not have right instance", appId);
+            return RedisOperateEnum.FAIL;
+        }
+
+        // 3. 找到丢失的slots，如果没找到就说明集群正常，直接返回
+        String healthyMasterHost = sourceMasterInstance.getIp();
+        int healthyMasterPort = sourceMasterInstance.getPort();
+        int healthyMasterMem = sourceMasterInstance.getMem();
+        // 3.1 查看整个集群中是否有丢失的slots
+        List<Integer> allLossSlots = redisCenter.getClusterLossSlots(healthyMasterHost, healthyMasterPort);
+        if (CollectionUtils.isEmpty(allLossSlots)) {
+            logger.warn("appId {} all slots is regular and assigned", appId);
+            return RedisOperateEnum.ALREADY_SUCCESS;
+        }
+        // 3.2 查看目标实例丢失slots 
+        List<Integer> clusterLossSlots = redisCenter.getInstanceSlots(healthyMasterHost, healthyMasterPort, lossSlotsInstanceInfo.getIp(), lossSlotsInstanceInfo.getPort());
+        // 4.开启新的节点
+        // 4.1 从newMasterHost找到可用的端口newMasterPort
+        final Integer newMasterPort = machineCenter.getAvailablePort(newMasterHost, ConstUtils.CACHE_TYPE_REDIS_CLUSTER);
+        if (newMasterPort == null) {
+            logger.error("host={} getAvailablePort is null", newMasterHost);
+            return RedisOperateEnum.FAIL;
+        }
+        // 4.2 按照sourceMasterInstance的内存启动
+        boolean isRun = runInstance(newMasterHost, newMasterPort, healthyMasterMem, true);
+        if (!isRun) {
+            logger.error("{}:{} is not run", newMasterHost, newMasterPort);
+            return RedisOperateEnum.FAIL;
+        }
+        // 4.3 拷贝配置
+        boolean isCopy = copyCommonConfig(healthyMasterHost, healthyMasterPort, newMasterHost, newMasterPort);
+        if (!isCopy) {
+            logger.error("{}:{} copy config {}:{} is error", healthyMasterHost, healthyMasterPort, newMasterHost, newMasterPort);
+            return RedisOperateEnum.FAIL;
+        }
+        
+        // 5. meet
+        boolean isClusterMeet = false;
+        Jedis sourceMasterJedis = null;
+        try {
+            sourceMasterJedis = new Jedis(healthyMasterHost, healthyMasterPort, 5000);
+            isClusterMeet = clusterMeet(sourceMasterJedis, newMasterHost, newMasterPort);
+            if (!isClusterMeet) {
+                logger.error("{}:{} cluster is failed", newMasterHost, newMasterPort);
+                return RedisOperateEnum.FAIL;
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        } finally {
+            if (sourceMasterJedis != null) {
+                sourceMasterJedis.close();
+            }
+        }
+        if (!isClusterMeet) {
+            logger.warn("{}:{} meet {}:{} is fail", healthyMasterHost, healthyMasterPort, newMasterHost, newMasterPort);
+            return RedisOperateEnum.FAIL;
+        }
+        
+        // 6. 分配slots
+        String addSlotsResult = "";
+        Jedis newMasterJedis = null;
+        Jedis healthyMasterJedis = null;
+        try {
+            newMasterJedis = new Jedis(newMasterHost, newMasterPort, 5000);
+            healthyMasterJedis = new Jedis(healthyMasterHost, healthyMasterPort, 5000);
+            //获取新的补救节点的nodid
+            final String nodeId = getClusterNodeId(newMasterJedis);
+            for (Integer slot : clusterLossSlots) {
+                addSlotsResult = healthyMasterJedis.clusterSetSlotNode(slot, nodeId);
+                logger.warn("set slot {}, result is {}", slot, addSlotsResult);
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        } finally {
+            if (newMasterJedis != null) {
+                newMasterJedis.close();
+            }
+            if (healthyMasterJedis != null) {
+                healthyMasterJedis.close();
+            }
+        }
+        if (!"OK".equalsIgnoreCase(addSlotsResult)) {
+            logger.warn("{}:{} set slots faily", newMasterHost, newMasterPort);
+            return RedisOperateEnum.FAIL;
+        }
+        
+        // 7.保存实例信息、并开启收集信息
+        saveInstance(appId, 0, newMasterHost, newMasterPort, healthyMasterMem, ConstUtils.CACHE_TYPE_REDIS_CLUSTER, "");
+        redisCenter.deployRedisCollection(appId, newMasterHost, newMasterPort);
+        
+        // 休息一段时间，同步clusterNodes信息
+        TimeUnit.SECONDS.sleep(2);
+        
+        // 8.最终打印出当前还没有补充的slots
+        List<Integer> currentLossSlots = redisCenter.getClusterLossSlots(newMasterHost, newMasterPort);
+        logger.warn("appId {} failslots assigned unsuccessfully, lossslots is {}", appId, currentLossSlots);
+        
+        return RedisOperateEnum.OP_SUCCESS;        
+    }
 
     @Override
     public boolean addSlave(long appId, int instanceId, final String slaveHost) {
@@ -944,7 +1067,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
      */
     private boolean copyCommonConfig(String sourceHost, int sourcePort, String targetHost, int targetPort) {
         String[] compareConfigs = new String[] {"maxmemory-policy", "maxmemory", "cluster-node-timeout",
-                "cluster-require-full-coverage", "repl-backlog-size"};
+                "cluster-require-full-coverage", "repl-backlog-size", "appendonly"};
         try {
             for (String config : compareConfigs) {
                 String sourceValue = getConfigValue(sourceHost, sourcePort, config);
@@ -1003,4 +1126,5 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
     public void setSchedulerCenter(SchedulerCenter schedulerCenter) {
         this.schedulerCenter = schedulerCenter;
     }
+
 }

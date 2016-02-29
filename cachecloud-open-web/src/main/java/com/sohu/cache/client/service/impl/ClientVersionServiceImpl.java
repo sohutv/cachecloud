@@ -79,9 +79,21 @@ public class ClientVersionServiceImpl implements ClientVersionService {
         }
         return appClientVersionServerList;
     }
+    
+    @Override
+    public List<AppClientVersion> getAll(long appId) {
+        try {
+            return appClientVersionDao.getAll(appId);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return Collections.emptyList();
+        }
+    }
 
     public void setAppClientVersionDao(AppClientVersionDao appClientVersionDao) {
         this.appClientVersionDao = appClientVersionDao;
     }
+
+    
 
 }

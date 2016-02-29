@@ -6,7 +6,7 @@
         " default-autowire="byName">
 
     <!--redis调度接口-->
-    <bean id="redisCenter" class="com.sohu.cache.redis.impl.RedisCenterImpl" destroy-method="destory"/>
+    <bean id="redisCenter" class="com.sohu.cache.redis.impl.RedisCenterImpl" init-method="init" destroy-method="destory"/>
 
     <!--machine调度接口-->
     <bean id="machineCenter" class="com.sohu.cache.machine.impl.MachineCenterImpl" />

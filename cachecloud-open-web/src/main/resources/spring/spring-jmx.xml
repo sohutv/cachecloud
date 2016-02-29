@@ -24,6 +24,13 @@
             <util:constant static-field="com.sohu.cache.async.AsyncThreadPoolFactory.CLIENT_REPORT_THREAD_POOL"/>
         </constructor-arg>
     </bean>
+    
+    <!-- 实例慢查询jmx -->
+    <bean id="redisSlowlogAsyncThreadPoolStatistics" class="com.sohu.cache.jmx.ThreadPoolStatisticsImpl">
+        <constructor-arg index="0">
+            <util:constant static-field="com.sohu.cache.async.AsyncThreadPoolFactory.REDIS_SLOWLOG_THREAD_POOL"/>
+        </constructor-arg>
+    </bean>
 
 	<!-- mbeanServerExporter -->
     <bean id="mbeanServerExporter" class="org.springframework.jmx.export.MBeanExporter">
@@ -32,6 +39,7 @@
                 <entry key="cacheCloudJMX:myjavaobj=errorLoggerWatcher" value-ref="errorLoggerWatcher"/>
                 <entry key="cacheCloudJMX:myjavaobj=cachecloudDataWatcher" value-ref="cachecloudDataWatcher"/>
                 <entry key="cacheCloudJMX:myjavaobj=clientReportAsyncThreadPoolStatistics" value-ref="clientReportAsyncThreadPoolStatistics"/>
+                <entry key="cacheCloudJMX:myjavaobj=redisSlowlogAsyncThreadPoolStatistics" value-ref="redisSlowlogAsyncThreadPoolStatistics"/>
             </map>
         </property>
         <property name="server" ref="mbeanServer"/>

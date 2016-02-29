@@ -58,8 +58,10 @@ public class InstanceRunInspector extends BaseAlertService implements Inspector 
                     continue;
                 } else if (isUpdate) {
                     redisCenter.deployRedisCollection(appId, host, port);
+                    redisCenter.deployRedisSlowLogCollection(appId, host, port);
                 } else {
                     redisCenter.unDeployRedisCollection(appId, host, port);
+                    redisCenter.unDeployRedisSlowLogCollection(appId, host, port);
                 }
                 // 错误
                 if (isUpdate != null) {

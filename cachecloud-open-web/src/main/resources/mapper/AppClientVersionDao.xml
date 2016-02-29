@@ -22,5 +22,13 @@
 		select id,<include refid="columns"/> from app_client_version_statistic where app_id=#{appId}
 	</select>
 	
+	<select id="getAll" resultType="AppClientVersion">
+		select id,<include refid="columns"/> from app_client_version_statistic where 1=1
+		<choose>
+        	<when test="appId > 0">
+        	 	and app_id=#{appId}
+        	</when>
+        </choose>
+	</select>
 
 </mapper>

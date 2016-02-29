@@ -106,7 +106,7 @@ public class AppMemInspector extends BaseAlertService implements Inspector {
         String title = "CacheCloud系统-应用内存使用率报警";
         emailComponent.sendMail(title, content, appDetailVO.getEmailList(),
                 Arrays.asList(emailComponent.getAdminEmail().split(CacheCloudConstants.COMMA)));
-        // 临时注释掉
+        // TODO 临时注释掉
         // mobileAlertComponent.sendPhone(content,
         // appDetailVO.getPhoneList());
 
@@ -121,7 +121,7 @@ public class AppMemInspector extends BaseAlertService implements Inspector {
         String title = "CacheCloud系统-分片内存使用率报警";
         emailComponent.sendMail(title, content, appDetailVO.getEmailList(),
                 Arrays.asList(emailComponent.getAdminEmail().split(CacheCloudConstants.COMMA)));
-        // 临时注释掉
+        // TODO 临时注释掉
         // mobileAlertComponent.sendPhone(content,
         // appDetailVO.getPhoneList());
     }

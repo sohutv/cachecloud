@@ -4,6 +4,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.common.util.concurrent.AtomicLongMap;
 import com.sohu.cache.async.AsyncService;
+import com.sohu.cache.async.AsyncThreadPoolFactory;
 import com.sohu.cache.async.KeyCallable;
 import com.sohu.cache.constant.*;
 import com.sohu.cache.dao.*;
@@ -34,11 +35,15 @@ import org.springframework.util.Assert;
 
 import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisDataException;
+import redis.clients.util.ClusterNodeInformation;
+import redis.clients.util.ClusterNodeInformationParser;
 import redis.clients.util.JedisClusterCRC16;
+import redis.clients.util.SafeEncoder;
 import redis.clients.util.Slowlog;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -73,6 +78,14 @@ public class RedisCenterImpl implements RedisCenter {
     private AppDao appDao;
 
     private AppAuditLogDao appAuditLogDao;
+    
+    public static final String REDIS_SLOWLOG_POOL ="redis-slowlog-pool";
+    
+    public void init() {
+        asyncService.assemblePool(getThreadPoolKey(), AsyncThreadPoolFactory.REDIS_SLOWLOG_THREAD_POOL);
+    }
+    
+    private InstanceSlowLogDao instanceSlowLogDao;
 
     @Override
     public boolean deployRedisCollection(long appId, String host, int port) {
@@ -226,6 +239,89 @@ public class RedisCenterImpl implements RedisCenter {
 
             return true;
         }
+    }
+    
+    
+    @Override
+    public List<InstanceSlowLog> collectRedisSlowLog(long appId, long collectTime, String host, int port) {
+        Assert.isTrue(appId > 0);
+        Assert.hasText(host);
+        Assert.isTrue(port > 0);
+        InstanceInfo instanceInfo = instanceDao.getInstByIpAndPort(host, port);
+        //不存在实例/实例异常/下线
+        if (instanceInfo == null) {
+            return null;
+        }
+        if (TypeUtil.isRedisSentinel(instanceInfo.getType())) {
+            //忽略sentinel redis实例
+            return null;
+        }
+        // 从redis中获取慢查询日志
+        List<RedisSlowLog> redisLowLogList = getRedisSlowLogs(host, port, 100);
+        if (CollectionUtils.isEmpty(redisLowLogList)) {
+            return Collections.emptyList();
+        }
+        
+        // transfer
+        final List<InstanceSlowLog> instanceSlowLogList = new ArrayList<InstanceSlowLog>();
+        for (RedisSlowLog redisSlowLog : redisLowLogList) {
+            InstanceSlowLog instanceSlowLog = transferRedisSlowLogToInstance(redisSlowLog, instanceInfo);
+            if (instanceSlowLog == null) {
+                continue;
+            }
+            instanceSlowLogList.add(instanceSlowLog);
+        }
+        
+        if (CollectionUtils.isEmpty(instanceSlowLogList)) {
+            return Collections.emptyList();
+        }
+        
+        //处理
+        String key = getThreadPoolKey() + "_" + host + "_" + port;
+        boolean isOk = asyncService.submitFuture(getThreadPoolKey(), new KeyCallable<Boolean>(key) {
+            @Override
+            public Boolean execute() {
+                try {
+                    instanceSlowLogDao.batchSave(instanceSlowLogList);
+                    return true;
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
+                    return false;
+                }
+            }
+        });
+        if (!isOk) {
+            logger.error("slowlog submitFuture failed,appId:{},collectTime:{},host:{},ip:{}", appId, collectTime, host, port);
+        }
+        return instanceSlowLogList;
+    }
+
+    private InstanceSlowLog transferRedisSlowLogToInstance(RedisSlowLog redisSlowLog, InstanceInfo instanceInfo) {
+        if (redisSlowLog == null) {
+            return null;
+        }
+        String command = redisSlowLog.getCommand();
+        long executionTime = redisSlowLog.getExecutionTime();
+        //如果command=BGREWRITEAOF并且小于50毫秒,则忽略
+        if (command.equalsIgnoreCase("BGREWRITEAOF") && executionTime < 50000) {
+            return null;
+        }
+        InstanceSlowLog instanceSlowLog = new InstanceSlowLog();
+        instanceSlowLog.setAppId(instanceInfo.getAppId());
+        instanceSlowLog.setCommand(redisSlowLog.getCommand());
+        instanceSlowLog.setCostTime((int)redisSlowLog.getExecutionTime());
+        instanceSlowLog.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        instanceSlowLog.setExecuteTime(new Timestamp(redisSlowLog.getDate().getTime()));
+        instanceSlowLog.setInstanceId(instanceInfo.getId());
+        instanceSlowLog.setIp(instanceInfo.getIp());
+        instanceSlowLog.setPort(instanceInfo.getPort());
+        instanceSlowLog.setSlowLogId(redisSlowLog.getId());
+        
+        return instanceSlowLog;
+    }
+
+    private String getThreadPoolKey() {
+        return REDIS_SLOWLOG_POOL;
     }
 
     @Override
@@ -956,7 +1052,7 @@ public class RedisCenterImpl implements RedisCenter {
     }
 
     @Override
-    public List<RedisSlowLog> getRedisSlowLogs(int instanceId) {
+    public List<RedisSlowLog> getRedisSlowLogs(int instanceId, int maxCount) {
         if (instanceId <= 0) {
             return Collections.emptyList();
         }
@@ -965,33 +1061,46 @@ public class RedisCenterImpl implements RedisCenter {
             return Collections.emptyList();
         }
         if (TypeUtil.isRedisType(instanceInfo.getType())) {
-            Jedis jedis = null;
-            try {
-                jedis = new Jedis(instanceInfo.getIp(), instanceInfo.getPort(), REDIS_DEFAULT_TIME);
-                List<RedisSlowLog> resultList = new ArrayList<RedisSlowLog>();
-                List<Slowlog> slowlogs = jedis.slowlogGet();
-                if (slowlogs != null && slowlogs.size() > 0) {
-                    for (Slowlog sl : slowlogs) {
-                        RedisSlowLog rs = new RedisSlowLog();
-                        rs.setId(sl.getId());
-                        rs.setExecutionTime(sl.getExecutionTime());
-                        long time = sl.getTimeStamp() * 1000L;
-                        rs.setTimeStamp(DateUtil.formatYYYYMMddHHMMSS(new Date(time)));
-                        rs.setCommand(StringUtils.join(sl.getArgs(), " "));
-                        resultList.add(rs);
-                    }
-                }
-                return resultList;
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-            } finally {
-                if (jedis != null) {
-                    jedis.close();
-                }
-            }
+            return getRedisSlowLogs(instanceInfo.getIp(), instanceInfo.getPort(), maxCount);
         }
         return Collections.emptyList();
     }
+    
+    
+    private List<RedisSlowLog> getRedisSlowLogs(String host, int port, int maxCount) {
+        Jedis jedis = null;
+        try {
+            jedis = new Jedis(host, port, REDIS_DEFAULT_TIME);
+            List<RedisSlowLog> resultList = new ArrayList<RedisSlowLog>();
+            List<Slowlog> slowlogs = null;
+            if (maxCount > 0) {
+                slowlogs = jedis.slowlogGet(maxCount);
+            } else {
+                slowlogs = jedis.slowlogGet();
+            }
+            if (slowlogs != null && slowlogs.size() > 0) {
+                for (Slowlog sl : slowlogs) {
+                    RedisSlowLog rs = new RedisSlowLog();
+                    rs.setId(sl.getId());
+                    rs.setExecutionTime(sl.getExecutionTime());
+                    long time = sl.getTimeStamp() * 1000L;
+                    rs.setDate(new Date(time));
+                    rs.setTimeStamp(DateUtil.formatYYYYMMddHHMMSS(new Date(time)));
+                    rs.setCommand(StringUtils.join(sl.getArgs(), " "));
+                    resultList.add(rs);
+                }
+            }
+            return resultList;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return Collections.emptyList();
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+    }
+    
 
     public boolean configRewrite(final String host, final int port) {
         return new IdempotentConfirmer() {
@@ -1120,12 +1229,284 @@ public class RedisCenterImpl implements RedisCenter {
         }
         return Collections.emptyList();
     }
+    
+    @Override
+    public Map<String,String> getClusterLossSlots(long appId) {
+        // 1.从应用中获取一个健康的主节点
+        InstanceInfo sourceMasterInstance = getHealthyInstanceInfo(appId);
+        // 2. 获取所有slot和节点的对应关系
+        Map<Integer, String> slotHostPortMap = getSlotsHostPortMap(sourceMasterInstance.getIp(), sourceMasterInstance.getPort());
+        // 3. 获取集群中失联的slot
+        List<Integer> lossSlotList = getClusterLossSlots(sourceMasterInstance.getIp(), sourceMasterInstance.getPort());
+        // 3.1 将失联的slot列表组装成Map<String host:port,List<Integer> lossSlotList>
+        Map<String,List<Integer>> hostPortSlotMap = new HashMap<String, List<Integer>>();
+        if (CollectionUtils.isNotEmpty(lossSlotList)) {
+            for (Integer lossSlot : lossSlotList) {
+                String key = slotHostPortMap.get(lossSlot);
+                if (hostPortSlotMap.containsKey(key)) {
+                    hostPortSlotMap.get(key).add(lossSlot);
+                } else {
+                    List<Integer> list = new ArrayList<Integer>();
+                    list.add(lossSlot);
+                    hostPortSlotMap.put(key, list);
+                }
+            }
+        }
+        // 3.2 hostPortSlotMap组装成Map<String host:port,String startSlot-endSlot>
+        Map<String, String> slotSegmentsMap = new HashMap<String, String>();
+        for(Entry<String,List<Integer>> entry : hostPortSlotMap.entrySet()) {
+            List<Integer> list = entry.getValue();
+            List<String> slotSegments = new ArrayList<String>();
+            int min = list.get(0);
+            int max = min;
+            for (int i = 1; i < list.size(); i++) {
+                int temp = list.get(i);
+                if (temp == max + 1) {
+                    max = temp;
+                } else {
+                    slotSegments.add(String.valueOf(min) + "-" + String.valueOf(max));
+                    min = temp;
+                    max = temp;
+                }
+            }
+            slotSegments.add(String.valueOf(min) + "-" + String.valueOf(max));
+            slotSegmentsMap.put(entry.getKey(), slotSegments.toString());
+        }
+        return slotSegmentsMap;
+    }
+    
+    /**
+     * 从一个应用中获取一个健康的主节点
+     * @param appId
+     * @return
+     */
+    public InstanceInfo getHealthyInstanceInfo(long appId) {
+        InstanceInfo sourceMasterInstance = null;
+        List<InstanceInfo> appInstanceInfoList = instanceDao.getInstListByAppId(appId);
+        if (CollectionUtils.isEmpty(appInstanceInfoList)) {
+            logger.error("appId {} has not instances", appId);
+            return null;
+        }
+        for (InstanceInfo instanceInfo : appInstanceInfoList) {
+            int instanceType = instanceInfo.getType();
+            if (!TypeUtil.isRedisCluster(instanceType)) {
+                continue;
+            }
+            final String host = instanceInfo.getIp();
+            final int port = instanceInfo.getPort();
+            if (instanceInfo.getStatus() != InstanceStatusEnum.GOOD_STATUS.getStatus()){
+                continue; 
+             }
+            boolean isRun = isRun(host, port);
+            if (!isRun) {
+                logger.warn("{}:{} is not run", host, port);
+                continue;
+            }
+            boolean isMaster = isMaster(host, port);
+            if (!isMaster) {
+                logger.warn("{}:{} is not master", host, port);
+                continue;
+            }
+            sourceMasterInstance = instanceInfo;
+            break;
+        }
+        return sourceMasterInstance;
+    }
+    
+    /**
+     * clusterslots命令拼接成Map<Integer slot, String host:port>
+     * @param host
+     * @param port
+     * @return
+     */
+    private Map<Integer, String> getSlotsHostPortMap(String host, int port) {
+        Map<Integer, String> slotHostPortMap = new HashMap<Integer, String>();
+        Jedis jedis = null;
+        try {
+            jedis = new Jedis(host, port);
+            List<Object> slots = jedis.clusterSlots();
+            for (Object slotInfoObj : slots) {
+                List<Object> slotInfo = (List<Object>) slotInfoObj;
+                if (slotInfo.size() <= 2) {
+                    continue;
+                }
+                List<Integer> slotNums = getAssignedSlotArray(slotInfo);
+
+                // hostInfos
+                List<Object> hostInfos = (List<Object>) slotInfo.get(2);
+                if (hostInfos.size() <= 0) {
+                    continue;
+                }
+                HostAndPort targetNode = generateHostAndPort(hostInfos);
+                
+                for (Integer slot : slotNums) {
+                    slotHostPortMap.put(slot, targetNode.getHost() + ":" + targetNode.getPort());
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+        return slotHostPortMap;
+    }
+    
+    private HostAndPort generateHostAndPort(List<Object> hostInfos) {
+        return new HostAndPort(SafeEncoder.encode((byte[]) hostInfos.get(0)),
+                ((Long) hostInfos.get(1)).intValue());
+    }
+
+    private List<Integer> getAssignedSlotArray(List<Object> slotInfo) {
+        List<Integer> slotNums = new ArrayList<Integer>();
+        for (int slot = ((Long) slotInfo.get(0)).intValue(); slot <= ((Long) slotInfo.get(1))
+                .intValue(); slot++) {
+            slotNums.add(slot);
+        }
+        return slotNums;
+    }
+    
+    
+    @Override
+    public List<Integer> getClusterLossSlots(String host, int port) {
+        InstanceInfo instanceInfo = instanceDao.getAllInstByIpAndPort(host, port);
+        if (instanceInfo == null) {
+            logger.warn("{}:{} instanceInfo is null", host, port);
+            return Collections.emptyList();
+        }
+        if (!TypeUtil.isRedisCluster(instanceInfo.getType())) {
+            logger.warn("{}:{} is not rediscluster type", host, port);
+            return Collections.emptyList();
+        }
+        List<Integer> clusterLossSlots = new ArrayList<Integer>();
+        Jedis jedis = null;
+        try {
+            jedis = new Jedis(host, port, 5000);
+            String clusterNodes = jedis.clusterNodes();
+            if (StringUtils.isBlank(clusterNodes)) {
+                throw new RuntimeException(host + ":" + port + "clusterNodes is null");
+            }
+            Set<Integer> allSlots = new LinkedHashSet<Integer>();
+            for (int i = 0; i <= 16383; i++) {
+                allSlots.add(i);
+            }
+            
+            // 解析
+            ClusterNodeInformationParser nodeInfoParser = new ClusterNodeInformationParser();
+            for (String nodeInfo : clusterNodes.split("\n")) {
+                if (StringUtils.isNotBlank(nodeInfo) && !nodeInfo.contains("disconnected")) {
+                    ClusterNodeInformation clusterNodeInfo = nodeInfoParser.parse(nodeInfo, new HostAndPort(host, port));
+                    List<Integer> availableSlots = clusterNodeInfo.getAvailableSlots();
+                    for(Integer slot : availableSlots) {
+                        allSlots.remove(slot);
+                    }
+                }
+            }
+            clusterLossSlots = new ArrayList<Integer>(allSlots);
+        } catch (Exception e) {
+            logger.error("getClusterLossSlots: " + e.getMessage(), e);
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+        return clusterLossSlots;
+    }
+    
+    @Override
+    public List<Integer> getInstanceSlots(String healthHost, int healthPort, String lossSlotsHost, int lossSlotsPort) {
+        InstanceInfo instanceInfo = instanceDao.getAllInstByIpAndPort(healthHost, healthPort);
+        if (instanceInfo == null) {
+            logger.warn("{}:{} instanceInfo is null", healthHost, healthPort);
+            return Collections.emptyList();
+        }
+        if (!TypeUtil.isRedisCluster(instanceInfo.getType())) {
+            logger.warn("{}:{} is not rediscluster type", healthHost, healthPort);
+            return Collections.emptyList();
+        }
+        List<Integer> clusterLossSlots = new ArrayList<Integer>();
+        Jedis jedis = null;
+        try {
+            jedis = new Jedis(healthHost, healthPort, 5000);
+            String clusterNodes = jedis.clusterNodes();
+            if (StringUtils.isBlank(clusterNodes)) {
+                throw new RuntimeException(healthHost + ":" + healthPort + "clusterNodes is null");
+            }
+            // 解析
+            ClusterNodeInformationParser nodeInfoParser = new ClusterNodeInformationParser();
+            for (String nodeInfo : clusterNodes.split("\n")) {
+                if (StringUtils.isNotBlank(nodeInfo) && nodeInfo.contains("disconnected") && nodeInfo.contains(lossSlotsHost + ":" + lossSlotsPort)) {
+                    ClusterNodeInformation clusterNodeInfo = nodeInfoParser.parse(nodeInfo, new HostAndPort(healthHost, healthPort));
+                    clusterLossSlots = clusterNodeInfo.getAvailableSlots();
+                }
+            }
+        } catch (Exception e) {
+            logger.error("getClusterLossSlots: " + e.getMessage(), e);
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+        return clusterLossSlots;
+    }
+    
 
     public void destory() {
         for (JedisPool jedisPool : jedisPoolMap.values()) {
             jedisPool.destroy();
         }
     }
+    
+    @Override
+    public boolean deployRedisSlowLogCollection(long appId, String host, int port) {
+        Assert.isTrue(appId > 0);
+        Assert.hasText(host);
+        Assert.isTrue(port > 0);
+        Map<String, Object> dataMap = new HashMap<String, Object>();
+        dataMap.put(ConstUtils.HOST_KEY, host);
+        dataMap.put(ConstUtils.PORT_KEY, port);
+        dataMap.put(ConstUtils.APP_KEY, appId);
+        JobKey jobKey = JobKey.jobKey(ConstUtils.REDIS_SLOWLOG_JOB_NAME, ConstUtils.REDIS_SLOWLOG_JOB_GROUP);
+        TriggerKey triggerKey = TriggerKey.triggerKey(ObjectConvert.linkIpAndPort(host, port), ConstUtils.REDIS_SLOWLOG_TRIGGER_GROUP + appId);
+        boolean result = schedulerCenter.deployJobByCron(jobKey, triggerKey, dataMap, ScheduleUtil.getRandomHourCron(appId), false);
+        return result;
+    }
+
+    @Override
+    public boolean unDeployRedisSlowLogCollection(long appId, String host, int port) {
+        Assert.isTrue(appId > 0);
+        Assert.hasText(host);
+        Assert.isTrue(port > 0);
+        TriggerKey triggerKey = TriggerKey.triggerKey(ObjectConvert.linkIpAndPort(host, port), ConstUtils.REDIS_SLOWLOG_TRIGGER_GROUP + appId);
+        Trigger trigger = schedulerCenter.getTrigger(triggerKey);
+        if (trigger == null) {
+            return true;
+        }
+        return schedulerCenter.unscheduleJob(triggerKey);
+    }
+    
+    @Override
+    public List<InstanceSlowLog> getInstanceSlowLogByAppId(long appId) {
+        try {
+            return instanceSlowLogDao.getByAppId(appId);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return Collections.emptyList();
+        }
+    }
+    
+    
+    @Override
+    public List<InstanceSlowLog> getInstanceSlowLogByAppId(long appId, Date startDate, Date endDate, int limit) {
+        try {
+            return instanceSlowLogDao.search(appId, startDate, endDate, limit);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return Collections.emptyList();
+        }
+    }
+    
 
     public void setSchedulerCenter(SchedulerCenter schedulerCenter) {
         this.schedulerCenter = schedulerCenter;
@@ -1162,5 +1543,15 @@ public class RedisCenterImpl implements RedisCenter {
     public void setAppAuditLogDao(AppAuditLogDao appAuditLogDao) {
         this.appAuditLogDao = appAuditLogDao;
     }
+
+    public void setInstanceSlowLogDao(InstanceSlowLogDao instanceSlowLogDao) {
+        this.instanceSlowLogDao = instanceSlowLogDao;
+    }
+
+    
+
+    
+
+
 
 }

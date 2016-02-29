@@ -3,13 +3,12 @@ package com.sohu.cache.stats.instance.impl;
 import com.sohu.cache.constant.InstanceStatusEnum;
 import com.sohu.cache.dao.InstanceDao;
 import com.sohu.cache.entity.InstanceInfo;
-import com.sohu.cache.exception.SSHException;
 import com.sohu.cache.machine.MachineCenter;
 import com.sohu.cache.protocol.RedisProtocol;
 import com.sohu.cache.redis.RedisCenter;
-import com.sohu.cache.ssh.SSHUtil;
 import com.sohu.cache.stats.instance.InstanceDeployCenter;
 import com.sohu.cache.util.TypeUtil;
+
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,6 +99,7 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
             instanceDao.update(instanceInfo);
             if (TypeUtil.isRedisType(type)) {
                 redisCenter.unDeployRedisCollection(instanceInfo.getAppId(), instanceInfo.getIp(), instanceInfo.getPort());
+                redisCenter.unDeployRedisSlowLogCollection(instanceInfo.getAppId(), host, port);
             }
         }
         return isShutdown;
@@ -110,19 +110,11 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
         Assert.isTrue(instanceId > 0L);
         InstanceInfo instanceInfo = instanceDao.getInstanceInfoById(instanceId);
         Assert.isTrue(instanceInfo != null);
-        String host = instanceInfo.getIp();
-        int port = instanceInfo.getPort();
         try {
-            String remoteFilePath = "/opt/cachecloud/logs/redis-"+port+"-*.log";
-            try {
-                String loglog = SSHUtil.execute(host, "tail -n100 " + remoteFilePath);
-            } catch (SSHException e) {
-                logger.error(e.getMessage(), e);
-            }
-            return machineCenter.showInstanceRecentLog(host, port, maxLineNum);
+            return machineCenter.showInstanceRecentLog(instanceInfo, maxLineNum);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            return null;
+            return "";
         }
     }
     

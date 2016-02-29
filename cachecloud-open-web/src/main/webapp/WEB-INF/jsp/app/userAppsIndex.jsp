@@ -34,6 +34,9 @@
             <li><a href="#app_demo" data-url="/admin/app/demo.html?appId=${appId}"
                    data-toggle="tab">接入代码</a>
             </li>
+            <li><a href="#app_slow_log" data-url="/admin/app/slowLog?appId=${appId}&slowLogStartDate=${slowLogStartDate}&slowLogEndDate=${slowLogEndDate}"
+                   data-toggle="tab">慢查询</a>
+            </li>
         </ul>
         <div class="tab-content">
             <div class="tab-pane active" id="app_stat">
@@ -51,6 +54,8 @@
             <div class="tab-pane" id="app_command">
             </div>
             <div class="tab-pane" id="app_demo">
+            </div>
+            <div class="tab-pane" id="app_slow_log">
             </div>
         </div>
     </div>

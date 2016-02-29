@@ -1,5 +1,7 @@
 package com.sohu.cache.entity;
 
+import com.sohu.cache.web.util.Page;
+
 /**
  * 搜索实体
  * 
@@ -32,7 +34,12 @@ public class AppSearch {
      * 命中率排序
      */
     private String orderBy;
-
+    
+    /**
+     * 分页
+     */
+    private Page page;
+    
     public long getAppId() {
         return appId;
     }
@@ -73,5 +80,18 @@ public class AppSearch {
         this.orderBy = orderBy;
     }
 
+    public Page getPage() {
+        return page;
+    }
+
+    public void setPage(Page page) {
+        this.page = page;
+    }
+
+    @Override
+    public String toString() {
+        return "AppSearch [appId=" + appId + ", appName=" + appName + ", appType=" + appType + ", appStatus="
+                + appStatus + ", orderBy=" + orderBy + ", page=" + page + "]";
+    }
 
 }

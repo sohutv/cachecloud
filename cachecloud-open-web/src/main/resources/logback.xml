@@ -65,11 +65,11 @@
         <appender-ref ref="stderr"/>
     </root>
 
-    <logger name="com.sohu.cache.web.controller.AppManageController" level="INFO">
+    <logger name="com.sohu.cache.web.controller.AppManageController" level="WARN">
         <appender-ref ref="managerAppender"/>
     </logger>
     
-    <logger name="com.sohu.cache.web.controller.InstanceManageController" level="INFO">
+    <logger name="com.sohu.cache.web.controller.InstanceManageController" level="WARN">
         <appender-ref ref="managerAppender"/>
     </logger>
 

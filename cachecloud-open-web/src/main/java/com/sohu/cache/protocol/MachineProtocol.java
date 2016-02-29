@@ -23,9 +23,10 @@ public interface MachineProtocol {
 
 
     /**
-     * ssh端口(默认22)
+     * ssh端口(默认22、其他例如32200)
      */
     public static final int SSH_PORT_DEFAULT = 22;
+    public static final int SSH_PORT_56 = 32200;
 
     /**
      * 编码

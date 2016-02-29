@@ -18,6 +18,7 @@ import com.sohu.cache.dao.AppClientVersionDao;
 import com.sohu.cache.dao.InstanceDao;
 import com.sohu.cache.entity.AppClientExceptionStat;
 import com.sohu.cache.entity.AppClientVersion;
+import com.sohu.cache.entity.ClientInstanceException;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.web.util.Page;
 import com.sohu.tv.jedis.stat.constant.ClientReportConstant;
@@ -80,7 +81,7 @@ public class ClientReportExceptionServiceImpl implements ClientReportExceptionSe
             // 实例信息
             InstanceInfo instanceInfo = instanceDao.getInstByIpAndPort(host, port);
             if (instanceInfo == null) {
-                logger.warn("instanceInfo is empty, host is {}, port is {}", host, port);
+//                logger.warn("instanceInfo is empty, host is {}, port is {}", host, port);
                 return;
             }
             // 实例id
@@ -134,6 +135,16 @@ public class ClientReportExceptionServiceImpl implements ClientReportExceptionSe
             return 0;
         }
     }
+    
+    @Override
+    public List<ClientInstanceException> getInstanceExceptionStat(String ip, long collectTime) {
+        try {
+            return appClientExceptionStatDao.getInstanceExceptionStat(ip, collectTime);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return Collections.emptyList();
+        }
+    }
 
     public void setAppClientExceptionStatDao(AppClientExceptionStatDao appClientExceptionStatDao) {
         this.appClientExceptionStatDao = appClientExceptionStatDao;
@@ -146,6 +157,8 @@ public class ClientReportExceptionServiceImpl implements ClientReportExceptionSe
     public void setAppClientVersionDao(AppClientVersionDao appClientVersionDao) {
         this.appClientVersionDao = appClientVersionDao;
     }
+
+    
 
     
 

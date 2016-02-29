@@ -34,5 +34,10 @@ public interface ClientVersionService {
      */
     List<AppClientVersion> getAppAllServerClientVersion(long appId);
 
+    /**
+     * 获取所有客户端版本
+     * @return
+     */
+    List<AppClientVersion> getAll(long appId);
 
 }

@@ -178,6 +178,7 @@ public class AppDeployCenterImpl implements AppDeployCenter {
                 if (TypeUtil.isRedisType(type)) {
                     //取消收集
                     redisCenter.unDeployRedisCollection(appId, ip, port);
+                    redisCenter.unDeployRedisSlowLogCollection(appId, ip, port);
                     boolean isShutdown = redisCenter.shutdown(ip, port);
                     if (!isShutdown) {
                         logger.error("{}:{} redis not shutdown!", ip, port);

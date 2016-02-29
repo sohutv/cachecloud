@@ -353,7 +353,7 @@ public class InstanceController {
     public ModelAndView slowSelect(HttpServletRequest request, HttpServletResponse response, Model model, Integer admin, Long instanceId) {
         if (instanceId != null && instanceId > 0) {
             model.addAttribute("instanceId", instanceId);
-            List<RedisSlowLog> redisSlowLogs = redisCenter.getRedisSlowLogs(instanceId.intValue());
+            List<RedisSlowLog> redisSlowLogs = redisCenter.getRedisSlowLogs(instanceId.intValue(), -1);
             model.addAttribute("redisSlowLogs", redisSlowLogs);
         }
         return new ModelAndView("instance/instanceSlowSelect");

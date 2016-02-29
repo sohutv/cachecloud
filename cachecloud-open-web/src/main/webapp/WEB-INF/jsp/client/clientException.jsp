@@ -61,7 +61,7 @@ function search() {
     <div class="row">
 		<div style="margin-bottom: 10px;float: right;margin-right: 15px">
 			<ul id='ccPagenitor' style="margin-bottom: 0px"></ul>
-			<div id="pageDetail" style="float:right;padding-top:28px;padding-left:8px;color:#4A64A4;display: none">共${totalPages}页,${totalRows}条</div>		
+			<div id="pageDetail" style="float:right;padding-top:28px;padding-left:8px;color:#4A64A4;display: none">共${page.totalPages}页,${page.totalCount}条</div>		
 		</div>
         <div class="col-md-12">
         	<table class="table table-striped table-hover table-bordered" style="margin-top: 0px">
@@ -120,11 +120,11 @@ function search() {
     	//分页组件
         var element = $('#ccPagenitor');
         //当前page号码
-        var pageNo = '${pageNo}';
+        var pageNo = '${page.pageNo}';
         //总页数
-        var totalPages = '${totalPages}';
+        var totalPages = '${page.totalPages}';
         //显示总页数
-        var numberOfPages = '${numberOfPages}';
+        var numberOfPages = '${page.numberOfPages}';
 		var options = generatePagenitorOption(pageNo, numberOfPages, totalPages, pageClickedFunc);
 		if(totalPages > 0){
 			element.bootstrapPaginator(options);

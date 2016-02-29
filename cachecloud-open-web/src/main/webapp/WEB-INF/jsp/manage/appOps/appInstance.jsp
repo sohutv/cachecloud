@@ -151,6 +151,35 @@
 	     );
 	}
 	
+	function redisAddFailSlotsMaster(appId, instanceId){
+		var failSlotsMasterHost = document.getElementById("failSlotsMasterHost" + instanceId);
+		var redisAddFailSlotsMasterBtn = document.getElementById("redisAddFailSlotsMasterBtn" + instanceId);
+		redisAddFailSlotsMasterBtn.disabled = true;
+		$.post(
+			'/manage/app/addFailSlotsMaster.do',
+			{
+				appId: appId,
+				failSlotsMasterHost: failSlotsMasterHost.value,
+				instanceId: instanceId
+			},
+	        function(data){
+	            if(data==1 || data==2){
+	            	if (data == 1) {
+		                alert("执行成功!");
+	            	} else {
+		                alert("集群所有slots已经分配，无需补充！");
+	            	}
+	            	$("#redisAddFailSlotsMasterInfo" + instanceId).html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Success!</strong>执行成功，应用的拓扑结构要1分钟之后生效，请耐心等待</div>");
+	                var targetId = "#redisAddFailSlotsMasterModal" + instanceId;
+	            	setTimeout("$('" + targetId +"').modal('hide');reloadAppInstancesPage("+appId+");",1000);
+	            } else{
+	            	redisAddFailSlotsMasterBtn.disabled = false;
+	                $("#redisAddFailSlotsMasterInfo" + instanceId).html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Error!</strong>执行失败，请查找原因！</div>");
+	            }
+	        }
+	     );
+	}
+	
 	function redisAddSentinel(appId){
 		var sentinelIp = document.getElementById("sentinelIp");
 		if(sentinelIp.value == ""){
@@ -192,6 +221,9 @@
         	应用实例管理-${appDesc.name}(${appDesc.typeDesc})
         	<c:choose>
 	            <c:when test="${appDesc.type == 2}">
+	            	<c:if test="${lossSlotsSegmentMap != null && lossSlotsSegmentMap != '' && lossSlotsSegmentMap.size() > 0}">
+	            		<font color="red">丢失的slots:${lossSlotsSegmentMap}</font>
+	            	</c:if>
 	            </c:when>
 	  		    <c:when test="${appDesc.type == 5}">
 		  		    <button type="button" class="btn btn-small btn-primary" data-target="#redisAddSentinelModal" data-toggle="modal">添加sentinel节点</button>
@@ -213,6 +245,7 @@
 	                <th>对象数</th>
 	                <th>连接数</th>
 	                <th>命中率</th>
+	                <th>日志</th>
 	                <th>操作</th>
 	            </tr>
             </thead>
@@ -273,20 +306,28 @@
 	                    <td>${(instanceStatsMap[instanceStatsMapKey]).currConnections}</td>
 	                    <td>${(instanceStatsMap[instanceStatsMapKey]).hitPercent}</td>
 	                    <td>
+	                    	<a target="_blank" href="/manage/instance/log?instanceId=${instance.id}">查看</a>
+	                    </td>
+	                    <td>
 	                    	<div>
                                 <c:choose>
                                    <c:when test="${instance.status ==2}">
                                      <button type="button" class="btn btn-small btn-success" onclick="startInstance('${instance.id}')">
-                                        启动实例
+                                        	启动实例
                                      </button>
                                    </c:when>
                                     <c:when test="${instance.status ==0}">
                                         <button type="button" class="btn btn-small btn-success" onclick="startInstance('${instance.id}')">
-                                            启动实例
+                                            	启动实例
                                         </button>
                                         <button type="button" class="btn btn-small btn-danger" onclick="shutdownInstance('${instance.id}')">
-                                            下线实例
+                                            	下线实例
                                         </button>
+                                        <c:choose>
+		                                   <c:when test="${instance.masterInstanceId == 0 && appDesc.type == 2 && lossSlotsSegmentMap[instanceStatsMapKey] != null && lossSlotsSegmentMap[instanceStatsMapKey] != ''}">
+		                                      <button type="button" class="btn btn-small btn-primary" data-target="#redisAddFailSlotsMasterModal${instance.id}" data-toggle="modal">修复slot丢失数据</button>
+		                                   </c:when>
+		                                </c:choose>
                                     </c:when>
                                    <c:when test="${instance.status == 1}">
                                      <button type="button" class="btn btn-small btn-danger" onclick="shutdownInstance('${instance.id}')">
@@ -348,6 +389,10 @@
 		</div>
 	</div>
 </div>
+
+
+
+
 
 <div id="redisSentinelFailOverModal" class="modal fade" tabindex="-1" data-width="400">
 		<div class="modal-dialog">
@@ -478,6 +523,44 @@
 					<div class="modal-footer">
 						<button type="button" data-dismiss="modal" class="btn" >Close</button>
 						<button type="button" id="redisSentinelAddSlaveBtn${instance.id}" class="btn red" onclick="redisSentinelAddSlave('${appDesc.appId}', '${instance.id}')">Ok</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<div id="redisAddFailSlotsMasterModal${instance.id}" class="modal fade" tabindex="-1" data-width="400">
+		<div class="modal-dialog">
+			<div class="modal-content">
+		
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+					<h4 class="modal-title">修复failslots</h4>
+				</div>
+			
+				<form class="form-horizontal form-bordered form-row-stripped">
+					<div class="modal-body">
+						<div class="row">
+							<!-- 控件开始 -->
+							<div class="col-md-12">
+								<!-- form-body开始 -->
+								<div class="form-body">
+									<div class="form-group">
+										<label class="control-label col-md-3">节点Ip:</label>
+										<div class="col-md-7">
+											<input type="text" name="failSlotsMasterHost" id="failSlotsMasterHost${instance.id}" placeholder="failSlotsMasterHost" class="form-control">
+										</div>
+									</div>
+								</div>
+								<!-- form-body 结束 -->
+								<div id="redisAddFailSlotsMasterInfo${instance.id}"></div>
+							</div>
+						</div>
+					</div>
+					
+					<div class="modal-footer">
+						<button type="button" data-dismiss="modal" class="btn" >Close</button>
+						<button type="button" id="redisAddFailSlotsMasterBtn${instance.id}" class="btn red" onclick="redisAddFailSlotsMaster('${appDesc.appId}', '${instance.id}')">Ok</button>
 					</div>
 				</form>
 			</div>

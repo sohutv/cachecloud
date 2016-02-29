@@ -29,6 +29,11 @@ public class ConstUtils {
     public static final String MACHINE_MONITOR_JOB_NAME = "machineMonitorJob";
     public static final String MACHINE_MONITOR_JOB_GROUP = "machineMonitor";
     public static final String MACHINE_MONITOR_TRIGGER_GROUP = "machineMonitor-";
+    
+    // redis-slowlog job/trigger name/group
+    public static final String REDIS_SLOWLOG_JOB_NAME = "redisSlowLogJob";
+    public static final String REDIS_SLOWLOG_JOB_GROUP = "redisSlowLog";
+    public static final String REDIS_SLOWLOG_TRIGGER_GROUP = "redisSlowLog-";
 
     // http 超时设置
     public static final int HTTP_CONNECTION_TIMEOUT = 3000;
