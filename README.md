@@ -69,6 +69,7 @@ Redis的开发人员如同使用Mysql一样，不需要运维Mysql服务器，�
 +  Java 7
 +  Maven 3
 +  MySQL
++  Redis 3
 
 <a name="cc7"/>
 ## 七、CacheCloud快速开始 ###
