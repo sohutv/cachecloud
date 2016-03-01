@@ -58,8 +58,7 @@
     </bean>
  
     <!-- 分布式QuartzScheduler -->
-    <bean id="clusterScheduler" name="clusterScheduler" lazy-init="false"
-          class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+    <bean id="clusterScheduler" name="clusterScheduler" lazy-init="false" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
         <property name="dataSource" ref="cacheCloudDB"></property>
         <property name="taskExecutor" ref="quartzThreadPool"/>
         <!--

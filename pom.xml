@@ -10,7 +10,8 @@
     <modules>
         <module>cachecloud-open-web</module>
         <module>cachecloud-open-client</module>
-  	</modules>
+        <module>cachecloud-open-common</module>
+    </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

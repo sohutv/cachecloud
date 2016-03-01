@@ -15,8 +15,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sohu.cache.util.ConstUtils;
-
 /**
  * http原生工具类
  * 
@@ -26,14 +24,18 @@ import com.sohu.cache.util.ConstUtils;
  */
 public final class HttpRequestUtil {
     
+    // http 超时设置
+    private static final int HTTP_CONNECTION_TIMEOUT = 3000;
+    private static final int HTTP_SOCKET_TIMEOUT = 3000;
+    
     private static Logger logger = LoggerFactory.getLogger(HttpRequestUtil.class);
 
     public static String doPost(String reqUrl, Map<String, String> parameters) {
-        return doPost(reqUrl, parameters, "UTF-8", ConstUtils.HTTP_CONNECTION_TIMEOUT, ConstUtils.HTTP_SOCKET_TIMEOUT);
+        return doPost(reqUrl, parameters, "UTF-8", HTTP_CONNECTION_TIMEOUT, HTTP_SOCKET_TIMEOUT);
     }
 
     public static String doPost(String reqUrl, Map<String, String> parameters, String encoding) {
-        return doPost(reqUrl, parameters, encoding, ConstUtils.HTTP_CONNECTION_TIMEOUT, ConstUtils.HTTP_SOCKET_TIMEOUT);
+        return doPost(reqUrl, parameters, encoding, HTTP_CONNECTION_TIMEOUT, HTTP_SOCKET_TIMEOUT);
     }
 
     public static String doPost(String reqUrl, Map<String, String> parameters, String encoding, int connectTimeout,
@@ -136,7 +138,7 @@ public final class HttpRequestUtil {
      * @return
      */
     public static String doGet(String link) {
-        return doGet(link, "UTF-8", ConstUtils.HTTP_CONNECTION_TIMEOUT, ConstUtils.HTTP_SOCKET_TIMEOUT);
+        return doGet(link, "UTF-8", HTTP_CONNECTION_TIMEOUT, HTTP_SOCKET_TIMEOUT);
     }
 
     /**

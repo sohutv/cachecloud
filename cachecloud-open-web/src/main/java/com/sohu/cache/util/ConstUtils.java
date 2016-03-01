@@ -35,10 +35,6 @@ public class ConstUtils {
     public static final String REDIS_SLOWLOG_JOB_GROUP = "redisSlowLog";
     public static final String REDIS_SLOWLOG_TRIGGER_GROUP = "redisSlowLog-";
 
-    // http 超时设置
-    public static final int HTTP_CONNECTION_TIMEOUT = 3000;
-    public static final int HTTP_SOCKET_TIMEOUT = 3000;
-
     // 创建trigger时，dataMap的数据key
     public static final String HOST_KEY = "host_key";
     public static final String PORT_KEY = "port_key";

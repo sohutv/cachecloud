@@ -277,5 +277,4 @@ public class InstanceStatsCenterImpl implements InstanceStatsCenter {
     public void setRedisCenter(RedisCenter redisCenter) {
         this.redisCenter = redisCenter;
     }
-
 }

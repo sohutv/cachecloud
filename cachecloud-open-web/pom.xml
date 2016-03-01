@@ -18,6 +18,7 @@
         <tomcat.version>8.0.28</tomcat.version>
         <cachecloud-open-client-basic>1.0-SNAPSHOT</cachecloud-open-client-basic>
         <cachecloud-jedis>1.0-SNAPSHOT</cachecloud-jedis>
+        <cachecloud-open-common.version>1.0-SNAPSHOT</cachecloud-open-common.version>
     </properties>
     <dependencies>
         <dependency>
@@ -194,6 +195,12 @@
 			<groupId>com.sohu.tv</groupId>
 			<artifactId>cachecloud-jedis</artifactId>
 			<version>${cachecloud-jedis}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.sohu.tv</groupId>
+			<artifactId>cachecloud-open-common</artifactId>
+			<version>${cachecloud-open-common.version}</version>
 		</dependency>
 
     </dependencies>
