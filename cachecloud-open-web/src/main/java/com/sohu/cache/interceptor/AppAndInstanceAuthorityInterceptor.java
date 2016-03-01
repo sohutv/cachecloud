@@ -16,11 +16,11 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import com.sohu.cache.constant.AppUserTypeEnum;
-import com.sohu.cache.constant.CacheCloudConstants;
 import com.sohu.cache.entity.AppToUser;
 import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.stats.instance.InstanceStatsCenter;
+import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.service.AppService;
 
 /**
@@ -43,7 +43,7 @@ public class AppAndInstanceAuthorityInterceptor extends HandlerInterceptorAdapte
 
         // 1.从session获取用户
         HttpSession session = request.getSession(true);
-        Object object = session.getAttribute(CacheCloudConstants.LOGIN_USER_SESSION_NAME);
+        Object object = session.getAttribute(ConstUtils.LOGIN_USER_SESSION_NAME);
         AppUser user = object == null ? null : (AppUser) object;
         
         // 2. 管理员直接跳过

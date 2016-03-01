@@ -7,7 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sohu.cache.constant.CacheCloudConstants;
+import com.sohu.cache.util.ConstUtils;
 
 /**
  * 手机短信报警
@@ -28,7 +28,7 @@ public class MobileAlertComponentImpl implements MobileAlertComponent {
         if (StringUtils.isBlank(message) || StringUtils.isBlank(adminPhones)) {
             logger.error("message is {}, maybe empty or adminPhones is {}, maybe empty", message, adminPhones);
         }
-        sendPhone(message, Arrays.asList(adminPhones.split(CacheCloudConstants.COMMA)));
+        sendPhone(message, Arrays.asList(adminPhones.split(ConstUtils.COMMA)));
     }
 
     @Override

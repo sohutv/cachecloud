@@ -1,12 +1,13 @@
 package com.sohu.cache.web.util;
 
 import com.sohu.cache.constant.AppCheckEnum;
-import com.sohu.cache.constant.CacheCloudConstants;
 import com.sohu.cache.entity.AppAudit;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.AppUser;
+import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.component.EmailComponent;
 import com.sohu.cache.web.service.UserService;
+
 import org.apache.velocity.app.VelocityEngine;
 
 import java.util.Arrays;
@@ -33,7 +34,7 @@ public class AppEmailUtil {
     public void noticeAppResult(AppDesc appDesc, AppAudit appAudit) {
         String mailContent = VelocityUtils.createText(velocityEngine, appDesc, appAudit, "appAudit.vm", "UTF-8");
         AppUser appUser = userService.get(appDesc.getUserId());
-        emailComponent.sendMail("【CacheCloud】状态通知", mailContent, Arrays.asList(appUser.getEmail()), Arrays.asList(emailComponent.getAdminEmail().split(CacheCloudConstants.COMMA)));
+        emailComponent.sendMail("【CacheCloud】状态通知", mailContent, Arrays.asList(appUser.getEmail()), Arrays.asList(emailComponent.getAdminEmail().split(ConstUtils.COMMA)));
     }
     
     /**
@@ -46,7 +47,7 @@ public class AppEmailUtil {
     	StringBuffer mailContent = new StringBuffer();
     	mailContent.append(appUser.getChName() + "(项目组:"+groupName+")申请成为CacheCloud贡献者<br/>");
     	mailContent.append("申请理由:<br/>" + applyReason);
-        emailComponent.sendMail("【CacheCloud】状态通知", mailContent.toString(), Arrays.asList(appUser.getEmail()), Arrays.asList(emailComponent.getAdminEmail().split(CacheCloudConstants.COMMA)));
+        emailComponent.sendMail("【CacheCloud】状态通知", mailContent.toString(), Arrays.asList(appUser.getEmail()), Arrays.asList(emailComponent.getAdminEmail().split(ConstUtils.COMMA)));
 	}
     
     /**
@@ -66,7 +67,7 @@ public class AppEmailUtil {
         } else if (AppCheckEnum.APP_REJECT.value().equals(appAudit.getStatus())) {
             mailContent.append("您的用户申请被驳回，原因是: " + appAudit.getRefuseReason());
         }
-        emailComponent.sendMail("【CacheCloud】状态通知", mailContent.toString(), Arrays.asList(appUser.getEmail()), Arrays.asList(emailComponent.getAdminEmail().split(CacheCloudConstants.COMMA)));
+        emailComponent.sendMail("【CacheCloud】状态通知", mailContent.toString(), Arrays.asList(appUser.getEmail()), Arrays.asList(emailComponent.getAdminEmail().split(ConstUtils.COMMA)));
     }
     
     /**
@@ -80,7 +81,7 @@ public class AppEmailUtil {
         mailContent.append(appUser.getChName()).append(",对应用appid=").append(appId);
         mailContent.append("进行下线,操作结果是").append(isSuccess?"成功":"失败");
         mailContent.append(",请知晓!");
-        emailComponent.sendMail("【CacheCloud】状态通知", mailContent.toString(), Arrays.asList(appUser.getEmail()), Arrays.asList(emailComponent.getAdminEmail().split(CacheCloudConstants.COMMA)));
+        emailComponent.sendMail("【CacheCloud】状态通知", mailContent.toString(), Arrays.asList(appUser.getEmail()), Arrays.asList(emailComponent.getAdminEmail().split(ConstUtils.COMMA)));
     }
 
     public void setEmailComponent(EmailComponent emailComponent) {

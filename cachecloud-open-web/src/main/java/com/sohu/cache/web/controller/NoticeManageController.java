@@ -13,7 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.sohu.cache.constant.CacheCloudConstants;
+import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.enums.SuccessEnum;
 
 @Controller
@@ -68,7 +68,7 @@ public class NoticeManageController extends BaseController {
         String notice = "";
         List<String> list = null;
         if (StringUtils.isNotBlank(notice)) {
-            list = Arrays.asList(notice.split(CacheCloudConstants.NEXT_LINE));
+            list = Arrays.asList(notice.split(ConstUtils.NEXT_LINE));
             model.addAttribute("status", SuccessEnum.SUCCESS.value());
         } else {
             list = new ArrayList<String>();

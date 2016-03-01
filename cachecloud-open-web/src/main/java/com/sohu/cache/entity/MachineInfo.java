@@ -1,8 +1,9 @@
 package com.sohu.cache.entity;
 
-import com.sohu.cache.constant.CacheCloudConstants;
 
 import java.util.Date;
+
+import com.sohu.cache.util.ConstUtils;
 
 /**
  * 机器的属性信息
@@ -18,12 +19,12 @@ public class MachineInfo {
     /**
      * ssh用户名
      */
-    private String sshUser= CacheCloudConstants.USERNAME;
+    private String sshUser= ConstUtils.USERNAME;
     
     /**
      * ssh密码
      */
-    private String sshPasswd=CacheCloudConstants.PASSWORD;
+    private String sshPasswd=ConstUtils.PASSWORD;
     
     /**
      * ip地址

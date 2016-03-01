@@ -2,7 +2,6 @@ package com.sohu.cache.util;
 
 
 import com.google.common.collect.Lists;
-import com.sohu.cache.constant.CacheCloudConstants;
 import com.sohu.cache.entity.AppDesc;
 
 import java.util.ArrayList;
@@ -33,7 +32,7 @@ public class DemoCodeUtil {
         dependencyRedis.add("&lt;repositories&gt;                                                   ");
         dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&lt;repository&gt;                                                     ");
         dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;id&gt;nexus_id&lt;/id&gt;                                              ");
-        dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;url&gt;" + CacheCloudConstants.MAVEN_WAREHOUSE + "&lt;/url&gt;");
+        dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;url&gt;" + ConstUtils.MAVEN_WAREHOUSE + "&lt;/url&gt;");
         dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&lt;/repository&gt;                                                    ");
         dependencyRedis.add("&lt;/repositories&gt;                                                  ");
 

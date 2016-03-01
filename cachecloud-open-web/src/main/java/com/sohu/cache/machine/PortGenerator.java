@@ -1,10 +1,10 @@
 package com.sohu.cache.machine;
 
-import com.sohu.cache.constant.CacheCloudConstants;
 import com.sohu.cache.exception.SSHException;
 import com.sohu.cache.ssh.SSHUtil;
-
+import com.sohu.cache.util.ConstUtils;
 import com.google.common.util.concurrent.AtomicLongMap;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,7 @@ public class PortGenerator {
         String maxPortStr = "";
         try {
             int sshPort = SSHUtil.getSshPort(ip);
-            maxPortStr = SSHUtil.execute(ip, sshPort, CacheCloudConstants.USERNAME, CacheCloudConstants.PASSWORD, REDIS_PORT_CMD);
+            maxPortStr = SSHUtil.execute(ip, sshPort, ConstUtils.USERNAME, ConstUtils.PASSWORD, REDIS_PORT_CMD);
         } catch (SSHException e) {
             logger.error("cannot get max port of redis by ssh, ip: {}", ip, e);
         }

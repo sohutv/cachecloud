@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-import com.sohu.cache.constant.CacheCloudConstants;
 import com.sohu.cache.entity.AppUser;
+import com.sohu.cache.util.ConstUtils;
 
 /**
  * 前台登陆验证
@@ -26,7 +26,7 @@ public class FrontUserLoginInterceptor extends HandlerInterceptorAdapter {
                              HttpServletResponse response, Object handler) throws Exception {
 
         HttpSession session = request.getSession(true);
-        Object object = session.getAttribute(CacheCloudConstants.LOGIN_USER_SESSION_NAME);
+        Object object = session.getAttribute(ConstUtils.LOGIN_USER_SESSION_NAME);
         AppUser user = object == null ? null : (AppUser) object;
         
         if (user == null) {

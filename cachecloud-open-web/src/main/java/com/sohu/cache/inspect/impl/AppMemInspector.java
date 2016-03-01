@@ -1,7 +1,6 @@
 package com.sohu.cache.inspect.impl;
 
 import com.sohu.cache.alert.impl.BaseAlertService;
-import com.sohu.cache.constant.CacheCloudConstants;
 import com.sohu.cache.dao.AppDao;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.InstanceInfo;
@@ -10,8 +9,10 @@ import com.sohu.cache.inspect.InspectParamEnum;
 import com.sohu.cache.inspect.Inspector;
 import com.sohu.cache.stats.app.AppStatsCenter;
 import com.sohu.cache.stats.instance.InstanceStatsCenter;
+import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.TypeUtil;
 import com.sohu.cache.web.vo.AppDetailVO;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 
@@ -105,7 +106,7 @@ public class AppMemInspector extends BaseAlertService implements Inspector {
                 appDesc.getAppId(), appDesc.getMemAlertValue(), appDetailVO.getMemUsePercent());
         String title = "CacheCloud系统-应用内存使用率报警";
         emailComponent.sendMail(title, content, appDetailVO.getEmailList(),
-                Arrays.asList(emailComponent.getAdminEmail().split(CacheCloudConstants.COMMA)));
+                Arrays.asList(emailComponent.getAdminEmail().split(ConstUtils.COMMA)));
         // TODO 临时注释掉
         // mobileAlertComponent.sendPhone(content,
         // appDetailVO.getPhoneList());
@@ -120,7 +121,7 @@ public class AppMemInspector extends BaseAlertService implements Inspector {
                 instanceStats.getMemUsePercent(), appDetailVO.getMemUsePercent());
         String title = "CacheCloud系统-分片内存使用率报警";
         emailComponent.sendMail(title, content, appDetailVO.getEmailList(),
-                Arrays.asList(emailComponent.getAdminEmail().split(CacheCloudConstants.COMMA)));
+                Arrays.asList(emailComponent.getAdminEmail().split(ConstUtils.COMMA)));
         // TODO 临时注释掉
         // mobileAlertComponent.sendPhone(content,
         // appDetailVO.getPhoneList());

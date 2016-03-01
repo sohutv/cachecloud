@@ -4,11 +4,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.sohu.cache.constant.AppAuditType;
 import com.sohu.cache.constant.AppStatusEnum;
 import com.sohu.cache.constant.AppUserTypeEnum;
-import com.sohu.cache.constant.CacheCloudConstants;
 import com.sohu.cache.entity.*;
 import com.sohu.cache.stats.app.AppDeployCenter;
 import com.sohu.cache.stats.app.AppStatsCenter;
 import com.sohu.cache.stats.instance.InstanceStatsCenter;
+import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.DemoCodeUtil;
 import com.sohu.cache.web.vo.AppDetailVO;
 import com.sohu.cache.web.chart.model.AreaChartEntity;
@@ -754,7 +754,7 @@ public class AppController extends BaseController {
 
             //如果当前用户修改了自己的资料，那么更新session
             if (newUser != null && currentUser != null && newUser.getId().equals(currentUser.getId())) {
-                request.getSession().setAttribute(CacheCloudConstants.LOGIN_USER_SESSION_NAME, newUser);
+                request.getSession().setAttribute(ConstUtils.LOGIN_USER_SESSION_NAME, newUser);
             }
             write(response, String.valueOf(SuccessEnum.SUCCESS.value()));
         } catch (Exception e) {

@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.sohu.cache.constant.AppUserTypeEnum;
-import com.sohu.cache.constant.CacheCloudConstants;
 import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.entity.LoginResult;
+import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.enums.AdminEnum;
 import com.sohu.cache.web.enums.LoginEnum;
 import com.sohu.cache.web.util.LoginUtil;
@@ -55,7 +55,7 @@ public class LoginController extends BaseController {
         loginResult.setLoginEnum(LoginEnum.LOGIN_WRONG_USER_OR_PASSWORD);
 
         AppUser userModel = null;
-        if (CacheCloudConstants.SUPER_ADMIN_NAME.equals(userName) && CacheCloudConstants.SUPER_ADMIN_PASS.equals(password)) {
+        if (ConstUtils.SUPER_ADMIN_NAME.equals(userName) && ConstUtils.SUPER_ADMIN_PASS.equals(password)) {
             userModel = userService.getByName(userName);
             loginResult.setLoginEnum(LoginEnum.LOGIN_SUCCESS);
         } else {
@@ -80,7 +80,7 @@ public class LoginController extends BaseController {
         }
         
         if (loginResult.getLoginEnum().equals(LoginEnum.LOGIN_SUCCESS)) {
-            request.getSession().setAttribute(CacheCloudConstants.LOGIN_USER_SESSION_NAME, userModel);
+            request.getSession().setAttribute(ConstUtils.LOGIN_USER_SESSION_NAME, userModel);
         }
         model.addAttribute("success", loginResult.getLoginEnum().value());
         model.addAttribute("admin", loginResult.getAdminEnum().value());
@@ -95,7 +95,7 @@ public class LoginController extends BaseController {
      */
     @RequestMapping(value = "/logout", method = RequestMethod.GET)
     public ModelAndView logout(HttpServletRequest reqeust, HttpServletResponse response) {
-        reqeust.getSession().removeAttribute(CacheCloudConstants.LOGIN_USER_SESSION_NAME);
+        reqeust.getSession().removeAttribute(ConstUtils.LOGIN_USER_SESSION_NAME);
         return new ModelAndView("redirect:/manage/login");
     }
 

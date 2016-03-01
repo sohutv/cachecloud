@@ -1,6 +1,5 @@
 package com.sohu.cache.redis.impl;
 
-import com.sohu.cache.constant.CacheCloudConstants;
 import com.sohu.cache.constant.InstanceStatusEnum;
 import com.sohu.cache.dao.AppDao;
 import com.sohu.cache.dao.InstanceDao;
@@ -58,7 +57,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
     static {
         ResourceBundle resourceBundle = ResourceBundle.getBundle("application");
         String sentinels = resourceBundle.getString("sentinel.host.list");
-        String[] hosts = sentinels.split(CacheCloudConstants.COMMA);
+        String[] hosts = sentinels.split(ConstUtils.COMMA);
         for (String host : hosts) {
             if (StringUtils.isNotBlank(host)) {
                 SENTINEL_LIST.add(host);
