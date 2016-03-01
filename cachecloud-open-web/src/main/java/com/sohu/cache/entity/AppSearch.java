@@ -13,7 +13,7 @@ public class AppSearch {
     /**
      * 应用id
      */
-    private long appId;
+    private Long appId;
 
     /**
      * 应用名
@@ -40,11 +40,11 @@ public class AppSearch {
      */
     private Page page;
     
-    public long getAppId() {
+    public Long getAppId() {
         return appId;
     }
 
-    public void setAppId(long appId) {
+    public void setAppId(Long appId) {
         this.appId = appId;
     }
 

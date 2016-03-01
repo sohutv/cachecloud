@@ -81,6 +81,9 @@
 				<div style="float:right">
 					<form class="form-inline" method="post" action="/admin/app/list.do" id="appList" name="ec">
 					  <div class="form-group">
+					    <input type="text" class="form-control" id="appId" name="appId" value="${appSearch.appId}" placeholder="应用ID">
+					  </div>
+					  <div class="form-group">
 					    <input type="text" class="form-control" id="appName" name="appName" value="${appSearch.appName}" placeholder="应用名">
 					  </div>
 					  <div class="form-group">
