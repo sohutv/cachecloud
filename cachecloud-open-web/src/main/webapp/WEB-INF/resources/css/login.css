@@ -1,0 +1,31 @@
+body{background:#fff;color:#999;font:12px/1.5 hiragino sans gb,microsoft yahei,simsun;}
+body,form,ul,ol,li,p,dl,dt,dd,h1,h2,h3,h4,h5,h6{margin:0;padding:0;}
+h1,h2,h3,h4,h5,h6,input,textarea{font-size:12px;font-weight:normal;}
+li{list-style:none;}
+img{border:0;vertical-align:top;}
+em{font-style:normal;}
+textarea{resize:none;}
+a{outline:none; text-decoration:none;}
+input{outline: none}
+html{height: 100%}
+body{ /* background: url(images/bg.png) no-repeat; background-size: 100% 100%*/}
+.container{width: 330px;  margin: 0 auto;}
+.img{position:fixed;top:0;left:0;bottom:0;right:0;z-index:-1; height: 100%;}
+.img img{width: 100%; height: 100%; outline: 0}
+.logo .logo-pic{ width: 330px; height: 100px; margin-top: 100px;}
+.info{ margin-top: 50px; }
+.info .input{margin-top: 20px;}
+.info .input input{ border: 0; background-color: transparent; border-bottom: 1px solid #a3a8ae;
+    height: 35px; line-height: 35px; width: 280px; color: #616365;
+    -webkit-appearance: none}
+
+input:-webkit-autofill { 
+
+-webkit-box-shadow: 0 0 0px 1000px #D7ECF1 inset; 
+border: 0; 
+background-color: transparent;
+}
+.info .info-user{float:left; cursor: default; height: 37px; *height:38px; line-height: 35px; display: block; width:45px; border-bottom: 1px solid #a3a8ae;}
+.info .login{background-color: #d25156; margin-top: 40px; }
+.info .login input{color: #f8e6e6; padding-left: 43px; font-size: 14px;}
+.info .register{margin-bottom: 80px; color:#616365;text-align: center; font-size: 14px; line-height: 20px; margin-top: 14px; display: block;}

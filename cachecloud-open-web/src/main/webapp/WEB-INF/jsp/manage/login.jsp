@@ -6,18 +6,12 @@
 <head>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	<title>CacheCloud系统</title>
-	
-	<link rel="stylesheet" href="/resources/external/d2ea59be8e96916df3d534861fad3a96.reg.css" type="text/css" media="screen,print">
-	<script src="/resources/external/40779259d6cb8446472f5b9f98386159.instant.min.js"></script>
-	<link rel="stylesheet" type="text/css" href="/resources/external/play.css">
+	<link rel="stylesheet" type="text/css" href="/resources/css/login.css">
+	<script type="text/javascript" src="/resources/bootstrap/jquery/jquery-1.11.0.min.js"></script>
 	<script type="text/javascript">
-		function jumpToUserRegister(){
-			window.location = "/user/register";
-		}
-		function login(){
+		function loginIn() {
 			var userName = document.getElementById("userName");
 			var password = document.getElementById("password");
-			var isAdmin = document.getElementById("isAdmin");
 			if(userName.value == ""){
 	        	alert("用户名不能为空!");
 	        	userName.focus();
@@ -33,7 +27,7 @@
 				{
 					userName: userName.value,
 					password: password.value,
-					isAdmin: isAdmin.checked
+					isAdmin: false
 				},
 	            function(data){
 					var success = data.success;
@@ -56,56 +50,30 @@
 		}
 	</script>
 </head>
-<body class="zhi no-auth">
-	<div class="wrapper">
-		<div class="top">
-			<div class="video-bg">
-				<div style="max-width: 1500px; margin: 0 auto; z-index: 0; text-align: center;">
-					<video autoplay="autoplay" loop="loop" preload=""> 
-						<source src="/resources/external/home_video_v3.1.mp4" type="video/mp4"> 
-						<source src="/resources/external/home_video_v3.1.webm" type="video/webm">
-						<img src="/resources/external/home-bg.png" style="margin: 0 auto; height: 360px; width: 1000;">
-					 </video>
-				</div>
-				<div class="video-mask"></div>
-			</div>
-
-			<div class="inner-wrapper">
-				<div class="form-wrapper" id="js-form-wrapper">
-					<div class="videopopup" data-vid="XNjEwNTk4MjIw">
-						<div class="logo"></div>
-					</div>
-
-					<div id="js-sign-flow" class="desk-front sign-flow clearfix dialog">
-						<div class="view view-signin selected" id="signin" style="opacity: 1; right: 0px; position: relative;">
-							<form method="post" class="zu-side-login-box" novalidate="novalidate">
-								<div class="email input-wrapper">
-									<input type="text" name="userName" id="userName" placeholder="域账户名">
-								</div>
-								
-								<div class="input-wrapper">
-									<input type="password" id="password" name="password" placeholder="密码">
-								</div>
-								
-								<div class="button-wrapper command">
-									<button class="sign-button" type="button" onclick="jumpToUserRegister()">&nbsp;&nbsp;注&nbsp;&nbsp;&nbsp;册&nbsp;&nbsp;</button>
-									&nbsp;&nbsp;
-									<button class="sign-button" type="button" onclick="login()">&nbsp;登&nbsp;&nbsp;&nbsp;录&nbsp;</button>
-								</div>
-								
-								<div class="signin-misc-wrapper clearfix">
-									<input id="isAdmin" type="checkbox" name="isAdmin" > 超级管理员
-									
-								</div>
-							</form>
-						</div>
-					</div>
-				</div>
-			</div>
+	<body>
+		<div class="img"><img src="/resources/img/bg.png"></div>
+		<div class="container">
+		    <div class="logo">
+		        <img class="logo-pic" src="/resources/img/logo.png">
+		    </div>
+		    <div class="info">
+		        <form method="post" name="login" autocomplete="off">
+		            <div class="input">
+		                <span class="info-user">用户名</span><input type="text" id="userName" name="userName" autocomplete="off">
+		            </div>
+		
+		            <div class="input">
+		                <span class="info-user">密码</span><input type="password" id="password" name="password" autocomplete="off">
+		            </div>
+		            
+		            <div class="input login">
+		                <input type="button" value="登 录" onclick="loginIn()">
+		            </div>
+		
+		        </form>
+		        <a class="register" href="/user/register">新用户注册</a>
+		    </div>
 		</div>
-	</div>
-	
-	<script src="/resources/external/be1f4e09e99650d8ff09ac81943bc61f.extern_src.min.js"></script>
-
-</body>
+		<script src="/resources/img/pv.gif"></script>
+	</body>
 </html>
