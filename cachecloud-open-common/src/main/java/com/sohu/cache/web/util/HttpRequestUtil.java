@@ -108,9 +108,10 @@ public final class HttpRequestUtil {
      * @return
      */
     public static String doGet(String link, String encoding, int connectTimeout, int readTimeout) {
+        HttpURLConnection conn = null;
         try {
             URL url = new URL(link);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setConnectTimeout(connectTimeout);
             conn.setReadTimeout(readTimeout);
@@ -128,6 +129,11 @@ public final class HttpRequestUtil {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return null;
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+                conn = null;
+            }
         }
     }
 

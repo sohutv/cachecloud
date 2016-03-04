@@ -100,9 +100,10 @@ public final class HttpUtils {
      * @return
      */
     public static String doGet(String link, String encoding, int connectTimeout, int readTimeout) {
+        HttpURLConnection conn = null;
         try {
             URL url = new URL(link);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setConnectTimeout(connectTimeout);
             conn.setReadTimeout(readTimeout);
@@ -119,6 +120,11 @@ public final class HttpUtils {
             return s;
         } catch (Exception e) {
             throw new CacheCloudClientHttpUtilsException(e.getMessage(), e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+                conn = null;
+            }
         }
     }
 
