@@ -800,6 +800,21 @@ CREATE TABLE `standard_statistics` (
   KEY `idx_create_time` (`created_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 
+CREATE TABLE `instance_slow_log` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增id',
+  `instance_id` bigint(20) NOT NULL COMMENT '实例的id',
+  `app_id` bigint(20) NOT NULL COMMENT 'app id',
+  `ip` varchar(32) NOT NULL COMMENT 'ip',
+  `port` int(11) NOT NULL COMMENT 'port',
+  `slow_log_id` bigint(20) NOT NULL COMMENT '慢查询id',
+  `cost_time` int(11) NOT NULL COMMENT '耗时(微妙)',
+  `command` varchar(255) NOT NULL COMMENT '执行命令',
+  `execute_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '执行时间点',
+  `create_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '记录创建时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `slowlogkey` (`instance_id`,`slow_log_id`,`execute_time`),
+  KEY `idx_app_create_time` (`app_id`,`create_time`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='实例慢查询列表';
 --
 -- init cachecloud data
 --
