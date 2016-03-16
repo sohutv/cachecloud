@@ -68,7 +68,7 @@ init() {
 	# change owner
 	chown -R $1:$1 /opt/cachecloud
 	chown -R $1:$1 /tmp/cachecloud
-	chown -R $1 /var/run
+	chown -R $1 /var/run/*redis*
 	echo "OK: init: $1 done"
 }
 
