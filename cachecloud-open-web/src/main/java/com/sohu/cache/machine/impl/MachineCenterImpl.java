@@ -96,7 +96,7 @@ public class MachineCenterImpl implements MachineCenter {
         dataMap.put(ConstUtils.HOST_ID_KEY, hostId);
         JobKey jobKey = JobKey.jobKey(ConstUtils.MACHINE_JOB_NAME, ConstUtils.MACHINE_JOB_GROUP);
         TriggerKey triggerKey = TriggerKey.triggerKey(ip, ConstUtils.MACHINE_TRIGGER_GROUP + hostId);
-        boolean result = schedulerCenter.deployJobByCron(jobKey, triggerKey, dataMap, ScheduleUtil.getHourCronByHostId                (hostId), false);
+        boolean result = schedulerCenter.deployJobByCron(jobKey, triggerKey, dataMap, ScheduleUtil.getMinuteCronByAppId(hostId), false);
 
         return result;
     }
