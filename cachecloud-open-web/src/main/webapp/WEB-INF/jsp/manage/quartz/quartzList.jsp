@@ -61,7 +61,7 @@
                                         </c:if>
                                         <c:if test="${t.triggerState != 'PAUSED'}">
                                             <a onclick="if(window.confirm('确认暂定吗?!')){return true;}else{return false;}"
-                                               href="/manage/quartz/pause.do?name=${t.triggerName}&group=${t.triggerGroup}">[暂定]
+                                               href="/manage/quartz/pause.do?name=${t.triggerName}&group=${t.triggerGroup}">[暂停]
                                             </a>
                                         </c:if>
                                         <a onclick="if(window.confirm('确认删除吗?!')){return true;}else{return false;}"
