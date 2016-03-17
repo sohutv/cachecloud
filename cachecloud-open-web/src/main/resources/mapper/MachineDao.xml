@@ -42,8 +42,12 @@
           (<include refid="machine_info_columns"/>)
         values
           (<include refid="machine_info_fields"/>)
+        on duplicate key 
+        update ssh_user=#{sshUser},ssh_passwd=#{sshPasswd},room=#{room},mem=#{mem},cpu=#{cpu},
+        virtual=#{virtual},real_ip=#{realIp},service_time=#{serviceTime},fault_count=#{faultCount},
+        warn=#{warn},available=#{available},type=#{type},groupId=#{groupId},extra_desc=#{extraDesc}
     </select>
-
+    
     <!--根据ip删除一台机器的信息-->
     <delete id="removeMachineInfoByIp" parameterType="string">
         DELETE FROM machine_info
