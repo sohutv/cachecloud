@@ -84,7 +84,9 @@ public class MachineManageController extends BaseController{
             machineInfo.setCpu(NumberUtils.toInt(request.getParameter("cpu"), 0));
             machineInfo.setVirtual(NumberUtils.toInt(request.getParameter("virtual"), 0));
             machineInfo.setRealIp(request.getParameter("realIp"));
-            machineInfo.setServiceTime(new Date());
+            Date date = new Date();
+            machineInfo.setServiceTime(date);
+            machineInfo.setModifyTime(date);
             boolean isSuccess = machineDeployCenter.addMachine(machineInfo);
             model.addAttribute("result", isSuccess);
         }
