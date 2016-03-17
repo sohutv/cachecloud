@@ -138,6 +138,7 @@ public class MachineCenterImpl implements MachineCenter {
                 instanceStatsCenter.saveStandardStats(infoMap, ip, (int) hostId, ConstUtils.MACHINE);
                 machineStats.setMemoryFree(Long.valueOf(machineStats.getMemoryFree()) * ConstUtils._1024 + "");
                 machineStats.setMemoryTotal(Long.valueOf(machineStats.getMemoryTotal()) * ConstUtils._1024 + "");
+                machineStats.setModifyTime(new Date());
                 machineStatsDao.mergeMachineStats(machineStats);
                 logger.info("collect machine info done, host: {}, time: {}", ip, collectTime);
             }
