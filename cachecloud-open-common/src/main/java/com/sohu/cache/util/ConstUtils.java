@@ -75,8 +75,7 @@ public class ConstUtils {
     public static Set<String> SUPER_MANAGER = new HashSet<String>();
 
     static {
-        SUPER_MANAGER.add("yijunzhang");
-        SUPER_MANAGER.add("leifu");
+        SUPER_MANAGER.add("admin");
     }
     
     /**
