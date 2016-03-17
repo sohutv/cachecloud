@@ -21,6 +21,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,6 +84,7 @@ public class MachineManageController extends BaseController{
             machineInfo.setCpu(NumberUtils.toInt(request.getParameter("cpu"), 0));
             machineInfo.setVirtual(NumberUtils.toInt(request.getParameter("virtual"), 0));
             machineInfo.setRealIp(request.getParameter("realIp"));
+            machineInfo.setServiceTime(new Date());
             boolean isSuccess = machineDeployCenter.addMachine(machineInfo);
             model.addAttribute("result", isSuccess);
         }
