@@ -35,6 +35,18 @@
         from machine_info
         where ip = #{ip};
     </select>
+    
+    <!--通过ip查找机器-->
+    <select id="getMachineInfoByLikeIp" resultType="MachineInfo">
+        select
+          id, modify_time, <include refid="machine_info_columns"/>
+        from machine_info
+        <choose>
+            <when test="ipLike != '' and ipLike != null">
+                where ip like '%${ipLike}%'
+            </when>
+        </choose>
+    </select>
 
     <!--保存机器信息-->
     <select id="saveMachineInfo" parameterType="MachineInfo">

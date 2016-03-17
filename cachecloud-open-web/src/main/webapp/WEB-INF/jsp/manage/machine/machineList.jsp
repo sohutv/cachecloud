@@ -56,59 +56,92 @@
 								<c:forEach items="${list}" var="machine">
 									<tr class="odd gradeX">
 										<td>
-											<a target="_blank" href="/manage/machine/machineInstances.do?ip=${machine.ip}">${machine.ip}</a>
+											<a target="_blank" href="/manage/machine/machineInstances.do?ip=${machine.info.ip}">${machine.info.ip}</a>
 										</td>
 										<td>
-											<span style="display:none"><fmt:formatNumber value="${machine.memoryUsageRatio / 100}" pattern="0.00"/></span>
-                                            
-                                            <div class="progress margin-custom-bottom0">
-                                                <fmt:formatNumber var="fmtMemoryUsageRatio" value="${machine.memoryUsageRatio}" pattern="0.00"/>
-                                                <c:choose>
-                                                    <c:when test="${fmtMemoryUsageRatio >= 80.00}">
-                                                <div class="progress-bar progress-bar-danger"
-                                                             role="progressbar" aria-valuenow="${machine.memoryUsageRatio}" aria-valuemax="100"
-                                                             aria-valuemin="0" style="width: ${machine.memoryUsageRatio}%">
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                <div class="progress-bar progress-bar-success"
-                                                                 role="progressbar" aria-valuenow="${machine.memoryUsageRatio}" aria-valuemax="100"
-                                                                 aria-valuemin="0" style="width: ${machine.memoryUsageRatio}%">
-                                                        </c:otherwise>
-                                                </c:choose>
-                                                    <label style="color: #000000">
-                                                        <fmt:formatNumber value="${((machine.memoryTotal-machine.memoryFree)/1024/1024/1024)}" pattern="0.00"/>G&nbsp;&nbsp;Used/
-                                                        <fmt:formatNumber value="${ machine.memoryTotal/1024/1024/1024}" pattern="0.00"/>G&nbsp;&nbsp;Total
-                                                    </label>
-                                              </div>
+											<c:choose>
+												<c:when test="${machine.memoryUsageRatio == null || machine.memoryUsageRatio == ''}">
+													收集中..
+												</c:when>
+												<c:otherwise>
+													<span style="display:none"><fmt:formatNumber value="${machine.memoryUsageRatio / 100}" pattern="0.00"/></span>
+		                                            <div class="progress margin-custom-bottom0">
+		                                                <fmt:formatNumber var="fmtMemoryUsageRatio" value="${machine.memoryUsageRatio}" pattern="0.00"/>
+		                                                <c:choose>
+		                                                    <c:when test="${fmtMemoryUsageRatio >= 80.00}">
+		                                                <div class="progress-bar progress-bar-danger"
+		                                                             role="progressbar" aria-valuenow="${machine.memoryUsageRatio}" aria-valuemax="100"
+		                                                             aria-valuemin="0" style="width: ${machine.memoryUsageRatio}%">
+		                                                        </c:when>
+		                                                        <c:otherwise>
+		                                                <div class="progress-bar progress-bar-success"
+		                                                                 role="progressbar" aria-valuenow="${machine.memoryUsageRatio}" aria-valuemax="100"
+		                                                                 aria-valuemin="0" style="width: ${machine.memoryUsageRatio}%">
+		                                                        </c:otherwise>
+		                                                </c:choose>
+		                                                    <label style="color: #000000">
+		                                                        <fmt:formatNumber value="${((machine.memoryTotal-machine.memoryFree)/1024/1024/1024)}" pattern="0.00"/>G&nbsp;&nbsp;Used/
+		                                                        <fmt:formatNumber value="${ machine.memoryTotal/1024/1024/1024}" pattern="0.00"/>G&nbsp;&nbsp;Total
+		                                                    </label>
+		                                              </div>
+												</c:otherwise>
+											</c:choose>
+											
                                               
 										</td>
                                         <td>
-                                            <fmt:formatNumber var="fmtMemoryAllocatedRatio" value="${((machine.memoryAllocated)/1024)*100.0/(machine.memoryTotal/1024/1024/1024)}" pattern="0.00"/>
-                                        	<span  style="display:none"><fmt:formatNumber value="${fmtMemoryAllocatedRatio / 100}" pattern="0.00"/></span>
-                                            <div class="progress margin-custom-bottom0">
-                                                <c:choose>
-                                                <c:when test="${fmtMemoryAllocatedRatio >= 80.00}">
-                                                <div class="progress-bar progress-bar-danger"
-                                                     role="progressbar" aria-valuenow="${fmtMemoryAllocatedRatio}" aria-valuemax="100"
-                                                     aria-valuemin="0" style="width: ${fmtMemoryAllocatedRatio}%">
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                    <div class="progress-bar progress-bar-success"
-                                                         role="progressbar" aria-valuenow="${fmtMemoryAllocatedRatio}" aria-valuemax="100"
-                                                         aria-valuemin="0" style="width: ${fmtMemoryAllocatedRatio}%">				                    		</c:otherwise>
-                                                        </c:choose>
-                                                        <label style="color: #000000">
-                                                            <fmt:formatNumber value="${((machine.memoryAllocated)/1024)}" pattern="0.00"/>G&nbsp;&nbsp;Used/
-                                                            <fmt:formatNumber value="${ machine.memoryTotal/1024/1024/1024}" pattern="0.00"/>G&nbsp;&nbsp;Total
-                                                        </label>
-                                                    </div>
-                                                </div>
+                                        <c:choose>
+											<c:when test="${machine.memoryUsageRatio == null || machine.memoryUsageRatio == ''}">
+												收集中..
+											</c:when>
+											<c:otherwise>
+												<fmt:formatNumber var="fmtMemoryAllocatedRatio" value="${((machine.memoryAllocated)/1024)*100.0/(machine.memoryTotal/1024/1024/1024)}" pattern="0.00"/>
+	                                        	<span  style="display:none"><fmt:formatNumber value="${fmtMemoryAllocatedRatio / 100}" pattern="0.00"/></span>
+	                                            <div class="progress margin-custom-bottom0">
+	                                                <c:choose>
+	                                                <c:when test="${fmtMemoryAllocatedRatio >= 80.00}">
+	                                                <div class="progress-bar progress-bar-danger"
+	                                                     role="progressbar" aria-valuenow="${fmtMemoryAllocatedRatio}" aria-valuemax="100"
+	                                                     aria-valuemin="0" style="width: ${fmtMemoryAllocatedRatio}%">
+	                                                    </c:when>
+	                                                    <c:otherwise>
+	                                                    <div class="progress-bar progress-bar-success"
+	                                                         role="progressbar" aria-valuenow="${fmtMemoryAllocatedRatio}" aria-valuemax="100"
+	                                                         aria-valuemin="0" style="width: ${fmtMemoryAllocatedRatio}%">				                    		</c:otherwise>
+	                                                        </c:choose>
+	                                                        <label style="color: #000000">
+	                                                            <fmt:formatNumber value="${((machine.memoryAllocated)/1024)}" pattern="0.00"/>G&nbsp;&nbsp;Used/
+	                                                            <fmt:formatNumber value="${ machine.memoryTotal/1024/1024/1024}" pattern="0.00"/>G&nbsp;&nbsp;Total
+	                                                        </label>
+	                                                    </div>
+	                                                </div>
+											</c:otherwise>
+										</c:choose>
+                                            
                                         </td>
-										<td>${machine.cpuUsage}</td>
+										<td>
+											<c:choose>
+												<c:when test="${machine.cpuUsage == null || machine.cpuUsage == ''}">
+													收集中..
+												</c:when>
+												<c:otherwise>
+													${machine.cpuUsage}
+												</c:otherwise>
+											</c:choose>
+										</td>
 										<td>
 											<fmt:formatNumber value="${machine.traffic / 1024 / 1024}" pattern="0.00"/>M
 										</td>
-										<td>${machine.load}</td>
+										<td>
+											<c:choose>
+												<c:when test="${machine.load == null || machine.load == ''}">
+													收集中..
+												</c:when>
+												<c:otherwise>
+													${machine.load}
+												</c:otherwise>
+											</c:choose>
+										</td>
 										<td><fmt:formatDate value="${machine.modifyTime}" type="time" timeStyle="full" pattern="yyyy-MM-dd HH:mm"/></td>
                                         <th>
                                         	<c:choose>

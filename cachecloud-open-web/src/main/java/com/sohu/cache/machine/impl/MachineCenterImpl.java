@@ -37,6 +37,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -373,13 +374,19 @@ public class MachineCenterImpl implements MachineCenter {
 
     @Override
     public List<MachineStats> getMachineStats(String ipLike) {
-        List<MachineStats> list = machineStatsDao.getMachineStats(ipLike);
-        for (MachineStats ms : list) {
-            int memoryHost = instanceDao.getMemoryByHost(ms.getIp());
-            ms.setMemoryAllocated(memoryHost);
-            ms.setInfo(machineDao.getMachineInfoByIp(ms.getIp()));
+        List<MachineInfo> machineInfoList = machineDao.getMachineInfoByLikeIp(ipLike);
+        List<MachineStats> machineStatsList = new ArrayList<MachineStats>();
+        for (MachineInfo machineInfo : machineInfoList) {
+            String ip = machineInfo.getIp();
+            MachineStats machineStats = machineStatsDao.getMachineStatsByIp(ip);
+            if (machineStats == null) {
+                machineStats = new MachineStats();
+            }
+            machineStats.setMemoryAllocated(instanceDao.getMemoryByHost(ip));
+            machineStats.setInfo(machineInfo);
+            machineStatsList.add(machineStats);
         }
-        return list;
+        return machineStatsList;
     }
 
     @Override

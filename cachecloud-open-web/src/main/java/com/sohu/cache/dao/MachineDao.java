@@ -35,6 +35,14 @@ public interface MachineDao {
      * @return
      */
     public MachineInfo getMachineInfoByIp(@Param("ip") String ip);
+    
+    /**
+     * 通过ip模糊查询机器信息
+     * @param ipLike
+     * @return
+     */
+    public List<MachineInfo> getMachineInfoByLikeIp(@Param("ipLike")String ipLike);
+
 
     /**
      * 保存一条机器信息
@@ -49,4 +57,5 @@ public interface MachineDao {
      * @param ip
      */
     public void removeMachineInfoByIp(@Param("ip") String ip);
+
 }

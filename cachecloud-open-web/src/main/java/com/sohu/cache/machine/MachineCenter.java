@@ -94,12 +94,11 @@ public interface MachineCenter {
 
 
     /**
-     * 分页获取机器列表
+     * 获取机器列表
      * @param ipLike
      * @return
      */
     public List<MachineStats> getMachineStats(String ipLike);
-    
     
     /**
      * 获取全部机器列表
