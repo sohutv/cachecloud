@@ -124,7 +124,10 @@
 											<div class="col-md-5">
 												<textarea rows="10" name="appDeployText" id="appDeployText" placeholder="部署详情" class="form-control"></textarea>
 												<span class="help-block">
-													具体规则如下:masterIp:memSize(M):slaveIp(比如10.10.xx.xx:2048:10.11.xx.xx)
+													具体规则如下:
+													1. standalone类型： masterIp:memSize(M)(例如：10.10.xx.xx:2048)
+													2. sentinel类型：
+													masterIp:memSize(M):slaveIp(比如10.10.xx.xx:2048:10.11.xx.xx)
 												</span>
 											</div>
 										</div>

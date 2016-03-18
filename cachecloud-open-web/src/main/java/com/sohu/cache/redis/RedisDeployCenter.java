@@ -27,9 +27,11 @@ public interface RedisDeployCenter {
      * @param masterHost       主节点地址
      * @param slaveHost        从节点地址
      * @param maxMemory    实例最大内存,单位MB
+     * @param sentinelList sentinel-host列表
+     * @param 
      * @return 实例是否部署成功
      */
-    public boolean deploySentinelInstance(long appId, String masterHost, String slaveHost, int maxMemory);
+    public boolean deploySentinelInstance(long appId, String masterHost, String slaveHost, int maxMemory, List<String> sentinelList);
 
     /**
      * 部署Standalone redis实例

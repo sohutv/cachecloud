@@ -15,7 +15,6 @@ import com.sohu.cache.redis.RedisDeployCenter;
 import com.sohu.cache.redis.enums.RedisClusterConfigEnum;
 import com.sohu.cache.redis.enums.RedisConfigEnum;
 import com.sohu.cache.redis.enums.RedisSentinelConfigEnum;
-import com.sohu.cache.schedule.SchedulerCenter;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.IdempotentConfirmer;
 import com.sohu.cache.util.TypeUtil;
@@ -49,21 +48,6 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
     private RedisCenter redisCenter;
 
     private AppDao appDao;
-
-    private SchedulerCenter schedulerCenter;
-
-    private static final List<String> SENTINEL_LIST = new ArrayList<String>();
-
-    static {
-        ResourceBundle resourceBundle = ResourceBundle.getBundle("application");
-        String sentinels = resourceBundle.getString("sentinel.host.list");
-        String[] hosts = sentinels.split(ConstUtils.COMMA);
-        for (String host : hosts) {
-            if (StringUtils.isNotBlank(host)) {
-                SENTINEL_LIST.add(host);
-            }
-        }
-    }
 
     @Override
     public boolean deployClusterInstance(long appId, List<RedisClusterNode> clusterNodes, int maxMemory) {
@@ -288,7 +272,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
     }
 
     @Override
-    public boolean deploySentinelInstance(long appId, String masterHost, String slaveHost, int maxMemory) {
+    public boolean deploySentinelInstance(long appId, String masterHost, String slaveHost, int maxMemory, List<String> sentinelList) {
         if (!isExist(appId)) {
             return false;
         }
@@ -319,7 +303,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         }
 
         //运行sentinel实例组
-        boolean isRunSentinel = runSentinelGroup(masterHost, masterPort, appId);
+        boolean isRunSentinel = runSentinelGroup(sentinelList, masterHost, masterPort, appId);
         if (!isRunSentinel) {
             return false;
         }
@@ -389,8 +373,8 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         return instanceInfo;
     }
 
-    private boolean runSentinelGroup(String masterHost, int masterPort, long appId) {
-        for (String sentinelHost : SENTINEL_LIST) {
+    private boolean runSentinelGroup(List<String> sentinelList, String masterHost, int masterPort, long appId) {
+        for (String sentinelHost : sentinelList) {
             boolean isRun = runSentinel(sentinelHost, getMasterName(masterHost, masterPort), masterHost, masterPort,
                     appId);
             if (!isRun) {
@@ -1120,10 +1104,6 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
 
     public void setAppDao(AppDao appDao) {
         this.appDao = appDao;
-    }
-
-    public void setSchedulerCenter(SchedulerCenter schedulerCenter) {
-        this.schedulerCenter = schedulerCenter;
     }
 
 }

@@ -127,10 +127,10 @@ public class AppDeployCenterImpl implements AppDeployCenter {
                 continue;
             }
             String[] array = nodeInfo.split(":");
-            if (array.length < 2) {
-                logger.error("error nodeInfo:{}", Arrays.toString(array));
-                continue;
-            }
+//            if (array.length < 2) {
+//                logger.error("error nodeInfo:{}", Arrays.toString(array));
+//                continue;
+//            }
             nodes.add(array);
         }
 
@@ -140,7 +140,7 @@ public class AppDeployCenterImpl implements AppDeployCenter {
                 isAudited = deployCluster(appId, nodes);
             } else if (nodes.size() > 0) {
                 if (TypeUtil.isRedisSentinel(type)) {
-                    isAudited = deploySentinel(appId, nodes.get(0));
+                    isAudited = deploySentinel(appId, nodes);
                 } else {
                     isAudited = deployStandalone(appId, nodes.get(0));
                 }
@@ -210,11 +210,30 @@ public class AppDeployCenterImpl implements AppDeployCenter {
         return isModify;
     }
 
-    private boolean deploySentinel(long appId, String[] nodeInfo) {
-        String master = nodeInfo[0];
-        int memory = NumberUtils.createInteger(nodeInfo[1]);
-        String slave = nodeInfo[2];
-        return redisDeployCenter.deploySentinelInstance(appId, master, slave, memory);
+    private boolean deploySentinel(long appId, List<String[]> nodes) {
+        //数据节点
+        String[] dataNodeInfo = nodes.get(0);
+        String master = dataNodeInfo[0];
+        int memory = NumberUtils.createInteger(dataNodeInfo[1]);
+        String slave = dataNodeInfo[2];
+        // sentinel节点
+        List<String> sentinelList = new ArrayList<String>();
+        if (nodes.size() < 2) {
+            logger.error("sentinelList is none,don't generate sentinel app!");
+            return false;
+        }
+
+        // sentinel节点
+        for (int i = 1; i < nodes.size(); i++) {
+            String[] nodeInfo = nodes.get(i);
+            if (nodeInfo.length == 0 || StringUtils.isBlank(nodeInfo[0])) {
+                logger.error("sentinel line {} may be empty", i);
+                return false;
+            }
+            sentinelList.add(nodeInfo[0]);
+        }
+        
+        return redisDeployCenter.deploySentinelInstance(appId, master, slave, memory, sentinelList);
     }
 
     private boolean deployCluster(long appId, List<String[]> nodes) {
