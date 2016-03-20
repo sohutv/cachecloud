@@ -184,7 +184,7 @@ public class AppManageController extends BaseController {
 			HttpServletResponse response, Model model, String masterSizeSlave,
 			Long appAuditId) {
 	    AppUser appUser = getUserInfo(request);
-        logger.warn("user {} addAppClusterSharding:{}, result is {}", appUser.getName(), masterSizeSlave);
+        logger.warn("user {} addAppClusterSharding:{}", appUser.getName(), masterSizeSlave);
 		boolean isAdd = false;
 		if (StringUtils.isNotBlank(masterSizeSlave) && appAuditId != null) {
 			AppAudit appAudit = appService.getAppAuditById(appAuditId);
