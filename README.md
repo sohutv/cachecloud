@@ -1,4 +1,4 @@
-##<a name="index"/>目录&nbsp;&nbsp;(具体细节[wiki文档](https://github.com/sohutv/cachecloud/wiki "Cachecloud Wiki")、[page](http://sohutv.github.io/cachecloud "Cachecloud page")、QQ群：534429768)
+##<a name="index"/>目录&nbsp;&nbsp;(具体细节[wiki文档](https://github.com/sohutv/cachecloud/wiki "Cachecloud Wiki")、[page](http://sohutv.github.io/cachecloud "Cachecloud page")、[视频教程](http://my.tv.sohu.com/pl/9100280/index.shtml "Cachecloud video")、QQ群：534429768)
 * [一、CacheCloud是做什么的](#cc1)
 * [二、CacheCloud提供哪些功能](#cc2)
 * [三、CacheCloud解决什么问题](#cc3)
