@@ -66,7 +66,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public AppUser getByName(String name) {
-        return appUserDao.getByName(name);
+        try {
+            return appUserDao.getByName(name);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return null;
+        }
     }
 
     @Override
