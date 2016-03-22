@@ -227,8 +227,8 @@ public interface RedisCenter {
 
     /**
      * 获取集群中失联的slots
-     * @param healthHost
-     * @param healthPort
+     * @param healthyHost
+     * @param healthyPort
      * @param lossSlotsHost
      * @param lossSlotsPort
      * @return

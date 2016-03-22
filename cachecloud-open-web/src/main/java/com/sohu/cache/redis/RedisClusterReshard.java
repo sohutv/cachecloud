@@ -33,7 +33,7 @@ public class RedisClusterReshard {
 
     private static final int allSlots = 16384;
 
-    static{
+    static {
         System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
     }
 
