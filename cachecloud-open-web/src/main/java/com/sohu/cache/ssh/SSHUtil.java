@@ -28,6 +28,8 @@ import java.io.InputStreamReader;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by yijunzhang on 14-6-20.
@@ -35,7 +37,7 @@ import java.util.Map;
 public class SSHUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(SSHUtil.class);
-    
+
     private final static String COMMAND_TOP = "top -b -n 1 | head -5";
     private final static String COMMAND_DF_LH = "df -lh";
     private final static String LOAD_AVERAGE_STRING = "load average: ";
@@ -88,6 +90,7 @@ public class SSHUtil {
      * @return double cpu usage
      * @throws Exception
      */
+    @SuppressWarnings("resource")
     private static MachineStats getMachineInfo(Connection conn) throws Exception {
 
         MachineStats systemPerformanceEntity = null;
@@ -109,6 +112,7 @@ public class SSHUtil {
             String freeMem = EMPTY_STRING;
             String buffersMem = EMPTY_STRING;
             String cachedMem = EMPTY_STRING;
+
             while ((line = read.readLine()) != null) {
 
                 if (StringUtil.isBlank(line))
@@ -139,17 +143,22 @@ public class SSHUtil {
                     // Mem: 1572988k total, 1490452k used, 82536k free, 138300k
                     // buffers
                     String[] memArray = line.replace(MEM_USAGE_STRING, EMPTY_STRING).split(COMMA);
-                    totalMem = StringUtil.trimToEmpty(memArray[0].replace("total", EMPTY_STRING)).replace("k", EMPTY_STRING);
-                    freeMem = StringUtil.trimToEmpty(memArray[2].replace("free", EMPTY_STRING)).replace("k", EMPTY_STRING);
-                    buffersMem = StringUtil.trimToEmpty(memArray[3].replace("buffers", EMPTY_STRING)).replace("k", EMPTY_STRING);
+                    totalMem = MatchNumber(memArray[0]).trim();
+                    freeMem = MatchNumber(memArray[1]).trim();
+                    buffersMem = MatchNumber(memArray[3]).trim();
+                    //freeMem = StringUtil.trimToEmpty(memArray[1].replace("free", EMPTY_STRING)).replace("k", EMPTY_STRING).trim();
+                    //buffersMem = StringUtil.trimToEmpty(memArray[3].replace("buff/cache", EMPTY_STRING)).replace("k", EMPTY_STRING).trim();
                 } else if (5 == lineNum) {
                     // 第四行通常是这样：
                     // Swap: 2096472k total, 252k used, 2096220k free, 788540k
                     // cached
                     String[] memArray = line.replace(SWAP_USAGE_STRING, EMPTY_STRING).split(COMMA);
-                    cachedMem = StringUtil.trimToEmpty(memArray[3].replace("cached", EMPTY_STRING)).replace("k", EMPTY_STRING);
-
-                    if (StringUtil.isBlank(totalMem, freeMem, buffersMem, cachedMem))
+                    if(memArray.length>3){
+                        cachedMem = MatchNumber(memArray[3]).trim();
+                    }else{
+                        cachedMem="0";
+                    }
+                    if (StringUtil.isBlank(totalMem, freeMem, buffersMem))
                         throw new Exception("Error when get system performance of ip: " + conn.getHostname()
                                 + ", can't get totalMem, freeMem, buffersMem or cachedMem");
 
@@ -164,6 +173,7 @@ public class SSHUtil {
                     systemPerformanceEntity.setMemoryFree(String.valueOf(usedMemFree));
                     DecimalFormat df = new DecimalFormat(".00");
                     systemPerformanceEntity.setMemoryUsageRatio(df.format(memoryUsage * 100));
+
                 } else {
                     continue;
                 }
@@ -203,7 +213,7 @@ public class SSHUtil {
             }
             systemPerformanceEntity.setDiskUsageMap(diskUsageMap);
 
-            // 使用tsar统计当前网络流量 @TODO 
+            // 使用tsar统计当前网络流量 @TODO
             Double traffic = 0.0;
             systemPerformanceEntity.setTraffic(traffic.toString());
 
@@ -415,5 +425,21 @@ public class SSHUtil {
          * 如果ssh默认端口不是22,请自行实现该逻辑
          */
         return MachineProtocol.SSH_PORT_DEFAULT;
+    }
+
+    /**
+     * 匹配字符串中的数字
+     * @param content
+     * @return
+     */
+    private static String MatchNumber(String content){
+        String sResult = "0";
+        Pattern p=Pattern.compile("(\\d+)");
+        Matcher m=p.matcher(content);
+        if(m.find()){
+            System.out.println(m.group(1));
+            sResult = m.group(1).replace("k", "");
+        }
+        return sResult;
     }
 }
