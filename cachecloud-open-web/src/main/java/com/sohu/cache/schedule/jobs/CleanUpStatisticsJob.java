@@ -78,14 +78,4 @@ public class CleanUpStatisticsJob extends CacheBaseJob {
 
     }
     
-    public static void main(String[] args) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.add(Calendar.DAY_OF_MONTH, -7);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-        long timeFormat = NumberUtils.toLong(sdf.format(calendar.getTime()));
-        System.out.println(CLEAN_APP_CLIENT_MINUTE_COST + timeFormat);
-    }
-    
-    
 }

@@ -19,6 +19,6 @@ public class AppClientVersionDaoTest extends BaseTest{
     @Test
     public void testGetByClientIp(){
         List<AppClientVersion> list = appClientVersionDao.getByClientIp("192.168.106.165");
-        System.out.println(list);
+        logger.info("list={}", list);
     }
 }

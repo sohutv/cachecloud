@@ -101,15 +101,15 @@ public class AppStatsDaoTest extends BaseTest {
     @Test
     public void getAppCommandStatsListByDate() {
         List<AppCommandStats> list = appStatsDao.getAppCommandStatsList(appId, "get", new TimeDimensionality(collectTime, collectTime + 20, "yyyyMMddHHmm"));
-        System.out.println("list->" + list.toString());
-        System.out.println("size->" + list.size());
+        logger.info("list->" + list.toString());
+        logger.info("size->" + list.size());
     }
 
     @Test
     public void getAppAllCommandStatsList() {
         List<AppCommandStats> list = appStatsDao.getAppAllCommandStatsList(appId, new TimeDimensionality(collectTime, collectTime + 1800, "yyyyMMddHHmm"));
-        System.out.println("list->" + list.toString());
-        System.out.println("size->" + list.size());
+        logger.info("list->" + list.toString());
+        logger.info("size->" + list.size());
     }
 
 }

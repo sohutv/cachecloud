@@ -52,7 +52,7 @@ public class AppAuditDaoTest extends BaseTest{
     @Test
     public void testSelect(){
         List<AppAudit> audits = appAuditDao.selectWaitAppAudits(1, 1);
-        System.out.println(audits);
+        logger.info("list={}", audits);
     }
     
     @Test
@@ -66,7 +66,7 @@ public class AppAuditDaoTest extends BaseTest{
         Long appId = 10170L;
         List<AppAudit> appAudits = appAuditDao.getAppAuditByAppId(appId);
         for(AppAudit appAudit : appAudits){
-            System.out.println(appAudit);
+            logger.info("{}", appAudit);
         }
     }
     

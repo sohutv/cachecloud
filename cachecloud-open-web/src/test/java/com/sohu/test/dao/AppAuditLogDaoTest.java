@@ -22,7 +22,7 @@ public class AppAuditLogDaoTest extends BaseTest {
     public void getAuditByType() {
         Long appAuditId = 75L;
         AppAuditLog appAuditLog = appAuditLogDao.getAuditByType(appAuditId, AppAuditLogTypeEnum.APP_CHECK.value());
-        System.out.println(appAuditLog);
+        logger.info("{}", appAuditLog);
     }
 
 }

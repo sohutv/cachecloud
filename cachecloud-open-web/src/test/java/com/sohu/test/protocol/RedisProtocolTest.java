@@ -13,9 +13,9 @@ public class RedisProtocolTest {
 
     @Test
     public void testRedisProtocolEcho() {
-        System.out.println(RedisProtocol.getRunShell(6379, true));
-        System.out.println(RedisProtocol.getSentinelShell(6379));
-        System.out.println(RedisProtocol.getConfig(6379, false));
+        logger.info(RedisProtocol.getRunShell(6379, true));
+        logger.info(RedisProtocol.getSentinelShell(6379));
+        logger.info(RedisProtocol.getConfig(6379, false));
     }
 
 }

@@ -21,7 +21,7 @@ public class AppUserDaoTest extends BaseTest{
     public void testAppDao() {
         AppUser appUser = AppUser.buildFrom(null, "11", "fff", "leifu@sohu-inc.com", "13820794024", -1);
         appUserDao.save(appUser);
-        System.out.println(appUser);
+        logger.info("{}", appUser);
     }
     
     

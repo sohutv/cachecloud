@@ -25,8 +25,8 @@ public class AppStatsCenterImplTest extends BaseTest {
         long appId = 10015L;
         long begin = System.currentTimeMillis();
         AppDetailVO resultVO = appStatsCenter.getAppDetail(appId);
-        System.out.println("cost=" + (System.currentTimeMillis() - begin));
-        System.out.println(resultVO);
+        logger.info("cost=" + (System.currentTimeMillis() - begin));
+        logger.info("result={}", resultVO);
     }
     
     @Test
@@ -35,7 +35,7 @@ public class AppStatsCenterImplTest extends BaseTest {
     	long beginTime = 201408260001L;
     	long endTime = 201408261601L;
     	List<AppCommandGroup> list = appStatsCenter.getAppCommandGroup(appId, beginTime, endTime);
-    	System.out.println(list);
+        logger.info("list={}", list);
     }
     
     @Test
@@ -44,7 +44,7 @@ public class AppStatsCenterImplTest extends BaseTest {
     	long beginTime = 201411060000L;
     	long endTime = 201411070000L;
     	List<AppCommandStats> list = appStatsCenter.getTop5AppCommandStatsList(appId, beginTime, endTime);
-    	System.out.println(list);
+        logger.info("list={}", list);
     }
 
     @Test
@@ -53,7 +53,7 @@ public class AppStatsCenterImplTest extends BaseTest {
         long beginTime = 201409100001L;
         long endTime = 201409101601L;
         List<AppCommandStats> list = appStatsCenter.getCommandStatsList(appId, beginTime, endTime);
-        System.out.println(list);
+        logger.info("list={}", list);
     }
 
     @Test
@@ -61,7 +61,7 @@ public class AppStatsCenterImplTest extends BaseTest {
         long appId = 998L;
         String command = "info all";
         String value = appStatsCenter.executeCommand(appId, command);
-        System.out.println(value);
+        logger.info("value={}", value);
     }
 
 }

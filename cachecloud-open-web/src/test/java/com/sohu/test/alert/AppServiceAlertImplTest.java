@@ -40,7 +40,7 @@ public class AppServiceAlertImplTest extends BaseTest {
         watch.start("getAppInstanceInfo2");
         list = appService.getAppInstanceInfo(10129L);
         watch.stop();
-        System.out.println(watch.prettyPrint());
+        logger.info(watch.prettyPrint());
         for (InstanceInfo info : list) {
             logger.warn("{}:{} -> {}:{} id={}", info.getIp(), info.getPort(), info.getMasterHost(), info.getMasterPort(),info.getMasterInstanceId());
         }

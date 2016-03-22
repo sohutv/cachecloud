@@ -78,7 +78,7 @@ public class MiscTest extends SimpleBaseTest {
         try {
             File file = new File(url.toURI());
             if (file.exists()) {
-                System.out.println("file is " + file.getAbsolutePath());
+                logger.info("file is " + file.getAbsolutePath());
             }
         } catch (URISyntaxException e) {
             e.printStackTrace();

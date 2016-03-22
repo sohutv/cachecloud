@@ -48,7 +48,7 @@ public class RedisImportantDataDeal extends BaseTest {
         // /////////////一定要谨慎处理/////////////////
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("确认要清除appId:" + appId + "的所有内存数据(输入y代表确认):");
+        logger.warn("确认要清除appId:" + appId + "的所有内存数据(输入y代表确认):");
         String confirm = null;
         try {
             confirm = br.readLine();

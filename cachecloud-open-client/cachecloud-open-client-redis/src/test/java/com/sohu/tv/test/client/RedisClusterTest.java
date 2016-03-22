@@ -31,7 +31,7 @@ public class RedisClusterTest extends BaseTest {
         for (int i = 1; i < 100; i++) {
             redisCluster.setex("tmp:key" + i, 60 * 20, "value" + i);
             TimeUnit.MILLISECONDS.sleep(20);
-            System.out.println("push:" + i);
+            logger.info("push:" + i);
         }
     }
 
@@ -48,15 +48,15 @@ public class RedisClusterTest extends BaseTest {
             JedisPool jedisPool = clusterMap.get(key);
             Jedis jedis = jedisPool.getResource();
 
-            System.out.println("before:cluster-slave-validity-factor->"
+            logger.info("before:cluster-slave-validity-factor->"
                     + jedis.configGet("cluster-slave-validity-factor"));
             jedis.configSet("cluster-slave-validity-factor", "10");
-            System.out.println("after:cluster-slave-validity-factor->"
+            logger.info("after:cluster-slave-validity-factor->"
                     + jedis.configGet("cluster-slave-validity-factor"));
             logger.info("------------------------------------");
-            System.out.println("before:repl-disable-tcp-nodelay->" + jedis.configGet("repl-disable-tcp-nodelay"));
+            logger.info("before:repl-disable-tcp-nodelay->" + jedis.configGet("repl-disable-tcp-nodelay"));
             jedis.configSet("repl-disable-tcp-nodelay", "no");
-            System.out.println("after:repl-disable-tcp-nodelay->" + jedis.configGet("repl-disable-tcp-nodelay"));
+            logger.info("after:repl-disable-tcp-nodelay->" + jedis.configGet("repl-disable-tcp-nodelay"));
             logger.info("####################################");
             jedis.close();
         }
