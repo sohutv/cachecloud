@@ -398,6 +398,7 @@ public class AppManageController extends BaseController {
 		model.addAttribute("appAuditId", appAuditId);
 		model.addAttribute("appId", appAudit.getAppId());
 		model.addAttribute("appDesc", appService.getByAppId(appAudit.getAppId()));
+        model.addAttribute("appDetails",appAudit.getAppDetails());
 
 		return new ModelAndView("manage/appAudit/initAppDeploy");
 	}
@@ -419,7 +420,11 @@ public class AppManageController extends BaseController {
 	    if (appAuditId != null && StringUtils.isNotBlank(appDeployText)) {
 			String[] appDetails = appDeployText.split("\n");
 			// 部署service
+
 			isSuccess = appDeployCenter.allocateResourceApp(appAuditId, Arrays.asList(appDetails), getUserInfo(request));
+			if (isSuccess){
+                appService.updateAppDetail(appAuditId,appDeployText);
+			}
 		} else {
 			logger.error("appDeploy error param: appDeployText={},appAuditId:{}", appDeployText, appAuditId);
 		}

@@ -3,7 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sohu.cache.dao.AppAuditDao">
     <sql id="columns">
-    	app_id,user_id,user_name,type,param1,param2,param3,info,status,modify_time
+    	app_id,user_id,user_name,type,param1,param2,param3,info,status,modify_time,appdetails
     </sql>
 
     <select id="selectWaitAppAudits" resultType="com.sohu.cache.entity.AppAudit">
@@ -49,5 +49,12 @@
         from app_audit
         where app_id=#{appId}
     </select>
+
+    <update id="updateAppDetail" parameterType="com.sohu.cache.entity.AppAudit">
+        update app_audit
+        set
+        appdetails = #{appDetails}
+        where id=#{id}
+    </update>
     
 </mapper>

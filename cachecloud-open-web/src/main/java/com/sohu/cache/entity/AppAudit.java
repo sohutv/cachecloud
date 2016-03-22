@@ -48,6 +48,8 @@ public class AppAudit {
 
     private Date modifyTime;
 
+    private String appDetails;
+
     /**
      * 驳回原因
      */
@@ -227,4 +229,11 @@ public class AppAudit {
     }
 
 
+    public String getAppDetails() {
+        return appDetails;
+    }
+
+    public void setAppDetails(String appDetails) {
+        this.appDetails = appDetails;
+    }
 }

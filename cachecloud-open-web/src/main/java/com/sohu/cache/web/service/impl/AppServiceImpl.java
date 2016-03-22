@@ -420,6 +420,11 @@ public class AppServiceImpl implements AppService {
         return appDao.getAllAppDescList(null);
     }
 
+    @Override
+    public void updateAppDetail(Long id, String appDetails) {
+        appAuditDao.updateAppDetail(id,appDetails);
+    }
+
     public void setAppDao(AppDao appDao) {
         this.appDao = appDao;
     }

@@ -122,7 +122,7 @@
 												部署详情:<font color='red'>(*)</font>:
 											</label>
 											<div class="col-md-5">
-												<textarea rows="10" name="appDeployText" id="appDeployText" placeholder="部署详情" class="form-control"></textarea>
+												<textarea rows="10" name="appDeployText" id="appDeployText" placeholder="部署详情" class="form-control">${appDetails}</textarea>
 												<span class="help-block">
 													具体规则如下:<br/>
 													1. standalone类型：<br/> 

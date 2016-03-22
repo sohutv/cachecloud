@@ -44,4 +44,11 @@ public interface AppAuditDao {
      */
     public List<AppAudit> getAppAuditByAppId(@Param("appId")Long appId);
 
+    /**
+     * 更新部署记录
+     * @param id
+     * @param appDetails
+     */
+    public void updateAppDetail(@Param("id") long id,@Param("appDetails") String appDetails);
+
 }

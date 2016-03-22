@@ -187,4 +187,11 @@ public interface AppService {
      * 获取所有应用
      */
     List<AppDesc> getAllAppDesc();
+
+    /**
+     * 更新部署记录
+     * @param id
+     * @param appDetails
+     */
+    void updateAppDetail(Long id,String appDetails);
 }
