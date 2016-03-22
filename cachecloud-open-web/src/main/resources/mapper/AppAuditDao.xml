@@ -26,7 +26,7 @@
 
     <insert id="insertAppAudit" parameterType="com.sohu.cache.entity.AppAudit" keyProperty="id" useGeneratedKeys="true">
         insert into app_audit(<include refid="columns"/>)
-        values(#{appId},#{userId},#{userName},#{type},#{param1},#{param2},#{param3},#{info},#{status},#{modifyTime})
+        values(#{appId},#{userId},#{userName},#{type},#{param1},#{param2},#{param3},#{info},#{status},#{modifyTime},#{appDetails})
     </insert>
 
     <update id="updateAppAudit" parameterType="com.sohu.cache.entity.AppAudit">
