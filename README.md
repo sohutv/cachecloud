@@ -109,12 +109,19 @@ mvn spring-boot:run
 ```
 
 #####(2). 生产环境
-        1. 构建：mvn -Ponline clean package
-        2. 上传war包到特定目录下:如/opt/cachecloud-web
-        3: 拷贝项目中的cachecloud-web.conf配置到/opt/cachecloud-web目录下,注意必须跟war包同目录才生效
-        4. 作为linux服务启动:
-        sudo ln -s /opt/cachecloud-web/cachecloud-web-1.0-SNAPSHOT.war /etc/init.d/cachecloud-web 
-        /etc/init.d/cachecloud-web start
++  在cachecloud根目录下运行
+```Java        
+mvn clean compile install -Ponline
+```
++  拷贝war包(cachecloud-open-web/target/cachecloud-open-web-1.0-SNAPSHOT.war)到/opt/cachecloud-web下
++  拷贝配置文件(cachecloud-open-web/src/main/resources/cachecloud-web.conf)到/opt/cachecloud-web下，并改名为cachecloud-open-web-1.0-SNAPSHOT.conf（spring-boot要求，否则配置不生效）
++  启动
+```Java
+sudo ln -s /opt/cachecloud-web/cachecloud-web-1.0-SNAPSHOT.war /etc/init.d/cachecloud-web
+/etc/init.d/cachecloud-web start 
+```        
+        
+        
 #####(3). 登录确认
 
 #####(a) 访问：http://127.0.0.1:9999
