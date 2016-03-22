@@ -12,6 +12,12 @@
     * [4.添加机器](#cc7-4)
 
 <a name="cc1"/>
+## 才米公社分支版修复问题:
++  2016-3-22 .添加机器后，在Centos 7下无法获取机器CPU,内存等信息
++  2016-3-23. 应用部署后无法查看在线运行机器列表信息
+更多问题修复中.....
+
+<a name="cc1"/>
 ## 一、CacheCloud是做什么的
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CacheCloud提供一个Redis云管理平台：实现多种类型(**Redis Standalone**、**Redis Sentinel**、**Redis Cluster**)自动部署、解决Redis实例碎片化现象、提供完善统计、监控、运维功能、减少开发人员的运维成本和误操作，提高机器的利用率，提供灵活的伸缩性，提供方便的接入客户端。
 
