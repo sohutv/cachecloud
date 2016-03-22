@@ -98,8 +98,16 @@ Redis的开发人员如同使用Mysql一样，不需要运维Mysql服务器，�
 <a name="cc7-3"/>
 ####3、启动cachecloud系统
 
-#####(1). 本地启动:在cachecloud-web模块下运行
-        mvn spring-boot:run
+#####(1). 本地启动:
++  在cachecloud根目录下运行
+```Java        
+mvn clean compile install -Plocal
+```
++  在cachecloud-web模块下运行
+```Java        
+mvn spring-boot:run
+```
+
 #####(2). 生产环境
         1. 构建：mvn -Ponline clean package
         2. 上传war包到特定目录下:如/opt/cachecloud-web
