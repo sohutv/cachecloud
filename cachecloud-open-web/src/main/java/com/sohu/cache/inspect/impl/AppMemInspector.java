@@ -76,6 +76,9 @@ public class AppMemInspector extends BaseAlertService implements Inspector {
                         if (instanceInfo == null) {
                             continue;
                         }
+                        if (!TypeUtil.isRedisType(instanceInfo.getType())) {
+                            continue;
+                        }
                         // 忽略sentinel观察者
                         if (TypeUtil.isRedisSentinel(instanceInfo.getType())) {
                             continue;
