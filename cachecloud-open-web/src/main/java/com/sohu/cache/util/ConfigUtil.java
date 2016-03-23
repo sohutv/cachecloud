@@ -4,11 +4,12 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-/*
- * Create time : 2010-02-04
- */
 
 /**
+ * 配置隔离工具
+ * @author leifu
+ * @Date 2016年3月23日
+ * @Time 上午10:47:15
  */
 public enum ConfigUtil {
 

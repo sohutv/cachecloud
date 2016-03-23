@@ -10,7 +10,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
- * JSON工具类(from播放数)
+ * jackson转换工具
+ * @author leifu
+ * @Date 2016年3月23日
+ * @Time 上午10:47:57
  */
 public class JsonUtil {
     private static final Logger logger = LoggerFactory.getLogger(JsonUtil.class);
