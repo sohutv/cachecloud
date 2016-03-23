@@ -117,7 +117,7 @@ mvn clean compile install -Ponline
 +  拷贝配置文件(cachecloud-open-web/src/main/resources/cachecloud-web.conf)到/opt/cachecloud-web下，并改名为cachecloud-open-web-1.0-SNAPSHOT.conf（spring-boot要求，否则配置不生效）
 +  启动
 ```Java
-sudo ln -s /opt/cachecloud-web/cachecloud-web-1.0-SNAPSHOT.war /etc/init.d/cachecloud-web
+sudo ln -s /opt/cachecloud-web/cachecloud-open-web-1.0-SNAPSHOT.war /etc/init.d/cachecloud-web
 /etc/init.d/cachecloud-web start 
 ```        
         
