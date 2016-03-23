@@ -3,7 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sohu.cache.dao.MachineDao">
     <sql id="machine_info_columns">
-        ssh_user,ssh_passwd,ip,room,mem,cpu,virtual,real_ip,service_time,fault_count,warn,available,type,groupId,extra_desc
+        ssh_user,ssh_passwd,ip,room,mem,cpu,`virtual`,real_ip,service_time,fault_count,warn,available,type,groupId,extra_desc
     </sql>
 
     <sql id="machine_info_fields">
@@ -56,7 +56,7 @@
           (<include refid="machine_info_fields"/>)
         on duplicate key 
         update ssh_user=#{sshUser},ssh_passwd=#{sshPasswd},room=#{room},mem=#{mem},cpu=#{cpu},
-        virtual=#{virtual},real_ip=#{realIp},service_time=#{serviceTime},fault_count=#{faultCount},
+        `virtual`=#{virtual},real_ip=#{realIp},service_time=#{serviceTime},fault_count=#{faultCount},
         warn=#{warn},available=#{available},type=#{type},groupId=#{groupId},extra_desc=#{extraDesc}
     </select>
     
