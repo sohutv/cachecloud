@@ -268,6 +268,7 @@ CREATE TABLE `app_audit` (
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `modify_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `refuse_reason` varchar(360) DEFAULT NULL COMMENT '驳回理由',
+  `appdetails` VARCHAR(1000) DEFAULT NULL  COMMIT '部署详情记录',
   PRIMARY KEY (`id`),
   KEY `idx_appid` (`app_id`),
   KEY `idx_create_time` (`create_time`),
