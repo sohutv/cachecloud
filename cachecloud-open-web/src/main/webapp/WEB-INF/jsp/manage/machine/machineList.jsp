@@ -161,7 +161,7 @@
                                         <td>
                                             <a href="javascript;" data-target="#addMachineModal${machine.info.id}" data-toggle="modal">[修改]</a>
                                             &nbsp;
-                                            <a onclick="if(window.confirm('确认要删除ip=${machine.ip}的机器吗?!')){return true;}else{return false;}" href="/manage/machine/delete.do?machineIp=${machine.ip}">[删除]</a>
+                                            <a onclick="if(window.confirm('确认要删除ip=${machine.info.ip}的机器吗?!')){return true;}else{return false;}" href="/manage/machine/delete.do?machineIp=${machine.info.ip}">[删除]</a>
                                         </td>
 									</tr>
 								</c:forEach>

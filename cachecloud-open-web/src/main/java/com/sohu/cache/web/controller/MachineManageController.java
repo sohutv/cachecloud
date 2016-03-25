@@ -103,7 +103,7 @@ public class MachineManageController extends BaseController{
         } else {
             logger.warn("machineIp is empty!");
         }
-        return new ModelAndView("manage/machine/list");
+        return new ModelAndView("redirect:/manage/machine/list");
     }
     
     
