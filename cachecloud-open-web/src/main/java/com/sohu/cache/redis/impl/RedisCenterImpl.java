@@ -1225,6 +1225,9 @@ public class RedisCenterImpl implements RedisCenter {
     public Map<String,String> getClusterLossSlots(long appId) {
         // 1.从应用中获取一个健康的主节点
         InstanceInfo sourceMasterInstance = getHealthyInstanceInfo(appId);
+        if (sourceMasterInstance == null) {
+            return Collections.emptyMap();
+        }
         // 2. 获取所有slot和节点的对应关系
         Map<Integer, String> slotHostPortMap = getSlotsHostPortMap(sourceMasterInstance.getIp(), sourceMasterInstance.getPort());
         // 3. 获取集群中失联的slot
