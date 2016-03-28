@@ -41,7 +41,6 @@ public class SSHUtil {
     private final static String COMMAND_TOP = "top -b -n 1 | head -5";
     private final static String COMMAND_DF_LH = "df -lh";
     private final static String LOAD_AVERAGE_STRING = "load average: ";
-    private final static String CPU_USAGE_STRING = "Cpu(s):";
     private final static String MEM_USAGE_STRING = "Mem:";
     private final static String SWAP_USAGE_STRING = "Swap:";
 
@@ -135,8 +134,8 @@ public class SSHUtil {
                     // 0.0% hi, 0.0% si
 //                    redhat:%Cpu(s):  0.0 us
 //                    centos7:Cpu(s): 0.0% us
-                    String cpuUsage = line.split(",")[0].replace(CPU_USAGE_STRING, EMPTY_STRING).replace("us", EMPTY_STRING);
-                    systemPerformanceEntity.setCpuUsage(StringUtil.trimToEmpty(cpuUsage));
+                    double cpuUs = getUsCpu(line);
+                    systemPerformanceEntity.setCpuUsage(String.valueOf(cpuUs));
                 } else if (4 == lineNum) {
                     // 第四行通常是这样：
                     // Mem: 1572988k total, 1490452k used, 82536k free, 138300k
@@ -167,7 +166,7 @@ public class SSHUtil {
                     Double memoryUsage = 1 - (NumberUtils.toDouble(usedMemFree.toString()) / NumberUtils.toDouble(totalMemLong.toString()) / 1.0);
                     systemPerformanceEntity.setMemoryTotal(String.valueOf(totalMemLong));
                     systemPerformanceEntity.setMemoryFree(String.valueOf(usedMemFree));
-                    DecimalFormat df = new DecimalFormat(".00");
+                    DecimalFormat df = new DecimalFormat("0.00");
                     systemPerformanceEntity.setMemoryUsageRatio(df.format(memoryUsage * 100));
                 } else {
                     continue;
@@ -441,17 +440,35 @@ public class SSHUtil {
         return result;
     }
     
-    public static void main(String[] args) {
-        Long a = 988L;
-        Long b = 25L;
-        double c = 988.0;
-        double d = 23.0;
-        System.out.println(b/a);
-        System.out.println(d/c);
-        
-        System.out.println(org.springframework.util.NumberUtils.parseNumber(b.toString(), Double.class) / org.springframework.util.NumberUtils.parseNumber(a.toString(), Double.class));
+    /**
+     * 从top的cpuLine解析出us
+     * @param cpuLine
+     * @return
+     */
+    public static double getUsCpu(String cpuLine) {
+        if (cpuLine == null || EMPTY_STRING.equals(cpuLine.trim())) {
+            return 0;
+        }
+        String[] items = cpuLine.split(COMMA);
+        if (items.length < 1) {
+            return 0;
+        }
+        String usCpuStr = items[0];
+        return NumberUtils.toDouble(matchCpuLine(usCpuStr));
     }
-    
+
+    private static String matchCpuLine(String content) {
+        String result = EMPTY_STRING;
+        if (content == null || EMPTY_STRING.equals(content.trim())) {
+            return result;
+        }
+        Pattern pattern = Pattern.compile("(\\d+).(\\d+)");
+        Matcher matcher = pattern.matcher(content);
+        if (matcher.find()) {
+            result = matcher.group();
+        }
+        return result;
+    }
     
     
 }
