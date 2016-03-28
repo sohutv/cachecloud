@@ -142,7 +142,7 @@ public class SSHUtil {
                     // buffers
                     String[] memArray = line.replace(MEM_USAGE_STRING, EMPTY_STRING).split(COMMA);
                     totalMem = matchMemLineNumber(memArray[0]).trim();
-                    freeMem = matchMemLineNumber(memArray[1]).trim();
+                    freeMem = matchMemLineNumber(memArray[2]).trim();
                     buffersMem = matchMemLineNumber(memArray[3]).trim();
                 } else if (5 == lineNum) {
                     // 第四行通常是这样：
