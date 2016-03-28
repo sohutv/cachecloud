@@ -43,6 +43,7 @@ public class SSHUtil {
     private final static String LOAD_AVERAGE_STRING = "load average: ";
     private final static String MEM_USAGE_STRING = "Mem:";
     private final static String SWAP_USAGE_STRING = "Swap:";
+    private final static String BUFFER_CACHE = "buff/cache";
 
     /**
      * Get HostPerformanceEntity[cpuUsage, memUsage, load] by ssh.<br>
@@ -142,7 +143,12 @@ public class SSHUtil {
                     // buffers
                     String[] memArray = line.replace(MEM_USAGE_STRING, EMPTY_STRING).split(COMMA);
                     totalMem = matchMemLineNumber(memArray[0]).trim();
-                    freeMem = matchMemLineNumber(memArray[2]).trim();
+                    
+                    if (line.contains(BUFFER_CACHE)) {
+                        freeMem = matchMemLineNumber(memArray[1]).trim();
+                    } else {
+                        freeMem = matchMemLineNumber(memArray[2]).trim();
+                    }
                     buffersMem = matchMemLineNumber(memArray[3]).trim();
                 } else if (5 == lineNum) {
                     // 第四行通常是这样：
