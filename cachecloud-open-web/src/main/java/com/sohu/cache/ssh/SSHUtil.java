@@ -18,9 +18,9 @@ import ch.ethz.ssh2.Session;
 import ch.ethz.ssh2.StreamGobbler;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.NumberUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,6 +28,8 @@ import java.io.InputStreamReader;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by yijunzhang on 14-6-20.
@@ -89,7 +91,6 @@ public class SSHUtil {
      * @throws Exception
      */
     private static MachineStats getMachineInfo(Connection conn) throws Exception {
-
         MachineStats systemPerformanceEntity = null;
         Session session = null;
         BufferedReader read = null;
@@ -130,8 +131,10 @@ public class SSHUtil {
                     systemPerformanceEntity.setLoad(StringUtil.trimToEmpty(loadAverageArray[0]));
                 } else if (3 == lineNum) {
                     // 第三行通常是这样：
-                    // Cpu(s): 0.0% us, 0.0% sy, 0.0% ni, 100.0% id, 0.0% wa,
+                    // , 0.0% sy, 0.0% ni, 100.0% id, 0.0% wa,
                     // 0.0% hi, 0.0% si
+//                    redhat:%Cpu(s):  0.0 us
+//                    centos7:Cpu(s): 0.0% us
                     String cpuUsage = line.split(",")[0].replace(CPU_USAGE_STRING, EMPTY_STRING).replace("us", EMPTY_STRING);
                     systemPerformanceEntity.setCpuUsage(StringUtil.trimToEmpty(cpuUsage));
                 } else if (4 == lineNum) {
@@ -139,27 +142,29 @@ public class SSHUtil {
                     // Mem: 1572988k total, 1490452k used, 82536k free, 138300k
                     // buffers
                     String[] memArray = line.replace(MEM_USAGE_STRING, EMPTY_STRING).split(COMMA);
-                    totalMem = StringUtil.trimToEmpty(memArray[0].replace("total", EMPTY_STRING)).replace("k", EMPTY_STRING);
-                    freeMem = StringUtil.trimToEmpty(memArray[2].replace("free", EMPTY_STRING)).replace("k", EMPTY_STRING);
-                    buffersMem = StringUtil.trimToEmpty(memArray[3].replace("buffers", EMPTY_STRING)).replace("k", EMPTY_STRING);
+                    totalMem = matchMemLineNumber(memArray[0]).trim();
+                    freeMem = matchMemLineNumber(memArray[1]).trim();
+                    buffersMem = matchMemLineNumber(memArray[3]).trim();
                 } else if (5 == lineNum) {
                     // 第四行通常是这样：
-                    // Swap: 2096472k total, 252k used, 2096220k free, 788540k
-                    // cached
+                    // Swap: 2096472k total, 252k used, 2096220k free, 788540k cached
                     String[] memArray = line.replace(SWAP_USAGE_STRING, EMPTY_STRING).split(COMMA);
-                    cachedMem = StringUtil.trimToEmpty(memArray[3].replace("cached", EMPTY_STRING)).replace("k", EMPTY_STRING);
-
-                    if (StringUtil.isBlank(totalMem, freeMem, buffersMem, cachedMem))
+                    if (memArray.length > 3) {
+                        cachedMem = matchMemLineNumber(memArray[3]).trim();
+                    } else {
+                        cachedMem = "0";
+                    }
+                    if (StringUtil.isBlank(totalMem, freeMem, buffersMem))
                         throw new Exception("Error when get system performance of ip: " + conn.getHostname()
                                 + ", can't get totalMem, freeMem, buffersMem or cachedMem");
 
-                    Long totalMemLong = Long.parseLong(totalMem);
-                    Long freeMemLong = Long.parseLong(freeMem);
-                    Long buffersMemLong = Long.parseLong(buffersMem);
-                    Long cachedMemLong = Long.parseLong(cachedMem);
+                    Long totalMemLong = NumberUtils.toLong(totalMem);
+                    Long freeMemLong = NumberUtils.toLong(freeMem);
+                    Long buffersMemLong = NumberUtils.toLong(buffersMem);
+                    Long cachedMemLong = NumberUtils.toLong(cachedMem);
 
                     Long usedMemFree = freeMemLong + buffersMemLong + cachedMemLong;
-                    Double memoryUsage = 1 - (NumberUtils.parseNumber(usedMemFree.toString(), Double.class) / NumberUtils.parseNumber(totalMemLong.toString(), Double.class));
+                    Double memoryUsage = 1 - (NumberUtils.toDouble(usedMemFree.toString()) / NumberUtils.toDouble(totalMemLong.toString()) / 1.0);
                     systemPerformanceEntity.setMemoryTotal(String.valueOf(totalMemLong));
                     systemPerformanceEntity.setMemoryFree(String.valueOf(usedMemFree));
                     DecimalFormat df = new DecimalFormat(".00");
@@ -416,4 +421,37 @@ public class SSHUtil {
          */
         return MachineProtocol.SSH_PORT_DEFAULT;
     }
+
+    /**
+     * 匹配字符串中的数字
+     * 
+     * @param content
+     * @return
+     */
+    private static String matchMemLineNumber(String content) {
+        String result = EMPTY_STRING;
+        if (content == null || EMPTY_STRING.equals(content.trim())) {
+            return result;
+        }
+        Pattern pattern = Pattern.compile("(\\d+)");
+        Matcher matcher = pattern.matcher(content);
+        if (matcher.find()) {
+            result = matcher.group(1);
+        }
+        return result;
+    }
+    
+    public static void main(String[] args) {
+        Long a = 988L;
+        Long b = 25L;
+        double c = 988.0;
+        double d = 23.0;
+        System.out.println(b/a);
+        System.out.println(d/c);
+        
+        System.out.println(org.springframework.util.NumberUtils.parseNumber(b.toString(), Double.class) / org.springframework.util.NumberUtils.parseNumber(a.toString(), Double.class));
+    }
+    
+    
+    
 }
