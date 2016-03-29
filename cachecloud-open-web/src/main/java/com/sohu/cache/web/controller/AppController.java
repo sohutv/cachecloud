@@ -919,15 +919,6 @@ public class AppController extends BaseController {
     }
     
     /**
-     * 存储选型说明
-     */
-    @RequestMapping(value = "/storeTypeSelectInfo")
-    public ModelAndView doStoreTypeSelectIntro(HttpServletRequest request, HttpServletResponse response, Model model) {
-        return new ModelAndView("app/storeTypeSelectInfo");
-    }
-    
-    
-    /**
      * 清理应用数据
      */
     @RequestMapping(value = "/cleanAppData")

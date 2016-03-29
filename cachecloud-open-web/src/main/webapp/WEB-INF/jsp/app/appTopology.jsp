@@ -29,35 +29,27 @@
                     <td>${instance.ip}:${instance.port}</td>
                     <td>${instance.statusDesc}</td>
 					<td>
+						<c:choose>
+							<c:when test="${(instanceStatsMap[instanceStatsMapKey]).memUsePercent >= 80}">
+								<c:set var="progressBarStatus" value="progress-bar-danger"/>
+							</c:when>
+							<c:otherwise>
+								<c:set var="progressBarStatus" value="progress-bar-success"/>
+							</c:otherwise>
+						</c:choose>
+					
                          <div class="progress margin-custom-bottom0">
-                         	<c:choose>
-                             	<c:when test="${(instanceStatsMap[instanceStatsMapKey]).memUsePercent >= 80}">
-                               <div class="progress-bar progress-bar-danger"
+                               <div class="progress-bar ${progressBarStatus}"
                                     role="progressbar"
                                     aria-valuenow="${(instanceStatsMap[instanceStatsMapKey]).memUsePercent}"
                                     aria-valuemax="100"
                                     aria-valuemin="0"
                                     style="width: ${(instanceStatsMap[instanceStatsMapKey]).memUsePercent}%">
                                     
-                               	<label style="color: #000000">
-                                   <fmt:formatNumber value="${(instanceStatsMap[instanceStatsMapKey]).usedMemory / 1024 / 1024 / 1024}" pattern="0.00"/>G&nbsp;&nbsp;Used/<fmt:formatNumber value="${(instanceStatsMap[instanceStatsMapKey]).maxMemory / 1024 / 1024 / 1024}" pattern="0.00"/>G&nbsp;&nbsp;Total
-                               	</label>
-                                   </div>
-                                 </c:when>
-                                 <c:otherwise>
-                                  <div class="progress-bar progress-bar-success"
-                                       role="progressbar"
-                                       aria-valuenow="${(instanceStatsMap[instanceStatsMapKey]).memUsePercent}"
-                                       aria-valuemax="100"
-                                       aria-valuemin="0"
-                                       style="width: ${(instanceStatsMap[instanceStatsMapKey]).memUsePercent}%">
-                                       
-                                   	<label style="color: #000000">
-                                   <fmt:formatNumber value="${(instanceStatsMap[instanceStatsMapKey]).usedMemory / 1024 / 1024 / 1024}" pattern="0.00"/>G&nbsp;&nbsp;Used/<fmt:formatNumber value="${(instanceStatsMap[instanceStatsMapKey]).maxMemory / 1024 / 1024 / 1024}" pattern="0.00"/>G&nbsp;&nbsp;Total
-                               	</label>
-                                   </div>
-                                 </c:otherwise>
-                            </c:choose>
+	                               	<label style="color: #000000">
+	                                   <fmt:formatNumber value="${(instanceStatsMap[instanceStatsMapKey]).usedMemory / 1024 / 1024 / 1024}" pattern="0.00"/>G&nbsp;&nbsp;Used/<fmt:formatNumber value="${(instanceStatsMap[instanceStatsMapKey]).maxMemory / 1024 / 1024 / 1024}" pattern="0.00"/>G&nbsp;&nbsp;Total
+	                               	</label>
+                                </div>
                          </div>
                   </td>
                   <td>
