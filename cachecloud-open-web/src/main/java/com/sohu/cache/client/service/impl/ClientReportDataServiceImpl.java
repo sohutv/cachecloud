@@ -3,17 +3,17 @@ package com.sohu.cache.client.service.impl;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sohu.cache.async.AsyncService;
 import com.sohu.cache.async.AsyncThreadPoolFactory;
 import com.sohu.cache.async.KeyCallable;
+import com.sohu.cache.client.service.ClientReportCostDistriService;
 import com.sohu.cache.client.service.ClientReportDataService;
-import com.sohu.cache.client.service.ClientReportDataExecuteService;
-import com.sohu.tv.jedis.stat.constant.ClientReportConstant;
-import com.sohu.tv.jedis.stat.enums.ClientCollectDataTypeEnum;
+import com.sohu.cache.client.service.ClientReportDataSizeService;
+import com.sohu.cache.client.service.ClientReportExceptionService;
+import com.sohu.cache.client.service.ClientReportValueDistriService;
 import com.sohu.tv.jedis.stat.model.ClientReportBean;
 
 /**
@@ -28,72 +28,76 @@ public class ClientReportDataServiceImpl implements ClientReportDataService {
     
     private AsyncService asyncService;
     
-    private ClientReportDataExecuteService clientReportDataSizeService;
+    private final Logger logger = LoggerFactory.getLogger(ClientReportDataServiceImpl.class);
     
-	private final Logger logger = LoggerFactory.getLogger(ClientReportDataServiceImpl.class);
+    private ClientReportCostDistriService clientReportCostDistriService;
+    
+    private ClientReportValueDistriService clientReportValueDistriService;
+    
+    private ClientReportExceptionService clientReportExceptionService;
+    
+    private ClientReportDataSizeService clientReportDataSizeService;
 
-    /**
-	 * 上报数据类型对应不同的处理逻辑
-	 */
-	private Map<ClientCollectDataTypeEnum, ClientReportDataExecuteService> clientReportServiceMap;
-
-	public void init() {
+    public void init() {
         asyncService.assemblePool(getThreadPoolKey(), AsyncThreadPoolFactory.CLIENT_REPORT_THREAD_POOL);
     }
     
     private String getThreadPoolKey() {
         return CLIENT_REPORT_POOL;
     }
-	
-	@Override
-	public boolean deal(ClientReportBean clientReportBean) {
-		try {
-			// 上报的数据
-			final String clientIp = clientReportBean.getClientIp();
-			final long collectTime = clientReportBean.getCollectTime();
-			final long reportTime = clientReportBean.getReportTimeStamp();
-			final List<Map<String, Object>> datas = clientReportBean.getDatas();
-			final Map<String, Object> otherInfo = clientReportBean.getOtherInfo();
-			if (datas == null || datas.isEmpty()) {
-				logger.warn("datas field {} is empty", clientReportBean);
-				return false;
-			}
-			String key = getThreadPoolKey() + "_" + clientIp;
-			asyncService.submitFuture(getThreadPoolKey(), new KeyCallable<Boolean>(key) {
+    
+    @Override
+    public boolean deal(final ClientReportBean clientReportBean) {
+        try {
+            // 上报的数据
+            final String clientIp = clientReportBean.getClientIp();
+            final List<Map<String, Object>> datas = clientReportBean.getDatas();
+            if (datas == null || datas.isEmpty()) {
+                logger.warn("datas field {} is empty", clientReportBean);
+                return false;
+            }
+            String key = getThreadPoolKey() + "_" + clientIp;
+            asyncService.submitFuture(getThreadPoolKey(), new KeyCallable<Boolean>(key) {
                 @Override
                 public Boolean execute() {
-                    // 根据不同的数据类型映射不同处理逻辑
-                    for (Map<String, Object> map : datas) {
-                        Integer clientDataType = MapUtils.getInteger(map, ClientReportConstant.CLIENT_DATA_TYPE, -1);
-                        ClientCollectDataTypeEnum clientCollectDataTypeEnum = ClientCollectDataTypeEnum.MAP.get(clientDataType);
-                        if (clientCollectDataTypeEnum != null) {
-                            clientReportServiceMap.get(clientCollectDataTypeEnum).execute(clientIp, collectTime, reportTime, map);
-                        }
+                    try {
+                        clientReportCostDistriService.batchSave(clientReportBean);
+                        clientReportValueDistriService.batchSave(clientReportBean);
+                        clientReportExceptionService.batchSave(clientReportBean);
+                        clientReportDataSizeService.save(clientReportBean);
+                        return true;
+                    } catch (Exception e) {
+                        logger.error(e.getMessage(), e);
+                        return false;
                     }
-                    // 处理其他信息
-                    if (MapUtils.isNotEmpty(otherInfo)) {
-                        clientReportDataSizeService.execute(clientIp, collectTime, reportTime, otherInfo);
-                    }
-                    return true;
                 }
             });
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return false;
-		}
-		return true;
-	}
-
-	public void setClientReportServiceMap(Map<ClientCollectDataTypeEnum, ClientReportDataExecuteService> clientReportServiceMap) {
-		this.clientReportServiceMap = clientReportServiceMap;
-	}
+            return true;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return false;
+        }
+    }
 
     public void setAsyncService(AsyncService asyncService) {
         this.asyncService = asyncService;
     }
 
-    public void setClientReportDataSizeService(ClientReportDataExecuteService clientReportDataSizeService) {
+    public void setClientReportCostDistriService(ClientReportCostDistriService clientReportCostDistriService) {
+        this.clientReportCostDistriService = clientReportCostDistriService;
+    }
+
+    public void setClientReportExceptionService(ClientReportExceptionService clientReportExceptionService) {
+        this.clientReportExceptionService = clientReportExceptionService;
+    }
+
+    public void setClientReportValueDistriService(ClientReportValueDistriService clientReportValueDistriService) {
+        this.clientReportValueDistriService = clientReportValueDistriService;
+    }
+
+    public void setClientReportDataSizeService(ClientReportDataSizeService clientReportDataSizeService) {
         this.clientReportDataSizeService = clientReportDataSizeService;
     }
+
 
 }

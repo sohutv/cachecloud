@@ -10,15 +10,6 @@
 		class="com.sohu.cache.client.service.impl.ClientReportDataServiceImpl"
 		init-method="init" />
 
-	<!-- 根据上报不同类型，分发到不同的处理逻辑 -->
-	<util:map id="clientReportServiceMap"
-		key-type="com.sohu.tv.jedis.stat.enums.ClientCollectDataTypeEnum"
-		value-type="com.sohu.cache.client.service.ClientReportDataExecuteService">
-		<entry key="COST_TIME_DISTRI_TYPE" value-ref="clientReportCostDistriService" />
-		<entry key="VALUE_LENGTH_DISTRI_TYPE" value-ref="clientReportValueDistriService" />
-		<entry key="EXCEPTION_TYPE" value-ref="clientReportExceptionService" />
-	</util:map>
-
 	<!-- 耗时分布  -->
 	<bean id="clientReportCostDistriService"
 		class="com.sohu.cache.client.service.impl.ClientReportCostDistriServiceImpl" />

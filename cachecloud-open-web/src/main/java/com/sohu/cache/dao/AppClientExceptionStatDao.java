@@ -58,4 +58,11 @@ public interface AppClientExceptionStatDao {
      */
     List<ClientInstanceException> getInstanceExceptionStat(@Param("ip") String ip, @Param("collectTime") long collectTime);
 
+    /**
+     * 批量保存
+     * @param appClientExceptionStatList
+     * @return
+     */
+    int batchSave(@Param("appClientExceptionStatList") List<AppClientExceptionStat> appClientExceptionStatList);
+
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import com.sohu.cache.entity.AppClientExceptionStat;
 import com.sohu.cache.entity.ClientInstanceException;
 import com.sohu.cache.web.util.Page;
+import com.sohu.tv.jedis.stat.model.ClientReportBean;
 
 
 /**
@@ -13,7 +14,7 @@ import com.sohu.cache.web.util.Page;
  * @Date 2015年1月19日
  * @Time 上午10:02:32
  */
-public interface ClientReportExceptionService extends ClientReportDataExecuteService {
+public interface ClientReportExceptionService {
     
     /**
      * 获取客户端异常列表
@@ -44,5 +45,12 @@ public interface ClientReportExceptionService extends ClientReportDataExecuteSer
      * @return
      */
     List<ClientInstanceException> getInstanceExceptionStat(String ip, long collectTime);
+    
+    /**
+     * 批量保存
+     * @param clientReportBean
+     * @return
+     */
+    void batchSave(ClientReportBean clientReportBean);
 
 }

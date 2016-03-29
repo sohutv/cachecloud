@@ -21,6 +21,13 @@ public interface AppClientValueDistriStatDao {
      * @param appClientValueDistriStat
      */
     void save(AppClientValueDistriStat appClientValueDistriStat);
+    
+    /**
+     * 批量保存值分布
+     * @param appClientValueDistriStatList
+     * @return
+     */
+    int batchSave(@Param("appClientValueDistriStatList") List<AppClientValueDistriStat> appClientValueDistriStatList);
 
     /**
      * 获取某个应用一段时间内值分布统计
@@ -30,4 +37,6 @@ public interface AppClientValueDistriStatDao {
      * @return
      */
     List<AppClientValueDistriSimple> getAppValueDistriList(@Param("appId") long appId, @Param("startTime") long startTime, @Param("endTime") long endTime);
+
+    
 }

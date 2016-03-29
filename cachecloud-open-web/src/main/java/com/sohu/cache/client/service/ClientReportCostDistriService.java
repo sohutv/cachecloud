@@ -4,13 +4,14 @@ import java.util.List;
 
 import com.sohu.cache.entity.AppClientCostTimeStat;
 import com.sohu.cache.entity.AppClientCostTimeTotalStat;
+import com.sohu.tv.jedis.stat.model.ClientReportBean;
 
 /**
  * @author leifu
  * @Date 2015年1月19日
  * @Time 上午10:02:28
  */
-public interface ClientReportCostDistriService extends ClientReportDataExecuteService {
+public interface ClientReportCostDistriService {
 
     /**
      * 获取一段时间内某个应用执行的命令列表
@@ -55,5 +56,11 @@ public interface ClientReportCostDistriService extends ClientReportDataExecuteSe
      * @return
      */
     List<AppClientCostTimeTotalStat> getAppClientCommandTotalStat(Long appId, String command, long startTime, long endTime);
+    
+    /**
+     * 批量保存
+     * @param clientReportBean
+     */
+    void batchSave(ClientReportBean clientReportBean);
 
 }

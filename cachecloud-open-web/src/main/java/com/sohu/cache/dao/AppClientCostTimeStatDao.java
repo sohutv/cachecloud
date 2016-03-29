@@ -45,4 +45,11 @@ public interface AppClientCostTimeStatDao {
             @Param("command") String command, @Param("instanceId") long instanceId,
             @Param("clientIp") String clientIp, @Param("startTime") long startTime, @Param("endTime") long endTime);
 
+    /**
+     * 批量更新
+     * @param appClientCostTimeStatList
+     * @return
+     */
+    int batchSave(@Param("appClientCostTimeStatList") List<AppClientCostTimeStat> appClientCostTimeStatList);
+
 }

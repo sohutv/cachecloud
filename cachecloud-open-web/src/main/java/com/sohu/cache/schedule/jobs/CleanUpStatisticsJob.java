@@ -63,14 +63,17 @@ public class CleanUpStatisticsJob extends CacheBaseJob {
             
             //清除客户端数据
             calendar.setTime(new Date());
-            calendar.add(Calendar.DAY_OF_MONTH, -7);
+            calendar.add(Calendar.DAY_OF_MONTH, -2);
             long timeFormat = NumberUtils.toLong(new SimpleDateFormat("yyyyMMddHHmmss").format(calendar.getTime()));
             cleanCount = jdbcTemplate.update(CLEAN_APP_CLIENT_MINUTE_COST, timeFormat);
             logger.warn("clean_app_client_costtime_minute_stat count={}", cleanCount);
-            cleanCount = jdbcTemplate.update(CLEAN_APP_CLIENT_MINUTE_COST_TOTAL, timeFormat);
-            logger.warn("clean_app_client_costtime_minute_stat_total count={}", cleanCount);
             cleanCount = jdbcTemplate.update(CLEAN_APP_CLIENT_VALUE_DISTRI, timeFormat);
             logger.warn("clean_app_client_value_distri_minute_stat count={}", cleanCount);
+            
+            calendar.setTime(new Date());
+            calendar.add(Calendar.DAY_OF_MONTH, -14);
+            cleanCount = jdbcTemplate.update(CLEAN_APP_CLIENT_MINUTE_COST_TOTAL, timeFormat);
+            logger.warn("clean_app_client_costtime_minute_stat_total count={}", cleanCount);
             
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

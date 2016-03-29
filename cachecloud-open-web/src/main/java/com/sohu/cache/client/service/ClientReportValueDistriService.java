@@ -3,6 +3,7 @@ package com.sohu.cache.client.service;
 import java.util.List;
 
 import com.sohu.cache.entity.AppClientValueDistriSimple;
+import com.sohu.tv.jedis.stat.model.ClientReportBean;
 
 
 /**
@@ -11,7 +12,7 @@ import com.sohu.cache.entity.AppClientValueDistriSimple;
  * @Date 2015年1月19日
  * @Time 上午10:02:37
  */
-public interface ClientReportValueDistriService extends ClientReportDataExecuteService{
+public interface ClientReportValueDistriService {
     
     /**
      * 获取某个应用一段时间内值分布统计
@@ -21,5 +22,12 @@ public interface ClientReportValueDistriService extends ClientReportDataExecuteS
      * @return
      */
     List<AppClientValueDistriSimple> getAppValueDistriList(long appId, long startTime, long endTime);
+    
+    /**
+     * 批量保存
+     * @param clientReportBean
+     * @return
+     */
+    void batchSave(ClientReportBean clientReportBean);
 
 }

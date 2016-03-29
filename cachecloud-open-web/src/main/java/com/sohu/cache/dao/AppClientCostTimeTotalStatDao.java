@@ -40,4 +40,10 @@ public interface AppClientCostTimeTotalStatDao {
      */
     List<AppClientCostTimeTotalStat> getAppClientCommandStat(@Param("appId") Long appId,
             @Param("command") String command, @Param("startTime") long startTime, @Param("endTime") long endTime);
+
+    /**
+     * 批量保存
+     * @param appClientCostTimeTotalStatList
+     */
+    void batchSave(@Param("appClientCostTimeTotalStatList") List<AppClientCostTimeTotalStat> appClientCostTimeTotalStatList);
 }

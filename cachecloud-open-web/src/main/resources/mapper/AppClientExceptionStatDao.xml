@@ -12,6 +12,15 @@
 		values(#{appId},#{collectTime},#{clientIp},#{reportTime},#{createTime},#{exceptionClass},#{exceptionCount},#{instanceHost},#{instancePort},#{instanceId},#{type})
 	</insert>
 	
+	<insert id="batchSave">
+		insert into app_client_exception_minute_stat(<include refid="columns" />)
+		values
+		<foreach collection="appClientExceptionStatList" item="clientException" separator=",">
+			(#{clientException.appId},#{clientException.collectTime},#{clientException.clientIp},#{clientException.reportTime},#{clientException.createTime},
+			#{clientException.exceptionClass},#{clientException.exceptionCount},#{clientException.instanceHost},#{clientException.instancePort},#{clientException.instanceId},#{clientException.type})
+	    </foreach>
+	</insert>
+	
 	<select id="getAppExceptionList" resultType="AppClientExceptionStat">
     	select id,<include refid="columns" />
     	from app_client_exception_minute_stat

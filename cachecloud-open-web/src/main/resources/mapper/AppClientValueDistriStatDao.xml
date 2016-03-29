@@ -12,6 +12,15 @@
 		values(#{appId},#{collectTime},#{clientIp},#{reportTime},#{createTime},#{command},#{distributeValue},#{distributeType},#{count},#{instanceHost},#{instancePort},#{instanceId})
 	</insert>
 	
+	<insert id="batchSave">
+		insert into app_client_value_distri_minute_stat(<include refid="columns" />)
+		values
+		<foreach collection="appClientValueDistriStatList" item="valueDistri" separator=",">
+        	(#{valueDistri.appId},#{valueDistri.collectTime},#{valueDistri.clientIp},#{valueDistri.reportTime},#{valueDistri.createTime},#{valueDistri.command},
+        	#{valueDistri.distributeValue},#{valueDistri.distributeType},#{valueDistri.count},#{valueDistri.instanceHost},#{valueDistri.instancePort},#{valueDistri.instanceId})
+	    </foreach>
+	</insert>
+	
 	<select id="getAppValueDistriList" resultType="AppClientValueDistriSimple">
     	select distribute_value,distribute_type, sum(count) as count
     	from app_client_value_distri_minute_stat
