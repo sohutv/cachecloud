@@ -201,16 +201,16 @@
 			                    <td>
 			                        <div class="progress margin-custom-bottom0">
 			                        	<c:choose>
-				                    		<c:when test="${appDetail.memUsePercent >= 80}">
-												<div class="progress-bar progress-bar-danger"
-													role="progressbar" aria-valuenow="${appDetail.memUsePercent}" aria-valuemax="100"
-													aria-valuemin="0" style="width: ${appDetail.memUsePercent}%">
-					                    	</c:when>
-				                    		<c:otherwise>
-												<div class="progress-bar progress-bar-success"
-													role="progressbar" aria-valuenow="${appDetail.memUsePercent}" aria-valuemax="100"
-													aria-valuemin="0" style="width: ${appDetail.memUsePercent}%">				                    		</c:otherwise>
-				                    	</c:choose>
+			                        		<c:when test="${appDetail.memUsePercent >= 80}">
+												<c:set var="progressBarStatus" value="progress-bar-danger"/>
+			                        		</c:when>
+			                        		<c:otherwise>
+												<c:set var="progressBarStatus" value="progress-bar-success"/>
+			                        		</c:otherwise>
+			                        	</c:choose>
+										<div class="progress-bar ${progressBarStatus}"
+											role="progressbar" aria-valuenow="${appDetail.memUsePercent}" aria-valuemax="100"
+											aria-valuemin="0" style="width: ${appDetail.memUsePercent}%">
 											<label style="color: #000000">
 												<fmt:formatNumber value="${appDetail.mem * appDetail.memUsePercent / 100 / 1024}" pattern="0.00"/>G&nbsp;&nbsp;Used/<fmt:formatNumber value="${appDetail.mem / 1024 * 1.0}" pattern="0.00"/>G&nbsp;&nbsp;Total
 											</label>
