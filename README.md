@@ -115,12 +115,12 @@ mvn clean compile install -Ponline
 ```
 +  拷贝war包(cachecloud-open-web/target/cachecloud-open-web-1.0-SNAPSHOT.war)到/opt/cachecloud-web下
 +  拷贝配置文件(cachecloud-open-web/src/main/resources/cachecloud-web.conf)到/opt/cachecloud-web下，并改名为cachecloud-open-web-1.0-SNAPSHOT.conf（spring-boot要求，否则配置不生效）
-+  启动方法1(作为系统服务启动，可能存在系统兼容性问题，目前redhat6.5,centos7正常)
++  **启动方法1**(作为系统服务启动，可能存在系统兼容性问题，目前redhat6.5,centos7正常)
 ```Java
 sudo ln -s /opt/cachecloud-web/cachecloud-open-web-1.0-SNAPSHOT.war /etc/init.d/cachecloud-web
 /etc/init.d/cachecloud-web start 
 ```
-+  启动方法2(使用脚本启动，大部分操作系统都正常)
++  **启动方法2**(使用脚本启动，大部分操作系统都正常)
 拷贝启动脚本(cachecloud根目录下script目录下的start.sh和stop.sh)到/opt/cachecloud-web下
 ```Java
 sh start.sh
