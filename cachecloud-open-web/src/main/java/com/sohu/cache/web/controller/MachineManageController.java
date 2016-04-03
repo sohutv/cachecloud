@@ -73,23 +73,18 @@ public class MachineManageController extends BaseController{
     @RequestMapping(value = "/add", method = {RequestMethod.POST})
     public ModelAndView doAdd(HttpServletRequest request,
                               HttpServletResponse response, Model model) {
-        int id = NumberUtils.toInt(request.getParameter("id"), 0);
-        MachineInfo machineInfo = null;
-        if (id > 0) {
-        } else {
-            machineInfo = new MachineInfo();
-            machineInfo.setIp(request.getParameter("ip"));
-            machineInfo.setRoom(request.getParameter("room"));
-            machineInfo.setMem(NumberUtils.toInt(request.getParameter("mem"), 0));
-            machineInfo.setCpu(NumberUtils.toInt(request.getParameter("cpu"), 0));
-            machineInfo.setVirtual(NumberUtils.toInt(request.getParameter("virtual"), 0));
-            machineInfo.setRealIp(request.getParameter("realIp"));
-            Date date = new Date();
-            machineInfo.setServiceTime(date);
-            machineInfo.setModifyTime(date);
-            boolean isSuccess = machineDeployCenter.addMachine(machineInfo);
-            model.addAttribute("result", isSuccess);
-        }
+        MachineInfo machineInfo = new MachineInfo();
+        machineInfo.setIp(request.getParameter("ip"));
+        machineInfo.setRoom(request.getParameter("room"));
+        machineInfo.setMem(NumberUtils.toInt(request.getParameter("mem"), 0));
+        machineInfo.setCpu(NumberUtils.toInt(request.getParameter("cpu"), 0));
+        machineInfo.setVirtual(NumberUtils.toInt(request.getParameter("virtual"), 0));
+        machineInfo.setRealIp(request.getParameter("realIp"));
+        Date date = new Date();
+        machineInfo.setServiceTime(date);
+        machineInfo.setModifyTime(date);
+        boolean isSuccess = machineDeployCenter.addMachine(machineInfo);
+        model.addAttribute("result", isSuccess);
         return new ModelAndView("");
     }
     
