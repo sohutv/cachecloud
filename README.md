@@ -123,7 +123,7 @@ sudo ln -s /opt/cachecloud-web/cachecloud-open-web-1.0-SNAPSHOT.war /etc/init.d/
 +  **启动方法2**(使用脚本启动，大部分操作系统都正常)
 拷贝启动脚本(cachecloud根目录下script目录下的start.sh和stop.sh)到/opt/cachecloud-web下
 ```Java
-sh start.sh
+sh start.sh #如果机器内存不足，可以适当调小:-Xmx和-Xms(默认是4g)
 sh stop.sh
 ```
         
