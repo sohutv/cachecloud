@@ -100,12 +100,6 @@
 							<option value="6" <c:if test="${appSearch.appType == 6}">selected</c:if>>
 								redis-standalone
 							</option>
-		                    <option value="1" <c:if test="${appSearch.appType == 1}">selected</c:if>>
-		                        Memcached
-		                    </option>
-		                    <option value="3" <c:if test="${appSearch.appType == 3}">selected</c:if>>
-		                        MemcacheQ
-		                    </option>
 						</select>
 					 </div>
 					 <div class="form-group">
