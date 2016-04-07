@@ -365,10 +365,10 @@ public class AppDeployCenterImpl implements AppDeployCenter {
         boolean joinCluster = clusterReshard.joinCluster(masterHost, masterPort, slaveHost, slavePort);
         if (joinCluster) {
             //保存实例
-            InstanceInfo instanceInfo = saveInstance(appId, 0, masterHost, masterPort, memory);
+            saveInstance(appId, masterHost, masterPort, memory);
             redisCenter.deployRedisCollection(appId, masterHost, masterPort);
             if (hasSlave) {
-                saveInstance(appId, instanceInfo.getParentId(), slaveHost, slavePort, memory);
+                saveInstance(appId, slaveHost, slavePort, memory);
                 redisCenter.deployRedisCollection(appId, slaveHost, slavePort);
             }
         }
@@ -511,7 +511,7 @@ public class AppDeployCenterImpl implements AppDeployCenter {
         return processMap;
     }
 
-    private InstanceInfo saveInstance(long appId, int parentId, String host, int port, int maxMemory) {
+    private InstanceInfo saveInstance(long appId, String host, int port, int maxMemory) {
         InstanceInfo instanceInfo = new InstanceInfo();
         instanceInfo.setAppId(appId);
         MachineInfo machineInfo = machineCenter.getMachineInfoByIp(host);
@@ -521,7 +521,6 @@ public class AppDeployCenterImpl implements AppDeployCenter {
         instanceInfo.setStatus(InstanceStatusEnum.GOOD_STATUS.getStatus());
         instanceInfo.setPort(port);
         instanceInfo.setType(ConstUtils.CACHE_TYPE_REDIS_CLUSTER);
-        instanceInfo.setParentId(parentId);
         instanceInfo.setCmd("");
         instanceInfo.setIp(host);
         instanceDao.saveInstance(instanceInfo);

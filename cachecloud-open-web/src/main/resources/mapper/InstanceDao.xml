@@ -4,7 +4,7 @@
 
 <mapper namespace="com.sohu.cache.dao.InstanceDao">
     <sql id="instance_info_columns">
-        id, parent_id, app_id, host_id, ip, port, status, mem, conn, cmd, type
+        id, app_id, host_id, ip, port, status, mem, conn, cmd, type
     </sql>
 
     <!--通过type查询实例列表-->
@@ -71,14 +71,13 @@
 
     <!--保存实例-->
     <insert id="saveInstance" parameterType="InstanceInfo" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
-        INSERT INTO instance_info (parent_id, app_id, host_id, ip, port, status, mem, conn, cmd, type)
-        VALUE(#{parentId}, #{appId}, #{hostId}, #{ip}, #{port}, #{status}, #{mem}, #{conn}, #{cmd}, #{type});
+        INSERT INTO instance_info (app_id, host_id, ip, port, status, mem, conn, cmd, type)
+        VALUE(#{appId}, #{hostId}, #{ip}, #{port}, #{status}, #{mem}, #{conn}, #{cmd}, #{type});
     </insert>
 
     <update id="update" parameterType="InstanceInfo">
         update instance_info
         set
-        <if test="parentId != null">parent_id=#{parentId},</if>
         <if test="appId != null">app_id=#{appId},</if>
         <if test="hostId != null">host_id=#{hostId},</if>
         <if test="ip != null">ip=#{ip},</if>

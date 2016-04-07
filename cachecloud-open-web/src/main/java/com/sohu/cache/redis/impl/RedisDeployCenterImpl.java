@@ -101,11 +101,11 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
                 Jedis master = entry.getKey();
                 Jedis slave = entry.getValue();
                 //保存实例信息 & 触发收集
-                InstanceInfo instanceInfo = saveInstance(appId, 0, master.getClient().getHost(),
+                saveInstance(appId, master.getClient().getHost(),
                         master.getClient().getPort(), maxMemory, ConstUtils.CACHE_TYPE_REDIS_CLUSTER, "");
                 redisCenter.deployRedisCollection(appId, master.getClient().getHost(), master.getClient().getPort());
                 if (slave != null) {
-                    saveInstance(appId, instanceInfo.getId(), slave.getClient().getHost(), slave.getClient().getPort(),
+                    saveInstance(appId, slave.getClient().getHost(), slave.getClient().getPort(),
                             maxMemory, ConstUtils.CACHE_TYPE_REDIS_CLUSTER, "");
                     redisCenter.deployRedisCollection(appId, slave.getClient().getHost(), slave.getClient().getPort());
                 }
@@ -309,9 +309,9 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         }
 
         //写入instanceInfo 信息
-        InstanceInfo masterInfo = saveInstance(appId, 0, masterHost, masterPort, maxMemory,
+        saveInstance(appId, masterHost, masterPort, maxMemory,
                 ConstUtils.CACHE_REDIS_STANDALONE, "");
-        saveInstance(appId, masterInfo.getId(), slaveHost, slavePort, maxMemory, ConstUtils.CACHE_REDIS_STANDALONE, "");
+        saveInstance(appId, slaveHost, slavePort, maxMemory, ConstUtils.CACHE_REDIS_STANDALONE, "");
 
         //启动监控trigger
         boolean isMasterDeploy = redisCenter.deployRedisCollection(appId, masterHost, masterPort);
@@ -344,7 +344,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         }
 
         //写入instanceInfo 信息
-        InstanceInfo instanceInfo = saveInstance(appId, 0, host, port, maxMemory, ConstUtils.CACHE_REDIS_STANDALONE,
+        saveInstance(appId, host, port, maxMemory, ConstUtils.CACHE_REDIS_STANDALONE,
                 "");
 
         //启动监控trigger
@@ -355,7 +355,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         return true;
     }
 
-    private InstanceInfo saveInstance(long appId, int parentId, String host, int port, int maxMemory, int type,
+    private InstanceInfo saveInstance(long appId, String host, int port, int maxMemory, int type,
             String cmd) {
         InstanceInfo instanceInfo = new InstanceInfo();
         instanceInfo.setAppId(appId);
@@ -366,7 +366,6 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         instanceInfo.setStatus(InstanceStatusEnum.GOOD_STATUS.getStatus());
         instanceInfo.setPort(port);
         instanceInfo.setType(type);
-        instanceInfo.setParentId(parentId);
         instanceInfo.setCmd(cmd);
         instanceInfo.setIp(host);
         instanceDao.saveInstance(instanceInfo);
@@ -498,7 +497,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
             logger.warn("runSentinel-fallback : redis-cli -h {} -p {} shutdown", sentinelHost, sentinelPort);
         }
         //save sentinel
-        saveInstance(appId, 0, sentinelHost, sentinelPort, 0, ConstUtils.CACHE_REDIS_SENTINEL,
+        saveInstance(appId, sentinelHost, sentinelPort, 0, ConstUtils.CACHE_REDIS_SENTINEL,
                 getMasterName(masterHost, masterPort));
         return true;
     }
@@ -804,7 +803,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         }
         
         // 7.保存实例信息、并开启收集信息
-        saveInstance(appId, 0, newMasterHost, newMasterPort, healthyMasterMem, ConstUtils.CACHE_TYPE_REDIS_CLUSTER, "");
+        saveInstance(appId, newMasterHost, newMasterPort, healthyMasterMem, ConstUtils.CACHE_TYPE_REDIS_CLUSTER, "");
         redisCenter.deployRedisCollection(appId, newMasterHost, newMasterPort);
         
         // 休息一段时间，同步clusterNodes信息
@@ -907,10 +906,10 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
 
         //写入instanceInfo 信息
         if (TypeUtil.isRedisCluster(type)) {
-            saveInstance(appId, instanceId, slaveHost, slavePort, instanceInfo.getMem(),
+            saveInstance(appId, slaveHost, slavePort, instanceInfo.getMem(),
                     ConstUtils.CACHE_TYPE_REDIS_CLUSTER, "");
         } else {
-            saveInstance(appId, instanceId, slaveHost, slavePort, instanceInfo.getMem(),
+            saveInstance(appId, slaveHost, slavePort, instanceInfo.getMem(),
                     ConstUtils.CACHE_REDIS_STANDALONE, "");
         }
         //启动监控trigger

@@ -6,7 +6,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -31,8 +30,7 @@ public class ObjectConvert {
     }
 
     /**
-     * 将实例列表根据主从关系配对，主从之间以逗号分隔，分片之间以空格分隔，如：
-     *   "xx.xx.xx.xx:1008,xx.xx.xx.xx:1009 xx.xx.xx.xx:1201,xx.xx.xx.xx:1301"
+     * 将实例列表转化为ip1:port1,ip2:port2
      *
      * @param instanceList
      * @return
@@ -41,28 +39,13 @@ public class ObjectConvert {
         if (instanceList.isEmpty()) {
             return null;
         }
-        // 将主从实例分离
-        List<InstanceInfo> masterInstList = new ArrayList<InstanceInfo>();
-        List<InstanceInfo> slaveInstList = new ArrayList<InstanceInfo>();
-        for (InstanceInfo instanceInfo: instanceList) {
-            if (instanceInfo.getParentId() == 0) {
-                masterInstList.add(instanceInfo);
-            } else {
-                slaveInstList.add(instanceInfo);
-            }
-        }
-
-        // 主从实例配对，并构成"主,从 主,从"的形式返回(存在一主多从的情况)
         StringBuilder instanceBuilder = new StringBuilder();
-        for (InstanceInfo master : masterInstList) {
-            instanceBuilder.append(master.getIp()).append(":").append(master.getPort());
-            for (InstanceInfo slave : slaveInstList) {
-                if (master.getId() == slave.getParentId()) {
-                    instanceBuilder.append(",");
-                    instanceBuilder.append(slave.getIp()).append(":").append(slave.getPort());
-                }
+        for (int i = 0; i < instanceList.size(); i++) {
+            InstanceInfo instanceInfo = instanceList.get(i);
+            if (i > 0) {
+                instanceBuilder.append(",");
             }
-            instanceBuilder.append(" ");
+            instanceBuilder.append(instanceInfo.getIp()).append(":").append(instanceInfo.getPort());
         }
         return StringUtils.trim(instanceBuilder.toString());
     }

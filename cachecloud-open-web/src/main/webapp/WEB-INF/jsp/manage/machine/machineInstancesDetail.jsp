@@ -2,7 +2,7 @@
 <%@ include file="/WEB-INF/jsp/manage/commons/taglibs.jsp"%>
 <script type="text/javascript">
 	function startInstance(instanceId){
-		if(confirm("确认要开启该实例吗?")){
+		if(confirm("确认要开启"+instanceId+"实例吗?")){
 			$.ajax({
                 type: "get",
                 url: "/manage/instance/startInstance.json",
@@ -23,7 +23,7 @@
 	}
 	
 	function shutdownInstance(instanceId){
-		if(confirm("确认要下线该实例吗?")){
+		if(confirm("确认要下线"+instanceId+"实例吗?")){
 			$.ajax({
                 type: "get",
                 url: "/manage/instance/shutdownInstance.json",
@@ -96,41 +96,29 @@
 		                            <td>${instance.ip}:${instance.port}</td>
 		                            <td>
 		                                <div class="progress margin-custom-bottom0">
-		                                    <c:choose>
-		                                    <c:when test="${(instanceStatsMap[instanceStatsMapKey]).memUsePercent >= 80}">
-		                                    <div class="progress-bar progress-bar-danger"
+		                                	<c:choose>
+				                        		<c:when test="${(instanceStatsMap[instanceStatsMapKey]).memUsePercent >= 80}">
+													<c:set var="progressBarStatus" value="progress-bar-danger"/>
+				                        		</c:when>
+				                        		<c:otherwise>
+													<c:set var="progressBarStatus" value="progress-bar-success"/>
+				                        		</c:otherwise>
+				                        	</c:choose>
+		                                    <div class="progress-bar ${progressBarStatus}"
 		                                         role="progressbar"
 		                                         aria-valuenow="${(instanceStatsMap[instanceStatsMapKey]).memUsePercent }"
 		                                         aria-valuemax="100"
 		                                         aria-valuemin="0"
 		                                         style="width: ${(instanceStatsMap[instanceStatsMapKey]).memUsePercent }%">
-		                                        </c:when>
-		                                        <c:otherwise>
-		                                        <div class="progress-bar progress-bar-success"
-		                                             role="progressbar"
-		                                             aria-valuenow="${(instanceStatsMap[instanceStatsMapKey]).memUsePercent }"
-		                                             aria-valuemax="100"
-		                                             aria-valuemin="0"
-		                                             style="width: ${(instanceStatsMap[instanceStatsMapKey]).memUsePercent }%">
-		                                            </c:otherwise>
-		                                            </c:choose>
 		                                            <label style="color: #000000">
 		                                                <fmt:formatNumber
 		                                                        value="${(instanceStatsMap[instanceStatsMapKey]).usedMemory / 1024 / 1024 / 1024}"
-		                                                        pattern="0.00"/>G&nbsp;&nbsp;Used/${(instanceStatsMap[instanceStatsMapKey]).maxMemory / 1024 / 1024 / 1024}G&nbsp;&nbsp;Total
+		                                                        pattern="0.00"/>G&nbsp;&nbsp;Used/<fmt:formatNumber value="${(instanceStatsMap[instanceStatsMapKey]).maxMemory / 1024 / 1024 / 1024}" pattern="0.00"/>G&nbsp;&nbsp;Total
 		                                            </label>
-		                                        </div>
-		                                    </div>
+		                                     </div>
 		                                </div>
 		                            </td>
-		                            <c:choose>
-		                                <c:when test="${instance.parentId > 0}">
-		                                    <td>slave</td>
-		                                </c:when>
-		                                <c:otherwise>
-		                                    <td>master</td>
-		                                </c:otherwise>
-		                            </c:choose>
+                            		<td>${instance.roleDesc}</td>
 		                            <td><fmt:formatNumber
 		                                    value="${(machineCanUseMem[instance.ip])/1024/1024/1024}"
 		                                    pattern="0.00"/>

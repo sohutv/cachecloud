@@ -27,7 +27,6 @@
                         <td>角色</td>
                         <%--<td>主实例ID</td>--%>
                         <td>实例所在机器信息可用内存</td>
-                        <td>下线实例</td>
                     </tr>
                     </thead>
                     <tbody>
@@ -39,51 +38,32 @@
                             <td>
                                 <c:set var="instanceStatsMapKey" value="${instance.ip}:${instance.port}"></c:set>
                                 <div class="progress margin-custom-bottom0">
-                                    <c:choose>
-                                    <c:when test="${(instanceStatsMap[instanceStatsMapKey]).memUsePercent >= 80}">
-                                    <div class="progress-bar progress-bar-danger"
+                                	<c:choose>
+		                        		<c:when test="${(instanceStatsMap[instanceStatsMapKey]).memUsePercent >= 80}">
+											<c:set var="progressBarStatus" value="progress-bar-danger"/>
+		                        		</c:when>
+		                        		<c:otherwise>
+											<c:set var="progressBarStatus" value="progress-bar-success"/>
+		                        		</c:otherwise>
+		                        	</c:choose>
+                                    <div class="progress-bar ${progressBarStatus}"
                                          role="progressbar"
                                          aria-valuenow="${(instanceStatsMap[instanceStatsMapKey]).memUsePercent }"
                                          aria-valuemax="100"
                                          aria-valuemin="0"
                                          style="width: ${(instanceStatsMap[instanceStatsMapKey]).memUsePercent }%">
-                                        </c:when>
-                                        <c:otherwise>
-                                        <div class="progress-bar progress-bar-success"
-                                             role="progressbar"
-                                             aria-valuenow="${(instanceStatsMap[instanceStatsMapKey]).memUsePercent }"
-                                             aria-valuemax="100"
-                                             aria-valuemin="0"
-                                             style="width: ${(instanceStatsMap[instanceStatsMapKey]).memUsePercent }%">
-                                            </c:otherwise>
-                                            </c:choose>
                                             <label style="color: #000000">
                                                 <fmt:formatNumber
                                                         value="${(instanceStatsMap[instanceStatsMapKey]).usedMemory / 1024 / 1024 / 1024}"
-                                                        pattern="0.00"/>G&nbsp;&nbsp;Used/${(instanceStatsMap[instanceStatsMapKey]).maxMemory / 1024 / 1024 / 1024}G&nbsp;&nbsp;Total
+                                                        pattern="0.00"/>G&nbsp;&nbsp;Used/<fmt:formatNumber value="${(instanceStatsMap[instanceStatsMapKey]).maxMemory / 1024 / 1024 / 1024}" pattern="0.00"/>G&nbsp;&nbsp;Total
                                             </label>
-                                        </div>
-                                    </div>
+                                     </div>
                                 </div>
                             </td>
-                            <c:choose>
-                                <c:when test="${instance.parentId > 0}">
-                                    <td>slave</td>
-                                    <%--<td>${instance.parentId}</td>--%>
-                                </c:when>
-                                <c:otherwise>
-                                    <td>master</td>
-                                    <%--<td></td>--%>
-                                </c:otherwise>
-                            </c:choose>
+                            <td>${instance.roleDesc}</td>
                             <td><fmt:formatNumber
                                     value="${(machineCanUseMem[instance.ip])/1024/1024/1024}"
                                     pattern="0.00"/>G
-                            </td>
-                            <td>
-                            	<a target="_blank" onclick="if(window.confirm('确认要下线该实例吗?')){return true;}else{return false;}" class="btn green" href="/manage/app/offLineHorizontalShard.do?appId=${appId}&appAuditId=${appAudit.id}&ip=${instance.ip}&port=${instance.port}">
-                            		下线实例
-                            	</a>
                             </td>
                         </tr>
                     </c:forEach>
