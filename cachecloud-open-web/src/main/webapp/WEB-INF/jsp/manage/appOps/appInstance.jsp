@@ -59,7 +59,7 @@
 	                alert("执行成功!");
 	            	$("#redisClusterFailOverInfo" + instanceId).html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Success!</strong>执行成功，应用的拓扑结构要1分钟之后生效，请耐心等待</div>");
 	                var targetId = "#redisClusterFailOverModal" + instanceId;
-	            	setTimeout("$('" + targetId +"').modal('hide');reloadAppInstancesPage("+appId+");",1000);
+	            	setTimeout("$('" + targetId +"').modal('hide');window.location.reload();",1000);
 	            }else{
 	            	redisClusterFailOverBtn.disabled = false;
 	                $("#redisClusterFailOverInfo" + instanceId).html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Error!</strong>执行失败，请查找原因！</div>");
@@ -89,7 +89,7 @@
 	                alert("执行成功!");
 	            	$("#redisClusterAddSlaveInfo" + instanceId).html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Success!</strong>添加成功!</div>");
 	                var targetId = "#redisClusterAddSlaveModal" + instanceId;
-	                setTimeout("$('" + targetId +"').modal('hide');reloadAppInstancesPage("+appId+");",1000);
+	                setTimeout("$('" + targetId +"').modal('hide');window.location.reload();",1000);
 	            }else{
 	            	redisClusterAddSlaveBtn.disabled = false;
 	                $("#redisClusterAddSlaveInfo" + instanceId).html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Error!</strong>执行失败，请查找原因！</div>");
@@ -119,7 +119,7 @@
 	                alert("执行成功!");
 	            	$("#redisSentinelAddSlaveInfo" + instanceId).html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Success!</strong>添加成功!</div>");
 	                var targetId = "#redisSentinelAddSlaveModal" + instanceId;
-	                setTimeout("$('" + targetId +"').modal('hide');reloadAppInstancesPage("+appId+");",1000);
+	                setTimeout("$('" + targetId +"').modal('hide');window.location.reload();",1000);
 	            }else{
 	            	redisSentinelAddSlaveBtn.disabled = false;
 	                $("#redisSentinelAddSlaveInfo" + instanceId).html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Error!</strong>执行失败，请查找原因！</div>");
@@ -142,7 +142,7 @@
 	                alert("执行成功!");
 	            	$("#redisSentinelFailOverInfo").html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Success!</strong>执行成功，应用的拓扑结构要1分钟之后生效，请耐心等待</div>");
 	                var targetId = "#redisSentinelFailOverModal";
-	            	setTimeout("$('" + targetId +"').modal('hide');reloadAppInstancesPage("+appId+");",1000);
+	            	setTimeout("$('" + targetId +"').modal('hide');window.location.reload();",1000);
 	            }else{
 	            	redisSentinelFailOverBtn.disabled = false;
 	                $("#redisSentinelFailOverInfo").html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Error!</strong>执行失败，请查找原因！</div>");
@@ -171,7 +171,7 @@
 	            	}
 	            	$("#redisAddFailSlotsMasterInfo" + instanceId).html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Success!</strong>执行成功，应用的拓扑结构要1分钟之后生效，请耐心等待</div>");
 	                var targetId = "#redisAddFailSlotsMasterModal" + instanceId;
-	            	setTimeout("$('" + targetId +"').modal('hide');reloadAppInstancesPage("+appId+");",1000);
+	            	setTimeout("$('" + targetId +"').modal('hide');window.location.reload();",1000);
 	            } else{
 	            	redisAddFailSlotsMasterBtn.disabled = false;
 	                $("#redisAddFailSlotsMasterInfo" + instanceId).html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Error!</strong>执行失败，请查找原因！</div>");
@@ -200,18 +200,13 @@
 	                alert("执行成功!");
 	            	$("#redisAddSentinelInfo").html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Success!</strong>添加成功!</div>");
 	                var targetId = "#redisAddSentinelModal";
-	                setTimeout("$('" + targetId +"').modal('hide');reloadAppInstancesPage("+appId+");",1000);
+	                setTimeout("$('" + targetId +"').modal('hide');window.location.reload();",1000);
 	            }else{
 	            	redisAddSentinelBtn.disabled = false;
 	                $("#redisAddSentinelInfo").html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Error!</strong>执行失败，请查找原因！</div>");
 	            }
 	        }
 	     );
-	}
-	
-	//重新加载appDetail页面
-	function reloadAppInstancesPage(appId){
-		location.href = "/manage/app/index.do?appId=" + appId + "#app_ops_instance";
 	}
 	
 </script>
