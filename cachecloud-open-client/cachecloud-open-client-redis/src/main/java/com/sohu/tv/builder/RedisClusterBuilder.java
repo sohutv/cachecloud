@@ -114,20 +114,17 @@ public class RedisClusterBuilder {
                     }
 
                     Set<HostAndPort> nodeList = new HashSet<HostAndPort>();
-
+                    //形如 ip1:port1,ip2:port2,ip3:port3
                     String nodeInfo = heartbeatInfo.getShardInfo();
-                    String[] pairArray = nodeInfo.split(" ");
-                    for (String pair : pairArray) {
-                        String[] nodes = pair.split(",");
-                        for (String node : nodes) {
-                            String[] ipAndPort = node.split(":");
-                            if (ipAndPort.length < 2) {
-                                continue;
-                            }
-                            String ip = ipAndPort[0];
-                            int port = Integer.parseInt(ipAndPort[1]);
-                            nodeList.add(new HostAndPort(ip, port));
+                    String[] nodeArray = nodeInfo.split(",");
+                    for (String node : nodeArray) {
+                        String[] ipAndPort = node.split(":");
+                        if (ipAndPort.length < 2) {
+                            continue;
                         }
+                        String ip = ipAndPort[0];
+                        int port = Integer.parseInt(ipAndPort[1]);
+                        nodeList.add(new HostAndPort(ip, port));
                     }
                     
                     //收集上报数据
