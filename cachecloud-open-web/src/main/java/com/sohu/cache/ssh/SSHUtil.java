@@ -92,6 +92,7 @@ public class SSHUtil {
      *
      * @param ip
      * @param userName
+     * @param keypath
      * @param password
      * @throws Exception
      * @since 1.0.0
@@ -116,10 +117,10 @@ public class SSHUtil {
             {
                 isAuthenticated = conn.authenticateWithPublicKey(userName, key, password);
             }else{
-                throw new Exception("File open failed with public key: " + keypath);
+                throw new Exception("File open failed with private key: " + keypath);
             }
             if (isAuthenticated == false) {
-                    throw new Exception("SSH authentication failed with [ userName: " + userName + ",public key: " + keypath + "]");
+                    throw new Exception("SSH authentication failed with [ userName: " + userName + ",private key: " + keypath + "]");
             }
             return getMachineInfo(conn);
         } catch (Exception e) {
@@ -399,7 +400,7 @@ public class SSHUtil {
      *
      * @param ip       主机ip
      * @param username 用户名
-     * @param keypath      public key file
+     * @param keypath      private key file
      * @param password key密码
      * @param command  要执行的命令
      */
@@ -425,7 +426,7 @@ public class SSHUtil {
                 isAuthenticated = conn.authenticateWithPublicKey(username, key, password);
             }
             if (isAuthenticated == false) {
-                    throw new Exception("SSH authentication failed with [ userName: " + username + ",public key: " + keypath + "]");
+                    throw new Exception("SSH authentication failed with [ userName: " + username + ",private key: " + keypath + "]");
             }
             session = conn.openSession();
             session.execCommand(command);
