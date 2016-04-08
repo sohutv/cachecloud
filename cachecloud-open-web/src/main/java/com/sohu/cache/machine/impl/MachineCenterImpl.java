@@ -30,8 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
-import redis.clients.jedis.HostAndPort;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -119,7 +117,8 @@ public class MachineCenterImpl implements MachineCenter {
         MachineStats machineStats = null;
         try {
             int sshPort = SSHUtil.getSshPort(ip);
-            machineStats = SSHUtil.getMachineInfo(ip, sshPort, ConstUtils.USERNAME, ConstUtils.PASSWORD);
+            //machineStats = SSHUtil.getMachineInfo(ip, sshPort, ConstUtils.USERNAME, ConstUtils.PASSWORD);
+            machineStats = SSHUtil.getMachineInfo(ip);
             machineStats.setHostId(hostId);
             if (machineStats != null) {
                 infoMap.put(MachineConstant.Ip.getValue(), machineStats.getIp());
@@ -456,43 +455,24 @@ public class MachineCenterImpl implements MachineCenter {
     
     @Override
     public List<InstanceInfo> getMachineInstanceInfo(String ip) {
-        List<InstanceInfo> resultList = instanceDao.getInstListByIp(ip);
-        if (resultList == null || resultList.isEmpty()) {
-            return resultList;
+        List<InstanceInfo> list = instanceDao.getInstListByIp(ip);
+        if (list == null || list.isEmpty()) {
+            return list;
         }
-        if (resultList != null && resultList.size() > 0) {
-            for (InstanceInfo instanceInfo : resultList) {
-                int type = instanceInfo.getType();
-                if(instanceInfo.getStatus() != InstanceStatusEnum.GOOD_STATUS.getStatus()){
-                    continue;
-                }
-                if (TypeUtil.isRedisType(type)) {
-                    if (TypeUtil.isRedisSentinel(type)) {
-                        continue;
-                    }
-                    String host = instanceInfo.getIp();
-                    int port = instanceInfo.getPort();
-                    Boolean isMaster = redisCenter.isMaster(host, port);
-                    instanceInfo.setRoleDesc(isMaster);
-                    if(isMaster != null && !isMaster){
-                        HostAndPort hap = redisCenter.getMaster(host, port);
-                        if (hap != null) {
-                            instanceInfo.setMasterHost(hap.getHost());
-                            instanceInfo.setMasterPort(hap.getPort());
-                            for (InstanceInfo innerInfo : resultList) {
-                                if (innerInfo.getIp().equals(hap.getHost())
-                                        && innerInfo.getPort() == hap.getPort()) {
-                                    instanceInfo.setMasterInstanceId(innerInfo.getId());
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
+        for (InstanceInfo info : list) {
+            int type = info.getType();
+            String host = info.getIp();
+            int port = info.getPort();
+            if (TypeUtil.isRedisType(type)) {
+                boolean isRun = redisCenter.isRun(host, port);
+                if (isRun) {
+                    info.setStatus(InstanceStatusEnum.GOOD_STATUS.getStatus());
+                } else {
+                    info.setStatus(InstanceStatusEnum.ERROR_STATUS.getStatus());
                 }
             }
         }
-        return resultList;
+        return list;
     }
     
     @Override

@@ -22,8 +22,11 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.text.DecimalFormat;
 import java.util.HashMap;
@@ -81,6 +84,72 @@ public class SSHUtil {
             if (null != conn)
                 conn.close();
         }
+    }
+
+    /**
+     * Get HostPerformanceEntity[cpuUsage, memUsage, load] by ssh.<br>
+     * 方法返回前已经释放了所有资源，调用方不需要关心
+     *
+     * @param ip
+     * @param userName
+     * @param password
+     * @throws Exception
+     * @since 1.0.0
+     */
+    public static MachineStats getMachineInfo(String ip, int port, String userName, String keypath, String password) throws SSHException {
+
+        if (StringUtil.isBlank(ip)) {
+            try {
+                throw new IllegalParamException("Param ip is empty!");
+            } catch (IllegalParamException e) {
+                throw new SSHException(e.getMessage(), e);
+            }
+        }
+        port = IntegerUtil.defaultIfSmallerThan0(port, MachineProtocol.SSH_PORT_DEFAULT);
+        Connection conn = null;
+        try {
+            conn = new Connection(ip, port);
+            conn.connect(null, 2000, 2000);
+            boolean isAuthenticated = false;
+            File key = new File(keypath);
+            if (key.exists())
+            {
+                isAuthenticated = conn.authenticateWithPublicKey(userName, key, password);
+            }else{
+                throw new Exception("File open failed with public key: " + keypath);
+            }
+            if (isAuthenticated == false) {
+                    throw new Exception("SSH authentication failed with [ userName: " + userName + ",public key: " + keypath + "]");
+            }
+            return getMachineInfo(conn);
+        } catch (Exception e) {
+            throw new SSHException("SSH error, ip: " + ip, e);
+        } finally {
+            if (null != conn)
+                conn.close();
+        }
+    }
+
+    /**
+     * Get HostPerformanceEntity[cpuUsage, memUsage, load] by ssh.<br>
+     * 方法返回前已经释放了所有资源，调用方不需要关心
+     *
+     * @param ip
+     * @since 1.0.0
+     */
+    public static MachineStats getMachineInfo(String ip) throws SSHException {
+        if (StringUtil.isBlank(ip)) {
+            try {
+                throw new IllegalParamException("Param ip is empty!");
+            } catch (IllegalParamException e) {
+                throw new SSHException(e.getMessage(), e);
+            }
+        }
+        int sshPort = SSHUtil.getSshPort(ip);
+        if(MachineProtocol.SSH_AUTH_PUBLICKEY.equals(ConstUtils.AUTHTYPE)){
+            return getMachineInfo(ip, sshPort, ConstUtils.USERNAME, ConstUtils.KEY, ConstUtils.PASSWORD);
+        }
+        return getMachineInfo(ip, sshPort, ConstUtils.USERNAME, ConstUtils.PASSWORD);
     }
 
     /**
@@ -326,6 +395,70 @@ public class SSHUtil {
     }
 
     /**
+     * SSH 方式登录远程主机，执行命令,方法内部会关闭所有资源，调用方无须关心。
+     *
+     * @param ip       主机ip
+     * @param username 用户名
+     * @param keypath      public key file
+     * @param password key密码
+     * @param command  要执行的命令
+     */
+    public static String execute(String ip, int port, String username, String keypath, String password, String command) throws SSHException {
+
+        if (StringUtil.isBlank(command))
+            return EMPTY_STRING;
+        port = IntegerUtil.defaultIfSmallerThan0(port, MachineProtocol.SSH_PORT_DEFAULT);
+        Connection conn = null;
+        Session session = null;
+        BufferedReader read = null;
+        StringBuffer sb = new StringBuffer();
+        try {
+            if (StringUtil.isBlank(ip)) {
+                throw new IllegalParamException("Param ip is empty!");
+            }
+            conn = new Connection(ip, port);
+            conn.connect(null, 6000, 6000);
+            boolean isAuthenticated = false;
+            File key = new File(keypath);
+            if (key.exists())
+            {
+                isAuthenticated = conn.authenticateWithPublicKey(username, key, password);
+            }
+            if (isAuthenticated == false) {
+                    throw new Exception("SSH authentication failed with [ userName: " + username + ",public key: " + keypath + "]");
+            }
+            session = conn.openSession();
+            session.execCommand(command);
+            //stderr
+            printSessionStdErr(ip, command, session);
+            //stdout
+            read = new BufferedReader(new InputStreamReader(new StreamGobbler(session.getStdout())));
+            String line = "";
+            int lineNumber = 1;
+            while ((line = read.readLine()) != null) {
+//                sb.append(line).append(BR);
+                if (lineNumber++ > 1) {
+                    sb.append(System.lineSeparator());
+                }
+                sb.append(line);
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            throw new SSHException("SSH远程执行command: " + command + " 出现错误: " + e.getMessage(), e);
+        } finally {
+            if (null != read) {
+                try {
+                    read.close();
+                } catch (IOException e) {
+                }
+            }
+            if (null != session)
+                session.close();
+            if (null != conn)
+                conn.close();
+        }
+    }
+    /**
      * @param ip
      * @param port
      * @param username
@@ -356,7 +489,42 @@ public class SSHUtil {
         }
         return isSuccess;
     }
-
+    /**
+     * @param ip
+     * @param port
+     * @param username
+     * @param password
+     * @param localPath
+     * @param remoteDir
+     * @return
+     * @throws SSHException
+     */
+    public static boolean scpFileToRemote(String ip, int port, String username, String keypath,  String password, String localPath, String remoteDir) throws SSHException{
+        boolean isSuccess = true;
+        Connection connection = new Connection(ip, port);
+        try {
+            connection.connect();
+            boolean isAuthed = false;
+            File key = new File(keypath);
+            if (key.exists())
+            {
+                isAuthed = connection.authenticateWithPublicKey(username, key, password);
+            }
+            if (!isAuthed) {
+                throw new SSHException("auth error.");
+            }
+            SCPClient scpClient = connection.createSCPClient();
+            scpClient.put(localPath, remoteDir, "0644");
+        } catch (IOException e) {
+            isSuccess = false;
+            throw new SSHException("scp file to remote error.", e);
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
+        }
+        return isSuccess;
+    }
     /**
      * 重载，使用默认端口、用户名和密码
      *
@@ -368,6 +536,9 @@ public class SSHUtil {
      */
     public static boolean scpFileToRemote(String ip, String localPath, String remoteDir) throws SSHException {
         int sshPort = SSHUtil.getSshPort(ip);
+        if(MachineProtocol.SSH_AUTH_PUBLICKEY.equals(ConstUtils.AUTHTYPE)){
+            return scpFileToRemote(ip, sshPort, ConstUtils.USERNAME, ConstUtils.KEY, ConstUtils.PASSWORD, localPath, remoteDir);
+        }
         return scpFileToRemote(ip, sshPort, ConstUtils.USERNAME, ConstUtils.PASSWORD, localPath, remoteDir);
     }
 
@@ -381,6 +552,9 @@ public class SSHUtil {
      */
     public static String execute(String ip, String cmd) throws SSHException {
         int sshPort = SSHUtil.getSshPort(ip);
+        if(MachineProtocol.SSH_AUTH_PUBLICKEY.equals(ConstUtils.AUTHTYPE)){
+            return execute(ip, sshPort, ConstUtils.USERNAME, ConstUtils.KEY, ConstUtils.PASSWORD, cmd);
+        }
         return execute(ip, sshPort, ConstUtils.USERNAME, ConstUtils.PASSWORD, cmd);
     }
 

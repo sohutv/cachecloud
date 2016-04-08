@@ -65,9 +65,13 @@ public class ConstUtils {
      */
     public static String USERNAME;
     public static String PASSWORD;
+    public static String KEY;
+    public static String AUTHTYPE;
     
     static {
         ResourceBundle resourceBundle = ResourceBundle.getBundle("application");
+        AUTHTYPE = resourceBundle.getString("shell.auth");
+        KEY = resourceBundle.getString("shell.auth.key.path");
         USERNAME = resourceBundle.getString("shell.auth.simple.user.name");
         PASSWORD = resourceBundle.getString("shell.auth.simple.user.password");
     }
