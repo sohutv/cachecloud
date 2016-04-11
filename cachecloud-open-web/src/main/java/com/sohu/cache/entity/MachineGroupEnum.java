@@ -11,10 +11,8 @@ import java.util.Map;
  * @Time 下午1:42:51
  */
 public enum MachineGroupEnum {
-    MOBIL_GROUP(0, "本组"),
-    UGC_GROUP(1, "ugc组"),
-    HADOOP_GROUP(2, "hadoop组"),
-    VRS_GROUP(3, "vrs组");
+    GROUP_ONE(1, "1组"),
+    GROUP_TWO(2, "2组");
 
     private static final Map<Integer, MachineGroupEnum> MAP = new HashMap<Integer, MachineGroupEnum>();
 
