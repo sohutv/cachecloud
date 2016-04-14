@@ -6,7 +6,7 @@
     <title>CacheCloud用户申请</title>
     <script type="text/javascript">
   	//验证手机号格式
-    var valPhones=/^(1[3|5|8][0-9]\d{4,8};){0,6}(1[3|5|8][0-9]\d{4,8})$/; 
+    var valPhones=/^(1[3|5|7|8][0-9]\d{4,8};){0,6}(1[3|5|8][0-9]\d{4,8})$/; 
     //验证邮箱格式
     var valEmails=/^(([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.|\-]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3};){0,6}([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.|\-]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/;
     function checkUser(){
