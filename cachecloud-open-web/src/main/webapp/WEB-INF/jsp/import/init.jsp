@@ -100,6 +100,7 @@
     				var status = data.status;
     				if (status == 1) {
     					alert("应用导入成功，请查看应用列表!");
+    					location.href = "/admin/app/list";
     				} else {
     					alert("应用导入失败!");
     				}
@@ -228,22 +229,22 @@
 												<div class="col-md-5">
 													<textarea rows="10" name="appInstanceInfo" id="appInstanceInfo" placeholder="节点详情" class="form-control"></textarea>
 													<span class="help-block">
-														每行格式都是:&nbsp;&nbsp;ip:port:memSize(单位:M)<br/>
+														每行格式都是:&nbsp;&nbsp;ip:port:maxMemory(单位:M)或者masterName}<br/>
 														1. standalone类型：<br/> 
-														&nbsp;&nbsp;&nbsp;&nbsp;masterIp:masterPort:memSize(例如：10.10.xx.xx:6379:2048)<br/>
+														&nbsp;&nbsp;&nbsp;&nbsp;masterIp:masterPort:maxMemory(例如：10.10.xx.xx:6379:2048)<br/>
 														2. sentinel类型：<br/>
-														&nbsp;&nbsp;&nbsp;&nbsp;masterIp:masterPort:memSize<br/>
-														&nbsp;&nbsp;&nbsp;&nbsp;slaveIp:slavePort:memSize<br/>
+														&nbsp;&nbsp;&nbsp;&nbsp;masterIp:masterPort:maxMemory<br/>
+														&nbsp;&nbsp;&nbsp;&nbsp;slaveIp:slavePort:maxMemory<br/>
 														(可以是多个slave)<br/>
-														&nbsp;&nbsp;&nbsp;&nbsp;sentinelIp1:sentinelPor1:0<br/>
-														&nbsp;&nbsp;&nbsp;&nbsp;sentinelIp2:sentinelPor2:0<br/>
-														&nbsp;&nbsp;&nbsp;&nbsp;sentinelIp3:sentinelPor3:0<br/>
+														&nbsp;&nbsp;&nbsp;&nbsp;sentinelIp1:sentinelPor1:masterName<br/>
+														&nbsp;&nbsp;&nbsp;&nbsp;sentinelIp2:sentinelPor2:masterName<br/>
+														&nbsp;&nbsp;&nbsp;&nbsp;sentinelIp3:sentinelPor3:masterName<br/>
 														(可以是多个sentinel)<br/>
 														3. cluster类型：<br/>
-														&nbsp;&nbsp;&nbsp;&nbsp;masterIp1:masterPort1:memSize1<br/>
-														&nbsp;&nbsp;&nbsp;&nbsp;slaveIp1:slavePort1:memSize1<br/>
-														&nbsp;&nbsp;&nbsp;&nbsp;masterIp2:masterPort2:memSize2<br/>
-														&nbsp;&nbsp;&nbsp;&nbsp;slaveIp2:slavePort21:memSize2<br/>
+														&nbsp;&nbsp;&nbsp;&nbsp;masterIp1:masterPort1:maxMemory1<br/>
+														&nbsp;&nbsp;&nbsp;&nbsp;slaveIp1:slavePort1:maxMemory1<br/>
+														&nbsp;&nbsp;&nbsp;&nbsp;masterIp2:masterPort2:maxMemory2<br/>
+														&nbsp;&nbsp;&nbsp;&nbsp;slaveIp2:slavePort2:maxMemory2<br/>
 														(可以是多对主从，只要把所有的cluster节点都按照格式写就可以，程序会自动判断)<br/>
 													</span>
 												</div>
