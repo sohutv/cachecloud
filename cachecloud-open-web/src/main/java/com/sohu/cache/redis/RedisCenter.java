@@ -269,5 +269,13 @@ public interface RedisCenter {
      * @return
      */
     public List<InstanceSlowLog> getInstanceSlowLogByAppId(long appId, Date startDate, Date endDate, int limit);
+
+    /**
+     * 判断当前节点是否是sentinel节点
+     * @param ip
+     * @param port
+     * @return
+     */
+    public boolean isSentinelNode(String ip, int port);
     
 }

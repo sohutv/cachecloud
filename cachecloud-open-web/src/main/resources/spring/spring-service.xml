@@ -36,5 +36,7 @@
     <bean id="instanceStatsCenter" class="com.sohu.cache.stats.instance.impl.InstanceStatsCenterImpl"/>
 
     <bean id="instanceDeployCenter" class="com.sohu.cache.stats.instance.impl.InstanceDeployCenterImpl"/>
+    
+    <bean id="importAppCenter" class="com.sohu.cache.stats.app.impl.ImportAppCenterImpl"/>
 
 </beans>

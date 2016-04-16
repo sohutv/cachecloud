@@ -40,6 +40,7 @@
             <mvc:mapping path="/manage/total/*"/>
             <mvc:mapping path="/manage/machine/*"/>
             <mvc:mapping path="/manage/notice/*"/>
+            <mvc:mapping path="/import/app/*"/>
             <bean class="com.sohu.cache.interceptor.ManageUserLoginInterceptor"/>
         </mvc:interceptor>
         <!-- 应用和实例权限验证 -->
