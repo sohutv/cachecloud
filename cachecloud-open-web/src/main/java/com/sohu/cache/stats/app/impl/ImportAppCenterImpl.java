@@ -154,7 +154,7 @@ public class ImportAppCenterImpl implements ImportAppCenter {
                 if (isSentinelNode) {
                     saveInstance(appId, host, port, 0, ConstUtils.CACHE_REDIS_SENTINEL, memoryOrMasterName);
                 } else {
-                    if (ConstUtils.CACHE_REDIS_STANDALONE == type) {
+                    if (ConstUtils.CACHE_REDIS_STANDALONE == type || ConstUtils.CACHE_REDIS_SENTINEL == type) {
                         saveInstance(appId, host, port, NumberUtils.toInt(memoryOrMasterName), ConstUtils.CACHE_REDIS_STANDALONE, "");
                     } else if (ConstUtils.CACHE_TYPE_REDIS_CLUSTER == type) {
                         saveInstance(appId, host, port, NumberUtils.toInt(memoryOrMasterName), ConstUtils.CACHE_TYPE_REDIS_CLUSTER, "");

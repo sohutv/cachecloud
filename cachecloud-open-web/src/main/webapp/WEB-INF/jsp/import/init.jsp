@@ -259,7 +259,7 @@
 														<div class="col-md-offset-3 col-md-9">
 															<button id="submitButton" type="button" onclick="importApp()" class="btn green" disabled="disabled">
 																<i class="fa fa-check"></i>
-																提交申请
+																开始导入
 															</button>
 															<button id="checkButton" type="button" class="btn green" onclick="checkAppInstanceFormat()">
 																<i class="fa fa-check"></i>
