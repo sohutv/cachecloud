@@ -65,7 +65,7 @@ public class AppDeployCenterImpl implements AppDeployCenter {
     public boolean createApp(AppDesc appDesc, AppUser appUser, String memSize) {
         try {
             appService.save(appDesc);
-            // 保存应用和应用的关系
+            // 保存应用和用户的关系
             appService.saveAppToUser(appDesc.getAppId(), appDesc.getUserId());
 
             // 保存应用审批信息

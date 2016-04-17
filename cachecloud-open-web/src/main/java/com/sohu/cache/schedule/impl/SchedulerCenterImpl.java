@@ -4,7 +4,7 @@ import com.sohu.cache.dao.QuartzDao;
 import com.sohu.cache.entity.TriggerInfo;
 import com.sohu.cache.schedule.SchedulerCenter;
 
-import com.google.common.util.concurrent.AtomicLongMap;
+import org.apache.commons.lang.time.DateUtils;
 import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,9 +28,6 @@ public class SchedulerCenterImpl implements SchedulerCenter {
 
     // 注入预定义的scheduler
     private Scheduler clusterScheduler;
-
-    //维护app下所有trigger启动时间,key为triggerGroup名称，确保应用级别唯一
-    private AtomicLongMap<String> appLongMap = AtomicLongMap.create();
 
     private QuartzDao quartzDao;
 
@@ -128,7 +125,7 @@ public class SchedulerCenterImpl implements SchedulerCenter {
                             )
                     .startAt(startAtDate)
                     .build();
-            if (dataMap != null || dataMap.size() > 0) {
+            if (dataMap != null && dataMap.size() > 0) {
                 trigger.getJobDataMap().putAll(dataMap);
             }
             clusterScheduler.scheduleJob(trigger);
@@ -151,26 +148,14 @@ public class SchedulerCenterImpl implements SchedulerCenter {
                     return false;
                 }
             }
-            long appLong = appLongMap.get(triggerKey.getGroup());
-            if (appLong == 0L || appLong < System.currentTimeMillis()) {
-                synchronized (appLongMap) {
-                    appLong = appLongMap.get(triggerKey.getGroup());
-                    if (appLong == 0L || appLong < System.currentTimeMillis()) {
-                        //启动时间往后延续2分钟.
-                        appLong = System.currentTimeMillis();
-                        appLong = appLong + 2 * 60 * 1000;
-                        appLongMap.put(triggerKey.getGroup(), appLong);
-                    }
-                }
-            }
-            Date startDate = new Date(appLongMap.get(triggerKey.getGroup()));
+            Date startDate = DateUtils.addSeconds(new Date(), 20);
             Trigger trigger = TriggerBuilder.newTrigger()
                     .withIdentity(triggerKey)
                     .forJob(jobDetail)
                     .withSchedule(CronScheduleBuilder.cronSchedule(cron))
                     .startAt(startDate)
                     .build();
-            if (dataMap != null || dataMap.size() > 0) {
+            if (dataMap != null && dataMap.size() > 0) {
                 trigger.getJobDataMap().putAll(dataMap);
             }
             clusterScheduler.scheduleJob(trigger);

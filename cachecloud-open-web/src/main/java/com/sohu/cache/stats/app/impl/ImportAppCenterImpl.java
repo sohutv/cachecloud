@@ -15,8 +15,10 @@ import redis.clients.jedis.Protocol;
 import com.sohu.cache.constant.ImportAppResult;
 import com.sohu.cache.constant.InstanceStatusEnum;
 import com.sohu.cache.dao.InstanceDao;
+import com.sohu.cache.dao.InstanceStatsDao;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.InstanceInfo;
+import com.sohu.cache.entity.InstanceStats;
 import com.sohu.cache.entity.MachineInfo;
 import com.sohu.cache.machine.MachineCenter;
 import com.sohu.cache.redis.RedisCenter;
@@ -43,6 +45,8 @@ public class ImportAppCenterImpl implements ImportAppCenter {
     private MachineCenter machineCenter;
 
     private InstanceDao instanceDao;
+    
+    private InstanceStatsDao instanceStatsDao;
 
     @Override
     public ImportAppResult check(AppDesc appDesc, String appInstanceInfo) {
@@ -90,12 +94,15 @@ public class ImportAppCenterImpl implements ImportAppCenter {
             }
 
             int port = NumberUtils.toInt(portStr);
-            // 4.3.检查ip:port是否已经在instance_info表中
+            // 4.3.检查ip:port是否已经在instance_info表和instance_statistics中
             int count = instanceDao.getCountByIpAndPort(ip, port);
             if (count > 0) {
                 return ImportAppResult.fail(appInstance + "中ip:port已经在instance_info存在");
             }
-
+            InstanceStats instanceStats = instanceStatsDao.getInstanceStatsByHost(ip, port);
+            if (instanceStats != null) { 
+                return ImportAppResult.fail(appInstance + "中ip:port已经在instance_statistics存在");
+            }
             // 4.4.检查Redis实例是否存活
             boolean isRun = redisCenter.isRun(ip, port);
             if (!isRun) {
@@ -250,6 +257,11 @@ public class ImportAppCenterImpl implements ImportAppCenter {
 
     public void setInstanceDao(InstanceDao instanceDao) {
         this.instanceDao = instanceDao;
+    }
+
+
+    public void setInstanceStatsDao(InstanceStatsDao instanceStatsDao) {
+        this.instanceStatsDao = instanceStatsDao;
     }
 
 }
