@@ -17,8 +17,6 @@ public class RedisProtocol {
 
     private static final String COMMON_CONFIG = "redis-sentinel-%d.conf";
 
-    private static final String CONFIG_REWRITE = "redis-cli -h %s -p %d config rewrite";
-
     private static final String EXECUTE_COMMAND = "redis-cli -h %s -p %s --raw %s";
 
     public static String getRunShell(int port, boolean isCluster) {
@@ -27,10 +25,6 @@ public class RedisProtocol {
 
     public static String getSentinelShell(int port) {
         return String.format(SENTINEL_SHELL, MachineProtocol.CONF_DIR + getConfig(port, false), port, DateUtil.formatYYYYMMddHHMM(new Date()));
-    }
-
-    public static String getConfigRewrite(String host,int port){
-        return String.format(CONFIG_REWRITE, host, port);
     }
 
     public static String getExecuteCommandShell(String host, int port, String command) {

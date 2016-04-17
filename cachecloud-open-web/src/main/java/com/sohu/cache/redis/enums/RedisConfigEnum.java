@@ -1,5 +1,7 @@
 package com.sohu.cache.redis.enums;
 
+import com.sohu.cache.protocol.MachineProtocol;
+
 /**
  * Created by yijunzhang on 14-7-27.
  */
@@ -10,7 +12,7 @@ public enum RedisConfigEnum {
     TCP_KEEPALIVE("tcp-keepalive", "0", "检测客户端是否健康周期,默认关闭"),
     LOGLEVEL("loglevel", "notice", "默认普通的verbose"),
     DATABASES("databases", "16", "可用的数据库数，默认值为16个,默认数据库为0"),
-    DIR("dir", "/opt/cachecloud/data", "redis工作目录,默认:/opt/cachecloud/data"),
+    DIR("dir", MachineProtocol.DATA_DIR, "redis工作目录,默认:" + MachineProtocol.DATA_DIR),
     //--------复制相关--------------
     REPL_TIMEOUT("repl-timeout", "60", "master批量数据传输时间或者ping回复时间间隔,默认:60秒"),
     REPL_PING_SLAVE_PERIOD("repl-ping-slave-period", "10", "指定slave定期ping master的周期,默认:10秒"),

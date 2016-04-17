@@ -8,6 +8,7 @@ import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.entity.MachineInfo;
 import com.sohu.cache.machine.MachineCenter;
+import com.sohu.cache.protocol.MachineProtocol;
 import com.sohu.cache.protocol.RedisProtocol;
 import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.redis.RedisClusterNode;
@@ -416,7 +417,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         }
         if (isCluster) {
             //删除cluster节点配置
-            String nodesFile = String.format("rm -rf /opt/cachecloud/data/nodes-%s.conf", port);
+            String nodesFile = String.format("rm -rf %s/nodes-%s.conf", MachineProtocol.DATA_DIR, port);
             boolean isDelete = machineCenter.startProcessAtPort(host, port, nodesFile);
             if (isDelete) {
                 logger.warn("{} to {}:{}", nodesFile, host, port);
