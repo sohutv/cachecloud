@@ -55,9 +55,13 @@ public class LoginController extends BaseController {
         loginResult.setLoginEnum(LoginEnum.LOGIN_WRONG_USER_OR_PASSWORD);
 
         AppUser userModel = null;
-        if (ConstUtils.SUPER_ADMIN_NAME.equals(userName) && ConstUtils.SUPER_ADMIN_PASS.equals(password)) {
+        if (ConstUtils.SUPER_ADMIN_NAME.equals(userName)) {
             userModel = userService.getByName(userName);
-            loginResult.setLoginEnum(LoginEnum.LOGIN_SUCCESS);
+            if (userModel != null && ConstUtils.SUPER_ADMIN_PASS.equals(password)) {
+                loginResult.setLoginEnum(LoginEnum.LOGIN_SUCCESS);
+            } else {
+                loginResult.setLoginEnum(LoginEnum.LOGIN_WRONG_USER_OR_PASSWORD);
+            }
         } else {
             if (LoginUtil.passportCheck(userName, password)) {
                 // 同时要验证是否有cachecloud权限

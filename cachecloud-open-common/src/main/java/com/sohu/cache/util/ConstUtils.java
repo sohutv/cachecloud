@@ -55,7 +55,7 @@ public class ConstUtils {
     // 容量转换
     public static final int _1024 = 1024;
 
-    // 机器报警阀值，应该放到数据库中，供动态调整
+    // 机器报警阀值
     public static double CPU_USAGE_RATIO_THRESHOLD = 80.0;
     public static double MEMORY_USAGE_RATIO_THRESHOLD = 80.0;
     public static double LOAD_THRESHOLD = 7.5;
@@ -66,10 +66,18 @@ public class ConstUtils {
     public static String USERNAME;
     public static String PASSWORD;
     
+    /**
+     * 管理员
+     */
+    public static String SUPER_ADMIN_NAME;
+    public static String SUPER_ADMIN_PASS;
+    
     static {
         ResourceBundle resourceBundle = ResourceBundle.getBundle("application");
         USERNAME = resourceBundle.getString("shell.auth.simple.user.name");
         PASSWORD = resourceBundle.getString("shell.auth.simple.user.password");
+        SUPER_ADMIN_NAME = resourceBundle.getString("cachecloud.admin.user.name");
+        SUPER_ADMIN_PASS = resourceBundle.getString("cachecloud.admin.user.password");
     }
     
     public static Set<String> SUPER_MANAGER = new HashSet<String>();
@@ -87,17 +95,6 @@ public class ConstUtils {
      * maven仓库地址
      */
     public static final String MAVEN_WAREHOUSE = "http://your_maven_warehouse";
-    
-    /**
-     * 超级管理员
-     */
-    public static final String SUPER_ADMIN_NAME = "admin";
-    
-    
-    /**
-     * 超级管理员
-     */
-    public static final String SUPER_ADMIN_PASS = "admin";
     
     /**
      * 分号
