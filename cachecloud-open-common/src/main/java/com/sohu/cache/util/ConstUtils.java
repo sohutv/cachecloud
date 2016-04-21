@@ -71,6 +71,7 @@ public class ConstUtils {
      */
     public static String SUPER_ADMIN_NAME;
     public static String SUPER_ADMIN_PASS;
+    public static Set<String> SUPER_MANAGER = new HashSet<String>();
     
     static {
         ResourceBundle resourceBundle = ResourceBundle.getBundle("application");
@@ -78,14 +79,9 @@ public class ConstUtils {
         PASSWORD = resourceBundle.getString("shell.auth.simple.user.password");
         SUPER_ADMIN_NAME = resourceBundle.getString("cachecloud.admin.user.name");
         SUPER_ADMIN_PASS = resourceBundle.getString("cachecloud.admin.user.password");
+        SUPER_MANAGER.add(SUPER_ADMIN_NAME);
     }
-    
-    public static Set<String> SUPER_MANAGER = new HashSet<String>();
 
-    static {
-        SUPER_MANAGER.add("admin");
-    }
-    
     /**
      * cachecloud普通用户登录session
      */
