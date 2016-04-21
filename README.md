@@ -10,6 +10,7 @@
     * [2.CacheCloud项目配置](#cc7-2)
     * [3.启动cachecloud系统](#cc7-3)
     * [4.添加机器](#cc7-4)
+* [八、CacheCloud开发计划TODO LIST](#cc8)
 
 <a name="cc1"/>
 ## 一、CacheCloud是做什么的
@@ -165,5 +166,7 @@ cachecloud项目中的cachecloud-init.sh脚本是用来初始化服务器的cach
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;进入管理员界面(http://ip:port/manage/total/list)，进入机器管理，点击添加机器，添加机器信息是开通应用的基础。
 <img src="http://i2.itc.cn/20160127/3084_c9d9d17b_4e86_a17f_5442_cf9cc08c68f3_1.jpg"/>
 
-
+<a name="cc8"/>
+## 七、开发计划-TODO LIST ###
+[后期开发计划](http://cachecloud.github.io/2016/04/17/v2%E8%AE%A1%E5%88%92/)
  
