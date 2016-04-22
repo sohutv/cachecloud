@@ -11,6 +11,7 @@
         <module>cachecloud-open-web</module>
         <module>cachecloud-open-client</module>
         <module>cachecloud-open-common</module>
+        <module>cachecloud-open-jedis-statistics</module>
     </modules>
 
     <properties>
