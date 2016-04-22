@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.sohu.tv</groupId>
-		<artifactId>cachecloud-open-parent</artifactId>
+		<artifactId>cachecloud-open-client</artifactId>
 		<version>1.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>cachecloud-open-jedis-statistics</artifactId>
