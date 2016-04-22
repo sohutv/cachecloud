@@ -18,6 +18,7 @@
         <module>cachecloud-open-client-basic</module>
         <module>cachecloud-open-client-redis</module>
         <module>cachecloud-jedis</module>
+        <module>cachecloud-open-jedis-stat</module>
     </modules>
 
 
