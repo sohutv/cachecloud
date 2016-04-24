@@ -25,6 +25,15 @@ public interface MachineCenter {
      * @return          是否部署成功
      */
     public boolean deployMachineCollection(final long hostId, final String ip);
+    
+    /**
+     * 为当前host删除trigger,取消部署
+     *
+     * @param hostId    机器id
+     * @param ip        ip
+     * @return          是否取消部署成功
+     */
+    public boolean unDeployMachineCollection(final long hostId, final String ip);
 
     /**
      * 收集host的状态信息
@@ -36,6 +45,15 @@ public interface MachineCenter {
      */
     public Map<String, Object> collectMachineInfo(final long hostId, final long collectTime, final String ip);
 
+    /**
+     * 为当前机器的监控删除trigger
+     *
+     * @param hostId    机器id
+     * @param ip    ip
+     * @return      取消部署成功返回true， 否则返回false
+     */
+    public boolean unDeployMachineMonitor(final long hostId, final String ip);
+    
     /**
      * 为当前机器的监控创建trigger
      *

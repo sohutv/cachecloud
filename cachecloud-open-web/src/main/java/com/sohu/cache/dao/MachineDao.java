@@ -14,12 +14,6 @@ import java.util.List;
  * Time: 下午2:33
  */
 public interface MachineDao {
-    /**
-     * 返回特定分组下的machine
-     *
-     * @return
-     */
-    public List<MachineInfo> getMachinesByGroupId(@Param("groupId") int groupId);
 
     /**
      * 返回所有可用的机器资源

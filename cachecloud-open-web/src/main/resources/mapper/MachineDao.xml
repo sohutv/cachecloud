@@ -11,15 +11,6 @@
         #{faultCount},#{warn},#{available},#{type},#{groupId},#{extraDesc}
     </sql>
 
-    <!--返回特定分组下的机器资源-->
-    <select id="getMachinesByGroupId" resultType="MachineInfo" parameterType="int">
-        select
-            id, modify_time, <include refid="machine_info_columns"/>
-        from machine_info
-        where available = 1
-        and groupId = #{groupId}
-    </select>
-
     <!--返回所有可用的机器资源-->
     <select id="getAllMachines" resultType="MachineInfo">
         select

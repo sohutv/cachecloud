@@ -25,6 +25,7 @@ import com.sohu.cache.web.component.MobileAlertComponent;
 
 import org.apache.commons.lang.StringUtils;
 import org.quartz.JobKey;
+import org.quartz.Trigger;
 import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,6 +105,19 @@ public class MachineCenterImpl implements MachineCenter {
         return result;
     }
     
+    @Override
+    public boolean unDeployMachineCollection(long hostId, String ip) {
+        Assert.isTrue(hostId > 0);
+        Assert.hasText(ip);
+        TriggerKey collectionTriggerKey = TriggerKey.triggerKey(ip, ConstUtils.MACHINE_TRIGGER_GROUP + hostId);
+        Trigger trigger = schedulerCenter.getTrigger(collectionTriggerKey);
+        if (trigger == null) {
+            return true;
+        }
+        return schedulerCenter.unscheduleJob(collectionTriggerKey);
+    }
+    
+    
     /**
      * 收集当前host的状态信息，保存到mysql；
      * 这里将hostId作为参数传入，mysql中集合名为：ip:hostId
@@ -175,6 +189,19 @@ public class MachineCenterImpl implements MachineCenter {
 
         return result;
     }
+    
+    @Override
+    public boolean unDeployMachineMonitor(long hostId, String ip) {
+        Assert.isTrue(hostId > 0);
+        Assert.hasText(ip);
+        TriggerKey monitorTriggerKey = TriggerKey.triggerKey(ip, ConstUtils.MACHINE_MONITOR_TRIGGER_GROUP + hostId);
+        Trigger trigger = schedulerCenter.getTrigger(monitorTriggerKey);
+        if (trigger == null) {
+            return true;
+        }
+        return schedulerCenter.unscheduleJob(monitorTriggerKey);
+    }
+    
 
     /**
      * 监控机器的状态
@@ -236,9 +263,6 @@ public class MachineCenterImpl implements MachineCenter {
 
     /**
      * 在主机ip上的端口port上启动一个进程，并check是否启动成功；
-     * 注意：
-     * - 1. 命令要使用绝对路径，示例：/usr/local/redis-3.0.0-beta8/src/redis-server；
-     * - 2. 进程使用daemon，否则shell一直等待命令返回，卡死；
      *
      * @param ip    ip
      * @param port  port
@@ -553,6 +577,5 @@ public class MachineCenterImpl implements MachineCenter {
     public void setInstanceStatsCenter(InstanceStatsCenter instanceStatsCenter) {
         this.instanceStatsCenter = instanceStatsCenter;
     }
-
     
 }
