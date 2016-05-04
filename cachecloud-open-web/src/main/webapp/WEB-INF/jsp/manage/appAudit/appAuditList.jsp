@@ -111,26 +111,40 @@
 										<td>
 											<c:choose>
 												<c:when test="${item.type == 3}">
-													<a onclick="if(window.confirm('确认要通过该应用申请请求吗?!')){return true;}else{return false;}" href="/manage/user/addAuditStatus.do?status=1&appAuditId=${item.id}">[通过]</a>
+													<a onclick="if(window.confirm('确认要通过该申请请求吗?')){return true;}else{return false;}" href="/manage/user/addAuditStatus.do?status=1&appAuditId=${item.id}">[通过]</a>
 												</c:when>
 												<c:otherwise>
-													<a onclick="if(window.confirm('确认要通过该应用申请请求吗?!')){return true;}else{return false;}" href="/manage/app/addAuditStatus.do?status=1&appAuditId=${item.id}">[通过]</a>
+													<c:set var="auditUrl" value="/manage/app/addAuditStatus.do?status=1&appAuditId=${item.id}"/>
 												</c:otherwise>
 											</c:choose>	
+											<c:choose>
+												<c:when test="${item.status == 2}">
+													<a onclick="if(window.confirm('确认要通过该申请请求吗?')){return true;}else{return false;}" href="${auditUrl}">[通过]</a>
+												</c:when>
+											</c:choose>
 											&nbsp;
-											<a href="javascript:void(0);" data-target="#appRefuseModal${item.id}" data-toggle="modal">[驳回]</a>
+											<c:choose>
+												<c:when test="${item.status == 0}">
+													<a href="javascript:void(0);" data-target="#appRefuseModal${item.id}" data-toggle="modal">[驳回]</a>
+												</c:when>
+											</c:choose>
 											&nbsp;
 											<c:choose>
 												<c:when test="${item.type == 0}">
-													<a href="/manage/app/initAppDeploy.do?appAuditId=${item.id}">[审批处理]</a>
+													<c:set var="auditDealUrl" value="/manage/app/initAppDeploy.do?appAuditId=${item.id}"/>
 												</c:when>
 												<c:when test="${item.type == 1}">
-													<a href="/manage/app/initAppScaleApply.do?appAuditId=${item.id}">[审批处理]</a>
+													<c:set var="auditDealUrl" value="/manage/app/initAppScaleApply.do?appAuditId=${item.id}"/>
 												</c:when>
 												<c:when test="${item.type == 2}">
-													<a href="/manage/app/initAppConfigChange.do?appAuditId=${item.id}" target="_blank">[审批处理]</a>
+													<c:set var="auditDealUrl" value="/manage/app/initAppConfigChange.do?appAuditId=${item.id}"/>
 												</c:when>
-											</c:choose>	
+											</c:choose>
+											<c:choose>
+												<c:when test="${item.status == 0 && item.type != 3}">
+													<a href="${auditDealUrl}">[审批处理]</a>
+												</c:when>
+											</c:choose>
 										</td>
 									</tr>
 								</c:forEach>

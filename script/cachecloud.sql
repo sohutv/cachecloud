@@ -464,7 +464,7 @@ CREATE TABLE `app_desc` (
   `app_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '应用id',
   `name` varchar(36) NOT NULL COMMENT '应用名',
   `user_id` bigint(20) NOT NULL COMMENT '申请人id',
-  `status` tinyint(4) NOT NULL COMMENT '应用状态, 0未分配，1申请未审批，2审批并发布 3:应用下线',
+  `status` tinyint(4) NOT NULL COMMENT '应用状态, 0未分配，1申请未审批，2审批并发布 3:应用下线,4:驳回',
   `intro` varchar(255) NOT NULL COMMENT '应用描述',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `passed_time` datetime NOT NULL COMMENT '审批通过时间',
