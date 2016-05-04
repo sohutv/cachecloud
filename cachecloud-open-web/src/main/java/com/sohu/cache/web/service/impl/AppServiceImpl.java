@@ -138,9 +138,13 @@ public class AppServiceImpl implements AppService {
     public void updateAppAuditStatus(Long id, Long appId, Integer status, AppUser appUser) {
         appAuditDao.updateAppAudit(id, status);
         AppDesc appDesc = appDao.getAppDescById(appId);
+        
         if (AppCheckEnum.APP_PASS.value().equals(status)) {
             appDesc.setStatus(AppStatusEnum.STATUS_PUBLISHED.getStatus());
             appDesc.setPassedTime(new Date());
+            appDao.update(appDesc);
+        } else if (AppCheckEnum.APP_REJECT.value().equals(status)) {
+            appDesc.setStatus(AppStatusEnum.STATUS_DENY.getStatus());
             appDao.update(appDesc);
         }
         AppAudit appAudit = appAuditDao.getAppAudit(id);

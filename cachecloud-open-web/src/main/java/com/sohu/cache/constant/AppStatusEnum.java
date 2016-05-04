@@ -13,7 +13,8 @@ public enum AppStatusEnum {
     STATUS_INITIALIZE(0, "未分配"),
     STATUS_ALLOCATED(1, "已申请未审批"),
     STATUS_PUBLISHED(2, "运行中"),
-    STATUS_OFFLINE(3, "已下线");
+    STATUS_OFFLINE(3, "已下线"),
+    STATUS_DENY(4, "驳回");
 
     private int status;
 
