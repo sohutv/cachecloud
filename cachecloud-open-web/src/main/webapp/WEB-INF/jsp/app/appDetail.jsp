@@ -129,7 +129,7 @@
    		
    			<button class="col-md-3" type="button" class="btn default" data-target="#appAddUserModal" data-toggle="modal">添加报警接收用户</button>
    				<div class="col-md-2"></div>
-   			<button class="col-md-3" type="button" class="btn default" data-target="#appConfigChangeModal" data-toggle="modal">应用报警配置</button>
+   			<button class="col-md-3" type="button" class="btn default" data-target="#appAlertConfigModal" data-toggle="modal">应用报警配置</button>
    		</div>
     </div>
     <br/><br/><br/>
@@ -181,7 +181,7 @@
 </div>
 
 
-<div id="appConfigChangeModal" class="modal fade" tabindex="-1" data-width="400">
+<div id="appAlertConfigModal" class="modal fade" tabindex="-1" data-width="400">
 	<div class="modal-dialog">
 		<div class="modal-content">
 		

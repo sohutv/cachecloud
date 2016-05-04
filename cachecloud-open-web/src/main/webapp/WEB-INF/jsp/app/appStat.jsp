@@ -48,6 +48,7 @@ Highcharts.setOptions({
 				<h4>
 				全局信息&nbsp;&nbsp;&nbsp;
 				<button type="button" id="appScaleApplyBtn" class="btn btn-info" data-target="#appScaleApplyModal" data-toggle="modal">申请扩容</button>
+				<button type="button" class="btn btn-info" data-target="#appConfigChangeModal" data-toggle="modal" href="#">申请修改配置</button>
 				<a target="_blank" href="/client/show/index.do?appId=${appId}" class="btn btn-info" role="button">客户端统计</a>
 				</h4>
 			</div>
@@ -468,6 +469,63 @@ Highcharts.setOptions({
 				<div class="modal-footer">
 					<button type="button" data-dismiss="modal" class="btn" >Close</button>
 					<button type="button" class="btn red" onclick="appScaleApply('${appDetail.appDesc.appId}')">Ok</button>
+				</div>
+			
+			</form>
+		</div>
+	</div>
+</div>
+
+<div id="appConfigChangeModal" class="modal fade" tabindex="-1" data-width="400">
+	<div class="modal-dialog">
+		<div class="modal-content">
+		
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+				<h4 class="modal-title">应用配置修改</h4>
+			</div>
+			
+			<form class="form-horizontal form-bordered form-row-stripped">
+				<div class="modal-body">
+					<div class="row">
+						<!-- 控件开始 -->
+						<div class="col-md-12">
+							<!-- form-body开始 -->
+							<div class="form-body">
+								
+								<div class="form-group">
+									<label class="control-label col-md-3">配置项:</label>
+									<div class="col-md-8">
+										<input type="text" name="appConfigKey" id="appConfigKey" placeholder="例如:maxclients" class="form-control" />
+									</div>
+								</div>
+								
+								<div class="form-group">
+									<label class="control-label col-md-3">配置值:</label>
+									<div class="col-md-8">
+										<input type="text" name="appConfigValue" id="appConfigValue" placeholder="例如:15000" class="form-control">
+									</div>
+								</div>
+
+                                <div class="form-group">
+                                    <label class="control-label col-md-3">修改原因:</label>
+                                    <div class="col-md-8">
+                                        <textarea name="appConfigReason" id="appConfigReason" placeholder="例如：修改原因:1.需要更多的连接数。" class="form-control"></textarea>
+                                        <%--<input type="text" name="appConfigReason" id="appConfigReason" placeholder="例如：修改原因:1.需要更多的连接数。" class="form-control">--%>
+                                    </div>
+                                </div>
+								
+							</div>
+							<!-- form-body 结束 -->
+						</div>
+						<div id="appConfigChangeInfo"></div>
+						<!-- 控件结束 -->
+					</div>
+				</div>
+				
+				<div class="modal-footer">
+					<button type="button" data-dismiss="modal" class="btn" >Close</button>
+					<button type="button" id="appConfigChangeBtn" class="btn red" onclick="appConfigChange('${appId}','${instanceId}')">Ok</button>
 				</div>
 			
 			</form>
