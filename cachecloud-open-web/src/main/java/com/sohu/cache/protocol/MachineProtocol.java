@@ -1,12 +1,14 @@
 package com.sohu.cache.protocol;
 
+import java.util.ResourceBundle;
+
 /**
  * 机器相关的一些常量
  *
  * @author: lingguo
  * @time: 2014/8/26 16:18
  */
-public interface MachineProtocol {
+public class MachineProtocol {
     
     /**
      * 统一的目录结构
@@ -22,11 +24,14 @@ public interface MachineProtocol {
 
 
     /**
-     * ssh端口(默认22、其他例如32200)
+     * ssh端口
      */
-    public static final int SSH_PORT_DEFAULT = 22;
-    public static final int SSH_PORT_56 = 32200;
-
+    public static int SSH_PORT_DEFAULT;
+    static {
+        ResourceBundle resourceBundle = ResourceBundle.getBundle("application");
+        SSH_PORT_DEFAULT = Integer.parseInt(resourceBundle.getString("cachecloud.machine.ssh.port"));
+        System.out.println("==========ssh port " + SSH_PORT_DEFAULT);
+    }
     /**
      * 编码
      */
