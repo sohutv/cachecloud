@@ -30,7 +30,6 @@ public class MachineProtocol {
     static {
         ResourceBundle resourceBundle = ResourceBundle.getBundle("application");
         SSH_PORT_DEFAULT = Integer.parseInt(resourceBundle.getString("cachecloud.machine.ssh.port"));
-        System.out.println("==========ssh port " + SSH_PORT_DEFAULT);
     }
     /**
      * 编码
