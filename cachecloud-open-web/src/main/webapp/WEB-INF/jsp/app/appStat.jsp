@@ -257,14 +257,14 @@ Highcharts.setOptions({
 					$.ajax({
 						type : "get",
 						url : commandsUrl,
-						async : false,
+						async : true,
 						success : function(data) {
 							var nameLegend = "命令趋势图";
 							var finalPoints = getSeriesPoints(data, nameLegend);
 							options.series.push(finalPoints);
+							new Highcharts.Chart(options);
 						}
 					});
-					new Highcharts.Chart(options);
 			 });
 		}
 	</script>
@@ -314,14 +314,14 @@ Highcharts.setOptions({
 					$.ajax({
 						type : "get",
 						url : commandsUrl,
-						async : false,
+						async : true,
 						success : function(data) {
 							var nameLegend = "命中趋势图";
 							var finalPoints = getSeriesPoints(data, nameLegend);
 							options.series.push(finalPoints);
+							new Highcharts.Chart(options);
 						}
 					});
-					new Highcharts.Chart(options);
 			 });
 		}
 	</script>
@@ -382,16 +382,16 @@ Highcharts.setOptions({
 					$.ajax({
 						type : "get",
 						url : commandsUrl,
-						async : false,
+						async : true,
 						success : function(data) {
 							var nameLegend = "内存使用量(" + startDate + ")";
 							var finalPoints = getSeriesPoints(data, nameLegend, "M");
 							options.series.push(finalPoints);
 							var maxMemoryPoints = getSeriesPoints(data, "应用总内存", "M", parseInt(appTotalMem));
 							options.series.push(maxMemoryPoints);
+							new Highcharts.Chart(options);
 						}
 					});
-					new Highcharts.Chart(options);
 			 });
 		/*}*/
 		/*
