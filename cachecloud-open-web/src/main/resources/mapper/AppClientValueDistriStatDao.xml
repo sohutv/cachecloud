@@ -27,5 +27,17 @@
     	where app_id=#{appId} and collect_time between #{startTime} and #{endTime}
         group by distribute_value order by distribute_type
     </select>
+    
+    <select id="getTableMinimumId" resultType="long">
+    	select id from app_client_value_distri_minute_stat order by id limit 1
+    </select>
+    
+    <select id="getMinimumIdByCollectTime" resultType="long">
+    	select id from app_client_value_distri_minute_stat where collect_time >= #{collectTime} order by id limit 1
+    </select>
+    
+    <delete id="deleteByIds">
+    	delete from app_client_value_distri_minute_stat where id>=#{startId} and id &lt;#{endId}
+    </delete>
 
 </mapper>

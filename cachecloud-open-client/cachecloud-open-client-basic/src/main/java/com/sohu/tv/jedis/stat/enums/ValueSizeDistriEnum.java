@@ -51,15 +51,26 @@ public enum ValueSizeDistriEnum {
         return info;
     }
     
-    public final static Map<String, ValueSizeDistriEnum> MAP = new HashMap<String, ValueSizeDistriEnum>();
+    public final static Map<String, ValueSizeDistriEnum> VALUE_MAP = new HashMap<String, ValueSizeDistriEnum>();
     static {
         for (ValueSizeDistriEnum enumObject : ValueSizeDistriEnum.values()) {
-            MAP.put(enumObject.getValue(), enumObject);
+            VALUE_MAP.put(enumObject.getValue(), enumObject);
         }
     }
     
     public static ValueSizeDistriEnum getByValue(String targetValue){
-        return MAP.get(targetValue);
+        return VALUE_MAP.get(targetValue);
+    }
+    
+    public final static Map<Integer, ValueSizeDistriEnum> TYPE_MAP = new HashMap<Integer, ValueSizeDistriEnum>();
+    static {
+        for (ValueSizeDistriEnum enumObject : ValueSizeDistriEnum.values()) {
+            TYPE_MAP.put(enumObject.getType(), enumObject);
+        }
+    }
+    
+    public static ValueSizeDistriEnum getByType(int targetType){
+        return TYPE_MAP.get(targetType);
     }
 
     /**

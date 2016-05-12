@@ -3,8 +3,10 @@ package com.sohu.cache.client.service.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -15,9 +17,9 @@ import org.slf4j.LoggerFactory;
 
 import com.sohu.cache.client.service.ClientReportInstanceService;
 import com.sohu.cache.client.service.ClientReportValueDistriService;
-import com.sohu.cache.dao.AppClientValueDistriStatDao;
+import com.sohu.cache.dao.AppClientValueStatDao;
 import com.sohu.cache.entity.AppClientValueDistriSimple;
-import com.sohu.cache.entity.AppClientValueDistriStat;
+import com.sohu.cache.entity.AppClientValueDistriStatTotal;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.tv.jedis.stat.constant.ClientReportConstant;
 import com.sohu.tv.jedis.stat.enums.ClientCollectDataTypeEnum;
@@ -25,41 +27,47 @@ import com.sohu.tv.jedis.stat.enums.ValueSizeDistriEnum;
 import com.sohu.tv.jedis.stat.model.ClientReportBean;
 
 /**
- * 客户端上报值分布service
+ * 客户端上报值分布serviceV2
  * 
  * @author leifu
- * @Date 2015年1月19日
- * @Time 上午10:02:32
+ * @Date 2016年5月5日
+ * @Time 上午10:23:00
  */
-public class ClientReportValueDistriServiceImpl implements ClientReportValueDistriService {
+public class ClientReportValueDistriServiceImplV2 implements ClientReportValueDistriService {
 
-	private final Logger logger = LoggerFactory.getLogger(ClientReportValueDistriServiceImpl.class);
+    private final Logger logger = LoggerFactory.getLogger(ClientReportValueDistriServiceImplV2.class);
 
-	/**
-	 * 客户端统计值分布数据操作
-	 */
-	private AppClientValueDistriStatDao appClientValueDistriStatDao;
+    public static Set<String> excludeCommands = new HashSet<String>();
+    static {
+        excludeCommands.add("ping");
+        excludeCommands.add("quit");
+    }
+    
+    
+    /**
+     * 客户端统计值分布数据操作
+     */
+    private AppClientValueStatDao appClientValueStatDao;
 
-	/**
+    /**
      * host:port与instanceInfo简单缓存
      */
     private ClientReportInstanceService clientReportInstanceService;
 
-	@Override
-	public List<AppClientValueDistriSimple> getAppValueDistriList(long appId, long startTime, long endTime) {
-	    try {
-            return appClientValueDistriStatDao.getAppValueDistriList(appId, startTime, endTime);
+    @Override
+    public List<AppClientValueDistriSimple> getAppValueDistriList(long appId, long startTime, long endTime) {
+        try {
+            return appClientValueStatDao.getAppValueDistriList(appId, startTime, endTime);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return Collections.emptyList();
         }
-	}
-	
-	@Override
+    }
+
+    @Override
     public void batchSave(ClientReportBean clientReportBean) {
         try {
             // 1.client上报
-            final String clientIp = clientReportBean.getClientIp();
             final long collectTime = clientReportBean.getCollectTime();
             final long reportTime = clientReportBean.getReportTimeStamp();
             final List<Map<String, Object>> datas = clientReportBean.getDatas();
@@ -69,7 +77,7 @@ public class ClientReportValueDistriServiceImpl implements ClientReportValueDist
             }
 
             // 2.结果集
-            List<AppClientValueDistriStat> appClientValueDistriStatList = new ArrayList<AppClientValueDistriStat>();
+            List<AppClientValueDistriStatTotal> appClientValueDistriStatTotalList = new ArrayList<AppClientValueDistriStatTotal>();
 
             // 3.解析
             for (Map<String, Object> map : datas) {
@@ -79,24 +87,24 @@ public class ClientReportValueDistriServiceImpl implements ClientReportValueDist
                     continue;
                 }
                 if (ClientCollectDataTypeEnum.VALUE_LENGTH_DISTRI_TYPE.equals(clientCollectDataTypeEnum)) {
-                    AppClientValueDistriStat appClientValueDistriStat = generate(clientIp, collectTime, reportTime, map);
+                    AppClientValueDistriStatTotal appClientValueDistriStat = generate(collectTime, reportTime, map);
                     if (appClientValueDistriStat != null) {
-                        appClientValueDistriStatList.add(appClientValueDistriStat);
+                        appClientValueDistriStatTotalList.add(appClientValueDistriStat);
                     }
                 }
             }
-            
+
             // 4.保存
-            if (CollectionUtils.isNotEmpty(appClientValueDistriStatList)) {
-                appClientValueDistriStatDao.batchSave(appClientValueDistriStatList);
+            if (CollectionUtils.isNotEmpty(appClientValueDistriStatTotalList)) {
+                appClientValueStatDao.batchSave(appClientValueDistriStatTotalList);
             }
-            
+
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
     }
-	
-	private AppClientValueDistriStat generate(String clientIp, long collectTime, long reportTime, Map<String, Object> map) {
+
+    private AppClientValueDistriStatTotal generate(long collectTime, long reportTime, Map<String, Object> map) {
         String valueDistri = MapUtils.getString(map, ClientReportConstant.VALUE_DISTRI, "");
         ValueSizeDistriEnum valueSizeDistriEnum = ValueSizeDistriEnum.getByValue(valueDistri);
         if (valueSizeDistriEnum == null) {
@@ -110,6 +118,9 @@ public class ClientReportValueDistriServiceImpl implements ClientReportValueDist
         String command = MapUtils.getString(map, ClientReportConstant.VALUE_COMMAND, "");
         if (StringUtils.isBlank(command)) {
             logger.warn("command is empty!");
+            return null;
+        }
+        if (excludeCommands.contains(command)) {
             return null;
         }
 
@@ -130,63 +141,33 @@ public class ClientReportValueDistriServiceImpl implements ClientReportValueDist
         // 实例信息
         InstanceInfo instanceInfo = clientReportInstanceService.getInstanceInfoByHostPort(host, port);
         if (instanceInfo == null) {
-            //logger.warn("instanceInfo is empty, host is {}, port is {}", host, port);
+            // logger.warn("instanceInfo is empty, host is {}, port is {}",
+            // host, port);
             return null;
         }
-        long appId = instanceInfo.getAppId();
 
-        AppClientValueDistriStat stat = new AppClientValueDistriStat();
-        stat.setAppId(appId);
-        stat.setClientIp(clientIp);
-        stat.setReportTime(new Date(reportTime));
+        AppClientValueDistriStatTotal stat = new AppClientValueDistriStatTotal();
+        stat.setAppId(instanceInfo.getAppId());
         stat.setCollectTime(collectTime);
-        stat.setCreateTime(new Date());
+        stat.setUpdateTime(new Date());
         stat.setCommand(command);
-        stat.setDistributeValue(valueDistri);
         stat.setDistributeType(valueSizeDistriEnum.getType());
         stat.setCount(count);
-        stat.setInstanceHost(host);
-        stat.setInstancePort(port);
-        stat.setInstanceId(instanceInfo.getId());
 
         return stat;
     }
-	
-	@Override
+
+    @Override
     public int deleteBeforeCollectTime(long collectTime) {
-	    long startTime = System.currentTimeMillis();
-	    int deleteCount = 0;
-        try {
-            int batchSize = 10000;
-            long minId = appClientValueDistriStatDao.getTableMinimumId();
-            long maxId = appClientValueDistriStatDao.getMinimumIdByCollectTime(collectTime);
-            if (minId > maxId) {
-                return deleteCount;
-            }
-            long startId = minId;
-            long endId = startId + batchSize;
-            while (startId < maxId) {
-                if (endId > maxId) {
-                    endId = maxId;
-                }
-                deleteCount += appClientValueDistriStatDao.deleteByIds(startId, endId);
-                startId += batchSize;
-                endId += batchSize;
-            }
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-        }
-        logger.warn("batch delete before collectTime {} cost time is {} ms", collectTime, (System.currentTimeMillis() - startTime));
-        return deleteCount;
+        return 0;
     }
 
-
-	public void setClientReportInstanceService(ClientReportInstanceService clientReportInstanceService) {
+    public void setClientReportInstanceService(ClientReportInstanceService clientReportInstanceService) {
         this.clientReportInstanceService = clientReportInstanceService;
     }
 
-    public void setAppClientValueDistriStatDao(AppClientValueDistriStatDao appClientValueDistriStatDao) {
-		this.appClientValueDistriStatDao = appClientValueDistriStatDao;
-	}
+    public void setAppClientValueStatDao(AppClientValueStatDao appClientValueStatDao) {
+        this.appClientValueStatDao = appClientValueStatDao;
+    }
 
 }

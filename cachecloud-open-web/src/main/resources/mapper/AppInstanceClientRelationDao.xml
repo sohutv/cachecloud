@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.AppInstanceClientRelationDao">
+	<sql id="columns">
+		app_id,client_ip,instance_host,instance_port,instance_id,day
+	</sql>
+	
+	<insert id="save" parameterType="AppInstanceClientRelation" keyProperty="id" useGeneratedKeys="true">
+		insert ignore into app_client_instance(<include refid="columns"/>)
+		values(#{appId},#{clientIp},#{instanceHost},#{instancePort},#{instanceId},#{day})
+	</insert>
+	
+	<insert id="batchSave">
+		insert ignore into app_client_instance(<include refid="columns" />)
+		values
+		<foreach collection="appInstanceClientRelationList" item="appInstanceClientRelation" separator=",">
+			(#{appInstanceClientRelation.appId},#{appInstanceClientRelation.clientIp},#{appInstanceClientRelation.instanceHost},#{appInstanceClientRelation.instancePort},#{appInstanceClientRelation.instanceId},#{appInstanceClientRelation.day})
+	    </foreach>
+	</insert>
+	
+	<select id="isExist" resultType="int">
+		select count(*) from app_client_instance where app_id=#{appId} and day=#{day} and client_ip=#{clientIp} and instance_id=#{instanceId}
+	</select>
+	
+	<select id="getAppInstanceClientRelationList" resultType="AppInstanceClientRelation">
+		select <include refid="columns"/> from app_client_instance where app_id=#{appId} and day=date(#{day})
+	</select>
+	
+</mapper>

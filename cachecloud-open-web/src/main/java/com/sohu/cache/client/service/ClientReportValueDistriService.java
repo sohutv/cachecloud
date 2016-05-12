@@ -30,4 +30,11 @@ public interface ClientReportValueDistriService {
      */
     void batchSave(ClientReportBean clientReportBean);
 
+    /**
+     * 删除指定收集日期前的数据
+     * @param collectTime
+     * @return
+     */
+    int deleteBeforeCollectTime(long collectTime);
+
 }

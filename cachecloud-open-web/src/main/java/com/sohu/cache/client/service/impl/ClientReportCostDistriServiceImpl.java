@@ -16,10 +16,11 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sohu.cache.client.service.AppInstanceClientRelationService;
 import com.sohu.cache.client.service.ClientReportCostDistriService;
+import com.sohu.cache.client.service.ClientReportInstanceService;
 import com.sohu.cache.dao.AppClientCostTimeStatDao;
 import com.sohu.cache.dao.AppClientCostTimeTotalStatDao;
-import com.sohu.cache.dao.InstanceDao;
 import com.sohu.cache.entity.AppClientCostTimeStat;
 import com.sohu.cache.entity.AppClientCostTimeTotalStat;
 import com.sohu.cache.entity.InstanceInfo;
@@ -49,9 +50,14 @@ public class ClientReportCostDistriServiceImpl implements ClientReportCostDistri
     private AppClientCostTimeTotalStatDao appClientCostTimeTotalStatDao;
 
     /**
-     * 实例操作
+     * host:port与instanceInfo简单缓存
      */
-    private InstanceDao instanceDao;
+    private ClientReportInstanceService clientReportInstanceService;
+    
+    /**
+     * 应用下节点和客户端关系
+     */
+    private AppInstanceClientRelationService appInstanceClientRelationService;
 
     @Override
     public List<String> getAppDistinctCommand(Long appId, long startTime, long endTime) {
@@ -63,16 +69,6 @@ public class ClientReportCostDistriServiceImpl implements ClientReportCostDistri
         }
     }
     
-    @Override
-    public List<AppClientCostTimeStat> getAppDistinctClientAndInstance(Long appId, long startTime, long endTime) {
-        try {
-            return appClientCostTimeStatDao.getAppDistinctClientAndInstance(appId, startTime, endTime);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return Collections.emptyList();
-        }
-    }
-
     @Override
     public List<AppClientCostTimeStat> getAppCommandClientToInstanceStat(Long appId, String command, Long instanceId,
             String clientIp, long startTime, long endTime) {
@@ -135,6 +131,8 @@ public class ClientReportCostDistriServiceImpl implements ClientReportCostDistri
                 if (CollectionUtils.isNotEmpty(appClientCostTimeTotalStatList)) {
                     appClientCostTimeTotalStatDao.batchSave(appClientCostTimeTotalStatList);
                 }
+                // 6.保存应用下节点和客户端关系
+                appInstanceClientRelationService.batchSave(appClientCostTimeStatList);
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -244,7 +242,7 @@ public class ClientReportCostDistriServiceImpl implements ClientReportCostDistri
             int port = NumberUtils.toInt(hostPort.substring(index + 1));
 
             // 实例信息
-            InstanceInfo instanceInfo = instanceDao.getInstByIpAndPort(host, port);
+            InstanceInfo instanceInfo = clientReportInstanceService.getInstanceInfoByHostPort(host, port);
             if (instanceInfo == null) {
 //                logger.warn("instanceInfo is empty, host is {}, port is {}", host, port);
                 return null;
@@ -281,23 +279,55 @@ public class ClientReportCostDistriServiceImpl implements ClientReportCostDistri
             return null;
         }
     }
+    
+    /**
+     * 1.获取最小的id
+     * 2.获取date的id
+     * 3.按照id批量删除
+     */
+    @Override
+    public int deleteBeforeCollectTime(long collectTime) {
+        long startTime = System.currentTimeMillis();
+        int deleteCount = 0;
+        try {
+            int batchSize = 10000;
+            long minId = appClientCostTimeStatDao.getTableMinimumId();
+            long maxId = appClientCostTimeStatDao.getMinimumIdByCollectTime(collectTime);
+            if (minId > maxId) {
+                return deleteCount;
+            }
+            long startId = minId;
+            long endId = startId + batchSize;
+            while (startId < maxId) {
+                if (endId > maxId) {
+                    endId = maxId;
+                }
+                deleteCount += appClientCostTimeStatDao.deleteByIds(startId, endId);
+                startId += batchSize;
+                endId += batchSize;
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        logger.warn("batch delete before collectTime {} cost time is {} ms", collectTime, (System.currentTimeMillis() - startTime));
+        return deleteCount;
+    }
 
     public void setAppClientCostTimeStatDao(AppClientCostTimeStatDao appClientCostTimeStatDao) {
         this.appClientCostTimeStatDao = appClientCostTimeStatDao;
     }
 
-    public void setInstanceDao(InstanceDao instanceDao) {
-        this.instanceDao = instanceDao;
+    public void setClientReportInstanceService(ClientReportInstanceService clientReportInstanceService) {
+        this.clientReportInstanceService = clientReportInstanceService;
     }
 
     public void setAppClientCostTimeTotalStatDao(AppClientCostTimeTotalStatDao appClientCostTimeTotalStatDao) {
         this.appClientCostTimeTotalStatDao = appClientCostTimeTotalStatDao;
     }
 
-    
+    public void setAppInstanceClientRelationService(AppInstanceClientRelationService appInstanceClientRelationService) {
+        this.appInstanceClientRelationService = appInstanceClientRelationService;
+    }
 
-    
-
-   
 
 }

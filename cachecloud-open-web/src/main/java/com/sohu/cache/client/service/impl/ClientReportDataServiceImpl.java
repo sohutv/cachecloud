@@ -32,12 +32,14 @@ public class ClientReportDataServiceImpl implements ClientReportDataService {
     
     private ClientReportCostDistriService clientReportCostDistriService;
     
-    private ClientReportValueDistriService clientReportValueDistriService;
+//    private ClientReportValueDistriService clientReportValueDistriService;
+    
+    private ClientReportValueDistriService clientReportValueDistriServiceV2;
     
     private ClientReportExceptionService clientReportExceptionService;
     
     private ClientReportDataSizeService clientReportDataSizeService;
-
+    
     public void init() {
         asyncService.assemblePool(getThreadPoolKey(), AsyncThreadPoolFactory.CLIENT_REPORT_THREAD_POOL);
     }
@@ -61,8 +63,9 @@ public class ClientReportDataServiceImpl implements ClientReportDataService {
                 @Override
                 public Boolean execute() {
                     try {
+                        
                         clientReportCostDistriService.batchSave(clientReportBean);
-                        clientReportValueDistriService.batchSave(clientReportBean);
+                        clientReportValueDistriServiceV2.batchSave(clientReportBean);
                         clientReportExceptionService.batchSave(clientReportBean);
                         clientReportDataSizeService.save(clientReportBean);
                         return true;
@@ -78,6 +81,8 @@ public class ClientReportDataServiceImpl implements ClientReportDataService {
             return false;
         }
     }
+    
+    
 
     public void setAsyncService(AsyncService asyncService) {
         this.asyncService = asyncService;
@@ -91,13 +96,16 @@ public class ClientReportDataServiceImpl implements ClientReportDataService {
         this.clientReportExceptionService = clientReportExceptionService;
     }
 
-    public void setClientReportValueDistriService(ClientReportValueDistriService clientReportValueDistriService) {
-        this.clientReportValueDistriService = clientReportValueDistriService;
-    }
-
     public void setClientReportDataSizeService(ClientReportDataSizeService clientReportDataSizeService) {
         this.clientReportDataSizeService = clientReportDataSizeService;
     }
+
+    public void setClientReportValueDistriServiceV2(ClientReportValueDistriService clientReportValueDistriServiceV2) {
+        this.clientReportValueDistriServiceV2 = clientReportValueDistriServiceV2;
+    }
+    
+
+    
 
 
 }

@@ -14,9 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sohu.cache.client.service.ClientReportExceptionService;
+import com.sohu.cache.client.service.ClientReportInstanceService;
 import com.sohu.cache.dao.AppClientExceptionStatDao;
 import com.sohu.cache.dao.AppClientVersionDao;
-import com.sohu.cache.dao.InstanceDao;
 import com.sohu.cache.entity.AppClientExceptionStat;
 import com.sohu.cache.entity.AppClientVersion;
 import com.sohu.cache.entity.ClientInstanceException;
@@ -44,10 +44,10 @@ public class ClientReportExceptionServiceImpl implements ClientReportExceptionSe
     private AppClientExceptionStatDao appClientExceptionStatDao;
 
     /**
-     * 实例操作
+     * host:port与instanceInfo简单缓存
      */
-    private InstanceDao instanceDao;
-
+    private ClientReportInstanceService clientReportInstanceService;
+    
     /**
      * 客户端ip,版本查询
      */
@@ -154,7 +154,7 @@ public class ClientReportExceptionServiceImpl implements ClientReportExceptionSe
             port = NumberUtils.toInt(hostPort.substring(index + 1));
 
             // 实例信息
-            InstanceInfo instanceInfo = instanceDao.getInstByIpAndPort(host, port);
+            InstanceInfo instanceInfo = clientReportInstanceService.getInstanceInfoByHostPort(host, port);
             if (instanceInfo == null) {
 //                logger.warn("instanceInfo is empty, host is {}, port is {}", host, port);
                 return null;
@@ -193,18 +193,12 @@ public class ClientReportExceptionServiceImpl implements ClientReportExceptionSe
         this.appClientExceptionStatDao = appClientExceptionStatDao;
     }
 
-    public void setInstanceDao(InstanceDao instanceDao) {
-        this.instanceDao = instanceDao;
-    }
-
     public void setAppClientVersionDao(AppClientVersionDao appClientVersionDao) {
         this.appClientVersionDao = appClientVersionDao;
     }
 
-    
-
-    
-
-    
+    public void setClientReportInstanceService(ClientReportInstanceService clientReportInstanceService) {
+        this.clientReportInstanceService = clientReportInstanceService;
+    }
 
 }

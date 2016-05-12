@@ -7,7 +7,6 @@
 		median,mean,ninety_percent_max,ninety_nine_percent_max,hundred_max,
 		count,instance_host,instance_port,instance_id
 	</sql>
-	
 
 	<insert id="save" parameterType="AppClientCostTimeStat"
 		keyProperty="id" useGeneratedKeys="true">
@@ -27,19 +26,22 @@
 	    </foreach>
 	</insert>
 	
-    <select id="getAppDistinctClientAndInstance" resultType="AppClientCostTimeStat">
-    	select distinct t1.client_ip,t1.instance_id 
-		from app_client_costtime_minute_stat t1,
-			(select id 
-				from app_client_costtime_minute_stat 
-				where app_id=#{appId} and collect_time between #{startTime} and #{endTime}) t2
-		where t1.id=t2.id;
-    </select>
-    
     <select id="getAppCommandClientToInstanceStat" resultType="AppClientCostTimeStat">
     	select id,<include refid="columns"/>
     	from app_client_costtime_minute_stat
     	where app_id=#{appId} and instance_id=#{instanceId} and client_ip=#{clientIp} and collect_time between #{startTime} and #{endTime} and command=#{command};
     </select>
+    
+    <select id="getTableMinimumId" resultType="long">
+    	select id from app_client_costtime_minute_stat order by id limit 1
+    </select>
+    
+    <select id="getMinimumIdByCollectTime" resultType="long">
+    	select id from app_client_costtime_minute_stat where collect_time = #{collectTime} order by id limit 1
+    </select>
+    
+    <delete id="deleteByIds">
+    	delete from app_client_costtime_minute_stat where id>=#{startId} and id &lt;#{endId}
+    </delete>
 
 </mapper>
