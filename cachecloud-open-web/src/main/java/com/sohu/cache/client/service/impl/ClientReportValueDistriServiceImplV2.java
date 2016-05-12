@@ -43,6 +43,8 @@ public class ClientReportValueDistriServiceImplV2 implements ClientReportValueDi
         excludeCommands.add("quit");
     }
     
+    private final static int BATCH_SIZE = 50;
+    
     
     /**
      * 客户端统计值分布数据操作
@@ -96,7 +98,14 @@ public class ClientReportValueDistriServiceImplV2 implements ClientReportValueDi
 
             // 4.保存
             if (CollectionUtils.isNotEmpty(appClientValueDistriStatTotalList)) {
-                appClientValueStatDao.batchSave(appClientValueDistriStatTotalList);
+                List<AppClientValueDistriStatTotal> tmpList = new ArrayList<AppClientValueDistriStatTotal>(BATCH_SIZE);
+                for (AppClientValueDistriStatTotal appClientValueDistriStatTotal : appClientValueDistriStatTotalList) {
+                    tmpList.add(appClientValueDistriStatTotal);
+                    if (tmpList.size() == BATCH_SIZE || tmpList.size() == appClientValueDistriStatTotalList.size()) {
+                        appClientValueStatDao.batchSave(appClientValueDistriStatTotalList);
+                        tmpList = new ArrayList<AppClientValueDistriStatTotal>(BATCH_SIZE);
+                    }
+                }
             }
 
         } catch (Exception e) {
