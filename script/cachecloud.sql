@@ -815,6 +815,28 @@ CREATE TABLE `instance_slow_log` (
   UNIQUE KEY `slowlogkey` (`instance_id`,`slow_log_id`,`execute_time`),
   KEY `idx_app_create_time` (`app_id`,`create_time`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='实例慢查询列表';
+
+CREATE TABLE `app_client_value_minute_stats` (
+  `app_id` bigint(20) NOT NULL COMMENT '应用id',
+  `collect_time` bigint(20) NOT NULL COMMENT '统计时间:格式yyyyMMddHHmm00',
+  `update_time` datetime NOT NULL COMMENT '创建时间',
+  `command` varchar(20) NOT NULL COMMENT '命令',
+  `distribute_type` tinyint(4) NOT NULL COMMENT '值分布类型',
+  `count` int(11) NOT NULL COMMENT '调用次数',
+  PRIMARY KEY (`app_id`,`collect_time`,`command`,`distribute_type`),
+  KEY `idx_collect_time` (`collect_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='客户端每分钟值分布上报数据统计';
+
+CREATE TABLE `app_client_instance` (
+  `app_id` bigint(20) NOT NULL COMMENT '应用id',
+  `client_ip` varchar(20) NOT NULL COMMENT '客户端ip',
+  `instance_host` varchar(20) NOT NULL COMMENT 'redis节点ip',
+  `instance_port` int(11) NOT NULL COMMENT 'redis节点端口',
+  `instance_id` bigint(20) NOT NULL COMMENT 'redis节点id',
+  `day` date NOT NULL COMMENT '日期',
+  PRIMARY KEY (`app_id`,`day`,`client_ip`,`instance_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='应用实例与客户端对应关系表';
+
 --
 -- init cachecloud data
 --

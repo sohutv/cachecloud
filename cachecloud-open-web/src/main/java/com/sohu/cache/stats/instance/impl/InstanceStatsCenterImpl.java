@@ -110,6 +110,9 @@ public class InstanceStatsCenterImpl implements InstanceStatsCenter {
         }
         Map<Integer, Map<String, List<InstanceCommandStats>>> resultMap = new LinkedHashMap<Integer, Map<String, List<InstanceCommandStats>>>();
         for (InstanceInfo instance : list) {
+            if (instance.isOffline()) {
+                continue;
+            }
             int instanceId = instance.getId();
             String ip = instance.getIp();
             int port = instance.getPort();
