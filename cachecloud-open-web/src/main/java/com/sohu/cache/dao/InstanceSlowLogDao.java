@@ -4,6 +4,7 @@ import com.sohu.cache.entity.InstanceSlowLog;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -37,5 +38,14 @@ public interface InstanceSlowLogDao {
      * @param limit
      * @return
      */
-    List<InstanceSlowLog> search(@Param("appId") long appId, @Param("startDate") Date startDate, @Param("endDate") Date endDate, @Param("limit") int limit);
+    List<InstanceSlowLog> search(@Param("appId") long appId, @Param("startDate") Date startDate, @Param("endDate") Date endDate);
+
+    /**
+     * 
+     * @param appId
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    List<Map<String, Object>> getInstanceSlowLogCountMapByAppId(@Param("appId") long appId, @Param("startDate") Date startDate, @Param("endDate") Date endDate);
 }

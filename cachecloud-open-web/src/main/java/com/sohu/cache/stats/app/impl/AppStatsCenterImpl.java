@@ -232,6 +232,9 @@ public class AppStatsCenterImpl implements AppStatsCenter {
             }
 
             for (InstanceInfo instanceInfo : instanceList) {
+                if (instanceInfo.isOffline()) {
+                    continue;
+                }
                 machines.add(instanceInfo.getIp());
                 InstanceStats instanceStats = instanceStatMap.get(Long.valueOf(instanceInfo.getId()));
                 if (instanceStats == null) {
@@ -308,13 +311,25 @@ public class AppStatsCenterImpl implements AppStatsCenter {
     }
     
     @Override
-    public List<InstanceSlowLog> getInstanceSlowLogByAppId(long appId, Date startDate, Date endDate, int limit) {
+    public Map<String, Long> getInstanceSlowLogCountMapByAppId(Long appId, Date startDate, Date endDate) {
         AppDesc appDesc = appDao.getAppDescById(appId);
         if (appDesc == null) {
-            return null;
+            return Collections.emptyMap();
         }
         if (TypeUtil.isRedisType(appDesc.getType())) {
-            return redisCenter.getInstanceSlowLogByAppId(appId, startDate, endDate, limit);
+            return redisCenter.getInstanceSlowLogCountMapByAppId(appId, startDate, endDate);
+        }
+        return Collections.emptyMap();
+    }
+    
+    @Override
+    public List<InstanceSlowLog> getInstanceSlowLogByAppId(long appId, Date startDate, Date endDate) {
+        AppDesc appDesc = appDao.getAppDescById(appId);
+        if (appDesc == null) {
+            return Collections.emptyList();
+        }
+        if (TypeUtil.isRedisType(appDesc.getType())) {
+            return redisCenter.getInstanceSlowLogByAppId(appId, startDate, endDate);
         }
         return Collections.emptyList();
     }
@@ -343,5 +358,4 @@ public class AppStatsCenterImpl implements AppStatsCenter {
         this.userService = userService;
     }
 
-    
 }

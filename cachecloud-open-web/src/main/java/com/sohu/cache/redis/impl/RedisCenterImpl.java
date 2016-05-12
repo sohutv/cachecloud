@@ -20,6 +20,7 @@ import com.sohu.cache.stats.instance.InstanceStatsCenter;
 import com.sohu.cache.util.*;
 import com.sohu.cache.web.util.DateUtil;
 import com.sohu.cache.web.vo.RedisSlowLog;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -30,6 +31,7 @@ import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
+
 import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisDataException;
 import redis.clients.util.*;
@@ -1492,12 +1494,34 @@ public class RedisCenterImpl implements RedisCenter {
     
     
     @Override
-    public List<InstanceSlowLog> getInstanceSlowLogByAppId(long appId, Date startDate, Date endDate, int limit) {
+    public List<InstanceSlowLog> getInstanceSlowLogByAppId(long appId, Date startDate, Date endDate) {
         try {
-            return instanceSlowLogDao.search(appId, startDate, endDate, limit);
+            return instanceSlowLogDao.search(appId, startDate, endDate);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return Collections.emptyList();
+        }
+    }
+    
+    @Override
+    public Map<String, Long> getInstanceSlowLogCountMapByAppId(Long appId, Date startDate, Date endDate) {
+        try {
+            List<Map<String, Object>> list = instanceSlowLogDao.getInstanceSlowLogCountMapByAppId(appId, startDate, endDate);
+            if (CollectionUtils.isEmpty(list)) {
+                return Collections.emptyMap();
+            }
+            Map<String, Long> resultMap = new LinkedHashMap<String, Long>();
+            for (Map<String, Object> map : list) {
+                long count = MapUtils.getLongValue(map, "count");
+                String hostPort = MapUtils.getString(map, "hostPort");
+                if (StringUtils.isNotBlank(hostPort)) {
+                    resultMap.put(hostPort, count);
+                }
+            }
+            return resultMap;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return Collections.emptyMap();
         }
     }
     

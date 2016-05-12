@@ -265,11 +265,19 @@ public interface RedisCenter {
      * @param appId
      * @param startDate
      * @param endDate
-     * @param limit
      * @return
      */
-    public List<InstanceSlowLog> getInstanceSlowLogByAppId(long appId, Date startDate, Date endDate, int limit);
+    public List<InstanceSlowLog> getInstanceSlowLogByAppId(long appId, Date startDate, Date endDate);
 
+    /**
+     * 按照appid获取慢查询日志数关系
+     * @param appId
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    public Map<String, Long> getInstanceSlowLogCountMapByAppId(Long appId, Date startDate, Date endDate);
+    
     /**
      * 判断当前节点是否是sentinel节点
      * @param ip

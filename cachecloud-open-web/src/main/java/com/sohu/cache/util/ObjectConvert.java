@@ -30,7 +30,7 @@ public class ObjectConvert {
     }
 
     /**
-     * 将实例列表转化为ip1:port1,ip2:port2
+     * 将实例列表转化为ip1:port1 ip2:port2
      *
      * @param instanceList
      * @return
@@ -42,6 +42,9 @@ public class ObjectConvert {
         StringBuilder instanceBuilder = new StringBuilder();
         for (int i = 0; i < instanceList.size(); i++) {
             InstanceInfo instanceInfo = instanceList.get(i);
+            if (instanceInfo.isOffline()) {
+                continue;
+            }
             if (i > 0) {
                 instanceBuilder.append(",");
             }

@@ -131,7 +131,7 @@ public class AppController extends BaseController {
         if (StringUtils.isBlank(slowLogStartDateParam) || StringUtils.isBlank(slowLogEndDateParam)) {
             Date startDate = new Date();
             slowLogEndDateParam = DateUtil.formatDate(startDate, "yyyy-MM-dd");
-            slowLogStartDateParam = DateUtil.formatDate(DateUtils.addDays(startDate, -7), "yyyy-MM-dd");
+            slowLogStartDateParam = DateUtil.formatDate(DateUtils.addDays(startDate, -2), "yyyy-MM-dd");
         }
         
         model.addAttribute("startDate", startDateParam);
@@ -893,8 +893,9 @@ public class AppController extends BaseController {
         model.addAttribute("slowLogEndDate", slowLogEndDateParam);
         
         // 应用慢查询日志
-        int limit = 10;
-        List<InstanceSlowLog> appInstanceSlowLogList = appStatsCenter.getInstanceSlowLogByAppId(appId, startDate, endDate, limit);
+        Map<String,Long> appInstanceSlowLogCountMap = appStatsCenter.getInstanceSlowLogCountMapByAppId(appId, startDate, endDate);
+        model.addAttribute("appInstanceSlowLogCountMap", appInstanceSlowLogCountMap);
+        List<InstanceSlowLog> appInstanceSlowLogList = appStatsCenter.getInstanceSlowLogByAppId(appId, startDate, endDate);
         model.addAttribute("appInstanceSlowLogList", appInstanceSlowLogList);
         
         // 各个实例对应的慢查询日志
