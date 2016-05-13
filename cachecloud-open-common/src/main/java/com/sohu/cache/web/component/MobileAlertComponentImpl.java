@@ -21,7 +21,7 @@ public class MobileAlertComponentImpl implements MobileAlertComponent {
     /**
      * 管理员电话
      */
-    private String adminPhones;
+    private String adminPhones = ConstUtils.PHONES;
 
     @Override
     public void sendPhoneToAdmin(String message) {

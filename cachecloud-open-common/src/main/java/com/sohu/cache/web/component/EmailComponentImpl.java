@@ -3,6 +3,8 @@ package com.sohu.cache.web.component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sohu.cache.util.ConstUtils;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,7 +21,7 @@ public class EmailComponentImpl implements EmailComponent {
     /**
      * 管理员
      */
-    private String adminEmail;
+    private String adminEmail = ConstUtils.EMAILS;
 
     @Override
     public boolean sendMailToAdmin(String title, String content) {

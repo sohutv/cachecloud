@@ -7,7 +7,7 @@
                      http://www.springframework.org/schema/context
                      http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <context:property-placeholder location="classpath:application.properties"/>
+    <context:property-placeholder location="classpath:jdbc.properties"/>
 
     <!--cache data source-->
     <bean name="cacheCloudDB" class="com.mchange.v2.c3p0.ComboPooledDataSource">

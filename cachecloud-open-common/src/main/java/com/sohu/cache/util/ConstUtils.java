@@ -61,10 +61,11 @@ public class ConstUtils {
     public static double LOAD_THRESHOLD = 7.5;
 
     /**
-     * 机器统一的用户名、密码
+     * 机器统一的用户名、密码、端口
      */
     public static String USERNAME;
     public static String PASSWORD;
+    public static int SSH_PORT_DEFAULT;
     
     /**
      * 管理员
@@ -76,27 +77,46 @@ public class ConstUtils {
     /**
      * 是否为调试
      */
-    public static boolean IS_DEBUG = false;
+    public static boolean IS_DEBUG;
+    
+    /**
+     * 联系人
+     */
+    public static String CONTACT;
+    
+    /**
+     * 文档地址
+     */
+    public static String DOCUMENT_URL;
+    
+    /**
+     * 报警相关
+     */
+    public static String EMAILS;
+    public static String PHONES;
     
     static {
-        ResourceBundle resourceBundle = ResourceBundle.getBundle("application");
-        USERNAME = resourceBundle.getString("shell.auth.simple.user.name");
-        PASSWORD = resourceBundle.getString("shell.auth.simple.user.password");
-        SUPER_ADMIN_NAME = resourceBundle.getString("cachecloud.admin.user.name");
-        SUPER_ADMIN_PASS = resourceBundle.getString("cachecloud.admin.user.password");
+        ResourceBundle configresourceBundle = ResourceBundle.getBundle("config");
+        CONTACT = configresourceBundle.getString("cachecloud.contact");
+        DOCUMENT_URL = configresourceBundle.getString("cachecloud.documentUrl");
+        EMAILS = configresourceBundle.getString("cachecloud.owner.email");
+        PHONES = configresourceBundle.getString("cachecloud.owner.phone");
+        
+        ResourceBundle applicationResourceBundle = ResourceBundle.getBundle("application");
+        IS_DEBUG = "true".equals(applicationResourceBundle.getString("isDebug"));
+        USERNAME = applicationResourceBundle.getString("shell.auth.simple.user.name");
+        PASSWORD = applicationResourceBundle.getString("shell.auth.simple.user.password");
+        SSH_PORT_DEFAULT = Integer.parseInt(applicationResourceBundle.getString("cachecloud.machine.ssh.port"));
+        SUPER_ADMIN_NAME = applicationResourceBundle.getString("cachecloud.admin.user.name");
+        SUPER_ADMIN_PASS = applicationResourceBundle.getString("cachecloud.admin.user.password");
+        
         SUPER_MANAGER.add(SUPER_ADMIN_NAME);
-        IS_DEBUG = "true".equals(resourceBundle.getString("isDebug"));        
     }
 
     /**
      * maven仓库地址
      */
     public static final String MAVEN_WAREHOUSE = "http://your_maven_warehouse";
-    
-    /**
-     * 分号
-     */
-    public static final String SEMICOLON = ";";
     
     /**
      * 逗号
@@ -107,6 +127,17 @@ public class ConstUtils {
      * 换行
      */
     public static final String NEXT_LINE = "\n";
+    
+    /**
+     * ldap登录服务
+     */
+    public static final String LDAP_URL = "ldap://ldap.sohu-inc.com";
+
+    
+    /**
+     * 邮箱后缀
+     */
+    public static final String EMAIL_SUFFIX = "@sohu-inc.com";
 }
 
 

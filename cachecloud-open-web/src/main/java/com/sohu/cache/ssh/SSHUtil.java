@@ -7,7 +7,6 @@ import static com.sohu.cache.constant.SymbolConstant.COMMA;
 import com.sohu.cache.entity.MachineStats;
 import com.sohu.cache.exception.IllegalParamException;
 import com.sohu.cache.exception.SSHException;
-import com.sohu.cache.protocol.MachineProtocol;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.IntegerUtil;
 import com.sohu.cache.util.StringUtil;
@@ -64,7 +63,7 @@ public class SSHUtil {
                 throw new SSHException(e.getMessage(), e);
             }
         }
-        port = IntegerUtil.defaultIfSmallerThan0(port, MachineProtocol.SSH_PORT_DEFAULT);
+        port = IntegerUtil.defaultIfSmallerThan0(port, ConstUtils.SSH_PORT_DEFAULT);
         Connection conn = null;
         try {
             conn = new Connection(ip, port);
@@ -278,7 +277,7 @@ public class SSHUtil {
 
         if (StringUtil.isBlank(command))
             return EMPTY_STRING;
-        port = IntegerUtil.defaultIfSmallerThan0(port, MachineProtocol.SSH_PORT_DEFAULT);
+        port = IntegerUtil.defaultIfSmallerThan0(port, ConstUtils.SSH_PORT_DEFAULT);
         Connection conn = null;
         Session session = null;
         BufferedReader read = null;
@@ -424,7 +423,7 @@ public class SSHUtil {
         /**
          * 如果ssh默认端口不是22,请自行实现该逻辑
          */
-        return MachineProtocol.SSH_PORT_DEFAULT;
+        return ConstUtils.SSH_PORT_DEFAULT;
     }
 
     /**

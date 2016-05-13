@@ -1,7 +1,5 @@
 package com.sohu.cache.protocol;
 
-import java.util.ResourceBundle;
-
 /**
  * 机器相关的一些常量
  *
@@ -22,15 +20,6 @@ public class MachineProtocol {
      */
     public static final String TMP_DIR = "/tmp/cachecloud/";
 
-
-    /**
-     * ssh端口
-     */
-    public static int SSH_PORT_DEFAULT;
-    static {
-        ResourceBundle resourceBundle = ResourceBundle.getBundle("application");
-        SSH_PORT_DEFAULT = Integer.parseInt(resourceBundle.getString("cachecloud.machine.ssh.port"));
-    }
     /**
      * 编码
      */
