@@ -46,7 +46,7 @@ public class ObjectConvert {
                 continue;
             }
             if (i > 0) {
-                instanceBuilder.append(",");
+                instanceBuilder.append(" ");
             }
             instanceBuilder.append(instanceInfo.getIp()).append(":").append(instanceInfo.getPort());
         }

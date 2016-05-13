@@ -213,7 +213,7 @@ public class SSHUtil {
             }
             systemPerformanceEntity.setDiskUsageMap(diskUsageMap);
 
-            // 使用tsar统计当前网络流量 @TODO 
+            // 统计当前网络流量 @TODO 
             Double traffic = 0.0;
             systemPerformanceEntity.setTraffic(traffic.toString());
 

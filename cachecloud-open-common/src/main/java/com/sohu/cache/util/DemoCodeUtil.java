@@ -1,12 +1,11 @@
 package com.sohu.cache.util;
 
 
-import com.google.common.collect.Lists;
-import com.sohu.cache.entity.AppDesc;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
+
 
 /**
  * Created by hym on 14-11-3.
@@ -20,13 +19,14 @@ public class DemoCodeUtil {
     
     static {
         ResourceBundle rb = ResourceBundle.getBundle("client");
-        List<String> redisGoodVersions = Lists.newArrayList(rb.getString("good_versions").split(","));
-        String goodVersion = redisGoodVersions.get(redisGoodVersions.size() - 1);
+        String[] redisGoodVersionArr = rb.getString("good_versions").split(",");
+        List<String> redisGoodVersions = Arrays.asList(redisGoodVersionArr);
+        String redisGoodVersion = redisGoodVersions.get(redisGoodVersions.size() - 1);
         
         dependencyRedis.add("&lt;dependency&gt;                                                     ");
         dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&lt;groupId&gt;com.sohu.tv&lt;/groupId&gt;                                   ");
         dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&lt;artifactId&gt;cachecloud-open-client-redis&lt;/artifactId&gt;                       ");
-        dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&lt;version&gt;" + goodVersion + "&lt;/version&gt;                                           ");
+        dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&lt;version&gt;" + redisGoodVersion + "&lt;/version&gt;                                           ");
 
         dependencyRedis.add("&lt;/dependency&gt;                                                    ");
         dependencyRedis.add("&lt;repositories&gt;                                                   ");
@@ -110,9 +110,9 @@ public class DemoCodeUtil {
     }
 
 
-    public static List<String> getCode(AppDesc appDesc) {
+    public static List<String> getCode(int appType, long appId) {
         List<String> list = null;
-        switch (appDesc.getType()) {
+        switch (appType) {
             case ConstUtils.CACHE_REDIS_SENTINEL: {
                 list = new ArrayList<String>(redisSentinel);
                 break;
@@ -128,7 +128,7 @@ public class DemoCodeUtil {
         }
         if (list != null && list.size() > 0) {
             if (!list.get(0).contains("appId =")) {
-                list.add(0, "long appId = " + appDesc.getAppId() + ";");
+                list.add(0, "long appId = " + appId + ";");
             }
 //            else {
 //                list.set(0, "long appId = " + appDesc.getAppId() + ";");
@@ -137,9 +137,9 @@ public class DemoCodeUtil {
         return list;
     }
 
-    public static List<String> getDependency(AppDesc appDesc) {
+    public static List<String> getDependency(int appType) {
         List<String> list = null;
-        switch (appDesc.getType()) {
+        switch (appType) {
             case ConstUtils.CACHE_REDIS_SENTINEL: {
                 list = dependencyRedis;
                 break;
@@ -155,6 +155,13 @@ public class DemoCodeUtil {
         }
         return list;
 
+    }
+
+    public static List<String> getSpringConfig(int appType, long appId) {
+        /**
+         * your code
+         */
+        return null;
     }
 
     

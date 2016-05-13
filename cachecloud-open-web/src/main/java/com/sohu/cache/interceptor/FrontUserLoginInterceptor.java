@@ -2,7 +2,6 @@ package com.sohu.cache.interceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +9,8 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import com.sohu.cache.entity.AppUser;
-import com.sohu.cache.util.ConstUtils;
+import com.sohu.cache.web.service.UserService;
+import com.sohu.cache.web.util.UserLoginStatusUtil;
 
 /**
  * 前台登陆验证
@@ -20,17 +20,18 @@ import com.sohu.cache.util.ConstUtils;
  */
 public class FrontUserLoginInterceptor extends HandlerInterceptorAdapter {
     private Logger logger = LoggerFactory.getLogger(FrontUserLoginInterceptor.class);
+    
+    private UserService userService;
 
     @Override
     public boolean preHandle(HttpServletRequest request,
                              HttpServletResponse response, Object handler) throws Exception {
 
-        HttpSession session = request.getSession(true);
-        Object object = session.getAttribute(ConstUtils.LOGIN_USER_SESSION_NAME);
-        AppUser user = object == null ? null : (AppUser) object;
+        long userId = UserLoginStatusUtil.getUserIdFromLoginStatus(request);
+        AppUser user = userService.get(userId);
         
         if (user == null) {
-            String path = session.getServletContext().getContextPath();
+            String path = request.getSession(true).getServletContext().getContextPath();
             response.sendRedirect(path + "/manage/login");
             return false;
         }
@@ -51,6 +52,10 @@ public class FrontUserLoginInterceptor extends HandlerInterceptorAdapter {
     public void afterCompletion(HttpServletRequest request,
                                 HttpServletResponse response, Object handler, Exception ex)
             throws Exception {
+    }
+
+    public void setUserService(UserService userService) {
+        this.userService = userService;
     }
 
 }

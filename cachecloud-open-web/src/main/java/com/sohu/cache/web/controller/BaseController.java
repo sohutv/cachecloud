@@ -10,15 +10,13 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
-import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.service.AppService;
 import com.sohu.cache.web.service.UserService;
+import com.sohu.cache.web.util.UserLoginStatusUtil;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ui.Model;
@@ -57,12 +55,17 @@ public class BaseController {
         this.machineCenter = machineCenter;
     }
 
+    /**
+     * 返回用户基本信息
+     *
+     * @param request
+     * @return
+     */
     public AppUser getUserInfo(HttpServletRequest request) {
-        HttpSession session = request.getSession(true);
-        Object object = session.getAttribute(ConstUtils.LOGIN_USER_SESSION_NAME);
-        AppUser user = object == null ? null : (AppUser) object;
-        return user;
+        long userId = UserLoginStatusUtil.getUserIdFromLoginStatus(request);
+        return userService.get(userId);
     }
+
 
     /**
      * 发送json消息

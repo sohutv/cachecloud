@@ -3,7 +3,8 @@ package com.sohu.cache.init;
 import com.sohu.cache.dao.MachineDao;
 import com.sohu.cache.entity.MachineInfo;
 import com.sohu.cache.machine.MachineCenter;
-import com.sohu.cache.util.ConfigUtil;
+import com.sohu.cache.util.ConstUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
@@ -24,7 +25,7 @@ public class MachineInitLoad extends AsyncLoad{
     private MachineDao machineDao;
 
     public void init() {
-        if (ConfigUtil.I.isDebug()) {
+        if (ConstUtils.IS_DEBUG) {
             logger.warn("isDebug=true return");
             return;
         }

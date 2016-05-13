@@ -8,7 +8,6 @@ import com.sohu.cache.entity.*;
 import com.sohu.cache.stats.app.AppDeployCenter;
 import com.sohu.cache.stats.app.AppStatsCenter;
 import com.sohu.cache.stats.instance.InstanceStatsCenter;
-import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.DemoCodeUtil;
 import com.sohu.cache.web.vo.AppDetailVO;
 import com.sohu.cache.web.chart.model.AreaChartEntity;
@@ -141,6 +140,7 @@ public class AppController extends BaseController {
         model.addAttribute("appId", appId);
         model.addAttribute("tabTag", tabTag);
         model.addAttribute("firstCommand", firstCommand);
+        
 
         return new ModelAndView("app/userAppsIndex");
 
@@ -192,7 +192,7 @@ public class AppController extends BaseController {
         // 4. top5命令
         List<AppCommandStats> top5Commands = appStatsCenter.getTopLimitAppCommandStatsList(appId, beginTime, endTime, 5);
         model.addAttribute("top5Commands", top5Commands);
-
+        
         // 5.峰值
         List<AppCommandStats> top5ClimaxList = new ArrayList<AppCommandStats>();
         if (CollectionUtils.isNotEmpty(top5Commands)) {
@@ -203,6 +203,7 @@ public class AppController extends BaseController {
                 }
             }
         }
+
         model.addAttribute("top5ClimaxList", top5ClimaxList);
 
         model.addAttribute("appId", appId);
@@ -749,13 +750,6 @@ public class AppController extends BaseController {
             } else {
                 userService.update(appUser);
             }
-            AppUser newUser = userService.get(appUser.getId());
-            AppUser currentUser = getUserInfo(request);
-
-            //如果当前用户修改了自己的资料，那么更新session
-            if (newUser != null && currentUser != null && newUser.getId().equals(currentUser.getId())) {
-                request.getSession().setAttribute(ConstUtils.LOGIN_USER_SESSION_NAME, newUser);
-            }
             write(response, String.valueOf(SuccessEnum.SUCCESS.value()));
         } catch (Exception e) {
             write(response, String.valueOf(SuccessEnum.FAIL.value()));
@@ -848,13 +842,13 @@ public class AppController extends BaseController {
     public ModelAndView doDemo(HttpServletRequest request, HttpServletResponse response, Long appId, Model model) {
         if (appId != null && appId > 0) {
             AppDesc appDesc = appService.getByAppId(appId);
-            List<String> code = DemoCodeUtil.getCode(appDesc);
-            List<String> dependency = DemoCodeUtil.getDependency(appDesc);
-//            List<String> springConfig = DemoCodeUtil.getSpringConfig(appDesc);
+            List<String> code = DemoCodeUtil.getCode(appDesc.getType(), appDesc.getAppId());
+            List<String> dependency = DemoCodeUtil.getDependency(appDesc.getType());
+            List<String> springConfig = DemoCodeUtil.getSpringConfig(appDesc.getType(), appDesc.getAppId());
             
-//            if(CollectionUtils.isNotEmpty(springConfig) && springConfig.size() > 0){
-//                model.addAttribute("springConfig", springConfig);
-//            }
+            if(CollectionUtils.isNotEmpty(springConfig) && springConfig.size() > 0){
+                model.addAttribute("springConfig", springConfig);
+            }
             model.addAttribute("dependency",dependency);
             model.addAttribute("code", code);
             model.addAttribute("status", 1);

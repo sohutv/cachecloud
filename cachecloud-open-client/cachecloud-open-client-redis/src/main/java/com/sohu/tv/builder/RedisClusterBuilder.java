@@ -116,6 +116,8 @@ public class RedisClusterBuilder {
                     Set<HostAndPort> nodeList = new HashSet<HostAndPort>();
                     //形如 ip1:port1,ip2:port2,ip3:port3
                     String nodeInfo = heartbeatInfo.getShardInfo();
+                    //为了兼容,如果允许直接nodeInfo.split(" ")
+                    nodeInfo = nodeInfo.replace(" ", ",");
                     String[] nodeArray = nodeInfo.split(",");
                     for (String node : nodeArray) {
                         String[] ipAndPort = node.split(":");

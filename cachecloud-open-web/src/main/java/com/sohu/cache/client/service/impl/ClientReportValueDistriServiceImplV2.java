@@ -102,7 +102,7 @@ public class ClientReportValueDistriServiceImplV2 implements ClientReportValueDi
                 for (AppClientValueDistriStatTotal appClientValueDistriStatTotal : appClientValueDistriStatTotalList) {
                     tmpList.add(appClientValueDistriStatTotal);
                     if (tmpList.size() == BATCH_SIZE || tmpList.size() == appClientValueDistriStatTotalList.size()) {
-                        appClientValueStatDao.batchSave(appClientValueDistriStatTotalList);
+                        appClientValueStatDao.batchSave(tmpList);
                         tmpList = new ArrayList<AppClientValueDistriStatTotal>(BATCH_SIZE);
                     }
                 }

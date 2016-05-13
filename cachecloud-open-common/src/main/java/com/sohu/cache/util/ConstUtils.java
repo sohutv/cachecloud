@@ -73,6 +73,11 @@ public class ConstUtils {
     public static String SUPER_ADMIN_PASS;
     public static Set<String> SUPER_MANAGER = new HashSet<String>();
     
+    /**
+     * 是否为调试
+     */
+    public static boolean IS_DEBUG = false;
+    
     static {
         ResourceBundle resourceBundle = ResourceBundle.getBundle("application");
         USERNAME = resourceBundle.getString("shell.auth.simple.user.name");
@@ -80,12 +85,8 @@ public class ConstUtils {
         SUPER_ADMIN_NAME = resourceBundle.getString("cachecloud.admin.user.name");
         SUPER_ADMIN_PASS = resourceBundle.getString("cachecloud.admin.user.password");
         SUPER_MANAGER.add(SUPER_ADMIN_NAME);
+        IS_DEBUG = "true".equals(resourceBundle.getString("isDebug"));        
     }
-
-    /**
-     * cachecloud普通用户登录session
-     */
-    public static final String LOGIN_USER_SESSION_NAME = "CACHE_CLOUD_USER_SESSION";
 
     /**
      * maven仓库地址

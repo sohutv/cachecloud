@@ -20,8 +20,9 @@ import com.sohu.cache.entity.AppToUser;
 import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.stats.instance.InstanceStatsCenter;
-import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.service.AppService;
+import com.sohu.cache.web.service.UserService;
+import com.sohu.cache.web.util.UserLoginStatusUtil;
 
 /**
  * 应用和实例权限验证
@@ -35,16 +36,16 @@ public class AppAndInstanceAuthorityInterceptor extends HandlerInterceptorAdapte
 
     private AppService appService;
 
+    private UserService userService;
+
     private InstanceStatsCenter instanceStatsCenter;
 
     @Override
     public boolean preHandle(HttpServletRequest request,
             HttpServletResponse response, Object handler) throws Exception {
-
-        // 1.从session获取用户
-        HttpSession session = request.getSession(true);
-        Object object = session.getAttribute(ConstUtils.LOGIN_USER_SESSION_NAME);
-        AppUser user = object == null ? null : (AppUser) object;
+        // 1. 获取用户
+        long userId = UserLoginStatusUtil.getUserIdFromLoginStatus(request);
+        AppUser user = userService.get(userId);
         
         // 2. 管理员直接跳过
         if (AppUserTypeEnum.ADMIN_USER.value().equals(user.getType())) {
@@ -61,7 +62,7 @@ public class AppAndInstanceAuthorityInterceptor extends HandlerInterceptorAdapte
         String instanceId = request.getParameter("instanceId");
         if (StringUtils.isNotBlank(instanceId)) {
             InstanceInfo instanceInfo = instanceStatsCenter.getInstanceInfo(Long.parseLong(instanceId));
-            checkUserAppPower(response, session, user, instanceInfo.getAppId());
+            checkUserAppPower(response, request.getSession(true), user, instanceInfo.getAppId());
         }
 
         return true;
@@ -109,6 +110,10 @@ public class AppAndInstanceAuthorityInterceptor extends HandlerInterceptorAdapte
 
     public void setAppService(AppService appService) {
         this.appService = appService;
+    }
+
+    public void setUserService(UserService userService) {
+        this.userService = userService;
     }
 
     public void setInstanceStatsCenter(InstanceStatsCenter instanceStatsCenter) {

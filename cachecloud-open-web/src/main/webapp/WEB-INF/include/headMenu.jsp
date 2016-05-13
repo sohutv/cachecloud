@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@page import="com.sohu.cache.util.ConstUtils"%>   
 <%@ include file="/WEB-INF/jsp/manage/commons/taglibs.jsp"%>
 <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
     <div class="container">
@@ -27,15 +28,9 @@
             </ul>
             
             <ul class="nav navbar-nav navbar-left">
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><font color='white'>CacheCloud文档</font><b class="caret"></b>
-					<i class="fa fa-angle-down"></i>
+                <li>
+                    <a href="<%=ConstUtils.DOCUMENT_URL%>"><font color='white'>CacheCloud文档</font>
 					</a>
-					<ul class="dropdown-menu">
-						<li><a target="_blank" href=""><i class="fa fa-user"></i>使用文档</a></li>
-						<li><a target="_blank" href=""><i class="fa fa-user"></i>客户端接入文档</a></li>
-						<li><a target="_blank" href=""><i class="fa fa-user"></i>常见问题</a></li>
-					</ul>
                 </li>
             </ul>
             
