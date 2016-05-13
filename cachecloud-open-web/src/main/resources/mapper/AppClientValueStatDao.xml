@@ -16,6 +16,13 @@
 	    count = count + #{valueDistri.count}, update_time=now()
 	</insert>
 	
+	<insert id="save">
+		insert into app_client_value_minute_stats(<include refid="columns" />)
+		values(#{appId},#{collectTime},#{updateTime},#{command},#{distributeType},#{count})
+	    on duplicate key update
+	    count = count + #{count}, update_time=now()
+	</insert>
+	
 	<select id="getAppValueDistriList" resultType="AppClientValueDistriSimple">
     	select distribute_type, sum(count) as count
     	from app_client_value_minute_stats

@@ -29,5 +29,12 @@ public interface AppClientValueStatDao {
      * @param appClientValueDistriStatList
      */
     void batchSave(@Param("appClientValueDistriStatTotalList") List<AppClientValueDistriStatTotal> appClientValueDistriStatTotalList);
+    
+    
+    /**
+     * 保存
+     * @param appClientValueDistriStatTotal
+     */
+    int save(AppClientValueDistriStatTotal appClientValueDistriStatTotal);
 
 }

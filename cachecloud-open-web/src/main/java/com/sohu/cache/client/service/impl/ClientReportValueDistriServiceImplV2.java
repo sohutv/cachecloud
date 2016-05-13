@@ -1,6 +1,5 @@
 package com.sohu.cache.client.service.impl;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -8,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -43,9 +41,6 @@ public class ClientReportValueDistriServiceImplV2 implements ClientReportValueDi
         excludeCommands.add("quit");
     }
     
-    private final static int BATCH_SIZE = 50;
-    
-    
     /**
      * 客户端统计值分布数据操作
      */
@@ -78,9 +73,6 @@ public class ClientReportValueDistriServiceImplV2 implements ClientReportValueDi
                 return;
             }
 
-            // 2.结果集
-            List<AppClientValueDistriStatTotal> appClientValueDistriStatTotalList = new ArrayList<AppClientValueDistriStatTotal>();
-
             // 3.解析
             for (Map<String, Object> map : datas) {
                 Integer clientDataType = MapUtils.getInteger(map, ClientReportConstant.CLIENT_DATA_TYPE, -1);
@@ -91,19 +83,7 @@ public class ClientReportValueDistriServiceImplV2 implements ClientReportValueDi
                 if (ClientCollectDataTypeEnum.VALUE_LENGTH_DISTRI_TYPE.equals(clientCollectDataTypeEnum)) {
                     AppClientValueDistriStatTotal appClientValueDistriStat = generate(collectTime, reportTime, map);
                     if (appClientValueDistriStat != null) {
-                        appClientValueDistriStatTotalList.add(appClientValueDistriStat);
-                    }
-                }
-            }
-
-            // 4.保存
-            if (CollectionUtils.isNotEmpty(appClientValueDistriStatTotalList)) {
-                List<AppClientValueDistriStatTotal> tmpList = new ArrayList<AppClientValueDistriStatTotal>(BATCH_SIZE);
-                for (AppClientValueDistriStatTotal appClientValueDistriStatTotal : appClientValueDistriStatTotalList) {
-                    tmpList.add(appClientValueDistriStatTotal);
-                    if (tmpList.size() == BATCH_SIZE || tmpList.size() == appClientValueDistriStatTotalList.size()) {
-                        appClientValueStatDao.batchSave(tmpList);
-                        tmpList = new ArrayList<AppClientValueDistriStatTotal>(BATCH_SIZE);
+                        appClientValueStatDao.save(appClientValueDistriStat);
                     }
                 }
             }
