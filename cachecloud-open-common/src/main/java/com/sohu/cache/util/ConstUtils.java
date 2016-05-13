@@ -1,14 +1,14 @@
 package com.sohu.cache.util;
 
-import java.util.HashSet;
+import java.util.Arrays;
+import java.util.List;
 import java.util.ResourceBundle;
-import java.util.Set;
 
 /**
  * cachecloud常量
  * @author leifu
  * @Date 2016年3月1日
- * @Time 下午1:04:14
+ * @Time 下午12:54:45
  */
 public class ConstUtils {
     // cache的类型区分
@@ -34,12 +34,13 @@ public class ConstUtils {
     public static final String MACHINE_MONITOR_JOB_NAME = "machineMonitorJob";
     public static final String MACHINE_MONITOR_JOB_GROUP = "machineMonitor";
     public static final String MACHINE_MONITOR_TRIGGER_GROUP = "machineMonitor-";
+
     
     // redis-slowlog job/trigger name/group
     public static final String REDIS_SLOWLOG_JOB_NAME = "redisSlowLogJob";
     public static final String REDIS_SLOWLOG_JOB_GROUP = "redisSlowLog";
     public static final String REDIS_SLOWLOG_TRIGGER_GROUP = "redisSlowLog-";
-
+    
     // 创建trigger时，dataMap的数据key
     public static final String HOST_KEY = "host_key";
     public static final String PORT_KEY = "port_key";
@@ -66,13 +67,13 @@ public class ConstUtils {
     public static String USERNAME;
     public static String PASSWORD;
     public static int SSH_PORT_DEFAULT;
-    
+
     /**
      * 管理员
      */
     public static String SUPER_ADMIN_NAME;
     public static String SUPER_ADMIN_PASS;
-    public static Set<String> SUPER_MANAGER = new HashSet<String>();
+    public static List<String> SUPER_MANAGER;
     
     /**
      * 是否为调试
@@ -95,12 +96,25 @@ public class ConstUtils {
     public static String EMAILS;
     public static String PHONES;
     
+    /**
+     * maven仓库地址
+     */
+    public static String MAVEN_WAREHOUSE;
+    
+    /**
+     * 超级管理员列表
+     */
+    public static String SUPER_ADMINS;
+    
     static {
         ResourceBundle configresourceBundle = ResourceBundle.getBundle("config");
         CONTACT = configresourceBundle.getString("cachecloud.contact");
         DOCUMENT_URL = configresourceBundle.getString("cachecloud.documentUrl");
         EMAILS = configresourceBundle.getString("cachecloud.owner.email");
         PHONES = configresourceBundle.getString("cachecloud.owner.phone");
+        MAVEN_WAREHOUSE = configresourceBundle.getString("cachecloud.mavenWareHouse");
+        SUPER_ADMINS = configresourceBundle.getString("cachecloud.superAdmin");
+        SUPER_MANAGER = Arrays.asList(SUPER_ADMINS.split(","));
         
         ResourceBundle applicationResourceBundle = ResourceBundle.getBundle("application");
         IS_DEBUG = "true".equals(applicationResourceBundle.getString("isDebug"));
@@ -109,14 +123,7 @@ public class ConstUtils {
         SSH_PORT_DEFAULT = Integer.parseInt(applicationResourceBundle.getString("cachecloud.machine.ssh.port"));
         SUPER_ADMIN_NAME = applicationResourceBundle.getString("cachecloud.admin.user.name");
         SUPER_ADMIN_PASS = applicationResourceBundle.getString("cachecloud.admin.user.password");
-        
-        SUPER_MANAGER.add(SUPER_ADMIN_NAME);
     }
-
-    /**
-     * maven仓库地址
-     */
-    public static final String MAVEN_WAREHOUSE = "http://your_maven_warehouse";
     
     /**
      * 逗号
@@ -128,16 +135,7 @@ public class ConstUtils {
      */
     public static final String NEXT_LINE = "\n";
     
-    /**
-     * ldap登录服务
-     */
-    public static final String LDAP_URL = "ldap://ldap.sohu-inc.com";
 
-    
-    /**
-     * 邮箱后缀
-     */
-    public static final String EMAIL_SUFFIX = "@sohu-inc.com";
 }
 
 

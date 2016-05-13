@@ -30,9 +30,9 @@ public class LoginUtil {
         }
         Hashtable<String, String> env = new Hashtable<String, String>();
         env.put("java.naming.factory.initial", "com.sun.jndi.ldap.LdapCtxFactory");
-        env.put("java.naming.provider.url", ConstUtils.LDAP_URL);
+        env.put("java.naming.provider.url", "ldap://ldap.xx.com");
         env.put("java.naming.security.authentication", "simple");
-        env.put("java.naming.security.principal", username + ConstUtils.EMAIL_SUFFIX);
+        env.put("java.naming.security.principal", username + "@xx.com");
         env.put("java.naming.security.credentials", password);
         DirContext ctx = null;
         try {
