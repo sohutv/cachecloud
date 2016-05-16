@@ -42,7 +42,11 @@ public class ClientReportDataSizeServiceImpl implements ClientReportDataSizeServ
             int valueMapSize = MapUtils.getInteger(otherInfo, ClientReportConstant.VALUE_MAP_SIZE, 0);
             int exceptionMapSize = MapUtils.getInteger(otherInfo, ClientReportConstant.EXCEPTION_MAP_SIZE, 0);
             int collectMapSize = MapUtils.getInteger(otherInfo, ClientReportConstant.COLLECTION_MAP_SIZE, 0);
-
+            // 只记录大于minSize
+            int minSize = 100;
+            if (costMapSize < minSize && valueMapSize < minSize && exceptionMapSize < minSize && collectMapSize < minSize) {
+                return;
+            }
             // 设置实体
             AppClientDataSizeStat appClientDataSizeStat = new AppClientDataSizeStat();
             appClientDataSizeStat.setClientIp(clientIp);
