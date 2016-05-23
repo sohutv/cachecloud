@@ -843,7 +843,7 @@ public class AppController extends BaseController {
         if (appId != null && appId > 0) {
             AppDesc appDesc = appService.getByAppId(appId);
             List<String> code = DemoCodeUtil.getCode(appDesc.getType(), appDesc.getAppId());
-            List<String> dependency = DemoCodeUtil.getDependency(appDesc.getType());
+            List<String> dependency = DemoCodeUtil.getDependencyRedis();
             List<String> springConfig = DemoCodeUtil.getSpringConfig(appDesc.getType(), appDesc.getAppId());
             
             if(CollectionUtils.isNotEmpty(springConfig) && springConfig.size() > 0){
