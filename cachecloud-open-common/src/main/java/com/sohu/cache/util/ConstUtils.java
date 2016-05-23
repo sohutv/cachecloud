@@ -1,6 +1,5 @@
 package com.sohu.cache.util;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -56,23 +55,46 @@ public class ConstUtils {
     // 容量转换
     public static final int _1024 = 1024;
 
-    // 机器报警阀值
-    public static double CPU_USAGE_RATIO_THRESHOLD = 80.0;
-    public static double MEMORY_USAGE_RATIO_THRESHOLD = 80.0;
-    public static double LOAD_THRESHOLD = 7.5;
+    /**
+     * 机器报警阀值
+     */
+    public static double CPU_USAGE_RATIO_THRESHOLD;
+    public static double DEFAULT_CPU_USAGE_RATIO_THRESHOLD = 80.0;
+
+    
+    public static double MEMORY_USAGE_RATIO_THRESHOLD;
+    public static double DEFAULT_MEMORY_USAGE_RATIO_THRESHOLD = 80.0;
+
+    
+    public static double LOAD_THRESHOLD;
+    public static double DEFAULT_LOAD_THRESHOLD = 8.0;
+
 
     /**
      * 机器统一的用户名、密码、端口
      */
     public static String USERNAME;
+    public static String DEFAULT_USERNAME = "cachecloud";
+
     public static String PASSWORD;
+    public static String DEFAULT_PASSWORD = "cachecloud";
+
     public static int SSH_PORT_DEFAULT;
+    public static int DEFAULT_SSH_PORT_DEFAULT = 22;
+
 
     /**
-     * 管理员
+     * 管理员相关
      */
     public static String SUPER_ADMIN_NAME;
+    public static String DEFAULT_SUPER_ADMIN_NAME = "admin";
+    
     public static String SUPER_ADMIN_PASS;
+    public static String DEFAULT_SUPER_ADMIN_PASS = "admin";
+    
+    public static String SUPER_ADMINS;
+    public static String DEFAULT_SUPER_ADMINS="admin";
+    
     public static List<String> SUPER_MANAGER;
     
     /**
@@ -84,45 +106,56 @@ public class ConstUtils {
      * 联系人
      */
     public static String CONTACT;
+    public static String DEFAULT_CONTACT = "user1:(xx@zz.com, user1:135xxxxxxxx)<br/>user2: (user2@zz.com, user2:138xxxxxxxx)";
+
     
     /**
      * 文档地址
      */
     public static String DOCUMENT_URL;
+    public static String DEFAULT_DOCUMENT_URL = "http://cachecloud.github.io";
     
     /**
      * 报警相关
      */
     public static String EMAILS;
+    public static String DEFAULT_EMAILS = "xx@sohu.com,yy@qq.com";
+
+    
     public static String PHONES;
+    public static String DEFAULT_PHONES = "13812345678,13787654321";
+
     
     /**
      * maven仓库地址
      */
     public static String MAVEN_WAREHOUSE;
+    public static String DEFAULT_MAVEN_WAREHOUSE = "http://your_maven_house";
+    
     
     /**
-     * 超级管理员列表
+     * 客户端可用版本
      */
-    public static String SUPER_ADMINS;
+    public static String GOOD_CLIENT_VERSIONS;
+    public static String DEFAULT_GOOD_CLIENT_VERSIONS = "1.0-SNAPSHOT";
+
+    /**
+     * 客户端警告版本
+     */
+    public static String WARN_CLIENT_VERSIONS;
+    public static String DEFAULT_WARN_CLIENT_VERSIONS = "0.1";
+    
+    
+    /**
+     * 客户端错误版本
+     */
+    public static String ERROR_CLIENT_VERSIONS;
+    public static String DEFAULT_ERROR_CLIENT_VERSIONS = "0.0";
+
     
     static {
-        ResourceBundle configresourceBundle = ResourceBundle.getBundle("config");
-        CONTACT = configresourceBundle.getString("cachecloud.contact");
-        DOCUMENT_URL = configresourceBundle.getString("cachecloud.documentUrl");
-        EMAILS = configresourceBundle.getString("cachecloud.owner.email");
-        PHONES = configresourceBundle.getString("cachecloud.owner.phone");
-        MAVEN_WAREHOUSE = configresourceBundle.getString("cachecloud.mavenWareHouse");
-        SUPER_ADMINS = configresourceBundle.getString("cachecloud.superAdmin");
-        SUPER_MANAGER = Arrays.asList(SUPER_ADMINS.split(","));
-        
         ResourceBundle applicationResourceBundle = ResourceBundle.getBundle("application");
         IS_DEBUG = "true".equals(applicationResourceBundle.getString("isDebug"));
-        USERNAME = applicationResourceBundle.getString("shell.auth.simple.user.name");
-        PASSWORD = applicationResourceBundle.getString("shell.auth.simple.user.password");
-        SSH_PORT_DEFAULT = Integer.parseInt(applicationResourceBundle.getString("cachecloud.machine.ssh.port"));
-        SUPER_ADMIN_NAME = applicationResourceBundle.getString("cachecloud.admin.user.name");
-        SUPER_ADMIN_PASS = applicationResourceBundle.getString("cachecloud.admin.user.password");
     }
     
     /**

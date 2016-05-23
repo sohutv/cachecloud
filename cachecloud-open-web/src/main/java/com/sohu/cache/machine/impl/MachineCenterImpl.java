@@ -244,7 +244,7 @@ public class MachineCenterImpl implements MachineCenter {
         // 内存使用率 todo
         if (memoryUsage > memoryThreshold) {
             logger.warn("memoryUsageRatio is above security line, ip: {}, memoryUsage: {}%", ip, memoryUsage);
-//            alertContent.append("ip:").append(ip).append(",memUse:").append(memoryUsage);
+            alertContent.append("ip:").append(ip).append(",memUse:").append(memoryUsage);
         }
 
         // 负载 todo

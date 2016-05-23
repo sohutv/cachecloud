@@ -4,7 +4,6 @@ package com.sohu.cache.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.ResourceBundle;
 
 
 /**
@@ -12,30 +11,11 @@ import java.util.ResourceBundle;
  */
 public class DemoCodeUtil {
 
-    public static final List<String> dependencyRedis = new ArrayList<String>();
     public static final List<String> redisCluster = new ArrayList<String>();
     public static final List<String> redisSentinel = new ArrayList<String>();
     public static final List<String> redisStandalone = new ArrayList<String>();
     
     static {
-        ResourceBundle rb = ResourceBundle.getBundle("client");
-        String[] redisGoodVersionArr = rb.getString("good_versions").split(",");
-        List<String> redisGoodVersions = Arrays.asList(redisGoodVersionArr);
-        String redisGoodVersion = redisGoodVersions.get(redisGoodVersions.size() - 1);
-        
-        dependencyRedis.add("&lt;dependency&gt;                                                     ");
-        dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&lt;groupId&gt;com.sohu.tv&lt;/groupId&gt;                                   ");
-        dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&lt;artifactId&gt;cachecloud-open-client-redis&lt;/artifactId&gt;                       ");
-        dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&lt;version&gt;" + redisGoodVersion + "&lt;/version&gt;                                           ");
-
-        dependencyRedis.add("&lt;/dependency&gt;                                                    ");
-        dependencyRedis.add("&lt;repositories&gt;                                                   ");
-        dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&lt;repository&gt;                                                     ");
-        dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;id&gt;nexus_id&lt;/id&gt;                                              ");
-        dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;url&gt;" + ConstUtils.MAVEN_WAREHOUSE + "&lt;/url&gt;");
-        dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&lt;/repository&gt;                                                    ");
-        dependencyRedis.add("&lt;/repositories&gt;                                                  ");
-
         redisCluster.add("/**                                                                       ");
         redisCluster.add(" * 使用自定义配置：                                                         ");
         redisCluster.add(" *  1. setTimeout：redis操作的超时设置；                                    ");
@@ -109,6 +89,34 @@ public class DemoCodeUtil {
 
     }
 
+    /**
+     * 获取依赖
+     * @return
+     */
+    public static List<String> getDependencyRedis() {
+        List<String> dependencyRedis = new ArrayList<String>();
+        
+        // redis版本
+        String[] redisGoodVersionArr = ConstUtils.GOOD_CLIENT_VERSIONS.split(ConstUtils.COMMA);
+        List<String> redisGoodVersions = Arrays.asList(redisGoodVersionArr);
+        String redisGoodVersion = redisGoodVersions.get(redisGoodVersions.size() - 1);
+        
+        // 依赖
+        dependencyRedis.add("&lt;dependency&gt;                                                     ");
+        dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&lt;groupId&gt;com.sohu.tv&lt;/groupId&gt;                                   ");
+        dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&lt;artifactId&gt;cachecloud-client-redis&lt;/artifactId&gt;                       ");
+        dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&lt;version&gt;" + redisGoodVersion + "&lt;/version&gt;                                           ");
+
+        dependencyRedis.add("&lt;/dependency&gt;                                                    ");
+        dependencyRedis.add("&lt;repositories&gt;                                                   ");
+        dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&lt;repository&gt;                                                     ");
+        dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;id&gt;sohu.nexus&lt;/id&gt;                                              ");
+        dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;url&gt;" + ConstUtils.MAVEN_WAREHOUSE + "&lt;/url&gt;");
+        dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&lt;/repository&gt;                                                    ");
+        dependencyRedis.add("&lt;/repositories&gt;                                                  ");
+        
+        return dependencyRedis;
+    }
 
     public static List<String> getCode(int appType, long appId) {
         List<String> list = null;
@@ -135,26 +143,6 @@ public class DemoCodeUtil {
 //            }
         }
         return list;
-    }
-
-    public static List<String> getDependency(int appType) {
-        List<String> list = null;
-        switch (appType) {
-            case ConstUtils.CACHE_REDIS_SENTINEL: {
-                list = dependencyRedis;
-                break;
-            }
-            case ConstUtils.CACHE_REDIS_STANDALONE: {
-                list = dependencyRedis;
-                break;
-            }
-            case ConstUtils.CACHE_TYPE_REDIS_CLUSTER: {
-                list = dependencyRedis;
-                break;
-            }
-        }
-        return list;
-
     }
 
     public static List<String> getSpringConfig(int appType, long appId) {

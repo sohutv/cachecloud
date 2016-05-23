@@ -40,9 +40,11 @@ public class SSHUtil {
     private final static String COMMAND_TOP = "top -b -n 1 | head -5";
     private final static String COMMAND_DF_LH = "df -lh";
     private final static String LOAD_AVERAGE_STRING = "load average: ";
-    private final static String MEM_USAGE_STRING = "Mem:";
-    private final static String SWAP_USAGE_STRING = "Swap:";
-    private final static String BUFFER_CACHE = "buff/cache";
+    private final static String COMMAND_MEM = "cat /proc/meminfo | grep -E -w 'MemTotal|MemFree|Buffers|Cached'";
+    private final static String MEM_TOTAL = "MemTotal";
+    private final static String MEM_FREE = "MemFree";
+    private final static String MEM_BUFFERS = "Buffers";
+    private final static String MEM_CACHED = "Cached";
 
     /**
      * Get HostPerformanceEntity[cpuUsage, memUsage, load] by ssh.<br>
@@ -136,47 +138,48 @@ public class SSHUtil {
 //                    centos7:Cpu(s): 0.0% us
                     double cpuUs = getUsCpu(line);
                     systemPerformanceEntity.setCpuUsage(String.valueOf(cpuUs));
-                } else if (4 == lineNum) {
-                    // 第四行通常是这样：
-                    // Mem: 1572988k total, 1490452k used, 82536k free, 138300k
-                    // buffers
-                    String[] memArray = line.replace(MEM_USAGE_STRING, EMPTY_STRING).split(COMMA);
-                    totalMem = matchMemLineNumber(memArray[0]).trim();
-                    
-                    if (line.contains(BUFFER_CACHE)) {
-                        freeMem = matchMemLineNumber(memArray[1]).trim();
-                    } else {
-                        freeMem = matchMemLineNumber(memArray[2]).trim();
-                    }
-                    buffersMem = matchMemLineNumber(memArray[3]).trim();
-                } else if (5 == lineNum) {
-                    // 第四行通常是这样：
-                    // Swap: 2096472k total, 252k used, 2096220k free, 788540k cached
-                    String[] memArray = line.replace(SWAP_USAGE_STRING, EMPTY_STRING).split(COMMA);
-                    if (memArray.length > 3) {
-                        cachedMem = matchMemLineNumber(memArray[3]).trim();
-                    } else {
-                        cachedMem = "0";
-                    }
-                    if (StringUtil.isBlank(totalMem, freeMem, buffersMem))
-                        throw new Exception("Error when get system performance of ip: " + conn.getHostname()
-                                + ", can't get totalMem, freeMem, buffersMem or cachedMem");
-
-                    Long totalMemLong = NumberUtils.toLong(totalMem);
-                    Long freeMemLong = NumberUtils.toLong(freeMem);
-                    Long buffersMemLong = NumberUtils.toLong(buffersMem);
-                    Long cachedMemLong = NumberUtils.toLong(cachedMem);
-
-                    Long usedMemFree = freeMemLong + buffersMemLong + cachedMemLong;
-                    Double memoryUsage = 1 - (NumberUtils.toDouble(usedMemFree.toString()) / NumberUtils.toDouble(totalMemLong.toString()) / 1.0);
-                    systemPerformanceEntity.setMemoryTotal(String.valueOf(totalMemLong));
-                    systemPerformanceEntity.setMemoryFree(String.valueOf(usedMemFree));
-                    DecimalFormat df = new DecimalFormat("0.00");
-                    systemPerformanceEntity.setMemoryUsageRatio(df.format(memoryUsage * 100));
                 } else {
                     continue;
                 }
             }// parse the top output
+            
+            // 统计内存使用状况
+            session = conn.openSession();
+            session.execCommand(COMMAND_MEM);
+            printSessionStdErr(conn.getHostname(),COMMAND_MEM, session);
+            read = new BufferedReader(new InputStreamReader(new StreamGobbler(session.getStdout())));
+            /**
+             * 内容通常是这样：
+             * MemTotal:       32771088 kB
+             * MemFree:        11727096 kB
+             * Buffers:          497928 kB
+             * Cached:         16139624 kB
+             */
+            while((line = read.readLine()) != null) {
+            	if (line.contains(MEM_TOTAL)) {
+            		totalMem = matchMemLineNumber(line).trim();
+            	} else if (line.contains(MEM_FREE)) {
+            		freeMem = matchMemLineNumber(line).trim();
+            	} else if (line.contains(MEM_BUFFERS)) {
+            		buffersMem = matchMemLineNumber(line).trim();
+            	} else if (line.contains(MEM_CACHED)) {
+            		cachedMem = matchMemLineNumber(line).trim();
+            	}
+            }
+            if (StringUtil.isBlank(totalMem, freeMem, buffersMem))
+                throw new Exception("Error when get system performance of ip: " + conn.getHostname()
+                        + ", can't get totalMem, freeMem, buffersMem or cachedMem");
+            Long totalMemLong = NumberUtils.toLong(totalMem);
+            Long freeMemLong = NumberUtils.toLong(freeMem);
+            Long buffersMemLong = NumberUtils.toLong(buffersMem);
+            Long cachedMemLong = NumberUtils.toLong(cachedMem);
+
+            Long usedMemFree = freeMemLong + buffersMemLong + cachedMemLong;
+            Double memoryUsage = 1 - (NumberUtils.toDouble(usedMemFree.toString()) / NumberUtils.toDouble(totalMemLong.toString()) / 1.0);
+            systemPerformanceEntity.setMemoryTotal(String.valueOf(totalMemLong));
+            systemPerformanceEntity.setMemoryFree(String.valueOf(usedMemFree));
+            DecimalFormat df = new DecimalFormat("0.00");
+            systemPerformanceEntity.setMemoryUsageRatio(df.format(memoryUsage * 100));
 
             // 统计磁盘使用状况
             Map<String, String> diskUsageMap = new HashMap<String, String>();
