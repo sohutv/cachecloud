@@ -850,11 +850,11 @@ CREATE TABLE `system_config` (
 -- init cachecloud data
 --
 
-insert into system_config(config_key,config_value,info,status,order_id) values('shell.auth.simple.user.name','cachecloud','ssh用户名',1,1);
-insert into system_config(config_key,config_value,info,status,order_id) values('shell.auth.simple.user.password','cachecloud','ssh密码',1,2);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.ssh.name','cachecloud','ssh用户名',1,1);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.ssh.password','cachecloud','ssh密码',1,2);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.ssh.port','22','ssh端口',1,3);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.ssh.name','admin','admin用户名',1,4);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.ssh.password','admin','admin密码',1,5);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.admin.user.name','admin','admin用户名',1,4);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.admin.user.password','admin','admin密码',1,5);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.superAdmin','admin,xx,yy','超级管理员组',1,6);
 insert into system_config(config_key,config_value,info,status,order_id) values('machine.cpu.alert.ratio','80.0','cpu报警阀值',1,7);
 insert into system_config(config_key,config_value,info,status,order_id) values('machine.mem.alert.ratio','80.0','内存报警阀值',1,8);
