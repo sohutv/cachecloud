@@ -837,6 +837,13 @@ CREATE TABLE `app_client_instance` (
   PRIMARY KEY (`app_id`,`day`,`client_ip`,`instance_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='应用实例与客户端对应关系表';
 
+CREATE TABLE `system_config` (
+  `config_key` varchar(255) NOT NULL COMMENT '配置key',
+  `config_value` varchar(255) NOT NULL COMMENT '配置value',
+  `info` varchar(255) NOT NULL COMMENT '配置说明',
+  `status` tinyint NOT NULL COMMENT '1:可用,0:不可用',
+  PRIMARY KEY (`config_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='系统配置';
 --
 -- init cachecloud data
 --

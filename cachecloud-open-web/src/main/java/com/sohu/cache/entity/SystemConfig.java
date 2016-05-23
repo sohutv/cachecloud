@@ -1,0 +1,73 @@
+package com.sohu.cache.entity;
+
+/**
+ * 系统配置
+ * 
+ * @author leifu
+ * @Date 2016年5月23日
+ * @Time 上午11:18:11
+ */
+public class SystemConfig {
+
+    /**
+     * key是关键字
+     */
+    private String configKey;
+
+    private String configValue;
+
+    private String info;
+
+    private int status;
+
+    public SystemConfig(String configKey, String configValue, String info, int status) {
+        super();
+        this.configKey = configKey;
+        this.configValue = configValue;
+        this.info = info;
+        this.status = status;
+    }
+
+    public SystemConfig() {
+        super();
+    }
+
+    public String getConfigKey() {
+        return configKey;
+    }
+
+    public void setConfigKey(String configKey) {
+        this.configKey = configKey;
+    }
+
+    public String getConfigValue() {
+        return configValue;
+    }
+
+    public void setConfigValue(String configValue) {
+        this.configValue = configValue;
+    }
+
+    public String getInfo() {
+        return info;
+    }
+
+    public void setInfo(String info) {
+        this.info = info;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return "SystemConfig [configKey=" + configKey + ", configValue=" + configValue + ", info=" + info + ", status="
+                + status + "]";
+    }
+
+}
