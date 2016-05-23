@@ -4,7 +4,6 @@ package com.sohu.cache.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.ResourceBundle;
 
 
 /**
@@ -18,8 +17,7 @@ public class DemoCodeUtil {
     public static final List<String> redisStandalone = new ArrayList<String>();
     
     static {
-        ResourceBundle rb = ResourceBundle.getBundle("client");
-        String[] redisGoodVersionArr = rb.getString("good_versions").split(",");
+        String[] redisGoodVersionArr = ConstUtils.GOOD_CLIENT_VERSIONS.split(",");
         List<String> redisGoodVersions = Arrays.asList(redisGoodVersionArr);
         String redisGoodVersion = redisGoodVersions.get(redisGoodVersions.size() - 1);
         

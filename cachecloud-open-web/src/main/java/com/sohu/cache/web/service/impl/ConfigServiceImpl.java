@@ -2,7 +2,6 @@ package com.sohu.cache.web.service.impl;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,32 +39,49 @@ public class ConfigServiceImpl implements ConfigService {
         logger.warn("===========ConfigServiceImpl reload config start============");
         // 加载配置
         Map<String, String> configMap = getConfigMap();
-        // 赋值配置
+
+        // 文案相关
         ConstUtils.CONTACT = MapUtils.getString(configMap, "cachecloud.contact", ConstUtils.DEFAULT_CONTACT);
         ConstUtils.DOCUMENT_URL = MapUtils.getString(configMap, "cachecloud.documentUrl",
                 ConstUtils.DEFAULT_DOCUMENT_URL);
-        ConstUtils.EMAILS = MapUtils.getString(configMap, "cachecloud.owner.email", ConstUtils.DEFAULT_EMAILS);
-        ConstUtils.PHONES = MapUtils.getString(configMap, "cachecloud.owner.phone", ConstUtils.DEFAULT_PHONES);
         ConstUtils.MAVEN_WAREHOUSE = MapUtils.getString(configMap, "cachecloud.mavenWareHouse",
                 ConstUtils.DEFAULT_MAVEN_WAREHOUSE);
-        ConstUtils.SUPER_ADMINS = MapUtils.getString(configMap, "cachecloud.superAdmin",
-                ConstUtils.DEFAULT_SUPER_ADMINS);
-        ConstUtils.SUPER_MANAGER = Arrays.asList(ConstUtils.SUPER_ADMINS.split(","));
-        ConstUtils.USERNAME = MapUtils.getString(configMap, "shell.auth.simple.user.name", ConstUtils.DEFAULT_USERNAME);
-        ConstUtils.PASSWORD = MapUtils.getString(configMap, "shell.auth.simple.user.password",
+
+        // 报警相关配置
+        ConstUtils.EMAILS = MapUtils.getString(configMap, "cachecloud.owner.email", ConstUtils.DEFAULT_EMAILS);
+        ConstUtils.PHONES = MapUtils.getString(configMap, "cachecloud.owner.phone", ConstUtils.DEFAULT_PHONES);
+
+        // ssh相关配置
+        ConstUtils.USERNAME = MapUtils.getString(configMap, "cachecloud.machine.ssh.name", ConstUtils.DEFAULT_USERNAME);
+        ConstUtils.PASSWORD = MapUtils.getString(configMap, "cachecloud.machine.ssh.password",
                 ConstUtils.DEFAULT_PASSWORD);
         ConstUtils.SSH_PORT_DEFAULT = Integer.parseInt(MapUtils.getString(configMap, "cachecloud.machine.ssh.port",
                 String.valueOf(ConstUtils.DEFAULT_SSH_PORT_DEFAULT)));
+
+        // 管理员相关配置
         ConstUtils.SUPER_ADMIN_NAME = MapUtils.getString(configMap, "cachecloud.admin.user.name",
                 ConstUtils.DEFAULT_SUPER_ADMIN_NAME);
         ConstUtils.SUPER_ADMIN_PASS = MapUtils.getString(configMap, "cachecloud.admin.user.password",
                 ConstUtils.DEFAULT_SUPER_ADMIN_PASS);
+        ConstUtils.SUPER_ADMINS = MapUtils.getString(configMap, "cachecloud.superAdmin",
+                ConstUtils.DEFAULT_SUPER_ADMINS);
+        ConstUtils.SUPER_MANAGER = Arrays.asList(ConstUtils.SUPER_ADMINS.split(","));
+
+        // 机器报警阀值
         ConstUtils.CPU_USAGE_RATIO_THRESHOLD = MapUtils.getDoubleValue(configMap, "machine.cpu.alert.ratio",
                 ConstUtils.DEFAULT_CPU_USAGE_RATIO_THRESHOLD);
         ConstUtils.MEMORY_USAGE_RATIO_THRESHOLD = MapUtils.getDoubleValue(configMap, "machine.mem.alert.ratio",
                 ConstUtils.DEFAULT_MEMORY_USAGE_RATIO_THRESHOLD);
         ConstUtils.LOAD_THRESHOLD = MapUtils.getDoubleValue(configMap, "machine.load.alert.ratio",
                 ConstUtils.DEFAULT_LOAD_THRESHOLD);
+
+        // 客户端版本
+        ConstUtils.GOOD_CLIENT_VERSIONS = MapUtils.getString(configMap, "cachecloud.good.client",
+                ConstUtils.DEFAULT_GOOD_CLIENT_VERSIONS);
+        ConstUtils.WARN_CLIENT_VERSIONS = MapUtils.getString(configMap, "cachecloud.warn.client",
+                ConstUtils.DEFAULT_WARN_CLIENT_VERSIONS);
+        ConstUtils.ERROR_CLIENT_VERSIONS = MapUtils.getString(configMap, "cachecloud.error.client",
+                ConstUtils.DEFAULT_ERROR_CLIENT_VERSIONS);
 
         logger.warn("===========ConfigServiceImpl reload config end============");
     }

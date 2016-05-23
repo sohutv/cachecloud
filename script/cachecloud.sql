@@ -853,8 +853,8 @@ CREATE TABLE `system_config` (
 insert into system_config(config_key,config_value,info,status,order_id) values('shell.auth.simple.user.name','cachecloud','ssh用户名',1,1);
 insert into system_config(config_key,config_value,info,status,order_id) values('shell.auth.simple.user.password','cachecloud','ssh密码',1,2);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.ssh.port','22','ssh端口',1,3);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.admin.user.name','admin','admin用户名',1,4);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.admin.user.password','admin','admin密码',1,5);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.ssh.name','admin','admin用户名',1,4);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.ssh.password','admin','admin密码',1,5);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.superAdmin','admin,xx,yy','超级管理员组',1,6);
 insert into system_config(config_key,config_value,info,status,order_id) values('machine.cpu.alert.ratio','80.0','cpu报警阀值',1,7);
 insert into system_config(config_key,config_value,info,status,order_id) values('machine.mem.alert.ratio','80.0','内存报警阀值',1,8);
@@ -864,6 +864,9 @@ insert into system_config(config_key,config_value,info,status,order_id) values('
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.owner.phone','13812345678,13787654321','手机号报警(逗号隔开)',1,12);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.mavenWareHouse','http://your_maven_house','maven仓库地址(客户端)',1,13);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.contact','user1:(xx@zz.com, user1:135xxxxxxxx)<br/>user2: (user2@zz.com, user2:138xxxxxxxx)','值班联系人信息',1,14);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.good.client','1.0-SNAPSHOT','可用客户端版本(用逗号隔开)',1,15);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.warn.client','0.1','警告客户端版本(用逗号隔开)',1,16);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.error.client','0.0','不可用客户端版本(用逗号隔开)',1,17);
 
 
 

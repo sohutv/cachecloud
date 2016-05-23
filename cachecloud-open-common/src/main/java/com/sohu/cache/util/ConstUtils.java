@@ -1,6 +1,5 @@
 package com.sohu.cache.util;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -132,6 +131,27 @@ public class ConstUtils {
      */
     public static String MAVEN_WAREHOUSE;
     public static String DEFAULT_MAVEN_WAREHOUSE = "http://your_maven_house";
+    
+    
+    /**
+     * 客户端可用版本
+     */
+    public static String GOOD_CLIENT_VERSIONS;
+    public static String DEFAULT_GOOD_CLIENT_VERSIONS = "1.0-SNAPSHOT";
+
+    /**
+     * 客户端警告版本
+     */
+    public static String WARN_CLIENT_VERSIONS;
+    public static String DEFAULT_WARN_CLIENT_VERSIONS = "0.1";
+    
+    
+    /**
+     * 客户端错误版本
+     */
+    public static String ERROR_CLIENT_VERSIONS;
+    public static String DEFAULT_ERROR_CLIENT_VERSIONS = "0.0";
+
     
     static {
         ResourceBundle applicationResourceBundle = ResourceBundle.getBundle("application");

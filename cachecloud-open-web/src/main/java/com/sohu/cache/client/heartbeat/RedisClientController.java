@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -190,9 +189,8 @@ public class RedisClientController {
 
     private boolean checkClientVersion(String clientVersion, Model model) {
         /** 检查客户端的版本 **/
-        ResourceBundle rb = ResourceBundle.getBundle("client");
-        List<String> goodVersions = Lists.newArrayList(rb.getString("good_versions").split(","));
-        List<String> warnVersions = Lists.newArrayList(rb.getString("warn_versions").split(","));
+        List<String> goodVersions = Lists.newArrayList(ConstUtils.GOOD_CLIENT_VERSIONS.split(ConstUtils.COMMA));
+        List<String> warnVersions = Lists.newArrayList(ConstUtils.WARN_CLIENT_VERSIONS.split(ConstUtils.COMMA));
 
         boolean versionOk = true;
 
