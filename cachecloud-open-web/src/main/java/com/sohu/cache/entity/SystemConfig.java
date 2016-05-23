@@ -19,14 +19,9 @@ public class SystemConfig {
     private String info;
 
     private int status;
+    
+    private int orderId;
 
-    public SystemConfig(String configKey, String configValue, String info, int status) {
-        super();
-        this.configKey = configKey;
-        this.configValue = configValue;
-        this.info = info;
-        this.status = status;
-    }
 
     public SystemConfig() {
         super();
@@ -64,10 +59,20 @@ public class SystemConfig {
         this.status = status;
     }
 
+    public int getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(int orderId) {
+        this.orderId = orderId;
+    }
+
     @Override
     public String toString() {
         return "SystemConfig [configKey=" + configKey + ", configValue=" + configValue + ", info=" + info + ", status="
-                + status + "]";
+                + status + ", orderId=" + orderId + "]";
     }
+
+
 
 }

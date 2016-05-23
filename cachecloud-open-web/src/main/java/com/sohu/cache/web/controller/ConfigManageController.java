@@ -76,6 +76,9 @@ public class ConfigManageController extends BaseController {
                 logger.error("params {} may be empty!!", paramMap);
             }
             successEnum = configService.updateConfig(configMap);
+            if (successEnum.equals(SuccessEnum.SUCCESS)) {
+                configService.reloadSystemConfig();
+            }
         } catch (Exception e) {
             successEnum = SuccessEnum.FAIL;
             logger.error(e.getMessage(), e);
