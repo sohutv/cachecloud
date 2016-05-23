@@ -850,17 +850,17 @@ CREATE TABLE `system_config` (
 -- init cachecloud data
 --
 
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.ssh.name','cachecloud','ssh用户名',1,1);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.ssh.password','cachecloud','ssh密码',1,2);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.ssh.port','22','ssh端口',1,3);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.admin.user.name','admin','admin用户名',1,4);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.admin.user.password','admin','admin密码',1,5);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.ssh.name','cachecloud','机器ssh用户名',1,1);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.ssh.password','cachecloud','机器ssh密码',1,2);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.ssh.port','22','机器ssh端口',1,3);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.admin.user.name','admin','cachecloud-admin用户名',1,4);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.admin.user.password','admin','cachelcoud-admin密码',1,5);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.superAdmin','admin,xx,yy','超级管理员组',1,6);
-insert into system_config(config_key,config_value,info,status,order_id) values('machine.cpu.alert.ratio','80.0','cpu报警阀值',1,7);
-insert into system_config(config_key,config_value,info,status,order_id) values('machine.mem.alert.ratio','80.0','内存报警阀值',1,8);
-insert into system_config(config_key,config_value,info,status,order_id) values('machine.load.alert.ratio','8.0','负载报警阀值',1,9);
+insert into system_config(config_key,config_value,info,status,order_id) values('machine.cpu.alert.ratio','80.0','机器cpu报警阀值',1,7);
+insert into system_config(config_key,config_value,info,status,order_id) values('machine.mem.alert.ratio','80.0','机器内存报警阀值',1,8);
+insert into system_config(config_key,config_value,info,status,order_id) values('machine.load.alert.ratio','8.0','机器负载报警阀值',1,9);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.documentUrl','http://cachecloud.github.io','文档地址',1,10);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.owner.email','xx@sohu.com,yy@qq.com','邮件号报警(逗号隔开)',1,11);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.owner.email','xx@sohu.com,yy@qq.com','邮件报警(逗号隔开)',1,11);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.owner.phone','13812345678,13787654321','手机号报警(逗号隔开)',1,12);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.mavenWareHouse','http://your_maven_house','maven仓库地址(客户端)',1,13);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.contact','user1:(xx@zz.com, user1:135xxxxxxxx)<br/>user2: (user2@zz.com, user2:138xxxxxxxx)','值班联系人信息',1,14);
