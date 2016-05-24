@@ -11,6 +11,7 @@
     * [3.启动cachecloud系统](#cc7-3)
     * [4.添加机器](#cc7-4)
 * [八、CacheCloud开发计划TODO LIST](#cc8)
+* [九、CacheCloud已知用户](#cc9)
 
 <a name="cc1"/>
 ## 一、CacheCloud是做什么的
@@ -167,6 +168,17 @@ cachecloud项目中的cachecloud-init.sh脚本是用来初始化服务器的cach
 ### 更多内容参考：[wiki文档](https://github.com/sohutv/cachecloud/wiki)、[cachecloud官方博客](http://cachecloud.github.io/)
 
 <a name="cc8"/>
-## 七、开发计划-TODO LIST ###
+## 八、开发计划-TODO LIST ###
 [后期开发计划](http://cachecloud.github.io/2016/04/17/v2%E8%AE%A1%E5%88%92/)
+
+<a name="cc9"/>
+## 九、已知用户 ###
+<img src="http://i2.itc.cn/20160524/3084_d629c64a_470f_f0d1_2de6_6ac91761a292_1.png"/><img src="http://i2.itc.cn/20160524/3084_25214ef5_2489_64ef_853c_8429af315347_1.png"/><img src="http://i2.itc.cn/20160524/3084_688549c0_a4c5_aa8b_1c8a_a276f502df56_1.png"/>
+
+
+<img src="http://i3.itc.cn/20160524/3084_354a89c3_599a_54e5_0b6c_00d523ccd3ce_1.png"/><img width="200" height="100" src="http://i2.itc.cn/20160524/3084_c7455d89_b6d4_acf7_bfec_f54fbb39d11d_1.png"/><img src="http://i3.itc.cn/20160524/3084_70c582e9_41ed_f9a3_e370_377092ebc5ea_1.png"/>
+
+除此之外，还有天津联怡科技有限公司、瑞友科技、厦门美好出行物联网技术有限公司、北京九瑞网络科技有限公司、深圳市深软信息技术有限公司、欧乐在线科技有限公司、会客教育、上海仁画信息股份有限公司等。
+
+新用户可以从[这里登记](https://github.com/sohutv/cachecloud/issues/42)，我们有特殊“服务”。
  
