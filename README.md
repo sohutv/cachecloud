@@ -91,11 +91,9 @@ Redis的开发人员如同使用Mysql一样，不需要运维Mysql服务器，�
 | cachecloud.db.url      | mysql驱动url     | jdbc:mysql://127.0.0.1:3306/cache-cloud |
 | cachecloud.db.user     | mysql用户名      |  admin |
 | cachecloud.db.password | mysql密码        |  admin | 
-| cachecloud.machine.username | 服务器用户名,用于ssh        | ${your machine username} | 
-| cachecloud.machine.password | 服务器密码,用于ssh        |  ${your machine password} | 
 | web.port | spring-boot内嵌tomcat启动端口        | 8080  | 		
 		
-		
+更加详细的配置，请参考: [系统配置](http://cachecloud.github.io/2016/05/24/CacheCloud%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E/) 		
 		
 <a name="cc7-3"/>
 ####3、启动cachecloud系统
@@ -159,9 +157,8 @@ cachecloud项目中的cachecloud-init.sh脚本是用来初始化服务器的cach
 +  (a). 请在root用户下执行初始化脚本，因为初始化脚本涉及到了用户的创建等较高的权限。
 +  (b). 出于安全的考虑，所选的机器最好不要有外网IP地址。
 +  (c). 用户名和密码最好不要用cachecloud, 密码尽可能复杂。
-+  (d). 机器的ssh端口最好是22。
-+  (e). 请确保/opt/有足够的硬盘空间，因为/opt/cachecloud/data要存储RDB和AOF的持久化文件，如果硬盘过小，会造成持久化失败。（如果硬盘确实很小，建议建立一个软链接到/opt/cachecloud/data,且保证软链接的目录也是username用户，一定要保证/opt/cachecloud的目录结构）
-+  (f). 脚本中目前使用的是redis-3.0.6，如有需要请自行替换，建议使用3.0 release以后的版本。
++  (d). 请确保/opt/有足够的硬盘空间，因为/opt/cachecloud/data要存储RDB和AOF的持久化文件，如果硬盘过小，会造成持久化失败。（如果硬盘确实很小，建议建立一个软链接到/opt/cachecloud/data,且保证软链接的目录也是username用户，一定要保证/opt/cachecloud的目录结构）
++  (e). 脚本中目前使用的是redis-3.0.6，如有需要请自行替换，建议使用3.0 release以后的版本。3.2版本公司尚未在线上使用，但是要注意3.2版本中bind的默认是127.0.0.1
     
 #####(4). 添加机器 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;进入管理员界面(http://ip:port/manage/total/list)，进入机器管理，点击添加机器，添加机器信息是开通应用的基础。
