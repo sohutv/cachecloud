@@ -63,7 +63,7 @@ public class ConfigManageController extends BaseController {
     @RequestMapping(value = "/update")
     public ModelAndView update(HttpServletRequest request, HttpServletResponse response, Model model) {
         AppUser appUser = getUserInfo(request);
-        logger.info("user {} want to change config!", appUser.getName());
+        logger.warn("user {} want to change config!", appUser.getName());
         SuccessEnum successEnum;
         try {
             Map<String, String> configMap = new HashMap<String, String>();
@@ -71,7 +71,6 @@ public class ConfigManageController extends BaseController {
             for (Entry<String, String[]> entry : paramMap.entrySet()) {
                 String key = entry.getKey();
                 String value = entry.getValue()[0];
-                logger.warn("key: {}, value: {}", key, value);
                 if (StringUtils.isNotBlank(key) && StringUtils.isNotBlank(value)) {
                     configMap.put(key, value);
                 }
@@ -87,7 +86,7 @@ public class ConfigManageController extends BaseController {
             successEnum = SuccessEnum.FAIL;
             logger.error(e.getMessage(), e);
         }
-        logger.info("user {} change config result is {}!", appUser.getName(), successEnum.value());
+        logger.warn("user {} change config result is {}!", appUser.getName(), successEnum.value());
         return new ModelAndView("redirect:/manage/config/init?success=" + successEnum.value());
 
     }
