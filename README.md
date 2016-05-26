@@ -95,6 +95,7 @@ Redis的开发人员如同使用Mysql一样，不需要运维Mysql服务器，�
 | web.port | spring-boot内嵌tomcat启动端口        | 8080  | 		
 		
 更加详细的配置，请参考: [系统配置](http://cachecloud.github.io/2016/05/24/CacheCloud%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E/) 		
+**请在系统第一次启动后，进入后台管理中对配置进行详细配置，有些配置是比较重要的，例如cachecloud管理机器用到了ssh，配置中涉及到了ssh用户名、密码、端口等等。** 
 		
 <a name="cc7-3"/>
 ####3、启动cachecloud系统
@@ -132,7 +133,7 @@ sh stop.sh
 #####(3). 登录确认
 
 #####(a) 访问：http://127.0.0.1:9999
-(9999是tomcat的端口号，具体要参考第三节中的online.properties和local.properties中的web.port)
+(9999是tomcat的端口号，具体要参考第2节中的online.properties和local.properties中的web.port)
 #####(b) 如果访问正常，请使用用户名:admin、密码:admin访问系统，跳转到应用列表下：
 <img src="http://i1.itc.cn/20160304/3084_b7374fe0_1136_79a9_6de7_699599da7345_1.png">
 
@@ -141,7 +142,7 @@ sh stop.sh
 #####(1). 运行脚本:
 cachecloud项目中的cachecloud-init.sh脚本是用来初始化服务器的cachecloud环境，主要工作如下：
 
-+  **(a). 创建cachecloud项目用户**：因为cachecloud项目的部分功能(redis启动、服务器监控)是通过ssh完成的，所以这里的用户和密码要和项目中的相对应，具体详见第三节。
++  **(a). 创建cachecloud项目用户**：因为cachecloud项目的部分功能(redis启动、服务器监控)是通过ssh完成的，所以这里的用户和密码要和项目中的相对应，具体详见第2节的系统配置。
 
 +  **(b). 创建cachecloud项目的工作目录、数据目录、配置目录、日志目录、redis安装目录、临时目录等等。**(/opt/cachecloud/data、/opt/cachecloud/conf、/opt/cachecloud/logs、/opt/cachecloud/redis、/tmp/cachecloud)
 
