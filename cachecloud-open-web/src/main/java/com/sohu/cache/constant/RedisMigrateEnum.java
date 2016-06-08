@@ -26,8 +26,8 @@ public enum RedisMigrateEnum {
         }
     }
 
-    public static RedisMigrateEnum getByStatus(int status) {
-        return MAP.get(status);
+    public static RedisMigrateEnum getByIndex(int index) {
+        return MAP.get(index);
     }
 
     private RedisMigrateEnum(int index, String type) {
