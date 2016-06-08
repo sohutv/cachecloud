@@ -108,17 +108,16 @@ public class RedisMigrateCenterImpl implements RedisMigrateCenter {
     }
 
     /**
-     * 检查迁移的机器是否正常 1. 是否安装redis-migrate-tool
-     * 2.是否有redis-migrate-tool进程，暂时运行一个迁移任务
+     * 检查迁移的机器是否正常
      * 
      * @param migrateMachineIp
      * @return
      */
     private RedisMigrateResult checkMigrateMachine(String migrateMachineIp) {
-        // 1. 检查机器是否存在在机器列表中
         if (StringUtils.isBlank(migrateMachineIp)) {
             return RedisMigrateResult.fail("redis-migrate-tool所在机器的IP不能为空");
         }
+        // 1. 检查机器是否存在在机器列表中
         try {
             MachineInfo machineInfo = machineCenter.getMachineInfoByIp(migrateMachineIp);
             if (machineInfo == null) {
@@ -145,7 +144,7 @@ public class RedisMigrateCenterImpl implements RedisMigrateCenter {
 
         // 3.2 查看进程是否存在
         try {
-            String cmd = "/bin/ps -ef | grep redis-migrate-tool | grep -v grep";
+            String cmd = "/bin/ps -ef | grep redis-migrate-tool | grep -v grep | grep -v tail";
             String response = SSHUtil.execute(migrateMachineIp, cmd);
             if (StringUtils.isNotBlank(response)) {
                 return RedisMigrateResult.fail(migrateMachineIp + "下有redis-migrate-tool进程，请确保只有一台机器只有一个迁移任务进行");
@@ -168,7 +167,7 @@ public class RedisMigrateCenterImpl implements RedisMigrateCenter {
      */
     private RedisMigrateResult checkMigrateConfig(String migrateMachineIp, RedisMigrateEnum redisMigrateEnum,
             String servers) {
-        if (StringUtils.isNotBlank(servers)) {
+        if (StringUtils.isBlank(servers)) {
             return RedisMigrateResult.fail("服务器信息不能为空!");
         }
         List<String> serverList = Arrays.asList(servers.split(ConstUtils.NEXT_LINE));
@@ -205,7 +204,7 @@ public class RedisMigrateCenterImpl implements RedisMigrateCenter {
                 int port = NumberUtils.toInt(portStr);
                 boolean isRun = redisCenter.isRun(ip, port);
                 if (!isRun) {
-                    return RedisMigrateResult.fail(server + "中的节点不是存活的");
+                    return RedisMigrateResult.fail(server + "不是存活的");
                 }
             }
         }
@@ -220,14 +219,17 @@ public class RedisMigrateCenterImpl implements RedisMigrateCenter {
         String configContent = generateConfig(sourceRedisMigrateEnum, sourceServers, targetRedisMigrateEnum,
                 targetServers);
         // 2. 上传配置
-        String fileName = "rmt-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".conf";
+        String timestamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        String fileName = "rmt-" + timestamp + ".conf";
+        String logFileName = ConstUtils.REDIS_MIGRATE_TOOL_HOME + "rmt-" + timestamp + ".log";
         boolean uploadConfig = createRemoteFile(migrateMachineIp, fileName, configContent);
         if (!uploadConfig) {
             return false;
         }
         // 3. 开始执行: 指定的配置名、目录、日志名
         String cmd = ConstUtils.REDIS_MIGRATE_TOOL_CMD + " -c " + ConstUtils.REDIS_MIGRATE_TOOL_HOME + fileName
-                + " -o " + ConstUtils.REDIS_MIGRATE_TOOL_HOME + "rmt.log" + " -d";
+                + " -o " + logFileName + " -d";
+        logger.warn(cmd);
         try {
             SSHUtil.execute(migrateMachineIp, cmd);
         } catch (Exception e) {
@@ -249,7 +251,7 @@ public class RedisMigrateCenterImpl implements RedisMigrateCenter {
      * @param targetServers
      * @return
      */
-    private String generateConfig(RedisMigrateEnum sourceRedisMigrateEnum, String sourceServers,
+    public String generateConfig(RedisMigrateEnum sourceRedisMigrateEnum, String sourceServers,
             RedisMigrateEnum targetRedisMigrateEnum, String targetServers) {
         // source
         StringBuffer config = new StringBuffer();
