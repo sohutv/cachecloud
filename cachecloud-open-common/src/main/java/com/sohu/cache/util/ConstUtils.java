@@ -152,6 +152,16 @@ public class ConstUtils {
     public static String ERROR_CLIENT_VERSIONS;
     public static String DEFAULT_ERROR_CLIENT_VERSIONS = "0.0";
 
+    /**
+     * redis-migrate-tool相关路径
+     */
+    public static String REDIS_MIGRATE_TOOL_HOME = "/opt/redis-migrate-tool/";
+    public static String REDIS_MIGRATE_TOOL_CONF = REDIS_MIGRATE_TOOL_HOME + "config";
+    public static String REDIS_MIGRATE_TOOL_CMD = REDIS_MIGRATE_TOOL_HOME + "src/redis-migrate-tool";
+    /**
+     * redis-migrate-tool端口
+     */
+    public static int REDIS_MIGRATE_TOOL_PORT = 8888;
     
     static {
         ResourceBundle applicationResourceBundle = ResourceBundle.getBundle("application");
