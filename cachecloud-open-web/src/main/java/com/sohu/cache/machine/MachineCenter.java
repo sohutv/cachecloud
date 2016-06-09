@@ -1,5 +1,6 @@
 package com.sohu.cache.machine;
 
+import com.sohu.cache.constant.MachineTypeEnum;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.entity.InstanceStats;
 import com.sohu.cache.entity.MachineInfo;
@@ -155,5 +156,12 @@ public interface MachineCenter {
      * @return
      */
     String showInstanceRecentLog(InstanceInfo instanceInfo, int maxLineNum);
+
+    /**
+     * 根据机器类型获取机器列表
+     * @param machineTypeEnum
+     * @return
+     */
+    List<MachineInfo> getMachineInfoByType(MachineTypeEnum machineTypeEnum);
     
 }

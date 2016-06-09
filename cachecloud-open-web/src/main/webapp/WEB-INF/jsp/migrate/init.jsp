@@ -29,7 +29,7 @@
     		}
     		var instanceDetail = document.getElementById(instanceDetailId);
     		$.get(
-       			'/migrate/appInstanceList.json',
+       			'/data/migrate/appInstanceList.json',
        			{
        				appId: appId,
        			},
@@ -48,6 +48,8 @@
     		var sourceServers = document.getElementById("sourceServers");
     		var sourceAppId = document.getElementById("sourceAppId");
     		var sourceDataType = document.getElementById("sourceDataType").value;
+    		
+    		var migrateMachineIp = document.getElementById("migrateMachineIp").value;
     		
 			//非cachecloud
     		if (sourceDataType == 0 && sourceServers.value == "") {
@@ -85,13 +87,13 @@
     		}
     		
     		$.get(
-    			'/migrate/check.json',
+    			'/data/migrate/check.json',
     			{
     				sourceRedisMigrateIndex: sourceRedisMigrateIndex,
     				targetRedisMigrateIndex: targetRedisMigrateIndex,
     				sourceServers:sourceServers.value,
     				targetServers:targetServers.value,
-    				migrateMachineIp:'10.10.53.159'
+    				migrateMachineIp:migrateMachineIp
     			},
     	        function(data){
     				var status = data.status;
@@ -112,14 +114,15 @@
     		var targetRedisMigrateIndex = document.getElementById("targetRedisMigrateIndex").value;
     		var sourceServers = document.getElementById("sourceServers");
     		var targetServers = document.getElementById("targetServers");
+    		var migrateMachineIp = document.getElementById("migrateMachineIp").value;
     		$.get(
-    			'/migrate/start.json',
+    			'/data/migrate/start.json',
     			{
     				sourceRedisMigrateIndex: sourceRedisMigrateIndex,
     				targetRedisMigrateIndex: targetRedisMigrateIndex,
-    				sourceServers:sourceServers.value,
-    				targetServers:targetServers.value,
-    				migrateMachineIp:'10.10.53.159'
+    				sourceServers: sourceServers.value,
+    				targetServers: targetServers.value,
+    				migrateMachineIp: migrateMachineIp
     			},
     	        function(data){
     				var status = data.status;
@@ -155,9 +158,45 @@
 			<div class="portlet box light-grey">
 				<div class="portlet-body">
 					<div class="form">
-						<form action="/import/app/add" method="post"
+						<form action="" method="post"
 							class="form-horizontal form-bordered form-row-stripped">
 							<div class="form-body">
+								<div class="row">
+									<div class="col-md-12">
+										<h4 class="page-header">
+											迁移工具配置
+										</h4>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-12">
+										<div class="col-md-6">
+											<div class="form-group">
+												<label class="control-label col-md-3">
+													迁移工具机器:
+												</label>
+												<div class="col-md-5">
+													<select id="migrateMachineIp" name="migrateMachineIp" class="form-control select2_category">
+														<c:forEach items="${machineInfoList}" var="machineInfo">
+															<option value="${machineInfo.ip}">
+	                                                            ${machineInfo.ip}
+															</option>
+														</c:forEach>
+													</select>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							
+								<div class="row">
+									<div class="col-md-12">
+										<h4 class="page-header">
+											源和目标配置
+										</h4>
+									</div>
+								</div>
+							
 								<div class="row">
 									<div class="col-md-12">
 										<div class="col-md-6">

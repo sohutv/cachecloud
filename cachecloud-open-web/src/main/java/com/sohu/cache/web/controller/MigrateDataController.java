@@ -14,9 +14,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.sohu.cache.constant.MachineTypeEnum;
 import com.sohu.cache.constant.RedisMigrateEnum;
 import com.sohu.cache.constant.RedisMigrateResult;
 import com.sohu.cache.entity.InstanceInfo;
+import com.sohu.cache.entity.MachineInfo;
+import com.sohu.cache.machine.MachineCenter;
 import com.sohu.cache.stats.app.RedisMigrateCenter;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.service.AppService;
@@ -29,7 +32,7 @@ import com.sohu.cache.web.service.AppService;
  * @Time 下午11:10:34
  */
 @Controller
-@RequestMapping("/migrate")
+@RequestMapping("/data/migrate")
 public class MigrateDataController extends BaseController {
 
     @Resource(name = "redisMigrateCenter")
@@ -37,6 +40,9 @@ public class MigrateDataController extends BaseController {
     
     @Resource(name = "appService")
     private AppService appService;
+    
+    @Resource(name = "machineCenter")
+    private MachineCenter machineCenter;
 
     /**
      * 初始化界面
@@ -44,6 +50,8 @@ public class MigrateDataController extends BaseController {
      */
     @RequestMapping(value = "/init")
     public ModelAndView init(HttpServletRequest request, HttpServletResponse response, Model model) {
+        List<MachineInfo> machineInfoList = machineCenter.getMachineInfoByType(MachineTypeEnum.REDIS_MIGRATE_TOOL);
+        model.addAttribute("machineInfoList", machineInfoList);
         return new ModelAndView("migrate/init");
     }
 

@@ -3,6 +3,7 @@ package com.sohu.cache.machine.impl;
 import com.google.common.base.Strings;
 import com.sohu.cache.constant.InstanceStatusEnum;
 import com.sohu.cache.constant.MachineConstant;
+import com.sohu.cache.constant.MachineTypeEnum;
 import com.sohu.cache.dao.InstanceDao;
 import com.sohu.cache.dao.InstanceStatsDao;
 import com.sohu.cache.dao.MachineDao;
@@ -41,6 +42,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -541,6 +543,16 @@ public class MachineCenterImpl implements MachineCenter {
             return "";
         }
     }
+    
+    @Override
+    public List<MachineInfo> getMachineInfoByType(MachineTypeEnum machineTypeEnum) {
+        try {
+            return machineDao.getMachineInfoByType(machineTypeEnum.getType());
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return Collections.emptyList();
+        }
+    }
 
     public void setRedisCenter(RedisCenter redisCenter) {
         this.redisCenter = redisCenter;
@@ -577,5 +589,7 @@ public class MachineCenterImpl implements MachineCenter {
     public void setInstanceStatsCenter(InstanceStatsCenter instanceStatsCenter) {
         this.instanceStatsCenter = instanceStatsCenter;
     }
+
+    
     
 }
