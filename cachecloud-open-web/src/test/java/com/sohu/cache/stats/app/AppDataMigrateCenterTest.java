@@ -7,9 +7,9 @@ import javax.annotation.Resource;
 
 import org.junit.Test;
 
-import com.sohu.cache.constant.RedisMigrateEnum;
-import com.sohu.cache.constant.RedisMigrateResult;
-import com.sohu.cache.stats.app.impl.RedisMigrateCenterImpl;
+import com.sohu.cache.constant.AppDataMigrateEnum;
+import com.sohu.cache.constant.AppDataMigrateResult;
+import com.sohu.cache.stats.app.impl.AppDataMigrateCenterImpl;
 import com.sohu.test.BaseTest;
 
 /**
@@ -19,10 +19,10 @@ import com.sohu.test.BaseTest;
  * @Date 2016-6-8
  * @Time 下午8:53:19
  */
-public class RedisMigrateCenterTest extends BaseTest {
+public class AppDataMigrateCenterTest extends BaseTest {
 
-    @Resource(name = "redisMigrateCenter")
-    private RedisMigrateCenterImpl redisMigrateCenter;
+    @Resource(name = "appDataMigrateCenter")
+    private AppDataMigrateCenterImpl appDataMigrateCenter;
 
     @Test
     public void testCheckMigrateMachine() {
@@ -30,14 +30,14 @@ public class RedisMigrateCenterTest extends BaseTest {
         // 2.是否正确安装redis-migrate-tool(已测)
         // 3.是否存在正在执行的redis-migrate-tool(已测)
 
-        String migrateMachineIp = "10.10.53.158";
-        RedisMigrateEnum sourceRedisMigrateEnum = RedisMigrateEnum.REDIS_NODE;
-        String sourceServers = "10.10.53.159:6379";
+        String migrateMachineIp = "127.0.0.1";
+        AppDataMigrateEnum sourceRedisMigrateEnum = AppDataMigrateEnum.REDIS_NODE;
+        String sourceServers = "127.0.0.1:6379";
 
-        RedisMigrateEnum targetRedisMigrateEnum = RedisMigrateEnum.REDIS_CLUSTER_NODE;
-        String targetServers = "10.10.53.159:6380";
+        AppDataMigrateEnum targetRedisMigrateEnum = AppDataMigrateEnum.REDIS_CLUSTER_NODE;
+        String targetServers = "127.0.0.1:6380";
 
-        RedisMigrateResult redisMigrateResult = redisMigrateCenter.check(migrateMachineIp, sourceRedisMigrateEnum,
+        AppDataMigrateResult redisMigrateResult = appDataMigrateCenter.check(migrateMachineIp, sourceRedisMigrateEnum,
                 sourceServers, targetRedisMigrateEnum, targetServers);
 
         logger.info("===============testCheck start=================");
@@ -51,19 +51,19 @@ public class RedisMigrateCenterTest extends BaseTest {
         // 2.1 rdb文件是否存在(已测)
         // 2.2 redis节点是否存活
 
-        String migrateMachineIp = "10.10.53.159";
+        String migrateMachineIp = "127.0.0.1";
 
         // RedisMigrateEnum sourceRedisMigrateEnum =
         // RedisMigrateEnum.REDIS_NODE;
-        // String sourceServers = "10.10.53.159:6388";
+        // String sourceServers = "127.0.0.1:6388";
 
-        RedisMigrateEnum sourceRedisMigrateEnum = RedisMigrateEnum.RDB_FILE;
+        AppDataMigrateEnum sourceRedisMigrateEnum = AppDataMigrateEnum.RDB_FILE;
         String sourceServers = "/opt/soft/redis/data/dump-6380.rdb";
 
-        RedisMigrateEnum targetRedisMigrateEnum = RedisMigrateEnum.REDIS_CLUSTER_NODE;
-        String targetServers = "10.10.53.159:6380";
+        AppDataMigrateEnum targetRedisMigrateEnum = AppDataMigrateEnum.REDIS_CLUSTER_NODE;
+        String targetServers = "127.0.0.1:6380";
 
-        RedisMigrateResult redisMigrateResult = redisMigrateCenter.check(migrateMachineIp, sourceRedisMigrateEnum,
+        AppDataMigrateResult redisMigrateResult = appDataMigrateCenter.check(migrateMachineIp, sourceRedisMigrateEnum,
                 sourceServers, targetRedisMigrateEnum, targetServers);
 
         logger.info("===============testCheck start=================");
@@ -72,13 +72,13 @@ public class RedisMigrateCenterTest extends BaseTest {
     }
 
     private String getConfigContent() {
-        RedisMigrateEnum sourceRedisMigrateEnum = RedisMigrateEnum.REDIS_NODE;
-        String sourceServers = "10.10.53.159:6379";
+        AppDataMigrateEnum sourceRedisMigrateEnum = AppDataMigrateEnum.REDIS_NODE;
+        String sourceServers = "127.0.0.1:6379";
 
-        RedisMigrateEnum targetRedisMigrateEnum = RedisMigrateEnum.REDIS_CLUSTER_NODE;
-        String targetServers = "10.10.53.159:6380";
+        AppDataMigrateEnum targetRedisMigrateEnum = AppDataMigrateEnum.REDIS_CLUSTER_NODE;
+        String targetServers = "127.0.0.1:6380";
 
-        String configConent = redisMigrateCenter.generateConfig(sourceRedisMigrateEnum, sourceServers,
+        String configConent = appDataMigrateCenter.generateConfig(sourceRedisMigrateEnum, sourceServers,
                 targetRedisMigrateEnum, targetServers);
         return configConent;
     }
@@ -95,19 +95,19 @@ public class RedisMigrateCenterTest extends BaseTest {
     public void testCreateRemoteFile() {
         String fileName = "rmt-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".conf";
         String configConent = getConfigContent();
-        String migrateMachineIp = "10.10.53.159";
-        redisMigrateCenter.createRemoteFile(migrateMachineIp, fileName, configConent);
+        String migrateMachineIp = "127.0.0.1";
+        appDataMigrateCenter.createRemoteFile(migrateMachineIp, fileName, configConent);
     }
 
     @Test
     public void testMigrateNode() {
-        String migrateMachineIp = "10.10.53.159";
-        RedisMigrateEnum sourceRedisMigrateEnum = RedisMigrateEnum.REDIS_NODE;
-        String sourceServers = "10.10.53.159:6379";
-        RedisMigrateEnum targetRedisMigrateEnum = RedisMigrateEnum.REDIS_CLUSTER_NODE;
-        String targetServers = "10.10.53.159:6380";
+        String migrateMachineIp = "127.0.0.1";
+        AppDataMigrateEnum sourceRedisMigrateEnum = AppDataMigrateEnum.REDIS_NODE;
+        String sourceServers = "127.0.0.1:6379";
+        AppDataMigrateEnum targetRedisMigrateEnum = AppDataMigrateEnum.REDIS_CLUSTER_NODE;
+        String targetServers = "127.0.0.1:6380";
 
-        boolean isMigrate = redisMigrateCenter.migrate(migrateMachineIp, sourceRedisMigrateEnum, sourceServers,
+        boolean isMigrate = appDataMigrateCenter.migrate(migrateMachineIp, sourceRedisMigrateEnum, sourceServers,
                 targetRedisMigrateEnum,
                 targetServers);
         logger.warn("============testMigrate start=============");
@@ -117,13 +117,13 @@ public class RedisMigrateCenterTest extends BaseTest {
     
     @Test
     public void testMigrateRDB() {
-        String migrateMachineIp = "10.10.53.159";
-        RedisMigrateEnum sourceRedisMigrateEnum = RedisMigrateEnum.RDB_FILE;
+        String migrateMachineIp = "127.0.0.1";
+        AppDataMigrateEnum sourceRedisMigrateEnum = AppDataMigrateEnum.RDB_FILE;
         String sourceServers = "/opt/soft/redis/data/dump-6379.rdb.back";
-        RedisMigrateEnum targetRedisMigrateEnum = RedisMigrateEnum.REDIS_NODE;
-        String targetServers = "10.10.53.159:6380";
+        AppDataMigrateEnum targetRedisMigrateEnum = AppDataMigrateEnum.REDIS_NODE;
+        String targetServers = "127.0.0.1:6380";
 
-        boolean isMigrate = redisMigrateCenter.migrate(migrateMachineIp, sourceRedisMigrateEnum, sourceServers,
+        boolean isMigrate = appDataMigrateCenter.migrate(migrateMachineIp, sourceRedisMigrateEnum, sourceServers,
                 targetRedisMigrateEnum,
                 targetServers);
         logger.warn("============testMigrate start=============");

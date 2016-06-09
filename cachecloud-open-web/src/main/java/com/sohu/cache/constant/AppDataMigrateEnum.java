@@ -9,7 +9,7 @@ import java.util.Map;
  * @Date 2016-6-8
  * @Time 下午3:02:50
  */
-public enum RedisMigrateEnum {
+public enum AppDataMigrateEnum {
     REDIS_NODE(0, "single"),
     REDIS_CLUSTER_NODE(1, "redis cluster"),
     RDB_FILE(2, "rdb file"),
@@ -19,18 +19,18 @@ public enum RedisMigrateEnum {
 
     private String type;
 
-    private static Map<Integer, RedisMigrateEnum> MAP = new HashMap<Integer, RedisMigrateEnum>();
+    private static Map<Integer, AppDataMigrateEnum> MAP = new HashMap<Integer, AppDataMigrateEnum>();
     static {
-        for (RedisMigrateEnum redisMigrateEnum : RedisMigrateEnum.values()) {
+        for (AppDataMigrateEnum redisMigrateEnum : AppDataMigrateEnum.values()) {
             MAP.put(redisMigrateEnum.getIndex(), redisMigrateEnum);
         }
     }
 
-    public static RedisMigrateEnum getByIndex(int index) {
+    public static AppDataMigrateEnum getByIndex(int index) {
         return MAP.get(index);
     }
 
-    private RedisMigrateEnum(int index, String type) {
+    private AppDataMigrateEnum(int index, String type) {
         this.index = index;
         this.type = type;
     }

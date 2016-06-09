@@ -39,7 +39,7 @@
     
     <bean id="importAppCenter" class="com.sohu.cache.stats.app.impl.ImportAppCenterImpl"/>
     
-    <bean id="redisMigrateCenter" class="com.sohu.cache.stats.app.impl.RedisMigrateCenterImpl"/>
+    <bean id="appDataMigrateCenter" class="com.sohu.cache.stats.app.impl.AppDataMigrateCenterImpl"/>
     
 
 </beans>

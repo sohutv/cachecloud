@@ -7,13 +7,13 @@ package com.sohu.cache.constant;
  * @Date 2016-6-8
  * @Time 下午3:15:08
  */
-public class RedisMigrateResult {
+public class AppDataMigrateResult {
 
     private int status;
 
     private String message;
 
-    public RedisMigrateResult(int status, String message) {
+    public AppDataMigrateResult(int status, String message) {
         this.status = status;
         this.message = message;
     }
@@ -25,12 +25,12 @@ public class RedisMigrateResult {
         return false;
     }
 
-    public static RedisMigrateResult success() {
-        return new RedisMigrateResult(1, "所有检查都成功，可以迁移啦!");
+    public static AppDataMigrateResult success() {
+        return new AppDataMigrateResult(1, "所有检查都成功，可以迁移啦!");
     }
 
-    public static RedisMigrateResult fail(String message) {
-        return new RedisMigrateResult(0, message);
+    public static AppDataMigrateResult fail(String message) {
+        return new AppDataMigrateResult(0, message);
     }
 
     public int getStatus() {

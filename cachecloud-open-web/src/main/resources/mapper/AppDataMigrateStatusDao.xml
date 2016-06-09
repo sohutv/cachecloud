@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sohu.cache.dao.AppDataMigrateStatusDao">
+    <sql id="migrate_data_status_fields">
+        migrate_machine_ip,source_migrate_type,source_servers,target_migrate_type,target_servers,
+        source_app_id,target_app_id,migrate_user_id,migrate_status,migrate_start_time,migrate_end_time
+    </sql>
+    
+    <insert id="save" parameterType="AppDataMigrateStatus" keyProperty="id" useGeneratedKeys="true" >
+    	insert into app_data_migrate_status
+    		(<include refid="migrate_data_status_fields"/>)
+		values
+			(#{migrateMachineIp},#{sourceMigrateType},#{sourceServers},#{targetMigrateType},#{targetServers},
+			#{sourceAppId},#{targetAppId},#{migrateUserId},#{migrateStatus},#{migrateStartTime},#{migrateEndTime})    	
+    </insert>
+    
+    
+    <select id="search" resultType="AppDataMigrateStatus">
+    	select id,<include refid="migrate_data_status_fields"/>
+        from app_data_migrate_status where 1=1
+        <choose>
+            <when test="migrateStatus != null">
+            	and migrate_status = ${migrateStatus}
+       	 	</when>
+        </choose>
+    </select>
+</mapper>
+
+

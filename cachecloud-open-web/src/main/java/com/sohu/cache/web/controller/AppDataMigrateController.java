@@ -15,17 +15,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.sohu.cache.constant.MachineTypeEnum;
-import com.sohu.cache.constant.RedisMigrateEnum;
-import com.sohu.cache.constant.RedisMigrateResult;
+import com.sohu.cache.constant.AppDataMigrateEnum;
+import com.sohu.cache.constant.AppDataMigrateResult;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.entity.MachineInfo;
 import com.sohu.cache.machine.MachineCenter;
-import com.sohu.cache.stats.app.RedisMigrateCenter;
+import com.sohu.cache.stats.app.AppDataMigrateCenter;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.service.AppService;
 
 /**
- * Redis数据迁移入口
+ * 应用数据迁移入口
  * 
  * @author leifu
  * @Date 2016-6-8
@@ -33,10 +33,10 @@ import com.sohu.cache.web.service.AppService;
  */
 @Controller
 @RequestMapping("/data/migrate")
-public class MigrateDataController extends BaseController {
+public class AppDataMigrateController extends BaseController {
 
-    @Resource(name = "redisMigrateCenter")
-    private RedisMigrateCenter redisMigrateCenter;
+    @Resource(name = "appDataMigrateCenter")
+    private AppDataMigrateCenter appDataMigrateCenter;
     
     @Resource(name = "appService")
     private AppService appService;
@@ -64,13 +64,13 @@ public class MigrateDataController extends BaseController {
         //相关参数
         String migrateMachineIp = request.getParameter("migrateMachineIp");
         String sourceRedisMigrateIndex = request.getParameter("sourceRedisMigrateIndex");
-        RedisMigrateEnum sourceRedisMigrateEnum = RedisMigrateEnum.getByIndex(NumberUtils.toInt(sourceRedisMigrateIndex, -1));
+        AppDataMigrateEnum sourceRedisMigrateEnum = AppDataMigrateEnum.getByIndex(NumberUtils.toInt(sourceRedisMigrateIndex, -1));
         String sourceServers = request.getParameter("sourceServers");
         String targetRedisMigrateIndex = request.getParameter("targetRedisMigrateIndex");
-        RedisMigrateEnum targetRedisMigrateEnum = RedisMigrateEnum.getByIndex(NumberUtils.toInt(targetRedisMigrateIndex, -1));
+        AppDataMigrateEnum targetRedisMigrateEnum = AppDataMigrateEnum.getByIndex(NumberUtils.toInt(targetRedisMigrateIndex, -1));
         String targetServers = request.getParameter("targetServers");
         //检查返回结果
-        RedisMigrateResult redisMigrateResult = redisMigrateCenter.check(migrateMachineIp, sourceRedisMigrateEnum, sourceServers, targetRedisMigrateEnum, targetServers);
+        AppDataMigrateResult redisMigrateResult = appDataMigrateCenter.check(migrateMachineIp, sourceRedisMigrateEnum, sourceServers, targetRedisMigrateEnum, targetServers);
         model.addAttribute("status", redisMigrateResult.getStatus());
         model.addAttribute("message", redisMigrateResult.getMessage());
         return new ModelAndView("");
@@ -85,14 +85,14 @@ public class MigrateDataController extends BaseController {
         //相关参数
         String migrateMachineIp = request.getParameter("migrateMachineIp");
         String sourceRedisMigrateIndex = request.getParameter("sourceRedisMigrateIndex");
-        RedisMigrateEnum sourceRedisMigrateEnum = RedisMigrateEnum.getByIndex(NumberUtils.toInt(sourceRedisMigrateIndex, -1));
+        AppDataMigrateEnum sourceRedisMigrateEnum = AppDataMigrateEnum.getByIndex(NumberUtils.toInt(sourceRedisMigrateIndex, -1));
         String sourceServers = request.getParameter("sourceServers");
         String targetRedisMigrateIndex = request.getParameter("targetRedisMigrateIndex");
-        RedisMigrateEnum targetRedisMigrateEnum = RedisMigrateEnum.getByIndex(NumberUtils.toInt(targetRedisMigrateIndex, -1));
+        AppDataMigrateEnum targetRedisMigrateEnum = AppDataMigrateEnum.getByIndex(NumberUtils.toInt(targetRedisMigrateIndex, -1));
         String targetServers = request.getParameter("targetServers");
 
         // 不需要对格式进行检验,check已经做过了，开始迁移
-        boolean isSuccess = redisMigrateCenter.migrate(migrateMachineIp, sourceRedisMigrateEnum, sourceServers,
+        boolean isSuccess = appDataMigrateCenter.migrate(migrateMachineIp, sourceRedisMigrateEnum, sourceServers,
                 targetRedisMigrateEnum, targetServers);
 
         model.addAttribute("status", isSuccess ? 1 : 0);

@@ -1,7 +1,7 @@
 package com.sohu.cache.stats.app;
 
-import com.sohu.cache.constant.RedisMigrateEnum;
-import com.sohu.cache.constant.RedisMigrateResult;
+import com.sohu.cache.constant.AppDataMigrateEnum;
+import com.sohu.cache.constant.AppDataMigrateResult;
 
 /**
  * 数据迁移
@@ -10,7 +10,7 @@ import com.sohu.cache.constant.RedisMigrateResult;
  * @Date 2016-6-8
  * @Time 下午2:54:33
  */
-public interface RedisMigrateCenter {
+public interface AppDataMigrateCenter {
     
     /**
      * 检查配置
@@ -20,7 +20,7 @@ public interface RedisMigrateCenter {
      * @param targetAppId
      * @return
      */
-    RedisMigrateResult check(String migrateMachineIp, RedisMigrateEnum sourceRedisMigrateEnum, String sourceServers, long targetAppId);
+    AppDataMigrateResult check(String migrateMachineIp, AppDataMigrateEnum sourceRedisMigrateEnum, String sourceServers, long targetAppId);
     
 
     /**
@@ -33,8 +33,8 @@ public interface RedisMigrateCenter {
      * @param targetServers
      * @return
      */
-    RedisMigrateResult check(String migrateMachineIp, RedisMigrateEnum sourceRedisMigrateEnum, String sourceServers,
-            RedisMigrateEnum targetRedisMigrateEnum, String targetServers);
+    AppDataMigrateResult check(String migrateMachineIp, AppDataMigrateEnum sourceRedisMigrateEnum, String sourceServers,
+            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers);
 
     /**
      * 开始迁移
@@ -46,6 +46,7 @@ public interface RedisMigrateCenter {
      * @param targetServers
      * @return
      */
-    boolean migrate(String migrateMachineIp, RedisMigrateEnum sourceRedisMigrateEnum, String sourceServers,
-            RedisMigrateEnum targetRedisMigrateEnum, String targetServers);
+    boolean migrate(String migrateMachineIp, AppDataMigrateEnum sourceRedisMigrateEnum, String sourceServers,
+            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers);
+    
 }
