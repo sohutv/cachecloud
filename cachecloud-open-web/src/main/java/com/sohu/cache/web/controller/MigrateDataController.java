@@ -1,10 +1,13 @@
 package com.sohu.cache.web.controller;
 
 
+import java.util.List;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,7 +16,10 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.sohu.cache.constant.RedisMigrateEnum;
 import com.sohu.cache.constant.RedisMigrateResult;
+import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.stats.app.RedisMigrateCenter;
+import com.sohu.cache.util.ConstUtils;
+import com.sohu.cache.web.service.AppService;
 
 /**
  * Redis数据迁移入口
@@ -24,10 +30,13 @@ import com.sohu.cache.stats.app.RedisMigrateCenter;
  */
 @Controller
 @RequestMapping("/migrate")
-public class RedisMigrateController extends BaseController {
+public class MigrateDataController extends BaseController {
 
     @Resource(name = "redisMigrateCenter")
     private RedisMigrateCenter redisMigrateCenter;
+    
+    @Resource(name = "appService")
+    private AppService appService;
 
     /**
      * 初始化界面
@@ -121,5 +130,32 @@ public class RedisMigrateController extends BaseController {
         return new ModelAndView("migrate/list");
     }
     
+    /**
+     * 通过应用id获取可用的Redis实例信息
+     * @return
+     */
+    @RequestMapping(value = "/appInstanceList")
+    public ModelAndView appInstanceList(HttpServletRequest request, HttpServletResponse response, Model model) {
+        String appId = request.getParameter("appId");
+        StringBuffer instances = new StringBuffer();
+        List<InstanceInfo> instanceList = appService.getAppInstanceInfo(NumberUtils.toLong(appId));
+        if (CollectionUtils.isNotEmpty(instanceList)) {
+            for (int i = 0; i < instanceList.size(); i++) {
+                InstanceInfo instanceInfo = instanceList.get(i);
+                if (instanceInfo == null) {
+                    continue;
+                }
+                if (instanceInfo.isOffline()) {
+                    continue;
+                }
+                instances.append(instanceInfo.getIp() + ":" + instanceInfo.getPort());
+                if (i != instanceList.size() - 1) {
+                    instances.append(ConstUtils.NEXT_LINE);
+                }
+            }
+        }
+        model.addAttribute("instances", instances.toString());
+        return new ModelAndView("");
+    }
     
 }
