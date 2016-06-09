@@ -13,7 +13,7 @@ public enum RedisConfigEnum {
     LOGLEVEL("loglevel", "notice", "默认普通的verbose"),
     DATABASES("databases", "16", "可用的数据库数，默认值为16个,默认数据库为0"),
     DIR("dir", MachineProtocol.DATA_DIR, "redis工作目录,默认:" + MachineProtocol.DATA_DIR),
-    //--------复制相关--------------
+    STOP_WRITES_ON_BGSAVE_ERROR("stop-writes-on-bgsave-error", "no", "bgsave出错了不停写"),
     REPL_TIMEOUT("repl-timeout", "60", "master批量数据传输时间或者ping回复时间间隔,默认:60秒"),
     REPL_PING_SLAVE_PERIOD("repl-ping-slave-period", "10", "指定slave定期ping master的周期,默认:10秒"),
     REPL_DISABLE_TCP_NODELAY("repl-disable-tcp-nodelay", "no", "是否禁用socket的NO_DELAY,默认关闭，影响主从延迟"),
@@ -38,9 +38,8 @@ public enum RedisConfigEnum {
     CLIENT_OUTPUT_BUFFER_LIMIT_PUBSUB("client-output-buffer-limit", "pubsub 32mb 8mb 60", ""),
     HZ("hz", "10", "执行后台task数量,默认:10"),
     PORT("port", "", "端口"),
-    MAXMEMORY("maxmemory", "", "当前实例最大可用内存,默认4Gb"),
+    MAXMEMORY("maxmemory", "", "当前实例最大可用内存"),
     MAXMEMORY_POLICY("maxmemory-policy", "volatile-lru", "内存不够时,淘汰策略,默认:volatile-lru"),
-    //------------AOF相关------------
     APPENDONLY("appendonly", "yes", "开启append only持久化模式"),
     APPENDFSYNC("appendfsync", "everysec", "默认:aof每秒同步一次"),
     APPENDFILENAME("appendfilename", "appendonly-%d.aof", "aof文件名称,默认:appendonly-{port}.aof"),
