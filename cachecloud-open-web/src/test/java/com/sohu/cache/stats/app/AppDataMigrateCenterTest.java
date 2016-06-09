@@ -10,6 +10,7 @@ import org.junit.Test;
 import com.sohu.cache.constant.AppDataMigrateEnum;
 import com.sohu.cache.constant.AppDataMigrateResult;
 import com.sohu.cache.stats.app.impl.AppDataMigrateCenterImpl;
+import com.sohu.cache.util.ConstUtils;
 import com.sohu.test.BaseTest;
 
 /**
@@ -78,7 +79,8 @@ public class AppDataMigrateCenterTest extends BaseTest {
         AppDataMigrateEnum targetRedisMigrateEnum = AppDataMigrateEnum.REDIS_CLUSTER_NODE;
         String targetServers = "127.0.0.1:6380";
 
-        String configConent = appDataMigrateCenter.generateConfig(sourceRedisMigrateEnum, sourceServers,
+        int port = ConstUtils.REDIS_MIGRATE_TOOL_PORT;
+        String configConent = appDataMigrateCenter.generateConfig(port, sourceRedisMigrateEnum, sourceServers,
                 targetRedisMigrateEnum, targetServers);
         return configConent;
     }
@@ -109,7 +111,7 @@ public class AppDataMigrateCenterTest extends BaseTest {
 
         boolean isMigrate = appDataMigrateCenter.migrate(migrateMachineIp, sourceRedisMigrateEnum, sourceServers,
                 targetRedisMigrateEnum,
-                targetServers);
+                targetServers, 10000, 20000, 30000);
         logger.warn("============testMigrate start=============");
         logger.warn("isMigrate:{}", isMigrate);
         logger.warn("============testMigrate start=============");
@@ -125,7 +127,7 @@ public class AppDataMigrateCenterTest extends BaseTest {
 
         boolean isMigrate = appDataMigrateCenter.migrate(migrateMachineIp, sourceRedisMigrateEnum, sourceServers,
                 targetRedisMigrateEnum,
-                targetServers);
+                targetServers, 10000, 20000, 30000);
         logger.warn("============testMigrate start=============");
         logger.warn("isMigrate:{}", isMigrate);
         logger.warn("============testMigrate start=============");

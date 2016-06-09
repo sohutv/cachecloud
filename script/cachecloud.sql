@@ -871,16 +871,19 @@ insert into system_config(config_key,config_value,info,status,order_id) values('
 CREATE TABLE `app_data_migrate_status` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增id',
   `migrate_machine_ip` varchar(255) NOT NULL COMMENT '迁移工具所在机器ip',
+  `migrate_machine_port` int NOT NULL COMMENT '迁移工具所占port',
   `source_migrate_type` tinyint(4) NOT NULL COMMENT '源迁移类型,0:single,1:redis cluster,2:rdb file,3:twemproxy',
   `source_servers` varchar(2048) NOT NULL COMMENT '源实例列表',
   `target_migrate_type` tinyint(4) NOT NULL COMMENT '目标迁移类型,0:single,1:redis cluster,2:rdb file,3:twemproxy',
   `target_servers` varchar(2048) NOT NULL COMMENT '目标实例列表',
   `source_app_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '源应用id',
   `target_app_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '目标应用id',
-  `migrate_user_id` bigint(20) NOT NULL COMMENT '操作人',
-  `migrate_status` tinyint(4) NOT NULL COMMENT '迁移执行状态,0:开始,1:结束,2:异常',
-  `migrate_start_time` datetime NOT NULL COMMENT '迁移开始执行时间',
-  `migrate_end_time` datetime DEFAULT NULL COMMENT '迁移结束执行时间',
+  `user_id` bigint(20) NOT NULL COMMENT '操作人',
+  `status` tinyint(4) NOT NULL COMMENT '迁移执行状态,0:开始,1:结束,2:异常',
+  `start_time` datetime NOT NULL COMMENT '迁移开始执行时间',
+  `end_time` datetime DEFAULT NULL COMMENT '迁移结束执行时间',
+  `log_path` varchar(255) NOT NULL COMMENT '日志文件路径',
+  `config_path` varchar(255) NOT NULL COMMENT '配置文件路径',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='迁移状态';
 

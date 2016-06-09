@@ -1,7 +1,10 @@
 package com.sohu.cache.stats.app;
 
+import java.util.List;
+
 import com.sohu.cache.constant.AppDataMigrateEnum;
 import com.sohu.cache.constant.AppDataMigrateResult;
+import com.sohu.cache.entity.AppDataMigrateStatus;
 
 /**
  * 数据迁移
@@ -47,6 +50,29 @@ public interface AppDataMigrateCenter {
      * @return
      */
     boolean migrate(String migrateMachineIp, AppDataMigrateEnum sourceRedisMigrateEnum, String sourceServers,
-            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers);
+            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers, long sourceAppId, long targetAppId, long userId);
+
+
+    /**
+     * 列表
+     * @return
+     */
+    List<AppDataMigrateStatus> search();
+
+
+    /**
+     * 查看日志
+     * @param id
+     * @param pageSize
+     * @return
+     */
+    String showDataMigrateLog(long id, int pageSize);
+    
+    /**
+     * 查看配置
+     * @param id
+     * @return
+     */
+    String showDataMigrateConf(long id);
     
 }

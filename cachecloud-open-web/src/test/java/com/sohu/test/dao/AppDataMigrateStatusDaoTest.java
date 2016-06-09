@@ -26,17 +26,20 @@ public class AppDataMigrateStatusDaoTest extends BaseTest {
     @Test
     public void testSave() {
         AppDataMigrateStatus appDataMigrateStatus = new AppDataMigrateStatus();
-        appDataMigrateStatus.setMigrateEndTime(new Date());
+        appDataMigrateStatus.setEndTime(new Date());
         appDataMigrateStatus.setMigrateMachineIp("10.10.53.159");
-        appDataMigrateStatus.setMigrateStartTime(new Date());
-        appDataMigrateStatus.setMigrateStatus(1);
-        appDataMigrateStatus.setMigrateUserId(10244);
+        appDataMigrateStatus.setMigrateMachinePort(8888);
+        appDataMigrateStatus.setStartTime(new Date());
+        appDataMigrateStatus.setStatus(1);
+        appDataMigrateStatus.setUserId(10244);
         appDataMigrateStatus.setSourceAppId(10023);
         appDataMigrateStatus.setSourceMigrateType(1);
         appDataMigrateStatus.setSourceServers("10.10.53.159:6379");
         appDataMigrateStatus.setTargetAppId(0);
         appDataMigrateStatus.setTargetMigrateType(2);
         appDataMigrateStatus.setTargetServers("10.10.52.136:6385");
+        appDataMigrateStatus.setLogPath("/opt/redis-migrate-tool/rmt-20160609144601.log");
+        appDataMigrateStatus.setConfigPath("/opt/redis-migrate-tool/rmt-20160609144601.conf");
         appDataMigrateStatusDao.save(appDataMigrateStatus);
     }
 
@@ -49,6 +52,15 @@ public class AppDataMigrateStatusDaoTest extends BaseTest {
             logger.info(appDataMigrateStatus.toString());
         }
         logger.info("==============testSearch end==============");
+    }
+    
+    @Test
+    public void testGet() {
+        long id = 1;
+        AppDataMigrateStatus appDataMigrateStatus = appDataMigrateStatusDao.get(id);
+        logger.info("==============testGet start==============");
+        logger.info(appDataMigrateStatus.toString());
+        logger.info("==============testGet end==============");
     }
 
 }

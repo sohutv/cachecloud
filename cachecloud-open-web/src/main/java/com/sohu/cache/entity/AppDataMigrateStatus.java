@@ -1,6 +1,10 @@
 package com.sohu.cache.entity;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import com.sohu.cache.constant.AppDataMigrateEnum;
+import com.sohu.cache.constant.AppDataMigrateStatusEnum;
 
 /**
  * 迁移状态
@@ -20,6 +24,11 @@ public class AppDataMigrateStatus {
      * 迁移工具所在机器ip
      */
     private String migrateMachineIp;
+    
+    /**
+     * 迁移工具所占port
+     */
+    private int migrateMachinePort;
 
     /**
      * 目标实例列表
@@ -54,23 +63,33 @@ public class AppDataMigrateStatus {
     /**
      * 操作人
      */
-    private long migrateUserId;
+    private long userId;
 
     /**
      * 迁移执行状态
      */
-    private int migrateStatus;
+    private int status;
 
     /**
      * 迁移开始执行时间
      */
-    private Date migrateStartTime;
+    private Date startTime;
 
     /**
      * 迁移结束执行时间
      */
-    private Date migrateEndTime;
+    private Date endTime;
+    
+    /**
+     * 日志路径
+     */
+    private String logPath;
 
+    /**
+     * 配置路径
+     */
+    private String configPath;
+    
     public long getId() {
         return id;
     }
@@ -87,6 +106,14 @@ public class AppDataMigrateStatus {
         this.migrateMachineIp = migrateMachineIp;
     }
 
+    public int getMigrateMachinePort() {
+        return migrateMachinePort;
+    }
+
+    public void setMigrateMachinePort(int migrateMachinePort) {
+        this.migrateMachinePort = migrateMachinePort;
+    }
+
     public String getSourceServers() {
         return sourceServers;
     }
@@ -97,6 +124,11 @@ public class AppDataMigrateStatus {
 
     public int getSourceMigrateType() {
         return sourceMigrateType;
+    }
+    
+    public String getSourceMigrateTypeDesc() {
+        AppDataMigrateEnum appDataMigrateEnum = AppDataMigrateEnum.getByIndex(sourceMigrateType);
+        return appDataMigrateEnum == null ? "异常" :appDataMigrateEnum.getType();
     }
 
     public void setSourceMigrateType(int sourceMigrateType) {
@@ -113,6 +145,11 @@ public class AppDataMigrateStatus {
 
     public int getTargetMigrateType() {
         return targetMigrateType;
+    }
+    
+    public String getTargetMigrateTypeDesc() {
+        AppDataMigrateEnum appDataMigrateEnum = AppDataMigrateEnum.getByIndex(targetMigrateType);
+        return appDataMigrateEnum == null ? "异常" :appDataMigrateEnum.getType();
     }
 
     public void setTargetMigrateType(int targetMigrateType) {
@@ -135,46 +172,85 @@ public class AppDataMigrateStatus {
         this.targetAppId = targetAppId;
     }
 
-    public long getMigrateUserId() {
-        return migrateUserId;
+    public long getUserId() {
+        return userId;
     }
 
-    public void setMigrateUserId(long migrateUserId) {
-        this.migrateUserId = migrateUserId;
+    public void setUserId(long userId) {
+        this.userId = userId;
     }
 
-    public int getMigrateStatus() {
-        return migrateStatus;
+    public int getStatus() {
+        return status;
+    }
+    
+    public String getStatusDesc() {
+        AppDataMigrateStatusEnum appDataMigrateStatusEnum = AppDataMigrateStatusEnum.getByStatus(status);
+        return appDataMigrateStatusEnum == null ? "异常" : appDataMigrateStatusEnum.getInfo();
     }
 
-    public void setMigrateStatus(int migrateStatus) {
-        this.migrateStatus = migrateStatus;
+    public void setStatus(int status) {
+        this.status = status;
     }
 
-    public Date getMigrateStartTime() {
-        return migrateStartTime;
+    public Date getStartTime() {
+        return startTime;
+    }
+    
+    public String getStartTimeFormat() {
+        if (startTime == null) {
+            return "";
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return sdf.format(startTime);
     }
 
-    public void setMigrateStartTime(Date migrateStartTime) {
-        this.migrateStartTime = migrateStartTime;
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
     }
 
-    public Date getMigrateEndTime() {
-        return migrateEndTime;
+    public Date getEndTime() {
+        return endTime;
+    }
+    
+    public String getEndTimeFormat() {
+        if (endTime == null) {
+            return "";
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return sdf.format(endTime);
     }
 
-    public void setMigrateEndTime(Date migrateEndTime) {
-        this.migrateEndTime = migrateEndTime;
+    public void setEndTime(Date endTime) {
+        this.endTime = endTime;
+    }
+
+    public String getLogPath() {
+        return logPath;
+    }
+
+    public void setLogPath(String logPath) {
+        this.logPath = logPath;
+    }
+
+    public String getConfigPath() {
+        return configPath;
+    }
+
+    public void setConfigPath(String configPath) {
+        this.configPath = configPath;
     }
 
     @Override
     public String toString() {
-        return "AppDataMigrateStatus [id=" + id + ", migrateMachineIp=" + migrateMachineIp + ", sourceServers="
-                + sourceServers + ", sourceMigrateType=" + sourceMigrateType + ", targetServers=" + targetServers
-                + ", targetMigrateType=" + targetMigrateType + ", sourceAppId=" + sourceAppId + ", targetAppId="
-                + targetAppId + ", migrateUserId=" + migrateUserId + ", migrateStatus=" + migrateStatus
-                + ", migrateStartTime=" + migrateStartTime + ", migrateEndTime=" + migrateEndTime + "]";
+        return "AppDataMigrateStatus [id=" + id + ", migrateMachineIp=" + migrateMachineIp + ", migrateMachinePort="
+                + migrateMachinePort + ", sourceServers=" + sourceServers + ", sourceMigrateType=" + sourceMigrateType
+                + ", targetServers=" + targetServers + ", targetMigrateType=" + targetMigrateType + ", sourceAppId="
+                + sourceAppId + ", targetAppId=" + targetAppId + ", userId=" + userId + ", status=" + status
+                + ", startTime=" + startTime + ", endTime=" + endTime + ", logPath=" + logPath + ", configPath="
+                + configPath + "]";
     }
+
 
 
 }

@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -20,6 +21,9 @@ import org.slf4j.LoggerFactory;
 
 import com.sohu.cache.constant.AppDataMigrateEnum;
 import com.sohu.cache.constant.AppDataMigrateResult;
+import com.sohu.cache.constant.AppDataMigrateStatusEnum;
+import com.sohu.cache.dao.AppDataMigrateStatusDao;
+import com.sohu.cache.entity.AppDataMigrateStatus;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.entity.MachineInfo;
@@ -49,6 +53,8 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
     private RedisCenter redisCenter;
 
     private MachineCenter machineCenter;
+    
+    private AppDataMigrateStatusDao appDataMigrateStatusDao;
 
     @Override
     public AppDataMigrateResult check(String migrateMachineIp, AppDataMigrateEnum sourceRedisMigrateEnum,
@@ -140,7 +146,15 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
         }
 
         // 3. 检查是否有运行的redis-migrate-tool
-        // 3.1 从数据库里检测，每次迁移记录迁移的详情@TODO
+        // 3.1 从数据库里检测，每次迁移记录迁移的详情,状态不太好控制，暂时去掉
+//        try {
+//            int count = appDataMigrateStatusDao.getMigrateMachineStatCount(migrateMachineIp, AppDataMigrateStatusEnum.START.getStatus());
+//            if (count > 0) {
+//                return AppDataMigrateResult.fail(migrateMachineIp + "下有redis-migrate-tool进程，请确保只有一台机器只有一个迁移任务进行");
+//            }
+//        } catch (Exception e) {
+//            logger.error(e.getMessage(), e);
+//        }
 
         // 3.2 查看进程是否存在
         try {
@@ -214,21 +228,22 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
 
     @Override
     public boolean migrate(String migrateMachineIp, AppDataMigrateEnum sourceRedisMigrateEnum, String sourceServers,
-            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers) {
+            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers, long sourceAppId, long targetAppId, long userId) {
         // 1. 生成配置
-        String configContent = generateConfig(sourceRedisMigrateEnum, sourceServers, targetRedisMigrateEnum,
+        int migrateMachinePort = ConstUtils.REDIS_MIGRATE_TOOL_PORT;
+        String configContent = generateConfig(migrateMachinePort, sourceRedisMigrateEnum, sourceServers, targetRedisMigrateEnum,
                 targetServers);
         // 2. 上传配置
         String timestamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-        String fileName = "rmt-" + timestamp + ".conf";
-        String logFileName = ConstUtils.REDIS_MIGRATE_TOOL_HOME + "rmt-" + timestamp + ".log";
-        boolean uploadConfig = createRemoteFile(migrateMachineIp, fileName, configContent);
+        String confileFileName = "rmt-" + timestamp + ".conf";
+        String logFileName = "rmt-" + timestamp + ".log";
+        boolean uploadConfig = createRemoteFile(migrateMachineIp, confileFileName, configContent);
         if (!uploadConfig) {
             return false;
         }
         // 3. 开始执行: 指定的配置名、目录、日志名
-        String cmd = ConstUtils.REDIS_MIGRATE_TOOL_CMD + " -c " + ConstUtils.REDIS_MIGRATE_TOOL_HOME + fileName
-                + " -o " + logFileName + " -d";
+        String cmd = ConstUtils.REDIS_MIGRATE_TOOL_CMD + " -c " + ConstUtils.REDIS_MIGRATE_TOOL_HOME + confileFileName
+                + " -o " + ConstUtils.REDIS_MIGRATE_TOOL_HOME + logFileName + " -d";
         logger.warn(cmd);
         try {
             SSHUtil.execute(migrateMachineIp, cmd);
@@ -237,7 +252,22 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
             return false;
         }
 
-        // 4. 记录执行记录@TODO
+        // 4. 记录执行记录
+        AppDataMigrateStatus appDataMigrateStatus = new AppDataMigrateStatus();
+        appDataMigrateStatus.setMigrateMachineIp(migrateMachineIp);
+        appDataMigrateStatus.setMigrateMachinePort(migrateMachinePort);
+        appDataMigrateStatus.setStartTime(new Date());
+        appDataMigrateStatus.setSourceMigrateType(sourceRedisMigrateEnum.getIndex());
+        appDataMigrateStatus.setSourceServers(sourceServers);
+        appDataMigrateStatus.setTargetMigrateType(targetRedisMigrateEnum.getIndex());
+        appDataMigrateStatus.setTargetServers(targetServers);
+        appDataMigrateStatus.setLogPath(ConstUtils.REDIS_MIGRATE_TOOL_HOME + logFileName);
+        appDataMigrateStatus.setConfigPath(ConstUtils.REDIS_MIGRATE_TOOL_HOME + confileFileName);
+        appDataMigrateStatus.setUserId(userId);
+        appDataMigrateStatus.setSourceAppId(sourceAppId);
+        appDataMigrateStatus.setTargetAppId(targetAppId);
+        appDataMigrateStatus.setStatus(AppDataMigrateStatusEnum.START.getStatus());
+        appDataMigrateStatusDao.save(appDataMigrateStatus);
 
         return true;
     }
@@ -251,7 +281,7 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
      * @param targetServers
      * @return
      */
-    public String generateConfig(AppDataMigrateEnum sourceRedisMigrateEnum, String sourceServers,
+    public String generateConfig(int listenPort, AppDataMigrateEnum sourceRedisMigrateEnum, String sourceServers,
             AppDataMigrateEnum targetRedisMigrateEnum, String targetServers) {
         // source
         StringBuffer config = new StringBuffer();
@@ -276,7 +306,7 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
 
         // common:使用最简配置
         config.append("[common]" + ConstUtils.NEXT_LINE);
-        config.append("listen: 0.0.0.0:" + ConstUtils.REDIS_MIGRATE_TOOL_PORT);
+        config.append("listen: 0.0.0.0:" + listenPort);
 
         return config.toString();
     }
@@ -339,6 +369,51 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
 
         return true;
     }
+    
+    @Override
+    public List<AppDataMigrateStatus> search() {
+        try {
+            return appDataMigrateStatusDao.search(null);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return Collections.emptyList();
+        }
+    }
+    
+    @Override
+    public String showDataMigrateLog(long id, int pageSize) {
+        AppDataMigrateStatus appDataMigrateStatus = appDataMigrateStatusDao.get(id);
+        if (appDataMigrateStatus == null) {
+            return "";
+        }
+        String logPath = appDataMigrateStatus.getLogPath();
+        String host = appDataMigrateStatus.getMigrateMachineIp();
+        StringBuilder command = new StringBuilder();
+        command.append("/usr/bin/tail -n").append(pageSize).append(" ").append(logPath);
+        try {
+            return SSHUtil.execute(host, command.toString());
+        } catch (SSHException e) {
+            logger.error(e.getMessage(), e);
+            return "";
+        }
+    }
+    
+    @Override
+    public String showDataMigrateConf(long id) {
+        AppDataMigrateStatus appDataMigrateStatus = appDataMigrateStatusDao.get(id);
+        if (appDataMigrateStatus == null) {
+            return "";
+        }
+        String configPath = appDataMigrateStatus.getConfigPath();
+        String host = appDataMigrateStatus.getMigrateMachineIp();
+        String command = "cat " + configPath;
+        try {
+            return SSHUtil.execute(host, command);
+        } catch (SSHException e) {
+            logger.error(e.getMessage(), e);
+            return "";
+        }
+    }
 
     public void setRedisCenter(RedisCenter redisCenter) {
         this.redisCenter = redisCenter;
@@ -351,5 +426,11 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
     public void setAppService(AppService appService) {
         this.appService = appService;
     }
+
+    public void setAppDataMigrateStatusDao(AppDataMigrateStatusDao appDataMigrateStatusDao) {
+        this.appDataMigrateStatusDao = appDataMigrateStatusDao;
+    }
+
+    
 
 }

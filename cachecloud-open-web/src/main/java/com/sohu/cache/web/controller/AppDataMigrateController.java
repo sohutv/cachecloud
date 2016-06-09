@@ -1,6 +1,7 @@
 package com.sohu.cache.web.controller;
 
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -17,6 +18,8 @@ import org.springframework.web.servlet.ModelAndView;
 import com.sohu.cache.constant.MachineTypeEnum;
 import com.sohu.cache.constant.AppDataMigrateEnum;
 import com.sohu.cache.constant.AppDataMigrateResult;
+import com.sohu.cache.entity.AppDataMigrateStatus;
+import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.entity.MachineInfo;
 import com.sohu.cache.machine.MachineCenter;
@@ -90,10 +93,14 @@ public class AppDataMigrateController extends BaseController {
         String targetRedisMigrateIndex = request.getParameter("targetRedisMigrateIndex");
         AppDataMigrateEnum targetRedisMigrateEnum = AppDataMigrateEnum.getByIndex(NumberUtils.toInt(targetRedisMigrateIndex, -1));
         String targetServers = request.getParameter("targetServers");
+        long sourceAppId = NumberUtils.toLong(request.getParameter("sourceAppId"));
+        long targetAppId = NumberUtils.toLong(request.getParameter("targetAppId"));
+        AppUser appUser = getUserInfo(request);
+        long userId = appUser == null ? 0 : appUser.getId();
 
         // 不需要对格式进行检验,check已经做过了，开始迁移
         boolean isSuccess = appDataMigrateCenter.migrate(migrateMachineIp, sourceRedisMigrateEnum, sourceServers,
-                targetRedisMigrateEnum, targetServers);
+                targetRedisMigrateEnum, targetServers, sourceAppId, targetAppId, userId);
 
         model.addAttribute("status", isSuccess ? 1 : 0);
         return new ModelAndView("");
@@ -113,10 +120,31 @@ public class AppDataMigrateController extends BaseController {
      * 查看迁移日志
      * @return
      */
-    @RequestMapping(value = "/showLog")
-    public ModelAndView showLog(HttpServletRequest request, HttpServletResponse response, Model model) {
+    @RequestMapping(value = "/log")
+    public ModelAndView log(HttpServletRequest request, HttpServletResponse response, Model model) {
         //任务id：查到任务相关信息
-        return new ModelAndView("migrate/showLog");
+        long id = NumberUtils.toLong(request.getParameter("id"));
+        int pageSize = NumberUtils.toInt(request.getParameter("pageSize"), 0);
+        if (pageSize == 0) {
+            pageSize = 100;
+        }
+        
+        String log = appDataMigrateCenter.showDataMigrateLog(id, pageSize);
+        model.addAttribute("logList", Arrays.asList(log.split(ConstUtils.NEXT_LINE)));
+        return new ModelAndView("migrate/log");
+    }
+    
+    /**
+     * 查看迁移日志
+     * @return
+     */
+    @RequestMapping(value = "/config")
+    public ModelAndView config(HttpServletRequest request, HttpServletResponse response, Model model) {
+        //任务id：查到任务相关信息
+        long id = NumberUtils.toLong(request.getParameter("id"));
+        String config = appDataMigrateCenter.showDataMigrateConf(id);
+        model.addAttribute("configList", Arrays.asList(config.split(ConstUtils.NEXT_LINE)));
+        return new ModelAndView("migrate/config");
     }
     
     /**
@@ -124,7 +152,7 @@ public class AppDataMigrateController extends BaseController {
      * @return
      */
     @RequestMapping(value = "/showProcess")
-    public ModelAndView log(HttpServletRequest request, HttpServletResponse response, Model model) {
+    public ModelAndView showProcess(HttpServletRequest request, HttpServletResponse response, Model model) {
         //任务id：查到任务相关信息
         return new ModelAndView("migrate/showProcess");
     }
@@ -135,6 +163,8 @@ public class AppDataMigrateController extends BaseController {
      */
     @RequestMapping(value = "/list")
     public ModelAndView list(HttpServletRequest request, HttpServletResponse response, Model model) {
+        List<AppDataMigrateStatus> appDataMigrateStatusList = appDataMigrateCenter.search();
+        model.addAttribute("appDataMigrateStatusList", appDataMigrateStatusList);
         return new ModelAndView("migrate/list");
     }
     

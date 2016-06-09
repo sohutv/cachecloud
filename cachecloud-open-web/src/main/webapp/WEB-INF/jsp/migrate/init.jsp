@@ -115,6 +115,9 @@
     		var sourceServers = document.getElementById("sourceServers");
     		var targetServers = document.getElementById("targetServers");
     		var migrateMachineIp = document.getElementById("migrateMachineIp").value;
+    		var sourceAppId = document.getElementById("sourceAppId");
+    		var targetAppId = document.getElementById("targetAppId");
+
     		$.get(
     			'/data/migrate/start.json',
     			{
@@ -122,7 +125,9 @@
     				targetRedisMigrateIndex: targetRedisMigrateIndex,
     				sourceServers: sourceServers.value,
     				targetServers: targetServers.value,
-    				migrateMachineIp: migrateMachineIp
+    				migrateMachineIp: migrateMachineIp,
+    				sourceAppId: sourceAppId.value,
+    				targetAppId: targetAppId.value
     			},
     	        function(data){
     				var status = data.status;

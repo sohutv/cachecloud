@@ -16,5 +16,10 @@ public interface AppDataMigrateStatusDao {
 
     int save(AppDataMigrateStatus appDataMigrateStatus);
     
-    List<AppDataMigrateStatus> search(@Param("migrateStatus") Integer migrateStatus);
+    List<AppDataMigrateStatus> search(@Param("status") Integer status);
+
+    int getMigrateMachineStatCount(@Param("migrateMachineIp") String migrateMachineIp, @Param("status") int status);
+    
+    AppDataMigrateStatus get(@Param("id") long id);
+
 }
