@@ -2,6 +2,8 @@ package com.sohu.cache.stats.app;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.annotation.Resource;
 
@@ -9,6 +11,7 @@ import org.junit.Test;
 
 import com.sohu.cache.constant.AppDataMigrateEnum;
 import com.sohu.cache.constant.AppDataMigrateResult;
+import com.sohu.cache.constant.RedisMigrateToolConstant;
 import com.sohu.cache.stats.app.impl.AppDataMigrateCenterImpl;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.test.BaseTest;
@@ -114,7 +117,7 @@ public class AppDataMigrateCenterTest extends BaseTest {
                 targetServers, 10000, 20000, 30000);
         logger.warn("============testMigrate start=============");
         logger.warn("isMigrate:{}", isMigrate);
-        logger.warn("============testMigrate start=============");
+        logger.warn("============testMigrate end=============");
     }
     
     @Test
@@ -130,7 +133,22 @@ public class AppDataMigrateCenterTest extends BaseTest {
                 targetServers, 10000, 20000, 30000);
         logger.warn("============testMigrate start=============");
         logger.warn("isMigrate:{}", isMigrate);
-        logger.warn("============testMigrate start=============");
+        logger.warn("============testMigrate end=============");
     }
+    
+    @Test
+    public void testShowMiragteToolProcess() {
+        long id = 1;
+        Map<RedisMigrateToolConstant, Map<String, Object>> map = appDataMigrateCenter.showMiragteToolProcess(id);
+        logger.warn("============testShowMiragteToolProcess start=============");
+        for(Entry<RedisMigrateToolConstant, Map<String, Object>> entry : map.entrySet()) {
+            logger.info(entry.getKey().getValue());
+            for(Entry<String, Object> entry2 : entry.getValue().entrySet()) {
+                logger.info("\t" + entry2.getKey() + "->" + entry2.getValue());
+            }
+        }
+        logger.warn("============testShowMiragteToolProcess end=============");
+    }
+    
 
 }

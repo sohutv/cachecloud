@@ -133,7 +133,7 @@
     				var status = data.status;
     				if (status == 1) {
     					alert("迁移程序已经启动，请返回迁移列表关注迁移进度!");
-    					//location.href = "/admin/app/list";
+    					location.href = "/data/migrate/list";
     				} else {
     					alert("迁移失败,请查看日志分析原因!");
     				}

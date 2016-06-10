@@ -20,7 +20,10 @@
 	    <div class="row">
 	        <div class="col-md-12">
 	            <div class="page-header">
-	                <h4>迁移数据记录列表</h4>
+	                <h4>
+	                	迁移数据记录列表
+	                	<a target="_blank" href="/data/migrate/init" class="btn btn-info btn-success" role="button">添加新的迁移</a>
+	                </h4>
 	            </div>
 			</div>
 		</div>
@@ -42,6 +45,7 @@
 		                    <td>结束时间</td>
 		                    <td>查看</td>
 		                    <td>操作</td>
+		                    <td>校验数据</td>
 		                </tr>
 	                </thead>
 	                <tbody>
@@ -78,10 +82,13 @@
    			                    <td>
    			                        <a target="_blank" href="/data/migrate/log?id=${appDataMigrateStatus.id}">日志|</a>
    			                        <a target="_blank" href="/data/migrate/config?id=${appDataMigrateStatus.id}">配置|</a>
-   			                        <a target="_blank" href="">进度</a>
+   			                        <a target="_blank" href="/data/migrate/process?id=${appDataMigrateStatus.id}">进度</a>
    			                    </td>
    			                    <td>
 	                                <button type="button" class="btn btn-small btn-primary">停止</button>               
+   			                    </td>
+   			                    <td>
+	                                <button type="button" class="btn btn-small btn-primary">校验</button>               
    			                    </td>
 			                </tr>
 	                	</c:forEach>

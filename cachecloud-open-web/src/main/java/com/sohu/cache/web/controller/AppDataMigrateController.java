@@ -3,6 +3,7 @@ package com.sohu.cache.web.controller;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +19,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.sohu.cache.constant.MachineTypeEnum;
 import com.sohu.cache.constant.AppDataMigrateEnum;
 import com.sohu.cache.constant.AppDataMigrateResult;
+import com.sohu.cache.constant.RedisMigrateToolConstant;
 import com.sohu.cache.entity.AppDataMigrateStatus;
 import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.entity.InstanceInfo;
@@ -151,10 +153,12 @@ public class AppDataMigrateController extends BaseController {
      * 查看迁移进度
      * @return
      */
-    @RequestMapping(value = "/showProcess")
+    @RequestMapping(value = "/process")
     public ModelAndView showProcess(HttpServletRequest request, HttpServletResponse response, Model model) {
-        //任务id：查到任务相关信息
-        return new ModelAndView("migrate/showProcess");
+        long id = NumberUtils.toLong(request.getParameter("id"));
+        Map<RedisMigrateToolConstant, Map<String, Object>> migrateToolStatMap = appDataMigrateCenter.showMiragteToolProcess(id);
+        model.addAttribute("migrateToolStatMap", migrateToolStatMap);
+        return new ModelAndView("migrate/process");
     }
 
     /**

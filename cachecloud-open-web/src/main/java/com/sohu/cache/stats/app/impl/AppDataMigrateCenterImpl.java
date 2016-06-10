@@ -11,7 +11,10 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -19,9 +22,13 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import redis.clients.jedis.Jedis;
+
 import com.sohu.cache.constant.AppDataMigrateEnum;
 import com.sohu.cache.constant.AppDataMigrateResult;
 import com.sohu.cache.constant.AppDataMigrateStatusEnum;
+import com.sohu.cache.constant.RedisConstant;
+import com.sohu.cache.constant.RedisMigrateToolConstant;
 import com.sohu.cache.dao.AppDataMigrateStatusDao;
 import com.sohu.cache.entity.AppDataMigrateStatus;
 import com.sohu.cache.entity.AppDesc;
@@ -414,6 +421,69 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
             return "";
         }
     }
+    
+    @Override
+    public Map<RedisMigrateToolConstant, Map<String, Object>> showMiragteToolProcess(long id) {
+        AppDataMigrateStatus appDataMigrateStatus = appDataMigrateStatusDao.get(id);
+        if (appDataMigrateStatus == null) {
+            return Collections.emptyMap();
+        }
+        String info = "";
+        String host = appDataMigrateStatus.getMigrateMachineIp();
+        int port = appDataMigrateStatus.getMigrateMachinePort();
+        Jedis jedis = null;
+        try {
+            jedis = new Jedis(host, port, 5000);
+            info = jedis.info();
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+        if (StringUtils.isBlank(info)) {
+            return Collections.emptyMap();
+        }
+
+        return processRedisMigrateToolStats(info);
+        
+    }
+    
+    /**
+     * 处理迁移工具状态
+     * @param statResult
+     * @return
+     */
+    private Map<RedisMigrateToolConstant, Map<String, Object>> processRedisMigrateToolStats(String statResult) {
+        Map<RedisMigrateToolConstant, Map<String, Object>> redisStatMap = new HashMap<RedisMigrateToolConstant, Map<String, Object>>();
+        String[] data = statResult.split("\r\n");
+        String key;
+        int i = 0;
+        int length = data.length;
+        while (i < length) {
+            if (data[i].contains("#")) {
+                int index = data[i].indexOf('#');
+                key = data[i].substring(index + 1);
+                ++i;
+                RedisMigrateToolConstant redisMigrateToolConstant = RedisMigrateToolConstant.value(key.trim());
+                if (redisMigrateToolConstant == null) {
+                    continue;
+                }
+                Map<String, Object> sectionMap = new LinkedHashMap<String, Object>();
+                while (i < length && data[i].contains(":")) {
+                    String[] pair = data[i].split(":");
+                    sectionMap.put(pair[0], pair[1]);
+                    i++;
+                }
+                redisStatMap.put(redisMigrateToolConstant, sectionMap);
+            } else {
+                i++;
+            }
+        }
+        return redisStatMap;
+    }
+    
 
     public void setRedisCenter(RedisCenter redisCenter) {
         this.redisCenter = redisCenter;
@@ -430,6 +500,8 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
     public void setAppDataMigrateStatusDao(AppDataMigrateStatusDao appDataMigrateStatusDao) {
         this.appDataMigrateStatusDao = appDataMigrateStatusDao;
     }
+
+    
 
     
 

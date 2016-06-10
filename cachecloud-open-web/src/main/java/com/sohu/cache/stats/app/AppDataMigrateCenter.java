@@ -1,9 +1,11 @@
 package com.sohu.cache.stats.app;
 
 import java.util.List;
+import java.util.Map;
 
 import com.sohu.cache.constant.AppDataMigrateEnum;
 import com.sohu.cache.constant.AppDataMigrateResult;
+import com.sohu.cache.constant.RedisMigrateToolConstant;
 import com.sohu.cache.entity.AppDataMigrateStatus;
 
 /**
@@ -74,5 +76,12 @@ public interface AppDataMigrateCenter {
      * @return
      */
     String showDataMigrateConf(long id);
+
+    /**
+     * 查询迁移工具的实时状态
+     * @param id
+     * @return
+     */
+    Map<RedisMigrateToolConstant, Map<String, Object>> showMiragteToolProcess(long id);
     
 }
