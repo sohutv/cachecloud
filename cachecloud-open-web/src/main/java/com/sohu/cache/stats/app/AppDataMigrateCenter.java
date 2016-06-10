@@ -92,5 +92,13 @@ public interface AppDataMigrateCenter {
      * @return
      */
     String sampleCheckData(long id, int nums);
+
+
+    /**
+     * 关闭迁移
+     * @param id
+     * @return
+     */
+    AppDataMigrateResult stopMigrate(long id);
     
 }

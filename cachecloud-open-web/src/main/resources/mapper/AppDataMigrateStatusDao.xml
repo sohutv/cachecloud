@@ -22,20 +22,25 @@
         from app_data_migrate_status where 1=1
         <choose>
             <when test="status != null">
-            	and status = ${status}
+            	and status = #{status}
        	 	</when>
         </choose>
     </select>
     
     <select id="getMigrateMachineStatCount" resultType="int">
     	select count(*)
-        from app_data_migrate_status where migrate_machine_ip=#{migrateMachineIp} and status = ${status}
+        from app_data_migrate_status where migrate_machine_ip=#{migrateMachineIp} and status = #{status}
     </select>
     
     <select id="get" resultType="AppDataMigrateStatus">
     	select id,<include refid="migrate_data_status_fields"/>
         from app_data_migrate_status where id = #{id}
     </select>
+    
+    <update id="updateStatus">
+    	update app_data_migrate_status set status = #{status}, end_time=now() where id = #{id}
+    </update>
+    
 </mapper>
 
 

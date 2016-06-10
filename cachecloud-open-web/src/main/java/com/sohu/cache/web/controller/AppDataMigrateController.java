@@ -124,7 +124,11 @@ public class AppDataMigrateController extends BaseController {
     @RequestMapping(value = "/stop")
     public ModelAndView stop(HttpServletRequest request, HttpServletResponse response, Model model) {
         //任务id：查到任务相关信息
-        return new ModelAndView("migrate/stop");
+        long id = NumberUtils.toLong(request.getParameter("id"));
+        AppDataMigrateResult stopMigrateResult = appDataMigrateCenter.stopMigrate(id);
+        model.addAttribute("status", stopMigrateResult.getStatus());
+        model.addAttribute("message", stopMigrateResult.getMessage());
+        return new ModelAndView("");
     }
     
     /**

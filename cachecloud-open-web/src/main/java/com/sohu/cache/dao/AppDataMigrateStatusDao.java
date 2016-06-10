@@ -21,5 +21,7 @@ public interface AppDataMigrateStatusDao {
     int getMigrateMachineStatCount(@Param("migrateMachineIp") String migrateMachineIp, @Param("status") int status);
     
     AppDataMigrateStatus get(@Param("id") long id);
+    
+    int updateStatus(@Param("id") long id, @Param("status") int status);
 
 }

@@ -6,6 +6,23 @@
 <head>
     <title>迁移数据记录列表</title>
     <jsp:include page="/WEB-INF/include/head.jsp"/>
+    <script type="text/javascript">
+    	function stopMigrate(id) {
+    		if(window.confirm("确认要停掉id="+id+"的迁移任务吗?")) {
+    			$.get(
+ 	       			'/data/migrate/stop.json',
+ 	       			{
+ 	       				id: id,
+ 	       			},
+ 	       	        function(data){
+ 	       				var status = data.status;
+ 	       				alert(data.message);
+	    				location.href = "/data/migrate/list";
+ 	       	        }
+ 	       	     );
+    		}
+    	}
+    </script>
 </head>
 <body role="document">
 	<div class="container">
@@ -80,13 +97,27 @@
    			                    <td>
    			                        <a target="_blank" href="/data/migrate/log?id=${appDataMigrateStatus.id}">日志|</a>
    			                        <a target="_blank" href="/data/migrate/config?id=${appDataMigrateStatus.id}">配置|</a>
-   			                        <a target="_blank" href="/data/migrate/process?id=${appDataMigrateStatus.id}">进度</a>
+   			                        <c:choose>
+   			                        	<c:when test="${appDataMigrateStatus.status == 1}">
+   			                        		进度
+   			                        	</c:when>
+   			                        	<c:otherwise>
+   			                       			<a target="_blank" href="/data/migrate/process?id=${appDataMigrateStatus.id}">进度</a>
+   			                        	</c:otherwise>
+   			                        </c:choose>
    			                    </td>
    			                    <td>
-	                                <button type="button" class="btn btn-info">停止</button>               
+	                                <button <c:if test='${appDataMigrateStatus.status == 1}'>disabled="disabled"</c:if> onclick="stopMigrate(${appDataMigrateStatus.id})" type="button" class="btn btn-info">停止</button>               
    			                    </td>
    			                    <td>
-   			                    	<a target="_blank" href="/data/migrate/checkData?id=${appDataMigrateStatus.id}" class="btn btn-info" role="button">采样校验</a>
+   			                    	<c:choose>
+   			                        	<c:when test="${appDataMigrateStatus.status == 1}">
+	                                		<button disabled="disabled" type="button" class="btn btn-info">采样校验</button>               
+   			                        	</c:when>
+   			                        	<c:otherwise>
+   			                    			<a target="_blank" href="/data/migrate/checkData?id=${appDataMigrateStatus.id}" class="btn btn-info" role="button">采样校验</a>
+   			                        	</c:otherwise>
+   			                        </c:choose>
    			                    </td>
 			                </tr>
 	                	</c:forEach>

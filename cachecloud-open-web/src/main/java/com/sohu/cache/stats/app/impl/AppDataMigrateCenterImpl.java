@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
@@ -502,6 +503,76 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
             return "发生异常，请查看系统日志";
         }
     }
+    
+    @Override
+    public AppDataMigrateResult stopMigrate(long id) {
+        // 获取基本信息
+        AppDataMigrateStatus appDataMigrateStatus = appDataMigrateStatusDao.get(id);
+        if (appDataMigrateStatus == null) {
+            return AppDataMigrateResult.fail("id=" + id + "迁移记录不存在!");
+        }
+        // 获取进程号
+        String migrateMachineIp = appDataMigrateStatus.getMigrateMachineIp();
+        String migrateMachineHostPort = migrateMachineIp + ":" + appDataMigrateStatus.getMigrateMachinePort();
+        Map<RedisMigrateToolConstant, Map<String, Object>> redisMigrateToolStatMap = showMiragteToolProcess(id);
+        if (MapUtils.isEmpty(redisMigrateToolStatMap)) {
+            return AppDataMigrateResult.fail("获取" + migrateMachineHostPort + "相关信息失败，可能是进程不存在或者客户端超时，请查找原因或重试!");
+        }
+        Map<String, Object> serverMap = redisMigrateToolStatMap.get(RedisMigrateToolConstant.Server);
+        int pid = MapUtils.getInteger(serverMap, "process_id", -1);
+        if (pid <= 0) {
+            return AppDataMigrateResult.fail("获取" + migrateMachineHostPort + "的进程号" + pid + "异常");
+        }
+
+        // 确认进程号是redis-migrate-tool进程
+        Boolean exist = checkPidWhetherIsRmt(migrateMachineIp, pid);
+        if (exist == null) {
+            return AppDataMigrateResult.fail("执行过程中发生异常,请查看系统日志!");
+        } else if (exist.equals(false)) {
+            return AppDataMigrateResult.fail(migrateMachineIp + "进程号" + pid + "不存在,请确认!");
+        }
+
+        // kill掉进程
+        try {
+            String cmd = "kill " + pid;
+            SSHUtil.execute(migrateMachineIp, cmd);
+            exist = checkPidWhetherIsRmt(migrateMachineIp, pid);
+            if (exist == null) {
+                return AppDataMigrateResult.fail("执行过程中发生异常,请查看系统日志!");
+            } else if (exist.equals(false)) {
+                // 更新记录完成更新
+                appDataMigrateStatusDao.updateStatus(id, AppDataMigrateStatusEnum.END.getStatus());
+                return AppDataMigrateResult.success("已经成功停止了id=" + id + "的迁移任务");
+            } else {
+                return AppDataMigrateResult.fail(migrateMachineIp + "进程号" + pid + "仍然存在,没有kill掉,请确认!");
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return AppDataMigrateResult.fail("执行过程中发生异常,请查看系统日志!");
+        }
+    }
+
+    /**
+     * 检查pid是否是redis-migrate-tool进程
+     * @param migrateMachineIp
+     * @param pid
+     * @return
+     * @throws SSHException
+     */
+    private Boolean checkPidWhetherIsRmt(String migrateMachineIp, int pid){
+        try {
+            String cmd = "/bin/ps -ef | grep redis-migrate-tool | grep -v grep | grep " + pid;
+            String response = SSHUtil.execute(migrateMachineIp, cmd);
+            if (StringUtils.isNotBlank(response)) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (SSHException e) {
+            logger.error(e.getMessage(), e);
+            return null;
+        }
+    }
 
     public void setRedisCenter(RedisCenter redisCenter) {
         this.redisCenter = redisCenter;
@@ -518,10 +589,6 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
     public void setAppDataMigrateStatusDao(AppDataMigrateStatusDao appDataMigrateStatusDao) {
         this.appDataMigrateStatusDao = appDataMigrateStatusDao;
     }
-
-    
-
-    
 
     
 

@@ -28,6 +28,10 @@ public class AppDataMigrateResult {
     public static AppDataMigrateResult success() {
         return new AppDataMigrateResult(1, "所有检查都成功，可以迁移啦!");
     }
+    
+    public static AppDataMigrateResult success(String message) {
+        return new AppDataMigrateResult(1, message);
+    }
 
     public static AppDataMigrateResult fail(String message) {
         return new AppDataMigrateResult(0, message);

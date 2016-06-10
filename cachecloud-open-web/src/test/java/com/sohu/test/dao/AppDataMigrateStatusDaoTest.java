@@ -7,6 +7,7 @@ import javax.annotation.Resource;
 
 import org.junit.Test;
 
+import com.sohu.cache.constant.AppDataMigrateStatusEnum;
 import com.sohu.cache.dao.AppDataMigrateStatusDao;
 import com.sohu.cache.entity.AppDataMigrateStatus;
 import com.sohu.test.BaseTest;
@@ -57,6 +58,17 @@ public class AppDataMigrateStatusDaoTest extends BaseTest {
     @Test
     public void testGet() {
         long id = 1;
+        AppDataMigrateStatus appDataMigrateStatus = appDataMigrateStatusDao.get(id);
+        logger.info("==============testGet start==============");
+        logger.info(appDataMigrateStatus.toString());
+        logger.info("==============testGet end==============");
+    }
+    
+    @Test
+    public void testUpdate() {
+        long id = 1;
+        int status = AppDataMigrateStatusEnum.END.getStatus();
+        appDataMigrateStatusDao.updateStatus(id, status);
         AppDataMigrateStatus appDataMigrateStatus = appDataMigrateStatusDao.get(id);
         logger.info("==============testGet start==============");
         logger.info(appDataMigrateStatus.toString());
