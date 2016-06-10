@@ -99,14 +99,6 @@ public interface RedisCenter {
     public HostAndPort getMaster(String ip, int port);
 
     /**
-     * @param ip
-     * @param port
-     * @param maxMemory 单实例最大可用内存,单位Mb
-     * @return
-     */
-    public List<RedisConfig> getClusterConfig(String ip, int port, int maxMemory);
-
-    /**
      * 判断实例是否运行
      *
      * @param ip

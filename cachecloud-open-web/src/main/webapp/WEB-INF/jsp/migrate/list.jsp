@@ -26,7 +26,7 @@
 		<div class="row">
 			<br/>
 			<div class="col-md-12">
-	            <table class="table table-striped table-hover" style="margin-top: 0px">
+	            <table class="table table-bordered table-striped table-hover" style="margin-top: 0px">
 	                <thead>
 		                <tr>
 		                    <th>id</th>
