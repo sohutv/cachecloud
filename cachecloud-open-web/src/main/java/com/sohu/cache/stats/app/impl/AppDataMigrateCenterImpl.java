@@ -143,7 +143,7 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
         }
         // 2. 检查是否安装redis-migrate-tool
         try {
-            String cmd = ConstUtils.REDIS_MIGRATE_TOOL_CMD;
+            String cmd = ConstUtils.getRedisMigrateToolCmd();
             String response = SSHUtil.execute(migrateMachineIp, cmd);
             if (StringUtils.isBlank(response) || !response.contains("source") || !response.contains("target")) {
                 return AppDataMigrateResult.fail(migrateMachineIp + "下，" + cmd + "执行失败，请确保redis-migrate-tool安装正确!");
@@ -250,7 +250,7 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
             return false;
         }
         // 3. 开始执行: 指定的配置名、目录、日志名
-        String cmd = ConstUtils.REDIS_MIGRATE_TOOL_CMD + " -c " + ConstUtils.REDIS_MIGRATE_TOOL_HOME + confileFileName
+        String cmd = ConstUtils.getRedisMigrateToolCmd() + " -c " + ConstUtils.REDIS_MIGRATE_TOOL_HOME + confileFileName
                 + " -o " + ConstUtils.REDIS_MIGRATE_TOOL_HOME + logFileName + " -d";
         logger.warn(cmd);
         try {
@@ -495,7 +495,7 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
             }
             String ip = appDataMigrateStatus.getMigrateMachineIp();
             String configPath = appDataMigrateStatus.getConfigPath();
-            String sampleCheckDataCmd = ConstUtils.REDIS_MIGRATE_TOOL_CMD + " -c " + configPath + " -C" + " 'redis_check " + nums + "'";
+            String sampleCheckDataCmd = ConstUtils.getRedisMigrateToolCmd() + " -c " + configPath + " -C" + " 'redis_check " + nums + "'";
             logger.warn("sampleCheckDataCmd: {}", sampleCheckDataCmd);
             return SSHUtil.execute(ip, sampleCheckDataCmd);
         } catch (Exception e) {
