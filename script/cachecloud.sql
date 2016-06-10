@@ -868,6 +868,8 @@ insert into system_config(config_key,config_value,info,status,order_id) values('
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.warn.client','0.1','警告客户端版本(用逗号隔开)',1,16);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.error.client','0.0','不可用客户端版本(用逗号隔开)',1,17);
 
+insert into system_config(config_key,config_value,info,status,order_id) values('redis.migrate.tool.home','/opt/redis-migrate-tool/','redis-migrate-tool安装路径',1,18);
+
 CREATE TABLE `app_data_migrate_status` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增id',
   `migrate_machine_ip` varchar(255) NOT NULL COMMENT '迁移工具所在机器ip',

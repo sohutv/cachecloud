@@ -155,7 +155,9 @@ public class ConstUtils {
     /**
      * redis-migrate-tool相关路径
      */
-    public static String REDIS_MIGRATE_TOOL_HOME = "/opt/redis-migrate-tool/";
+    public static String REDIS_MIGRATE_TOOL_HOME;
+    public static String DEFAULT_REDIS_MIGRATE_TOOL_HOME = "/opt/redis-migrate-tool/";
+
     public static String REDIS_MIGRATE_TOOL_CMD = REDIS_MIGRATE_TOOL_HOME + "src/redis-migrate-tool";
     /**
      * redis-migrate-tool端口

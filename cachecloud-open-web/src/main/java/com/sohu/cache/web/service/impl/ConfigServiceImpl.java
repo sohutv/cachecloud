@@ -125,6 +125,11 @@ public class ConfigServiceImpl implements ConfigService {
                 ConstUtils.DEFAULT_ERROR_CLIENT_VERSIONS);
         logger.warn("{}: {}", "ConstUtils.ERROR_CLIENT_VERSIONS", ConstUtils.ERROR_CLIENT_VERSIONS);
 
+        //redis-migrate-tool安装路径
+        ConstUtils.REDIS_MIGRATE_TOOL_HOME = MapUtils.getString(configMap, "redis.migrate.tool.home",
+                ConstUtils.DEFAULT_REDIS_MIGRATE_TOOL_HOME);
+        logger.warn("{}: {}", "ConstUtils.REDIS_MIGRATE_TOOL_HOME", ConstUtils.REDIS_MIGRATE_TOOL_HOME);
+        
 
         logger.warn("===========ConfigServiceImpl reload config end============");
     }
