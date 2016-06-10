@@ -8,20 +8,20 @@
     <jsp:include page="/WEB-INF/include/head.jsp"/>
     <script type="text/javascript">
     
-    	function changeDataType(appIdDivId,serversDivId, choose) {
+    	function changeDataType(appIdId,serversId, choose) {
     		var dataType = choose.options[choose.selectedIndex].value;
-    		var appIdDiv = document.getElementById(appIdDivId);
-    		var serversDiv = document.getElementById(serversDivId);
+    		var appId = document.getElementById(appIdId);
+    		var servers = document.getElementById(serversId);
     		if (dataType == 0) {
-    			appIdDiv.style.display = "none";
-    			serversDiv.style.display = "";
+    			appId.disabled = true;
+    			servers.disabled = false;
     		} else if(dataType == 1) {
-    			appIdDiv.style.display = "";
-    			serversDiv.style.display = "none";
+    			appId.disabled = false;
+    			servers.disabled = true;
     		}
     	}
     	
-    	function fillAppInstanceList(instanceDetailId, appIdInputId) {
+    	function fillAppInstanceList(instanceDetailId,redisMigrateIndexId,appIdInputId) {
     		var appId = document.getElementById(appIdInputId).value;
     		if (appId == "") {
     			//不能为空
@@ -36,6 +36,28 @@
        	        function(data){
        				var instances = data.instances;
        				instanceDetail.value = instances;
+       				
+       				var appType = data.appType;
+       				var redisMigrateIndex = document.getElementById(redisMigrateIndexId);
+       				//修改select
+       				if (appType == 2) {
+       					var options = redisMigrateIndex.options;
+       					for(var i = 0;i < options.length; i++){
+       						if (1 == options[i].value){
+       							options[i].selected = 'selected';
+       							break;
+       						}
+       					}
+       				} else if(appType == 5 || appType == 6) {
+       					var options = redisMigrateIndex.options;
+       					for(var i = 0;i < options.length; i++){
+       						if (0 == options[i].value){
+       							options[i].selected = 'selected';
+       							break;
+       						}
+       					}
+       				}
+       				
        	        }
        	     );
     		
@@ -153,13 +175,6 @@
 	    <div id="systemAlert">
 	    </div>
 		<div class="page-content">
-			<div class="row">
-				<div class="col-md-12">
-					<h3 class="page-header">
-						迁移数据
-					</h3>
-				</div>
-			</div>
 			<div class="portlet box light-grey">
 				<div class="portlet-body">
 					<div class="form">
@@ -238,9 +253,6 @@
 														<option value="1">
 															Redis-cluster
 														</option>
-														<option value="2">
-                                                            RDB-file
-														</option>
 													</select>
 												</div>
 											</div>
@@ -256,7 +268,7 @@
 													数据源:
 												</label>
 												<div class="col-md-5">
-													<select id="sourceDataType" name="sourceDataType" class="form-control select2_category" onchange="changeDataType('sourceAppIdDiv','sourceServersDiv',this)">
+													<select id="sourceDataType" name="sourceDataType" class="form-control select2_category" onchange="changeDataType('sourceAppId','sourceServers',this)">
 														<option value="0" selected="selected">
 															非cachecloud
 														</option>
@@ -274,7 +286,7 @@
 													数据源:
 												</label>
 												<div class="col-md-5">
-													<select id="targetDataType" name="targetDataType" class="form-control select2_category" onchange="changeDataType('targetAppIdDiv','targetServersDiv',this)">
+													<select id="targetDataType" name="targetDataType" class="form-control select2_category" onchange="changeDataType('targetAppId','targetServers',this)">
 														<option value="1" selected="selected">
 															cachecloud
 														</option>
@@ -291,12 +303,12 @@
 								<div class="row">
 									<div class="col-md-12">
 										<div class="col-md-6">
-											<div class="form-group" id="sourceAppIdDiv" style="display:none">
+											<div class="form-group" id="sourceAppIdDiv">
 												<label class="control-label col-md-3">
 													源appId:
 												</label>
 												<div class="col-md-5">
-													<input type="text" id="sourceAppId" class="form-control" onchange="fillAppInstanceList('sourceServers', this.id)"/>
+													<input disabled="disabled" type="text" id="sourceAppId" class="form-control" onchange="fillAppInstanceList('sourceServers', 'sourceRedisMigrateIndex',this.id)"/>
 												</div>
 											</div>
 										</div>
@@ -307,7 +319,7 @@
 													目标appId:
 												</label>
 												<div class="col-md-5">
-													<input type="text" id="targetAppId" class="form-control"  onchange="fillAppInstanceList('targetServers', this.id)"/>
+													<input type="text" id="targetAppId" class="form-control"  onchange="fillAppInstanceList('targetServers', 'targetRedisMigrateIndex',this.id)"/>
 												</div>
 											</div>
 										</div>
@@ -341,12 +353,12 @@
 										</div>
 									
 										<div class="col-md-6">
-											<div class="form-group" id="targetServersDiv" style="display:none">
+											<div class="form-group" id="targetServersDiv">
 												<label class="control-label col-md-3">
 													目标实例详情:
 												</label>
 												<div class="col-md-8">
-													<textarea rows="10" name="targetServers" id="targetServers" placeholder="节点详情" class="form-control"></textarea>
+													<textarea disabled="disabled" rows="10" name="targetServers" id="targetServers" placeholder="节点详情" class="form-control"></textarea>
 													<span class="help-block">
 														每行格式都是:&nbsp;&nbsp;ip:port(例如：10.10.xx.xx:6379)<br/>
 														1. standalone类型：<br/> 

@@ -83,5 +83,14 @@ public interface AppDataMigrateCenter {
      * @return
      */
     Map<RedisMigrateToolConstant, Map<String, Object>> showMiragteToolProcess(long id);
+
+
+    /**
+     * 比较源和目标的样本数据
+     * @param id
+     * @param nums
+     * @return
+     */
+    String sampleCheckData(long id, int nums);
     
 }

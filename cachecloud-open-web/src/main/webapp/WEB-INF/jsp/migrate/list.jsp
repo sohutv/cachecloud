@@ -6,10 +6,6 @@
 <head>
     <title>迁移数据记录列表</title>
     <jsp:include page="/WEB-INF/include/head.jsp"/>
-    <script type="text/javascript">
-    
-    </script>
-    
 </head>
 <body role="document">
 	<div class="container">
@@ -33,19 +29,17 @@
 	            <table class="table table-striped table-hover" style="margin-top: 0px">
 	                <thead>
 		                <tr>
-		                    <td>id</td>
-		                    <td>迁移工具</td>
-		                    <td>源实例列表</td>
-		                    <td>目标实例列表</td>
-		                    <td>源appId</td>
-		                    <td>目标appId</td>
-		                    <td>操作人id</td>
-		                    <td>状态</td>
-		                    <td>开始时间</td>
-		                    <td>结束时间</td>
-		                    <td>查看</td>
-		                    <td>操作</td>
-		                    <td>校验数据</td>
+		                    <th>id</th>
+		                    <th>迁移工具</th>
+		                    <th>源数据</th>
+		                    <th>目标数据</th>
+		                    <th>操作人</th>
+		                    <th>开始时间</th>
+		                    <th>结束时间</th>
+		                    <th>状态</th>
+		                    <th>查看</th>
+		                    <th>操作</th>
+		                    <th>校验数据</th>
 		                </tr>
 	                </thead>
 	                <tbody>
@@ -53,17 +47,18 @@
 	                		 <tr>
 			                    <td>${appDataMigrateStatus.id}</td>
 			                    <td>${appDataMigrateStatus.migrateMachineIp}:${appDataMigrateStatus.migrateMachinePort}</td>
-			                    <td>${appDataMigrateStatus.sourceServers}<br/>${appDataMigrateStatus.sourceMigrateTypeDesc}</td>
-			                    <td>${appDataMigrateStatus.targetServers}<br/>${appDataMigrateStatus.targetMigrateTypeDesc}</td>
 			                    <td>
 			                    	<c:choose>
 			                    		<c:when test="${appDataMigrateStatus.sourceAppId <= 0}">
 			                    			非cachecloud
 			                    		</c:when>
 			                    		<c:otherwise>
-			                    			${appDataMigrateStatus.sourceAppId}
+			                    			cachecloud:<a target="_blank" href="/admin/app/index.do?appId=${appDataMigrateStatus.sourceAppId}">${appDataMigrateStatus.sourceAppId}</a>
 			                    		</c:otherwise>
 			                    	</c:choose>
+			                    	<br/>
+			                    	${appDataMigrateStatus.sourceServers}<br/>
+			                    	${appDataMigrateStatus.sourceMigrateTypeDesc}
 			                    </td>
 			                    <td>
 			                    	<c:choose>
@@ -71,24 +66,27 @@
 			                    			非cachecloud
 			                    		</c:when>
 			                    		<c:otherwise>
-			                    			${appDataMigrateStatus.targetAppId}
+			                    			cachecloud:<a target="_blank" href="/admin/app/index.do?appId=${appDataMigrateStatus.targetAppId}">${appDataMigrateStatus.targetAppId}</a>
 			                    		</c:otherwise>
 			                    	</c:choose>
+			                    	<br/>
+			                    	${appDataMigrateStatus.targetServers}<br/>
+			                    	${appDataMigrateStatus.targetMigrateTypeDesc}
 			                    </td>
 			                    <td>${appDataMigrateStatus.userId}</td>
-			                    <td>${appDataMigrateStatus.statusDesc}</td>
    			                    <td>${appDataMigrateStatus.startTimeFormat}</td>
    			                    <td>${appDataMigrateStatus.endTimeFormat}</td>
+   			                    <td>${appDataMigrateStatus.statusDesc}</td>
    			                    <td>
    			                        <a target="_blank" href="/data/migrate/log?id=${appDataMigrateStatus.id}">日志|</a>
    			                        <a target="_blank" href="/data/migrate/config?id=${appDataMigrateStatus.id}">配置|</a>
    			                        <a target="_blank" href="/data/migrate/process?id=${appDataMigrateStatus.id}">进度</a>
    			                    </td>
    			                    <td>
-	                                <button type="button" class="btn btn-small btn-primary">停止</button>               
+	                                <button type="button" class="btn btn-info">停止</button>               
    			                    </td>
    			                    <td>
-	                                <button type="button" class="btn btn-small btn-primary">校验</button>               
+   			                    	<a target="_blank" href="/data/migrate/checkData?id=${appDataMigrateStatus.id}" class="btn btn-info" role="button">采样校验</a>
    			                    </td>
 			                </tr>
 	                	</c:forEach>

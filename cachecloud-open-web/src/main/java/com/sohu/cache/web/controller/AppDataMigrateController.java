@@ -1,15 +1,18 @@
 package com.sohu.cache.web.controller;
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,12 +24,15 @@ import com.sohu.cache.constant.AppDataMigrateEnum;
 import com.sohu.cache.constant.AppDataMigrateResult;
 import com.sohu.cache.constant.RedisMigrateToolConstant;
 import com.sohu.cache.entity.AppDataMigrateStatus;
+import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.entity.MachineInfo;
 import com.sohu.cache.machine.MachineCenter;
+import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.stats.app.AppDataMigrateCenter;
 import com.sohu.cache.util.ConstUtils;
+import com.sohu.cache.util.TypeUtil;
 import com.sohu.cache.web.service.AppService;
 
 /**
@@ -48,6 +54,9 @@ public class AppDataMigrateController extends BaseController {
     
     @Resource(name = "machineCenter")
     private MachineCenter machineCenter;
+    
+    @Resource(name = "redisCenter")
+    private RedisCenter redisCenter;
 
     /**
      * 初始化界面
@@ -160,6 +169,30 @@ public class AppDataMigrateController extends BaseController {
         model.addAttribute("migrateToolStatMap", migrateToolStatMap);
         return new ModelAndView("migrate/process");
     }
+    
+    /**
+     * 查看迁移进度
+     * @return
+     */
+    @RequestMapping(value = "/checkData")
+    public ModelAndView checkData(HttpServletRequest request, HttpServletResponse response, Model model) {
+        long id = NumberUtils.toLong(request.getParameter("id"));
+        int nums = 1000 + new Random().nextInt(2000);
+        //message格式显示有点问题
+        String message = appDataMigrateCenter.sampleCheckData(id, nums);
+        List<String> checkDataResultList = new ArrayList<String>();
+        checkDataResultList.add("一共随机检验了" + nums + "个key" + ",检查结果如下:");
+        String[] lineArr = message.split(ConstUtils.NEXT_LINE);
+        for (String line : lineArr) {
+            if (StringUtils.isNotBlank(line)) {
+                line = line.replace("[0m", "");
+                line = line.replace("[31m", "");
+            }
+            checkDataResultList.add(line.trim());
+        }
+        model.addAttribute("checkDataResultList", checkDataResultList);
+        return new ModelAndView("migrate/checkData");
+    }
 
     /**
      * 查看迁移列表(包含历史)
@@ -178,9 +211,11 @@ public class AppDataMigrateController extends BaseController {
      */
     @RequestMapping(value = "/appInstanceList")
     public ModelAndView appInstanceList(HttpServletRequest request, HttpServletResponse response, Model model) {
-        String appId = request.getParameter("appId");
+        String appIdStr = request.getParameter("appId");
+        long appId = NumberUtils.toLong(appIdStr);
+        AppDesc appDesc = appService.getByAppId(appId);
         StringBuffer instances = new StringBuffer();
-        List<InstanceInfo> instanceList = appService.getAppInstanceInfo(NumberUtils.toLong(appId));
+        List<InstanceInfo> instanceList = appService.getAppInstanceInfo(appId);
         if (CollectionUtils.isNotEmpty(instanceList)) {
             for (int i = 0; i < instanceList.size(); i++) {
                 InstanceInfo instanceInfo = instanceList.get(i);
@@ -190,6 +225,15 @@ public class AppDataMigrateController extends BaseController {
                 if (instanceInfo.isOffline()) {
                     continue;
                 }
+                // 如果是sentinel类型的应用只出master
+                if (TypeUtil.isRedisSentinel(appDesc.getType())) {
+                    if (TypeUtil.isRedisSentinel(instanceInfo.getType())) {
+                        continue;
+                    }
+                    if (!redisCenter.isMaster(instanceInfo.getIp(), instanceInfo.getPort())) {
+                        continue;
+                    }
+                }
                 instances.append(instanceInfo.getIp() + ":" + instanceInfo.getPort());
                 if (i != instanceList.size() - 1) {
                     instances.append(ConstUtils.NEXT_LINE);
@@ -197,6 +241,7 @@ public class AppDataMigrateController extends BaseController {
             }
         }
         model.addAttribute("instances", instances.toString());
+        model.addAttribute("appType", appDesc == null ? -1 : appDesc.getType());
         return new ModelAndView("");
     }
     

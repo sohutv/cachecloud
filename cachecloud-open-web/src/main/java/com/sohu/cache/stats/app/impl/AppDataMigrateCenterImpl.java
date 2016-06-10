@@ -484,6 +484,24 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
         return redisStatMap;
     }
     
+    
+    @Override
+    public String sampleCheckData(long id, int nums) {
+        try {
+            AppDataMigrateStatus appDataMigrateStatus = appDataMigrateStatusDao.get(id);
+            if (appDataMigrateStatus == null) {
+                return "";
+            }
+            String ip = appDataMigrateStatus.getMigrateMachineIp();
+            String configPath = appDataMigrateStatus.getConfigPath();
+            String sampleCheckDataCmd = ConstUtils.REDIS_MIGRATE_TOOL_CMD + " -c " + configPath + " -C" + " 'redis_check " + nums + "'";
+            logger.warn("sampleCheckDataCmd: {}", sampleCheckDataCmd);
+            return SSHUtil.execute(ip, sampleCheckDataCmd);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return "发生异常，请查看系统日志";
+        }
+    }
 
     public void setRedisCenter(RedisCenter redisCenter) {
         this.redisCenter = redisCenter;
@@ -500,6 +518,8 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
     public void setAppDataMigrateStatusDao(AppDataMigrateStatusDao appDataMigrateStatusDao) {
         this.appDataMigrateStatusDao = appDataMigrateStatusDao;
     }
+
+    
 
     
 
