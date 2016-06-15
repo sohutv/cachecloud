@@ -11,6 +11,7 @@ import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sohu.cache.constant.UserLoginTypeEnum;
 import com.sohu.cache.dao.ConfigDao;
 import com.sohu.cache.entity.SystemConfig;
 import com.sohu.cache.util.ConstUtils;
@@ -130,6 +131,14 @@ public class ConfigServiceImpl implements ConfigService {
                 ConstUtils.DEFAULT_REDIS_MIGRATE_TOOL_HOME);
         logger.warn("{}: {}", "ConstUtils.REDIS_MIGRATE_TOOL_HOME", ConstUtils.REDIS_MIGRATE_TOOL_HOME);
         
+        //用户登录状态方式
+        ConstUtils.USER_LOGIN_TYPE = MapUtils.getIntValue(configMap, "cachecloud.user.login.type", ConstUtils.DEFAULT_USER_LOGIN_TYPE);
+        UserLoginTypeEnum userLoginTypeEnum = UserLoginTypeEnum.getLoginTypeEnum(ConstUtils.USER_LOGIN_TYPE);
+        logger.warn("{}: {}, {}", "ConstUtils.USER_LOGIN_TYPE", userLoginTypeEnum.getType(), userLoginTypeEnum.getDesc());
+        
+        //cookie登录方式所需要的domain
+        ConstUtils.COOKIE_DOMAIN = MapUtils.getString(configMap, "cachecloud.cookie.domain", ConstUtils.DEFAULT_COOKIE_DOMAIN);
+        logger.warn("{}: {}", "ConstUtils.COOKIE_DOMAIN", ConstUtils.COOKIE_DOMAIN);
 
         logger.warn("===========ConfigServiceImpl reload config end============");
     }

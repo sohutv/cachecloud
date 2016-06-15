@@ -868,7 +868,9 @@ insert into system_config(config_key,config_value,info,status,order_id) values('
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.warn.client','0.1','警告客户端版本(用逗号隔开)',1,16);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.error.client','0.0','不可用客户端版本(用逗号隔开)',1,17);
 
-insert into system_config(config_key,config_value,info,status,order_id) values('redis.migrate.tool.home','/opt/redis-migrate-tool/','redis-migrate-tool安装路径',1,18);
+insert into system_config(config_key,config_value,info,status,order_id) values('redis.migrate.tool.home','/opt/cachecloud/redis-migrate-tool/','redis-migrate-tool安装路径',1,18);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.user.login.type','1','用户登录状态保存方式(1:session,2:cookie，重启后生效)',1,19);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.cookie.domain','none','cookie登录方式所需要的域名',1,20);
 
 CREATE TABLE `app_data_migrate_status` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增id',

@@ -21,8 +21,8 @@ import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.stats.instance.InstanceStatsCenter;
 import com.sohu.cache.web.service.AppService;
+import com.sohu.cache.web.service.UserLoginStatusService;
 import com.sohu.cache.web.service.UserService;
-import com.sohu.cache.web.util.UserLoginStatusUtil;
 
 /**
  * 应用和实例权限验证
@@ -39,12 +39,14 @@ public class AppAndInstanceAuthorityInterceptor extends HandlerInterceptorAdapte
     private UserService userService;
 
     private InstanceStatsCenter instanceStatsCenter;
+    
+    private UserLoginStatusService userLoginStatusService;
 
     @Override
     public boolean preHandle(HttpServletRequest request,
             HttpServletResponse response, Object handler) throws Exception {
         // 1. 获取用户
-        long userId = UserLoginStatusUtil.getUserIdFromLoginStatus(request);
+        long userId = userLoginStatusService.getUserIdFromLoginStatus(request);
         AppUser user = userService.get(userId);
         
         // 2. 管理员直接跳过
@@ -118,6 +120,10 @@ public class AppAndInstanceAuthorityInterceptor extends HandlerInterceptorAdapte
 
     public void setInstanceStatsCenter(InstanceStatsCenter instanceStatsCenter) {
         this.instanceStatsCenter = instanceStatsCenter;
+    }
+
+    public void setUserLoginStatusService(UserLoginStatusService userLoginStatusService) {
+        this.userLoginStatusService = userLoginStatusService;
     }
 
 }

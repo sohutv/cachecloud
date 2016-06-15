@@ -1,5 +1,6 @@
 package com.sohu.cache.web.controller;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -15,8 +16,8 @@ import com.sohu.cache.entity.LoginResult;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.enums.AdminEnum;
 import com.sohu.cache.web.enums.LoginEnum;
+import com.sohu.cache.web.service.UserLoginStatusService;
 import com.sohu.cache.web.util.LoginUtil;
-import com.sohu.cache.web.util.UserLoginStatusUtil;
 
 /**
  * 登录逻辑
@@ -27,6 +28,9 @@ import com.sohu.cache.web.util.UserLoginStatusUtil;
 @Controller
 @RequestMapping("manage")
 public class LoginController extends BaseController {
+    
+    @Resource(name = "userLoginStatusService")
+    private UserLoginStatusService userLoginStatusService;
 
     /**
      * 用户登录界面
@@ -85,7 +89,7 @@ public class LoginController extends BaseController {
         }
         // 登录成功写入登录状态
         if (loginResult.getLoginEnum().equals(LoginEnum.LOGIN_SUCCESS)) {
-            UserLoginStatusUtil.addLoginStatus(request, response, userModel.getId().toString());
+            userLoginStatusService.addLoginStatus(request, response, userModel.getId().toString());
         }
         model.addAttribute("success", loginResult.getLoginEnum().value());
         model.addAttribute("admin", loginResult.getAdminEnum().value());
@@ -100,7 +104,7 @@ public class LoginController extends BaseController {
      */
     @RequestMapping(value = "/logout", method = RequestMethod.GET)
     public ModelAndView logout(HttpServletRequest request, HttpServletResponse response) {
-        UserLoginStatusUtil.removeLoginStatus(request, response);
+        userLoginStatusService.removeLoginStatus(request, response);
         return new ModelAndView("redirect:/manage/login");
     }
 

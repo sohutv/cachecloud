@@ -12,8 +12,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.sohu.cache.web.service.AppService;
+import com.sohu.cache.web.service.UserLoginStatusService;
 import com.sohu.cache.web.service.UserService;
-import com.sohu.cache.web.util.UserLoginStatusUtil;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -42,6 +42,8 @@ public class BaseController {
     protected AppService appService;
     
     protected MachineCenter machineCenter;
+    
+    protected UserLoginStatusService userLoginStatusService;
 
     public void setUserService(UserService userService) {
         this.userService = userService;
@@ -55,6 +57,10 @@ public class BaseController {
         this.machineCenter = machineCenter;
     }
 
+    public void setUserLoginStatusService(UserLoginStatusService userLoginStatusService) {
+        this.userLoginStatusService = userLoginStatusService;
+    }
+
     /**
      * 返回用户基本信息
      *
@@ -62,7 +68,7 @@ public class BaseController {
      * @return
      */
     public AppUser getUserInfo(HttpServletRequest request) {
-        long userId = UserLoginStatusUtil.getUserIdFromLoginStatus(request);
+        long userId = userLoginStatusService.getUserIdFromLoginStatus(request);
         return userService.get(userId);
     }
 

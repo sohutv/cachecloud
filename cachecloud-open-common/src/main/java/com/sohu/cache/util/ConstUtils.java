@@ -156,7 +156,7 @@ public class ConstUtils {
      * redis-migrate-tool相关路径
      */
     public static String REDIS_MIGRATE_TOOL_HOME;
-    public static String DEFAULT_REDIS_MIGRATE_TOOL_HOME = "/opt/redis-migrate-tool/";
+    public static String DEFAULT_REDIS_MIGRATE_TOOL_HOME = "/opt/cachecloud/redis-migrate-tool/";
 
     public static String getRedisMigrateToolCmd() {
         return REDIS_MIGRATE_TOOL_HOME + "src/redis-migrate-tool";
@@ -166,6 +166,19 @@ public class ConstUtils {
      * redis-migrate-tool端口
      */
     public static int REDIS_MIGRATE_TOOL_PORT = 8888;
+    
+    
+    /**
+     * 1是session,2是cookie(参考UserLoginTypeEnum)
+     */
+    public static int USER_LOGIN_TYPE;
+    public static int DEFAULT_USER_LOGIN_TYPE = 1;
+    
+    /**
+     * cookie登录方式所需要的域
+     */
+    public static String COOKIE_DOMAIN;
+    public static String DEFAULT_COOKIE_DOMAIN = "none";
     
     static {
         ResourceBundle applicationResourceBundle = ResourceBundle.getBundle("application");
