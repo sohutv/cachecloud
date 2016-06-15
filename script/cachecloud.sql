@@ -871,6 +871,7 @@ insert into system_config(config_key,config_value,info,status,order_id) values('
 insert into system_config(config_key,config_value,info,status,order_id) values('redis.migrate.tool.home','/opt/cachecloud/redis-migrate-tool/','redis-migrate-tool安装路径',1,18);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.user.login.type','1','用户登录状态保存方式(1:session,2:cookie，重启后生效)',1,19);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.cookie.domain','none','cookie登录方式所需要的域名',1,20);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.base.dir','/opt','cachecloud根目录，要和cachecloud-init.sh脚本中的目录一致',1,21);
 
 CREATE TABLE `app_data_migrate_status` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增id',

@@ -139,6 +139,10 @@ public class ConfigServiceImpl implements ConfigService {
         //cookie登录方式所需要的domain
         ConstUtils.COOKIE_DOMAIN = MapUtils.getString(configMap, "cachecloud.cookie.domain", ConstUtils.DEFAULT_COOKIE_DOMAIN);
         logger.warn("{}: {}", "ConstUtils.COOKIE_DOMAIN", ConstUtils.COOKIE_DOMAIN);
+        
+        //cachecloud根目录
+        ConstUtils.CACHECLOUD_BASE_DIR = MapUtils.getString(configMap, "cachecloud.base.dir", ConstUtils.DEFAULT_CACHECLOUD_BASE_DIR);
+        logger.warn("{}: {}", "ConstUtils.CACHECLOUD_BASE_DIR", ConstUtils.CACHECLOUD_BASE_DIR);
 
         logger.warn("===========ConfigServiceImpl reload config end============");
     }

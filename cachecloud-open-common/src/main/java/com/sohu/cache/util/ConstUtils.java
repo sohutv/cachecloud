@@ -180,6 +180,12 @@ public class ConstUtils {
     public static String COOKIE_DOMAIN;
     public static String DEFAULT_COOKIE_DOMAIN = "none";
     
+    /**
+     * cachecloud根目录，这个要与cachecloud-init.sh脚本中的目录一致
+     */
+    public static String CACHECLOUD_BASE_DIR;
+    public static String DEFAULT_CACHECLOUD_BASE_DIR = "/opt";
+    
     static {
         ResourceBundle applicationResourceBundle = ResourceBundle.getBundle("application");
         IS_DEBUG = "true".equals(applicationResourceBundle.getString("isDebug"));
