@@ -60,6 +60,27 @@ function checkAppConfig(){
 	return true;
 }
 
+//检查配置项
+function checkInstanceConfig(){
+	//配置项
+	var instanceConfigKey = document.getElementById("instanceConfigKey");
+	if(instanceConfigKey.value == ""){
+		alert("配置项不能为空");
+		instanceConfigKey.focus();
+		return false;
+	}
+	
+	//配置值
+	var instanceConfigValue = document.getElementById("instanceConfigValue");
+	if(instanceConfigValue.value == ""){
+		alert("配置值不能为空");
+		instanceConfigValue.focus();
+		return false;
+	}
+	return true;
+}
+
+
 //检查扩容配置
 function checkAppScaleText(){
 	var appScaleText = document.getElementById("appScaleText");

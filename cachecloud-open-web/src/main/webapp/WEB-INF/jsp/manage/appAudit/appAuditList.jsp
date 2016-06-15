@@ -104,6 +104,9 @@
 												<c:when test="${item.type == 3}">
 													注册用户申请
 												</c:when>
+												<c:when test="${item.type == 4}">
+													实例配置修改
+												</c:when>
 											</c:choose>	
 										</td>
 										<td>${item.info}</td>
@@ -138,6 +141,9 @@
 												</c:when>
 												<c:when test="${item.type == 2}">
 													<c:set var="auditDealUrl" value="/manage/app/initAppConfigChange.do?appAuditId=${item.id}"/>
+												</c:when>
+												<c:when test="${item.type == 4}">
+													<c:set var="auditDealUrl" value="/manage/instance/initInstanceConfigChange.do?appAuditId=${item.id}"/>
 												</c:when>
 											</c:choose>
 											<c:choose>

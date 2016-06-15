@@ -10,14 +10,16 @@ public enum AppAuditLogTypeEnum {
     APP_DESC_APPLY(1),
     // 扩容申请
     APP_SCALE_APPLY(2),
-    // 配置修改申请
+    // 应用配置修改申请
     APP_CONFIG_APPLY(3),
     // 审批
     APP_CHECK(4),
     // 修改报警阀值
     APP_CHANGE_MEM_ALERT(5),
     // 清理数据
-    APP_CLEAN_DATA(6);
+    APP_CLEAN_DATA(6),
+    // 实例配置修改申请
+    INSTANCE_CONFIG_APPLY(7);
     
     private int value;
     

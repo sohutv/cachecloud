@@ -4,7 +4,7 @@
 <div class="row">
 	<div class="col-md-12">
 		<h3 class="page-title">
-			应用配置信息
+			配置信息
 		</h3>
 	</div>
 </div>
@@ -12,7 +12,7 @@
 	<div class="col-md-12">
 		<div class="portlet box light-grey">
 			<div class="portlet-title">
-				<div class="caption"><i class="fa fa-globe"></i>应用配置信息列表</div>
+				<div class="caption"><i class="fa fa-globe"></i>配置信息列表</div>
 				<div class="tools">
 					<a href="javascript:;" class="collapse"></a>
 				</div>

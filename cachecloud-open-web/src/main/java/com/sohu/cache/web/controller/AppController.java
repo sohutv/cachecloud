@@ -779,7 +779,7 @@ public class AppController extends BaseController {
     }
 
     /**
-     * 修改配置申请
+     * 应用修改配置申请
      *
      * @param appId          应用id
      * @param appConfigKey   配置项
@@ -791,7 +791,26 @@ public class AppController extends BaseController {
                                           HttpServletResponse response, Model model, Long appId, Long instanceId, String appConfigKey, String appConfigValue, String appConfigReason) {
         AppUser appUser = getUserInfo(request);
         AppDesc appDesc = appService.getByAppId(appId);
-        AppAudit appAudit = appService.saveAppChangeConfig(appDesc, appUser, instanceId, appConfigKey, appConfigValue,appConfigReason, AppAuditType.MODIFY_CONFIG);
+        AppAudit appAudit = appService.saveAppChangeConfig(appDesc, appUser, instanceId, appConfigKey, appConfigValue,appConfigReason, AppAuditType.APP_MODIFY_CONFIG);
+        appEmailUtil.noticeAppResult(appDesc, appAudit);
+        write(response, String.valueOf(SuccessEnum.SUCCESS.value()));
+        return null;
+    }
+    
+    /**
+     * 实例修改配置申请
+     *
+     * @param appId          应用id
+     * @param appConfigKey   配置项
+     * @param appConfigValue 配置值
+     * @return
+     */
+    @RequestMapping(value = "/changeInstanceConfig")
+    public ModelAndView doChangeInstanceConfig(HttpServletRequest request,
+                                          HttpServletResponse response, Model model, Long appId, Long instanceId, String instanceConfigKey, String instanceConfigValue, String instanceConfigReason) {
+        AppUser appUser = getUserInfo(request);
+        AppDesc appDesc = appService.getByAppId(appId);
+        AppAudit appAudit = appService.saveInstanceChangeConfig(appDesc, appUser, instanceId, instanceConfigKey, instanceConfigValue, instanceConfigReason, AppAuditType.INSTANCE_MODIFY_CONFIG);
         appEmailUtil.noticeAppResult(appDesc, appAudit);
         write(response, String.valueOf(SuccessEnum.SUCCESS.value()));
         return null;

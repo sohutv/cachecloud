@@ -28,4 +28,16 @@ public interface InstanceDeployCenter {
      */
     String showInstanceRecentLog(int instanceId, int maxLineNum);
 
+    /**
+     * 修改实例配置
+     * @param appAuditId
+     * @param host
+     * @param port
+     * @param instanceConfigKey
+     * @param instanceConfigValue
+     * @return
+     */
+    boolean modifyInstanceConfig(Long appAuditId, String host, int port, String instanceConfigKey,
+            String instanceConfigValue);
+
 }
