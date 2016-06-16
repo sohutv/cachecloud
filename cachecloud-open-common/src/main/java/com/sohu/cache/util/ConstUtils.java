@@ -69,6 +69,11 @@ public class ConstUtils {
     public static double LOAD_THRESHOLD;
     public static double DEFAULT_LOAD_THRESHOLD = 8.0;
 
+    /**
+     * 应用客户端连接数报警阀值 
+     */
+    public static int APP_CLIENT_CONN_THRESHOLD;
+    public static int DEFAULT_APP_CLIENT_CONN_THRESHOLD = 2000;
 
     /**
      * 机器统一的用户名、密码、端口
