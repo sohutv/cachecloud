@@ -24,7 +24,7 @@ public class LoginUtil {
     public static boolean passportCheck(String username, String password) {
         //LDAP登陆地址
         String ldapUrl = ConstUtils.LDAP_URL;
-        if (StringUtils.isBlank(ldapUrl)) {
+        if (StringUtils.isBlank(ldapUrl) || ConstUtils.NONE.equals(ldapUrl)) {
             logger.warn("ldap url is empty!!");
             return true;
         }

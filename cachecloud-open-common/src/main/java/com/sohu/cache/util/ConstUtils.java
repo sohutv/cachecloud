@@ -54,6 +54,9 @@ public class ConstUtils {
 
     // 容量转换
     public static final int _1024 = 1024;
+    
+    // 表示空
+    public static final String NONE = "none";
 
     /**
      * 机器报警阀值
@@ -137,16 +140,16 @@ public class ConstUtils {
     /**
      * 邮箱报警接口
      */
-    public static String DEFAULT_EMAIL_ALERT_INTERFACE = "";
+    public static String DEFAULT_EMAIL_ALERT_INTERFACE = NONE;
     public static String EMAIL_ALERT_INTERFACE = DEFAULT_EMAIL_ALERT_INTERFACE;
     
     /**
      * 短信报警接口
      */
-    public static String DEFAULT_MOBILE_ALERT_INTERFACE = "";
+    public static String DEFAULT_MOBILE_ALERT_INTERFACE = NONE;
     public static String MOBILE_ALERT_INTERFACE = DEFAULT_MOBILE_ALERT_INTERFACE;
     
-    /**,
+    /**
      * maven仓库地址
      */
     public static String DEFAULT_MAVEN_WAREHOUSE = "http://your_maven_house";
@@ -196,7 +199,7 @@ public class ConstUtils {
     /**
      * cookie登录方式所需要的域
      */
-    public static String DEFAULT_COOKIE_DOMAIN = "none";
+    public static String DEFAULT_COOKIE_DOMAIN = NONE;
     public static String COOKIE_DOMAIN = DEFAULT_COOKIE_DOMAIN;
     
     /**

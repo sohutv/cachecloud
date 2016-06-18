@@ -874,6 +874,11 @@ insert into system_config(config_key,config_value,info,status,order_id) values('
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.base.dir','/opt','cachecloud根目录，要和cachecloud-init.sh脚本中的目录一致',1,21);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.app.client.conn.threshold','2000','应用连接数报警阀值',1,22);
 
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.email.alert.interface','none','邮件报警接口(说明:http://cachecloud.github.io 邮件和短信报警接口规范)',1,23);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.mobile.alert.interface','none','短信报警接口(说明:http://cachecloud.github.io 邮件和短信报警接口规范)',1,24);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.ldap.url','none','LDAP接口地址(例如:ldap://ldap.xx.com)',1,25);
+
+
 CREATE TABLE `app_data_migrate_status` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增id',
   `migrate_machine_ip` varchar(255) NOT NULL COMMENT '迁移工具所在机器ip',
