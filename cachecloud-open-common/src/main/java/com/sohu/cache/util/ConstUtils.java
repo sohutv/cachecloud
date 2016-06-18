@@ -107,7 +107,7 @@ public class ConstUtils {
     /**
      * ldap登陆
      */
-    public static String DEFAULT_LDAP_URL = "";
+    public static String DEFAULT_LDAP_URL = NONE;
     public static String LDAP_URL = DEFAULT_LDAP_URL;
     
     /**
