@@ -128,8 +128,19 @@ public class ConstUtils {
     public static String DEFAULT_PHONES = "13812345678,13787654321";
     public static String PHONES = DEFAULT_PHONES;
 
+    /**
+     * 邮箱报警接口
+     */
+    public static String DEFAULT_EMAIL_ALERT_INTERFACE = "";
+    public static String EMAIL_ALERT_INTERFACE = DEFAULT_EMAIL_ALERT_INTERFACE;
     
     /**
+     * 短信报警接口
+     */
+    public static String DEFAULT_MOBILE_ALERT_INTERFACE = "";
+    public static String MOBILE_ALERT_INTERFACE = DEFAULT_MOBILE_ALERT_INTERFACE;
+    
+    /**,
      * maven仓库地址
      */
     public static String DEFAULT_MAVEN_WAREHOUSE = "http://your_maven_house";
