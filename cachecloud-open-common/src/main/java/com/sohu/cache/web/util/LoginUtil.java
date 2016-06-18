@@ -45,7 +45,7 @@ public class LoginUtil {
                 return true;
             }
         } catch (Exception e) {
-            logger.error("passportCheck: " + e.getMessage(), e);
+            logger.error("username {} passportCheck: " + e.getMessage(), username, e);
         } finally {
             if (ctx != null) {
                 try {
@@ -55,6 +55,6 @@ public class LoginUtil {
                 }
             }
         }
-        return true;
+        return false;
     }
 }
