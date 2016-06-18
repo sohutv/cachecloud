@@ -102,6 +102,12 @@ public class ConstUtils {
     public static List<String> SUPER_MANAGER;
     
     /**
+     * ldap登陆
+     */
+    public static String DEFAULT_LDAP_URL = "";
+    public static String LDAP_URL = DEFAULT_LDAP_URL;
+    
+    /**
      * 是否为调试
      */
     public static boolean IS_DEBUG;
@@ -198,6 +204,7 @@ public class ConstUtils {
      */
     public static String DEFAULT_CACHECLOUD_BASE_DIR = "/opt";
     public static String CACHECLOUD_BASE_DIR = DEFAULT_CACHECLOUD_BASE_DIR;
+    
     
     static {
         ResourceBundle applicationResourceBundle = ResourceBundle.getBundle("application");
