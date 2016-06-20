@@ -36,7 +36,7 @@ public class LoginUtil {
         env.put("java.naming.factory.initial", "com.sun.jndi.ldap.LdapCtxFactory");
         env.put("java.naming.provider.url", ldapUrl);
         env.put("java.naming.security.authentication", "simple");
-        env.put("java.naming.security.principal", username);
+        env.put("java.naming.security.principal", username + ConstUtils.EMAIL_SUFFIX);
         env.put("java.naming.security.credentials", password);
         DirContext ctx = null;
         try {

@@ -111,6 +111,11 @@ public class ConstUtils {
     public static String LDAP_URL = DEFAULT_LDAP_URL;
     
     /**
+     * 登陆邮箱后缀
+     */
+    public static String EMAIL_SUFFIX = "";
+    
+    /**
      * 是否为调试
      */
     public static boolean IS_DEBUG;
