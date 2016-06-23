@@ -4,9 +4,9 @@ package com.sohu.cache.redis.enums;
  * Created by yijunzhang on 14-8-25.
  */
 public enum RedisSentinelConfigEnum {
-    PORT("port", "", "sentinel实例端口"),
+    PORT("port", "%d", "sentinel实例端口"),
     DIR("dir", "/tmp", "文件目录"),
-    MONITOR("sentinel monitor", "", "master名称定义和最少参与监控的sentinel数,格式:masterName ip port num"),
+    MONITOR("sentinel monitor", "%s %s %d %d", "master名称定义和最少参与监控的sentinel数,格式:masterName ip port num"),
     DOWN_AFTER_MILLISECONDS("sentinel down-after-milliseconds", "%s 20000", "Sentinel判定服务器断线的毫秒数,默认:20秒"),
     FAILOVER_TIMEOUT("sentinel failover-timeout", "%s 180000", "故障迁移超时时间,默认:3分钟"),
     PARALLEL_SYNCS("sentinel parallel-syncs", "%s 1", "在执行故障转移时,最多有多少个从服务器同时对新的主服务器进行同步,默认:1");

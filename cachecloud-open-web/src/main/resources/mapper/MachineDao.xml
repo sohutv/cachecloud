@@ -40,7 +40,7 @@
     </select>
 
     <!--保存机器信息-->
-    <select id="saveMachineInfo" parameterType="MachineInfo">
+    <insert id="saveMachineInfo" parameterType="MachineInfo">
         insert into machine_info
           (<include refid="machine_info_columns"/>)
         values
@@ -49,7 +49,7 @@
         update ssh_user=#{sshUser},ssh_passwd=#{sshPasswd},room=#{room},mem=#{mem},cpu=#{cpu},
         `virtual`=#{virtual},real_ip=#{realIp},service_time=#{serviceTime},fault_count=#{faultCount},
         warn=#{warn},available=#{available},type=#{type},groupId=#{groupId},extra_desc=#{extraDesc}
-    </select>
+    </insert>
     
     <!--根据ip删除一台机器的信息-->
     <delete id="removeMachineInfoByIp" parameterType="string">
