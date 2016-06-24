@@ -58,7 +58,6 @@ public class InstanceConfigDaoTest extends BaseTest {
         instanceConfig.setConfigKey("hello");
         instanceConfig.setConfigValue("world");
         instanceConfig.setInfo("info");
-        instanceConfig.setDynamicParamCount(0);
         instanceConfig.setStatus(1);
         instanceConfig.setType(ConstUtils.CACHE_TYPE_REDIS_CLUSTER);
         instanceConfig.setUpdateTime(new Date());

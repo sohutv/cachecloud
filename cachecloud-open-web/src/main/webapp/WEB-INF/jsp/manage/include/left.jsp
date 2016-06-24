@@ -92,10 +92,21 @@
 			</a>
 		</li>
 		
+		<li <c:if test="${redisConfigActive == 1}">class="active"</c:if>>
+			<a href="/manage/redisConfig/init.do">
+				<i class="fa fa-map-marker"></i> 
+				<span class="title">Redis配置模板管理</span>
+				<c:if test="${redisConfigActive == 1}">
+					<span class="selected"></span>
+					<span class="arrow"></span>
+				</c:if>
+			</a>
+		</li>
+		
 		<li <c:if test="${configActive == 1}">class="active"</c:if>>
 			<a href="/manage/config/init.do">
 				<i class="fa fa-map-marker"></i> 
-				<span class="title">配置修改</span>
+				<span class="title">系统配置管理</span>
 				<c:if test="${configActive == 1}">
 					<span class="selected"></span>
 					<span class="arrow"></span>

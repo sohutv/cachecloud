@@ -14,6 +14,12 @@ import com.sohu.cache.entity.InstanceConfig;
  * @Time 下午5:46:37
  */
 public interface InstanceConfigDao {
+    
+    /**
+     * 获取所有配置模板
+     * @return
+     */
+    List<InstanceConfig> getAllInstanceConfig();
 
     /**
      * 根据type获取配置模板列表
@@ -55,4 +61,5 @@ public interface InstanceConfigDao {
      * @return
      */
     int updateStatus(@Param("id") long id, @Param("status") int status);
+
 }

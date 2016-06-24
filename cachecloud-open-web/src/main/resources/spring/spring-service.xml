@@ -41,5 +41,6 @@
     
     <bean id="appDataMigrateCenter" class="com.sohu.cache.stats.app.impl.AppDataMigrateCenterImpl"/>
     
+    <bean id="redisConfigTemplateService" class="com.sohu.cache.redis.impl.RedisConfigTemplateServiceImpl"/>
 
 </beans>

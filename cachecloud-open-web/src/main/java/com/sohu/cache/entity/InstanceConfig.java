@@ -28,11 +28,6 @@ public class InstanceConfig {
     private String info;
     
     /**
-     * 动态参数个数，例如configValue dump-%d.rdb，那么动态参数个数是1
-     */
-    private int dynamicParamCount;
-    
-    /**
      * 更新时间
      */
     private Date updateTime;
@@ -79,15 +74,6 @@ public class InstanceConfig {
         this.info = info;
     }
 
-
-    public int getDynamicParamCount() {
-        return dynamicParamCount;
-    }
-
-    public void setDynamicParamCount(int dynamicParamCount) {
-        this.dynamicParamCount = dynamicParamCount;
-    }
-
     public Date getUpdateTime() {
         return updateTime;
     }
@@ -115,7 +101,7 @@ public class InstanceConfig {
     @Override
     public String toString() {
         return "InstanceConfig [id=" + id + ", configKey=" + configKey + ", configValue=" + configValue
-                + ", info=" + info + ", dynamicParamCount=" + dynamicParamCount + ", updateTime=" + updateTime
+                + ", info=" + info  + ", updateTime=" + updateTime
                 + ", type=" + type + ", status=" + status + "]";
     }
     

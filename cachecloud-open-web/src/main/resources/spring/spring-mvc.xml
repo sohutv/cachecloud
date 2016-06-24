@@ -43,6 +43,7 @@
             <mvc:mapping path="/import/app/*"/>
             <mvc:mapping path="/manage/config/*"/>
             <mvc:mapping path="/data/migrate/*"/>
+            <mvc:mapping path="/manage/redisConfig/*"/>
             <bean class="com.sohu.cache.interceptor.ManageUserLoginInterceptor"/>
         </mvc:interceptor>
         <!-- 应用和实例权限验证 -->
