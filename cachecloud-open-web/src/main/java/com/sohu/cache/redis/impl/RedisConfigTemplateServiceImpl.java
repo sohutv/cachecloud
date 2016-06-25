@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +29,8 @@ import com.sohu.cache.util.ConstUtils;
 public class RedisConfigTemplateServiceImpl implements RedisConfigTemplateService {
 
     private Logger logger = LoggerFactory.getLogger(RedisConfigTemplateServiceImpl.class);
+    
+    private final static String SPECIAL_EMPTY_STR = "\"\"";
 
     private InstanceConfigDao instanceConfigDao;
     
@@ -101,6 +104,9 @@ public class RedisConfigTemplateServiceImpl implements RedisConfigTemplateServic
             }
             String configKey = instanceConfig.getConfigKey();
             String configValue = instanceConfig.getConfigValue();
+            if (StringUtils.isBlank(configValue)) {
+                configValue = SPECIAL_EMPTY_STR;
+            }
             if (RedisConfigEnum.MAXMEMORY.getKey().equals(configKey)) {
                 configValue = String.format(configValue, maxMemory);
             } else if (RedisConfigEnum.DBFILENAME.getKey().equals(configKey) 
@@ -131,6 +137,9 @@ public class RedisConfigTemplateServiceImpl implements RedisConfigTemplateServic
             }
             String configKey = instanceConfig.getConfigKey();
             String configValue = instanceConfig.getConfigValue();
+            if (StringUtils.isBlank(configValue)) {
+                configValue = SPECIAL_EMPTY_STR;
+            }
             if (RedisSentinelConfigEnum.PORT.getKey().equals(configKey)) {
                 configValue = String.format(configValue, sentinelPort);
             } else if(RedisSentinelConfigEnum.MONITOR.getKey().equals(configKey)) {
@@ -158,6 +167,9 @@ public class RedisConfigTemplateServiceImpl implements RedisConfigTemplateServic
             }
             String configKey = instanceConfig.getConfigKey();
             String configValue = instanceConfig.getConfigValue();
+            if (StringUtils.isBlank(configValue)) {
+                configValue = SPECIAL_EMPTY_STR;
+            }
             if (RedisClusterConfigEnum.CLUSTER_CONFIG_FILE.getKey().equals(configKey)) {
                 configValue = String.format(configValue, port);
             }

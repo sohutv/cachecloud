@@ -953,9 +953,9 @@ insert into instance_config(config_key,config_value,info,update_time, type, stat
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('zset-max-ziplist-entries','128','zset数据结构优化参数',now(),6,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('zset-max-ziplist-value','64','zset数据结构优化参数',now(),6,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('activerehashing','yes','是否激活重置哈希,默认:yes',now(),6,1);
-insert into instance_config(config_key,config_value,info,update_time, type, status) values('client-output-buffer-limit normal','0 0 0','',now(),6,1);
-insert into instance_config(config_key,config_value,info,update_time, type, status) values('client-output-buffer-limit slave','512mb 128mb 60','',now(),6,1);
-insert into instance_config(config_key,config_value,info,update_time, type, status) values('client-output-buffer-limit pubsub','32mb 8mb 60','',now(),6,1);
+insert into instance_config(config_key,config_value,info,update_time, type, status) values('client-output-buffer-limit normal','0 0 0','客户端输出缓冲区限制(客户端)',now(),6,1);
+insert into instance_config(config_key,config_value,info,update_time, type, status) values('client-output-buffer-limit slave','512mb 128mb 60','客户端输出缓冲区限制(复制)',now(),6,1);
+insert into instance_config(config_key,config_value,info,update_time, type, status) values('client-output-buffer-limit pubsub','32mb 8mb 60','客户端输出缓冲区限制(发布订阅)',now(),6,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('hz','10','执行后台task数量,默认:10',now(),6,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('port','%d','端口',now(),6,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('maxmemory','%dmb','当前实例最大可用内存',now(),6,1);
@@ -976,19 +976,21 @@ insert into instance_config(config_key,config_value,info,update_time, type, stat
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('save 300','10','300秒有10次修改做bgsave',now(),6,0);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('save 60','10000','60秒有10000次修改做bgsave',now(),6,0);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('maxclients','10000','客户端最大连接数',now(),6,1);
-insert into instance_config(config_key,config_value,info,update_time, type, status) values('unixsocketperm','0','',now(),6,1);
+insert into instance_config(config_key,config_value,info,update_time, type, status) values('unixsocketperm','0','unix套接字权限',now(),6,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('watchdog-period','0','关门狗执行周期，0是不执行',now(),6,1);
-insert into instance_config(config_key,config_value,info,update_time, type, status) values('requirepass','""','密码',now(),6,1);
-insert into instance_config(config_key,config_value,info,update_time, type, status) values('masterauth','""','master密码',now(),6,1);
-insert into instance_config(config_key,config_value,info,update_time, type, status) values('unixsocket','""','',now(),6,1);
-insert into instance_config(config_key,config_value,info,update_time, type, status) values('logfile','""','日志文件名',now(),6,1);
-insert into instance_config(config_key,config_value,info,update_time, type, status) values('hll-sparse-max-bytes','3000','',now(),6,1);
-insert into instance_config(config_key,config_value,info,update_time, type, status) values('min-slaves-to-write','0','',now(),6,1);
-insert into instance_config(config_key,config_value,info,update_time, type, status) values('min-slaves-max-lag','10','',now(),6,1);
+insert into instance_config(config_key,config_value,info,update_time, type, status) values('requirepass','','密码',now(),6,1);
+insert into instance_config(config_key,config_value,info,update_time, type, status) values('masterauth','','master密码',now(),6,1);
+insert into instance_config(config_key,config_value,info,update_time, type, status) values('unixsocket','','unix套接字',now(),6,1);
+insert into instance_config(config_key,config_value,info,update_time, type, status) values('logfile','','日志文件名',now(),6,1);
+insert into instance_config(config_key,config_value,info,update_time, type, status) values('hll-sparse-max-bytes','3000','HyperLogLog稀疏表示限制设置	',now(),6,1);
+insert into instance_config(config_key,config_value,info,update_time, type, status) values('min-slaves-to-write','0','当slave数量小于min-slaves-to-write，且延迟小于等于min-slaves-max-lag时， master停止写入操作',now(),6,1);
+insert into instance_config(config_key,config_value,info,update_time, type, status) values('min-slaves-max-lag','10','当slave服务器和master服务器失去连接后，或者当数据正在复制传输的时候，如果此参数值设置yes，slave服务器可以继续接受客户端的请求',now(),6,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('aof-load-truncated','yes','加载aof文件时，是否忽略aof文件不完整的情况，是否Redis正常启动',now(),6,1);
-insert into instance_config(config_key,config_value,info,update_time, type, status) values('notify-keyspace-events','""','keyspace事件通知功能',now(),6,1);
+insert into instance_config(config_key,config_value,info,update_time, type, status) values('notify-keyspace-events','','keyspace事件通知功能',now(),6,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('latency-monitor-threshold','0','Redis服务内存延迟监控',now(),6,1);
-insert into instance_config(config_key,config_value,info,update_time, type, status) values('bind','""','绑定IP',now(),6,1);
+insert into instance_config(config_key,config_value,info,update_time, type, status) values('bind','','绑定IP',now(),6,1);
+
+
 
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
