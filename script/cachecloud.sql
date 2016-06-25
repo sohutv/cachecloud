@@ -921,7 +921,7 @@ insert into instance_config(config_key,config_value,info,update_time, type, stat
 
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('port','%d','sentinel实例端口',now(),5,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('dir','/tmp','工作目录',now(),5,1);
-insert into instance_config(config_key,config_value,info,update_time, type, status) values('sentinel monitor','%s %s %d %d','master名称定义和最少参与监控的sentinel数,格式:masterName ip port num',now(),5,1);
+insert into instance_config(config_key,config_value,info,update_time, type, status) values('sentinel monitor','%s %s %d 1','master名称定义和最少参与监控的sentinel数,格式:masterName ip port num',now(),5,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('sentinel down-after-milliseconds','%s 20000','Sentinel判定服务器断线的毫秒数,默认:20秒',now(),5,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('sentinel failover-timeout','%s 180000','故障迁移超时时间,默认:3分钟',now(),5,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('sentinel parallel-syncs','%s 1','在执行故障转移时,最多有多少个从服务器同时对新的主服务器进行同步,默认:1',now(),5,1);

@@ -2,11 +2,9 @@ package com.sohu.cache.redis.impl;
 
 import com.sohu.cache.constant.InstanceStatusEnum;
 import com.sohu.cache.dao.AppDao;
-import com.sohu.cache.dao.InstanceConfigDao;
 import com.sohu.cache.dao.InstanceDao;
 import com.sohu.cache.dao.MachineDao;
 import com.sohu.cache.entity.AppDesc;
-import com.sohu.cache.entity.InstanceConfig;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.entity.MachineInfo;
 import com.sohu.cache.machine.MachineCenter;
@@ -14,10 +12,8 @@ import com.sohu.cache.protocol.MachineProtocol;
 import com.sohu.cache.protocol.RedisProtocol;
 import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.redis.RedisClusterNode;
+import com.sohu.cache.redis.RedisConfigTemplateService;
 import com.sohu.cache.redis.RedisDeployCenter;
-import com.sohu.cache.redis.enums.RedisClusterConfigEnum;
-import com.sohu.cache.redis.enums.RedisConfigEnum;
-import com.sohu.cache.redis.enums.RedisSentinelConfigEnum;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.IdempotentConfirmer;
 import com.sohu.cache.util.TypeUtil;
@@ -52,7 +48,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
 
     private AppDao appDao;
     
-    private InstanceConfigDao instanceConfigDao;
+    private RedisConfigTemplateService redisConfigTemplateService;
 
     @Override
     public boolean deployClusterInstance(long appId, List<RedisClusterNode> clusterNodes, int maxMemory) {
@@ -515,57 +511,47 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
      * @return
      */
     public List<String> handleCommonConfig(int port, int maxMemory) {
-        List<String> configs = new ArrayList<String>();
-        for (RedisConfigEnum config : RedisConfigEnum.values()) {
-            if (RedisConfigEnum.MAXMEMORY.equals(config)) {
-                configs.add(config.getKey() + " " + String.format(config.getValue(), maxMemory));
-            } else if (RedisConfigEnum.DBFILENAME.equals(config) ||
-                    RedisConfigEnum.APPENDFILENAME.equals(config) || RedisConfigEnum.PORT.equals(config)) {
-                configs.add(config.getKey() + " " + String.format(config.getValue(), port));
-            } else if (RedisConfigEnum.DIR.equals(config)) {
-                configs.add(config.getKey() + " " + MachineProtocol.DATA_DIR);
-            } else if (RedisConfigEnum.AUTO_AOF_REWRITE_PERCENTAGE.equals(config)) {
-                //随机比例 auto-aof-rewrite-percentage
-                int percent = 69 + new Random().nextInt(30);
-                configs.add(config.getKey() + " " + String.format(RedisConfigEnum.AUTO_AOF_REWRITE_PERCENTAGE.getValue(), percent));
-            } else {
-                configs.add(config.getKey() + " " + config.getValue());
-            }
+        List<String> configs = null;
+        try {
+            configs = redisConfigTemplateService.handleCommonConfig(port, maxMemory);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        if (CollectionUtils.isEmpty(configs)) {
+            configs = redisConfigTemplateService.handleCommonDefaultConfig(port, maxMemory);
         }
         return configs;
     }
 
-    public List<String> handleSentinelConfig(String masterName, String host, int port, int sentinelPort) {
-        List<String> configs = new ArrayList<String>();
-        configs.add(RedisSentinelConfigEnum.PORT.getKey() + " " + String.format(RedisSentinelConfigEnum.PORT.getValue(), sentinelPort));
-        configs.add(RedisSentinelConfigEnum.DIR.getKey() + " " + RedisSentinelConfigEnum.DIR.getValue());
-        configs.add(RedisSentinelConfigEnum.MONITOR.getKey() + " " + String.format(RedisSentinelConfigEnum.MONITOR.getValue(), masterName, host, port, 1));
-        configs.add(RedisSentinelConfigEnum.DOWN_AFTER_MILLISECONDS.getKey() + " " + String
-                .format(RedisSentinelConfigEnum.DOWN_AFTER_MILLISECONDS.getValue(), masterName));
-        configs.add(RedisSentinelConfigEnum.FAILOVER_TIMEOUT.getKey() + " " + String
-                .format(RedisSentinelConfigEnum.FAILOVER_TIMEOUT.getValue(), masterName));
-        configs.add(RedisSentinelConfigEnum.PARALLEL_SYNCS.getKey() + " " + String
-                .format(RedisSentinelConfigEnum.PARALLEL_SYNCS.getValue(), masterName));
+    private List<String> handleSentinelConfig(String masterName, String host, int port, int sentinelPort) {
+        List<String> configs = null;
+        try {
+            configs = redisConfigTemplateService.handleSentinelConfig(masterName, host, port, sentinelPort);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        if (CollectionUtils.isEmpty(configs)) {
+            configs = redisConfigTemplateService.handleSentinelDefaultConfig(masterName, host, port, sentinelPort);
+        }
         return configs;
     }
-    
+
+    private List<String> handleClusterConfig(int port) {
+        List<String> configs = null;
+        try {
+            configs = redisConfigTemplateService.handleClusterConfig(port);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        if (CollectionUtils.isEmpty(configs)) {
+            configs = redisConfigTemplateService.handleClusterDefaultConfig(port);
+        }
+        return configs;
+    }
+
     private String getMasterName(String host, int port) {
         String masterSentinelName = String.format("sentinel-%s-%s", host, port);
         return masterSentinelName;
-    }
-
-    public List<String> handleClusterConfig(int port) {
-        List<String> configs = new ArrayList<String>();
-        for (RedisClusterConfigEnum config : RedisClusterConfigEnum.values()) {
-            if (config.equals(RedisClusterConfigEnum.CLUSTER_CONFIG_FILE)) {
-                configs.add(RedisClusterConfigEnum.CLUSTER_CONFIG_FILE.getKey() + " "
-                        + String.format(RedisClusterConfigEnum.CLUSTER_CONFIG_FILE.getValue(), port));
-            } else {
-                configs.add(config.getKey() + " "
-                        + config.getValue());
-            }
-        }
-        return configs;
     }
 
     private boolean isRun(String host, int port) {
@@ -1115,9 +1101,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         this.appDao = appDao;
     }
 
-    public void setInstanceConfigDao(InstanceConfigDao instanceConfigDao) {
-        this.instanceConfigDao = instanceConfigDao;
+    public void setRedisConfigTemplateService(RedisConfigTemplateService redisConfigTemplateService) {
+        this.redisConfigTemplateService = redisConfigTemplateService;
     }
-
-
 }

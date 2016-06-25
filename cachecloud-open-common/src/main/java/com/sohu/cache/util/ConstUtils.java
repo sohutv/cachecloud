@@ -228,6 +228,12 @@ public class ConstUtils {
      * 换行
      */
     public static final String NEXT_LINE = "\n";
+
+    /**
+     * 空格
+     */
+    public static final String SPACE = " ";
+
     
 
 }

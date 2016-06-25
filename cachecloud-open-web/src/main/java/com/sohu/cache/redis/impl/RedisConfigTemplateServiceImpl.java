@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,79 +89,147 @@ public class RedisConfigTemplateServiceImpl implements RedisConfigTemplateServic
 
     @Override
     public List<String> handleCommonConfig(int port, int maxMemory) {
-        List<InstanceConfig> instanceConfigList = instanceConfigDao.getByType(ConstUtils.CACHE_REDIS_STANDALONE);
+        List<InstanceConfig> instanceConfigList = getByType(ConstUtils.CACHE_REDIS_STANDALONE);
+        if (CollectionUtils.isEmpty(instanceConfigList)) {
+            return Collections.emptyList();
+        }
         List<String> configs = new ArrayList<String>();
         for (InstanceConfig instanceConfig : instanceConfigList) {
-            int status = instanceConfig.getStatus();
-            if (status == 0) {
+            // 无效配置过滤
+            if (!instanceConfig.isEffective()) {
                 continue;
             }
             String configKey = instanceConfig.getConfigKey();
             String configValue = instanceConfig.getConfigValue();
             if (RedisConfigEnum.MAXMEMORY.getKey().equals(configKey)) {
-                configs.add(configKey + " " + String.format(configValue, maxMemory));
+                configValue = String.format(configValue, maxMemory);
             } else if (RedisConfigEnum.DBFILENAME.getKey().equals(configKey) 
                     || RedisConfigEnum.APPENDFILENAME.getKey().equals(configKey) || RedisConfigEnum.PORT.getKey().equals(configKey)) {
-                configs.add(configKey + " " + String.format(configValue, port));
+                configValue = String.format(configValue, port);
             } else if (RedisConfigEnum.DIR.getKey().equals(configKey)) {
-                configs.add(configKey + " " + MachineProtocol.DATA_DIR);
+                configValue = MachineProtocol.DATA_DIR;
             } else if (RedisConfigEnum.AUTO_AOF_REWRITE_PERCENTAGE.getKey().equals(configKey)) {
                 //随机比例 auto-aof-rewrite-percentage
                 int percent = 69 + new Random().nextInt(30);
-                configs.add(configKey + " " + String.format(RedisConfigEnum.AUTO_AOF_REWRITE_PERCENTAGE.getValue(), percent));
-            } else {
-                configs.add(configKey + " " + configValue);
+                configValue = String.format(configValue, percent);
             }
+            configs.add(combineConfigKeyValue(configKey, configValue));
         }
         return configs;
     }
 
     @Override
-    public List<String> handleSentinelConfig(String masterName, String host, int port, int sentinelPort, int quorum) {
+    public List<String> handleSentinelConfig(String masterName, String host, int port, int sentinelPort) {
         List<InstanceConfig> instanceConfigList = instanceConfigDao.getByType(ConstUtils.CACHE_REDIS_SENTINEL);
+        if (CollectionUtils.isEmpty(instanceConfigList)) {
+            return Collections.emptyList();
+        }
         List<String> configs = new ArrayList<String>();
         for (InstanceConfig instanceConfig : instanceConfigList) {
-            int status = instanceConfig.getStatus();
-            if (status == 0) {
+            if (!instanceConfig.isEffective()) {
                 continue;
             }
             String configKey = instanceConfig.getConfigKey();
             String configValue = instanceConfig.getConfigValue();
-            if(RedisSentinelConfigEnum.PORT.getKey().equals(configKey)) {
-                configs.add(configKey + " " + String.format(configValue, sentinelPort));
+            if (RedisSentinelConfigEnum.PORT.getKey().equals(configKey)) {
+                configValue = String.format(configValue, sentinelPort);
             } else if(RedisSentinelConfigEnum.MONITOR.getKey().equals(configKey)) {
-                configs.add(configKey + " " + String.format(configValue, masterName, host, port, 1));
+                configValue = String.format(configValue, masterName, host, port);
             } else if(RedisSentinelConfigEnum.DOWN_AFTER_MILLISECONDS.getKey().equals(configKey) || RedisSentinelConfigEnum.FAILOVER_TIMEOUT.getKey().equals(configKey) || RedisSentinelConfigEnum.PARALLEL_SYNCS.getKey().equals(configKey)) {
-                configs.add(configKey + " " + String.format(configValue, masterName));
-            } else {
-                configs.add(configKey + " " + configValue);
+                configValue = String.format(configValue, masterName);
             }
+            configs.add(combineConfigKeyValue(configKey, configValue));
         }
         return configs;
     }
 
     @Override
     public List<String> handleClusterConfig(int port) {
-        List<InstanceConfig> instanceConfigList = instanceConfigDao.getByType(ConstUtils.CACHE_TYPE_REDIS_CLUSTER);
+        List<InstanceConfig> instanceConfigList = getByType(ConstUtils.CACHE_TYPE_REDIS_CLUSTER);
+        if (CollectionUtils.isEmpty(instanceConfigList)) {
+            return Collections.emptyList();
+        }
         List<String> configs = new ArrayList<String>();
         for (InstanceConfig instanceConfig : instanceConfigList) {
-            int status = instanceConfig.getStatus();
-            if (status == 0) {
+            if (!instanceConfig.isEffective()) {
                 continue;
             }
             String configKey = instanceConfig.getConfigKey();
             String configValue = instanceConfig.getConfigValue();
             if (RedisClusterConfigEnum.CLUSTER_CONFIG_FILE.getKey().equals(configKey)) {
-                configs.add(configKey + " " + String.format(configValue, port));
+                configValue = String.format(configValue, port);
+            }
+            configs.add(combineConfigKeyValue(configKey, configValue));
+
+        }
+        return configs;
+    }
+    
+    @Override
+    public List<String> handleCommonDefaultConfig(int port, int maxMemory) {
+        List<String> configs = new ArrayList<String>();
+        for (RedisConfigEnum config : RedisConfigEnum.values()) {
+            if (RedisConfigEnum.MAXMEMORY.equals(config)) {
+                configs.add(config.getKey() + " " + String.format(config.getValue(), maxMemory));
+            } else if (RedisConfigEnum.DBFILENAME.equals(config) ||
+                    RedisConfigEnum.APPENDFILENAME.equals(config) || RedisConfigEnum.PORT.equals(config)) {
+                configs.add(config.getKey() + " " + String.format(config.getValue(), port));
+            } else if (RedisConfigEnum.DIR.equals(config)) {
+                configs.add(config.getKey() + " " + MachineProtocol.DATA_DIR);
+            } else if (RedisConfigEnum.AUTO_AOF_REWRITE_PERCENTAGE.equals(config)) {
+                //随机比例 auto-aof-rewrite-percentage
+                int percent = 69 + new Random().nextInt(30);
+                configs.add(config.getKey() + " " + String.format(RedisConfigEnum.AUTO_AOF_REWRITE_PERCENTAGE.getValue(), percent));
             } else {
-                configs.add(configKey + " " + configValue);
+                configs.add(config.getKey() + " " + config.getValue());
             }
         }
         return configs;
     }
 
+    @Override
+    public List<String> handleSentinelDefaultConfig(String masterName, String host, int port, int sentinelPort) {
+        List<String> configs = new ArrayList<String>();
+        configs.add(RedisSentinelConfigEnum.PORT.getKey() + " " + String.format(RedisSentinelConfigEnum.PORT.getValue(), sentinelPort));
+        configs.add(RedisSentinelConfigEnum.DIR.getKey() + " " + RedisSentinelConfigEnum.DIR.getValue());
+        configs.add(RedisSentinelConfigEnum.MONITOR.getKey() + " " + String.format(RedisSentinelConfigEnum.MONITOR.getValue(), masterName, host, port, 1));
+        configs.add(RedisSentinelConfigEnum.DOWN_AFTER_MILLISECONDS.getKey() + " " + String
+                .format(RedisSentinelConfigEnum.DOWN_AFTER_MILLISECONDS.getValue(), masterName));
+        configs.add(RedisSentinelConfigEnum.FAILOVER_TIMEOUT.getKey() + " " + String
+                .format(RedisSentinelConfigEnum.FAILOVER_TIMEOUT.getValue(), masterName));
+        configs.add(RedisSentinelConfigEnum.PARALLEL_SYNCS.getKey() + " " + String
+                .format(RedisSentinelConfigEnum.PARALLEL_SYNCS.getValue(), masterName));
+        return configs;
+    }
+
+    @Override
+    public List<String> handleClusterDefaultConfig(int port) {
+        List<String> configs = new ArrayList<String>();
+        for (RedisClusterConfigEnum config : RedisClusterConfigEnum.values()) {
+            if (config.equals(RedisClusterConfigEnum.CLUSTER_CONFIG_FILE)) {
+                configs.add(RedisClusterConfigEnum.CLUSTER_CONFIG_FILE.getKey() + " "
+                        + String.format(RedisClusterConfigEnum.CLUSTER_CONFIG_FILE.getValue(), port));
+            } else {
+                configs.add(config.getKey() + " "
+                        + config.getValue());
+            }
+        }
+        return configs;
+    }
+
+    /**
+     * 组合
+     * @param configKey
+     * @param configValue
+     * @return
+     */
+    private String combineConfigKeyValue(String configKey, String configValue) {
+        return configKey + ConstUtils.SPACE + configValue;
+    }
+
     public void setInstanceConfigDao(InstanceConfigDao instanceConfigDao) {
         this.instanceConfigDao = instanceConfigDao;
     }
+
 
 }

@@ -3,7 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sohu.cache.dao.InstanceConfigDao">
     <sql id="columns">
-    	config_key,config_value,info,update_time, type, status
+    	config_key, config_value, info, update_time, type, status
     </sql>
 
     <select id="getByType" resultType="com.sohu.cache.entity.InstanceConfig">

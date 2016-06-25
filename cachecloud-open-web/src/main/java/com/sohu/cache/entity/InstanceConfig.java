@@ -97,6 +97,13 @@ public class InstanceConfig {
     public void setStatus(int status) {
         this.status = status;
     }
+    
+    public boolean isEffective() {
+        if (1 == getStatus()) {
+            return true;
+        }
+        return false;
+    }
 
     @Override
     public String toString() {

@@ -14,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.sohu.cache.constant.ErrorMessageEnum;
 import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.entity.InstanceConfig;
 import com.sohu.cache.redis.RedisConfigTemplateService;
@@ -21,11 +22,11 @@ import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.enums.SuccessEnum;
 
 /**
- * cachecloud配置管理
+ * Redis配置模板管理
  * 
  * @author leifu
- * @Date 2016年5月23日
- * @Time 上午10:31:16
+ * @Date 2016-6-25
+ * @Time 下午2:48:25
  */
 @Controller
 @RequestMapping("manage/redisConfig")
@@ -39,6 +40,7 @@ public class RedisConfigTemplateController extends BaseController {
      */
     @RequestMapping(value = "/init")
     public ModelAndView init(HttpServletRequest request, HttpServletResponse response, Model model) {
+        // 默认是Redis普通节点配置
         int type = NumberUtils.toInt(request.getParameter("type"), ConstUtils.CACHE_REDIS_STANDALONE);
         model.addAttribute("redisConfigList", redisConfigTemplateService.getByType(type));
         model.addAttribute("success", request.getParameter("success"));
@@ -58,12 +60,16 @@ public class RedisConfigTemplateController extends BaseController {
         String configValue = request.getParameter("configValue");
         String info = request.getParameter("info");
         int status = NumberUtils.toInt(request.getParameter("status"), -1);
-        if (StringUtils.isBlank(id) || !NumberUtils.isDigits(id) || StringUtils.isBlank(configKey) || status > 1 || status < 0) {
+        if (StringUtils.isBlank(id) || !NumberUtils.isDigits(id) || StringUtils.isBlank(configKey) || status > 1
+                || status < 0) {
             model.addAttribute("status", SuccessEnum.FAIL.value());
-            model.addAttribute("message", "参数异常,id=" + id + ",configKey=" + configKey + ",configValue=" + configValue + ", status=" + status);
+            model.addAttribute("message", ErrorMessageEnum.PARAM_ERROR_MSG.getMessage() + "id=" + id + ",configKey="
+                    + configKey + ",configValue=" + configValue + ",status=" + status);
             return new ModelAndView("");
         }
-        logger.warn("user {} want to change id={}'s configKey={} configValue={} info={} status={} ", appUser.getName(), id, configKey, configValue, info , status);
+        //开始修改
+        logger.warn("user {} want to change id={}'s configKey={}, configValue={}, info={}, status={}", appUser.getName(),
+                id, configKey, configValue, info, status);
         SuccessEnum successEnum;
         try {
             InstanceConfig instanceConfig = redisConfigTemplateService.getById(NumberUtils.toLong(id));
@@ -74,10 +80,11 @@ public class RedisConfigTemplateController extends BaseController {
             successEnum = SuccessEnum.SUCCESS;
         } catch (Exception e) {
             successEnum = SuccessEnum.FAIL;
-            model.addAttribute("message", "系统异常，请观察系统日志!");
+            model.addAttribute("message", ErrorMessageEnum.INNER_ERROR_MSG.getMessage());
             logger.error(e.getMessage(), e);
         }
-        logger.warn("user {} want to change id={}'s configKey={} configValue={} info={} status={} result is {}", appUser.getName(), id, configKey, configValue, info , status, successEnum.value());
+        logger.warn("user {} want to change id={}'s configKey={}, configValue={}, info={}, status={}, result is {}", appUser.getName(),
+                id, configKey, configValue, info, status, successEnum.value());
         model.addAttribute("status", successEnum.value());
         return new ModelAndView("");
     }
@@ -92,10 +99,10 @@ public class RedisConfigTemplateController extends BaseController {
         String statusParam = request.getParameter("status");
         long id = NumberUtils.toLong(idParam);
         int status = NumberUtils.toInt(statusParam, -1);
-
         if (id <= 0 || status > 1 || status < 0) {
             model.addAttribute("status", SuccessEnum.FAIL.value());
-            model.addAttribute("message", "参数异常,idParam=" + idParam + ",status=" + statusParam);
+            model.addAttribute("message", ErrorMessageEnum.PARAM_ERROR_MSG.getMessage() + "id=" + idParam + ",status="
+                    + statusParam);
             return new ModelAndView("");
         }
         logger.warn("user {} want to change id={}'s status to {} ", appUser.getName(), id, status);
@@ -105,15 +112,15 @@ public class RedisConfigTemplateController extends BaseController {
             successEnum = SuccessEnum.SUCCESS;
         } catch (Exception e) {
             successEnum = SuccessEnum.FAIL;
-            model.addAttribute("message", "系统异常，请观察系统日志!");
+            model.addAttribute("message", ErrorMessageEnum.INNER_ERROR_MSG.getMessage());
             logger.error(e.getMessage(), e);
         }
-        logger.warn("user {} want to change id={}'s status to {} result is {}", appUser.getName(), id, status, successEnum.value());
+        logger.warn("user {} want to change id={}'s status to {} result is {}", appUser.getName(), id, status,
+                successEnum.value());
         model.addAttribute("status", successEnum.value());
         return new ModelAndView("");
-
     }
-    
+
     /**
      * 删除配置
      */
@@ -122,22 +129,22 @@ public class RedisConfigTemplateController extends BaseController {
         AppUser appUser = getUserInfo(request);
         String idParam = request.getParameter("id");
         long id = NumberUtils.toLong(idParam);
-        if (id <= 0 ) {
+        if (id <= 0) {
             model.addAttribute("status", SuccessEnum.FAIL.value());
-            model.addAttribute("message", "参数异常,idParam=" + idParam);
+            model.addAttribute("message", ErrorMessageEnum.PARAM_ERROR_MSG.getMessage() + "id=" + idParam);
             return new ModelAndView("");
         }
-        logger.warn("user {} want to delete id={}", appUser.getName(), id);
+        logger.warn("user {} want to delete id={}'s config", appUser.getName(), id);
         SuccessEnum successEnum;
         try {
             redisConfigTemplateService.remove(id);
             successEnum = SuccessEnum.SUCCESS;
         } catch (Exception e) {
             successEnum = SuccessEnum.FAIL;
-            model.addAttribute("message", "系统异常，请观察系统日志!");
+            model.addAttribute("message", ErrorMessageEnum.INNER_ERROR_MSG.getMessage());
             logger.error(e.getMessage(), e);
         }
-        logger.warn("user {} want to delete id={}, result is {}", appUser.getName(), id, successEnum.value());
+        logger.warn("user {} want to delete id={}'s config, result is {}", appUser.getName(), id, successEnum.value());
         model.addAttribute("status", successEnum.value());
         return new ModelAndView("");
 
@@ -152,48 +159,49 @@ public class RedisConfigTemplateController extends BaseController {
         InstanceConfig instanceConfig = getInstanceConfig(request);
         if (StringUtils.isBlank(instanceConfig.getConfigKey())) {
             model.addAttribute("status", SuccessEnum.FAIL.value());
-            model.addAttribute("message", "参数异常,configKey=" + instanceConfig.getConfigKey());
+            model.addAttribute("message", ErrorMessageEnum.PARAM_ERROR_MSG.getMessage() + "configKey=" + instanceConfig.getConfigKey());
             return new ModelAndView("");
         }
-        logger.warn("user {} want to change config, configKey is {}, configValue is {}, type is {}", appUser.getName(),
+        logger.warn("user {} want to add config, configKey is {}, configValue is {}, type is {}", appUser.getName(),
                 instanceConfig.getConfigKey(), instanceConfig.getType());
         SuccessEnum successEnum;
         try {
-            successEnum = redisConfigTemplateService.saveOrUpdate(instanceConfig) > 0 ? SuccessEnum.SUCCESS
-                    : SuccessEnum.FAIL;
+            redisConfigTemplateService.saveOrUpdate(instanceConfig);
+            successEnum = SuccessEnum.SUCCESS;
         } catch (Exception e) {
             successEnum = SuccessEnum.FAIL;
-            model.addAttribute("message", "系统异常，请观察系统日志!");
+            model.addAttribute("message", ErrorMessageEnum.INNER_ERROR_MSG.getMessage());
             logger.error(e.getMessage(), e);
         }
-        logger.warn("user {} want to change config, configKey is {}, configValue is {}, type is {}, result is {}",
+        logger.warn("user {} want to add config, configKey is {}, configValue is {}, type is {}, result is {}",
                 appUser.getName(),
                 instanceConfig.getConfigKey(), instanceConfig.getType(), successEnum.value());
         model.addAttribute("status", successEnum.value());
         return new ModelAndView("");
 
     }
-    
+
     /**
      * 预览配置
-     * 
-     * @return
      */
     @RequestMapping(value = "/preview")
     public ModelAndView preview(HttpServletRequest request, HttpServletResponse response, Model model) {
+        //默认配置
         int type = NumberUtils.toInt(request.getParameter("type"), -1);
         String host = StringUtils.isBlank(request.getParameter("host")) ? "127.0.0.1" : request.getParameter("host");
         int port = NumberUtils.toInt(request.getParameter("port"), 6379);
         int maxMemory = NumberUtils.toInt(request.getParameter("maxMemory"), 2048);
         int sentinelPort = NumberUtils.toInt(request.getParameter("sentinelPort"), 26379);
-        String masterName =  StringUtils.isBlank(request.getParameter("masterName")) ? "myMaster" : request.getParameter("masterName");
+        String masterName = StringUtils.isBlank(request.getParameter("masterName")) ? "myMaster" : request
+                .getParameter("masterName");
         int quorum = NumberUtils.toInt(request.getParameter("quorum"), 2);
-        
+
+        // 根据类型生成配置模板
         List<String> configList = new ArrayList<String>();
         if (ConstUtils.CACHE_REDIS_STANDALONE == type) {
             configList = redisConfigTemplateService.handleCommonConfig(port, maxMemory);
         } else if (ConstUtils.CACHE_REDIS_SENTINEL == type) {
-            configList = redisConfigTemplateService.handleSentinelConfig(masterName, host, port, sentinelPort, quorum);
+            configList = redisConfigTemplateService.handleSentinelConfig(masterName, host, port, sentinelPort);
         } else if (ConstUtils.CACHE_TYPE_REDIS_CLUSTER == type) {
             configList = redisConfigTemplateService.handleClusterConfig(port);
         }
@@ -209,6 +217,7 @@ public class RedisConfigTemplateController extends BaseController {
 
     /**
      * 使用最简单的request生成InstanceConfig对象
+     * 
      * @return
      */
     private InstanceConfig getInstanceConfig(HttpServletRequest request) {

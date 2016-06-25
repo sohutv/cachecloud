@@ -28,7 +28,7 @@ import redis.clients.jedis.Jedis;
 import com.sohu.cache.constant.AppDataMigrateEnum;
 import com.sohu.cache.constant.AppDataMigrateResult;
 import com.sohu.cache.constant.AppDataMigrateStatusEnum;
-import com.sohu.cache.constant.RedisConstant;
+import com.sohu.cache.constant.ErrorMessageEnum;
 import com.sohu.cache.constant.RedisMigrateToolConstant;
 import com.sohu.cache.dao.AppDataMigrateStatusDao;
 import com.sohu.cache.entity.AppDataMigrateStatus;
@@ -500,7 +500,7 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
             return SSHUtil.execute(ip, sampleCheckDataCmd);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            return "发生异常，请查看系统日志";
+            return ErrorMessageEnum.INNER_ERROR_MSG.getMessage();
         }
     }
     
@@ -538,7 +538,7 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
             SSHUtil.execute(migrateMachineIp, cmd);
             exist = checkPidWhetherIsRmt(migrateMachineIp, pid);
             if (exist == null) {
-                return AppDataMigrateResult.fail("执行过程中发生异常,请查看系统日志!");
+                return AppDataMigrateResult.fail(ErrorMessageEnum.INNER_ERROR_MSG.getMessage());
             } else if (exist.equals(false)) {
                 // 更新记录完成更新
                 appDataMigrateStatusDao.updateStatus(id, AppDataMigrateStatusEnum.END.getStatus());
@@ -548,7 +548,7 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
-            return AppDataMigrateResult.fail("执行过程中发生异常,请查看系统日志!");
+            return AppDataMigrateResult.fail(ErrorMessageEnum.INNER_ERROR_MSG.getMessage());
         }
     }
 

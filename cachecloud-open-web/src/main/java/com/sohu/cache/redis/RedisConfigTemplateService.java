@@ -11,8 +11,9 @@ import com.sohu.cache.entity.InstanceConfig;
  * @Time 下午2:08:03
  */
 public interface RedisConfigTemplateService {
-    
+
     /**
+     * 获取所有配置模板列表
      * @return
      */
     List<InstanceConfig> getAllInstanceConfig();
@@ -81,7 +82,7 @@ public interface RedisConfigTemplateService {
      * @param quorum
      * @return
      */
-    List<String> handleSentinelConfig(String masterName, String host, int port, int sentinelPort, int quorum);
+    List<String> handleSentinelConfig(String masterName, String host, int port, int sentinelPort);
     
     /**
      * cluster节点配置
@@ -89,5 +90,32 @@ public interface RedisConfigTemplateService {
      * @return
      */
     List<String> handleClusterConfig(int port);
+    
+    
+    /**
+     * 普通节点默认配置
+     * @param port
+     * @param maxMemory
+     * @return
+     */
+    List<String> handleCommonDefaultConfig(int port, int maxMemory);
+
+    /**
+     * sentinel节点默认配置
+     * @param masterName
+     * @param host
+     * @param port
+     * @param sentinelPort
+     * @param quorum
+     * @return
+     */
+    List<String> handleSentinelDefaultConfig(String masterName, String host, int port, int sentinelPort);
+    
+    /**
+     * cluster节点默认配置
+     * @param port
+     * @return
+     */
+    List<String> handleClusterDefaultConfig(int port);
 
 }
