@@ -74,15 +74,17 @@ public class RedisConfigTemplateServiceImpl implements RedisConfigTemplateServic
             return null;
         }
     }
+    
+    @Override
+    public int remove(long id) {
+        return instanceConfigDao.remove(id);
+    }
 
     @Override
     public int updateStatus(long id, int status) {
         return instanceConfigDao.updateStatus(id, status);
     }
 
-    public void setInstanceConfigDao(InstanceConfigDao instanceConfigDao) {
-        this.instanceConfigDao = instanceConfigDao;
-    }
 
     @Override
     public List<String> handleCommonConfig(int port, int maxMemory) {
@@ -157,6 +159,8 @@ public class RedisConfigTemplateServiceImpl implements RedisConfigTemplateServic
         return configs;
     }
 
-    
+    public void setInstanceConfigDao(InstanceConfigDao instanceConfigDao) {
+        this.instanceConfigDao = instanceConfigDao;
+    }
 
 }

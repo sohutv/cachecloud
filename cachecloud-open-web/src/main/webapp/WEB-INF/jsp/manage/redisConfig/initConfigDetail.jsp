@@ -2,19 +2,53 @@
 <%@ include file="/WEB-INF/jsp/manage/commons/taglibs.jsp"%>
 
 <script type="text/javascript">
+
+function removeConfig(id) {
+	if (confirm("确认要删除id="+id+"配置?")) {
+		$.get(
+			'/manage/redisConfig/remove.json',
+			{
+				id: id
+			},
+	        function(data){
+				var status = data.status;
+				if (status == 1) {
+            		alert("删除成功!");
+				} else {
+            		alert("删除失败, msg: " + result.message);
+				}
+                window.location.reload();
+	        }
+	     );
+		
+    }
+}
+
 function changeConfig(id, configKey) {
 	var configValue = document.getElementById("configValue" + id);
 	var info = document.getElementById("info" + id);
 	var status = document.getElementById("status" + id);
 	var url = "/manage/redisConfig/update.json?id="+id + "&configKey="+configKey + "&configValue="+configValue.value+"&info="+info.value+"&status=" + status.value;
-	$.ajax({
-		type : "get",
-		url : url,
-		async : false,
-		success : function(data) {
-			alert(data);
-		}
-	});
+	$.get(
+		'/manage/redisConfig/update.json',
+		{
+			id: id,
+			configKey: configKey,
+			configValue: configValue.value,
+			info: info.value,
+			status: status.value
+		},
+        function(data){
+			var status = data.status;
+			if (status == 1) {
+				alert("修改成功！");
+                window.location.reload();
+			} else {
+				alert("修改失败！" + data.message);
+			}
+			
+        }
+     );
 }
 
 function saveRedisConfig() {
@@ -26,9 +60,9 @@ function saveRedisConfig() {
 	}
 	var configValue = document.getElementById("configValue");
 	var info = document.getElementById("info");
-	if (info.value == ""){
+	if (info.value == "") {
 		alert("请填写配置说明");
-		configKey.focus();
+		info.focus();
 		return false;
 	}
 	var type = document.getElementById("type");
@@ -114,7 +148,7 @@ function saveRedisConfig() {
 								<form class="form-horizontal form-bordered form-row-stripped">
 									<div class="form-body">
 										<div class="form-group">
-											<label class="control-label col-md-2">
+											<label class="control-label col-md-3">
 												<c:choose>
 													<c:when test="${config.status == 0}">
 														<font color='red'>（无效配置）</font>
@@ -122,13 +156,13 @@ function saveRedisConfig() {
 												</c:choose>
 												${config.configKey}:
 											</label>
-											<div class="col-md-3">
+											<div class="col-md-2">
 												<input id="configValue${config.id}" type="text" name="configValue" class="form-control" value="${config.configValue}" />
 											</div>
-											<div class="col-md-4">
+											<div class="col-md-3">
 												<input id="info${config.id}" type="text" name="info" class="form-control" value="${config.info}" />
 											</div>
-											<div class="col-md-1">
+											<div class="col-md-2">
 												<select id="status${config.id}" name="status" class="form-control">
 													<option value="1" <c:if test="${config.status == 1}">selected</c:if>>
 														有效
@@ -139,8 +173,11 @@ function saveRedisConfig() {
 												</select>
 											</div>
 											<div class="col-md-2">
-												<button type="submit" class="btn btn-small" onclick="changeConfig('${config.id}','${config.configKey}')">
-													确认修改
+												<button type="button" class="btn btn-small" onclick="changeConfig('${config.id}','${config.configKey}')">
+													修改
+												</button>
+												<button type="button" class="btn btn-small" onclick="removeConfig('${config.id}')">
+													删除
 												</button>
 											</div>
 										</div>

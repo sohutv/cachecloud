@@ -36,11 +36,6 @@ public class RedisConfigTemplateController extends BaseController {
 
     /**
      * 初始化配置
-     * 
-     * @param request
-     * @param response
-     * @param model
-     * @return
      */
     @RequestMapping(value = "/init")
     public ModelAndView init(HttpServletRequest request, HttpServletResponse response, Model model) {
@@ -79,7 +74,7 @@ public class RedisConfigTemplateController extends BaseController {
             successEnum = SuccessEnum.SUCCESS;
         } catch (Exception e) {
             successEnum = SuccessEnum.FAIL;
-            //model.addAttribute("message", "系统异常，请观察系统日志!");
+            model.addAttribute("message", "系统异常，请观察系统日志!");
             logger.error(e.getMessage(), e);
         }
         logger.warn("user {} want to change id={}'s configKey={} configValue={} info={} status={} result is {}", appUser.getName(), id, configKey, configValue, info , status, successEnum.value());
@@ -114,6 +109,35 @@ public class RedisConfigTemplateController extends BaseController {
             logger.error(e.getMessage(), e);
         }
         logger.warn("user {} want to change id={}'s status to {} result is {}", appUser.getName(), id, status, successEnum.value());
+        model.addAttribute("status", successEnum.value());
+        return new ModelAndView("");
+
+    }
+    
+    /**
+     * 删除配置
+     */
+    @RequestMapping(value = "/remove")
+    public ModelAndView remove(HttpServletRequest request, HttpServletResponse response, Model model) {
+        AppUser appUser = getUserInfo(request);
+        String idParam = request.getParameter("id");
+        long id = NumberUtils.toLong(idParam);
+        if (id <= 0 ) {
+            model.addAttribute("status", SuccessEnum.FAIL.value());
+            model.addAttribute("message", "参数异常,idParam=" + idParam);
+            return new ModelAndView("");
+        }
+        logger.warn("user {} want to delete id={}", appUser.getName(), id);
+        SuccessEnum successEnum;
+        try {
+            redisConfigTemplateService.remove(id);
+            successEnum = SuccessEnum.SUCCESS;
+        } catch (Exception e) {
+            successEnum = SuccessEnum.FAIL;
+            model.addAttribute("message", "系统异常，请观察系统日志!");
+            logger.error(e.getMessage(), e);
+        }
+        logger.warn("user {} want to delete id={}, result is {}", appUser.getName(), id, successEnum.value());
         model.addAttribute("status", successEnum.value());
         return new ModelAndView("");
 
@@ -183,6 +207,10 @@ public class RedisConfigTemplateController extends BaseController {
         return new ModelAndView("manage/redisConfig/preview");
     }
 
+    /**
+     * 使用最简单的request生成InstanceConfig对象
+     * @return
+     */
     private InstanceConfig getInstanceConfig(HttpServletRequest request) {
         String configKey = request.getParameter("configKey");
         String configValue = request.getParameter("configValue");

@@ -59,6 +59,12 @@ public interface RedisConfigTemplateService {
     int updateStatus(long id, int status);
     
     /**
+     * 删除配置
+     * @param id
+     */
+    int remove(long id);
+    
+    /**
      * 普通节点配置
      * @param port
      * @param maxMemory
@@ -83,4 +89,5 @@ public interface RedisConfigTemplateService {
      * @return
      */
     List<String> handleClusterConfig(int port);
+
 }

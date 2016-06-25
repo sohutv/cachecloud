@@ -62,4 +62,11 @@ public interface InstanceConfigDao {
      */
     int updateStatus(@Param("id") long id, @Param("status") int status);
 
+    /**
+     * 删除配置
+     * @param id
+     * @return
+     */
+    int remove(@Param("id") long id);
+
 }

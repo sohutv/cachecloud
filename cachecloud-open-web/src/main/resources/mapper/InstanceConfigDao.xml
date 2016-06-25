@@ -34,5 +34,9 @@
 	<update id="updateStatus">
 		update instance_config set status = #{status} where id = #{id}
 	</update>
+	
+	<delete id="remove">
+		delete from instance_config where id = #{id}
+	</delete>
 
 </mapper>
