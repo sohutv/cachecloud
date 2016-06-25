@@ -8,18 +8,24 @@ import javax.annotation.Resource;
 
 import org.junit.Test;
 
+import com.sohu.cache.redis.RedisConfigTemplateService;
 import com.sohu.cache.redis.impl.RedisDeployCenterImpl;
 import com.sohu.test.BaseTest;
 
 /**
+ * Redis配置模板测试
  * @author leifu
  * @Date 2016年6月22日
  * @Time 下午6:26:28
  */
-public class RedisDeployCenterImplTest extends BaseTest {
+public class RedisConfigTemplateTest extends BaseTest {
 
     @Resource
     private RedisDeployCenterImpl redisDeployCenter;
+    
+    @Resource
+    private RedisConfigTemplateService redisConfigTemplateService;
+    
 
     @Test
     public void testSentinelConfig() {
@@ -27,9 +33,10 @@ public class RedisDeployCenterImplTest extends BaseTest {
         String host = "127.0.0.1";
         int port = 6379;
         int sentinelPort = 26379;
+        int quorum = 1;
 
         List<String> sentinelList1 = redisDeployCenter.handleSentinelConfig(masterName, host, port, sentinelPort);
-        List<String> sentinelList2 = redisDeployCenter.handleSentinelConfig2(masterName, host, port, sentinelPort);
+        List<String> sentinelList2 = redisConfigTemplateService.handleSentinelConfig(masterName, host, port, sentinelPort, quorum);
 
         Collections.sort(sentinelList1);
         Collections.sort(sentinelList2);
@@ -46,7 +53,7 @@ public class RedisDeployCenterImplTest extends BaseTest {
         int maxMemory = 2048;
 
         List<String> commonList1 = redisDeployCenter.handleCommonConfig(port, maxMemory);
-        List<String> commonList2 = redisDeployCenter.handleCommonConfig2(port, maxMemory);
+        List<String> commonList2 = redisConfigTemplateService.handleCommonConfig(port, maxMemory);
 
         Collections.sort(commonList1);
         Collections.sort(commonList2);
@@ -71,7 +78,7 @@ public class RedisDeployCenterImplTest extends BaseTest {
         int port = 6379;
 
         List<String> clusterList1 = redisDeployCenter.handleClusterConfig(port);
-        List<String> clusterList2 = redisDeployCenter.handleClusterConfig2(port);
+        List<String> clusterList2 = redisConfigTemplateService.handleClusterConfig(port);
 
         Collections.sort(clusterList1);
         Collections.sort(clusterList2);
