@@ -6,26 +6,15 @@ function changeConfig(id, configKey) {
 	var configValue = document.getElementById("configValue" + id);
 	var info = document.getElementById("info" + id);
 	var status = document.getElementById("status" + id);
-	$.get(
-		'/manage/redisConfig/update.json',
-		{
-			id: id,
-			configKey: configKey,
-			configValue: configValue.value,
-			info: info.value,
-			status: status.value
-		},
-        function(data){
-			var status = data.status;
-			if (status == 1) {
-				alert("修改成功！");
-                window.location.reload();
-			} else {
-				alert("修改失败！" + data.message);
-			}
-			
-        }
-     );
+	var url = "/manage/redisConfig/update.json?id="+id + "&configKey="+configKey + "&configValue="+configValue.value+"&info="+info.value+"&status=" + status.value;
+	$.ajax({
+		type : "get",
+		url : url,
+		async : false,
+		success : function(data) {
+			alert(data);
+		}
+	});
 }
 
 function saveRedisConfig() {

@@ -79,7 +79,7 @@ public class RedisConfigTemplateController extends BaseController {
             successEnum = SuccessEnum.SUCCESS;
         } catch (Exception e) {
             successEnum = SuccessEnum.FAIL;
-            model.addAttribute("message", "系统异常，请观察系统日志!");
+            //model.addAttribute("message", "系统异常，请观察系统日志!");
             logger.error(e.getMessage(), e);
         }
         logger.warn("user {} want to change id={}'s configKey={} configValue={} info={} status={} result is {}", appUser.getName(), id, configKey, configValue, info , status, successEnum.value());
