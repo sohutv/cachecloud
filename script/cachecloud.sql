@@ -914,15 +914,15 @@ CREATE TABLE `instance_config` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('cluster-enabled','yes','是否开启集群模式',now(),2,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('cluster-node-timeout','15000','集群节点超时时间,默认15秒',now(),2,1);
-insert into instance_config(config_key,config_value,info,update_time, type, status) values('cluster-slave-validity-factor','10','集群从节点,延迟有效性判断因子,默认10秒:(node-timeout * slave-validity-factor) + repl-ping-slave-period',now(),2,1);
-insert into instance_config(config_key,config_value,info,update_time, type, status) values('cluster-migration-barrier','1','cluster主从迁移至少需要的从节点数,默认1个',now(),2,1);
+insert into instance_config(config_key,config_value,info,update_time, type, status) values('cluster-slave-validity-factor','10','从节点延迟有效性判断因子,默认10秒',now(),2,1);
+insert into instance_config(config_key,config_value,info,update_time, type, status) values('cluster-migration-barrier','1','主从迁移至少需要的从节点数,默认1个',now(),2,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('cluster-config-file','nodes-%d.conf','集群配置文件名称,格式:nodes-{port}.conf',now(),2,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('cluster-require-full-coverage','no','节点部分失败期间,其他节点是否继续工作',now(),2,1);
 
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('port','%d','sentinel实例端口',now(),5,1);
-insert into instance_config(config_key,config_value,info,update_time, type, status) values('dir','/tmp','工作目录',now(),5,1);
+insert into instance_config(config_key,config_value,info,update_time, type, status) values('dir','%s','工作目录',now(),5,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('sentinel monitor','%s %s %d 1','master名称定义和最少参与监控的sentinel数,格式:masterName ip port num',now(),5,1);
-insert into instance_config(config_key,config_value,info,update_time, type, status) values('sentinel down-after-milliseconds','%s 20000','Sentinel判定服务器断线的毫秒数,默认:20秒',now(),5,1);
+insert into instance_config(config_key,config_value,info,update_time, type, status) values('sentinel down-after-milliseconds','%s 20000','Sentinel判定服务器断线的毫秒数',now(),5,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('sentinel failover-timeout','%s 180000','故障迁移超时时间,默认:3分钟',now(),5,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('sentinel parallel-syncs','%s 1','在执行故障转移时,最多有多少个从服务器同时对新的主服务器进行同步,默认:1',now(),5,1);
 
@@ -985,10 +985,10 @@ insert into instance_config(config_key,config_value,info,update_time, type, stat
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('hll-sparse-max-bytes','3000','',now(),6,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('min-slaves-to-write','0','',now(),6,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('min-slaves-max-lag','10','',now(),6,1);
-insert into instance_config(config_key,config_value,info,update_time, type, status) values('aof-load-truncated','yes','',now(),6,1);
-insert into instance_config(config_key,config_value,info,update_time, type, status) values('notify-keyspace-events','""','',now(),6,1);
-insert into instance_config(config_key,config_value,info,update_time, type, status) values('latency-monitor-threshold','0','',now(),6,1);
-insert into instance_config(config_key,config_value,info,update_time, type, status) values('bind','""','',now(),6,1);
+insert into instance_config(config_key,config_value,info,update_time, type, status) values('aof-load-truncated','yes','加载aof文件时，是否忽略aof文件不完整的情况，是否Redis正常启动',now(),6,1);
+insert into instance_config(config_key,config_value,info,update_time, type, status) values('notify-keyspace-events','""','keyspace事件通知功能',now(),6,1);
+insert into instance_config(config_key,config_value,info,update_time, type, status) values('latency-monitor-threshold','0','Redis服务内存延迟监控',now(),6,1);
+insert into instance_config(config_key,config_value,info,update_time, type, status) values('bind','""','绑定IP',now(),6,1);
 
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

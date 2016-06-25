@@ -137,7 +137,9 @@ public class RedisConfigTemplateServiceImpl implements RedisConfigTemplateServic
                 configValue = String.format(configValue, masterName, host, port);
             } else if(RedisSentinelConfigEnum.DOWN_AFTER_MILLISECONDS.getKey().equals(configKey) || RedisSentinelConfigEnum.FAILOVER_TIMEOUT.getKey().equals(configKey) || RedisSentinelConfigEnum.PARALLEL_SYNCS.getKey().equals(configKey)) {
                 configValue = String.format(configValue, masterName);
-            }
+            } else if (RedisConfigEnum.DIR.getKey().equals(configKey)) {
+                configValue = MachineProtocol.DATA_DIR;
+            } 
             configs.add(combineConfigKeyValue(configKey, configValue));
         }
         return configs;
