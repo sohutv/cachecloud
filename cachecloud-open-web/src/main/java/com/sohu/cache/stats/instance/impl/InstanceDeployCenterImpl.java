@@ -10,6 +10,7 @@ import com.sohu.cache.protocol.RedisProtocol;
 import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.redis.RedisDeployCenter;
 import com.sohu.cache.stats.instance.InstanceDeployCenter;
+import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.TypeUtil;
 
 import org.apache.commons.lang.StringUtils;
@@ -56,9 +57,9 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
                 } else {
                     runShell = RedisProtocol.getRunShell(port, false);
                 }
-                boolean isRunShell = machineCenter.startProcessAtPort(host, port, runShell);
-                if (!isRunShell) {
-                    logger.error("startProcessAtPort-> {}:{} shell= {} failed", host, port, runShell);
+                String shellResult = machineCenter.executeShell(host, runShell);
+                if (ConstUtils.INNER_ERROR.equals(shellResult)) {
+                    logger.error("executeShell={} at host {} failed", runShell, host);
                     return false;
                 } else {
                     logger.warn("{}:{} instance has Run", host, port);

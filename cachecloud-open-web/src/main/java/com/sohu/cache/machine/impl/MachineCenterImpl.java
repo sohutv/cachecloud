@@ -264,34 +264,6 @@ public class MachineCenterImpl implements MachineCenter {
     }
 
     /**
-     * 在主机ip上的端口port上启动一个进程，并check是否启动成功；
-     *
-     * @param ip    ip
-     * @param port  port
-     * @param shell shell命令
-     * @return 成功返回true，否则返回false；
-     */
-    @Override
-    public boolean startProcessAtPort(final String ip, final int port, final String shell) {
-        checkArgument(!Strings.isNullOrEmpty(ip), "invalid ip.");
-        checkArgument(port > 0 && port < 65536, "invalid port");
-        checkArgument(!Strings.isNullOrEmpty(shell), "invalid shell.");
-
-        boolean success = true;
-
-        try {
-            // 执行shell命令，有的是后台执行命令，没有返回值; 如果端口被占用，表示启动成功；
-            SSHUtil.execute(ip, shell);
-            success = SSHUtil.isPortUsed(ip, port);
-        } catch (SSHException e) {
-            logger.error("execute shell command error, ip: {}, port: {}, shell: {}", ip, port, shell);
-            logger.error(e.getMessage(), e);
-        }
-
-        return success;
-    }
-
-    /**
      * 执行shell命令，并将结果返回；
      *
      * @param ip    机器ip
@@ -308,6 +280,7 @@ public class MachineCenterImpl implements MachineCenter {
             result = SSHUtil.execute(ip, shell);
         } catch (SSHException e) {
             logger.error("execute shell: {} at ip: {} error.", shell, ip, e);
+            result = ConstUtils.INNER_ERROR;
         }
 
         return result;

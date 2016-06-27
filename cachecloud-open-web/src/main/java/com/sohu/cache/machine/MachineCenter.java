@@ -74,16 +74,6 @@ public interface MachineCenter {
     public void monitorMachineStats(final long hostId, final String ip);
 
     /**
-     * 在主机ip上的端口port上启动一个进程，并check是否启动成功；
-     *
-     * @param ip    ip
-     * @param port  端口
-     * @param shell shell命令
-     * @return 是否成功
-     */
-    public boolean startProcessAtPort(String ip, int port, final String shell);
-
-    /**
      * 执行shell命令并获取返回结果
      *
      * @param ip

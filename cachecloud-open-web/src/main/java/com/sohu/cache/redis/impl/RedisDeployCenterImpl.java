@@ -418,16 +418,16 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         if (isCluster) {
             //删除cluster节点配置
             String nodesFile = String.format("rm -rf %s/nodes-%s.conf", MachineProtocol.DATA_DIR, port);
-            boolean isDelete = machineCenter.startProcessAtPort(host, port, nodesFile);
-            if (isDelete) {
-                logger.warn("{} to {}:{}", nodesFile, host, port);
+            String deleteNodeFile = machineCenter.executeShell(host, nodesFile);
+            if (!ConstUtils.INNER_ERROR.equals(deleteNodeFile)) {
+                logger.warn("executeDeleteNodeFileShell={} at host {}", nodesFile, host);
             }
         }
         //启动实例
         logger.info("masterShell:host={};shell={}", host, runShell);
-        boolean isMasterShell = machineCenter.startProcessAtPort(host, port, runShell);
-        if (!isMasterShell) {
-            logger.error("runShell={} error,{}:{}", runShell, host, port);
+        String masterShellResult = machineCenter.executeShell(host, runShell);
+        if (ConstUtils.INNER_ERROR.equals(masterShellResult)) {
+            logger.error("executeMasterShell={} at host {} failed", runShell, host);
             return false;
         }
         //验证实例
@@ -485,9 +485,9 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         }
         String sentinelShell = RedisProtocol.getSentinelShell(sentinelPort);
         logger.info("sentinelMasterShell:{}", sentinelShell);
-        boolean isSentinelMasterShell = machineCenter.startProcessAtPort(sentinelHost, sentinelPort, sentinelShell);
-        if (!isSentinelMasterShell) {
-            logger.error("sentinelMasterShell={} error", sentinelShell);
+        String sentinelMasterShellResult = machineCenter.executeShell(sentinelHost, sentinelShell);
+        if (ConstUtils.INNER_ERROR.equals(sentinelMasterShellResult)) {
+            logger.error("sentinelMasterShell={} at host {} failed", sentinelShell, sentinelHost);
             return false;
         }
         //验证实例
