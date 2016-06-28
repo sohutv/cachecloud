@@ -250,8 +250,8 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
             return false;
         }
         // 3. 开始执行: 指定的配置名、目录、日志名
-        String cmd = ConstUtils.getRedisMigrateToolCmd() + " -c " + ConstUtils.REDIS_MIGRATE_TOOL_HOME + confileFileName
-                + " -o " + ConstUtils.REDIS_MIGRATE_TOOL_HOME + logFileName + " -d";
+        String cmd = ConstUtils.getRedisMigrateToolCmd() + " -c " + ConstUtils.getRedisMigrateToolDir() + confileFileName
+                + " -o " + ConstUtils.getRedisMigrateToolDir() + logFileName + " -d";
         logger.warn(cmd);
         try {
             SSHUtil.execute(migrateMachineIp, cmd);
@@ -269,8 +269,8 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
         appDataMigrateStatus.setSourceServers(sourceServers);
         appDataMigrateStatus.setTargetMigrateType(targetRedisMigrateEnum.getIndex());
         appDataMigrateStatus.setTargetServers(targetServers);
-        appDataMigrateStatus.setLogPath(ConstUtils.REDIS_MIGRATE_TOOL_HOME + logFileName);
-        appDataMigrateStatus.setConfigPath(ConstUtils.REDIS_MIGRATE_TOOL_HOME + confileFileName);
+        appDataMigrateStatus.setLogPath(ConstUtils.getRedisMigrateToolDir() + logFileName);
+        appDataMigrateStatus.setConfigPath(ConstUtils.getRedisMigrateToolDir() + confileFileName);
         appDataMigrateStatus.setUserId(userId);
         appDataMigrateStatus.setSourceAppId(sourceAppId);
         appDataMigrateStatus.setTargetAppId(targetAppId);
@@ -314,7 +314,8 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
 
         // common:使用最简配置
         config.append("[common]" + ConstUtils.NEXT_LINE);
-        config.append("listen: 0.0.0.0:" + listenPort);
+        config.append("listen: 0.0.0.0:" + listenPort + ConstUtils.NEXT_LINE);
+        config.append("dir: " + ConstUtils.getRedisMigrateToolDir());
 
         return config.toString();
     }
@@ -361,7 +362,7 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
          * 2. 将配置文件推送到目标机器上
          */
         try {
-            SSHUtil.scpFileToRemote(host, localAbsolutePath, ConstUtils.REDIS_MIGRATE_TOOL_HOME);
+            SSHUtil.scpFileToRemote(host, localAbsolutePath, ConstUtils.getRedisMigrateToolDir());
         } catch (SSHException e) {
             logger.error("scp rmt file to remote server error: ip: {}, fileName: {}", host, fileName, e);
             return false;

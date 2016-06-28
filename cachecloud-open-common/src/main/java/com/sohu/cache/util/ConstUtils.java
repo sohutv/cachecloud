@@ -190,6 +190,10 @@ public class ConstUtils {
         return REDIS_MIGRATE_TOOL_HOME + "src/redis-migrate-tool";
     }
     
+    public static String getRedisMigrateToolDir() {
+        return REDIS_MIGRATE_TOOL_HOME + "data/";
+    }
+    
     /**
      * redis-migrate-tool端口
      */
