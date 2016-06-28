@@ -18,6 +18,7 @@ import com.sohu.cache.schedule.SchedulerCenter;
 import com.sohu.cache.ssh.SSHUtil;
 import com.sohu.cache.stats.instance.InstanceStatsCenter;
 import com.sohu.cache.util.ConstUtils;
+import com.sohu.cache.util.IdempotentConfirmer;
 import com.sohu.cache.util.ObjectConvert;
 import com.sohu.cache.util.ScheduleUtil;
 import com.sohu.cache.util.TypeUtil;
@@ -47,12 +48,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * 机器接口的实现
- * <p/>
  * User: lingguo
  * Date: 14-6-12
  * Time: 上午10:46
@@ -282,13 +283,43 @@ public class MachineCenterImpl implements MachineCenter {
         try {
             // 执行shell命令，有的是后台执行命令，没有返回值; 如果端口被占用，表示启动成功；
             SSHUtil.execute(ip, shell);
-            success = SSHUtil.isPortUsed(ip, port);
+            success = isPortUsed(ip, port);
         } catch (SSHException e) {
             logger.error("execute shell command error, ip: {}, port: {}, shell: {}", ip, port, shell);
             logger.error(e.getMessage(), e);
         }
-
         return success;
+    }
+    
+    /**
+     * 多次验证是否进程已经启动
+     * @param ip
+     * @param port
+     * @return
+     */
+    private boolean isPortUsed(final String ip, final int port) {
+        boolean isPortUsed = new IdempotentConfirmer() {
+            private int sleepTime = 100;
+            
+            @Override
+            public boolean execute() {
+                try {
+                    boolean success = SSHUtil.isPortUsed(ip, port);
+                    if (!success) {
+                        TimeUnit.MILLISECONDS.sleep(sleepTime);
+                        sleepTime += 100;
+                    }
+                    return success;
+                } catch (SSHException e) {
+                    logger.error(e.getMessage(), e);
+                    return false;
+                } catch (InterruptedException e) {
+                    logger.error(e.getMessage(), e);
+                    return false;
+                }
+            }
+        }.run();
+        return isPortUsed;
     }
 
     /**
