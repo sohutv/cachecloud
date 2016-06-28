@@ -233,6 +233,11 @@ public class ConstUtils {
      * 空格
      */
     public static final String SPACE = " ";
+    
+    /**
+     * 内部错误
+     */
+    public static final String INNER_ERROR = "cachecloud_inner_error";
 
 }
 

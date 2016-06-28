@@ -339,6 +339,7 @@ public class MachineCenterImpl implements MachineCenter {
             result = SSHUtil.execute(ip, shell);
         } catch (SSHException e) {
             logger.error("execute shell: {} at ip: {} error.", shell, ip, e);
+            result = ConstUtils.INNER_ERROR;
         }
 
         return result;

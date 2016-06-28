@@ -417,10 +417,10 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         }
         if (isCluster) {
             //删除cluster节点配置
-            String nodesFile = String.format("rm -rf %s/nodes-%s.conf", MachineProtocol.DATA_DIR, port);
-            boolean isDelete = machineCenter.startProcessAtPort(host, port, nodesFile);
-            if (isDelete) {
-                logger.warn("{} to {}:{}", nodesFile, host, port);
+            String deleteNodeShell = String.format("rm -rf %s/nodes-%s.conf", MachineProtocol.DATA_DIR, port);
+            String deleteNodeResult = machineCenter.executeShell(host, deleteNodeShell);
+            if (!ConstUtils.INNER_ERROR.equals(deleteNodeResult)) {
+                logger.warn("runDeleteNodeShell={} at host {}", deleteNodeShell, host);
             }
         }
         //启动实例
