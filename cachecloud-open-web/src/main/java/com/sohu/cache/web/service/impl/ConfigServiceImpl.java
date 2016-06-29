@@ -2,6 +2,7 @@ package com.sohu.cache.web.service.impl;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -160,9 +161,14 @@ public class ConfigServiceImpl implements ConfigService {
         ConstUtils.LDAP_URL = MapUtils.getString(configMap, "cachecloud.ldap.url", ConstUtils.DEFAULT_LDAP_URL);
         logger.warn("{}: {}", "ConstUtils.LDAP_URL", ConstUtils.LDAP_URL);
         
+        //是否定期清理各种统计数据(详见CleanUpStatisticsJob)
+        ConstUtils.WHETHER_SCHEDULE_CLEAN_DATA = MapUtils.getBooleanValue(configMap, "cachecloud.whether.schedule.clean.data", ConstUtils.DEFAULT_WHETHER_SCHEDULE_CLEAN_DATA);
+        logger.warn("{}: {}", "ConstUtils.WHETHER_SCHEDULE_CLEAN_DATA", ConstUtils.WHETHER_SCHEDULE_CLEAN_DATA);
+        
+        
         logger.warn("===========ConfigServiceImpl reload config end============");
     }
-
+    
     @Override
     public SuccessEnum updateConfig(Map<String, String> configMap) {
         for (Entry<String, String> entry : configMap.entrySet()) {

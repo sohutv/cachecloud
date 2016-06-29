@@ -878,6 +878,8 @@ insert into system_config(config_key,config_value,info,status,order_id) values('
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.mobile.alert.interface','none','短信报警接口(说明:http://cachecloud.github.io 邮件和短信报警接口规范)',1,24);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.ldap.url','none','LDAP接口地址(例如:ldap://ldap.xx.com)',1,25);
 
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.whether.schedule.clean.data','false','是否定期清理各种统计数据',1,26);
+
 
 CREATE TABLE `app_data_migrate_status` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增id',

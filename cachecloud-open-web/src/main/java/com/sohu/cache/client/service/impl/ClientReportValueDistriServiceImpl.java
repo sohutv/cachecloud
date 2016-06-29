@@ -33,29 +33,29 @@ import com.sohu.tv.jedis.stat.model.ClientReportBean;
  */
 public class ClientReportValueDistriServiceImpl implements ClientReportValueDistriService {
 
-	private final Logger logger = LoggerFactory.getLogger(ClientReportValueDistriServiceImpl.class);
+    private final Logger logger = LoggerFactory.getLogger(ClientReportValueDistriServiceImpl.class);
 
-	/**
-	 * 客户端统计值分布数据操作
-	 */
-	private AppClientValueDistriStatDao appClientValueDistriStatDao;
+    /**
+     * 客户端统计值分布数据操作
+     */
+    private AppClientValueDistriStatDao appClientValueDistriStatDao;
 
-	/**
+    /**
      * host:port与instanceInfo简单缓存
      */
     private ClientReportInstanceService clientReportInstanceService;
 
-	@Override
-	public List<AppClientValueDistriSimple> getAppValueDistriList(long appId, long startTime, long endTime) {
-	    try {
+    @Override
+    public List<AppClientValueDistriSimple> getAppValueDistriList(long appId, long startTime, long endTime) {
+        try {
             return appClientValueDistriStatDao.getAppValueDistriList(appId, startTime, endTime);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return Collections.emptyList();
         }
-	}
-	
-	@Override
+    }
+    
+    @Override
     public void batchSave(ClientReportBean clientReportBean) {
         try {
             // 1.client上报
@@ -95,8 +95,8 @@ public class ClientReportValueDistriServiceImpl implements ClientReportValueDist
             logger.error(e.getMessage(), e);
         }
     }
-	
-	private AppClientValueDistriStat generate(String clientIp, long collectTime, long reportTime, Map<String, Object> map) {
+    
+    private AppClientValueDistriStat generate(String clientIp, long collectTime, long reportTime, Map<String, Object> map) {
         String valueDistri = MapUtils.getString(map, ClientReportConstant.VALUE_DISTRI, "");
         ValueSizeDistriEnum valueSizeDistriEnum = ValueSizeDistriEnum.getByValue(valueDistri);
         if (valueSizeDistriEnum == null) {
@@ -151,11 +151,11 @@ public class ClientReportValueDistriServiceImpl implements ClientReportValueDist
 
         return stat;
     }
-	
-	@Override
+    
+    @Override
     public int deleteBeforeCollectTime(long collectTime) {
-	    long startTime = System.currentTimeMillis();
-	    int deleteCount = 0;
+        long startTime = System.currentTimeMillis();
+        int deleteCount = 0;
         try {
             int batchSize = 10000;
             long minId = appClientValueDistriStatDao.getTableMinimumId();
@@ -181,12 +181,12 @@ public class ClientReportValueDistriServiceImpl implements ClientReportValueDist
     }
 
 
-	public void setClientReportInstanceService(ClientReportInstanceService clientReportInstanceService) {
+    public void setClientReportInstanceService(ClientReportInstanceService clientReportInstanceService) {
         this.clientReportInstanceService = clientReportInstanceService;
     }
 
     public void setAppClientValueDistriStatDao(AppClientValueDistriStatDao appClientValueDistriStatDao) {
-		this.appClientValueDistriStatDao = appClientValueDistriStatDao;
-	}
+        this.appClientValueDistriStatDao = appClientValueDistriStatDao;
+    }
 
 }

@@ -217,6 +217,11 @@ public class ConstUtils {
     public static String DEFAULT_CACHECLOUD_BASE_DIR = "/opt";
     public static String CACHECLOUD_BASE_DIR = DEFAULT_CACHECLOUD_BASE_DIR;
     
+    /**
+     * 是否定期清理各种统计数据：(详见CleanUpStatisticsJob)
+     */
+    public static boolean DEFAULT_WHETHER_SCHEDULE_CLEAN_DATA = false;
+    public static boolean WHETHER_SCHEDULE_CLEAN_DATA = DEFAULT_WHETHER_SCHEDULE_CLEAN_DATA;
     
     static {
         ResourceBundle applicationResourceBundle = ResourceBundle.getBundle("application");

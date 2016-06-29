@@ -3,6 +3,7 @@ package com.sohu.cache.schedule.jobs;
 import com.sohu.cache.client.service.ClientReportCostDistriService;
 import com.sohu.cache.client.service.ClientReportValueDistriService;
 import com.sohu.cache.stats.instance.InstanceStatsCenter;
+import com.sohu.cache.util.ConstUtils;
 
 import org.apache.commons.lang.math.NumberUtils;
 import org.quartz.JobExecutionContext;
@@ -36,6 +37,9 @@ public class CleanUpStatisticsJob extends CacheBaseJob {
     
     @Override
     public void action(JobExecutionContext context) {
+        if (!ConstUtils.WHETHER_SCHEDULE_CLEAN_DATA) {
+            return;
+        }
         try {
             SchedulerContext schedulerContext = context.getScheduler().getContext();
             ApplicationContext applicationContext = (ApplicationContext) schedulerContext.get(APPLICATION_CONTEXT_KEY);
