@@ -30,12 +30,14 @@
         <property name="triggers">
             <array>
                 <ref bean="errorStatisticsTrigger"/>
+                <ref bean="systemConfigRefreshTrigger"/>
             </array>
         </property>
 
         <property name="jobDetails">
             <array>
                 <ref bean="errorStatisticsJobDetail"/>
+                <ref bean="systemConfigRefreshJobDetail"/>
             </array>
         </property>
     </bean>
@@ -205,5 +207,20 @@
         <property name="jobDetail" ref="errorStatisticsJobDetail"/>
         <property name="cronExpression" value="0 0 10 * * ?"/>
     </bean>
+    
+    <bean id="systemConfigRefreshJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="name" value="systemConfigRefreshJobDetail"></property>
+        <property name="group" value="systemConfigRefreshGroup"></property>
+        <property name="jobClass" value="com.sohu.cache.schedule.jobs.SystemConfigRefreshJob"></property>
+        <property name="durability" value="true" />
+    </bean>
+    
+    <bean id="systemConfigRefreshTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="name" value="systemConfigRefreshTrigger"/>
+        <property name="group" value="systemConfigRefreshGroup"/>
+        <property name="jobDetail" ref="systemConfigRefreshJobDetail"/>
+        <property name="cronExpression" value="0/30 * * ? * *"/>
+    </bean>
+    
 
 </beans>
