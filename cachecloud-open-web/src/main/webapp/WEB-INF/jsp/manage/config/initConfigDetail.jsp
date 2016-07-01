@@ -43,7 +43,31 @@
 														${config.info}<font color='red'>(*)</font>:
 													</label>
 													<div class="col-md-5">
-														<input type="text" name="${config.configKey}" class="form-control" value="${config.configValue}" />
+														<c:choose>
+															<c:when test="${config.configKey == 'cachecloud.whether.schedule.clean.data'}">
+																<select name="${config.configKey}" class="form-control">
+																	<option value="false" <c:if test="${config.configValue == 'false'}">selected</c:if>>
+																		否
+																	</option>
+																	<option value="true" <c:if test="${config.configValue == 'true'}">selected</c:if>>
+																		是
+																	</option>
+																</select>
+															</c:when>
+															<c:when test="${config.configKey == 'cachecloud.user.login.type'}">
+																<select name="${config.configKey}" class="form-control">
+																	<option value="1" <c:if test="${config.configValue == '1'}">selected</c:if>>
+																		session
+																	</option>
+																	<option value="2" <c:if test="${config.configValue == '2'}">selected</c:if>>
+																		cookie
+																	</option>
+																</select>
+															</c:when>
+															<c:otherwise>
+																<input type="text" name="${config.configKey}" class="form-control" value="${config.configValue}" />
+															</c:otherwise>
+														</c:choose>
 													</div>
 												</div>
 											</c:forEach>
