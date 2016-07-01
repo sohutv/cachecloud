@@ -148,7 +148,7 @@
 													<div class="col-md-offset-3 col-md-9">
 														<button id="appDeployBtn" type="submit" class="btn green">
 															<i class="fa fa-check"></i>
-															保存
+															开始部署
 														</button>
 													</div>
 												</div>

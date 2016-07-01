@@ -36,7 +36,7 @@ public class EmailComponentImpl implements EmailComponent {
     @Override
 	public boolean sendMail(String title, String content, List<String> emailList, List<String> ccList) {
         String alertUrl = ConstUtils.EMAIL_ALERT_INTERFACE;
-        if (StringUtils.isBlank(alertUrl) || ConstUtils.NONE.equals(alertUrl)) {
+        if (StringUtils.isBlank(alertUrl)) {
             logger.error("emailAlertInterface url is empty!");
             return false;
         }

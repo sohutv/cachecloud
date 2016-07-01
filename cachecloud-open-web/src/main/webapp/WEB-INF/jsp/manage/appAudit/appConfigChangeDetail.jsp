@@ -56,7 +56,7 @@
 														<div class="col-md-offset-3 col-md-9">
 															<button type="submit" class="btn green">
 																<i class="fa fa-check"></i>
-																保存
+																确认
 															</button>
 														</div>
 													</div>

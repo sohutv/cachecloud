@@ -870,13 +870,13 @@ insert into system_config(config_key,config_value,info,status,order_id) values('
 
 insert into system_config(config_key,config_value,info,status,order_id) values('redis.migrate.tool.home','/opt/cachecloud/redis-migrate-tool/','redis-migrate-tool安装路径',1,18);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.user.login.type','1','用户登录状态保存方式(1:session,2:cookie，重启后生效)',1,19);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.cookie.domain','none','cookie登录方式所需要的域名',1,20);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.cookie.domain','','cookie登录方式所需要的域名',1,20);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.base.dir','/opt','cachecloud根目录，要和cachecloud-init.sh脚本中的目录一致',1,21);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.app.client.conn.threshold','2000','应用连接数报警阀值',1,22);
 
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.email.alert.interface','none','邮件报警接口(说明:http://cachecloud.github.io 邮件和短信报警接口规范)',1,23);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.mobile.alert.interface','none','短信报警接口(说明:http://cachecloud.github.io 邮件和短信报警接口规范)',1,24);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.ldap.url','none','LDAP接口地址(例如:ldap://ldap.xx.com)',1,25);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.email.alert.interface','','邮件报警接口(说明:http://cachecloud.github.io 邮件和短信报警接口规范)',1,23);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.mobile.alert.interface','','短信报警接口(说明:http://cachecloud.github.io 邮件和短信报警接口规范)',1,24);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.ldap.url','','LDAP接口地址(例如:ldap://ldap.xx.com)',1,25);
 
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.whether.schedule.clean.data','false','是否定期清理各种统计数据',1,26);
 

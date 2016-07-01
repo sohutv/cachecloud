@@ -71,7 +71,7 @@ public class ConfigManageController extends BaseController {
             for (Entry<String, String[]> entry : paramMap.entrySet()) {
                 String key = entry.getKey();
                 String value = entry.getValue()[0];
-                if (StringUtils.isNotBlank(key) && StringUtils.isNotBlank(value)) {
+                if (StringUtils.isNotBlank(key)) {
                     configMap.put(key, value);
                 }
             }

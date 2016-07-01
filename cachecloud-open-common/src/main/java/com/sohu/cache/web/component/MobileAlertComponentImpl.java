@@ -37,7 +37,7 @@ public class MobileAlertComponentImpl implements MobileAlertComponent {
     @Override
     public void sendPhone(String message, List<String> phoneList) {
         String alertUrl = ConstUtils.MOBILE_ALERT_INTERFACE;
-        if (StringUtils.isBlank(alertUrl) || ConstUtils.NONE.equals(alertUrl)) {
+        if (StringUtils.isBlank(alertUrl)) {
             logger.error("mobileAlertInterface url is empty!");
             return;
         }
