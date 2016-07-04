@@ -150,6 +150,10 @@
 															<i class="fa fa-check"></i>
 															开始部署
 														</button>
+														<button id="appCheckBtn" type="button" class="btn green">
+															<i class="fa fa-check"></i>
+															格式检查
+														</button>
 													</div>
 												</div>
 											</div>

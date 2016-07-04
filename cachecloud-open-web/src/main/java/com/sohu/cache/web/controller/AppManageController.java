@@ -2,9 +2,8 @@ package com.sohu.cache.web.controller;
 
 import com.sohu.cache.web.enums.RedisOperateEnum;
 import com.sohu.cache.constant.AppCheckEnum;
-import com.sohu.cache.constant.AppDataMigrateEnum;
-import com.sohu.cache.constant.AppDataMigrateResult;
 import com.sohu.cache.constant.DataFormatCheckResult;
+import com.sohu.cache.constant.ErrorMessageEnum;
 import com.sohu.cache.entity.*;
 import com.sohu.cache.machine.MachineCenter;
 import com.sohu.cache.redis.RedisCenter;
@@ -409,13 +408,19 @@ public class AppManageController extends BaseController {
 	}
 	
 	/**
-     * 检查配置
+     * 应用部署配置检查
      * @return
      */
     @RequestMapping(value = "/appDeployCheck")
-    public ModelAndView appDeployCheck(HttpServletRequest request, HttpServletResponse response, Model model, String appDeployText,
+    public ModelAndView doAppDeployCheck(HttpServletRequest request, HttpServletResponse response, Model model, String appDeployText,
             Long appAuditId) {
-        DataFormatCheckResult dataFormatCheckResult = appDeployCenter.checkAppDeployDetail(appAuditId, appDeployText);
+        DataFormatCheckResult dataFormatCheckResult = null;
+        try {
+            dataFormatCheckResult = appDeployCenter.checkAppDeployDetail(appAuditId, appDeployText);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            dataFormatCheckResult = DataFormatCheckResult.fail(ErrorMessageEnum.INNER_ERROR_MSG.getMessage());
+        }
         model.addAttribute("status", dataFormatCheckResult.getStatus());
         model.addAttribute("message", dataFormatCheckResult.getMessage());
         return new ModelAndView("");

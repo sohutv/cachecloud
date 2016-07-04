@@ -6,7 +6,6 @@ import com.sohu.cache.constant.AppAuditType;
 import com.sohu.cache.constant.AppCheckEnum;
 import com.sohu.cache.constant.AppStatusEnum;
 import com.sohu.cache.constant.DataFormatCheckResult;
-import com.sohu.cache.constant.ImportAppResult;
 import com.sohu.cache.constant.InstanceStatusEnum;
 import com.sohu.cache.dao.AppAuditDao;
 import com.sohu.cache.dao.AppAuditLogDao;
@@ -106,14 +105,18 @@ public class AppDeployCenterImpl implements AppDeployCenter {
             logger.error("appAuditId is null");
             return DataFormatCheckResult.fail("审核id不能为空!");
         }
-        String[] appDetails = appDeployText.split(ConstUtils.NEXT_LINE);
-        if (appDetails == null || appDetails.length == 0) {
+        if (StringUtils.isBlank(appDeployText)) {
+            logger.error("appDeployText is null");
+            return DataFormatCheckResult.fail("部署节点列表不能为空!");
+        }
+        String[] nodeInfoList = appDeployText.split(ConstUtils.NEXT_LINE);
+        if (nodeInfoList == null || nodeInfoList.length == 0) {
             logger.error("nodeInfoList is null");
             return DataFormatCheckResult.fail("部署节点列表不能为空!");
         }
         AppAudit appAudit = appAuditDao.getAppAudit(appAuditId);
         if (appAudit == null) {
-            logger.error("appAudit:id={} is not exist");
+            logger.error("appAudit:id={} is not exist", appAuditId);
             return DataFormatCheckResult.fail(String.format("审核id=%s不存在", appAuditId));
         }
         long appId = appAudit.getAppId();
@@ -122,7 +125,7 @@ public class AppDeployCenterImpl implements AppDeployCenter {
             logger.error("appDesc:id={} is not exist");
             return DataFormatCheckResult.fail(String.format("appId=%s不存在", appId));
         }
-        for (String nodeInfo : appDetails) {
+        for (String nodeInfo : nodeInfoList) {
             nodeInfo = StringUtils.trim(nodeInfo);
             if (StringUtils.isBlank(nodeInfo)) {
                 return DataFormatCheckResult.fail(String.format("部署列表%s中存在空行", appDeployText));
@@ -165,13 +168,13 @@ public class AppDeployCenterImpl implements AppDeployCenter {
                 }
             }
             if (!checkHostExist(masterHost)) {
-                return DataFormatCheckResult.fail(nodeInfo + "中的ip=" + masterHost + "不存在，请在机器管理中添加!");
+                return DataFormatCheckResult.fail(String.format("%s中的ip=%s不存在，请在机器管理中添加!", nodeInfo, masterHost));
             }
             if (StringUtils.isNotBlank(memSize) && !NumberUtils.isDigits(memSize)) {
-                return DataFormatCheckResult.fail(nodeInfo + "中的memSize=" + memSize + "不是整数");
+                return DataFormatCheckResult.fail(String.format("%s中的中的memSize=%s不是整数!", nodeInfo, memSize));
             }
             if (StringUtils.isNotBlank(slaveHost) && !checkHostExist(slaveHost)) {
-                return DataFormatCheckResult.fail(nodeInfo + "中的ip=" + slaveHost + "不存在，请在机器管理中添加!");
+                return DataFormatCheckResult.fail(String.format("%s中的ip=%s不存在，请在机器管理中添加!", nodeInfo, slaveHost));
             }
         }
         return DataFormatCheckResult.success("应用部署格式正确，可以开始部署了!");
@@ -207,7 +210,7 @@ public class AppDeployCenterImpl implements AppDeployCenter {
         }
         AppAudit appAudit = appAuditDao.getAppAudit(appAuditId);
         if (appAudit == null) {
-            logger.error("appAudit:id={} is not exist");
+            logger.error("appAudit:id={} is not exist", appAuditId);
             return false;
         }
         long appId = appAudit.getAppId();
