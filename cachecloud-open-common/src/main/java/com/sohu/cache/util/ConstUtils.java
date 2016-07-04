@@ -243,6 +243,13 @@ public class ConstUtils {
      */
     public static final String SPACE = " ";
     
+
+    /**
+     * 冒号
+     */
+    public static final String COLON = ":";
+
+    
     /**
      * 内部错误
      */

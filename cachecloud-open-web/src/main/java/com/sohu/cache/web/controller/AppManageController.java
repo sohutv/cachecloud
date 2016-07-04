@@ -2,6 +2,9 @@ package com.sohu.cache.web.controller;
 
 import com.sohu.cache.web.enums.RedisOperateEnum;
 import com.sohu.cache.constant.AppCheckEnum;
+import com.sohu.cache.constant.AppDataMigrateEnum;
+import com.sohu.cache.constant.AppDataMigrateResult;
+import com.sohu.cache.constant.DataFormatCheckResult;
 import com.sohu.cache.entity.*;
 import com.sohu.cache.machine.MachineCenter;
 import com.sohu.cache.redis.RedisCenter;
@@ -404,6 +407,19 @@ public class AppManageController extends BaseController {
 
 		return new ModelAndView("manage/appAudit/initAppDeploy");
 	}
+	
+	/**
+     * 检查配置
+     * @return
+     */
+    @RequestMapping(value = "/appDeployCheck")
+    public ModelAndView appDeployCheck(HttpServletRequest request, HttpServletResponse response, Model model, String appDeployText,
+            Long appAuditId) {
+        DataFormatCheckResult dataFormatCheckResult = appDeployCenter.checkAppDeployDetail(appAuditId, appDeployText);
+        model.addAttribute("status", dataFormatCheckResult.getStatus());
+        model.addAttribute("message", dataFormatCheckResult.getMessage());
+        return new ModelAndView("");
+    }
 
 	/**
 	 * 添加应用部署

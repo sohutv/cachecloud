@@ -1,5 +1,6 @@
 package com.sohu.cache.stats.app;
 
+import com.sohu.cache.constant.DataFormatCheckResult;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.redis.ReshardProcess;
@@ -32,6 +33,14 @@ public interface AppDeployCenter {
      */
     public boolean allocateResourceApp(Long appAuditId, List<String> nodeInfoList, AppUser auditUser);
 
+
+    /**
+     * 为应用分配的资源格式检测
+     * @param appAuditId
+     * @param appDeployText
+     * @return
+     */
+    public DataFormatCheckResult checkAppDeployDetail(Long appAuditId, String appDeployText);
 
     /**
      * 下线应用
@@ -109,4 +118,5 @@ public interface AppDeployCenter {
      * @return
      */
     public boolean cleanAppData(long appId, AppUser appUser);
+
 }

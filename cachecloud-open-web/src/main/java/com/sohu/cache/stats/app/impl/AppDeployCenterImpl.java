@@ -5,6 +5,8 @@ import com.sohu.cache.constant.AppAuditLogTypeEnum;
 import com.sohu.cache.constant.AppAuditType;
 import com.sohu.cache.constant.AppCheckEnum;
 import com.sohu.cache.constant.AppStatusEnum;
+import com.sohu.cache.constant.DataFormatCheckResult;
+import com.sohu.cache.constant.ImportAppResult;
 import com.sohu.cache.constant.InstanceStatusEnum;
 import com.sohu.cache.dao.AppAuditDao;
 import com.sohu.cache.dao.AppAuditLogDao;
@@ -97,11 +99,106 @@ public class AppDeployCenterImpl implements AppDeployCenter {
             return false;
         }
     }
+    
+    @Override
+    public DataFormatCheckResult checkAppDeployDetail(Long appAuditId, String appDeployText) {
+        if (appAuditId == null) {
+            logger.error("appAuditId is null");
+            return DataFormatCheckResult.fail("审核id不能为空!");
+        }
+        String[] appDetails = appDeployText.split(ConstUtils.NEXT_LINE);
+        if (appDetails == null || appDetails.length == 0) {
+            logger.error("nodeInfoList is null");
+            return DataFormatCheckResult.fail("部署节点列表不能为空!");
+        }
+        AppAudit appAudit = appAuditDao.getAppAudit(appAuditId);
+        if (appAudit == null) {
+            logger.error("appAudit:id={} is not exist");
+            return DataFormatCheckResult.fail(String.format("审核id=%s不存在", appAuditId));
+        }
+        long appId = appAudit.getAppId();
+        AppDesc appDesc = appService.getByAppId(appId);
+        if (appDesc == null) {
+            logger.error("appDesc:id={} is not exist");
+            return DataFormatCheckResult.fail(String.format("appId=%s不存在", appId));
+        }
+        for (String nodeInfo : appDetails) {
+            nodeInfo = StringUtils.trim(nodeInfo);
+            if (StringUtils.isBlank(nodeInfo)) {
+                return DataFormatCheckResult.fail(String.format("部署列表%s中存在空行", appDeployText));
+            }
+            String[] array = nodeInfo.split(ConstUtils.COLON);
+            if (array == null || array.length == 0) {
+                return DataFormatCheckResult.fail(String.format("部署列表%s中存在空行", appDeployText));
+            }
+            int type = appDesc.getType();
+            String masterHost = null;
+            String memSize = null;
+            String slaveHost = null;
+            if (TypeUtil.isRedisCluster(type)) {
+                if (array.length == 2) {
+                    masterHost = array[0];
+                    memSize = array[1];
+                } else if (array.length == 3) {
+                    masterHost = array[0];
+                    memSize = array[1];
+                    slaveHost = array[2];
+                } else {
+                    return DataFormatCheckResult.fail(String.format("部署列表中{}行格式错误", nodeInfo));
+                }
+            } else if (TypeUtil.isRedisSentinel(type)) {
+                if (array.length == 3) {
+                    masterHost = array[0];
+                    memSize = array[1];
+                    slaveHost = array[2];
+                } else if (array.length == 1) {
+                    masterHost = array[0];
+                } else {
+                    return DataFormatCheckResult.fail(String.format("部署列表中{}行格式错误", nodeInfo));
+                }
+            } else if (TypeUtil.isRedisDataType(type)) {
+                if (array.length == 2) {
+                    masterHost = array[0];
+                    memSize = array[1];
+                } else {
+                    return DataFormatCheckResult.fail(String.format("部署列表中{}行格式错误", nodeInfo));
+                }
+            }
+            if (!checkHostExist(masterHost)) {
+                return DataFormatCheckResult.fail(nodeInfo + "中的ip=" + masterHost + "不存在，请在机器管理中添加!");
+            }
+            if (StringUtils.isNotBlank(memSize) && !NumberUtils.isDigits(memSize)) {
+                return DataFormatCheckResult.fail(nodeInfo + "中的memSize=" + memSize + "不是整数");
+            }
+            if (StringUtils.isNotBlank(slaveHost) && !checkHostExist(slaveHost)) {
+                return DataFormatCheckResult.fail(nodeInfo + "中的ip=" + slaveHost + "不存在，请在机器管理中添加!");
+            }
+        }
+        return DataFormatCheckResult.success("应用部署格式正确，可以开始部署了!");
+    }
+
+    /**
+     * 查看host是否存在
+     * @param host
+     * @return
+     */
+    private boolean checkHostExist(String host) {
+        try {
+            MachineInfo machineInfo = machineCenter.getMachineInfoByIp(host);
+            if (machineInfo == null) {
+                return false;
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return false;
+        }
+        return true;
+    }
 
     @Override
     public boolean allocateResourceApp(Long appAuditId, List<String> nodeInfoList, AppUser auditUser) {
         if (appAuditId == null || appAuditId <= 0L) {
-            logger.error("appId is null");
+            logger.error("appAuditId is null");
             return false;
         }
         if (nodeInfoList == null || nodeInfoList.isEmpty()) {
@@ -562,5 +659,7 @@ public class AppDeployCenterImpl implements AppDeployCenter {
     public void setAppDao(AppDao appDao) {
         this.appDao = appDao;
     }
+
+    
 
 }
