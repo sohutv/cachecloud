@@ -116,6 +116,8 @@ function checkAppDeployText(){
 	    		
 	    		var appCheckBtn = document.getElementById("appCheckBtn");
 	    		appCheckBtn.disabled = true;
+	    		
+	    		appDeployText.disabled = true;
 			} else {
 				appDeployText.focus();
 			}

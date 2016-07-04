@@ -27,6 +27,13 @@ public class TypeUtil {
         }
         return false;
     }
+    
+    public static boolean isRedisStandalone(int type) {
+        if (type == ConstUtils.CACHE_REDIS_STANDALONE) {
+            return true;
+        }
+        return false;
+    }
 
     public static boolean isRedisDataType(int type) {
         if (type == ConstUtils.CACHE_TYPE_REDIS_CLUSTER

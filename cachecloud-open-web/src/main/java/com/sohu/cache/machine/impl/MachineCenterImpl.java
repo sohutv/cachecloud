@@ -559,7 +559,7 @@ public class MachineCenterImpl implements MachineCenter {
         int port = instanceInfo.getPort();
         int type = instanceInfo.getType();
         String logType = "";
-        if (TypeUtil.isRedisCluster(type) || TypeUtil.isRedisDataType(type)) {
+        if (TypeUtil.isRedisDataType(type)) {
             logType = "redis-";
         } else if (TypeUtil.isRedisSentinel(type)) {
             logType = "redis-sentinel-";

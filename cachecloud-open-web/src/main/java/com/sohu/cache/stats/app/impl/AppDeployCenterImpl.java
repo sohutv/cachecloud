@@ -125,6 +125,7 @@ public class AppDeployCenterImpl implements AppDeployCenter {
             logger.error("appDesc:id={} is not exist");
             return DataFormatCheckResult.fail(String.format("appId=%s不存在", appId));
         }
+        int type = appDesc.getType();
         //检查每一行
         for (String nodeInfo : nodeInfoList) {
             nodeInfo = StringUtils.trim(nodeInfo);
@@ -135,7 +136,6 @@ public class AppDeployCenterImpl implements AppDeployCenter {
             if (array == null || array.length == 0) {
                 return DataFormatCheckResult.fail(String.format("部署列表%s中存在空行", appDeployText));
             }
-            int type = appDesc.getType();
             String masterHost = null;
             String memSize = null;
             String slaveHost = null;
@@ -160,7 +160,7 @@ public class AppDeployCenterImpl implements AppDeployCenter {
                 } else {
                     return DataFormatCheckResult.fail(String.format("部署列表中%s, 格式错误!", nodeInfo));
                 }
-            } else if (TypeUtil.isRedisDataType(type)) {
+            } else if (TypeUtil.isRedisStandalone(type)) {
                 if (array.length == 2) {
                     masterHost = array[0];
                     memSize = array[1];
@@ -177,6 +177,65 @@ public class AppDeployCenterImpl implements AppDeployCenter {
             if (StringUtils.isNotBlank(slaveHost) && !checkHostExist(slaveHost)) {
                 return DataFormatCheckResult.fail(String.format("%s中的ip=%s不存在，请在机器管理中添加!", nodeInfo, slaveHost));
             }
+        }
+        //检查sentinel类型:数据节点一行，sentinel节点多行
+        if (TypeUtil.isRedisSentinel(type)) {
+            return checkSentinelAppDeploy(nodeInfoList);
+        //检查单点类型:只能有一行数据节点
+        } else if (TypeUtil.isRedisStandalone(type)) {
+            return checkStandaloneAppDeploy(nodeInfoList);
+        } 
+        return DataFormatCheckResult.success("应用部署格式正确，可以开始部署了!");
+    }
+
+    /**
+     * 检查单点格式
+     * @param nodeInfoList
+     * @return
+     */
+    private DataFormatCheckResult checkStandaloneAppDeploy(String[] nodeInfoList) {
+        int redisLineNum = 0;
+        for (String nodeInfo : nodeInfoList) {
+            nodeInfo = StringUtils.trim(nodeInfo);
+            String[] array = nodeInfo.split(ConstUtils.COLON);
+            if (array.length == 2) {
+                redisLineNum++;
+            }
+        }
+        // redis节点只有一行
+        if (redisLineNum != 1) {
+            return DataFormatCheckResult.fail("应用部署格式错误, Standalone格式必须是一行masterIp:memSize(M)");
+        }
+        return DataFormatCheckResult.success("应用部署格式正确，可以开始部署了!");
+    }
+
+    /**
+     * 检查redis sentinel格式
+     * @param nodeInfoList
+     * @return
+     */
+    private DataFormatCheckResult checkSentinelAppDeploy(String[] nodeInfoList) {
+        int redisLineNum = 0;
+        int sentinelLineNum = 0;
+        for (String nodeInfo : nodeInfoList) {
+            nodeInfo = StringUtils.trim(nodeInfo);
+            String[] array = nodeInfo.split(ConstUtils.COLON);
+            if (array.length == 3) {
+                redisLineNum++;
+            } else if (array.length == 1) {
+                sentinelLineNum++;
+            }
+        }
+        // redis节点只有一行
+        if (redisLineNum < 1) {
+            return DataFormatCheckResult.fail("应用部署格式错误, Sentinel应用中必须有Redis数据节点!");
+        } else if (redisLineNum > 1) {
+            return DataFormatCheckResult.fail("应用部署格式错误, Sentinel应用中Redis数据节点只能有一行!");
+        }  
+        
+        // sentinel节点至少三个
+        if (sentinelLineNum < 3) {
+            return DataFormatCheckResult.fail("应用部署格式错误, Sentinel应用中Sentinel节点至少要有三个!");
         }
         return DataFormatCheckResult.success("应用部署格式正确，可以开始部署了!");
     }
