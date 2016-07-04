@@ -115,7 +115,7 @@
 						<div class="form">
 								<!-- BEGIN FORM-->
 								<form action="/manage/app/addAppDeploy.do" method="post"
-									class="form-horizontal form-bordered form-row-stripped" onsubmit="return checkAppDeployText();">
+									class="form-horizontal form-bordered form-row-stripped" onsubmit="return submitAppDeployText();">
 									<div class="form-body">
 										<div class="form-group">
 											<label class="control-label col-md-3">
@@ -140,17 +140,17 @@
 											</div>
 										</div>
 										<input type="hidden" name="appId" value="${appId}">
-										<input type="hidden" name="appAuditId" value="${appAuditId}">
+										<input type="hidden" id="appAuditId" name="appAuditId" value="${appAuditId}">
 										
 										<div class="form-actions fluid">
 											<div class="row">
 												<div class="col-md-12">
 													<div class="col-md-offset-3 col-md-9">
-														<button id="appDeployBtn" type="submit" class="btn green">
+														<button id="appDeployBtn" type="submit" class="btn green" disabled="disabled">
 															<i class="fa fa-check"></i>
 															开始部署
 														</button>
-														<button id="appCheckBtn" type="button" class="btn green">
+														<button id="appCheckBtn" type="button" class="btn green" onclick="checkAppDeployText()">
 															<i class="fa fa-check"></i>
 															格式检查
 														</button>

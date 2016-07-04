@@ -96,13 +96,39 @@ function checkAppScaleText(){
 function checkAppDeployText(){
 	var appDeployText = document.getElementById("appDeployText");
 	if(appDeployText.value == ""){
-		alert("配置不能为空");
+		alert("应用部署信息不能为空");
 		appDeployText.focus();
 		return false;
 	}
-	document.getElementById("appDeployBtn").disabled = true;
-	return true;
+	var appAuditId = document.getElementById("appAuditId");
+	$.get(
+		'/manage/app/appDeployCheck.json',
+		{
+			appAuditId: appAuditId.value,
+			appDeployText: appDeployText.value
+		},
+        function(data){
+			var status = data.status;
+			alert(data.message);
+			if (status == 1) {
+				var appDeployBtn = document.getElementById("appDeployBtn");
+				appDeployBtn.disabled = false;
+	    		
+	    		var appCheckBtn = document.getElementById("appCheckBtn");
+	    		appCheckBtn.disabled = true;
+			} else {
+				appDeployText.focus();
+			}
+        }
+     );
 }
+
+function submitAppDeployText() {
+	var appDeployBtn = document.getElementById("appDeployBtn");
+	appDeployBtn.disabled = true;
+}
+
+
 
 //添加分片验证
 function checkAddShardParam(){

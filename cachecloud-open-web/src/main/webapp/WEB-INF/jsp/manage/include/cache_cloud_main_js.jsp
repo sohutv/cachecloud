@@ -6,7 +6,7 @@
 <script src="/resources/manage/scripts/table-managed.js" type="text/javascript"></script>
 <script src="/resources/manage/manage/userManage.js" type="text/javascript"></script>     
 <script src="/resources/manage/manage/machineManage.js" type="text/javascript"></script>
-<script src="/resources/manage/manage/auditManage.js" type="text/javascript"></script>
+<script src="/resources/manage/manage/auditManage.js?<%=System.currentTimeMillis()%>" type="text/javascript"></script>
      
 <script>
 	jQuery(document).ready(function() {    

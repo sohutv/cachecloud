@@ -125,6 +125,7 @@ public class AppDeployCenterImpl implements AppDeployCenter {
             logger.error("appDesc:id={} is not exist");
             return DataFormatCheckResult.fail(String.format("appId=%s不存在", appId));
         }
+        //检查每一行
         for (String nodeInfo : nodeInfoList) {
             nodeInfo = StringUtils.trim(nodeInfo);
             if (StringUtils.isBlank(nodeInfo)) {
@@ -147,7 +148,7 @@ public class AppDeployCenterImpl implements AppDeployCenter {
                     memSize = array[1];
                     slaveHost = array[2];
                 } else {
-                    return DataFormatCheckResult.fail(String.format("部署列表中{}行格式错误", nodeInfo));
+                    return DataFormatCheckResult.fail(String.format("部署列表中%s, 格式错误!", nodeInfo));
                 }
             } else if (TypeUtil.isRedisSentinel(type)) {
                 if (array.length == 3) {
@@ -157,14 +158,14 @@ public class AppDeployCenterImpl implements AppDeployCenter {
                 } else if (array.length == 1) {
                     masterHost = array[0];
                 } else {
-                    return DataFormatCheckResult.fail(String.format("部署列表中{}行格式错误", nodeInfo));
+                    return DataFormatCheckResult.fail(String.format("部署列表中%s, 格式错误!", nodeInfo));
                 }
             } else if (TypeUtil.isRedisDataType(type)) {
                 if (array.length == 2) {
                     masterHost = array[0];
                     memSize = array[1];
                 } else {
-                    return DataFormatCheckResult.fail(String.format("部署列表中{}行格式错误", nodeInfo));
+                    return DataFormatCheckResult.fail(String.format("部署列表中%s, 格式错误!", nodeInfo));
                 }
             }
             if (!checkHostExist(masterHost)) {
