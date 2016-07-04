@@ -92,6 +92,11 @@ function checkAppScaleText(){
 	return true;
 }
 
+function startShowDeployLabel(){
+	var startDeployLabel = document.getElementById("startDeployLabel");
+	startDeployLabel.innerHTML += '.';
+}
+
 //检查应用部署配置
 function checkAppDeployText(){
 	var appDeployText = document.getElementById("appDeployText");
@@ -125,12 +130,35 @@ function checkAppDeployText(){
      );
 }
 
-function submitAppDeployText() {
+function addAppDeployText() {
 	var appDeployBtn = document.getElementById("appDeployBtn");
 	appDeployBtn.disabled = true;
+	
+	var appDeployText = document.getElementById("appDeployText");
+	var appAuditId = document.getElementById("appAuditId");
+	
+	var startDeployLabel = document.getElementById("startDeployLabel");
+	startDeployLabel.innerHTML = '正在部署,请等待.';
+	
+	$.get(
+		'/manage/app/addAppDeploy.json',
+		{
+			appAuditId: appAuditId.value,
+			appDeployText: appDeployText.value
+		},
+        function(data){
+			var status = data.status;
+			if (status == 1) {
+				alert("应用部署成功,确认后将跳转到审核界面,点击[通过]按钮即可!");
+			} else {
+				alert("应用部署失败,请查看系统日志确认相关原因!");
+			}
+			window.location.href="/manage/app/auditList";
+        }
+     );
+	//展示简单的进度条
+	setInterval(startShowDeployLabel,500);
 }
-
-
 
 //添加分片验证
 function checkAddShardParam(){

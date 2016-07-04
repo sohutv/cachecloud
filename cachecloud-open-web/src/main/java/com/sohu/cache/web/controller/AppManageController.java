@@ -448,7 +448,8 @@ public class AppManageController extends BaseController {
 			logger.error("appDeploy error param: appDeployText={},appAuditId:{}", appDeployText, appAuditId);
 		}
         logger.warn("user {} appDeploy: appDeployText={},appAuditId:{}, result is {}", appUser.getName(), appDeployText, appAuditId, isSuccess);
-		return new ModelAndView("redirect:/manage/app/auditList");
+        model.addAttribute("status", isSuccess ? 1 : 0);
+        return new ModelAndView("");
 	}
 
 	/**
