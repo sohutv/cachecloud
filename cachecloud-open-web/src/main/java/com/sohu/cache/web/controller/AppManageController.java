@@ -347,9 +347,12 @@ public class AppManageController extends BaseController {
 		// 实例所在机器信息
         fillAppMachineStat(appAudit.getAppId(), model);
 
-		model.addAttribute("appAuditId", appAuditId);
+		long appId = appAudit.getAppId();
+		AppDesc appDesc = appService.getByAppId(appId);
+        model.addAttribute("appAuditId", appAuditId);
 		model.addAttribute("appId", appAudit.getAppId());
-
+        model.addAttribute("appDesc", appDesc);
+		
 		return new ModelAndView("manage/appAudit/initAppScaleApply");
 	}
 

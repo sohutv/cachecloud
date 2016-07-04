@@ -267,32 +267,23 @@
                             <div class="progress margin-custom-bottom0">
                             	<c:choose>
                                 	<c:when test="${(instanceStatsMap[instanceStatsMapKey]).memUsePercent >= 80}">
-		                                <div class="progress-bar progress-bar-danger"
-		                                     role="progressbar"
-		                                     aria-valuenow="${(instanceStatsMap[instanceStatsMapKey]).memUsePercent}"
-		                                     aria-valuemax="100"
-		                                     aria-valuemin="0"
-		                                     style="width: ${(instanceStatsMap[instanceStatsMapKey]).memUsePercent}%">
-		                                     
-		                                	<label style="color: #000000">
-			                                   <fmt:formatNumber value="${(instanceStatsMap[instanceStatsMapKey]).usedMemory / 1024 / 1024 / 1024}" pattern="0.00"/>G&nbsp;&nbsp;Used/<fmt:formatNumber value="${(instanceStatsMap[instanceStatsMapKey]).maxMemory / 1024 / 1024 / 1024}" pattern="0.00"/>G&nbsp;&nbsp;Total
-			                               	</label>
-	                                     </div>
+										<c:set var="progressBarStatus" value="progress-bar-danger"/>
                                     </c:when>
                                     <c:otherwise>
-	                                    <div class="progress-bar progress-bar-success"
-	                                         role="progressbar"
-	                                         aria-valuenow="${(instanceStatsMap[instanceStatsMapKey]).memUsePercent}"
-	                                         aria-valuemax="100"
-	                                         aria-valuemin="0"
-	                                         style="width: ${(instanceStatsMap[instanceStatsMapKey]).memUsePercent}%">
-	                                         
-	                                     	<label style="color: #000000">
-			                                   <fmt:formatNumber value="${(instanceStatsMap[instanceStatsMapKey]).usedMemory / 1024 / 1024 / 1024}" pattern="0.00"/>G&nbsp;&nbsp;Used/<fmt:formatNumber value="${(instanceStatsMap[instanceStatsMapKey]).maxMemory / 1024 / 1024 / 1024}" pattern="0.00"/>G&nbsp;&nbsp;Total
-			                               	</label>
-	                                     </div>
+                                    	<c:set var="progressBarStatus" value="progress-bar-success"/>
                                     </c:otherwise>
                                </c:choose>
+                               <div class="progress-bar ${progressBarStatus}"
+                                    role="progressbar"
+                                    aria-valuenow="${(instanceStatsMap[instanceStatsMapKey]).memUsePercent}"
+                                    aria-valuemax="100"
+                                    aria-valuemin="0"
+                                    style="width: ${(instanceStatsMap[instanceStatsMapKey]).memUsePercent}%">
+                                    
+                                	<label style="color: #000000">
+	                                	<fmt:formatNumber value="${(instanceStatsMap[instanceStatsMapKey]).usedMemory / 1024 / 1024 / 1024}" pattern="0.00"/>G&nbsp;&nbsp;Used/<fmt:formatNumber value="${(instanceStatsMap[instanceStatsMapKey]).maxMemory / 1024 / 1024 / 1024}" pattern="0.00"/>G&nbsp;&nbsp;Total
+	                            	</label>
+                                </div>
                             </div>
 	                    </td>
 	                    <td>
@@ -328,7 +319,7 @@
                                      <button type="button" class="btn btn-small btn-danger" onclick="shutdownInstance('${instance.id}')">
                                         下线实例
                                      </button>
-                                       <c:if test="${instance.masterInstanceId == 0}">
+                                       <c:if test="${instance.masterInstanceId == 0 and instance.type != 5}">
                                            <button type="button" class="btn btn-small btn-primary" data-target="#redisClusterAddSlaveModal${instance.id}" data-toggle="modal">添加Slave</button>
                                        </c:if>
                                        <c:if test="${instance.masterInstanceId > 0 and instance.type == 2}">
