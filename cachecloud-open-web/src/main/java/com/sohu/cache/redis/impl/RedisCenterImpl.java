@@ -779,7 +779,8 @@ public class RedisCenterImpl implements RedisCenter {
             instanceStats.setRole((byte) 2);
         }
         instanceStats.setModifyTime(new Timestamp(System.currentTimeMillis()));
-
+        instanceStats.setMemFragmentationRatio(MapUtils.getDoubleValue(infoMap.get(RedisConstant.Memory), "mem_fragmentation_ratio", 0.0));
+        instanceStats.setAofDelayedFsync(MapUtils.getIntValue(infoMap.get(RedisConstant.Persistence), "aof_delayed_fsync", 0));
         return instanceStats;
     }
 

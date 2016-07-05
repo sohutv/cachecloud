@@ -76,6 +76,12 @@
 	                    <td>${appDetail.appDesc.memAlertValue}%</td>
 	                    <td>每20分钟</td>
 	                </tr>
+	                 <tr>
+	                    <td>2</td>
+	                    <td>客户端连接数大于</td>
+	                    <td>${appDetail.appDesc.clientConnAlertValue}</td>
+	                    <td>每20分钟</td>
+	                </tr>
                 </tbody>
             </table>
         </div>

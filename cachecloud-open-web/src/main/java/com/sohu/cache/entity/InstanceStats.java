@@ -60,6 +60,16 @@ public class InstanceStats {
 
     /* 最后更新时间 */
     private Timestamp modifyTime;
+    
+    /**
+     * 内存碎片率
+     */
+    private double memFragmentationRatio;
+    
+    /**
+     * aof阻塞次数
+     */
+    private int aofDelayedFsync;
 
     private boolean isRun;
 
@@ -189,25 +199,30 @@ public class InstanceStats {
         this.instId = instId;
     }
 
+    public double getMemFragmentationRatio() {
+        return memFragmentationRatio;
+    }
+
+    public void setMemFragmentationRatio(double memFragmentationRatio) {
+        this.memFragmentationRatio = memFragmentationRatio;
+    }
+
+    public int getAofDelayedFsync() {
+        return aofDelayedFsync;
+    }
+
+    public void setAofDelayedFsync(int aofDelayedFsync) {
+        this.aofDelayedFsync = aofDelayedFsync;
+    }
+
     @Override
     public String toString() {
-        return "InstanceStats{" +
-                "id=" + id +
-                ", instId=" + instId +
-                ", appId=" + appId +
-                ", hostId=" + hostId +
-                ", ip='" + ip + '\'' +
-                ", port=" + port +
-                ", role=" + role +
-                ", maxMemory=" + maxMemory +
-                ", usedMemory=" + usedMemory +
-                ", currItems=" + currItems +
-                ", currConnections=" + currConnections +
-                ", misses=" + misses +
-                ", hits=" + hits +
-                ", createTime=" + createTime +
-                ", modifyTime=" + modifyTime +
-                '}';
+        return "InstanceStats [id=" + id + ", instId=" + instId + ", appId=" + appId + ", hostId=" + hostId + ", ip="
+                + ip + ", port=" + port + ", role=" + role + ", maxMemory=" + maxMemory + ", usedMemory=" + usedMemory
+                + ", memUsePercent=" + memUsePercent + ", currItems=" + currItems + ", currConnections="
+                + currConnections + ", misses=" + misses + ", hits=" + hits + ", createTime=" + createTime
+                + ", modifyTime=" + modifyTime + ", memFragmentationRatio=" + memFragmentationRatio
+                + ", aofDelayedFsync=" + aofDelayedFsync + ", isRun=" + isRun + ", infoMap=" + infoMap + "]";
     }
 
     public Map<String, Object> getInfoMap() {

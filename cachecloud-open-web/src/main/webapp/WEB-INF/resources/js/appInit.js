@@ -82,6 +82,14 @@ function saveAppDesc(){
 		return false;
 	}
 	
+	//客户端连接数报警阀值
+	var clientConnAlertValue = document.getElementById("clientConnAlertValue");
+	if(clientConnAlertValue.value == ""){
+		alert("客户端连接数报警阀值不能为空");
+		clientConnAlertValue.focus();
+		return false;
+	}
+	
 	return true;	
 }
 

@@ -4,19 +4,14 @@
 <mapper namespace="com.sohu.cache.dao.InstanceStatsDao">
 
     <sql id="instance_statistics_columns">
-        inst_id,app_id,host_id,ip,port,role,max_memory,used_memory,curr_items,curr_connections,misses,hits,modify_time
+        inst_id,app_id,host_id,ip,port,role,max_memory,used_memory,curr_items,curr_connections,misses,hits,modify_time,mem_fragmentation_ratio,aof_delayed_fsync
     </sql>
 
-    <!--更新实例的最新统计信息
-     无法写入 why ???
-       UNIQUE KEY `ip` (`ip`,`port`),
-       UNIQUE KEY `idx_inst_id` (`inst_id`),
-    -->
     <insert id="updateInstanceStats" parameterType="InstanceStats">
         INSERT INTO instance_statistics
           (<include refid="instance_statistics_columns"/>)
         VALUES (#{instId},#{appId},#{hostId},#{ip},#{port},#{role},#{maxMemory},#{usedMemory},#{currItems},#{currConnections},#{misses},#{hits},
-                  #{modifyTime} )
+                  #{modifyTime},#{memFragmentationRatio},#{aofDelayedFsync})
         ON DUPLICATE KEY UPDATE
           inst_id = #{instId},
           host_id = #{hostId},
@@ -27,7 +22,9 @@
           curr_connections = #{currConnections},
           misses = #{misses},
           hits = #{hits},
-          modify_time = #{modifyTime}
+          modify_time = #{modifyTime},
+          mem_fragmentation_ratio = #{memFragmentationRatio},
+          aof_delayed_fsync = #{aofDelayedFsync}
     </insert>
 
     <select id="getInstanceStatsByHost" resultType="InstanceStats">

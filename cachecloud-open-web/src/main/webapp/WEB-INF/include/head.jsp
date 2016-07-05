@@ -23,7 +23,7 @@
 <!-- user manage -->
 <script type="text/javascript" src="/resources/manage/manage/machineManage.js"></script>
 <script type="text/javascript" src="/resources/js/appDetail.js"></script>
-<script type="text/javascript" src="/resources/js/appInit.js"></script>
+<script type="text/javascript" src="/resources/js/appInit.js?<%=System.currentTimeMillis()%>"></script>
 <script type="text/javascript" src="/resources/js/appStat.js"></script>
 <script type="text/javascript" src="/resources/js/myhighchart.js?<%=System.currentTimeMillis()%>"></script>
 

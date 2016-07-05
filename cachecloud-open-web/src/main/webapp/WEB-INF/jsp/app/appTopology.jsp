@@ -16,6 +16,7 @@
                 <td>对象数</td>
                 <td>连接数</td>
                 <td>命中率</td>
+                <td>碎片率</td>
                 <td>角色</td>
                 <td>主实例ID</td>
             </tr>
@@ -57,6 +58,21 @@
                   </td>
                   <td>${(instanceStatsMap[instanceStatsMapKey]).currConnections}</td>
                   <td>${(instanceStatsMap[instanceStatsMapKey]).hitPercent}</td>
+                  <td>
+	                  <c:set var="memFragmentationRatio" value="${(instanceStatsMap[instanceStatsMapKey]).memFragmentationRatio}"/>
+	                  <c:choose>
+	                		<c:when test="${memFragmentationRatio > 5 && (instanceStatsMap[instanceStatsMapKey]).usedMemory > 1024 * 1024 * 100}">
+	                			  <c:set var="memFragmentationRatioLabel" value="label-danger"/>
+	                		</c:when>
+	                		<c:when test="${memFragmentationRatio >= 3 && memFragmentationRatio < 5 && (instanceStatsMap[instanceStatsMapKey]).usedMemory > 1024 * 1024 * 100}">
+	                			  <c:set var="memFragmentationRatioLabel" value="label-warning"/>
+	                		</c:when>
+	                		<c:otherwise>
+	                			  <c:set var="memFragmentationRatioLabel" value="label-success"/>
+	                 		</c:otherwise>
+	                  </c:choose>
+	                  <label class="label ${memFragmentationRatioLabel}">${memFragmentationRatio}</label>
+                  </td>
                   <td>${instance.roleDesc}</td>
                   <c:choose>
                      <c:when test="${instance.masterInstanceId >0}">

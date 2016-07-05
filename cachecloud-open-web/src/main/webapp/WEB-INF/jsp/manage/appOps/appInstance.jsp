@@ -240,6 +240,8 @@
 	                <th>对象数</th>
 	                <th>连接数</th>
 	                <th>命中率</th>
+	                <th>碎片率</th>
+	                <th>AOF阻塞数</th>
 	                <th>日志</th>
 	                <th>操作</th>
 	            </tr>
@@ -291,6 +293,22 @@
 	                    </td>
 	                    <td>${(instanceStatsMap[instanceStatsMapKey]).currConnections}</td>
 	                    <td>${(instanceStatsMap[instanceStatsMapKey]).hitPercent}</td>
+	                    <td>
+		                  <c:set var="memFragmentationRatio" value="${(instanceStatsMap[instanceStatsMapKey]).memFragmentationRatio}"/>
+		                  <c:choose>
+		                		<c:when test="${memFragmentationRatio > 5 && (instanceStatsMap[instanceStatsMapKey]).usedMemory > 1024 * 1024 * 100}">
+		                			  <c:set var="memFragmentationRatioLabel" value="label-danger"/>
+		                		</c:when>
+		                		<c:when test="${memFragmentationRatio >= 3 && memFragmentationRatio < 5 && (instanceStatsMap[instanceStatsMapKey]).usedMemory > 1024 * 1024 * 100}">
+		                			  <c:set var="memFragmentationRatioLabel" value="label-warning"/>
+		                		</c:when>
+		                		<c:otherwise>
+		                			  <c:set var="memFragmentationRatioLabel" value="label-success"/>
+		                 		</c:otherwise>
+		                  </c:choose>
+		                  <label class="label ${memFragmentationRatioLabel}">${memFragmentationRatio}</label>
+	                    </td>
+	                    <td>${(instanceStatsMap[instanceStatsMapKey]).aofDelayedFsync}</td>
 	                    <td>
 	                    	<a target="_blank" href="/manage/instance/log?instanceId=${instance.id}">查看</a>
 	                    </td>

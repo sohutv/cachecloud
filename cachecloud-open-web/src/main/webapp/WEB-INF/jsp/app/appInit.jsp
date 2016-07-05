@@ -206,6 +206,18 @@
 												</div>
 											</div>
 											
+											<div class="form-group">
+												<label class="control-label col-md-3">
+													客户端连接数报警阀值<font color='red'>(*)</font>:
+												</label>
+												<div class="col-md-5">
+													<input type="text" name="clientConnAlertValue" id="clientConnAlertValue" placeholder="客户端连接数报警阀值" class="form-control" onchange="testisNum(this.id)"/>
+													<span class="help-block">
+														例如:如果想客户端连接数率超过2000报警，填写2000
+													</span>
+												</div>
+											</div>
+											
 											<input name="userId" id="userId" value="${userInfo.id}" type="hidden" />
 											<input id="appExist" value="0" type="hidden" />
 											

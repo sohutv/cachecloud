@@ -986,7 +986,10 @@ insert into instance_config(config_key,config_value,info,update_time, type, stat
 
 -- change appdesc add 秘钥和客户端连接数报警
 alter table app_desc add column client_conn_alert_value int(11) DEFAULT 2000 COMMENT '客户端连接报警阀值';
-alter table app_desc add column app_key varchar(255) NOT NULL COMMENT '应用秘钥';
+alter table app_desc add column app_key varchar(255) DEFAULT NULL COMMENT '应用秘钥';
+
+alter table instance_statistics add column mem_fragmentation_ratio double default 0 COMMENT '碎片率';
+alter table instance_statistics add column aof_delayed_fsync double default 0 COMMENT 'aof阻塞次数';
 
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
