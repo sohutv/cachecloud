@@ -52,7 +52,7 @@ public class AppClientConnInspector extends BaseAlertService implements Inspecto
             return true;
         }
         // 报警阀值
-        int appClientConnThreshold = ConstUtils.APP_CLIENT_CONN_THRESHOLD;
+        int appClientConnThreshold = getClientConnThreshold(appDetailVO.getAppDesc());
         int appClientConnNum = appDetailVO.getConn();
         // 阀值乘以分片个数
         int instanceCount = appInstanceInfoList.size();
@@ -86,6 +86,17 @@ public class AppClientConnInspector extends BaseAlertService implements Inspecto
             }
         }
         return true;
+    }
+
+    /**
+     * 获取报警阀值(如果用户预设超过系统预设，以系统为准，反之以用户为准)
+     * @param appDesc
+     * @return
+     */
+    private int getClientConnThreshold(AppDesc appDesc) {
+        int userClientConnThreshold = appDesc.getClientConnAlertValue();
+        int systemClientConnThreshold =  ConstUtils.APP_CLIENT_CONN_THRESHOLD;
+        return userClientConnThreshold > systemClientConnThreshold ? systemClientConnThreshold : userClientConnThreshold;
     }
 
     /**

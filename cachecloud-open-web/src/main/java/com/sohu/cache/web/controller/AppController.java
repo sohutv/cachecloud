@@ -840,19 +840,15 @@ public class AppController extends BaseController {
 
     /**
      * 修改应用报警配置
-     *
-     * @param appId 应用id
-     * @return
-     * @memAlertValue 内存报警阀值
      */
     @RequestMapping(value = "/changeAppAlertConfig")
     public ModelAndView doChangeAppAlertConfig(HttpServletRequest request,
-                                               HttpServletResponse response, Model model, Long appId, Integer memAlertValue) {
+                                               HttpServletResponse response, Model model) {
 
-        SuccessEnum result = SuccessEnum.FAIL;
-        if (appId != null && memAlertValue != null) {
-            result = appService.updateMemAlertValue(appId, memAlertValue, getUserInfo(request));
-        }
+        long appId = NumberUtils.toLong(request.getParameter("appId"), -1);
+        int memAlertValue =  NumberUtils.toInt(request.getParameter("memAlertValue"), -1);
+        int clientConnAlertValue =  NumberUtils.toInt(request.getParameter("clientConnAlertValue"), -1);
+        SuccessEnum result = appService.changeAppAlertConfig(appId, memAlertValue,clientConnAlertValue, getUserInfo(request));
         write(response, String.valueOf(result.value()));
         return null;
     }

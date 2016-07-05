@@ -15,7 +15,7 @@ public enum AppAuditLogTypeEnum {
     // 审批
     APP_CHECK(4),
     // 修改报警阀值
-    APP_CHANGE_MEM_ALERT(5),
+    APP_CHANGE_ALERT(5),
     // 清理数据
     APP_CLEAN_DATA(6),
     // 实例配置修改申请

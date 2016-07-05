@@ -318,28 +318,6 @@ public class AppServiceImpl implements AppService {
         return appAudit;
     }
     
-
-    @Override
-    public SuccessEnum updateMemAlertValue(Long appId, Integer memAlertValue, AppUser userInfo) {
-        try {
-            appDao.updateMemAlertValue(appId, memAlertValue);
-
-            //保存日志
-            AppDesc appDesc = appDao.getAppDescById(appId);
-            //修改阀值，保存日志
-            AppAuditLog appAuditLog = AppAuditLog.generate(appDesc, userInfo, 0L,
-                    AppAuditLogTypeEnum.APP_CHANGE_MEM_ALERT);
-            if (appAuditLog != null) {
-                appAuditLogDao.save(appAuditLog);
-            }
-
-            return SuccessEnum.SUCCESS;
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return SuccessEnum.FAIL;
-        }
-    }
-
     @Override
     public SuccessEnum updateRefuseReason(AppAudit appAudit, AppUser userInfo) {
         try {
@@ -452,6 +430,32 @@ public class AppServiceImpl implements AppService {
     public List<AppDesc> getAllAppDesc() {
         return appDao.getAllAppDescList(null);
     }
+    
+    @Override
+    public SuccessEnum changeAppAlertConfig(long appId, int memAlertValue, int clientConnAlertValue, AppUser appUser) {
+        if (appId <= 0 || memAlertValue <= 0 || clientConnAlertValue <= 0) {
+            return SuccessEnum.FAIL;
+        }
+        AppDesc appDesc = appDao.getAppDescById(appId);
+        if (appDesc == null) {
+            return SuccessEnum.FAIL;
+        }
+        try {
+            // 修改报警阀值
+            appDesc.setMemAlertValue(memAlertValue);
+            appDesc.setClientConnAlertValue(clientConnAlertValue);
+            appDao.update(appDesc);
+            // 添加日志
+            AppAuditLog appAuditLog = AppAuditLog.generate(appDesc, appUser, 0L, AppAuditLogTypeEnum.APP_CHANGE_ALERT);
+            if (appAuditLog != null) {
+                appAuditLogDao.save(appAuditLog);
+            }
+            return SuccessEnum.SUCCESS;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return SuccessEnum.FAIL;
+        }
+    }
 
     public void setAppDao(AppDao appDao) {
         this.appDao = appDao;
@@ -492,8 +496,5 @@ public class AppServiceImpl implements AppService {
     public void setAppUserDao(AppUserDao appUserDao) {
         this.appUserDao = appUserDao;
     }
-
-    
-
 
 }

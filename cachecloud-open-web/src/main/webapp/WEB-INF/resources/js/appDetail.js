@@ -29,13 +29,20 @@ function appAlertConfigChange(appId){
 		memAlertValue.focus();
 		return false;
 	}
+	var clientConnAlertValue = document.getElementById("clientConnAlertValue");
+	if(clientConnAlertValue.value == ""){
+		alert("客户端连接数报警阀值不能为空");
+		clientConnAlertValue.focus();
+		return false;
+	}
 	var appConfigChangeBtn = document.getElementById("appConfigChangeBtn");
 	appConfigChangeBtn.disabled = true;
 	$.post(
 		'/admin/app/changeAppAlertConfig.do',
 		{
 			appId: appId,
-			memAlertValue: memAlertValue.value
+			memAlertValue: memAlertValue.value,
+			clientConnAlertValue: clientConnAlertValue.value
 		},
         function(data){
             if(data==1){

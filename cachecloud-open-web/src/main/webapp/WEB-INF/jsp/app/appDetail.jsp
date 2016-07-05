@@ -200,10 +200,19 @@
 								<div class="form-group">
 									<label class="control-label col-md-3">内存报警阀值:</label>
 									<div class="col-md-7">
-										<input type="text" name="memAlertValue" id="memAlertValue" placeholder="内存报警阀值" class="form-control" onchange="testisNum(this.id)">
+										<input type="text" name="memAlertValue" value="${appDetail.appDesc.memAlertValue}" id="memAlertValue" placeholder="内存报警阀值" class="form-control" onchange="testisNum(this.id)">
 										<span class="help-block">例如:如果想内存使用率超过90%报警，填写90<br/><font color="red">(如果不需要报警请填写100以上的数字)</font></span>
 									</div>
 								</div>
+								
+								<div class="form-group">
+									<label class="control-label col-md-3">客户端连接数报警阀值:</label>
+									<div class="col-md-7">
+										<input type="text" name="clientConnAlertValue" value="${appDetail.appDesc.clientConnAlertValue}" id="clientConnAlertValue" placeholder="客户端连接数报警阀值" class="form-control" onchange="testisNum(this.id)">
+										<span class="help-block">例如:如果想客户端连接数率超过2000报警，填写2000</span>
+									</div>
+								</div>
+								
 							</div>
 							<!-- form-body 结束 -->
 						</div>

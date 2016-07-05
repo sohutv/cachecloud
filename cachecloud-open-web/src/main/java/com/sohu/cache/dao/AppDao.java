@@ -77,13 +77,5 @@ public interface AppDao {
      */
     public int getAllAppCount(AppSearch appSearch);
 
-    
-    /**
-     * 更新内存报警阀值
-     * @param appId
-     * @param memAlertValue
-     */
-    public void updateMemAlertValue(@Param("appId") long appId, @Param("memAlertValue") int memAlertValue);
-
 
 }

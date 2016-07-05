@@ -984,7 +984,9 @@ insert into instance_config(config_key,config_value,info,update_time, type, stat
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('aof-load-truncated','yes','加载aof文件时，是否忽略aof文件不完整的情况，是否Redis正常启动',now(),6,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('notify-keyspace-events','','keyspace事件通知功能',now(),6,1);
 
-
+-- change appdesc add 秘钥和客户端连接数报警
+alter table app_desc add column client_conn_alert_value int(11) DEFAULT 2000 COMMENT '客户端连接报警阀值';
+alter table app_desc add column app_key varchar(255) NOT NULL COMMENT '应用秘钥';
 
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

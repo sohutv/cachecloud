@@ -22,6 +22,11 @@ public class AppDesc implements Serializable {
      * 应用id
      */
     private long appId;
+    
+    /**
+     * 应用秘钥
+     */
+    private String appKey;
 
     /**
      * 应用名称
@@ -107,6 +112,11 @@ public class AppDesc implements Serializable {
      * 内存报警阀值
      */
     private int memAlertValue;
+    
+    /**
+     * 客户端连接数报警阀值
+     */
+    private int clientConnAlertValue;
     
     /**
      * 客户端机器机房
@@ -261,6 +271,22 @@ public class AppDesc implements Serializable {
     public void setClientMachineRoom(String clientMachineRoom) {
         this.clientMachineRoom = clientMachineRoom;
     }
+    
+    public String getAppKey() {
+        return appKey;
+    }
+
+    public void setAppKey(String appKey) {
+        this.appKey = appKey;
+    }
+
+    public int getClientConnAlertValue() {
+        return clientConnAlertValue;
+    }
+
+    public void setClientConnAlertValue(int clientConnAlertValue) {
+        this.clientConnAlertValue = clientConnAlertValue;
+    }
 
     /**
      * 应用运行天数
@@ -297,12 +323,13 @@ public class AppDesc implements Serializable {
 
     @Override
     public String toString() {
-        return "AppDesc [appId=" + appId + ", name=" + name + ", userId=" + userId + ", status=" + status + ", intro="
-                + intro + ", createTime=" + createTime + ", passedTime=" + passedTime + ", type=" + type
-                + ", typeDesc=" + typeDesc + ", officer=" + officer + ", verId=" + verId + ", isTest=" + isTest
+        return "AppDesc [appId=" + appId + ", appKey=" + appKey + ", name=" + name + ", userId=" + userId + ", status="
+                + status + ", intro=" + intro + ", createTime=" + createTime + ", passedTime=" + passedTime + ", type="
+                + type + ", typeDesc=" + typeDesc + ", officer=" + officer + ", verId=" + verId + ", isTest=" + isTest
                 + ", hasBackStore=" + hasBackStore + ", needPersistence=" + needPersistence + ", forecaseQps="
                 + forecaseQps + ", needHotBackUp=" + needHotBackUp + ", forecastObjNum=" + forecastObjNum
-                + ", memAlertValue=" + memAlertValue + ", clientMachineRoom=" + clientMachineRoom + "]";
+                + ", memAlertValue=" + memAlertValue + ", clientConnAlertValue=" + clientConnAlertValue
+                + ", clientMachineRoom=" + clientMachineRoom + "]";
     }
 
     public String getStatusDesc() {
