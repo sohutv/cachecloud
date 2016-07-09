@@ -115,8 +115,12 @@
 		        </choose>
         	</when>
         </choose>
-        
     </select>
+    
+    <update id="updateAppKey">
+    	update app_desc set app_key=#{appKey} where app_id=#{appId}
+    </update>
+    
 </mapper>
 
 

@@ -68,10 +68,13 @@ public class AppDeployCenterImpl implements AppDeployCenter {
             appService.save(appDesc);
             // 保存应用和用户的关系
             appService.saveAppToUser(appDesc.getAppId(), appDesc.getUserId());
+            // 更新appKey
+            long appId = appDesc.getAppId();
+            appService.updateAppKey(appId);
 
             // 保存应用审批信息
             AppAudit appAudit = new AppAudit();
-            appAudit.setAppId(appDesc.getAppId());
+            appAudit.setAppId(appId);
             appAudit.setUserId(appUser.getId());
             appAudit.setUserName(appUser.getName());
             appAudit.setModifyTime(new Date());
@@ -82,7 +85,7 @@ public class AppDeployCenterImpl implements AppDeployCenter {
             appAudit.setType(AppAuditType.APP_AUDIT.getValue());
             appAuditDao.insertAppAudit(appAudit);
 
-            // 发邮件 -1表示申请
+            // 发邮件
             appEmailUtil.noticeAppResult(appDesc, appAudit);
 
             // 保存申请日志

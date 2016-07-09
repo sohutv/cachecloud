@@ -203,5 +203,10 @@ public interface AppService {
      */
     SuccessEnum changeAppAlertConfig(long appId, int memAlertValue, int clientConnAlertValue, AppUser appUser);
 
+    /**
+     * 更新appKey
+     * @param appId
+     */
+    void updateAppKey(long appId);
     
 }

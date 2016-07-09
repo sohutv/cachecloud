@@ -143,9 +143,12 @@ public class ImportAppCenterImpl implements ImportAppCenter {
     public boolean importAppAndInstance(AppDesc appDesc, String appInstanceInfo) {
         boolean isSuccess = true;
         try {
-            // 1.保存应用信息
+            // 1.1 保存应用信息
             appService.save(appDesc);
             long appId = appDesc.getAppId();
+            // 1.2 更新appKey
+            appService.updateAppKey(appId);
+
             int type = appDesc.getType();
             // 2.保存应用和用户的关系
             appService.saveAppToUser(appId, appDesc.getUserId());

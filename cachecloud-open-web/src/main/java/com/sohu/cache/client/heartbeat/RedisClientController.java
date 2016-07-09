@@ -43,10 +43,9 @@ public class RedisClientController {
     private ClientVersionService clientVersionService;
 
     /**
-     * 通过appId返回app的信息，包括实例组和心跳检测频率
+     * 通过appId返回RedisCluster实例信息
      *
      * @param appId
-     * @param model
      */
     @RequestMapping(value = "/redis/cluster/{appId}.json")
     public void getClusterAppById(HttpServletRequest request, @PathVariable long appId, Model model) {
@@ -85,10 +84,9 @@ public class RedisClientController {
     }
 
     /**
-     * 通过app和redis-sentinel信息
+     * 通过appId返回RedisSentinel实例信息
      *
      * @param appId
-     * @param model
      */
     @RequestMapping(value = "/redis/sentinel/{appId}.json")
     public void getSentinelAppById(HttpServletRequest request, @PathVariable long appId, Model model) {
@@ -137,10 +135,9 @@ public class RedisClientController {
     }
 
     /**
-     * 通过app和redis-standalone信息
+     * 通过appId返回RedisStandalone实例信息
      *
      * @param appId
-     * @param model
      */
     @RequestMapping(value = "/redis/standalone/{appId}.json")
     public void getStandaloneAppById(HttpServletRequest request, @PathVariable long appId, Model model) {

@@ -77,5 +77,12 @@ public interface AppDao {
      */
     public int getAllAppCount(AppSearch appSearch);
 
+    /**
+     * 更新appKey
+     * @param appId
+     * @param appKey
+     */
+    public void updateAppKey(@Param("appId") long appId, @Param("appKey") String appKey);
+
 
 }
