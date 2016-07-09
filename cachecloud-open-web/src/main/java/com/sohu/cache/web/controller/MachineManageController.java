@@ -1,5 +1,6 @@
 package com.sohu.cache.web.controller;
 
+import com.sohu.cache.constant.MachineInfoEnum;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.entity.InstanceStats;
@@ -86,6 +87,7 @@ public class MachineManageController extends BaseController{
         Date date = new Date();
         machineInfo.setServiceTime(date);
         machineInfo.setModifyTime(date);
+        machineInfo.setAvailable(MachineInfoEnum.AvailableEnum.YES.getValue());
         boolean isSuccess = machineDeployCenter.addMachine(machineInfo);
         model.addAttribute("result", isSuccess);
         return new ModelAndView("");

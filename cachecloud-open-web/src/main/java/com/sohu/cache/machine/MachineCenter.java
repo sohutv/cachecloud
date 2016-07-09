@@ -1,6 +1,6 @@
 package com.sohu.cache.machine;
 
-import com.sohu.cache.constant.MachineTypeEnum;
+import com.sohu.cache.constant.MachineInfoEnum.TypeEnum;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.entity.InstanceStats;
 import com.sohu.cache.entity.MachineInfo;
@@ -159,9 +159,9 @@ public interface MachineCenter {
 
     /**
      * 根据机器类型获取机器列表
-     * @param machineTypeEnum
+     * @param typeEnum
      * @return
      */
-    List<MachineInfo> getMachineInfoByType(MachineTypeEnum machineTypeEnum);
+    List<MachineInfo> getMachineInfoByType(TypeEnum typeEnum);
     
 }

@@ -31,10 +31,10 @@
     <select id="getMachineInfoByLikeIp" resultType="MachineInfo">
         select
           id, modify_time, <include refid="machine_info_columns"/>
-        from machine_info
+        from machine_info where available = 1
         <choose>
             <when test="ipLike != '' and ipLike != null">
-                where ip like '%${ipLike}%'
+                and ip like '%${ipLike}%'
             </when>
         </choose>
     </select>
@@ -51,17 +51,16 @@
         warn=#{warn},available=#{available},type=#{type},groupId=#{groupId},extra_desc=#{extraDesc}
     </insert>
     
-    <!--根据ip删除一台机器的信息-->
-    <delete id="removeMachineInfoByIp" parameterType="string">
-        DELETE FROM machine_info
-        WHERE ip = #{ip}
-    </delete>
+    <!--根据ip删除一台机器的信息:置无效-->
+    <update id="removeMachineInfoByIp" parameterType="string">
+        update machine_info set available = 0 WHERE ip = #{ip}
+    </update>
     
     <!--通过type查找机器-->
     <select id="getMachineInfoByType" resultType="MachineInfo">
         select
           id, modify_time, <include refid="machine_info_columns"/>
-        from machine_info where type = #{type}
+        from machine_info where type = #{type} and available = 1
     </select>
     
     <!-- 更新机器类型 -->

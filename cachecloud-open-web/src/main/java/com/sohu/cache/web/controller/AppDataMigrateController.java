@@ -19,7 +19,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.sohu.cache.constant.MachineTypeEnum;
+import com.sohu.cache.constant.MachineInfoEnum;
 import com.sohu.cache.constant.AppDataMigrateEnum;
 import com.sohu.cache.constant.AppDataMigrateResult;
 import com.sohu.cache.constant.RedisMigrateToolConstant;
@@ -64,7 +64,7 @@ public class AppDataMigrateController extends BaseController {
      */
     @RequestMapping(value = "/init")
     public ModelAndView init(HttpServletRequest request, HttpServletResponse response, Model model) {
-        List<MachineInfo> machineInfoList = machineCenter.getMachineInfoByType(MachineTypeEnum.REDIS_MIGRATE_TOOL);
+        List<MachineInfo> machineInfoList = machineCenter.getMachineInfoByType(MachineInfoEnum.TypeEnum.REDIS_MIGRATE_TOOL);
         model.addAttribute("machineInfoList", machineInfoList);
         return new ModelAndView("migrate/init");
     }

@@ -991,6 +991,8 @@ alter table app_desc add column app_key varchar(255) DEFAULT NULL COMMENT '应�
 alter table instance_statistics add column mem_fragmentation_ratio double default 0 COMMENT '碎片率';
 alter table instance_statistics add column aof_delayed_fsync int default 0 COMMENT 'aof阻塞次数';
 
+update machine_info set available=1;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

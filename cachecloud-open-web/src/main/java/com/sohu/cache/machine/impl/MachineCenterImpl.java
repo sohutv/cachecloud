@@ -3,7 +3,7 @@ package com.sohu.cache.machine.impl;
 import com.google.common.base.Strings;
 import com.sohu.cache.constant.InstanceStatusEnum;
 import com.sohu.cache.constant.MachineConstant;
-import com.sohu.cache.constant.MachineTypeEnum;
+import com.sohu.cache.constant.MachineInfoEnum.TypeEnum;
 import com.sohu.cache.dao.InstanceDao;
 import com.sohu.cache.dao.InstanceStatsDao;
 import com.sohu.cache.dao.MachineDao;
@@ -577,9 +577,9 @@ public class MachineCenterImpl implements MachineCenter {
     }
     
     @Override
-    public List<MachineInfo> getMachineInfoByType(MachineTypeEnum machineTypeEnum) {
+    public List<MachineInfo> getMachineInfoByType(TypeEnum typeEnum) {
         try {
-            return machineDao.getMachineInfoByType(machineTypeEnum.getType());
+            return machineDao.getMachineInfoByType(typeEnum.getType());
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return Collections.emptyList();

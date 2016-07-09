@@ -3,8 +3,6 @@ package com.sohu.cache.entity;
 
 import java.util.Date;
 
-import com.sohu.cache.util.ConstUtils;
-
 /**
  * 机器的属性信息
  *
@@ -19,12 +17,12 @@ public class MachineInfo {
     /**
      * ssh用户名
      */
-    private String sshUser= ConstUtils.USERNAME;
+    private String sshUser;
     
     /**
      * ssh密码
      */
-    private String sshPasswd=ConstUtils.PASSWORD;
+    private String sshPasswd;
     
     /**
      * ip地址
@@ -77,12 +75,12 @@ public class MachineInfo {
     private int warn;
     
     /**
-     * 是否可用，0否，1是
+     * 是否可用，MachineInfoEnum.AvailableEnum
      */
     private int available;
     
     /**
-     * 机器资源的类型，0表示我们提供的原生资源，其它整数对应外部应用提供的机器资源池
+     * 机器类型：详见MachineInfoEnum.TypeEnum
      */
     private int type;           
     
