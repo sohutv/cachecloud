@@ -1,3 +1,28 @@
+function removeMachine(id, ip) {
+	var removeMachineBtn = document.getElementById(id);
+	removeMachineBtn.disabled = true;
+	$.get(
+		'/manage/machine/checkMachineInstances.json',
+		{
+			ip: ip,
+		},
+        function(data){
+			var machineHasInstance = data.machineHasInstance;
+			var alertMsg;
+			if (machineHasInstance == true) {
+				alertMsg = "该机器ip=" + ip + "还有运行中的Redis节点,确认要删除吗？";
+			} else {
+				alertMsg = "确认要删除ip=" + ip + "吗?";
+			}
+			if (confirm(alertMsg)) {
+				location.href = "/manage/machine/delete.do?machineIp="+ip;
+			} else {
+				removeMachineBtn.disabled = false;
+			}
+        }
+     );
+}
+
 function saveOrUpdateMachine(machineId){
 	var ip = document.getElementById("ip" + machineId);
 	var room = document.getElementById("room" + machineId);

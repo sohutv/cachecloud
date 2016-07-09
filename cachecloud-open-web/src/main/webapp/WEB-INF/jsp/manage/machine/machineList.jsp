@@ -162,9 +162,12 @@
 										</c:if>
 										</th>
                                         <td>
-                                            <a href="javascript;" data-target="#addMachineModal${machine.info.id}" data-toggle="modal">[修改]</a>
+                                            <a href="javascript;" data-target="#addMachineModal${machine.info.id}" class="btn btn-info" data-toggle="modal">修改</a>
                                             &nbsp;
-                                            <a onclick="if(window.confirm('确认要删除ip=${machine.info.ip}的机器吗?!')){return true;}else{return false;}" href="/manage/machine/delete.do?machineIp=${machine.info.ip}">[删除]</a>
+                                            
+                                            <button id="removeMachineBtn${machine.info.id}" onclick="removeMachine(this.id,'${machine.info.ip}')" type="button" class="btn btn-info">删除</button>               
+                                            
+                                            
                                         </td>
 									</tr>
 								</c:forEach>

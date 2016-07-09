@@ -233,9 +233,9 @@ public class AppDeployCenterImpl implements AppDeployCenter {
             return DataFormatCheckResult.fail("应用部署格式错误, Sentinel应用中Redis数据节点只能有一行!");
         }  
         
-        // sentinel节点至少三个
-        if (sentinelLineNum < 3) {
-            return DataFormatCheckResult.fail("应用部署格式错误, Sentinel应用中Sentinel节点至少要有三个!");
+        // sentinel节点至少有1个
+        if (sentinelLineNum < 1) {
+            return DataFormatCheckResult.fail("应用部署格式错误, Sentinel应用中Sentinel节点至少要有1个!");
         }
         return DataFormatCheckResult.success("应用部署格式正确，可以开始部署了!");
     }
