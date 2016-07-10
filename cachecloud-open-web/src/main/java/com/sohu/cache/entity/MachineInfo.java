@@ -3,6 +3,8 @@ package com.sohu.cache.entity;
 
 import java.util.Date;
 
+import com.sohu.cache.constant.MachineInfoEnum;
+
 /**
  * 机器的属性信息
  *
@@ -251,5 +253,13 @@ public class MachineInfo {
                 ", groupId=" + groupId +
                 ", extraDesc=" + extraDesc +
                 '}';
+    }
+
+    /**
+     * 判断机器是否已经下线
+     * @return
+     */
+    public boolean isOffline() {
+        return MachineInfoEnum.AvailableEnum.NO.getValue() == this.available;
     }
 }

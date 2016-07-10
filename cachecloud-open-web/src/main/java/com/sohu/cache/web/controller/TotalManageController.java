@@ -12,7 +12,6 @@ import com.sohu.cache.entity.*;
 import com.sohu.cache.machine.MachineCenter;
 import com.sohu.cache.stats.app.AppStatsCenter;
 import com.sohu.cache.stats.instance.InstanceStatsCenter;
-import com.sohu.cache.stats.machine.MachineStatsCenter;
 import com.sohu.cache.web.vo.AppDetailVO;
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.stereotype.Controller;
@@ -37,9 +36,6 @@ public class TotalManageController extends BaseController {
 
     @Resource
     private MachineCenter machineCenter;
-
-    @Resource
-    private MachineStatsCenter machineStatsCenter;
 
     @Resource
     private InstanceStatsCenter instanceStatsCenter;

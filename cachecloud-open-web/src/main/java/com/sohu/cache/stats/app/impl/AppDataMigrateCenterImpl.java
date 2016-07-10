@@ -136,6 +136,8 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
             MachineInfo machineInfo = machineCenter.getMachineInfoByIp(migrateMachineIp);
             if (machineInfo == null) {
                 return AppDataMigrateResult.fail(migrateMachineIp + "没有在机器管理列表中");
+            } else if (machineInfo.isOffline()) {
+                return AppDataMigrateResult.fail(migrateMachineIp + ",该机器已经被删除");
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

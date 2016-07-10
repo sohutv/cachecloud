@@ -254,6 +254,10 @@ public class AppDeployCenterImpl implements AppDeployCenter {
             if (machineInfo == null) {
                 return false;
             }
+            if (machineInfo.isOffline()) {
+                logger.warn("host {} is offline", host);
+                return false;
+            }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return false;

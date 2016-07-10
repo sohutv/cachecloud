@@ -83,6 +83,8 @@ public class ImportAppCenterImpl implements ImportAppCenter {
                 MachineInfo machineInfo = machineCenter.getMachineInfoByIp(ip);
                 if (machineInfo == null) {
                     return ImportAppResult.fail(appInstance + "中的ip不存在");
+                } else if (machineInfo.isOffline()) {
+                    return ImportAppResult.fail(appInstance + "中的ip已经被删除");
                 }
             } catch (Exception e) {
                 return ImportAppResult.fail(appInstance + "中的ip不存在");
