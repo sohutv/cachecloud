@@ -42,17 +42,35 @@ public class RedisClientController {
     @Resource(name = "clientVersionService")
     private ClientVersionService clientVersionService;
 
+    
     /**
      * 通过appId返回RedisCluster实例信息
      *
      * @param appId
      */
     @RequestMapping(value = "/redis/cluster/{appId}.json")
-    public void getClusterAppById(HttpServletRequest request, @PathVariable long appId, Model model) {
-        if (!handleRedisApp(appId, model, ConstUtils.CACHE_TYPE_REDIS_CLUSTER)) {
+    public void getClusterByAppIdAndKey(HttpServletRequest request, @PathVariable long appId, Model model) {
+        if (!handleRedisApp(appId, request, model, ConstUtils.CACHE_TYPE_REDIS_CLUSTER, false)) {
             return;
         }
+        getRedisClusterInfo(request, appId, model);
+    }
+    
+    /**
+     * 通过appId返回RedisCluster实例信息(要求有appkey)
+     *
+     * @param appId
+     */
+    @RequestMapping(value = "/redis/cluster/safe/{appId}.json")
+    public void getClusterAppById(HttpServletRequest request, @PathVariable long appId, Model model) {
+        if (!handleRedisApp(appId, request, model, ConstUtils.CACHE_TYPE_REDIS_CLUSTER, true)) {
+            return;
+        }
+        getRedisClusterInfo(request, appId, model);
+        
+    }
 
+    private void getRedisClusterInfo(HttpServletRequest request, long appId, Model model) {
         String clientVersion = request.getParameter("clientVersion");
         if (!checkClientVersion(clientVersion, model)) {
             return;
@@ -90,10 +108,27 @@ public class RedisClientController {
      */
     @RequestMapping(value = "/redis/sentinel/{appId}.json")
     public void getSentinelAppById(HttpServletRequest request, @PathVariable long appId, Model model) {
-        if (!handleRedisApp(appId, model, ConstUtils.CACHE_REDIS_SENTINEL)) {
+        if (!handleRedisApp(appId, request, model, ConstUtils.CACHE_REDIS_SENTINEL, false)) {
             return;
         }
+        getRedisSentinelInfo(request, appId, model);
+    }
+    
+    
+    /**
+     * 通过appId返回RedisSentinel实例信息(要求有appkey)
+     *
+     * @param appId
+     */
+    @RequestMapping(value = "/redis/sentinel/safe/{appId}.json")
+    public void getSentinelByAppIdAndKey(HttpServletRequest request, @PathVariable long appId, Model model) {
+        if (!handleRedisApp(appId, request, model, ConstUtils.CACHE_REDIS_SENTINEL, true)) {
+            return;
+        }
+        getRedisSentinelInfo(request, appId, model);
+    }
 
+    private void getRedisSentinelInfo(HttpServletRequest request, long appId, Model model) {
         String clientVersion = request.getParameter("clientVersion");
         if (!checkClientVersion(clientVersion, model)) {
             return;
@@ -141,10 +176,28 @@ public class RedisClientController {
      */
     @RequestMapping(value = "/redis/standalone/{appId}.json")
     public void getStandaloneAppById(HttpServletRequest request, @PathVariable long appId, Model model) {
-        if (!handleRedisApp(appId, model, ConstUtils.CACHE_REDIS_STANDALONE)) {
+        if (!handleRedisApp(appId, request, model, ConstUtils.CACHE_REDIS_STANDALONE, false)) {
             return;
         }
+        getRedisStandaloneInfo(request, appId, model);
+        
+    }
+    
+    /**
+     * 通过appId返回RedisStandalone实例信息
+     *
+     * @param appId
+     */
+    @RequestMapping(value = "/redis/standalone/safe/{appId}.json")
+    public void getStandaloneByAppIdAndKey(HttpServletRequest request, @PathVariable long appId, Model model) {
+        if (!handleRedisApp(appId, request, model, ConstUtils.CACHE_REDIS_STANDALONE, true)) {
+            return;
+        }
+        getRedisStandaloneInfo(request, appId, model);
+        
+    }
 
+    private void getRedisStandaloneInfo(HttpServletRequest request, long appId, Model model) {
         String clientVersion = request.getParameter("clientVersion");
         if (!checkClientVersion(clientVersion, model)) {
             return;
@@ -168,8 +221,17 @@ public class RedisClientController {
             logger.error("redisStandalone heart error:" + e.getMessage(), e);
         }
     }
-
-    private boolean handleRedisApp(long appId, Model model, int type) {
+    
+    /**
+     * 检查客户端相关参数
+     * @param appId 应用id
+     * @param request
+     * @param model
+     * @param type 应用类型
+     * @param isCheckAppKey 是否检测appKey
+     * @return
+     */
+    private boolean handleRedisApp(long appId, HttpServletRequest request, Model model, int type, boolean isCheckAppKey) {
         AppDesc appDesc = appDao.getAppDescById(appId);
 
         if (appDesc == null) {
@@ -180,6 +242,18 @@ public class RedisClientController {
             model.addAttribute("status", ClientStatusEnum.ERROR.getStatus());
             model.addAttribute("message", String.format("appId:%s 类型不符,期望类型:%s,实际类型%s,请联系管理员!", appId, type, appDesc.getType()));
             return false;
+        } else if (isCheckAppKey) {
+            String appKey = request.getParameter("appKey");
+            if (StringUtils.isBlank(appKey)) {
+                model.addAttribute("status", ClientStatusEnum.ERROR.getStatus());
+                model.addAttribute("message", String.format("appKey:%s为空", appKey));
+                return false;
+            }
+            if (!appDesc.getAppKey().equals(appKey)) {
+                model.addAttribute("status", ClientStatusEnum.ERROR.getStatus());
+                model.addAttribute("message", String.format("appKey:%s错误", appKey));
+                return false;
+            }
         }
         return true;
     }
