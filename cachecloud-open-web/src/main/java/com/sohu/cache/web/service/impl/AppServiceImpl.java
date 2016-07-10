@@ -3,6 +3,7 @@ package com.sohu.cache.web.service.impl;
 import com.sohu.cache.constant.*;
 import com.sohu.cache.dao.*;
 import com.sohu.cache.entity.*;
+import com.sohu.cache.machine.MachineCenter;
 import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.util.AppKeyUtil;
 import com.sohu.cache.util.TypeUtil;
@@ -63,7 +64,7 @@ public class AppServiceImpl implements AppService {
 
     private RedisCenter redisCenter;
 
-    private MachineDao machineDao;
+    private MachineCenter machineCenter;
     
     private MachineStatsDao machineStatsDao;
     
@@ -381,8 +382,12 @@ public class AppServiceImpl implements AppService {
             int memoryHost = instanceDao.getMemoryByHost(ip);
             machineStats.setMemoryAllocated(memoryHost);
             //机器信息
-            MachineInfo machineInfo = machineDao.getMachineInfoByIp(ip);
+            MachineInfo machineInfo = machineCenter.getMachineInfoByIp(ip);
             if (machineInfo == null) {
+                continue;
+            }
+            //下线机器不展示
+            if (machineInfo.isOffline()) {
                 continue;
             }
             machineStats.setInfo(machineInfo);
@@ -491,8 +496,8 @@ public class AppServiceImpl implements AppService {
         this.redisCenter = redisCenter;
     }
 
-    public void setMachineDao(MachineDao machineDao) {
-        this.machineDao = machineDao;
+    public void setMachineCenter(MachineCenter machineCenter) {
+        this.machineCenter = machineCenter;
     }
 
     public void setMachineStatsDao(MachineStatsDao machineStatsDao) {
