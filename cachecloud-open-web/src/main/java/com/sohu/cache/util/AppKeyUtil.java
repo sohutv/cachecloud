@@ -13,15 +13,10 @@ import org.springframework.util.DigestUtils;
  */
 public class AppKeyUtil {
 
-    /**
-     * 浮动key
-     */
-    private static final String BASE_KEY = "cachecloud-2014";
-
     public static String genSecretKey(long appId) {
         StringBuilder key = new StringBuilder();
         // 相关参数
-        key.append(appId).append(BASE_KEY);
+        key.append(appId).append(ConstUtils.APP_SECRET_BASE_KEY);
         // 转成char[]
         char[] strs = key.toString().toCharArray();
         // 排序

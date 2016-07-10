@@ -125,7 +125,6 @@
 													<a onclick="if(window.confirm('确认要通过该申请请求吗?')){return true;}else{return false;}" href="${auditUrl}">[通过]</a>
 												</c:when>
 											</c:choose>
-											&nbsp;
 											<c:choose>
 												<c:when test="${item.status == 0}">
 													<a href="javascript:void(0);" data-target="#appRefuseModal${item.id}" data-toggle="modal">[驳回]</a>

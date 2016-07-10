@@ -246,12 +246,12 @@ public class RedisClientController {
             String appKey = request.getParameter("appKey");
             if (StringUtils.isBlank(appKey)) {
                 model.addAttribute("status", ClientStatusEnum.ERROR.getStatus());
-                model.addAttribute("message", String.format("appKey:%s为空", appKey));
+                model.addAttribute("message", String.format("appId=%s,appKey参数为空", appId));
                 return false;
             }
-            if (!appDesc.getAppKey().equals(appKey)) {
+            if (!appKey.equals(appDesc.getAppKey())) {
                 model.addAttribute("status", ClientStatusEnum.ERROR.getStatus());
-                model.addAttribute("message", String.format("appKey:%s错误", appKey));
+                model.addAttribute("message", String.format("appId=%s,appKey:%s错误,与服务端不匹配", appId, appKey));
                 return false;
             }
         }

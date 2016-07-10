@@ -223,6 +223,13 @@ public class ConstUtils {
     public static boolean DEFAULT_WHETHER_SCHEDULE_CLEAN_DATA = false;
     public static boolean WHETHER_SCHEDULE_CLEAN_DATA = DEFAULT_WHETHER_SCHEDULE_CLEAN_DATA;
     
+    
+    /**
+     * appkey秘钥
+     */
+    public static String DEFAULT_APP_SECRET_BASE_KEY = "cachecloud-2014";
+    public static String APP_SECRET_BASE_KEY = DEFAULT_APP_SECRET_BASE_KEY;
+    
     static {
         ResourceBundle applicationResourceBundle = ResourceBundle.getBundle("application");
         IS_DEBUG = "true".equals(applicationResourceBundle.getString("isDebug"));

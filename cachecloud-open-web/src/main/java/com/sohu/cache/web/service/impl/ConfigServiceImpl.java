@@ -164,6 +164,9 @@ public class ConfigServiceImpl implements ConfigService {
         ConstUtils.WHETHER_SCHEDULE_CLEAN_DATA = MapUtils.getBooleanValue(configMap, "cachecloud.whether.schedule.clean.data", ConstUtils.DEFAULT_WHETHER_SCHEDULE_CLEAN_DATA);
         logger.info("{}: {}", "ConstUtils.WHETHER_SCHEDULE_CLEAN_DATA", ConstUtils.WHETHER_SCHEDULE_CLEAN_DATA);
         
+        // app secret key
+        ConstUtils.APP_SECRET_BASE_KEY = MapUtils.getString(configMap, "cachecloud.app.secret.base.key", ConstUtils.APP_SECRET_BASE_KEY);
+        logger.info("{}: {}", "ConstUtils.APP_SECRET_KEY", ConstUtils.APP_SECRET_BASE_KEY);
         
         logger.info("===========ConfigServiceImpl reload config end============");
     }
