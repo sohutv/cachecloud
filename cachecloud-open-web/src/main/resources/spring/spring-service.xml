@@ -26,9 +26,6 @@
     <!--app deloy接口-->
     <bean id="appDeployCenter" class="com.sohu.cache.stats.app.impl.AppDeployCenterImpl"/>
 
-    <!--基于机器的统计的接口-->
-    <bean id="machineStatsCenter" class="com.sohu.cache.stats.machine.impl.MachineStatsCenterImpl"/>
-
     <bean id="redisDeployCenter" class="com.sohu.cache.redis.impl.RedisDeployCenterImpl"/>
 
     <bean id="machineDeployCenter" class="com.sohu.cache.machine.impl.MachineDeployCenterImpl"/>
