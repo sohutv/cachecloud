@@ -11,7 +11,7 @@ import com.sohu.cache.redis.impl.RedisCenterImpl;
 public class AsyncThreadPoolFactory {
 
     public static final ThreadPoolExecutor CLIENT_REPORT_THREAD_POOL =
-            new ThreadPoolExecutor(30, 30, 0L, TimeUnit.MILLISECONDS,
+            new ThreadPoolExecutor(80, 80, 0L, TimeUnit.MILLISECONDS,
                     new SynchronousQueue<Runnable>(), new NamedThreadFactory(
                             ClientReportDataServiceImpl.CLIENT_REPORT_POOL, true));
     
