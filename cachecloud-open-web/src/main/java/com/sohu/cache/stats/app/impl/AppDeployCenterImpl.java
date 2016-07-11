@@ -229,16 +229,18 @@ public class AppDeployCenterImpl implements AppDeployCenter {
                 sentinelLineNum++;
             }
         }
-        // redis节点只有一行
-        if (redisLineNum < 1) {
+        // redis节点只有redisLineMustNum行
+        final int redisLineMustNum = 1;
+        if (redisLineNum < redisLineMustNum) {
             return DataFormatCheckResult.fail("应用部署格式错误, Sentinel应用中必须有Redis数据节点!");
-        } else if (redisLineNum > 1) {
+        } else if (redisLineNum > redisLineMustNum) {
             return DataFormatCheckResult.fail("应用部署格式错误, Sentinel应用中Redis数据节点只能有一行!");
         }  
         
-        // sentinel节点至少有1个
-        if (sentinelLineNum < 1) {
-            return DataFormatCheckResult.fail("应用部署格式错误, Sentinel应用中Sentinel节点至少要有1个!");
+        // sentinel节点至少有sentinelLessNum个
+        final int sentinelLessNum = 3;
+        if (sentinelLineNum < sentinelLessNum) {
+            return DataFormatCheckResult.fail("应用部署格式错误, Sentinel应用中Sentinel节点至少要有" + sentinelLessNum + "个!");
         }
         return DataFormatCheckResult.success("应用部署格式正确，可以开始部署了!");
     }
