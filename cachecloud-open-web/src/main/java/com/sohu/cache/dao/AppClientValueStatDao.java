@@ -37,4 +37,11 @@ public interface AppClientValueStatDao {
      */
     int save(AppClientValueDistriStatTotal appClientValueDistriStatTotal);
 
+    /**
+     * 删除指定收集时间前的数据
+     * @param collectTime
+     * @return
+     */
+    int deleteBeforeCollectTime(@Param("collectTime") long collectTime);
+
 }

@@ -31,7 +31,7 @@ public class CleanUpStatisticsJob extends CacheBaseJob {
     private static final String CLEAN_APP_MINUTE_STATISTICS = "delete from app_minute_statistics where create_time < ?";
 
     /**
-     * 清除客户端数据
+     * 清除客户端耗时汇总数据
      */
     private static final String CLEAN_APP_CLIENT_MINUTE_COST_TOTAL = "delete from app_client_costtime_minute_stat_total where collect_time < ?";
     
@@ -65,26 +65,30 @@ public class CleanUpStatisticsJob extends CacheBaseJob {
             cleanCount = jdbcTemplate.update(CLEAN_APP_MINUTE_STATISTICS, time);
             logger.warn("clean_app_minute_statistics count={}", cleanCount);
             
-            //清除客户端数据
+            //清除客户端耗时数据(保存2天)
             ClientReportCostDistriService clientReportCostDistriService = applicationContext.getBean(
                     "clientReportCostDistriService", ClientReportCostDistriService.class);
             calendar.setTime(new Date());
             calendar.add(Calendar.DAY_OF_MONTH, -2);
-            long timeFormat = NumberUtils.toLong(new SimpleDateFormat("yyyyMMddHHmmss").format(calendar.getTime()));
+            long timeFormat = NumberUtils.toLong(new SimpleDateFormat("yyyyMMddHHmm00").format(calendar.getTime()));
             cleanCount = clientReportCostDistriService.deleteBeforeCollectTime(timeFormat);
             logger.warn("clean_app_client_costtime_minute_stat count={}", cleanCount);
             
-            
-            ClientReportValueDistriService clientReportValueDistriServiceV2 = applicationContext.getBean(
-                    "clientReportValueDistriServiceV2", ClientReportValueDistriService.class);
-            cleanCount = clientReportValueDistriServiceV2.deleteBeforeCollectTime(timeFormat);
-            logger.warn("clean_app_client_value_minute_stats count={}", cleanCount);
-            
+            //清除客户端耗时汇总数据(保存14天)
             calendar.setTime(new Date());
             calendar.add(Calendar.DAY_OF_MONTH, -14);
-            timeFormat = NumberUtils.toLong(new SimpleDateFormat("yyyyMMddHHmmss").format(calendar.getTime()));
+            timeFormat = NumberUtils.toLong(new SimpleDateFormat("yyyyMMddHHmm00").format(calendar.getTime()));
             cleanCount = jdbcTemplate.update(CLEAN_APP_CLIENT_MINUTE_COST_TOTAL, timeFormat);
             logger.warn("clean_app_client_costtime_minute_stat_total count={}", cleanCount);
+            
+            //清除客户端值数据(保存2天)
+            ClientReportValueDistriService clientReportValueDistriService = applicationContext.getBean(
+                    "clientReportValueDistriService", ClientReportValueDistriService.class);
+            calendar.setTime(new Date());
+            calendar.add(Calendar.DAY_OF_MONTH, -2);
+            timeFormat = NumberUtils.toLong(new SimpleDateFormat("yyyyMMddHHmm00").format(calendar.getTime()));
+            cleanCount = clientReportValueDistriService.deleteBeforeCollectTime(timeFormat);
+            logger.warn("clean_app_client_value_minute_stats count={}", cleanCount);
             
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

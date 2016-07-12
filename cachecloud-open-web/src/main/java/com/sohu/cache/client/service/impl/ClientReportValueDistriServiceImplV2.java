@@ -148,7 +148,12 @@ public class ClientReportValueDistriServiceImplV2 implements ClientReportValueDi
 
     @Override
     public int deleteBeforeCollectTime(long collectTime) {
-        return 0;
+        try {
+            return appClientValueStatDao.deleteBeforeCollectTime(collectTime);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return -1;
+        }
     }
 
     public void setClientReportInstanceService(ClientReportInstanceService clientReportInstanceService) {

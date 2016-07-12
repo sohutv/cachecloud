@@ -17,7 +17,7 @@
 	<bean id="clientReportExceptionService"
 		class="com.sohu.cache.client.service.impl.ClientReportExceptionServiceImpl" />
 	<!-- 值分布 -->
-	<bean id="clientReportValueDistriServiceV2"
+	<bean id="clientReportValueDistriService"
 		class="com.sohu.cache.client.service.impl.ClientReportValueDistriServiceImplV2" />
 	<!-- 客户端统计map大小统计，防止内存泄露 -->
 	<bean id="clientReportDataSizeService"

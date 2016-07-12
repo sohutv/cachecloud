@@ -30,5 +30,9 @@
         group by distribute_type order by distribute_type
     </select>
     
+    <delete id="deleteBeforeCollectTime">
+    	delete from app_client_value_minute_stats where collect_time &lt;#{collectTime}
+    </delete>
+    
 
 </mapper>

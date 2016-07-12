@@ -64,8 +64,8 @@ public class AppClientDataShowController extends BaseController {
     /**
      * 客户端值分布服务
      */
-    @Resource(name = "clientReportValueDistriServiceV2")
-    private ClientReportValueDistriService clientReportValueDistriServiceV2;
+    @Resource(name = "clientReportValueDistriService")
+    private ClientReportValueDistriService clientReportValueDistriService;
     
     /**
      * 应用基本服务
@@ -366,7 +366,7 @@ public class AppClientDataShowController extends BaseController {
         long endTime = timeBetween.getEndTime();
         
         //值分布列表
-        List<AppClientValueDistriSimple> appClientValueDistriSimpleList = clientReportValueDistriServiceV2.getAppValueDistriList(appId, startTime, endTime);
+        List<AppClientValueDistriSimple> appClientValueDistriSimpleList = clientReportValueDistriService.getAppValueDistriList(appId, startTime, endTime);
         model.addAttribute("appClientValueDistriSimpleList", appClientValueDistriSimpleList);
         
         //值分布json

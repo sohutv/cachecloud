@@ -32,7 +32,7 @@ public class ClientReportDataServiceImpl implements ClientReportDataService {
     
     private ClientReportCostDistriService clientReportCostDistriService;
     
-    private ClientReportValueDistriService clientReportValueDistriServiceV2;
+    private ClientReportValueDistriService clientReportValueDistriService;
     
     private ClientReportExceptionService clientReportExceptionService;
     
@@ -63,7 +63,7 @@ public class ClientReportDataServiceImpl implements ClientReportDataService {
                     try {
                         
                         clientReportCostDistriService.batchSave(clientReportBean);
-                        clientReportValueDistriServiceV2.batchSave(clientReportBean);
+                        clientReportValueDistriService.batchSave(clientReportBean);
                         clientReportExceptionService.batchSave(clientReportBean);
                         clientReportDataSizeService.save(clientReportBean);
                         return true;
@@ -79,8 +79,6 @@ public class ClientReportDataServiceImpl implements ClientReportDataService {
             return false;
         }
     }
-    
-    
 
     public void setAsyncService(AsyncService asyncService) {
         this.asyncService = asyncService;
@@ -98,12 +96,8 @@ public class ClientReportDataServiceImpl implements ClientReportDataService {
         this.clientReportDataSizeService = clientReportDataSizeService;
     }
 
-    public void setClientReportValueDistriServiceV2(ClientReportValueDistriService clientReportValueDistriServiceV2) {
-        this.clientReportValueDistriServiceV2 = clientReportValueDistriServiceV2;
+    public void setClientReportValueDistriService(ClientReportValueDistriService clientReportValueDistriService) {
+        this.clientReportValueDistriService = clientReportValueDistriService;
     }
-    
-
-    
-
 
 }
