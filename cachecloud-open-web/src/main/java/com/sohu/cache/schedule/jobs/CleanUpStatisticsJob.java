@@ -75,10 +75,10 @@ public class CleanUpStatisticsJob extends CacheBaseJob {
             logger.warn("clean_app_client_costtime_minute_stat count={}", cleanCount);
             
             
-            ClientReportValueDistriService clientReportValueDistriService = applicationContext.getBean(
-                    "clientReportValueDistriService", ClientReportValueDistriService.class);
-            cleanCount = clientReportValueDistriService.deleteBeforeCollectTime(timeFormat);
-            logger.warn("clean_app_client_value_distri_minute_stat count={}", cleanCount);
+            ClientReportValueDistriService clientReportValueDistriServiceV2 = applicationContext.getBean(
+                    "clientReportValueDistriServiceV2", ClientReportValueDistriService.class);
+            cleanCount = clientReportValueDistriServiceV2.deleteBeforeCollectTime(timeFormat);
+            logger.warn("clean_app_client_value_minute_stats count={}", cleanCount);
             
             calendar.setTime(new Date());
             calendar.add(Calendar.DAY_OF_MONTH, -14);

@@ -32,8 +32,6 @@ public class ClientReportDataServiceImpl implements ClientReportDataService {
     
     private ClientReportCostDistriService clientReportCostDistriService;
     
-//    private ClientReportValueDistriService clientReportValueDistriService;
-    
     private ClientReportValueDistriService clientReportValueDistriServiceV2;
     
     private ClientReportExceptionService clientReportExceptionService;
