@@ -45,6 +45,10 @@ public class ConstUtils {
     public static final String PORT_KEY = "port_key";
     public static final String APP_KEY = "app_key";
     public static final String HOST_ID_KEY = "host_id_key";
+    // server job/trigger name/group
+    public static final String SERVER_JOB_NAME = "serverJob";
+    public static final String SERVER_JOB_GROUP = "server";
+    public static final String SERVER_TRIGGER_GROUP = "server-";
 
     //mysql收集数据的时间字段
     public static final String COLLECT_TIME = "CollectTime";
