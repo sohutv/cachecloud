@@ -40,4 +40,13 @@
     
     <bean id="redisConfigTemplateService" class="com.sohu.cache.redis.impl.RedisConfigTemplateServiceImpl"/>
 
+    <!-- 服务器状况服务 -->
+    <bean id="nmonService" class="com.sohu.cache.server.nmon.NMONService"/>
+    
+    <bean id="sshTemplate" class="com.sohu.cache.ssh.SSHTemplate"/>
+    
+    <bean id="serverStatusCollector" class="com.sohu.cache.server.ServerStatusCollector"/>
+    
+    <bean id="serverDataService" class="com.sohu.cache.web.service.impl.ServerDataServiceImpl"/>
+
 </beans>

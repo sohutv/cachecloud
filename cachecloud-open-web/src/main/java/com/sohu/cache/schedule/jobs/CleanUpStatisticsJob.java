@@ -35,6 +35,9 @@ public class CleanUpStatisticsJob extends CacheBaseJob {
      */
     private static final String CLEAN_APP_CLIENT_MINUTE_COST_TOTAL = "delete from app_client_costtime_minute_stat_total where collect_time < ?";
     
+    //清除服务器统计数据
+    private static final String CLEAN_SERVER_STAT_STATISTICS = "delete from server_stat where cdate < ?";
+    
     @Override
     public void action(JobExecutionContext context) {
         if (!ConstUtils.WHETHER_SCHEDULE_CLEAN_DATA) {
@@ -90,6 +93,12 @@ public class CleanUpStatisticsJob extends CacheBaseJob {
             cleanCount = clientReportValueDistriService.deleteBeforeCollectTime(timeFormat);
             logger.warn("clean_app_client_value_minute_stats count={}", cleanCount);
             
+            //清除服务器统计数据
+            calendar.setTime(new Date());
+            calendar.add(Calendar.DAY_OF_MONTH, -7);
+            String date = new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime());
+            cleanCount = jdbcTemplate.update(CLEAN_SERVER_STAT_STATISTICS, date);
+            logger.warn("clean_server_stat_total count={}", cleanCount);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }

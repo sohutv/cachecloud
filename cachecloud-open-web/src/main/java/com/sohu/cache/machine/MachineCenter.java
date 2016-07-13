@@ -164,4 +164,21 @@ public interface MachineCenter {
      */
     List<MachineInfo> getMachineInfoByType(TypeEnum typeEnum);
     
+    /**
+     * 为当前ip创建trigger，并部署
+     *
+     * @param hostId    机器id
+     * @param ip        ip
+     * @return          是否部署成功
+     */
+    public boolean deployServerCollection(long hostId, String ip);
+    
+    /**
+     * 为当前服务器状态收集删除trigger
+     * @param hostId    机器id
+     * @param ip    ip
+     * @return      取消部署成功返回true， 否则返回false
+     */
+    public boolean unDeployServerCollection(final long hostId, final String ip);
+    
 }

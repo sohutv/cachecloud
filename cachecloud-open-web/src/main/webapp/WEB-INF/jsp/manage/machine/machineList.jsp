@@ -48,6 +48,7 @@
 									<th>是否虚机</th>
 									<th>机房</th>
 									<th>额外说明</th>
+									<th>状态收集</th>
                                     <th>操作</th>
 								</tr>
 							</thead>
@@ -161,6 +162,14 @@
 											<font color='red'>(迁移工具机器)</font>
 										</c:if>
 										</th>
+                                       	<c:choose>
+                                       		<c:when test="${machine.info.collect == 1}">
+                                       			<td>开启</td>
+                                       		</c:when>
+                                       		<c:otherwise>
+                                       			<th>关闭</th>
+                                       		</c:otherwise>
+                                       	</c:choose>
                                         <td>
                                             <a href="javascript;" data-target="#addMachineModal${machine.info.id}" class="btn btn-info" data-toggle="modal">修改</a>
                                             &nbsp;

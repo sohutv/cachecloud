@@ -95,6 +95,11 @@ public class MachineInfo {
      * 额外说明:(例如本机器有其他web或者其他服务)
      */
     private String extraDesc;
+    
+    /**
+     * 是否收集服务器信息，0否，1是
+     */
+    private int collect;
 
     public long getId() {
         return id;
@@ -103,8 +108,16 @@ public class MachineInfo {
     public void setId(long id) {
         this.id = id;
     }
+    
+    public int getCollect() {
+		return collect;
+	}
 
-    public String getSshUser() {
+	public void setCollect(int collect) {
+		this.collect = collect;
+	}
+
+	public String getSshUser() {
         return sshUser;
     }
 
@@ -252,6 +265,7 @@ public class MachineInfo {
                 ", type=" + type +
                 ", groupId=" + groupId +
                 ", extraDesc=" + extraDesc +
+                ", collect=" + collect +
                 '}';
     }
 

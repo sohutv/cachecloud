@@ -4,31 +4,28 @@ import static com.sohu.cache.constant.BaseConstant.WORD_SEPARATOR;
 import static com.sohu.cache.constant.EmptyObjectConstant.EMPTY_STRING;
 import static com.sohu.cache.constant.SymbolConstant.COMMA;
 
-import com.sohu.cache.entity.MachineStats;
-import com.sohu.cache.exception.IllegalParamException;
-import com.sohu.cache.exception.SSHException;
-import com.sohu.cache.util.ConstUtils;
-import com.sohu.cache.util.IntegerUtil;
-import com.sohu.cache.util.StringUtil;
-
-import ch.ethz.ssh2.Connection;
-import ch.ethz.ssh2.SCPClient;
-import ch.ethz.ssh2.Session;
-import ch.ethz.ssh2.StreamGobbler;
+import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.sohu.cache.entity.MachineStats;
+import com.sohu.cache.exception.IllegalParamException;
+import com.sohu.cache.exception.SSHException;
+import com.sohu.cache.ssh.SSHTemplate.DefaultLineProcessor;
+import com.sohu.cache.ssh.SSHTemplate.LineProcessor;
+import com.sohu.cache.ssh.SSHTemplate.Result;
+import com.sohu.cache.ssh.SSHTemplate.SSHCallback;
+import com.sohu.cache.ssh.SSHTemplate.SSHSession;
+import com.sohu.cache.util.ConstUtils;
+import com.sohu.cache.util.IntegerUtil;
+import com.sohu.cache.util.StringUtil;
 
 /**
  * Created by yijunzhang on 14-6-20.
@@ -45,6 +42,9 @@ public class SSHUtil {
     private final static String MEM_FREE = "MemFree";
     private final static String MEM_BUFFERS = "Buffers";
     private final static String MEM_CACHED = "Cached";
+    
+    //使用 @SSHTemplate 重构SSHUtil
+    private final static SSHTemplate sshTemplate = new SSHTemplate();
 
     /**
      * Get HostPerformanceEntity[cpuUsage, memUsage, load] by ssh.<br>
@@ -56,8 +56,8 @@ public class SSHUtil {
      * @throws Exception
      * @since 1.0.0
      */
-    public static MachineStats getMachineInfo(String ip, int port, String userName, String password) throws SSHException {
-
+    public static MachineStats getMachineInfo(String ip, int port, String userName, 
+    		String password) throws SSHException {
         if (StringUtil.isBlank(ip)) {
             try {
                 throw new IllegalParamException("Param ip is empty!");
@@ -66,206 +66,107 @@ public class SSHUtil {
             }
         }
         port = IntegerUtil.defaultIfSmallerThan0(port, ConstUtils.SSH_PORT_DEFAULT);
-        Connection conn = null;
-        try {
-            conn = new Connection(ip, port);
-            conn.connect(null, 2000, 2000);
-            boolean isAuthenticated = conn.authenticateWithPassword(userName, password);
-            if (isAuthenticated == false) {
-                throw new Exception("SSH authentication failed with [ userName: " + userName + ", " +
-                        "password: " + password + "] on ip: " + ip);
-            }
-            return getMachineInfo(conn);
-        } catch (Exception e) {
-            throw new SSHException("SSH error, ip: " + ip, e);
-        } finally {
-            if (null != conn)
-                conn.close();
-        }
-    }
+        final MachineStats systemPerformanceEntity =  new MachineStats();
+        systemPerformanceEntity.setIp(ip);
+        
+        sshTemplate.execute(ip, port, userName, password, new SSHCallback() {
+			public Result call(SSHSession session) {
+				//解析top命令
+				session.executeCommand(COMMAND_TOP, new DefaultLineProcessor() {
+					public void process(String line, int lineNum) throws Exception {
+		                if (lineNum > 5) {
+		                    return;
+		                }
+		                if (1 == lineNum) {
+		                    // 第一行，通常是这样：
+		                    // top - 19:58:52 up 416 days, 30 min, 1 user, load average:
+		                    // 0.00, 0.00, 0.00
+		                    int loadAverageIndex = line.indexOf(LOAD_AVERAGE_STRING);
+		                    String loadAverages = line.substring(loadAverageIndex).replace(LOAD_AVERAGE_STRING, EMPTY_STRING);
+		                    String[] loadAverageArray = loadAverages.split(",");
+		                    if (3 == loadAverageArray.length) {
+		                    	systemPerformanceEntity.setLoad(StringUtil.trimToEmpty(loadAverageArray[0]));
+		                    }
+		                } else if (3 == lineNum) {
+		                    // 第三行通常是这样：
+		                    // , 0.0% sy, 0.0% ni, 100.0% id, 0.0% wa,
+		                    // 0.0% hi, 0.0% si
+		                	// redhat:%Cpu(s):  0.0 us
+		                	// centos7:Cpu(s): 0.0% us
+		                    double cpuUs = getUsCpu(line);
+		                    systemPerformanceEntity.setCpuUsage(String.valueOf(cpuUs));
+		                } 
+					}
+				});
+				
+				//解析memory
+				session.executeCommand(COMMAND_MEM, new LineProcessor() {
+					private String totalMem;
+					private String freeMem;
+					private String buffersMem;
+					private String cachedMem;
+					public void process(String line, int lineNum) throws Exception {
+						if (line.contains(MEM_TOTAL)) {
+		            		totalMem = matchMemLineNumber(line).trim();
+		            	} else if (line.contains(MEM_FREE)) {
+		            		freeMem = matchMemLineNumber(line).trim();
+		            	} else if (line.contains(MEM_BUFFERS)) {
+		            		buffersMem = matchMemLineNumber(line).trim();
+		            	} else if (line.contains(MEM_CACHED)) {
+		            		cachedMem = matchMemLineNumber(line).trim();
+		            	}
+					}
+					public void finish() {
+						if (!StringUtil.isBlank(totalMem, freeMem, buffersMem)) {
+							Long totalMemLong = NumberUtils.toLong(totalMem);
+							Long freeMemLong = NumberUtils.toLong(freeMem);
+							Long buffersMemLong = NumberUtils.toLong(buffersMem);
+							Long cachedMemLong = NumberUtils.toLong(cachedMem);
+							Long usedMemFree = freeMemLong + buffersMemLong + cachedMemLong;
+							Double memoryUsage = 1 - (NumberUtils.toDouble(usedMemFree.toString()) / NumberUtils.toDouble(totalMemLong.toString()) / 1.0);
+							systemPerformanceEntity.setMemoryTotal(String.valueOf(totalMemLong));
+							systemPerformanceEntity.setMemoryFree(String.valueOf(usedMemFree));
+							DecimalFormat df = new DecimalFormat("0.00");
+							systemPerformanceEntity.setMemoryUsageRatio(df.format(memoryUsage * 100));
+						}
+					}
+				});
+				
+				// 统计磁盘使用状况
+				/**
+	             * 内容通常是这样： Filesystem 容量 已用 可用 已用% 挂载点 /dev/xvda2 5.8G 3.2G 2.4G
+	             * 57% / /dev/xvda1 99M 8.0M 86M 9% /boot none 769M 0 769M 0%
+	             * /dev/shm /dev/xvda7 68G 7.1G 57G 12% /home /dev/xvda6 2.0G 36M
+	             * 1.8G 2% /tmp /dev/xvda5 2.0G 199M 1.7G 11% /var
+	             * */
+				session.executeCommand(COMMAND_DF_LH, new LineProcessor() {
+					private Map<String, String> diskUsageMap = new HashMap<String, String>();
+					public void process(String line, int lineNum) throws Exception {
+						if(lineNum == 1) {
+							return;
+						}
+						line = line.replaceAll(" {1,}", WORD_SEPARATOR);
+		                String[] lineArray = line.split(WORD_SEPARATOR);
+		                if (6 == lineArray.length) {
+		                	String diskUsage = lineArray[4];
+		                	String mountedOn = lineArray[5];
+		                	diskUsageMap.put(mountedOn, diskUsage);
+		                }
+					}
+					public void finish() {
+						systemPerformanceEntity.setDiskUsageMap(diskUsageMap);
+					}
+				});
+				
+				return null;
+			}
+		});
 
-    /**
-     * GetSystemPerformance
-     *
-     * @param conn a connection
-     * @return double cpu usage
-     * @throws Exception
-     */
-    private static MachineStats getMachineInfo(Connection conn) throws Exception {
-        MachineStats systemPerformanceEntity = null;
-        Session session = null;
-        BufferedReader read = null;
-        try {
-            systemPerformanceEntity = new MachineStats();
-            systemPerformanceEntity.setIp(conn.getHostname());
-            session = conn.openSession();
-            session.execCommand(COMMAND_TOP);
-            //stderr
-            printSessionStdErr(conn.getHostname(),COMMAND_TOP, session);
-
-            read = new BufferedReader(new InputStreamReader(new StreamGobbler(session.getStdout())));
-            String line = "";
-            int lineNum = 0;
-
-            String totalMem = EMPTY_STRING;
-            String freeMem = EMPTY_STRING;
-            String buffersMem = EMPTY_STRING;
-            String cachedMem = EMPTY_STRING;
-            while ((line = read.readLine()) != null) {
-
-                if (StringUtil.isBlank(line))
-                    continue;
-                lineNum += 1;
-
-                if (5 < lineNum)
-                    return systemPerformanceEntity;
-
-                if (1 == lineNum) {
-                    // 第一行，通常是这样：
-                    // top - 19:58:52 up 416 days, 30 min, 1 user, load average:
-                    // 0.00, 0.00, 0.00
-                    int loadAverageIndex = line.indexOf(LOAD_AVERAGE_STRING);
-                    String loadAverages = line.substring(loadAverageIndex).replace(LOAD_AVERAGE_STRING, EMPTY_STRING);
-                    String[] loadAverageArray = loadAverages.split(",");
-                    if (3 != loadAverageArray.length)
-                        continue;
-                    systemPerformanceEntity.setLoad(StringUtil.trimToEmpty(loadAverageArray[0]));
-                } else if (3 == lineNum) {
-                    // 第三行通常是这样：
-                    // , 0.0% sy, 0.0% ni, 100.0% id, 0.0% wa,
-                    // 0.0% hi, 0.0% si
-//                    redhat:%Cpu(s):  0.0 us
-//                    centos7:Cpu(s): 0.0% us
-                    double cpuUs = getUsCpu(line);
-                    systemPerformanceEntity.setCpuUsage(String.valueOf(cpuUs));
-                } else {
-                    continue;
-                }
-            }// parse the top output
-            
-            // 统计内存使用状况
-            session = conn.openSession();
-            session.execCommand(COMMAND_MEM);
-            printSessionStdErr(conn.getHostname(),COMMAND_MEM, session);
-            read = new BufferedReader(new InputStreamReader(new StreamGobbler(session.getStdout())));
-            /**
-             * 内容通常是这样：
-             * MemTotal:       32771088 kB
-             * MemFree:        11727096 kB
-             * Buffers:          497928 kB
-             * Cached:         16139624 kB
-             */
-            while((line = read.readLine()) != null) {
-            	if (line.contains(MEM_TOTAL)) {
-            		totalMem = matchMemLineNumber(line).trim();
-            	} else if (line.contains(MEM_FREE)) {
-            		freeMem = matchMemLineNumber(line).trim();
-            	} else if (line.contains(MEM_BUFFERS)) {
-            		buffersMem = matchMemLineNumber(line).trim();
-            	} else if (line.contains(MEM_CACHED)) {
-            		cachedMem = matchMemLineNumber(line).trim();
-            	}
-            }
-            if (StringUtil.isBlank(totalMem, freeMem, buffersMem))
-                throw new Exception("Error when get system performance of ip: " + conn.getHostname()
-                        + ", can't get totalMem, freeMem, buffersMem or cachedMem");
-            Long totalMemLong = NumberUtils.toLong(totalMem);
-            Long freeMemLong = NumberUtils.toLong(freeMem);
-            Long buffersMemLong = NumberUtils.toLong(buffersMem);
-            Long cachedMemLong = NumberUtils.toLong(cachedMem);
-
-            Long usedMemFree = freeMemLong + buffersMemLong + cachedMemLong;
-            Double memoryUsage = 1 - (NumberUtils.toDouble(usedMemFree.toString()) / NumberUtils.toDouble(totalMemLong.toString()) / 1.0);
-            systemPerformanceEntity.setMemoryTotal(String.valueOf(totalMemLong));
-            systemPerformanceEntity.setMemoryFree(String.valueOf(usedMemFree));
-            DecimalFormat df = new DecimalFormat("0.00");
-            systemPerformanceEntity.setMemoryUsageRatio(df.format(memoryUsage * 100));
-
-            // 统计磁盘使用状况
-            Map<String, String> diskUsageMap = new HashMap<String, String>();
-            session = conn.openSession();
-            session.execCommand(COMMAND_DF_LH);
-            //stderr
-            printSessionStdErr(conn.getHostname(),COMMAND_DF_LH, session);
-            read = new BufferedReader(new InputStreamReader(new StreamGobbler(session.getStdout())));
-            /**
-             * 内容通常是这样： Filesystem 容量 已用 可用 已用% 挂载点 /dev/xvda2 5.8G 3.2G 2.4G
-             * 57% / /dev/xvda1 99M 8.0M 86M 9% /boot none 769M 0 769M 0%
-             * /dev/shm /dev/xvda7 68G 7.1G 57G 12% /home /dev/xvda6 2.0G 36M
-             * 1.8G 2% /tmp /dev/xvda5 2.0G 199M 1.7G 11% /var
-             * */
-            boolean isFirstLine = true;
-            while ((line = read.readLine()) != null) {
-
-                if (isFirstLine) {
-                    isFirstLine = false;
-                    continue;
-                }
-                if (StringUtil.isBlank(line))
-                    continue;
-
-                line = line.replaceAll(" {1,}", WORD_SEPARATOR);
-                String[] lineArray = line.split(WORD_SEPARATOR);
-                if (6 != lineArray.length) {
-                    continue;
-                }
-                String diskUsage = lineArray[4];
-                String mountedOn = lineArray[5];
-                diskUsageMap.put(mountedOn, diskUsage);
-            }
-            systemPerformanceEntity.setDiskUsageMap(diskUsageMap);
-
-            // 统计当前网络流量 @TODO 
-            Double traffic = 0.0;
-            systemPerformanceEntity.setTraffic(traffic.toString());
-
-        } catch (Exception e) {
-            throw new Exception("Error when get system performance of ip: " + conn.getHostname(), e);
-        } finally {
-            try {
-                if (null != read)
-                    read.close();
-                if (null != session)
-                    session.close();
-            } catch (Exception e) {
-                // ingore
-            }
-        }
+        // 统计当前网络流量 @TODO 
+        Double traffic = 0.0;
+        systemPerformanceEntity.setTraffic(traffic.toString());
 
         return systemPerformanceEntity;
-    }
-
-    /**
-     * 打印ssh错误信息
-     * @param session
-     */
-    private static void printSessionStdErr(String ip, String command, Session session) {
-        if (session == null) {
-            logger.error("session is null");
-            return;
-        }
-        StringBuffer sshErrorMsg = new StringBuffer();
-        BufferedReader read = null;
-        try {
-            read = new BufferedReader(new InputStreamReader(new StreamGobbler(session.getStderr())));
-            String line = null;
-            while ((line = read.readLine()) != null) {
-                sshErrorMsg.append(line);
-            }
-            if (StringUtils.isNotBlank(sshErrorMsg.toString())) {
-                logger.error("ip {} execute command:({}), sshErrorMsg:{}", ip, command, sshErrorMsg.toString());
-            }
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-        } finally {
-            if (read != null) {
-                try {
-                    read.close();
-                } catch (IOException e) {
-                    logger.error(e.getMessage(), e);
-                }
-            }
-        }
     }
 
     /**
@@ -276,55 +177,23 @@ public class SSHUtil {
      * @param password 密码
      * @param command  要执行的命令
      */
-    public static String execute(String ip, int port, String username, String password, String command) throws SSHException {
+    public static String execute(String ip, int port, String username, String password, 
+    		final String command) throws SSHException {
 
-        if (StringUtil.isBlank(command))
-            return EMPTY_STRING;
-        port = IntegerUtil.defaultIfSmallerThan0(port, ConstUtils.SSH_PORT_DEFAULT);
-        Connection conn = null;
-        Session session = null;
-        BufferedReader read = null;
-        StringBuffer sb = new StringBuffer();
-        try {
-            if (StringUtil.isBlank(ip)) {
-                throw new IllegalParamException("Param ip is empty!");
-            }
-            conn = new Connection(ip, port);
-            conn.connect(null, 6000, 6000);
-            boolean isAuthenticated = conn.authenticateWithPassword(username, password);
-            if (isAuthenticated == false) {
-                throw new Exception("SSH authentication failed with [ userName: " + username + ", password: " + password + "]");
-            }
-            session = conn.openSession();
-            session.execCommand(command);
-            //stderr
-            printSessionStdErr(ip, command, session);
-            //stdout
-            read = new BufferedReader(new InputStreamReader(new StreamGobbler(session.getStdout())));
-            String line = "";
-            int lineNumber = 1;
-            while ((line = read.readLine()) != null) {
-//                sb.append(line).append(BR);
-                if (lineNumber++ > 1) {
-                    sb.append(System.lineSeparator());
-                }
-                sb.append(line);
-            }
-            return sb.toString();
-        } catch (Exception e) {
-            throw new SSHException("SSH远程执行command: " + command + " 出现错误: " + e.getMessage(), e);
-        } finally {
-            if (null != read) {
-                try {
-                    read.close();
-                } catch (IOException e) {
-                }
-            }
-            if (null != session)
-                session.close();
-            if (null != conn)
-                conn.close();
+        if (StringUtil.isBlank(command)) {
+        	return EMPTY_STRING;
         }
+        port = IntegerUtil.defaultIfSmallerThan0(port, ConstUtils.SSH_PORT_DEFAULT);
+        
+        Result rst = sshTemplate.execute(ip, port, username, password, new SSHCallback() {
+			public Result call(SSHSession session) {
+				return session.executeCommand(command);
+			}
+		});
+        if(rst.isSuccess()) {
+        	return rst.getResult();
+        }
+        return "";
     }
 
     /**
@@ -337,26 +206,20 @@ public class SSHUtil {
      * @return
      * @throws SSHException
      */
-    public static boolean scpFileToRemote(String ip, int port, String username, String password, String localPath, String remoteDir) throws SSHException{
-        boolean isSuccess = true;
-        Connection connection = new Connection(ip, port);
-        try {
-            connection.connect();
-            boolean isAuthed = connection.authenticateWithPassword(username, password);
-            if (!isAuthed) {
-                throw new SSHException("auth error.");
-            }
-            SCPClient scpClient = connection.createSCPClient();
-            scpClient.put(localPath, remoteDir, "0644");
-        } catch (IOException e) {
-            isSuccess = false;
-            throw new SSHException("scp file to remote error.", e);
-        } finally {
-            if (connection != null) {
-                connection.close();
-            }
-        }
-        return isSuccess;
+    public static boolean scpFileToRemote(String ip, int port, String username, 
+    		String password, final String localPath, final String remoteDir) throws SSHException{
+    	Result rst = sshTemplate.execute(ip, port, username, password, new SSHCallback() {
+			public Result call(SSHSession session) {
+				return session.scpToDir(localPath, remoteDir, "0644");
+			}
+		});
+    	if(rst.isSuccess()) {
+    		return true;
+    	}
+    	if(rst.getExcetion() != null) {
+    		throw new SSHException(rst.getExcetion());
+    	}
+    	return false;
     }
 
     /**

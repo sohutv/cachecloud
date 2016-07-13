@@ -35,6 +35,11 @@ public class ScheduleUtil {
         String baseCron = (hostId % 50) + " 0/10 * ? * *";
         return baseCron;
     }
+    
+    public static String getFiveMinuteCronByHostId(long hostId) {
+        String baseCron = (hostId % 50) + " 0/5 * ? * *";
+        return baseCron;
+    }
 
     /**
      * cron表达式：每小时，根据hostId计算小时的分钟数

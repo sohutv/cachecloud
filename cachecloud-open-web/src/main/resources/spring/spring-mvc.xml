@@ -29,6 +29,7 @@
             <mvc:mapping path="/admin/app/*"/>
             <mvc:mapping path="/admin/instance/*"/>
             <mvc:mapping path="/client/show/*"/>
+            <mvc:mapping path="/server/*"/>
             <bean class="com.sohu.cache.interceptor.FrontUserLoginInterceptor"/>
         </mvc:interceptor>
         <!-- 后台管理员验证 -->

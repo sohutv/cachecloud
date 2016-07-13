@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Strings;
 import com.sohu.cache.dao.MachineDao;
 import com.sohu.cache.dao.MachineStatsDao;
+import com.sohu.cache.dao.ServerStatusDao;
 import com.sohu.cache.entity.MachineInfo;
 import com.sohu.cache.machine.MachineCenter;
 import com.sohu.cache.machine.MachineDeployCenter;
@@ -24,6 +25,8 @@ public class MachineDeployCenterImpl implements MachineDeployCenter {
     private MachineCenter machineCenter;
 
     private MachineStatsDao machineStatsDao;
+    
+    private ServerStatusDao serverStatusDao;
 
     /**
      * 将机器加入资源池并统计、监控
@@ -60,6 +63,17 @@ public class MachineDeployCenterImpl implements MachineDeployCenter {
                 if (!machineCenter.deployMachineMonitor(hostId, ip)) {
                     logger.error("deploy machine monitor error, machineInfo: {}", thisMachine.toString());
                     success = false;
+                }
+                if(thisMachine.getCollect() == 1) {
+                	if (!machineCenter.deployServerCollection(hostId, ip)) {
+                		logger.error("deploy server monitor error, machineInfo: {}", thisMachine.toString());
+                		success = false;
+                	}
+                } else {
+                	if (!machineCenter.unDeployServerCollection(hostId, ip)) {
+                		logger.error("undeploy server monitor error, machineInfo: {}", thisMachine.toString());
+                		success = false;
+                	}
                 }
             }
         } catch (Exception e) {
@@ -99,6 +113,10 @@ public class MachineDeployCenterImpl implements MachineDeployCenter {
                 logger.error("remove trigger for machine monitor error: {}", thisMachine.toString());
                 return false;
             }
+            if (!machineCenter.unDeployServerCollection(hostId, machineIp)) {
+                logger.error("remove trigger for server monitor error: {}", thisMachine.toString());
+                return false;
+            }
         } catch (Exception e) {
             logger.error("query machineInfo from db error: {}", machineInfo.toString());
         }
@@ -107,6 +125,7 @@ public class MachineDeployCenterImpl implements MachineDeployCenter {
         try {
             machineDao.removeMachineInfoByIp(machineIp);
             machineStatsDao.deleteMachineStatsByIp(machineIp);
+            serverStatusDao.deleteServerInfo(machineIp);
         } catch (Exception e) {
             logger.error("remove machineInfo from db error, machineInfo: {}", machineInfo.toString(), e);
             return false;
@@ -128,4 +147,7 @@ public class MachineDeployCenterImpl implements MachineDeployCenter {
         this.machineStatsDao = machineStatsDao;
     }
 
+	public void setServerStatusDao(ServerStatusDao serverStatusDao) {
+		this.serverStatusDao = serverStatusDao;
+	}
 }

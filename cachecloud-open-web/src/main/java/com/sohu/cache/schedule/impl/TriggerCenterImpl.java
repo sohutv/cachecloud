@@ -63,6 +63,9 @@ public class TriggerCenterImpl implements TriggerCenter {
         } else if (jobGroup.equals(ConstUtils.MACHINE_MONITOR_JOB_GROUP)) {
             MachineInfo machineInfo = machineDao.getMachineInfoByIp(ip);
             opResult = machineCenter.deployMachineMonitor(machineInfo.getId(), ip);
+        } else if (jobGroup.equals(ConstUtils.SERVER_TRIGGER_GROUP)) {
+            MachineInfo machineInfo = machineDao.getMachineInfoByIp(ip);
+            opResult = machineCenter.deployServerCollection(machineInfo.getId(), ip);
         }
         return opResult;
     }
