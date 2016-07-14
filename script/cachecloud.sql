@@ -1009,3 +1009,52 @@ update machine_info set available=1;
 
 -- add column for the switch of server status collection
 ALTER TABLE `machine_info` ADD COLUMN `collect` int DEFAULT 1 COMMENT 'switch of collect server status, 1:open, 0:close';
+
+-- add server status table
+DROP TABLE IF EXISTS `server`;
+CREATE TABLE `server` (
+  `ip` varchar(16) NOT NULL COMMENT 'ip',
+  `host` varchar(255) DEFAULT NULL COMMENT 'host',
+  `nmon` varchar(255) DEFAULT NULL COMMENT 'nmon version',
+  `cpus` tinyint(4) DEFAULT NULL COMMENT 'logic cpu num',
+  `cpu_model` varchar(255) DEFAULT NULL COMMENT 'cpu 型号',
+  `dist` varchar(255) DEFAULT NULL COMMENT '发行版信息',
+  `kernel` varchar(255) DEFAULT NULL COMMENT '内核信息',
+  `ulimit` varchar(255) DEFAULT NULL COMMENT 'ulimit -n,ulimit -u',
+  `updatetime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`ip`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `server_stat`;
+CREATE TABLE `server_stat` (
+  `ip` varchar(16) NOT NULL COMMENT 'ip',
+  `cdate` date NOT NULL COMMENT '数据收集天',
+  `ctime` char(4) NOT NULL COMMENT '数据收集小时分钟',
+  `cuser` float DEFAULT NULL COMMENT '用户态占比',
+  `csys` float DEFAULT NULL COMMENT '内核态占比',
+  `cwio` float DEFAULT NULL COMMENT 'wio占比',
+  `c_ext` text COMMENT '子cpu占比',
+  `cload1` float DEFAULT NULL COMMENT '1分钟load',
+  `cload5` float DEFAULT NULL COMMENT '5分钟load',
+  `cload15` float DEFAULT NULL COMMENT '15分钟load',
+  `mtotal` float DEFAULT NULL COMMENT '总内存,单位M',
+  `mfree` float DEFAULT NULL COMMENT '空闲内存',
+  `mcache` float DEFAULT NULL COMMENT 'cache',
+  `mbuffer` float DEFAULT NULL COMMENT 'buffer',
+  `mswap` float DEFAULT NULL COMMENT 'cache',
+  `mswap_free` float DEFAULT NULL COMMENT 'cache',
+  `nin` float DEFAULT NULL COMMENT '网络入流量 单位K/s',
+  `nout` float DEFAULT NULL COMMENT '网络出流量 单位k/s',
+  `nin_ext` text COMMENT '各网卡入流量详情',
+  `nout_ext` text COMMENT '各网卡出流量详情',
+  `tuse` int(11) DEFAULT NULL COMMENT 'tcp estab连接数',
+  `torphan` int(11) DEFAULT NULL COMMENT 'tcp orphan连接数',
+  `twait` int(11) DEFAULT NULL COMMENT 'tcp time wait连接数',
+  `dread` float DEFAULT NULL COMMENT '磁盘读速率 单位K/s',
+  `dwrite` float DEFAULT NULL COMMENT '磁盘写速率 单位K/s',
+  `diops` float DEFAULT NULL COMMENT '磁盘io速率 交互次数/s',
+  `dbusy` float DEFAULT NULL COMMENT '磁盘io带宽使用百分比',
+  `d_ext` text COMMENT '磁盘各分区占比',
+  `dspace` text COMMENT '磁盘各分区空间使用率',
+  PRIMARY KEY (`ip`,`cdate`,`ctime`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
