@@ -1006,3 +1006,6 @@ update machine_info set available=1;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2016-01-13  9:28:31
+
+-- add column for the switch of server status collection
+ALTER TABLE `machine_info` ADD COLUMN `collect` int DEFAULT 1 COMMENT 'switch of collect server status, 1:open, 0:close';
