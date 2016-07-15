@@ -1,5 +1,6 @@
 package com.sohu.cache.web.controller;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -210,6 +211,7 @@ public class ServerController extends BaseController{
 			//swap相关
 			swapSerie.addData(ss.getMswap());
 			float swapUse = ss.getMswap() - ss.getMswapFree();
+			swapUse = floor(swapUse);
 			swapUseSerie.addData(swapUse);
 			maxSwapUse = getBigger(maxSwapUse, swapUse);
 			//net相关
@@ -306,6 +308,15 @@ public class ServerController extends BaseController{
 			return a;
 		}
 		return b;
+	}
+	
+	/**
+	 * 保留一位小数，四舍五入
+	 * @param v
+	 * @return
+	 */
+	private float floor(float v) {
+		return new BigDecimal(v).setScale(1, BigDecimal.ROUND_HALF_UP).floatValue();
 	}
 	
 	/**

@@ -128,13 +128,11 @@ public class Disk implements LineParser{
 			sb.append("=");
 			List<Usage> usageList = diskMap.get(type);
 			for(Usage use : usageList) {
-				if(use.getValue() > 0) {
-					sb.append(use.getName());
-					sb.append(":");
-					sb.append(use.getValue());
-					sb.append(",");
-				}
-			}
+                sb.append(use.getName());
+                sb.append(":");
+                sb.append(use.getValue());
+                sb.append(",");
+            }
 			sb.append(";");
 		}
 		return sb.toString();

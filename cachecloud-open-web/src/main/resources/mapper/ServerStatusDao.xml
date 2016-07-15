@@ -47,14 +47,14 @@
     
     <!-- 获取服务器net状态 -->
     <select id="queryServerNet" resultType="ServerStatus">
-    	select nin_ext ninExt,nout_ext noutExt
+    	select ctime, nin_ext ninExt,nout_ext noutExt
 		from server_stat
 		where ip=#{ip} and cdate=#{cdate}
     </select>
     
     <!-- 获取服务器disk状态 -->
     <select id="queryServerDisk" resultType="ServerStatus">
-    	select d_ext dExt,dspace
+    	select ctime, d_ext dExt,dspace
 		from server_stat
 		where ip=#{ip} and cdate=#{cdate}
     </select>

@@ -454,6 +454,11 @@ public class MachineCenterImpl implements MachineCenter {
         List<MachineStats> list = machineStatsDao.getAllMachineStats();
         for (MachineStats ms : list) {
             String ip = ms.getIp();
+            MachineInfo machineInfo = machineDao.getMachineInfoByIp(ip);
+            if (machineInfo == null || machineInfo.isOffline()) {
+                continue;
+            }
+            
             int memoryHost = instanceDao.getMemoryByHost(ip);
             getMachineMemoryDetail(ms.getIp());
 
@@ -473,7 +478,7 @@ public class MachineCenterImpl implements MachineCenter {
             
 
             ms.setMemoryAllocated(memoryHost);
-            ms.setInfo(machineDao.getMachineInfoByIp(ip));
+            ms.setInfo(machineInfo);
         }
         return list;
     }
