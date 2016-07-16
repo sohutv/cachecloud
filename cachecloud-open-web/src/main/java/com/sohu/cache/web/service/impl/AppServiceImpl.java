@@ -7,7 +7,6 @@ import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.util.TypeUtil;
 import com.sohu.cache.web.enums.SuccessEnum;
 import com.sohu.cache.web.service.AppService;
-import com.sohu.cache.web.util.Page;
 
 import org.springframework.util.Assert;
 
@@ -138,9 +137,13 @@ public class AppServiceImpl implements AppService {
     public void updateAppAuditStatus(Long id, Long appId, Integer status, AppUser appUser) {
         appAuditDao.updateAppAudit(id, status);
         AppDesc appDesc = appDao.getAppDescById(appId);
+        
         if (AppCheckEnum.APP_PASS.value().equals(status)) {
             appDesc.setStatus(AppStatusEnum.STATUS_PUBLISHED.getStatus());
             appDesc.setPassedTime(new Date());
+            appDao.update(appDesc);
+        } else if (AppCheckEnum.APP_REJECT.value().equals(status)) {
+            appDesc.setStatus(AppStatusEnum.STATUS_DENY.getStatus());
             appDao.update(appDesc);
         }
         AppAudit appAudit = appAuditDao.getAppAudit(id);
@@ -275,7 +278,7 @@ public class AppServiceImpl implements AppService {
         appAudit.setType(modifyConfig.getValue());
         appAuditDao.insertAppAudit(appAudit);
 
-        //保存配置修改
+        //保存日志
         AppAuditLog appAuditLog = AppAuditLog.generate(appDesc, appUser, appAudit.getId(),
                 AppAuditLogTypeEnum.APP_CONFIG_APPLY);
         if (appAuditLog != null) {
@@ -285,6 +288,36 @@ public class AppServiceImpl implements AppService {
         return appAudit;
 
     }
+    
+    @Override
+    public AppAudit saveInstanceChangeConfig(AppDesc appDesc, AppUser appUser, Long instanceId,
+            String instanceConfigKey, String instanceConfigValue, String instanceConfigReason,
+            AppAuditType instanceModifyConfig) {
+        AppAudit appAudit = new AppAudit();
+        long appId = appDesc.getAppId();
+        appAudit.setAppId(appId);
+        appAudit.setUserId(appUser.getId());
+        appAudit.setUserName(appUser.getName());
+        appAudit.setModifyTime(new Date());
+        appAudit.setParam1(String.valueOf(instanceId));
+        appAudit.setParam2(instanceConfigKey);
+        appAudit.setParam3(instanceConfigValue);
+        InstanceInfo instanceInfo = instanceDao.getInstanceInfoById(instanceId);
+        String hostPort = instanceInfo == null ? "" : (instanceInfo.getIp() + ":" + instanceInfo.getPort());
+        appAudit.setInfo("appId=" + appId + "下的" + hostPort + "实例申请修改配置项:" + instanceConfigKey + ", 配置值: " + instanceConfigValue + ", 修改原因: " + instanceConfigReason);
+        appAudit.setStatus(AppCheckEnum.APP_WATING_CHECK.value());
+        appAudit.setType(instanceModifyConfig.getValue());
+        appAuditDao.insertAppAudit(appAudit);
+
+        //保存日志
+        AppAuditLog appAuditLog = AppAuditLog.generate(appDesc, appUser, appAudit.getId(), AppAuditLogTypeEnum.INSTANCE_CONFIG_APPLY);
+        if (appAuditLog != null) {
+            appAuditLogDao.save(appAuditLog);
+        }
+
+        return appAudit;
+    }
+    
 
     @Override
     public SuccessEnum updateMemAlertValue(Long appId, Integer memAlertValue, AppUser userInfo) {
@@ -459,6 +492,8 @@ public class AppServiceImpl implements AppService {
     public void setAppUserDao(AppUserDao appUserDao) {
         this.appUserDao = appUserDao;
     }
+
+    
 
 
 }

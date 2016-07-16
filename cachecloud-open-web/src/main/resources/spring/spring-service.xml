@@ -38,5 +38,8 @@
     <bean id="instanceDeployCenter" class="com.sohu.cache.stats.instance.impl.InstanceDeployCenterImpl"/>
     
     <bean id="importAppCenter" class="com.sohu.cache.stats.app.impl.ImportAppCenterImpl"/>
+    
+    <bean id="appDataMigrateCenter" class="com.sohu.cache.stats.app.impl.AppDataMigrateCenterImpl"/>
+    
 
 </beans>

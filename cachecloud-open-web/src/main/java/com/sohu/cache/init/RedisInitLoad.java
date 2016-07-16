@@ -3,7 +3,6 @@ package com.sohu.cache.init;
 import com.sohu.cache.dao.InstanceDao;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.redis.RedisCenter;
-import com.sohu.cache.util.ConfigUtil;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.TypeUtil;
 import org.slf4j.Logger;
@@ -26,7 +25,7 @@ public class RedisInitLoad extends AsyncLoad{
     private RedisCenter redisCenter;
 
     public void init() {
-        if (ConfigUtil.I.isDebug()) {
+        if (ConstUtils.IS_DEBUG) {
             logger.warn("isDebug=true return");
             return;
         }

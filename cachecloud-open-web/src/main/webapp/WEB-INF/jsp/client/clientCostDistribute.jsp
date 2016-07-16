@@ -171,7 +171,7 @@ function search() {
 			</tr>
 		</thead>
 		<tbody>
-			<c:forEach items="${clientInstanceRelationList}" var="item" varStatus="stat">
+			<c:forEach items="${appInstanceClientRelationList}" var="item" varStatus="stat">
 				<tr>
 					<td>${stat.index}</td>
 					<td>${item.clientIp}</td>

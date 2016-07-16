@@ -11,15 +11,13 @@ import com.sohu.cache.entity.*;
 import com.sohu.cache.machine.MachineCenter;
 import com.sohu.cache.protocol.RedisProtocol;
 import com.sohu.cache.redis.RedisCenter;
-import com.sohu.cache.redis.RedisConfig;
-import com.sohu.cache.redis.enums.RedisClusterConfigEnum;
-import com.sohu.cache.redis.enums.RedisConfigEnum;
 import com.sohu.cache.redis.enums.RedisReadOnlyCommandEnum;
 import com.sohu.cache.schedule.SchedulerCenter;
 import com.sohu.cache.stats.instance.InstanceStatsCenter;
 import com.sohu.cache.util.*;
 import com.sohu.cache.web.util.DateUtil;
 import com.sohu.cache.web.vo.RedisSlowLog;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -30,6 +28,7 @@ import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
+
 import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisDataException;
 import redis.clients.util.*;
@@ -733,40 +732,6 @@ public class RedisCenterImpl implements RedisCenter {
         } finally {
             jedis.close();
         }
-    }
-
-    @Override
-    public List<RedisConfig> getClusterConfig(String ip, int port, int maxMemory) {
-        if (StringUtils.isBlank(ip) || port <= 1024 || maxMemory <= 0) {
-            new IllegalArgumentException(
-                    String.format("ip->%s,port=%d,maxMemory=%d;illegal error", ip, port, maxMemory));
-        }
-        List<RedisConfig> configList = new ArrayList<RedisConfig>();
-
-        for (RedisConfigEnum configEnum : RedisConfigEnum.values()) {
-            RedisConfig config = RedisConfig.transfer(configEnum);
-
-            if (configEnum.equals(RedisConfigEnum.MAXMEMORY)) {
-                config.setValue(maxMemory + "mb");
-            } else if (configEnum.equals(RedisConfigEnum.PORT)) {
-                config.setValue(String.valueOf(port));
-            } else if (configEnum.equals(RedisConfigEnum.APPENDFILENAME)
-                    || configEnum.equals(RedisClusterConfigEnum.CLUSTER_CONFIG_FILE)
-                    || configEnum.equals(RedisConfigEnum.DBFILENAME)) {
-                config.setValue(String.format(configEnum.getValue(), port));
-            } else if (configEnum.equals(RedisConfigEnum.AUTO_AOF_REWRITE_PERCENTAGE)) {
-                int count = instanceDao.getInstanceTypeCount(ip, ConstUtils.CACHE_TYPE_REDIS_CLUSTER);
-                int percentage = 100 - 4 * count;
-                if (percentage < 10) {
-                    percentage = 40 + new Random().nextInt(50);
-                }
-                config.setValue(String.valueOf(percentage));
-            } else {
-                config = RedisConfig.transfer(configEnum);
-            }
-            configList.add(config);
-        }
-        return configList;
     }
 
     /**
@@ -1492,12 +1457,34 @@ public class RedisCenterImpl implements RedisCenter {
     
     
     @Override
-    public List<InstanceSlowLog> getInstanceSlowLogByAppId(long appId, Date startDate, Date endDate, int limit) {
+    public List<InstanceSlowLog> getInstanceSlowLogByAppId(long appId, Date startDate, Date endDate) {
         try {
-            return instanceSlowLogDao.search(appId, startDate, endDate, limit);
+            return instanceSlowLogDao.search(appId, startDate, endDate);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return Collections.emptyList();
+        }
+    }
+    
+    @Override
+    public Map<String, Long> getInstanceSlowLogCountMapByAppId(Long appId, Date startDate, Date endDate) {
+        try {
+            List<Map<String, Object>> list = instanceSlowLogDao.getInstanceSlowLogCountMapByAppId(appId, startDate, endDate);
+            if (CollectionUtils.isEmpty(list)) {
+                return Collections.emptyMap();
+            }
+            Map<String, Long> resultMap = new LinkedHashMap<String, Long>();
+            for (Map<String, Object> map : list) {
+                long count = MapUtils.getLongValue(map, "count");
+                String hostPort = MapUtils.getString(map, "hostPort");
+                if (StringUtils.isNotBlank(hostPort)) {
+                    resultMap.put(hostPort, count);
+                }
+            }
+            return resultMap;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return Collections.emptyMap();
         }
     }
     

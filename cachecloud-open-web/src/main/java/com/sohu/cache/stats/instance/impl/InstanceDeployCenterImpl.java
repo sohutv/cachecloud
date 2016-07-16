@@ -1,15 +1,18 @@
 package com.sohu.cache.stats.instance.impl;
 
+import com.sohu.cache.constant.AppCheckEnum;
 import com.sohu.cache.constant.InstanceStatusEnum;
+import com.sohu.cache.dao.AppAuditDao;
 import com.sohu.cache.dao.InstanceDao;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.machine.MachineCenter;
 import com.sohu.cache.protocol.RedisProtocol;
 import com.sohu.cache.redis.RedisCenter;
+import com.sohu.cache.redis.RedisDeployCenter;
 import com.sohu.cache.stats.instance.InstanceDeployCenter;
 import com.sohu.cache.util.TypeUtil;
 
-
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
@@ -24,8 +27,12 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
     private InstanceDao instanceDao;
 
     private RedisCenter redisCenter;
+    
+    private RedisDeployCenter redisDeployCenter;
 
     private MachineCenter machineCenter;
+    
+    private AppAuditDao appAuditDao;
 
     @Override
     public boolean startExistInstance(int instanceId) {
@@ -118,6 +125,22 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
         }
     }
     
+    @Override
+    public boolean modifyInstanceConfig(Long appAuditId, String host, int port, String instanceConfigKey,
+            String instanceConfigValue) {
+        Assert.isTrue(appAuditId != null && appAuditId > 0L);
+        Assert.isTrue(StringUtils.isNotBlank(host));
+        Assert.isTrue(port > 0);
+        Assert.isTrue(StringUtils.isNotBlank(instanceConfigKey));
+        Assert.isTrue(StringUtils.isNotBlank(instanceConfigValue));
+        boolean isModify = redisDeployCenter.modifyInstanceConfig(host, port, instanceConfigKey, instanceConfigValue);
+        if (isModify) {
+            // 改变审核状态
+            appAuditDao.updateAppAudit(appAuditId, AppCheckEnum.APP_ALLOCATE_RESOURCE.value());
+        }
+        return isModify;
+    }
+    
 
     public void setInstanceDao(InstanceDao instanceDao) {
         this.instanceDao = instanceDao;
@@ -131,6 +154,12 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
         this.machineCenter = machineCenter;
     }
 
-    
+    public void setRedisDeployCenter(RedisDeployCenter redisDeployCenter) {
+        this.redisDeployCenter = redisDeployCenter;
+    }
+
+    public void setAppAuditDao(AppAuditDao appAuditDao) {
+        this.appAuditDao = appAuditDao;
+    }
 
 }

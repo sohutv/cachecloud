@@ -4,6 +4,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
                      http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"
        default-autowire="byName">
+    <import resource="classpath:spring/spring-config.xml"/>
     <import resource="classpath:spring/spring-mybatis.xml"/>
     <import resource="classpath:spring/spring-service.xml"/>
     <import resource="classpath:spring/spring-data.xml"/>

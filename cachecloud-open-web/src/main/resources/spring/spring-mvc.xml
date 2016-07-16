@@ -41,6 +41,8 @@
             <mvc:mapping path="/manage/machine/*"/>
             <mvc:mapping path="/manage/notice/*"/>
             <mvc:mapping path="/import/app/*"/>
+            <mvc:mapping path="/manage/config/*"/>
+            <mvc:mapping path="/data/migrate/*"/>
             <bean class="com.sohu.cache.interceptor.ManageUserLoginInterceptor"/>
         </mvc:interceptor>
         <!-- 应用和实例权限验证 -->

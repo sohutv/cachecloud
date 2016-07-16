@@ -464,7 +464,7 @@ CREATE TABLE `app_desc` (
   `app_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '应用id',
   `name` varchar(36) NOT NULL COMMENT '应用名',
   `user_id` bigint(20) NOT NULL COMMENT '申请人id',
-  `status` tinyint(4) NOT NULL COMMENT '应用状态, 0未分配，1申请未审批，2审批并发布 3:应用下线',
+  `status` tinyint(4) NOT NULL COMMENT '应用状态, 0未分配，1申请未审批，2审批并发布 3:应用下线,4:驳回',
   `intro` varchar(255) NOT NULL COMMENT '应用描述',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `passed_time` datetime NOT NULL COMMENT '审批通过时间',
@@ -815,9 +815,89 @@ CREATE TABLE `instance_slow_log` (
   UNIQUE KEY `slowlogkey` (`instance_id`,`slow_log_id`,`execute_time`),
   KEY `idx_app_create_time` (`app_id`,`create_time`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='实例慢查询列表';
+
+CREATE TABLE `app_client_value_minute_stats` (
+  `app_id` bigint(20) NOT NULL COMMENT '应用id',
+  `collect_time` bigint(20) NOT NULL COMMENT '统计时间:格式yyyyMMddHHmm00',
+  `update_time` datetime NOT NULL COMMENT '创建时间',
+  `command` varchar(20) NOT NULL COMMENT '命令',
+  `distribute_type` tinyint(4) NOT NULL COMMENT '值分布类型',
+  `count` int(11) NOT NULL COMMENT '调用次数',
+  PRIMARY KEY (`app_id`,`collect_time`,`command`,`distribute_type`),
+  KEY `idx_collect_time` (`collect_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='客户端每分钟值分布上报数据统计';
+
+CREATE TABLE `app_client_instance` (
+  `app_id` bigint(20) NOT NULL COMMENT '应用id',
+  `client_ip` varchar(20) NOT NULL COMMENT '客户端ip',
+  `instance_host` varchar(20) NOT NULL COMMENT 'redis节点ip',
+  `instance_port` int(11) NOT NULL COMMENT 'redis节点端口',
+  `instance_id` bigint(20) NOT NULL COMMENT 'redis节点id',
+  `day` date NOT NULL COMMENT '日期',
+  PRIMARY KEY (`app_id`,`day`,`client_ip`,`instance_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='应用实例与客户端对应关系表';
+
+CREATE TABLE `system_config` (
+  `config_key` varchar(255) NOT NULL COMMENT '配置key',
+  `config_value` varchar(512) NOT NULL COMMENT '配置value',
+  `info` varchar(255) NOT NULL COMMENT '配置说明',
+  `status` tinyint NOT NULL COMMENT '1:可用,0:不可用',
+  `order_id` int NOT NULL COMMENT '顺序', 
+  PRIMARY KEY (`config_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='系统配置';
+
 --
 -- init cachecloud data
 --
+
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.ssh.name','cachecloud','机器ssh用户名',1,1);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.ssh.password','cachecloud','机器ssh密码',1,2);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.ssh.port','22','机器ssh端口',1,3);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.admin.user.name','admin','cachecloud-admin用户名',1,4);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.admin.user.password','admin','cachelcoud-admin密码',1,5);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.superAdmin','admin,xx,yy','超级管理员组',1,6);
+insert into system_config(config_key,config_value,info,status,order_id) values('machine.cpu.alert.ratio','80.0','机器cpu报警阀值',1,7);
+insert into system_config(config_key,config_value,info,status,order_id) values('machine.mem.alert.ratio','80.0','机器内存报警阀值',1,8);
+insert into system_config(config_key,config_value,info,status,order_id) values('machine.load.alert.ratio','8.0','机器负载报警阀值',1,9);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.documentUrl','http://cachecloud.github.io','文档地址',1,10);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.owner.email','xx@sohu.com,yy@qq.com','邮件报警(逗号隔开)',1,11);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.owner.phone','13812345678,13787654321','手机号报警(逗号隔开)',1,12);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.mavenWareHouse','http://your_maven_house','maven仓库地址(客户端)',1,13);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.contact','user1:(xx@zz.com, user1:135xxxxxxxx)<br/>user2: (user2@zz.com, user2:138xxxxxxxx)','值班联系人信息',1,14);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.good.client','1.0-SNAPSHOT','可用客户端版本(用逗号隔开)',1,15);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.warn.client','0.1','警告客户端版本(用逗号隔开)',1,16);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.error.client','0.0','不可用客户端版本(用逗号隔开)',1,17);
+
+insert into system_config(config_key,config_value,info,status,order_id) values('redis.migrate.tool.home','/opt/cachecloud/redis-migrate-tool/','redis-migrate-tool安装路径',1,18);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.user.login.type','1','用户登录状态保存方式(1:session,2:cookie，重启后生效)',1,19);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.cookie.domain','none','cookie登录方式所需要的域名',1,20);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.base.dir','/opt','cachecloud根目录，要和cachecloud-init.sh脚本中的目录一致',1,21);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.app.client.conn.threshold','2000','应用连接数报警阀值',1,22);
+
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.email.alert.interface','none','邮件报警接口(说明:http://cachecloud.github.io 邮件和短信报警接口规范)',1,23);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.mobile.alert.interface','none','短信报警接口(说明:http://cachecloud.github.io 邮件和短信报警接口规范)',1,24);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.ldap.url','none','LDAP接口地址(例如:ldap://ldap.xx.com)',1,25);
+
+
+CREATE TABLE `app_data_migrate_status` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增id',
+  `migrate_machine_ip` varchar(255) NOT NULL COMMENT '迁移工具所在机器ip',
+  `migrate_machine_port` int NOT NULL COMMENT '迁移工具所占port',
+  `source_migrate_type` tinyint(4) NOT NULL COMMENT '源迁移类型,0:single,1:redis cluster,2:rdb file,3:twemproxy',
+  `source_servers` varchar(2048) NOT NULL COMMENT '源实例列表',
+  `target_migrate_type` tinyint(4) NOT NULL COMMENT '目标迁移类型,0:single,1:redis cluster,2:rdb file,3:twemproxy',
+  `target_servers` varchar(2048) NOT NULL COMMENT '目标实例列表',
+  `source_app_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '源应用id',
+  `target_app_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '目标应用id',
+  `user_id` bigint(20) NOT NULL COMMENT '操作人',
+  `status` tinyint(4) NOT NULL COMMENT '迁移执行状态,0:开始,1:结束,2:异常',
+  `start_time` datetime NOT NULL COMMENT '迁移开始执行时间',
+  `end_time` datetime DEFAULT NULL COMMENT '迁移结束执行时间',
+  `log_path` varchar(255) NOT NULL COMMENT '日志文件路径',
+  `config_path` varchar(255) NOT NULL COMMENT '配置文件路径',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='迁移状态';
+
 insert into app_user(name,ch_name,email,mobile,type) values('admin','admin','admin@sohu-inc.com','13500000000',0);
 
 /*!40101 SET character_set_client = @saved_cs_client */;

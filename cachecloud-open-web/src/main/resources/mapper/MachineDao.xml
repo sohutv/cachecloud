@@ -56,4 +56,17 @@
         DELETE FROM machine_info
         WHERE ip = #{ip}
     </delete>
+    
+    <!--通过type查找机器-->
+    <select id="getMachineInfoByType" resultType="MachineInfo">
+        select
+          id, modify_time, <include refid="machine_info_columns"/>
+        from machine_info where type = #{type}
+    </select>
+    
+    <!-- 更新机器类型 -->
+    <update id="updateMachineType">
+    	update machine_info set type = #{type} where id = #{id}
+    </update>
+    
 </mapper>

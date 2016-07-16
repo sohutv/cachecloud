@@ -23,7 +23,12 @@
     
     <select id="search" resultType="InstanceSlowLog">
         select id,<include refid="instance_slow_log_columns"/>
-        from instance_slow_log where app_id = #{appId} and execute_time between DATE_FORMAT(#{startDate}, '%Y-%m-%d') and DATE_FORMAT(#{endDate}, '%Y-%m-%d')
+        from instance_slow_log where app_id = #{appId} and create_time between DATE_FORMAT(#{startDate}, '%Y-%m-%d') and DATE_FORMAT(#{endDate}, '%Y-%m-%d')
+    </select>
+    
+    <select id="getInstanceSlowLogCountMapByAppId" resultType="hashmap">
+        select concat(ip,":",port) as hostPort,count(*) as count
+        from instance_slow_log where app_id = #{appId} and create_time between DATE_FORMAT(#{startDate}, '%Y-%m-%d') and DATE_FORMAT(#{endDate}, '%Y-%m-%d') group by hostPort order by count desc
     </select>
 
 </mapper>

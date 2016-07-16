@@ -122,6 +122,15 @@ public interface AppStatsCenter {
      * @param endDate
      * @return
      */
-    public List<InstanceSlowLog> getInstanceSlowLogByAppId(long appId, Date startDate, Date endDate, int limit);
+    public List<InstanceSlowLog> getInstanceSlowLogByAppId(long appId, Date startDate, Date endDate);
+
+    /**
+     * 按照appId获取每个实例慢查询个数
+     * @param appId
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    public Map<String, Long> getInstanceSlowLogCountMapByAppId(Long appId, Date startDate, Date endDate);
     
 }

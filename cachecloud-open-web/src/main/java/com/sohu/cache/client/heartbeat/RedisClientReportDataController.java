@@ -1,7 +1,6 @@
 package com.sohu.cache.client.heartbeat;
 
 import java.util.List;
-import java.util.ResourceBundle;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.google.common.collect.Lists;
 import com.sohu.cache.client.service.ClientReportDataService;
 import com.sohu.cache.constant.ClientStatusEnum;
+import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.JsonUtil;
 import com.sohu.cache.web.service.AppService;
 import com.sohu.cache.web.util.IpUtil;
@@ -107,9 +107,8 @@ public class RedisClientReportDataController {
             return false;
         }
         // 获取合格的客户端版本
-        ResourceBundle rb = ResourceBundle.getBundle("client");
-        List<String> goodVersions = Lists.newArrayList(rb.getString("good_versions").split(","));
-        List<String> warnVersions = Lists.newArrayList(rb.getString("warn_versions").split(","));
+        List<String> goodVersions = Lists.newArrayList(ConstUtils.GOOD_CLIENT_VERSIONS.split(ConstUtils.COMMA));
+        List<String> warnVersions = Lists.newArrayList(ConstUtils.WARN_CLIENT_VERSIONS.split(ConstUtils.COMMA));
 
         // 错误版本
         if (goodVersions.contains(clientVersion) && warnVersions.contains(clientVersion)) {

@@ -9,6 +9,7 @@
 </head>
 <body>
 	<div class="container">
+		<jsp:include page="/WEB-INF/include/headMenu.jsp"/>
 		<div class="row">
 			<div class="page-header">
                 <h4>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.ConfigDao">
+	<sql id="columns">
+		config_key,config_value ,info,status,order_id
+	</sql>
+
+	<select id="getConfigList" resultType="com.sohu.cache.entity.SystemConfig">
+		select
+		<include refid="columns" />
+		from system_config where status=#{status} order by order_id
+	</select>
+
+	<update id="update">
+		update system_config set config_value = #{configValue} where config_key=#{configKey}
+	</update>
+
+</mapper>

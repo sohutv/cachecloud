@@ -11,6 +11,7 @@
     * [3.启动cachecloud系统](#cc7-3)
     * [4.添加机器](#cc7-4)
 * [八、CacheCloud开发计划TODO LIST](#cc8)
+* [九、CacheCloud已知用户](#cc9)
 
 <a name="cc1"/>
 ## 一、CacheCloud是做什么的
@@ -29,7 +30,8 @@
 +  **完善运维：**    提供自动运维和简化运维操作功能，避免纯手工运维出错。
 +  **方便的客户端：**方便快捷的客户端接入。
 +  **元数据管理：**    提供机器、应用、实例、用户信息管理。
-+  **流程化：**      提供申请，运维，伸缩，修改等完善的处理流程 
++  **流程化：**      提供申请，运维，伸缩，修改等完善的处理流程
++  **一键导入：**      [一键导入已经存在Redis](http://cachecloud.github.io/2016/04/17/%E5%B7%B2%E5%AD%98%E5%9C%A8Redis%E6%8E%A5%E5%85%A5CacheCloud/)
 
 <a name="cc3"/>
 ## 三、CacheCloud解决什么问题 ###
@@ -90,11 +92,10 @@ Redis的开发人员如同使用Mysql一样，不需要运维Mysql服务器，�
 | cachecloud.db.url      | mysql驱动url     | jdbc:mysql://127.0.0.1:3306/cache-cloud |
 | cachecloud.db.user     | mysql用户名      |  admin |
 | cachecloud.db.password | mysql密码        |  admin | 
-| cachecloud.machine.username | 服务器用户名,用于ssh        | ${your machine username} | 
-| cachecloud.machine.password | 服务器密码,用于ssh        |  ${your machine password} | 
 | web.port | spring-boot内嵌tomcat启动端口        | 8080  | 		
 		
-		
+更加详细的配置，请参考: [系统配置](http://cachecloud.github.io/2016/05/24/CacheCloud%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E/) 		
+**请在系统第一次启动后，进入后台管理中对配置进行详细配置，有些配置是比较重要的，例如cachecloud管理机器用到了ssh，配置中涉及到了ssh用户名、密码、端口等等。** 
 		
 <a name="cc7-3"/>
 ####3、启动cachecloud系统
@@ -132,7 +133,7 @@ sh stop.sh
 #####(3). 登录确认
 
 #####(a) 访问：http://127.0.0.1:9999
-(9999是tomcat的端口号，具体要参考第三节中的online.properties和local.properties中的web.port)
+(9999是tomcat的端口号，具体要参考第2节中的online.properties和local.properties中的web.port)
 #####(b) 如果访问正常，请使用用户名:admin、密码:admin访问系统，跳转到应用列表下：
 <img src="http://i1.itc.cn/20160304/3084_b7374fe0_1136_79a9_6de7_699599da7345_1.png">
 
@@ -141,7 +142,7 @@ sh stop.sh
 #####(1). 运行脚本:
 cachecloud项目中的cachecloud-init.sh脚本是用来初始化服务器的cachecloud环境，主要工作如下：
 
-+  **(a). 创建cachecloud项目用户**：因为cachecloud项目的部分功能(redis启动、服务器监控)是通过ssh完成的，所以这里的用户和密码要和项目中的相对应，具体详见第三节。
++  **(a). 创建cachecloud项目用户**：因为cachecloud项目的部分功能(redis启动、服务器监控)是通过ssh完成的，所以这里的用户和密码要和项目中的相对应，具体详见第2节的系统配置。
 
 +  **(b). 创建cachecloud项目的工作目录、数据目录、配置目录、日志目录、redis安装目录、临时目录等等。**(/opt/cachecloud/data、/opt/cachecloud/conf、/opt/cachecloud/logs、/opt/cachecloud/redis、/tmp/cachecloud)
 
@@ -158,15 +159,27 @@ cachecloud项目中的cachecloud-init.sh脚本是用来初始化服务器的cach
 +  (a). 请在root用户下执行初始化脚本，因为初始化脚本涉及到了用户的创建等较高的权限。
 +  (b). 出于安全的考虑，所选的机器最好不要有外网IP地址。
 +  (c). 用户名和密码最好不要用cachecloud, 密码尽可能复杂。
-+  (d). 机器的ssh端口最好是22。
-+  (e). 请确保/opt/有足够的硬盘空间，因为/opt/cachecloud/data要存储RDB和AOF的持久化文件，如果硬盘过小，会造成持久化失败。（如果硬盘确实很小，建议建立一个软链接到/opt/cachecloud/data,且保证软链接的目录也是username用户，一定要保证/opt/cachecloud的目录结构）
-+  (f). 脚本中目前使用的是redis-3.0.6，如有需要请自行替换，建议使用3.0 release以后的版本。
++  (d). 请确保/opt/有足够的硬盘空间，因为/opt/cachecloud/data要存储RDB和AOF的持久化文件，如果硬盘过小，会造成持久化失败。（如果硬盘确实很小，建议建立一个软链接到/opt/cachecloud/data,且保证软链接的目录也是username用户，一定要保证/opt/cachecloud的目录结构）
++  (e). 脚本中目前使用的是redis-3.0.6，如有需要请自行替换，建议使用3.0 release以后的版本。3.2版本公司尚未在线上使用，但是要注意3.2版本中bind的默认是127.0.0.1
     
 #####(4). 添加机器 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;进入管理员界面(http://ip:port/manage/total/list)，进入机器管理，点击添加机器，添加机器信息是开通应用的基础。
 <img src="http://i2.itc.cn/20160127/3084_c9d9d17b_4e86_a17f_5442_cf9cc08c68f3_1.jpg"/>
 
+### 更多内容参考：[wiki文档](https://github.com/sohutv/cachecloud/wiki)、[cachecloud官方博客](http://cachecloud.github.io/)
+
 <a name="cc8"/>
-## 七、开发计划-TODO LIST ###
+## 八、开发计划-TODO LIST ###
 [后期开发计划](http://cachecloud.github.io/2016/04/17/v2%E8%AE%A1%E5%88%92/)
+
+<a name="cc9"/>
+## 九、已知用户 ###
+<img src="http://i2.itc.cn/20160524/3084_d629c64a_470f_f0d1_2de6_6ac91761a292_1.png"/><img src="http://i2.itc.cn/20160524/3084_25214ef5_2489_64ef_853c_8429af315347_1.png"/><img src="http://i2.itc.cn/20160524/3084_688549c0_a4c5_aa8b_1c8a_a276f502df56_1.png"/>
+
+
+<img src="http://i3.itc.cn/20160524/3084_354a89c3_599a_54e5_0b6c_00d523ccd3ce_1.png"/><img width="200" height="100" src="http://i2.itc.cn/20160524/3084_c7455d89_b6d4_acf7_bfec_f54fbb39d11d_1.png"/><img src="http://i3.itc.cn/20160524/3084_70c582e9_41ed_f9a3_e370_377092ebc5ea_1.png"/>
+
+除此之外，还有天津联怡科技有限公司、瑞友科技、厦门美好出行物联网技术有限公司、北京九瑞网络科技有限公司、深圳市深软信息技术有限公司、欧乐在线科技有限公司、慧科教育、上海仁画信息股份有限公司等。
+
+新用户可以从[这里登记](https://github.com/sohutv/cachecloud/issues/42)，我们有特殊“服务”。
  

@@ -5,10 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
@@ -25,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sohu.cache.client.service.AppInstanceClientRelationService;
 import com.sohu.cache.client.service.ClientReportCostDistriService;
 import com.sohu.cache.client.service.ClientReportExceptionService;
 import com.sohu.cache.client.service.ClientReportValueDistriService;
@@ -33,7 +32,7 @@ import com.sohu.cache.entity.AppClientCostTimeTotalStat;
 import com.sohu.cache.entity.AppClientExceptionStat;
 import com.sohu.cache.entity.AppClientValueDistriSimple;
 import com.sohu.cache.entity.AppDesc;
-import com.sohu.cache.entity.InstanceInfo;
+import com.sohu.cache.entity.AppInstanceClientRelation;
 import com.sohu.cache.stats.instance.InstanceStatsCenter;
 import com.sohu.cache.web.service.AppService;
 import com.sohu.cache.web.util.DateUtil;
@@ -65,8 +64,8 @@ public class AppClientDataShowController extends BaseController {
     /**
      * 客户端值分布服务
      */
-    @Resource(name = "clientReportValueDistriService")
-    private ClientReportValueDistriService clientReportValueDistriService;
+    @Resource(name = "clientReportValueDistriServiceV2")
+    private ClientReportValueDistriService clientReportValueDistriServiceV2;
     
     /**
      * 应用基本服务
@@ -79,6 +78,12 @@ public class AppClientDataShowController extends BaseController {
      */
     @Resource(name = "instanceStatsCenter")
     private InstanceStatsCenter instanceStatsCenter;
+    
+    /**
+     * 应用下节点和客户端关系服务
+     */
+    @Resource(name = "appInstanceClientRelationService")
+    private AppInstanceClientRelationService appInstanceClientRelationService;
 
     /**
      * 收集数据时间format
@@ -189,7 +194,7 @@ public class AppClientDataShowController extends BaseController {
         // 查询后台需要
         long startTime = NumberUtils.toLong(DateUtil.formatDate(startDate, COLLECT_TIME_FORMAT));
         long endTime = NumberUtils.toLong(DateUtil.formatDate(endDate, COLLECT_TIME_FORMAT));
-        return new TimeBetween(startTime, endTime);
+        return new TimeBetween(startTime, endTime, startDate, endDate);
     }
 
     /**
@@ -215,32 +220,15 @@ public class AppClientDataShowController extends BaseController {
         }
         long startTime = timeBetween.getStartTime();
         long endTime = timeBetween.getEndTime();
+        Date startDate = timeBetween.getStartDate();
         
         // 3.所有命令和第一个命令
         List<String> allCommands = clientReportCostDistriService.getAppDistinctCommand(appId, startTime, endTime);
         model.addAttribute("allCommands", allCommands);
         
         // 4.所有客户端和实例对应关系
-        List<AppClientCostTimeStat> clientInstanceRelationList = clientReportCostDistriService.getAppDistinctClientAndInstance(appId, startTime, endTime);
-        model.addAttribute("clientInstanceRelationList", clientInstanceRelationList);
-        // 填充实例信息
-        Set<Long> instanceIdSet = new HashSet<Long>();
-        Map<Long, InstanceInfo> instanceIdInfoMap = new HashMap<Long, InstanceInfo>();
-        for (AppClientCostTimeStat appClientCostTimeStat : clientInstanceRelationList) {
-            long instanceId = appClientCostTimeStat.getInstanceId();
-            if (instanceIdSet.add(instanceId)) {
-                InstanceInfo instanceInfo = instanceStatsCenter.getInstanceInfo(instanceId);
-                instanceIdInfoMap.put(instanceId, instanceInfo);
-            }
-        }
-        for (AppClientCostTimeStat appClientCostTimeStat : clientInstanceRelationList) {
-            long instanceId = appClientCostTimeStat.getInstanceId();
-            InstanceInfo instanceInfo = instanceIdInfoMap.get(instanceId);
-            if (instanceInfo != null) {
-                appClientCostTimeStat.setInstanceHost(instanceInfo.getIp());
-                appClientCostTimeStat.setInstancePort(instanceInfo.getPort());
-            }
-        }
+        List<AppInstanceClientRelation> appInstanceClientRelationList = appInstanceClientRelationService.getAppInstanceClientRelationList(appId, startDate);
+        model.addAttribute("appInstanceClientRelationList", appInstanceClientRelationList);
         
         String firstCommand = request.getParameter("firstCommand");
         if (StringUtils.isBlank(firstCommand) && CollectionUtils.isNotEmpty(allCommands)) {
@@ -308,7 +296,7 @@ public class AppClientDataShowController extends BaseController {
         // 查询后台需要
         long startTime = NumberUtils.toLong(DateUtil.formatDate(startDate, COLLECT_TIME_FORMAT));
         long endTime = NumberUtils.toLong(DateUtil.formatDate(endDate, COLLECT_TIME_FORMAT));
-        return new TimeBetween(startTime, endTime);
+        return new TimeBetween(startTime, endTime, startDate, endDate);
     }
 
     /**
@@ -378,7 +366,7 @@ public class AppClientDataShowController extends BaseController {
         long endTime = timeBetween.getEndTime();
         
         //值分布列表
-        List<AppClientValueDistriSimple> appClientValueDistriSimpleList = clientReportValueDistriService.getAppValueDistriList(appId, startTime, endTime);
+        List<AppClientValueDistriSimple> appClientValueDistriSimpleList = clientReportValueDistriServiceV2.getAppValueDistriList(appId, startTime, endTime);
         model.addAttribute("appClientValueDistriSimpleList", appClientValueDistriSimpleList);
         
         //值分布json
@@ -417,16 +405,22 @@ public class AppClientDataShowController extends BaseController {
         // 查询后台需要
         long startTime = NumberUtils.toLong(DateUtil.formatDate(startDate, COLLECT_TIME_FORMAT));
         long endTime = NumberUtils.toLong(DateUtil.formatDate(endDate, COLLECT_TIME_FORMAT));
-        return new TimeBetween(startTime, endTime);
+        return new TimeBetween(startTime, endTime, startDate, endDate);
     }
 
     public static class TimeBetween {
         private long startTime = 0;
         private long endTime = 0;
+        private Date startDate;
+        private Date endDate;
 
-        public TimeBetween(long startTime, long endTime) {
+
+        public TimeBetween(long startTime, long endTime, Date startDate, Date endDate) {
+            super();
             this.startTime = startTime;
             this.endTime = endTime;
+            this.startDate = startDate;
+            this.endDate = endDate;
         }
 
         public TimeBetween() {
@@ -440,10 +434,20 @@ public class AppClientDataShowController extends BaseController {
             return endTime;
         }
 
+        public Date getStartDate() {
+            return startDate;
+        }
+
+        public Date getEndDate() {
+            return endDate;
+        }
+
         @Override
         public String toString() {
-            return "TimeBetween [startTime=" + startTime + ", endTime=" + endTime + "]";
+            return "TimeBetween [startTime=" + startTime + ", endTime=" + endTime + ", startDate=" + startDate
+                    + ", endDate=" + endDate + "]";
         }
+
 
     }
     

@@ -15,7 +15,10 @@
 
     <bean id="appInspectHandler" class="com.sohu.cache.inspect.impl.AppInspectHandler" init-method="init">
         <property name="inspectorList">
-            <bean class="com.sohu.cache.inspect.impl.AppMemInspector"/>
+        	<list>
+        		<bean class="com.sohu.cache.inspect.impl.AppMemInspector"/>
+            	<bean class="com.sohu.cache.inspect.impl.AppClientConnInspector"/>
+        	</list>
         </property>
     </bean>
 

@@ -15,7 +15,6 @@ import com.sohu.cache.constant.AppCheckEnum;
 import com.sohu.cache.constant.AppUserTypeEnum;
 import com.sohu.cache.entity.AppAudit;
 import com.sohu.cache.entity.AppUser;
-import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.enums.SuccessEnum;
 import com.sohu.cache.web.util.AppEmailUtil;
 
@@ -68,13 +67,6 @@ public class UserManageController extends BaseController {
 			    userService.save(appUser);
 			} else {
 			    userService.update(appUser);
-			}
-			AppUser newUser = userService.get(appUser.getId());
-			AppUser currentUser = getUserInfo(request);
-
-			//如果当前用户修改了自己的资料，那么更新session
-			if (newUser != null && currentUser != null && newUser.getId().equals(currentUser.getId())) {
-			    request.getSession().setAttribute(ConstUtils.LOGIN_USER_SESSION_NAME, newUser);
 			}
 	        write(response, String.valueOf(SuccessEnum.SUCCESS.value()));
 		} catch (Exception e) {

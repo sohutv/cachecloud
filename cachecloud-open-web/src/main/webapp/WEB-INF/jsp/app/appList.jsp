@@ -119,6 +119,9 @@
 		                    <option value="3" <c:if test="${appSearch.appStatus == 3}">selected</c:if>>
 		                       	 已下线
 		                    </option>
+		                    <option value="4" <c:if test="${appSearch.appStatus == 4}">selected</c:if>>
+		                       	 驳回
+		                    </option>
 						</select>
 					 </div>
 					 <div class="form-group">
@@ -170,7 +173,7 @@
 			                    		<c:when test="${appDetail.appDesc.status == 0 or appDetail.appDesc.status == 1}">
 			                   				${appDetail.appDesc.appId}
 			                    		</c:when>
-			                    		<c:when test="${appDetail.appDesc.status == 2 or appDetail.appDesc.status == 3}">
+			                    		<c:when test="${appDetail.appDesc.status == 2 or appDetail.appDesc.status == 3 or appDetail.appDesc.status == 4}">
 			                    			<a target="_blank" href="/admin/app/index.do?appId=${appDetail.appDesc.appId}">${appDetail.appDesc.appId}</a>
 			                    		</c:when>
 			                    	</c:choose>
@@ -180,7 +183,7 @@
 			                    		<c:when test="${appDetail.appDesc.status == 0 or appDetail.appDesc.status == 1}">
 			                    			${appDetail.appDesc.name}
 			                    		</c:when>
-			                    		<c:when test="${appDetail.appDesc.status == 2 or appDetail.appDesc.status == 3}">
+			                    		<c:when test="${appDetail.appDesc.status == 2 or appDetail.appDesc.status == 3 or appDetail.appDesc.status == 4}">
 			                    			<a target="_blank" href="/admin/app/index.do?appId=${appDetail.appDesc.appId}">${appDetail.appDesc.name}</a>
 			                    		</c:when>
 			                    	</c:choose>
@@ -244,6 +247,9 @@
 			                    		</c:when>
 	                                    <c:when test="${appDetail.appDesc.status == 3}">
 	                                        <font color="red">已下线</font>
+	                                    </c:when>
+	                                    <c:when test="${appDetail.appDesc.status == 4}">
+	                                        <font color="red">驳回</font>
 	                                    </c:when>
 			                    	</c:choose>
 			                    </td>

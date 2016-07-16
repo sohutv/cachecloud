@@ -5,6 +5,9 @@ function saveOrUpdateMachine(machineId){
 	var cpu = document.getElementById("cpu" + machineId);
 	var virtual = document.getElementById("virtual" + machineId);
     var realIp = document.getElementById("realIp" + machineId);
+    var type = document.getElementById("type" + machineId);
+    var extraDesc = document.getElementById("extraDesc" + machineId);
+
 	if(ip.value == ""){
     	alert("IP不能为空!");
         ip.focus();
@@ -42,7 +45,9 @@ function saveOrUpdateMachine(machineId){
             cpu: cpu.value,
             virtual: virtual.value,
             realIp: realIp.value,
-            id:machineId
+            id:machineId,
+            type: type.value,
+            extraDesc: extraDesc.value
 		},
         function(data){
             if(data.result){

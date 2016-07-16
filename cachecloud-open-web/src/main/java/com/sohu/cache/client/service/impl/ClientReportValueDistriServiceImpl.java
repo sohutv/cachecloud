@@ -13,9 +13,9 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sohu.cache.client.service.ClientReportInstanceService;
 import com.sohu.cache.client.service.ClientReportValueDistriService;
 import com.sohu.cache.dao.AppClientValueDistriStatDao;
-import com.sohu.cache.dao.InstanceDao;
 import com.sohu.cache.entity.AppClientValueDistriSimple;
 import com.sohu.cache.entity.AppClientValueDistriStat;
 import com.sohu.cache.entity.InstanceInfo;
@@ -41,9 +41,9 @@ public class ClientReportValueDistriServiceImpl implements ClientReportValueDist
 	private AppClientValueDistriStatDao appClientValueDistriStatDao;
 
 	/**
-	 * 实例操作
-	 */
-	private InstanceDao instanceDao;
+     * host:port与instanceInfo简单缓存
+     */
+    private ClientReportInstanceService clientReportInstanceService;
 
 	@Override
 	public List<AppClientValueDistriSimple> getAppValueDistriList(long appId, long startTime, long endTime) {
@@ -128,7 +128,7 @@ public class ClientReportValueDistriServiceImpl implements ClientReportValueDist
         int port = NumberUtils.toInt(hostPort.substring(index + 1));
 
         // 实例信息
-        InstanceInfo instanceInfo = instanceDao.getInstByIpAndPort(host, port);
+        InstanceInfo instanceInfo = clientReportInstanceService.getInstanceInfoByHostPort(host, port);
         if (instanceInfo == null) {
             //logger.warn("instanceInfo is empty, host is {}, port is {}", host, port);
             return null;
@@ -151,16 +151,42 @@ public class ClientReportValueDistriServiceImpl implements ClientReportValueDist
 
         return stat;
     }
+	
+	@Override
+    public int deleteBeforeCollectTime(long collectTime) {
+	    long startTime = System.currentTimeMillis();
+	    int deleteCount = 0;
+        try {
+            int batchSize = 10000;
+            long minId = appClientValueDistriStatDao.getTableMinimumId();
+            long maxId = appClientValueDistriStatDao.getMinimumIdByCollectTime(collectTime);
+            if (minId > maxId) {
+                return deleteCount;
+            }
+            long startId = minId;
+            long endId = startId + batchSize;
+            while (startId < maxId) {
+                if (endId > maxId) {
+                    endId = maxId;
+                }
+                deleteCount += appClientValueDistriStatDao.deleteByIds(startId, endId);
+                startId += batchSize;
+                endId += batchSize;
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        logger.warn("batch delete before collectTime {} cost time is {} ms", collectTime, (System.currentTimeMillis() - startTime));
+        return deleteCount;
+    }
 
 
-	public void setInstanceDao(InstanceDao instanceDao) {
-		this.instanceDao = instanceDao;
-	}
+	public void setClientReportInstanceService(ClientReportInstanceService clientReportInstanceService) {
+        this.clientReportInstanceService = clientReportInstanceService;
+    }
 
-	public void setAppClientValueDistriStatDao(AppClientValueDistriStatDao appClientValueDistriStatDao) {
+    public void setAppClientValueDistriStatDao(AppClientValueDistriStatDao appClientValueDistriStatDao) {
 		this.appClientValueDistriStatDao = appClientValueDistriStatDao;
 	}
-
-    
 
 }

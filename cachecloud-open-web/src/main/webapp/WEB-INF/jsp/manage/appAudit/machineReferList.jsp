@@ -27,7 +27,6 @@
 							<th>网络流量</th>
 							<th>机器负载</th>
 							<th>是否是虚机</th>
-							<th>本组</th>
 							<th>额外说明</th>
 							<th>机房</th>
 						</tr>
@@ -101,7 +100,6 @@
                                 		</c:otherwise>
                                 	</c:choose>
                                 </td>
-                                <td>${machine.info.groupDesc}</td>
 								<td>${machine.info.extraDesc}</td>
 								<td>${machine.info.room}</td>
 							</tr>

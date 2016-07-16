@@ -72,7 +72,7 @@
                                             <c:when test="${appDetail.appDesc.status == 0 or appDetail.appDesc.status == 1}">
                                                 ${appDetail.appDesc.appId}
                                             </c:when>
-                                            <c:when test="${appDetail.appDesc.status == 2 or appDetail.appDesc.status == 3}">
+                                            <c:when test="${appDetail.appDesc.status == 2 or appDetail.appDesc.status == 3 or appDetail.appDesc.status == 4}">
                                                 <a target="_blank"
                                                    href="/manage/app/index.do?appId=${appDetail.appDesc.appId}">${appDetail.appDesc.appId}</a>
                                             </c:when>
@@ -83,7 +83,7 @@
                                             <c:when test="${appDetail.appDesc.status == 0 or appDetail.appDesc.status == 1}">
                                                 ${appDetail.appDesc.name}
                                             </c:when>
-                                            <c:when test="${appDetail.appDesc.status == 2 or appDetail.appDesc.status == 3}">
+                                            <c:when test="${appDetail.appDesc.status == 2 or appDetail.appDesc.status == 3 or appDetail.appDesc.status == 4}">
                                                 <a target="_blank"
                                                    href="/admin/app/index.do?appId=${appDetail.appDesc.appId}">${appDetail.appDesc.name}</a>
                                             </c:when>
@@ -95,27 +95,25 @@
                                     <td>
                                     	<span style="display:none"><fmt:formatNumber value="${appDetail.memUsePercent / 100}" pattern="0.00"/></span>
                                         <div class="progress margin-custom-bottom0">
-                                            <c:choose>
-                                            <c:when test="${appDetail.memUsePercent >= 80}">
-                                            <div class="progress-bar progress-bar-danger"
+                                        	<c:choose>
+				                        		<c:when test="${appDetail.memUsePercent >= 80}">
+													<c:set var="progressBarStatus" value="progress-bar-danger"/>
+				                        		</c:when>
+				                        		<c:otherwise>
+													<c:set var="progressBarStatus" value="progress-bar-success"/>
+				                        		</c:otherwise>
+				                        	</c:choose>
+                                            <div class="progress-bar ${progressBarStatus}"
                                                  role="progressbar" aria-valuenow="${appDetail.memUsePercent}"
                                                  aria-valuemax="100"
                                                  aria-valuemin="0" style="width: ${appDetail.memUsePercent}%">
-                                                </c:when>
-                                                <c:otherwise>
-                                                <div class="progress-bar progress-bar-success"
-                                                     role="progressbar" aria-valuenow="${appDetail.memUsePercent}"
-                                                     aria-valuemax="100"
-                                                     aria-valuemin="0"
-                                                     style="width: ${appDetail.memUsePercent}%">                                            </c:otherwise>
-                                                    </c:choose>
                                                     <label style="color: #000000">
                                                         <fmt:formatNumber
                                                                 value="${appDetail.mem  * appDetail.memUsePercent / 100 / 1024}"
                                                                 pattern="0.00"/>G&nbsp;&nbsp;Used/<fmt:formatNumber value="${appDetail.mem / 1024 * 1.0}" pattern="0.00"/>G&nbsp;&nbsp;Total
                                                     </label>
-                                                </div>
                                             </div>
+                                        </div>
                                     </td>
                                     <td>
                                     	<span style="display:none"><fmt:formatNumber value="${appDetail.hitPercent / 100}" pattern="0.00"/></span>
@@ -151,6 +149,9 @@
                                             </c:when>
                                             <c:when test="${appDetail.appDesc.status == 3}">
                                                 <font color="red">已下线</font>
+                                            </c:when>
+                                            <c:when test="${appDetail.appDesc.status == 4}">
+                                                <font color="red">驳回</font>
                                             </c:when>
                                         </c:choose>
                                     </td>

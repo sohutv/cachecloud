@@ -2,7 +2,6 @@ package com.sohu.cache.interceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +10,8 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import com.sohu.cache.constant.AppUserTypeEnum;
 import com.sohu.cache.entity.AppUser;
-import com.sohu.cache.util.ConstUtils;
+import com.sohu.cache.web.service.UserLoginStatusService;
+import com.sohu.cache.web.service.UserService;
 
 /**
  * 管理员登录验证
@@ -22,17 +22,20 @@ import com.sohu.cache.util.ConstUtils;
 public class ManageUserLoginInterceptor extends HandlerInterceptorAdapter {
     private Logger logger = LoggerFactory.getLogger(ManageUserLoginInterceptor.class);
 
+    private UserService userService;
+    
+    private UserLoginStatusService userLoginStatusService;
+    
     @Override
     public boolean preHandle(HttpServletRequest request,
             HttpServletResponse response, Object handler) throws Exception {
 
-        HttpSession session = request.getSession(true);
-        Object object = session.getAttribute(ConstUtils.LOGIN_USER_SESSION_NAME);
-        AppUser user = object == null ? null : (AppUser) object;
+        long userId = userLoginStatusService.getUserIdFromLoginStatus(request);
+        AppUser user = userService.get(userId);
 
         //必须是管理员
         if (user == null || user.getType() != AppUserTypeEnum.ADMIN_USER.value()) {
-            String path = session.getServletContext().getContextPath();
+            String path = request.getSession(true).getServletContext().getContextPath();
             response.sendRedirect(path + "/manage/login");
             return false;
         }
@@ -54,6 +57,14 @@ public class ManageUserLoginInterceptor extends HandlerInterceptorAdapter {
     public void afterCompletion(HttpServletRequest request,
             HttpServletResponse response, Object handler, Exception ex)
             throws Exception {
+    }
+
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
+
+    public void setUserLoginStatusService(UserLoginStatusService userLoginStatusService) {
+        this.userLoginStatusService = userLoginStatusService;
     }
 
 }

@@ -47,7 +47,6 @@
 									<th>最后统计时间</th>
 									<th>是否虚机</th>
 									<th>机房</th>
-									<th>本组</th>
 									<th>额外说明</th>
                                     <th>操作</th>
 								</tr>
@@ -156,7 +155,6 @@
                                         	</c:choose>
                                         </th>
 										<th>${machine.info.room}</th>
-										<th>${machine.info.groupDesc}</th>
 										<th>${machine.info.extraDesc}</th>
                                         <td>
                                             <a href="javascript;" data-target="#addMachineModal${machine.info.id}" data-toggle="modal">[修改]</a>

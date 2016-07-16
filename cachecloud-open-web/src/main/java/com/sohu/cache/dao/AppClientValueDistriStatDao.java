@@ -38,5 +38,25 @@ public interface AppClientValueDistriStatDao {
      */
     List<AppClientValueDistriSimple> getAppValueDistriList(@Param("appId") long appId, @Param("startTime") long startTime, @Param("endTime") long endTime);
 
+    /**
+     * 获取最小id
+     * @return
+     */
+    long getTableMinimumId();
+
+    /**
+     * 按照collectTime获取最小id
+     * @param collectTime
+     * @return
+     */
+    long getMinimumIdByCollectTime(@Param("collectTime") long collectTime);
+
+    /**
+     * 按照id区间删除
+     * @param startId
+     * @param endId
+     */
+    long deleteByIds(@Param("startId") long startId, @Param("endId") long endId);
+
     
 }

@@ -9,7 +9,7 @@ public enum RedisClusterConfigEnum {
     CLUSTER_SLAVE_VALIDITY_FACTOR("cluster-slave-validity-factor", "10", "集群从节点,延迟有效性判断因子,默认10秒:(node-timeout * slave-validity-factor) + repl-ping-slave-period"),
     CLUSTER_MIGRATION_BARRIER("cluster-migration-barrier", "1", "cluster主从迁移至少需要的从节点数,默认1个"),
     CLUSTER_CONFIG_FILE("cluster-config-file", "nodes-%d.conf", "集群配置文件名称,格式:nodes-{port}.conf"),
-    CLUSTER_REQUIRE_FULL_COVERAGE("cluster-require-full-coverage", "no", "节点部分失败期间,其他节点是否继续工作,初始可用版本:RC-1");
+    CLUSTER_REQUIRE_FULL_COVERAGE("cluster-require-full-coverage", "no", "节点部分失败期间,其他节点是否继续工作");
 
     private String key;
 

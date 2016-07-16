@@ -613,6 +613,10 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
             if (TypeUtil.isRedisSentinel(type)) {
                 continue;
             }
+            //忽略下线
+            if (instance.isOffline()) {
+                continue;
+            }
             String host = instance.getIp();
             int port = instance.getPort();
             if (!modifyInstanceConfig(host, port, parameter, value)) {
@@ -1050,7 +1054,9 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
      */
     private boolean copyCommonConfig(String sourceHost, int sourcePort, String targetHost, int targetPort) {
         String[] compareConfigs = new String[] {"maxmemory-policy", "maxmemory", "cluster-node-timeout",
-                "cluster-require-full-coverage", "repl-backlog-size", "appendonly"};
+                "cluster-require-full-coverage", "repl-backlog-size", "appendonly", "hash-max-ziplist-entries",
+                "hash-max-ziplist-value", "list-max-ziplist-entries", "list-max-ziplist-value", "set-max-intset-entries",
+                "zset-max-ziplist-entries", "zset-max-ziplist-value"};
         try {
             for (String config : compareConfigs) {
                 String sourceValue = getConfigValue(sourceHost, sourcePort, config);

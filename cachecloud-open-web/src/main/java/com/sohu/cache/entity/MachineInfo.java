@@ -232,15 +232,6 @@ public class MachineInfo {
         this.extraDesc = extraDesc;
     }
     
-    /**
-     * 获取组描述
-     * @return
-     */
-    public String getGroupDesc() {
-        return MachineGroupEnum.getMachineGroupInfo(type);
-    }
-    
-
     @Override
     public String toString() {
         return "MachineInfo{" +

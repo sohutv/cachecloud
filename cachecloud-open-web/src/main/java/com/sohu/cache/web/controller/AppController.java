@@ -8,7 +8,6 @@ import com.sohu.cache.entity.*;
 import com.sohu.cache.stats.app.AppDeployCenter;
 import com.sohu.cache.stats.app.AppStatsCenter;
 import com.sohu.cache.stats.instance.InstanceStatsCenter;
-import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.DemoCodeUtil;
 import com.sohu.cache.web.vo.AppDetailVO;
 import com.sohu.cache.web.chart.model.AreaChartEntity;
@@ -131,7 +130,7 @@ public class AppController extends BaseController {
         if (StringUtils.isBlank(slowLogStartDateParam) || StringUtils.isBlank(slowLogEndDateParam)) {
             Date startDate = new Date();
             slowLogEndDateParam = DateUtil.formatDate(startDate, "yyyy-MM-dd");
-            slowLogStartDateParam = DateUtil.formatDate(DateUtils.addDays(startDate, -7), "yyyy-MM-dd");
+            slowLogStartDateParam = DateUtil.formatDate(DateUtils.addDays(startDate, -2), "yyyy-MM-dd");
         }
         
         model.addAttribute("startDate", startDateParam);
@@ -141,6 +140,7 @@ public class AppController extends BaseController {
         model.addAttribute("appId", appId);
         model.addAttribute("tabTag", tabTag);
         model.addAttribute("firstCommand", firstCommand);
+        
 
         return new ModelAndView("app/userAppsIndex");
 
@@ -192,7 +192,7 @@ public class AppController extends BaseController {
         // 4. top5命令
         List<AppCommandStats> top5Commands = appStatsCenter.getTopLimitAppCommandStatsList(appId, beginTime, endTime, 5);
         model.addAttribute("top5Commands", top5Commands);
-
+        
         // 5.峰值
         List<AppCommandStats> top5ClimaxList = new ArrayList<AppCommandStats>();
         if (CollectionUtils.isNotEmpty(top5Commands)) {
@@ -203,6 +203,7 @@ public class AppController extends BaseController {
                 }
             }
         }
+
         model.addAttribute("top5ClimaxList", top5ClimaxList);
 
         model.addAttribute("appId", appId);
@@ -749,13 +750,6 @@ public class AppController extends BaseController {
             } else {
                 userService.update(appUser);
             }
-            AppUser newUser = userService.get(appUser.getId());
-            AppUser currentUser = getUserInfo(request);
-
-            //如果当前用户修改了自己的资料，那么更新session
-            if (newUser != null && currentUser != null && newUser.getId().equals(currentUser.getId())) {
-                request.getSession().setAttribute(ConstUtils.LOGIN_USER_SESSION_NAME, newUser);
-            }
             write(response, String.valueOf(SuccessEnum.SUCCESS.value()));
         } catch (Exception e) {
             write(response, String.valueOf(SuccessEnum.FAIL.value()));
@@ -785,7 +779,7 @@ public class AppController extends BaseController {
     }
 
     /**
-     * 修改配置申请
+     * 应用修改配置申请
      *
      * @param appId          应用id
      * @param appConfigKey   配置项
@@ -797,7 +791,26 @@ public class AppController extends BaseController {
                                           HttpServletResponse response, Model model, Long appId, Long instanceId, String appConfigKey, String appConfigValue, String appConfigReason) {
         AppUser appUser = getUserInfo(request);
         AppDesc appDesc = appService.getByAppId(appId);
-        AppAudit appAudit = appService.saveAppChangeConfig(appDesc, appUser, instanceId, appConfigKey, appConfigValue,appConfigReason, AppAuditType.MODIFY_CONFIG);
+        AppAudit appAudit = appService.saveAppChangeConfig(appDesc, appUser, instanceId, appConfigKey, appConfigValue,appConfigReason, AppAuditType.APP_MODIFY_CONFIG);
+        appEmailUtil.noticeAppResult(appDesc, appAudit);
+        write(response, String.valueOf(SuccessEnum.SUCCESS.value()));
+        return null;
+    }
+    
+    /**
+     * 实例修改配置申请
+     *
+     * @param appId          应用id
+     * @param appConfigKey   配置项
+     * @param appConfigValue 配置值
+     * @return
+     */
+    @RequestMapping(value = "/changeInstanceConfig")
+    public ModelAndView doChangeInstanceConfig(HttpServletRequest request,
+                                          HttpServletResponse response, Model model, Long appId, Long instanceId, String instanceConfigKey, String instanceConfigValue, String instanceConfigReason) {
+        AppUser appUser = getUserInfo(request);
+        AppDesc appDesc = appService.getByAppId(appId);
+        AppAudit appAudit = appService.saveInstanceChangeConfig(appDesc, appUser, instanceId, instanceConfigKey, instanceConfigValue, instanceConfigReason, AppAuditType.INSTANCE_MODIFY_CONFIG);
         appEmailUtil.noticeAppResult(appDesc, appAudit);
         write(response, String.valueOf(SuccessEnum.SUCCESS.value()));
         return null;
@@ -848,13 +861,13 @@ public class AppController extends BaseController {
     public ModelAndView doDemo(HttpServletRequest request, HttpServletResponse response, Long appId, Model model) {
         if (appId != null && appId > 0) {
             AppDesc appDesc = appService.getByAppId(appId);
-            List<String> code = DemoCodeUtil.getCode(appDesc);
-            List<String> dependency = DemoCodeUtil.getDependency(appDesc);
-//            List<String> springConfig = DemoCodeUtil.getSpringConfig(appDesc);
+            List<String> code = DemoCodeUtil.getCode(appDesc.getType(), appDesc.getAppId());
+            List<String> dependency = DemoCodeUtil.getDependencyRedis();
+            List<String> springConfig = DemoCodeUtil.getSpringConfig(appDesc.getType(), appDesc.getAppId());
             
-//            if(CollectionUtils.isNotEmpty(springConfig) && springConfig.size() > 0){
-//                model.addAttribute("springConfig", springConfig);
-//            }
+            if(CollectionUtils.isNotEmpty(springConfig) && springConfig.size() > 0){
+                model.addAttribute("springConfig", springConfig);
+            }
             model.addAttribute("dependency",dependency);
             model.addAttribute("code", code);
             model.addAttribute("status", 1);
@@ -893,8 +906,9 @@ public class AppController extends BaseController {
         model.addAttribute("slowLogEndDate", slowLogEndDateParam);
         
         // 应用慢查询日志
-        int limit = 10;
-        List<InstanceSlowLog> appInstanceSlowLogList = appStatsCenter.getInstanceSlowLogByAppId(appId, startDate, endDate, limit);
+        Map<String,Long> appInstanceSlowLogCountMap = appStatsCenter.getInstanceSlowLogCountMapByAppId(appId, startDate, endDate);
+        model.addAttribute("appInstanceSlowLogCountMap", appInstanceSlowLogCountMap);
+        List<InstanceSlowLog> appInstanceSlowLogList = appStatsCenter.getInstanceSlowLogByAppId(appId, startDate, endDate);
         model.addAttribute("appInstanceSlowLogList", appInstanceSlowLogList);
         
         // 各个实例对应的慢查询日志

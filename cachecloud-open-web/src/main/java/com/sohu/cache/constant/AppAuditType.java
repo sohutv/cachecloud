@@ -7,9 +7,9 @@ public enum AppAuditType {
 
     APP_AUDIT(0),
     APP_SCALE(1),
-    MODIFY_CONFIG(2),
-    REGISTER_USER_APPLY(3);
-    
+    APP_MODIFY_CONFIG(2),
+    REGISTER_USER_APPLY(3),
+    INSTANCE_MODIFY_CONFIG(4);
 
     private int value;
 

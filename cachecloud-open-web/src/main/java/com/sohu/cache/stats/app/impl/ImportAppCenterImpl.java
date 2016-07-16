@@ -25,6 +25,7 @@ import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.stats.app.ImportAppCenter;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.IdempotentConfirmer;
+import com.sohu.cache.util.JedisUtil;
 import com.sohu.cache.web.service.AppService;
 
 /**
@@ -168,6 +169,7 @@ public class ImportAppCenterImpl implements ImportAppCenter {
                     }
                     //deploy quartz
                     redisCenter.deployRedisCollection(appId, host, port);
+                    redisCenter.deployRedisSlowLogCollection(appId, host, port);
                 }
             }
 
@@ -192,7 +194,9 @@ public class ImportAppCenterImpl implements ImportAppCenter {
             public boolean execute() {
                 Jedis jedis = null;
                 try {
-                    jedis = new Jedis(ip, port);
+                    // 预留
+                    String password = null;
+                    jedis = JedisUtil.getJedis(ip, port, password);
                     jedis.getClient().setConnectionTimeout(Protocol.DEFAULT_TIMEOUT * (timeOutFactor++));
                     jedis.getClient().setSoTimeout(Protocol.DEFAULT_TIMEOUT * (timeOutFactor++));
                     List<Map<String, String>> mapList = jedis.sentinelMasters();
