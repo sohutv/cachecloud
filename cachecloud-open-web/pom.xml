@@ -268,16 +268,5 @@
                 </filters>
             </build>
         </profile>
-        <profile>
-            <id>test</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <build>
-                <filters>
-                    <filter>${project.basedir}/src/main/swap/test.properties</filter>
-                </filters>
-            </build>
-        </profile>
     </profiles>
 </project>
