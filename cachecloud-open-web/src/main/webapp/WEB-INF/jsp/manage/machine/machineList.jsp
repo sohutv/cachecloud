@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java"  contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ include file="/WEB-INF/jsp/manage/commons/taglibs.jsp"%>
 <div class="page-container">
 	<div class="page-content">
@@ -61,7 +61,7 @@
 										<td>
 											<c:choose>
 												<c:when test="${machine.memoryUsageRatio == null || machine.memoryUsageRatio == ''}">
-													收集中..
+													收集中..${collectAlert}
 												</c:when>
 												<c:otherwise>
 													<span style="display:none"><fmt:formatNumber value="${machine.memoryUsageRatio / 100}" pattern="0.00"/></span>
@@ -92,7 +92,7 @@
                                         <td>
                                         <c:choose>
 											<c:when test="${machine.memoryUsageRatio == null || machine.memoryUsageRatio == ''}">
-												收集中..
+												收集中..${collectAlert}
 											</c:when>
 											<c:otherwise>
 												<fmt:formatNumber var="fmtMemoryAllocatedRatio" value="${((machine.memoryAllocated)/1024)*100.0/(machine.memoryTotal/1024/1024/1024)}" pattern="0.00"/>
@@ -122,7 +122,7 @@
 										<td>
 											<c:choose>
 												<c:when test="${machine.cpuUsage == null || machine.cpuUsage == ''}">
-													收集中..
+													收集中..${collectAlert}
 												</c:when>
 												<c:otherwise>
 													${machine.cpuUsage}
@@ -135,7 +135,7 @@
 										<td>
 											<c:choose>
 												<c:when test="${machine.load == null || machine.load == ''}">
-													收集中..
+													收集中..${collectAlert}
 												</c:when>
 												<c:otherwise>
 													${machine.load}
