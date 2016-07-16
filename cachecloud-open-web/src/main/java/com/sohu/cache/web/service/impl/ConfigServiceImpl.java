@@ -165,8 +165,13 @@ public class ConfigServiceImpl implements ConfigService {
         logger.info("{}: {}", "ConstUtils.WHETHER_SCHEDULE_CLEAN_DATA", ConstUtils.WHETHER_SCHEDULE_CLEAN_DATA);
         
         // app secret key
-        ConstUtils.APP_SECRET_BASE_KEY = MapUtils.getString(configMap, "cachecloud.app.secret.base.key", ConstUtils.APP_SECRET_BASE_KEY);
+        ConstUtils.APP_SECRET_BASE_KEY = MapUtils.getString(configMap, "cachecloud.app.secret.base.key", ConstUtils.DEFAULT_APP_SECRET_BASE_KEY);
         logger.info("{}: {}", "ConstUtils.APP_SECRET_KEY", ConstUtils.APP_SECRET_BASE_KEY);
+        
+        // 机器性能统计周期(分钟)
+        ConstUtils.MACHINE_STATS_CRON_MINUTE = MapUtils.getIntValue(configMap, "cachecloud.machine.stats.cron.minute", ConstUtils.DEFAULT_MACHINE_STATS_CRON_MINUTE);
+        logger.info("{}: {}", "ConstUtils.MACHINE_STATS_CRON_MINUTE", ConstUtils.MACHINE_STATS_CRON_MINUTE);
+        
         
         logger.info("===========ConfigServiceImpl reload config end============");
     }

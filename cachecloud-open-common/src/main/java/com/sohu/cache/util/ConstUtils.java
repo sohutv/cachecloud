@@ -234,6 +234,13 @@ public class ConstUtils {
     public static String DEFAULT_APP_SECRET_BASE_KEY = "cachecloud-2014";
     public static String APP_SECRET_BASE_KEY = DEFAULT_APP_SECRET_BASE_KEY;
     
+    
+    /**
+     * 机器性能统计周期(分钟)
+     */
+    public static int DEFAULT_MACHINE_STATS_CRON_MINUTE = 1;
+    public static int MACHINE_STATS_CRON_MINUTE = DEFAULT_MACHINE_STATS_CRON_MINUTE;
+    
     static {
         ResourceBundle applicationResourceBundle = ResourceBundle.getBundle("application");
         IS_DEBUG = "true".equals(applicationResourceBundle.getString("isDebug"));

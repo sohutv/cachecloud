@@ -881,6 +881,8 @@ insert into system_config(config_key,config_value,info,status,order_id) values('
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.whether.schedule.clean.data','false','是否定期清理统计数据',1,26);
 
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.app.secret.base.key','cachecloud-2014','appkey秘钥基准key',1,27);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.stats.cron.minute','1','机器性能统计周期(分钟)',1,28);
+
 
 CREATE TABLE `app_data_migrate_status` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增id',

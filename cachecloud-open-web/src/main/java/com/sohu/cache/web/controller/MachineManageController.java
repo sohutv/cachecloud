@@ -49,6 +49,7 @@ public class MachineManageController extends BaseController{
         model.addAttribute("list", machineList);
         model.addAttribute("ipLike", ipLike);
         model.addAttribute("machineActive", SuccessEnum.SUCCESS.value());
+        model.addAttribute("collectAlert", "(请等待" + ConstUtils.MACHINE_STATS_CRON_MINUTE + "分钟)");
         return new ModelAndView("manage/machine/list");
     }
     

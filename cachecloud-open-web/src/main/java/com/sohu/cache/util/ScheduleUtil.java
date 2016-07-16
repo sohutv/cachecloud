@@ -31,8 +31,8 @@ public class ScheduleUtil {
         return baseCron;
     }
     
-    public static String getTenMinuteCronByHostId(long hostId) {
-        String baseCron = (hostId % 50) + " 0/10 * ? * *";
+    public static String getMachineStatsCron(long hostId) {
+        String baseCron = (hostId % 50) + " 0/" + ConstUtils.MACHINE_STATS_CRON_MINUTE + " * ? * *";
         return baseCron;
     }
     
