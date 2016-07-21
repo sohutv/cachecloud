@@ -30,7 +30,7 @@ function saveOrUpdateMachine(machineId){
 	var cpu = document.getElementById("cpu" + machineId);
 	var virtual = document.getElementById("virtual" + machineId);
     var realIp = document.getElementById("realIp" + machineId);
-    var type = document.getElementById("type" + machineId);
+    var machineType = document.getElementById("machineType" + machineId);
     var extraDesc = document.getElementById("extraDesc" + machineId);
 
 	if(ip.value == ""){
@@ -71,7 +71,7 @@ function saveOrUpdateMachine(machineId){
             virtual: virtual.value,
             realIp: realIp.value,
             id:machineId,
-            type: type.value,
+            machineType: machineType.value,
             extraDesc: extraDesc.value
 		},
         function(data){

@@ -90,7 +90,7 @@
                                         	机器类型:
                                     </label>
                                     <div class="col-md-5">
-                                        <select name="type" id="type${machine.info.id}" class="form-control select2_category">
+                                        <select name="machineType" id="machineType${machine.info.id}" class="form-control select2_category">
                                             <option value="0" <c:if test="${machine.info.type == 0}">selected="selected"</c:if>>
                                                 	Redis机器(默认)
                                             </option>

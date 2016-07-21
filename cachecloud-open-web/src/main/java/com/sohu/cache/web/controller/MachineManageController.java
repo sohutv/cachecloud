@@ -97,7 +97,7 @@ public class MachineManageController extends BaseController{
         machineInfo.setCpu(NumberUtils.toInt(request.getParameter("cpu"), 0));
         machineInfo.setVirtual(NumberUtils.toInt(request.getParameter("virtual"), 0));
         machineInfo.setRealIp(request.getParameter("realIp"));
-        machineInfo.setType(NumberUtils.toInt(request.getParameter("type"), 0));
+        machineInfo.setType(NumberUtils.toInt(request.getParameter("machineType"), 0));
         machineInfo.setExtraDesc(request.getParameter("extraDesc"));
         machineInfo.setCollect(NumberUtils.toInt(request.getParameter("collect"), 1));
         
