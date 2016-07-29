@@ -28,6 +28,7 @@ import redis.clients.jedis.Jedis;
 import com.sohu.cache.constant.AppDataMigrateEnum;
 import com.sohu.cache.constant.AppDataMigrateResult;
 import com.sohu.cache.constant.AppDataMigrateStatusEnum;
+import com.sohu.cache.constant.CommandResult;
 import com.sohu.cache.constant.ErrorMessageEnum;
 import com.sohu.cache.constant.RedisMigrateToolConstant;
 import com.sohu.cache.dao.AppDataMigrateStatusDao;
@@ -490,20 +491,20 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
     
     
     @Override
-    public String sampleCheckData(long id, int nums) {
+    public CommandResult sampleCheckData(long id, int nums) {
+        AppDataMigrateStatus appDataMigrateStatus = appDataMigrateStatusDao.get(id);
+        if (appDataMigrateStatus == null) {
+            return null;
+        }
+        String ip = appDataMigrateStatus.getMigrateMachineIp();
+        String configPath = appDataMigrateStatus.getConfigPath();
+        String sampleCheckDataCmd = ConstUtils.getRedisMigrateToolCmd() + " -c " + configPath + " -C" + " 'redis_check " + nums + "'";
+        logger.warn("sampleCheckDataCmd: {}", sampleCheckDataCmd);
         try {
-            AppDataMigrateStatus appDataMigrateStatus = appDataMigrateStatusDao.get(id);
-            if (appDataMigrateStatus == null) {
-                return "";
-            }
-            String ip = appDataMigrateStatus.getMigrateMachineIp();
-            String configPath = appDataMigrateStatus.getConfigPath();
-            String sampleCheckDataCmd = ConstUtils.getRedisMigrateToolCmd() + " -c " + configPath + " -C" + " 'redis_check " + nums + "'";
-            logger.warn("sampleCheckDataCmd: {}", sampleCheckDataCmd);
-            return SSHUtil.execute(ip, sampleCheckDataCmd);
+            return new CommandResult(sampleCheckDataCmd, SSHUtil.execute(ip, sampleCheckDataCmd));
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            return ErrorMessageEnum.INNER_ERROR_MSG.getMessage();
+            return new CommandResult(sampleCheckDataCmd, ErrorMessageEnum.INNER_ERROR_MSG.getMessage());
         }
     }
     

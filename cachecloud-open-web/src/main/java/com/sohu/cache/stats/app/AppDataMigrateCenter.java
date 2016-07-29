@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.sohu.cache.constant.AppDataMigrateEnum;
 import com.sohu.cache.constant.AppDataMigrateResult;
+import com.sohu.cache.constant.CommandResult;
 import com.sohu.cache.constant.RedisMigrateToolConstant;
 import com.sohu.cache.entity.AppDataMigrateStatus;
 
@@ -91,7 +92,7 @@ public interface AppDataMigrateCenter {
      * @param nums
      * @return
      */
-    String sampleCheckData(long id, int nums);
+    CommandResult sampleCheckData(long id, int nums);
 
 
     /**
