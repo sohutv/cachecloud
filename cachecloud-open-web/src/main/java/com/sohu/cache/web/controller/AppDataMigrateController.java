@@ -3,9 +3,11 @@ package com.sohu.cache.web.controller;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -19,6 +21,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.sohu.cache.constant.CommandResult;
 import com.sohu.cache.constant.MachineInfoEnum;
 import com.sohu.cache.constant.AppDataMigrateEnum;
 import com.sohu.cache.constant.AppDataMigrateResult;
@@ -57,6 +60,16 @@ public class AppDataMigrateController extends BaseController {
     
     @Resource(name = "redisCenter")
     private RedisCenter redisCenter;
+    
+    private static Set<String> MIGRATE_SAMPLE_USEFUL_LINES = new HashSet<String>();
+    static {
+        MIGRATE_SAMPLE_USEFUL_LINES.add("Checked keys");
+        MIGRATE_SAMPLE_USEFUL_LINES.add("Inconsistent value keys");
+        MIGRATE_SAMPLE_USEFUL_LINES.add("Inconsistent expire keys");
+        MIGRATE_SAMPLE_USEFUL_LINES.add("Other check error keys");
+        MIGRATE_SAMPLE_USEFUL_LINES.add("Checked OK keys");
+    }
+    
 
     /**
      * 初始化界面
@@ -182,20 +195,38 @@ public class AppDataMigrateController extends BaseController {
     public ModelAndView checkData(HttpServletRequest request, HttpServletResponse response, Model model) {
         long id = NumberUtils.toLong(request.getParameter("id"));
         int nums = 1000 + new Random().nextInt(2000);
-        //message格式显示有点问题
-        String message = appDataMigrateCenter.sampleCheckData(id, nums);
+        //为了方便，直接传入命令
+        CommandResult commandResult = appDataMigrateCenter.sampleCheckData(id, nums);
+        String message = commandResult.getResult();
         List<String> checkDataResultList = new ArrayList<String>();
         checkDataResultList.add("一共随机检验了" + nums + "个key" + ",检查结果如下:");
         String[] lineArr = message.split(ConstUtils.NEXT_LINE);
         for (String line : lineArr) {
-            if (StringUtils.isNotBlank(line)) {
-                line = line.replace("[0m", "");
-                line = line.replace("[31m", "");
+            if (StringUtils.isBlank(line)) {
+                continue;
             }
+            // 行数太多显示会有问题
+            if (lineArr.length > 100 && !isUsefulLine(line)) {
+                continue;
+            }
+            //message格式显示有点问题
+            line = line.replace("[0m", "");
+            line = line.replace("[31m", "");
+            line = line.replace("[33m", "");
             checkDataResultList.add(line.trim());
         }
         model.addAttribute("checkDataResultList", checkDataResultList);
+        model.addAttribute("checkDataCommand", commandResult.getCommand());
         return new ModelAndView("migrate/checkData");
+    }
+
+    private boolean isUsefulLine(String line) {
+        for (String usefulLine : MIGRATE_SAMPLE_USEFUL_LINES) {
+            if (line.contains(usefulLine)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

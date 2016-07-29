@@ -10,5 +10,7 @@
 		<c:forEach items="${checkDataResultList}" var="line">
 			<font color="white">${line}</font><br/>
 		</c:forEach>
+		<br/>
+		如果发现不一致的情况，可以在目标机器执行${checkDataCommand}来看一下详细的key不一致情况
 	</body>
 </html>
