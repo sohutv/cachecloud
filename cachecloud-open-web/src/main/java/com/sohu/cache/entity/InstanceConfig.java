@@ -93,6 +93,16 @@ public class InstanceConfig {
     public int getStatus() {
         return status;
     }
+    
+    public String getStatusDesc() {
+        if (1 == status) {
+            return "有效";
+        } else if (0 == status) {
+            return "无效";
+        } else {
+            return "";
+        }
+    }
 
     public void setStatus(int status) {
         this.status = status;

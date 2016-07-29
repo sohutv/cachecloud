@@ -9,9 +9,6 @@ package com.sohu.cache.entity;
  */
 public class SystemConfig {
 
-    /**
-     * key是关键字
-     */
     private String configKey;
 
     private String configValue;
