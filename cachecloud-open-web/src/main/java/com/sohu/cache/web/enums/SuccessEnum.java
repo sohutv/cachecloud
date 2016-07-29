@@ -19,4 +19,12 @@ public enum SuccessEnum {
     public int value() {
         return value;
     }
+    
+    public String info() {
+        if (value == 1) {
+            return "成功";
+        } else {
+            return "失败";
+        }
+    }
 }

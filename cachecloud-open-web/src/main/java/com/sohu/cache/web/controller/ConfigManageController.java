@@ -20,6 +20,7 @@ import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.entity.SystemConfig;
 import com.sohu.cache.web.enums.SuccessEnum;
 import com.sohu.cache.web.service.ConfigService;
+import com.sohu.cache.web.util.AppEmailUtil;
 
 /**
  * cachecloud配置管理
@@ -34,6 +35,9 @@ public class ConfigManageController extends BaseController {
 
     @Resource(name = "configService")
     private ConfigService configService;
+    
+    @Resource(name = "appEmailUtil")
+    private AppEmailUtil appEmailUtil;
 
     /**
      * 初始化配置
@@ -64,9 +68,10 @@ public class ConfigManageController extends BaseController {
     public ModelAndView update(HttpServletRequest request, HttpServletResponse response, Model model) {
         AppUser appUser = getUserInfo(request);
         logger.warn("user {} want to change config!", appUser.getName());
+        List<SystemConfig> oldConfigList = configService.getConfigList(1);
         SuccessEnum successEnum;
+        Map<String, String> configMap = new HashMap<String, String>();
         try {
-            Map<String, String> configMap = new HashMap<String, String>();
             Map<String, String[]> paramMap = request.getParameterMap();
             for (Entry<String, String[]> entry : paramMap.entrySet()) {
                 String key = entry.getKey();
@@ -86,9 +91,23 @@ public class ConfigManageController extends BaseController {
             successEnum = SuccessEnum.FAIL;
             logger.error(e.getMessage(), e);
         }
+        Map<String, String> systemDifConfigMap = getDifConfigMap(oldConfigList, configMap);
+        appEmailUtil.sendSystemConfigDifEmail(appUser, systemDifConfigMap, successEnum);
         logger.warn("user {} change config result is {}!", appUser.getName(), successEnum.value());
         return new ModelAndView("redirect:/manage/config/init?success=" + successEnum.value());
+    }
 
+    private Map<String, String> getDifConfigMap(List<SystemConfig> oldConfigList, Map<String, String> configMap) {
+        Map<String, String> systemDifConfigMap = new HashMap<String, String>();
+        for (SystemConfig systemConfig : oldConfigList) {
+            String key = systemConfig.getConfigKey();
+            String oldValue = systemConfig.getConfigValue();
+            String newValue = configMap.get(key);
+            if (newValue != null && !oldValue.equals(newValue)) {
+                systemDifConfigMap.put(systemConfig.getInfo(), String.format("old value: %s, new value: %s", oldValue, newValue));
+            }
+        }
+        return systemDifConfigMap;
     }
 
 }

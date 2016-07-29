@@ -1,16 +1,22 @@
 package com.sohu.cache.web.util;
 
 import com.sohu.cache.constant.AppCheckEnum;
+import com.sohu.cache.constant.RedisConfigTemplateChangeEnum;
 import com.sohu.cache.entity.AppAudit;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.AppUser;
+import com.sohu.cache.entity.InstanceConfig;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.component.EmailComponent;
+import com.sohu.cache.web.enums.SuccessEnum;
 import com.sohu.cache.web.service.UserService;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.velocity.app.VelocityEngine;
 
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * 邮件通知应用的申请流程(方法内是具体的文案)
@@ -83,6 +89,32 @@ public class AppEmailUtil {
         mailContent.append(",请知晓!");
         emailComponent.sendMail("【CacheCloud】状态通知", mailContent.toString(), Arrays.asList(appUser.getEmail()), Arrays.asList(emailComponent.getAdminEmail().split(ConstUtils.COMMA)));
     }
+    
+    public void sendRedisConfigTemplateChangeEmail(AppUser appUser, InstanceConfig instanceConfig,
+            SuccessEnum successEnum, RedisConfigTemplateChangeEnum redisConfigTemplateChangeEnum) {
+        String mailTitle = "【CacheCloud】-Redis配置模板修改通知";
+        String mailContent = String.format("%s 对Redis配置模板 进行了%s,操作结果是%s,具体为(key=%s,value=%s,状态为%s)",
+                appUser.getChName(),
+                redisConfigTemplateChangeEnum.getInfo(), successEnum.info(), instanceConfig.getConfigKey(),
+                instanceConfig.getConfigValue(), instanceConfig.getStatusDesc());
+        emailComponent.sendMail(mailTitle, mailContent.toString(), Arrays.asList(emailComponent.getAdminEmail().split(ConstUtils.COMMA)));
+        
+    }
+    
+    public void sendSystemConfigDifEmail(AppUser appUser, Map<String, String> systemDifConfigMap,
+            SuccessEnum successEnum) {
+        if (MapUtils.isEmpty(systemDifConfigMap)) {
+            return;
+        }
+        String mailTitle = "【CacheCloud】-系统配置修改通知";
+        StringBuffer mailContent = new StringBuffer();
+        mailContent.append(appUser.getChName() + "修改了系统配置，修改结果:" + successEnum.info() + "<br/>");
+        mailContent.append("具体配置如下:<br/>");
+        for(Entry<String, String> entry : systemDifConfigMap.entrySet()) {
+            mailContent.append(entry.getKey() + "-->" + entry.getValue() + "<br/>");
+        }
+        emailComponent.sendMail(mailTitle, mailContent.toString(), Arrays.asList(emailComponent.getAdminEmail().split(ConstUtils.COMMA)));
+    }
 
     public void setEmailComponent(EmailComponent emailComponent) {
         this.emailComponent = emailComponent;
@@ -95,4 +127,8 @@ public class AppEmailUtil {
     public void setVelocityEngine(VelocityEngine velocityEngine) {
         this.velocityEngine = velocityEngine;
     }
+
+    
+
+    
 }

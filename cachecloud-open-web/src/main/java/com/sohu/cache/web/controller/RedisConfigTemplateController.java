@@ -15,11 +15,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.sohu.cache.constant.ErrorMessageEnum;
+import com.sohu.cache.constant.RedisConfigTemplateChangeEnum;
 import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.entity.InstanceConfig;
 import com.sohu.cache.redis.RedisConfigTemplateService;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.enums.SuccessEnum;
+import com.sohu.cache.web.util.AppEmailUtil;
 
 /**
  * Redis配置模板管理
@@ -34,6 +36,9 @@ public class RedisConfigTemplateController extends BaseController {
 
     @Resource(name = "redisConfigTemplateService")
     private RedisConfigTemplateService redisConfigTemplateService;
+
+    @Resource(name = "appEmailUtil")
+    private AppEmailUtil appEmailUtil;
 
     /**
      * 初始化配置
@@ -71,8 +76,8 @@ public class RedisConfigTemplateController extends BaseController {
         logger.warn("user {} want to change id={}'s configKey={}, configValue={}, info={}, status={}", appUser.getName(),
                 id, configKey, configValue, info, status);
         SuccessEnum successEnum;
+        InstanceConfig instanceConfig = redisConfigTemplateService.getById(NumberUtils.toLong(id));
         try {
-            InstanceConfig instanceConfig = redisConfigTemplateService.getById(NumberUtils.toLong(id));
             instanceConfig.setConfigValue(configValue);
             instanceConfig.setInfo(info);
             instanceConfig.setStatus(status);
@@ -85,38 +90,8 @@ public class RedisConfigTemplateController extends BaseController {
         }
         logger.warn("user {} want to change id={}'s configKey={}, configValue={}, info={}, status={}, result is {}", appUser.getName(),
                 id, configKey, configValue, info, status, successEnum.value());
-        model.addAttribute("status", successEnum.value());
-        return new ModelAndView("");
-    }
-
-    /**
-     * 更新状态
-     */
-    @RequestMapping(value = "/changeStatus")
-    public ModelAndView changeStatus(HttpServletRequest request, HttpServletResponse response, Model model) {
-        AppUser appUser = getUserInfo(request);
-        String idParam = request.getParameter("id");
-        String statusParam = request.getParameter("status");
-        long id = NumberUtils.toLong(idParam);
-        int status = NumberUtils.toInt(statusParam, -1);
-        if (id <= 0 || status > 1 || status < 0) {
-            model.addAttribute("status", SuccessEnum.FAIL.value());
-            model.addAttribute("message", ErrorMessageEnum.PARAM_ERROR_MSG.getMessage() + "id=" + idParam + ",status="
-                    + statusParam);
-            return new ModelAndView("");
-        }
-        logger.warn("user {} want to change id={}'s status to {} ", appUser.getName(), id, status);
-        SuccessEnum successEnum;
-        try {
-            redisConfigTemplateService.updateStatus(id, status);
-            successEnum = SuccessEnum.SUCCESS;
-        } catch (Exception e) {
-            successEnum = SuccessEnum.FAIL;
-            model.addAttribute("message", ErrorMessageEnum.INNER_ERROR_MSG.getMessage());
-            logger.error(e.getMessage(), e);
-        }
-        logger.warn("user {} want to change id={}'s status to {} result is {}", appUser.getName(), id, status,
-                successEnum.value());
+        //发送邮件通知
+        appEmailUtil.sendRedisConfigTemplateChangeEmail(appUser, instanceConfig, successEnum, RedisConfigTemplateChangeEnum.UPDATE);
         model.addAttribute("status", successEnum.value());
         return new ModelAndView("");
     }
@@ -136,6 +111,7 @@ public class RedisConfigTemplateController extends BaseController {
         }
         logger.warn("user {} want to delete id={}'s config", appUser.getName(), id);
         SuccessEnum successEnum;
+        InstanceConfig instanceConfig = redisConfigTemplateService.getById(id);
         try {
             redisConfigTemplateService.remove(id);
             successEnum = SuccessEnum.SUCCESS;
@@ -145,6 +121,8 @@ public class RedisConfigTemplateController extends BaseController {
             logger.error(e.getMessage(), e);
         }
         logger.warn("user {} want to delete id={}'s config, result is {}", appUser.getName(), id, successEnum.value());
+        //发送邮件通知
+        appEmailUtil.sendRedisConfigTemplateChangeEmail(appUser, instanceConfig, successEnum, RedisConfigTemplateChangeEnum.DELETE);
         model.addAttribute("status", successEnum.value());
         return new ModelAndView("");
 
@@ -175,8 +153,10 @@ public class RedisConfigTemplateController extends BaseController {
         }
         logger.warn("user {} want to add config, configKey is {}, configValue is {}, type is {}, result is {}",
                 appUser.getName(),
-                instanceConfig.getConfigKey(), instanceConfig.getType(), successEnum.value());
+                instanceConfig.getConfigKey(), instanceConfig.getConfigValue(), instanceConfig.getType(), successEnum.value());
         model.addAttribute("status", successEnum.value());
+        //发送邮件通知
+        appEmailUtil.sendRedisConfigTemplateChangeEmail(appUser, instanceConfig, successEnum, RedisConfigTemplateChangeEnum.ADD);
         return new ModelAndView("");
 
     }
