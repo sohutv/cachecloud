@@ -3,7 +3,7 @@
 
 <div class="row">
     <div class="page-header">
-        <h4>应用拓扑结构-${appDesc.type}-<a href="/admin/app/index.do?appId=${appDesc.appId}">${appDesc.name}</a></h4>
+        <h4>应用拓扑结构-<a href="/admin/app/index.do?appId=${appDesc.appId}">${appDesc.name}</a></h4>
     </div>
     <div style="margin-top: 20px">
         <table class="table table-bordered table-striped table-hover">
@@ -25,7 +25,11 @@
             <c:forEach var="instance" items="${instanceList}" varStatus="status">
             	<c:set var="instanceStatsMapKey" value="${instance.ip}:${instance.port}"></c:set>
                 <tr>
-                    <td><a href="/admin/instance/index.do?instanceId=${instance.id}" target="_blank">${instance.id}</a>
+                    <td>
+                    	 <a href="/admin/instance/index.do?instanceId=${instance.id}" target="_blank">${instance.id}</a>
+                    	 <c:if test="${instance.masterInstanceId == 0 && instance.status != 2}">
+							<span class="glyphicon glyphicon-star"></span>	                         
+	                     </c:if>
                     </td>
                     <td>${instance.ip}:${instance.port}</td>
                     <td>${instance.statusDesc}</td>
