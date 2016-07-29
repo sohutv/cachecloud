@@ -23,7 +23,7 @@
             <!-- 
             <li><a href="#app_fault" data-url="/admin/app/fault.do?appId=${appId}" data-toggle="tab">故障报警</a></li>
             -->
-            <li><a href="#app_topology" data-url="/admin/app/topology.do?appId=${appId}" data-toggle="tab">拓扑结构</a></li>
+            <li><a href="#app_topology" data-url="/admin/app/topology.do?appId=${appId}" data-toggle="tab">实例列表</a></li>
             <li><a href="#app_detail" data-url="/admin/app/detail.do?appId=${appId}" data-toggle="tab">应用详情</a></li>
             <li><a href="#app_command_analysis"
                    data-url="/admin/app/commandAnalysis.do?appId=${appId}&startDate=${startDate}&endDate=${endDate}&firstCommand=${firstCommand}"
@@ -37,6 +37,7 @@
             <li><a href="#app_slow_log" data-url="/admin/app/slowLog?appId=${appId}&slowLogStartDate=${slowLogStartDate}&slowLogEndDate=${slowLogEndDate}"
                    data-toggle="tab">慢查询</a>
             </li>
+            <li><a href="#app_top_pic" data-url="/admin/app/machineInstancesTopology.do?appId=${appId}" data-toggle="tab">应用拓扑</a></li>
         </ul>
         <div class="tab-content">
             <div class="tab-pane active" id="app_stat">
@@ -56,6 +57,8 @@
             <div class="tab-pane" id="app_demo">
             </div>
             <div class="tab-pane" id="app_slow_log">
+            </div>
+            <div class="tab-pane" id="app_top_pic">
             </div>
         </div>
     </div>

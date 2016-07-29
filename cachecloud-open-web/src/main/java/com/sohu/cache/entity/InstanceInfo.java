@@ -70,6 +70,8 @@ public class InstanceInfo implements Serializable {
     private int masterPort;
 
     private String roleDesc;
+    
+    private int groupId;
 
     public int getId() {
         return id;
@@ -177,6 +179,7 @@ public class InstanceInfo implements Serializable {
                 ", conn=" + conn +
                 ", cmd='" + cmd + '\'' +
                 ", type=" + type +
+                ", group=" + groupId +
                 '}';
     }
 
@@ -202,6 +205,14 @@ public class InstanceInfo implements Serializable {
 
     public void setMasterPort(int masterPort) {
         this.masterPort = masterPort;
+    }
+
+    public int getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(int groupId) {
+        this.groupId = groupId;
     }
 
     public String getStatusDesc() {

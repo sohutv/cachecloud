@@ -250,7 +250,8 @@
 	            <c:forEach var="instance" items="${instanceList}" varStatus="status">
 	            	<c:set var="instanceStatsMapKey" value="${instance.ip}:${instance.port}"></c:set>
 	                <tr>
-	                    <td><a href="/admin/instance/index.do?instanceId=${instance.id}" target="_blank">${instance.id}</a>
+	                    <td>
+	                    	 <a href="/admin/instance/index.do?instanceId=${instance.id}" target="_blank">${instance.id}</a>
 	                    </td>
 	                    <td>${instance.ip}:${instance.port}</td>
 	                    <td>${instance.statusDesc}</td>

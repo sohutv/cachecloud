@@ -293,6 +293,23 @@ public class AppController extends BaseController {
         fillAppInstanceStats(appId, model);
         return new ModelAndView("app/appTopology");
     }
+    
+    /**
+     * 应用机器拓扑图
+     *
+     * @param appId
+     * @return
+     */
+    @RequestMapping("/machineInstancesTopology")
+    public ModelAndView machineInstancesTopology(HttpServletRequest request,
+                                     HttpServletResponse response, Long appId, Model model) {
+        //应用信息
+        AppDesc appDesc = appService.getByAppId(appId);
+        model.addAttribute("appDesc", appDesc);
+        //拓扑
+        fillAppMachineInstanceTopology(appId, model);
+        return new ModelAndView("app/appMachineInstancesTopology");
+    }
 
     /**
      * 应用基本信息
