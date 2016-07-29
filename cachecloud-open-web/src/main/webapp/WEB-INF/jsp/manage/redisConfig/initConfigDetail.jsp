@@ -3,8 +3,8 @@
 
 <script type="text/javascript">
 
-function removeConfig(id) {
-	if (confirm("确认要删除id="+id+"配置?")) {
+function removeConfig(id, configKey) {
+	if (confirm("确认要删除key="+configKey+"配置?")) {
 		$.get(
 			'/manage/redisConfig/remove.json',
 			{
@@ -28,7 +28,6 @@ function changeConfig(id, configKey) {
 	var configValue = document.getElementById("configValue" + id);
 	var info = document.getElementById("info" + id);
 	var status = document.getElementById("status" + id);
-	var url = "/manage/redisConfig/update.json?id="+id + "&configKey="+configKey + "&configValue="+configValue.value+"&info="+info.value+"&status=" + status.value;
 	$.get(
 		'/manage/redisConfig/update.json',
 		{
@@ -128,6 +127,13 @@ function saveRedisConfig() {
 				</h3>
 			</div>
 		</div>
+		<div class="alert alert-warning" role="alert">
+		        1. 此功能是Redis全局配置模板(每次开启应用时用到)，请谨慎修改.<br/>
+		        2. 配置中的%d,%s代表Cachecloud会动态配置，最好不要修改.<br/>
+		        3. 使用方法详见<a target="_blank" href='http://cachecloud.github.io/2016/07/13/1.2.%20Redis%E9%85%8D%E7%BD%AE%E6%A8%A1%E6%9D%BF%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/'>Redis配置模板使用方法</a>
+		</div>
+		
+		
 		<div class="row">
 			<div class="col-md-12">
 				<div class="portlet box light-grey">
@@ -176,7 +182,7 @@ function saveRedisConfig() {
 												<button type="button" class="btn btn-small" onclick="changeConfig('${config.id}','${config.configKey}')">
 													修改
 												</button>
-												<button type="button" class="btn btn-small" onclick="removeConfig('${config.id}')">
+												<button type="button" class="btn btn-small" onclick="removeConfig('${config.id}','${config.configKey}')">
 													删除
 												</button>
 											</div>
