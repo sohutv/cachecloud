@@ -6,6 +6,7 @@
 <head>
     <title>迁移数据</title>
     <jsp:include page="/WEB-INF/include/head.jsp"/>
+    <script type="text/javascript" src="/resources/js/myPopover.js"></script>
     <script type="text/javascript">
     
     	function changeDataType(appIdId,serversId, choose) {
@@ -93,12 +94,7 @@
     		var targetServers = document.getElementById("targetServers");
     		var targetDataType = document.getElementById("targetDataType").value;
 			//非cachecloud
-    		if (targetDataType == 0 && targetServers.value == "") {
-   				alert("目标实例信息不能为空!");
-   				targetServers.focus();
-   				return false;
-    		//cachecloud
-    		} else if(targetDataType == 1 && targetAppId.value == "") {
+    		if(targetDataType == 1 && targetAppId.value == "") {
    				alert("目标appId不能为空!");
    				targetAppId.focus();
    				return false;
@@ -185,6 +181,11 @@
 									<div class="col-md-12">
 										<h4 class="page-header">
 											迁移工具配置
+											<button class="btn btn-success btn-sm" 
+										      data-container="body" data-toggle="popover" data-placement="top" 
+										      data-content="<a href='http://cachecloud.github.io/2016/06/28/1.2.%20%E8%BF%81%E7%A7%BB%E5%B7%A5%E5%85%B7%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E/'>使用文档</a>" style="border-radius:100%">
+										      ?
+										   </button>
 										</h4>
 									</div>
 								</div>
@@ -235,6 +236,9 @@
 														<option value="2">
                                                             RDB-file
 														</option>
+														<option value="4">
+                                                            AOF-file
+														</option>
 													</select>
 												</div>
 											</div>
@@ -252,6 +256,9 @@
 														</option>
 														<option value="1">
 															Redis-cluster
+														</option>
+														<option value="2">
+                                                            RDB-file
 														</option>
 													</select>
 												</div>

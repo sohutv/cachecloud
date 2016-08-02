@@ -13,7 +13,8 @@ public enum AppDataMigrateEnum {
     REDIS_NODE(0, "single"),
     REDIS_CLUSTER_NODE(1, "redis cluster"),
     RDB_FILE(2, "rdb file"),
-    TWEMPROXY(3, "twemproxy");
+    TWEMPROXY(3, "twemproxy"),
+    AOF_FILE(4, "aof file");
 
     private int index;
 
@@ -33,6 +34,13 @@ public enum AppDataMigrateEnum {
     private AppDataMigrateEnum(int index, String type) {
         this.index = index;
         this.type = type;
+    }
+    
+    public static boolean isFileType(AppDataMigrateEnum appDataMigrateEnum) {
+        if (RDB_FILE.equals(appDataMigrateEnum) || AOF_FILE.equals(appDataMigrateEnum)) {
+            return true;
+        }
+        return false;
     }
 
     public int getIndex() {

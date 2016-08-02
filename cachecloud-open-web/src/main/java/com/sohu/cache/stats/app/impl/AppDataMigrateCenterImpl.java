@@ -108,13 +108,13 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
         }
 
         // 2. 检查源配置
-        AppDataMigrateResult sourceResult = checkMigrateConfig(migrateMachineIp, sourceRedisMigrateEnum, sourceServers);
+        AppDataMigrateResult sourceResult = checkMigrateConfig(migrateMachineIp, sourceRedisMigrateEnum, sourceServers, true);
         if (!sourceResult.isSuccess()) {
             return sourceResult;
         }
 
         // 3. 检查目标
-        AppDataMigrateResult targetResult = checkMigrateConfig(migrateMachineIp, targetRedisMigrateEnum, targetServers);
+        AppDataMigrateResult targetResult = checkMigrateConfig(migrateMachineIp, targetRedisMigrateEnum, targetServers, false);
         if (!targetResult.isSuccess()) {
             return targetResult;
         }
@@ -191,17 +191,23 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
      * @return
      */
     private AppDataMigrateResult checkMigrateConfig(String migrateMachineIp, AppDataMigrateEnum redisMigrateEnum,
-            String servers) {
-        if (StringUtils.isBlank(servers)) {
-            return AppDataMigrateResult.fail("服务器信息不能为空!");
+            String servers, boolean isSource) {
+        //target如果是rdb是没有路径的，不需要检测
+        if (isSource || !AppDataMigrateEnum.isFileType(redisMigrateEnum)) {
+            if (StringUtils.isBlank(servers)) {
+                return AppDataMigrateResult.fail("服务器信息不能为空!");
+            }
         }
         List<String> serverList = Arrays.asList(servers.split(ConstUtils.NEXT_LINE));
         if (CollectionUtils.isEmpty(serverList)) {
             return AppDataMigrateResult.fail("服务器信息格式有问题!");
         }
         for (String server : serverList) {
-            if (AppDataMigrateEnum.RDB_FILE.equals(redisMigrateEnum)) {
-                // 检查文件是否存在
+            if (AppDataMigrateEnum.isFileType(redisMigrateEnum)) {
+                if (!isSource) {
+                    continue;
+                }
+                // 检查文件是否存在 
                 String filePath = server;
                 String cmd = "head " + filePath;
                 try {
@@ -308,12 +314,14 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
         // target
         config.append("[target]" + ConstUtils.NEXT_LINE);
         config.append("type: " + targetRedisMigrateEnum.getType() + ConstUtils.NEXT_LINE);
-        config.append("servers:" + ConstUtils.NEXT_LINE);
-        List<String> targetServerList = Arrays.asList(targetServers.split(ConstUtils.NEXT_LINE));
-        for (String server : targetServerList) {
-            config.append(" - " + server + ConstUtils.NEXT_LINE);
+        if (!AppDataMigrateEnum.isFileType(targetRedisMigrateEnum)) {
+            config.append("servers:" + ConstUtils.NEXT_LINE);
+            List<String> targetServerList = Arrays.asList(targetServers.split(ConstUtils.NEXT_LINE));
+            for (String server : targetServerList) {
+                config.append(" - " + server + ConstUtils.NEXT_LINE);
+            }
+            config.append(ConstUtils.NEXT_LINE);
         }
-        config.append(ConstUtils.NEXT_LINE);
 
         // common:使用最简配置
         config.append("[common]" + ConstUtils.NEXT_LINE);
