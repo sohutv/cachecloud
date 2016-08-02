@@ -1,6 +1,7 @@
 package com.sohu.cache.stats.app.impl;
 
 import com.sohu.cache.constant.AppTopology;
+import com.sohu.cache.constant.TimeDimensionalityEnum;
 import com.sohu.cache.dao.AppDao;
 import com.sohu.cache.dao.AppStatsDao;
 import com.sohu.cache.dao.InstanceDao;
@@ -45,6 +46,20 @@ public class AppStatsCenterImpl implements AppStatsCenter {
     
     private final static String COLLECT_DATE_FORMAT = "yyyyMMddHHmm";
 
+    
+    @Override
+    public List<AppStats> getAppStatsListByMinuteTime(long appId, long beginTime, long endTime) {
+        Assert.isTrue(appId > 0);
+        Assert.isTrue(beginTime > 0 && endTime > 0);
+
+        List<AppStats> appStatsList = null;
+        try {
+            appStatsList = appStatsDao.getAppStatsList(appId, new TimeDimensionality(beginTime, endTime, COLLECT_DATE_FORMAT));
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        return appStatsList;
+    }
 
     /**
      * 通过时间区间查询app的分钟统计数据
@@ -55,13 +70,17 @@ public class AppStatsCenterImpl implements AppStatsCenter {
      * @return
      */
     @Override
-    public List<AppStats> getAppStatsListByMinuteTime(final long appId, long beginTime, long endTime) {
+    public List<AppStats> getAppStatsList(final long appId, long beginTime, long endTime, TimeDimensionalityEnum timeDimensionalityEnum) {
         Assert.isTrue(appId > 0);
         Assert.isTrue(beginTime > 0 && endTime > 0);
 
         List<AppStats> appStatsList = null;
         try {
-            appStatsList = appStatsDao.getAppStatsList(appId, new TimeDimensionality(beginTime, endTime, COLLECT_DATE_FORMAT));
+            if (TimeDimensionalityEnum.MINUTE.equals(timeDimensionalityEnum)) {
+                appStatsList = appStatsDao.getAppStatsByMinute(appId, beginTime, endTime);
+            } else if(TimeDimensionalityEnum.HOUR.equals(timeDimensionalityEnum)) {
+                appStatsList = appStatsDao.getAppStatsByHour(appId, beginTime, endTime);
+            }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
@@ -175,6 +194,27 @@ public class AppStatsCenterImpl implements AppStatsCenter {
     public List<AppCommandStats> getCommandStatsList(long appId, long beginTime, long endTime) {
         return appStatsDao.getAppAllCommandStatsList(appId, new TimeDimensionality(beginTime, endTime, COLLECT_DATE_FORMAT));
     }
+    
+    @Override
+    public List<AppCommandStats> getCommandStatsListV2(long appId, long beginTime, long endTime, TimeDimensionalityEnum timeDimensionalityEnum, String commandName) {
+        if (TimeDimensionalityEnum.MINUTE.equals(timeDimensionalityEnum)) {
+            return appStatsDao.getAppCommandStatsListByMinuteWithCommand(appId, beginTime, endTime, commandName);
+        } else if(TimeDimensionalityEnum.HOUR.equals(timeDimensionalityEnum)) {
+            return appStatsDao.getAppCommandStatsListByHourWithCommand(appId, beginTime, endTime, commandName);
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<AppCommandStats> getCommandStatsListV2(long appId, long beginTime, long endTime, TimeDimensionalityEnum timeDimensionalityEnum) {
+        if (TimeDimensionalityEnum.MINUTE.equals(timeDimensionalityEnum)) {
+            return appStatsDao.getAppAllCommandStatsListByMinute(appId, beginTime, endTime);
+        } else if(TimeDimensionalityEnum.HOUR.equals(timeDimensionalityEnum)) {
+            return appStatsDao.getAppAllCommandStatsListByHour(appId, beginTime, endTime);
+        }
+        return Collections.emptyList();
+    }
+    
 
     /**
      * 查询应用指定命令的峰值
@@ -357,5 +397,7 @@ public class AppStatsCenterImpl implements AppStatsCenter {
     public void setUserService(UserService userService) {
         this.userService = userService;
     }
+
+
 
 }

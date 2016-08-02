@@ -10,6 +10,7 @@ var betweenOneDay = '${betweenOneDay}';
 var appId = '${appId}'; 
 var chartParams = "&startDate="+startDate+"&endDate="+endDate;
 var chartParamsCompare = "&startDate="+yesterDate+"&endDate="+startDate;
+var betweenParams = "&startDate="+yesterDate+"&endDate="+endDate;
 Highcharts.setOptions({
 	global : {
 		useUTC : false
@@ -87,32 +88,20 @@ function changeCommandChart(value){
 		if(betweenOneDay == 1){
 			$(document).ready(
 				function() {
-					var options = getOption("containerSingleCommand", title, "次数");
-					var commandsUrl = "/admin/app/getCommandStats.do?appId=" + appId+ "&commandName=" + firstCommand + chartParams;
+					var options = getOption("containerSingleCommand", "<b>全命令统计</b>", "次数");
+					var commandsUrl = "/admin/app/getMutiDatesCommandStats.json?appId=" + appId + "&commandName=" + firstCommand + betweenParams;
 					$.ajax({
 						type : "get",
 						url : commandsUrl,
-						async : false,
+						async : true,
 						success : function(data) {
-							var nameLegend = firstCommand + "命令趋势图(" + startDate + ")";
-							var finalPoints = getSeriesPoints(data, nameLegend);
-							options.series.push(finalPoints);
+							var dates = new Array();
+							dates.push(startDate); 
+							dates.push(yesterDate);
+							pushOptionSeries(options, data, dates, "命令趋势图");
+							new Highcharts.Chart(options);
 						}
 					});
-					
-					//比较
-					var commandsUrlCompare = "/admin/app/getCommandStats.do?appId=" + appId + "&commandName=" + firstCommand + chartParamsCompare + "&addDay=1";
-					$.ajax({
-						type : "get",
-						url : commandsUrlCompare,
-						async : false,
-						success : function(data) {
-							var nameLegend = firstCommand + "命令趋势图(" + yesterDate + ")";
-							var finalPoints = getSeriesPoints(data, nameLegend);
-							options.series.push(finalPoints);
-						}
-					});
-					new Highcharts.Chart(options);
 			 });
 		}else{
 			$(document).ready(

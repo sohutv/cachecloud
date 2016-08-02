@@ -4,13 +4,15 @@ import com.alibaba.fastjson.JSONObject;
 import com.sohu.cache.constant.AppAuditType;
 import com.sohu.cache.constant.AppStatusEnum;
 import com.sohu.cache.constant.AppUserTypeEnum;
+import com.sohu.cache.constant.TimeDimensionalityEnum;
 import com.sohu.cache.entity.*;
 import com.sohu.cache.stats.app.AppDeployCenter;
 import com.sohu.cache.stats.app.AppStatsCenter;
 import com.sohu.cache.stats.instance.InstanceStatsCenter;
+import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.DemoCodeUtil;
 import com.sohu.cache.web.vo.AppDetailVO;
-import com.sohu.cache.web.chart.model.AreaChartEntity;
+import com.sohu.cache.web.chart.model.HighchartPoint;
 import com.sohu.cache.web.chart.model.SimpleChartData;
 import com.sohu.cache.web.enums.SuccessEnum;
 import com.sohu.cache.web.util.AppEmailUtil;
@@ -333,7 +335,7 @@ public class AppController extends BaseController {
      */
     @RequestMapping("/getCommandStats")
     public ModelAndView getCommandStats(HttpServletRequest request,
-                                        HttpServletResponse response, Model model, Long appId, Integer addDay) throws ParseException {
+                                        HttpServletResponse response, Model model, Long appId) throws ParseException {
         String startDateParam = request.getParameter("startDate");
         String endDateParam = request.getParameter("endDate");
         Date startDate = DateUtil.parseYYYY_MM_dd(startDateParam);
@@ -351,21 +353,21 @@ public class AppController extends BaseController {
             } else {
                 appCommandStatsList = appStatsCenter.getCommandStatsList(appId, beginTime, endTime);
             }
-            result = assembleJson(appCommandStatsList, addDay);
+            result = assembleJson(appCommandStatsList);
         }
         write(response, result);
         return null;
     }
-
+    
     /**
      * 获取某个命令时间分布图
      *
      * @param appId 应用id
      * @throws ParseException
      */
-    @RequestMapping("/getCommandStatsV2")
-    public ModelAndView getCommandStatsV2(HttpServletRequest request,
-                                          HttpServletResponse response, Model model, Long appId, Integer addDay) throws ParseException {
+    @RequestMapping("/getMutiDatesCommandStats")
+    public ModelAndView getMutiDatesCommandStats(HttpServletRequest request,
+                                        HttpServletResponse response, Model model, Long appId) throws ParseException {
         String startDateParam = request.getParameter("startDate");
         String endDateParam = request.getParameter("endDate");
         Date startDate = DateUtil.parseYYYY_MM_dd(startDateParam);
@@ -379,25 +381,17 @@ public class AppController extends BaseController {
             String commandName = request.getParameter("commandName");
             List<AppCommandStats> appCommandStatsList;
             if (StringUtils.isNotBlank(commandName)) {
-                appCommandStatsList = appStatsCenter.getCommandStatsList(appId, beginTime, endTime, commandName);
+                appCommandStatsList = appStatsCenter.getCommandStatsListV2(appId, beginTime, endTime, TimeDimensionalityEnum.MINUTE, commandName);
             } else {
-                appCommandStatsList = appStatsCenter.getCommandStatsList(appId, beginTime, endTime);
+                appCommandStatsList = appStatsCenter.getCommandStatsListV2(appId, beginTime, endTime, TimeDimensionalityEnum.MINUTE);
             }
-            result = assembleJson(appCommandStatsList, addDay);
+            result = assembleMutilDateAppCommandJsonMinute(appCommandStatsList, startDate, endDate);
         }
-//        write(response, result);
-
-
-        AreaChartEntity splineChartEntity = new AreaChartEntity();
-        String container = request.getParameter("container");
-        if (container != null) {
-            splineChartEntity.renderTo(container);
-        }
-
-
-        return null;
+        model.addAttribute("data", result);
+        return new ModelAndView("");
     }
 
+    
     /**
      * 获取命中率、丢失率等分布
      *
@@ -408,7 +402,7 @@ public class AppController extends BaseController {
     @RequestMapping("/getAppStats")
     public ModelAndView getAppStats(HttpServletRequest request,
                                     HttpServletResponse response, Model model, Long appId,
-                                    String statName, Integer addDay) throws ParseException {
+                                    String statName) throws ParseException {
         String startDateParam = request.getParameter("startDate");
         String endDateParam = request.getParameter("endDate");
         Date startDate = DateUtil.parseYYYY_MM_dd(startDateParam);
@@ -417,12 +411,69 @@ public class AppController extends BaseController {
         if (appId != null) {
             long beginTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(startDate));
             long endTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(endDate));
-            List<AppStats> appStats = appStatsCenter
-                    .getAppStatsListByMinuteTime(appId, beginTime, endTime);
-            result = assembleAppStatsJson(appStats, statName, addDay);
+            List<AppStats> appStats = appStatsCenter.getAppStatsListByMinuteTime(appId, beginTime, endTime);
+            result = assembleAppStatsJson(appStats, statName);
         }
         write(response, result);
         return null;
+    }
+
+    /**
+     * 多命令
+     * @param appId
+     * @param statName
+     * @return
+     * @throws ParseException
+     */
+    @RequestMapping("/getMutiStatAppStats")
+    public ModelAndView getMutiStatAppStats(HttpServletRequest request,
+                                    HttpServletResponse response, Model model, Long appId) throws ParseException {
+        String statNames = request.getParameter("statName");
+        List<String> statNameList = Arrays.asList(statNames.split(ConstUtils.COMMA));
+        
+        String startDateParam = request.getParameter("startDate");
+        String endDateParam = request.getParameter("endDate");
+        Date startDate = DateUtil.parseYYYY_MM_dd(startDateParam);
+        Date endDate = DateUtil.parseYYYY_MM_dd(endDateParam);
+        String result = "[]";
+        if (appId != null) {
+            long beginTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(startDate));
+            long endTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(endDate));
+            List<AppStats> appStats = appStatsCenter.getAppStatsList(appId, beginTime, endTime, TimeDimensionalityEnum.MINUTE);
+            result = assembleMutiStatAppStatsJsonMinute(appStats, statNameList, startDate);
+        }
+        model.addAttribute("data", result);
+        return new ModelAndView("");
+    }
+    
+
+   
+
+    /**
+     * 获取命中率、丢失率等分布
+     *
+     * @param appId    应用id
+     * @param statName 统计项(hit,miss等)
+     * @throws ParseException
+     */
+    @RequestMapping("/getMutiDatesAppStats")
+    public ModelAndView getMutiDatesAppStats(HttpServletRequest request,
+                                    HttpServletResponse response, Model model, Long appId,
+                                    String statName, Integer addDay) throws ParseException {
+        
+        String startDateParam = request.getParameter("startDate");
+        String endDateParam = request.getParameter("endDate");
+        Date startDate = DateUtil.parseYYYY_MM_dd(startDateParam);
+        Date endDate = DateUtil.parseYYYY_MM_dd(endDateParam);
+        String result = "[]";
+        if (appId != null) {
+            long beginTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(startDate));
+            long endTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(endDate));
+            List<AppStats> appStats = appStatsCenter.getAppStatsList(appId, beginTime, endTime, TimeDimensionalityEnum.MINUTE);
+            result = assembleMutilDateAppStatsJsonMinute(appStats, statName, startDate, endDate);
+        }
+        model.addAttribute("data", result);
+        return new ModelAndView("");
     }
     
     /**
@@ -982,15 +1033,14 @@ public class AppController extends BaseController {
     /**
      * AppStats列表组装成json串
      */
-    private String assembleAppStatsJson(List<AppStats> appStats, String statName, Integer addDay) {
+    private String assembleAppStatsJson(List<AppStats> appStats, String statName) {
         if (appStats == null || appStats.isEmpty()) {
             return "[]";
         }
         List<SimpleChartData> list = new ArrayList<SimpleChartData>();
         for (AppStats stat : appStats) {
             try {
-                SimpleChartData chartData = SimpleChartData.getFromAppStats(
-                        stat, statName, addDay);
+                SimpleChartData chartData = SimpleChartData.getFromAppStats(stat, statName);
                 list.add(chartData);
             } catch (ParseException e) {
                 logger.info(e.getMessage(), e);
@@ -998,6 +1048,103 @@ public class AppController extends BaseController {
         }
         JSONArray jsonArray = JSONArray.fromObject(list);
         return jsonArray.toString();
+    }
+    
+    private String assembleMutilDateAppCommandJsonMinute(List<AppCommandStats> appCommandStats, Date startDate, Date endDate) {
+        if (appCommandStats == null || appCommandStats.isEmpty()) {
+            return "[]";
+        }
+        Map<String, List<HighchartPoint>> map = new HashMap<String, List<HighchartPoint>>();
+        Date currentDate = DateUtils.addDays(endDate, -1);
+        int diffDays = 0;
+        while (currentDate.getTime() >= startDate.getTime()) {
+            List<HighchartPoint> list = new ArrayList<HighchartPoint>();
+            for (AppCommandStats stat : appCommandStats) {
+                try {
+                    HighchartPoint highchartPoint = HighchartPoint.getFromAppCommandStats(stat, currentDate, diffDays);
+                    if (highchartPoint == null) {
+                        continue;
+                    }
+                    list.add(highchartPoint);
+                } catch (ParseException e) {
+                    logger.info(e.getMessage(), e);
+                }
+            }
+            String formatDate = DateUtil.formatDate(currentDate, "yyyy-MM-dd");
+            map.put(formatDate, list);
+            currentDate = DateUtils.addDays(currentDate, -1);
+            diffDays++;
+        }
+        net.sf.json.JSONObject jsonObject = net.sf.json.JSONObject.fromObject(map);
+        return jsonObject.toString();
+    }
+    
+    /**
+     * 多命令组装
+     * @param appStats
+     * @param statNameList
+     * @param startDate
+     * @return
+     */
+    private String assembleMutiStatAppStatsJsonMinute(List<AppStats> appStats, List<String> statNameList, Date startDate) {
+        if (appStats == null || appStats.isEmpty()) {
+            return "[]";
+        }
+        Map<String, List<HighchartPoint>> map = new HashMap<String, List<HighchartPoint>>();
+        for(String statName : statNameList) {
+            List<HighchartPoint> list = new ArrayList<HighchartPoint>();
+            for (AppStats stat : appStats) {
+                try {
+                    HighchartPoint highchartPoint = HighchartPoint.getFromAppStats(stat, statName, startDate, 0);
+                    if (highchartPoint == null) {
+                        continue;
+                    }
+                    list.add(highchartPoint);
+                } catch (ParseException e) {
+                    logger.info(e.getMessage(), e);
+                }
+            }
+            map.put(statName, list);
+        }
+        net.sf.json.JSONObject jsonObject = net.sf.json.JSONObject.fromObject(map);
+        return jsonObject.toString();
+    }
+    
+    /**
+     * 多时间组装
+     * @param appStats
+     * @param statName
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    private String assembleMutilDateAppStatsJsonMinute(List<AppStats> appStats, String statName, Date startDate, Date endDate) {
+        if (appStats == null || appStats.isEmpty()) {
+            return "[]";
+        }
+        Map<String, List<HighchartPoint>> map = new HashMap<String, List<HighchartPoint>>();
+        Date currentDate = DateUtils.addDays(endDate, -1);
+        int diffDays = 0;
+        while (currentDate.getTime() >= startDate.getTime()) {
+            List<HighchartPoint> list = new ArrayList<HighchartPoint>();
+            for (AppStats stat : appStats) {
+                try {
+                    HighchartPoint highchartPoint = HighchartPoint.getFromAppStats(stat, statName, currentDate, diffDays);
+                    if (highchartPoint == null) {
+                        continue;
+                    }
+                    list.add(highchartPoint);
+                } catch (ParseException e) {
+                    logger.info(e.getMessage(), e);
+                }
+            }
+            String formatDate = DateUtil.formatDate(currentDate, "yyyy-MM-dd");
+            map.put(formatDate, list);
+            currentDate = DateUtils.addDays(currentDate, -1);
+            diffDays++;
+        }
+        net.sf.json.JSONObject jsonObject = net.sf.json.JSONObject.fromObject(map);
+        return jsonObject.toString();
     }
 
     /**

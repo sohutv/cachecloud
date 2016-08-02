@@ -114,8 +114,7 @@ public class SimpleChartData {
 	 * @return
 	 * @throws ParseException
 	 */
-	public static SimpleChartData getFromAppStats(AppStats appStat,
-			String statName, Integer addDay) throws ParseException {
+	public static SimpleChartData getFromAppStats(AppStats appStat, String statName) throws ParseException {
 		SimpleChartData chartData = new SimpleChartData();
 		long collectTime = appStat.getCollectTime();
 		long count = 0;
@@ -137,9 +136,6 @@ public class SimpleChartData {
 			dateTime = DateUtil.parseYYYYMMddHH(String.valueOf(collectTime));
 		}
 		Long x = dateTime.getTime();
-		if(addDay != null){
-            x += TimeUnit.DAYS.toMillis(1) * addDay;
-        }
 		Long y = count;
 		String date = null;
 		try {

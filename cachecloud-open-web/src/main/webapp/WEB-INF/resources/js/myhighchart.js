@@ -34,6 +34,43 @@ function getClientCostSeriesPoints(dataType, dataArr, tags, unit){
 	return finalPoints;
 }
 
+function pushOptionSeries(options, data, dates, nameLegendPrefix, unit, defaultCount) {
+	if (typeof(unit) == "undefined") { 
+		unit = "次";
+	}  
+	var dataObject = eval("(" + data.data + ")");
+	for(var t=0;t<dates.length;t++){
+		date = dates[t];
+		var dataArr = dataObject[date];
+		var length = dataArr.length;
+		var dataSeries = [];
+		var count;
+		for (var i = 0; i < length - 1; i++) {
+			var data = dataArr[i];
+			count = data.y;
+			if (defaultCount > 0) { 
+				count = defaultCount;
+			}
+	  		var pointName = data.date + ":  " + count + unit;
+			var dataPoint = {
+	            name : pointName,
+				x : data.x,
+				y : count,
+			};
+			dataSeries.push(dataPoint);
+		}
+
+		var seriesPoints = {
+			name : nameLegendPrefix + "(" + date + ")",
+			data : dataSeries,
+			marker: {
+	            radius: 1,  //曲线点半径，默认是4
+	        }
+		};
+		options.series.push(seriesPoints);
+	}
+	
+}
 
 function getSeriesPoints(data,nameLegend, unit, defaultCount){
 	if (typeof(unit) == "undefined") { 
@@ -138,8 +175,7 @@ function getInstanceNetPoints(instanceNetData,nameLegend, command, unit){
 	return seriesPoints;
 }
 
-function getNetPoints(data,nameLegend, unit){
-	var dataArr = eval("(" + data + ")");
+function getNetPoints(dataArr,nameLegend, unit){
 	var length = dataArr.length;
 	var dataSeries = [];
 

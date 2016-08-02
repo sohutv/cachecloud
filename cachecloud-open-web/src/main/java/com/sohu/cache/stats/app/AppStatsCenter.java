@@ -1,6 +1,7 @@
 package com.sohu.cache.stats.app;
 
 import com.sohu.cache.constant.AppTopology;
+import com.sohu.cache.constant.TimeDimensionalityEnum;
 import com.sohu.cache.entity.AppCommandGroup;
 import com.sohu.cache.entity.AppCommandStats;
 import com.sohu.cache.entity.AppStats;
@@ -17,7 +18,7 @@ import java.util.Map;
  * Created by lingguo on 14-6-26.
  */
 public interface AppStatsCenter {
-
+    
     /**
      * 通过时间区间查询app的分钟统计数据
      *
@@ -27,6 +28,16 @@ public interface AppStatsCenter {
      * @return
      */
     public List<AppStats> getAppStatsListByMinuteTime(final long appId, long beginTime, long endTime);
+
+    /**
+     * 通过时间区间查询app的分钟统计数据
+     *
+     * @param appId
+     * @param beginTime      时间，格式：yyyyMMddHHmm
+     * @param endTime        时间，格式：yyyyMMddHHmm
+     * @return
+     */
+    public List<AppStats> getAppStatsList(final long appId, long beginTime, long endTime, TimeDimensionalityEnum timeDimensionalityEnum);
 
     /**
      * 查询一天中应用的命令执行次数的top5
@@ -56,6 +67,18 @@ public interface AppStatsCenter {
      */
     public Map<AppTopology, Object> queryAppTopology(final long appId);
     
+    
+    /**
+     * 查询应用指定时间段，指定命令名的结果集合
+     * 
+     * @param appId 应用id
+     * @param beginTime 时间，格式：yyyyMMddHHmm
+     * @param endTime 时间，格式：yyyyMMddHHmm
+     * @param commandName 命令名
+     * @return
+     */
+    public List<AppCommandStats> getCommandStatsListV2(long appId, long beginTime, long endTime, TimeDimensionalityEnum timeDimensionalityEnum, String commandName);
+    
     /**
      * 查询应用指定时间段，指定命令名的结果集合
      * 
@@ -76,6 +99,16 @@ public interface AppStatsCenter {
      * @return
      */
     public List<AppCommandStats> getCommandStatsList(long appId, long beginTime, long endTime);
+    
+    /**
+     * 查询应用指定时间段，指定命令名的结果集合
+     *
+     * @param appId 应用id
+     * @param beginTime 时间，格式：yyyyMMddHHmm
+     * @param endTime 时间，格式：yyyyMMddHHmm
+     * @return
+     */
+    public List<AppCommandStats> getCommandStatsListV2(long appId, long beginTime, long endTime, TimeDimensionalityEnum timeDimensionalityEnum);
 
     /**
      * 查询应用指定命令的峰值

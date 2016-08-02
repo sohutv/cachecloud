@@ -113,14 +113,32 @@
         command_count = command_count + #{commandCount},
         modify_time = #{modifyTime}
     </insert>
-
-    <select id="getAppStatsList" resultType="AppStats">
+    
+     <select id="getAppStatsList" resultType="AppStats">
         select
           <include refid="app_minute_statistics_columns"/> , create_time
         from <include refid="select_stat_table"/>
         where
           app_id = #{appId} and collect_time between #{td.begin} and #{td.end}
     </select>
+
+    <select id="getAppStatsByMinute" resultType="AppStats">
+        select
+          <include refid="app_minute_statistics_columns"/> , create_time
+        from app_minute_statistics
+        where
+          app_id = #{appId} and collect_time between #{beginTime} and #{endTime}
+    </select>
+    
+    
+    <select id="getAppStatsByHour" resultType="AppStats">
+        select
+          <include refid="app_minute_statistics_columns"/> , create_time
+        from app_hour_statistics
+        where
+          app_id = #{appId} and collect_time between #{beginTime} and #{endTime}
+    </select>
+    
     
     <select id="getAppCommandStatsList" resultType="AppCommandStats">
         select
@@ -131,6 +149,57 @@
           and command_name = #{commandName}
           and collect_time between #{td.begin} and #{td.end}
     </select>
+    
+    <select id="getAppAllCommandStatsListByMinute" resultType="AppCommandStats">
+        select
+        app_id,
+        collect_time,
+        'commands' command_name,
+        command_count,
+        create_time,
+        modify_time
+        from app_minute_statistics
+        where
+          app_id = #{appId}
+          and collect_time between #{beginTime} and #{endTime}
+    </select>
+    
+    
+    <select id="getAppAllCommandStatsListByHour" resultType="AppCommandStats">
+        select
+        app_id,
+        collect_time,
+        'commands' command_name,
+        command_count,
+        create_time,
+        modify_time
+        from app_hour_statistics
+        where
+          app_id = #{appId}
+          and collect_time between #{beginTime} and #{endTime}
+    </select>
+    
+    <select id="getAppCommandStatsListByMinuteWithCommand" resultType="AppCommandStats">
+        select
+          <include refid="app_minute_command_statistics_columns"/> , create_time
+        from app_minute_command_statistics
+        where
+          app_id = #{appId}
+          and command_name = #{commandName}
+          and collect_time between #{beginTime} and #{endTime}
+    </select>
+    
+    
+    <select id="getAppCommandStatsListByHourWithCommand" resultType="AppCommandStats">
+        select
+          <include refid="app_minute_command_statistics_columns"/> , create_time
+        from app_hour_command_statistics
+        where
+          app_id = #{appId}
+          and command_name = #{commandName}
+          and collect_time between #{beginTime} and #{endTime}
+    </select>
+    
 
     <select id="getAppAllCommandStatsList" resultType="AppCommandStats">
         select

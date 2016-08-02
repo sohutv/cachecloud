@@ -10,6 +10,7 @@ var appId = '${appId}';
 var chartType = 'line';
 var chartParams = "&startDate="+startDate+"&endDate="+endDate;
 var chartParamsCompare = "&startDate="+yesterDate+"&endDate="+startDate;
+var betweenParams = "&startDate="+yesterDate+"&endDate="+endDate;
 var appTotalMem = '${appDetail.mem}';
 Highcharts.setOptions({
 	global : {
@@ -223,31 +224,20 @@ Highcharts.setOptions({
 			$(document).ready(
 				function() {
 					var options = getOption("containerCommands", "<b>全命令统计</b>", "次数");
-					var commandsUrl = "/admin/app/getCommandStats.do?appId=" + appId + chartParams;
+					var commandsUrl = "/admin/app/getMutiDatesCommandStats.json?appId=" + appId + betweenParams;
 					$.ajax({
 						type : "get",
 						url : commandsUrl,
-						async : false,
+						async : true,
 						success : function(data) {
-							var nameLegend = "命令趋势图(" + startDate + ")";
-							var finalPoints = getSeriesPoints(data, nameLegend);
-							options.series.push(finalPoints);
+							var dates = new Array();
+							dates.push(startDate); 
+							dates.push(yesterDate);
+							pushOptionSeries(options, data, dates, "命令趋势图");
+							new Highcharts.Chart(options);
 						}
 					});
 					
-					//比较
-					var commandsUrlCompare = "/admin/app/getCommandStats.do?appId=" + appId + chartParamsCompare + "&addDay=1";
-					$.ajax({
-						type : "get",
-						url : commandsUrlCompare,
-						async : false,
-						success : function(data) {
-							var nameLegend = "命令趋势图(" + yesterDate + ")";
-							var finalPoints = getSeriesPoints(data, nameLegend);
-							options.series.push(finalPoints);
-						}
-					});
-					new Highcharts.Chart(options);
 			 });
 		}else{
 			$(document).ready(
@@ -280,37 +270,25 @@ Highcharts.setOptions({
 			$(document).ready(
 				function() {
 					var options = getOption("containerHits", "<b>命中统计</b>", "次数");
-					var commandsUrl = "/admin/app/getAppStats.do?appId=" + appId + "&statName=hits"+chartParams;
+					var commandsUrl = "/admin/app/getMutiDatesAppStats.json?appId=" + appId + "&statName=hits"+betweenParams;
 					$.ajax({
 						type : "get",
 						url : commandsUrl,
-						async : false,
+						async : true,
 						success : function(data) {
-							var nameLegend = "命中趋势图(" + startDate + ")";
-							var finalPoints = getSeriesPoints(data, nameLegend);
-							options.series.push(finalPoints);
+							var dates = new Array();
+							dates.push(startDate); 
+							dates.push(yesterDate);
+							pushOptionSeries(options, data, dates, "命中趋势图");
+							new Highcharts.Chart(options);
 						}
 					});
-					
-					//比较
-					var commandsUrlCompare = "/admin/app/getAppStats.do?appId=" + appId + "&statName=hits"+chartParamsCompare + "&addDay=1";
-					$.ajax({
-						type : "get",
-						url : commandsUrlCompare,
-						async : false,
-						success : function(data) {
-							var nameLegend = "命中趋势图(" + yesterDate + ")";
-							var finalPoints = getSeriesPoints(data, nameLegend);
-							options.series.push(finalPoints);
-						}
-					});
-					new Highcharts.Chart(options);
 			 });
 		}else{
 			$(document).ready(
 				function() {
 					var options = getOption("containerHits", "<b>命中统计</b>", "次数");
-					var commandsUrl = "/admin/app/getAppStats.do?appId=" + appId + "&statName=hits"+chartParams;
+					var commandsUrl = "/admin/app/getAppStats.json?appId=" + appId + "&statName=hits"+chartParams + "&timeDimensionalityIndex=1";
 					$.ajax({
 						type : "get",
 						url : commandsUrl,
@@ -334,36 +312,32 @@ Highcharts.setOptions({
 			$(document).ready(
 				function() {
 					var options = getOption("containerNet", "网络流量<a href='"+allInstanceNetStatUrl+"' target='_blank'>(查看实例流量)</a>", "");
-					//input流量
-					var netInputUrl = "/admin/app/getAppStats.do?appId=" + appId + "&statName=netInput" + chartParams;
-					var unit;
+					//网络流量
+					var netUrl = "/admin/app/getMutiStatAppStats.json?appId=" + appId + "&statName=netInput,netOutput" + chartParams;
 					$.ajax({
 						type : "get",
-						url : netInputUrl,
-						async : false,
+						url : netUrl,
+						async : true,
 						success : function(data) {
-							var nameLegend = "net_input";
-							var finalPoints = getNetPoints(data, nameLegend);
-							options.yAxis.title.text = finalPoints.unitTxt;
-							//获取单位
-							unit = finalPoints.unit;
-							options.series.push(finalPoints);
+
+							var dataObject = eval("(" + data.data + ")");
+							var inputDataArr = dataObject["netInput"];
+
+							//1.input
+							var inputPoints = getNetPoints(inputDataArr, "net_input");
+							//确认单位
+							options.yAxis.title.text = inputPoints.unitTxt;
+							var unit = inputPoints.unit;
+							options.series.push(inputPoints);
+							
+							//2.output
+							var outputDataArr = dataObject["netOutput"];
+							var outputPoints = getNetPoints(outputDataArr, "net_output", unit);
+							options.series.push(outputPoints);
+
+							new Highcharts.Chart(options);
 						}
 					});
-					
-					//output流量
-					var netOutputUrl = "/admin/app/getAppStats.do?appId=" + appId + "&statName=netOutput" + chartParams;
-					$.ajax({
-						type : "get",
-						url : netOutputUrl,
-						async : false,
-						success : function(data) {
-							var nameLegend = "net_output";
-							var finalPoints = getNetPoints(data, nameLegend, unit);
-							options.series.push(finalPoints);
-						}
-					});
-					new Highcharts.Chart(options);
 			 });
 	</script>
 	<div id="containerNet"
@@ -420,6 +394,29 @@ Highcharts.setOptions({
 		style="min-width: 310px; height: 350px; margin: 0 auto"></div>
 	
 	
+	<!-- 客户端连接数相关 -->
+	<script type="text/javascript">
+		//查询一天出每分钟数据
+			$(document).ready(
+				function() {
+					var options = getOption("containerClients", "<b>客户端连接统计</b>", "个");
+					var commandsUrl = "/admin/app/getMutiDatesAppStats.json?appId=" + appId + "&statName=connectedClient"+betweenParams;
+					$.ajax({
+						type : "get",
+						url : commandsUrl,
+						async : true,
+						success : function(data) {
+							var dates = new Array();
+							dates.push(startDate); 
+							dates.push(yesterDate);
+							pushOptionSeries(options, data, dates, "客户端连接趋势图", "个");
+							new Highcharts.Chart(options);
+						}
+					});
+			 });
+	</script>
+	<div id="containerClients"
+		style="min-width: 310px; height: 350px; margin: 0 auto"></div>
 	
 	<br/>
 	<br/>
