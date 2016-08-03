@@ -135,6 +135,7 @@
     		var migrateMachineIp = document.getElementById("migrateMachineIp").value;
     		var sourceAppId = document.getElementById("sourceAppId");
     		var targetAppId = document.getElementById("targetAppId");
+    		var redisSourcePass = document.getElementById("redisSourcePass");
 
     		$.get(
     			'/data/migrate/start.json',
@@ -145,7 +146,8 @@
     				targetServers: targetServers.value,
     				migrateMachineIp: migrateMachineIp,
     				sourceAppId: sourceAppId.value,
-    				targetAppId: targetAppId.value
+    				targetAppId: targetAppId.value,
+    				redisSourcePass: redisSourcePass.value
     			},
     	        function(data){
     				var status = data.status;
@@ -328,6 +330,26 @@
 												<div class="col-md-5">
 													<input type="text" id="targetAppId" class="form-control"  onchange="fillAppInstanceList('targetServers', 'targetRedisMigrateIndex',this.id)"/>
 												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								
+								<div class="row">
+									<div class="col-md-12">
+										<div class="col-md-6">
+											<div class="form-group">
+												<label class="control-label col-md-3">
+													源密码:
+												</label>
+												<div class="col-md-5">
+													<input type="text" id="redisSourcePass" name="redisSourcePass" placeholder="没有无需填写" class="form-control"/>
+												</div>
+											</div>
+										</div>
+										
+										<div class="col-md-6">
+											<div class="form-group">
 											</div>
 										</div>
 									</div>

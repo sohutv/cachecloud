@@ -119,12 +119,14 @@ public class AppDataMigrateController extends BaseController {
         String targetServers = request.getParameter("targetServers");
         long sourceAppId = NumberUtils.toLong(request.getParameter("sourceAppId"));
         long targetAppId = NumberUtils.toLong(request.getParameter("targetAppId"));
+        String redisSourcePass = request.getParameter("redisSourcePass");
+
         AppUser appUser = getUserInfo(request);
         long userId = appUser == null ? 0 : appUser.getId();
 
         // 不需要对格式进行检验,check已经做过了，开始迁移
         boolean isSuccess = appDataMigrateCenter.migrate(migrateMachineIp, sourceRedisMigrateEnum, sourceServers,
-                targetRedisMigrateEnum, targetServers, sourceAppId, targetAppId, userId);
+                targetRedisMigrateEnum, targetServers, sourceAppId, targetAppId, redisSourcePass, userId);
 
         model.addAttribute("status", isSuccess ? 1 : 0);
         return new ModelAndView("");

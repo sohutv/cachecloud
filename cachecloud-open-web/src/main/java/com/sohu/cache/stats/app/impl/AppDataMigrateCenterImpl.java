@@ -245,11 +245,11 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
 
     @Override
     public boolean migrate(String migrateMachineIp, AppDataMigrateEnum sourceRedisMigrateEnum, String sourceServers,
-            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers, long sourceAppId, long targetAppId, long userId) {
+            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers, long sourceAppId, long targetAppId, String redisSourcePass, long userId) {
         // 1. 生成配置
         int migrateMachinePort = ConstUtils.REDIS_MIGRATE_TOOL_PORT;
         String configContent = generateConfig(migrateMachinePort, sourceRedisMigrateEnum, sourceServers, targetRedisMigrateEnum,
-                targetServers);
+                targetServers, redisSourcePass);
         // 2. 上传配置
         String timestamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
         String confileFileName = "rmt-" + timestamp + ".conf";
@@ -299,7 +299,7 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
      * @return
      */
     public String generateConfig(int listenPort, AppDataMigrateEnum sourceRedisMigrateEnum, String sourceServers,
-            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers) {
+            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers, String redisSourcePass) {
         // source
         StringBuffer config = new StringBuffer();
         config.append("[source]" + ConstUtils.NEXT_LINE);
@@ -310,6 +310,9 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
             config.append(" - " + server + ConstUtils.NEXT_LINE);
         }
         config.append(ConstUtils.NEXT_LINE);
+        if (StringUtils.isNotBlank(redisSourcePass)) {
+            config.append("redis_auth: " + redisSourcePass + ConstUtils.NEXT_LINE);
+        }
 
         // target
         config.append("[target]" + ConstUtils.NEXT_LINE);

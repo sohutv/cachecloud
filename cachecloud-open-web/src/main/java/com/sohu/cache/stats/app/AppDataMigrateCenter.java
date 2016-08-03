@@ -50,10 +50,11 @@ public interface AppDataMigrateCenter {
      * @param sourceServers
      * @param targetRedisMigrateEnum
      * @param targetServers
+     * @param redisSourcePass
      * @return
      */
     boolean migrate(String migrateMachineIp, AppDataMigrateEnum sourceRedisMigrateEnum, String sourceServers,
-            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers, long sourceAppId, long targetAppId, long userId);
+            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers, long sourceAppId, long targetAppId, String redisSourcePass, long userId);
 
 
     /**
