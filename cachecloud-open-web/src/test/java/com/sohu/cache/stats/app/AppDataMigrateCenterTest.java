@@ -28,7 +28,9 @@ public class AppDataMigrateCenterTest extends BaseTest {
     @Resource(name = "appDataMigrateCenter")
     private AppDataMigrateCenterImpl appDataMigrateCenter;
     
-    private final static String REDIS_SOURCE_PASS = "redisPassWord";
+    private final static String REDIS_SOURCE_PASS = "redisSourcePassWord";
+    
+    private final static String REDIS_TARGET_PASS = "redisTargetPassWord";
 
     @Test
     public void testCheckMigrateMachine() {
@@ -44,7 +46,7 @@ public class AppDataMigrateCenterTest extends BaseTest {
         String targetServers = "127.0.0.1:6380";
 
         AppDataMigrateResult redisMigrateResult = appDataMigrateCenter.check(migrateMachineIp, sourceRedisMigrateEnum,
-                sourceServers, targetRedisMigrateEnum, targetServers);
+                sourceServers, targetRedisMigrateEnum, targetServers, REDIS_SOURCE_PASS, REDIS_TARGET_PASS);
 
         logger.info("===============testCheck start=================");
         logger.info(redisMigrateResult.toString());
@@ -70,7 +72,7 @@ public class AppDataMigrateCenterTest extends BaseTest {
         String targetServers = "127.0.0.1:6380";
 
         AppDataMigrateResult redisMigrateResult = appDataMigrateCenter.check(migrateMachineIp, sourceRedisMigrateEnum,
-                sourceServers, targetRedisMigrateEnum, targetServers);
+                sourceServers, targetRedisMigrateEnum, targetServers, REDIS_SOURCE_PASS, REDIS_TARGET_PASS);
 
         logger.info("===============testCheck start=================");
         logger.info(redisMigrateResult.toString());
@@ -86,7 +88,7 @@ public class AppDataMigrateCenterTest extends BaseTest {
 
         int port = ConstUtils.REDIS_MIGRATE_TOOL_PORT;
         String configConent = appDataMigrateCenter.generateConfig(port, sourceRedisMigrateEnum, sourceServers,
-                targetRedisMigrateEnum, targetServers, REDIS_SOURCE_PASS);
+                targetRedisMigrateEnum, targetServers, REDIS_SOURCE_PASS, REDIS_TARGET_PASS);
         return configConent;
     }
 
@@ -116,7 +118,7 @@ public class AppDataMigrateCenterTest extends BaseTest {
 
         boolean isMigrate = appDataMigrateCenter.migrate(migrateMachineIp, sourceRedisMigrateEnum, sourceServers,
                 targetRedisMigrateEnum,
-                targetServers, 10000, 20000, REDIS_SOURCE_PASS, 30000);
+                targetServers, 10000, 20000, REDIS_SOURCE_PASS, REDIS_TARGET_PASS, 30000);
         logger.warn("============testMigrate start=============");
         logger.warn("isMigrate:{}", isMigrate);
         logger.warn("============testMigrate end=============");
@@ -132,7 +134,7 @@ public class AppDataMigrateCenterTest extends BaseTest {
 
         boolean isMigrate = appDataMigrateCenter.migrate(migrateMachineIp, sourceRedisMigrateEnum, sourceServers,
                 targetRedisMigrateEnum,
-                targetServers, 10000, 20000, REDIS_SOURCE_PASS, 30000);
+                targetServers, 10000, 20000, REDIS_SOURCE_PASS, REDIS_TARGET_PASS, 30000);
         logger.warn("============testMigrate start=============");
         logger.warn("isMigrate:{}", isMigrate);
         logger.warn("============testMigrate end=============");
