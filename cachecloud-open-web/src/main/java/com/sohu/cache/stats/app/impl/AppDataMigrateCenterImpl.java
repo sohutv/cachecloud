@@ -33,8 +33,6 @@ import com.sohu.cache.constant.ErrorMessageEnum;
 import com.sohu.cache.constant.RedisMigrateToolConstant;
 import com.sohu.cache.dao.AppDataMigrateStatusDao;
 import com.sohu.cache.entity.AppDataMigrateStatus;
-import com.sohu.cache.entity.AppDesc;
-import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.entity.MachineInfo;
 import com.sohu.cache.exception.SSHException;
 import com.sohu.cache.machine.MachineCenter;
@@ -43,7 +41,6 @@ import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.ssh.SSHUtil;
 import com.sohu.cache.stats.app.AppDataMigrateCenter;
 import com.sohu.cache.util.ConstUtils;
-import com.sohu.cache.util.TypeUtil;
 import com.sohu.cache.web.service.AppService;
 
 /**
@@ -68,7 +65,7 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
     @Override
     public AppDataMigrateResult check(String migrateMachineIp, AppDataMigrateEnum sourceRedisMigrateEnum,
             String sourceServers,
-            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers, String redisSourcePass) {
+            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers, String redisSourcePass, String redisTargetPass) {
 
         // 1. 检查migrateMachineIp是否安装
         AppDataMigrateResult migrateMachineResult = checkMigrateMachine(migrateMachineIp);
@@ -83,7 +80,7 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
         }
 
         // 3. 检查目标
-        AppDataMigrateResult targetResult = checkMigrateConfig(migrateMachineIp, targetRedisMigrateEnum, targetServers, null, false);
+        AppDataMigrateResult targetResult = checkMigrateConfig(migrateMachineIp, targetRedisMigrateEnum, targetServers, redisTargetPass, false);
         if (!targetResult.isSuccess()) {
             return targetResult;
         }
@@ -214,12 +211,13 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
     }
 
     @Override
-    public boolean migrate(String migrateMachineIp, AppDataMigrateEnum sourceRedisMigrateEnum, String sourceServers,
-            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers, long sourceAppId, long targetAppId, String redisSourcePass, long userId) {
+	public boolean migrate(String migrateMachineIp, AppDataMigrateEnum sourceRedisMigrateEnum, String sourceServers,
+			AppDataMigrateEnum targetRedisMigrateEnum, String targetServers, long sourceAppId, long targetAppId,
+			String redisSourcePass, String redisTargetPass, long userId) {
         // 1. 生成配置
         int migrateMachinePort = ConstUtils.REDIS_MIGRATE_TOOL_PORT;
         String configContent = generateConfig(migrateMachinePort, sourceRedisMigrateEnum, sourceServers, targetRedisMigrateEnum,
-                targetServers, redisSourcePass);
+                targetServers, redisSourcePass, redisTargetPass);
         // 2. 上传配置
         String timestamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
         String confileFileName = "rmt-" + timestamp + ".conf";
@@ -269,7 +267,7 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
      * @return
      */
     public String generateConfig(int listenPort, AppDataMigrateEnum sourceRedisMigrateEnum, String sourceServers,
-            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers, String redisSourcePass) {
+            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers, String redisSourcePass, String redisTargetPass) {
         // source
         StringBuffer config = new StringBuffer();
         config.append("[source]" + ConstUtils.NEXT_LINE);
@@ -292,6 +290,9 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
             List<String> targetServerList = Arrays.asList(targetServers.split(ConstUtils.NEXT_LINE));
             for (String server : targetServerList) {
                 config.append(" - " + server + ConstUtils.NEXT_LINE);
+            }
+            if (StringUtils.isNotBlank(redisTargetPass)) {
+                config.append("redis_auth: " + redisTargetPass + ConstUtils.NEXT_LINE);
             }
             config.append(ConstUtils.NEXT_LINE);
         }

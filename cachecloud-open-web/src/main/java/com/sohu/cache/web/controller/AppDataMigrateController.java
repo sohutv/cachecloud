@@ -97,9 +97,10 @@ public class AppDataMigrateController extends BaseController {
         AppDataMigrateEnum targetRedisMigrateEnum = AppDataMigrateEnum.getByIndex(NumberUtils.toInt(targetRedisMigrateIndex, -1));
         String targetServers = request.getParameter("targetServers");
         String redisSourcePass = request.getParameter("redisSourcePass");
+        String redisTargetPass = request.getParameter("redisTargetPass");
 
         //检查返回结果
-        AppDataMigrateResult redisMigrateResult = appDataMigrateCenter.check(migrateMachineIp, sourceRedisMigrateEnum, sourceServers, targetRedisMigrateEnum, targetServers, redisSourcePass);
+        AppDataMigrateResult redisMigrateResult = appDataMigrateCenter.check(migrateMachineIp, sourceRedisMigrateEnum, sourceServers, targetRedisMigrateEnum, targetServers, redisSourcePass, redisTargetPass);
         model.addAttribute("status", redisMigrateResult.getStatus());
         model.addAttribute("message", redisMigrateResult.getMessage());
         return new ModelAndView("");
@@ -122,13 +123,14 @@ public class AppDataMigrateController extends BaseController {
         long sourceAppId = NumberUtils.toLong(request.getParameter("sourceAppId"));
         long targetAppId = NumberUtils.toLong(request.getParameter("targetAppId"));
         String redisSourcePass = request.getParameter("redisSourcePass");
+        String redisTargetPass = request.getParameter("redisTargetPass");
 
         AppUser appUser = getUserInfo(request);
         long userId = appUser == null ? 0 : appUser.getId();
 
         // 不需要对格式进行检验,check已经做过了，开始迁移
         boolean isSuccess = appDataMigrateCenter.migrate(migrateMachineIp, sourceRedisMigrateEnum, sourceServers,
-                targetRedisMigrateEnum, targetServers, sourceAppId, targetAppId, redisSourcePass, userId);
+                targetRedisMigrateEnum, targetServers, sourceAppId, targetAppId, redisSourcePass, redisTargetPass, userId);
 
         model.addAttribute("status", isSuccess ? 1 : 0);
         return new ModelAndView("");

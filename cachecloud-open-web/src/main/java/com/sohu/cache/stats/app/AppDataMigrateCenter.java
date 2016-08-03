@@ -27,10 +27,11 @@ public interface AppDataMigrateCenter {
      * @param targetRedisMigrateEnum
      * @param targetServers
      * @param redisSourcePass
+     * @param redisTargetPass
      * @return 
      */
     AppDataMigrateResult check(String migrateMachineIp, AppDataMigrateEnum sourceRedisMigrateEnum, String sourceServers,
-            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers, String redisSourcePass);
+            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers, String redisSourcePass, String redisTargetPass);
 
     /**
      * 开始迁移
@@ -41,10 +42,11 @@ public interface AppDataMigrateCenter {
      * @param targetRedisMigrateEnum
      * @param targetServers
      * @param redisSourcePass
+     * @param targetSourcePass
      * @return
      */
     boolean migrate(String migrateMachineIp, AppDataMigrateEnum sourceRedisMigrateEnum, String sourceServers,
-            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers, long sourceAppId, long targetAppId, String redisSourcePass, long userId);
+            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers, long sourceAppId, long targetAppId, String redisSourcePass, String targetSourcePass, long userId);
 
 
     /**

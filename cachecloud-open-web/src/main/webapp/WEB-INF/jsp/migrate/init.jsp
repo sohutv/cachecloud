@@ -72,6 +72,8 @@
     		var sourceDataType = document.getElementById("sourceDataType").value;
     		var migrateMachineIp = document.getElementById("migrateMachineIp").value;
     		var redisSourcePass = document.getElementById("redisSourcePass");
+    		var redisTargetPass = document.getElementById("redisTargetPass");
+
     		
 			//非cachecloud
     		if (sourceDataType == 0 && sourceServers.value == "") {
@@ -111,7 +113,8 @@
     				sourceServers:sourceServers.value,
     				targetServers:targetServers.value,
     				migrateMachineIp:migrateMachineIp,
-    				redisSourcePass:redisSourcePass.value
+    				redisSourcePass:redisSourcePass.value,
+    				redisTargetPass:redisTargetPass.value
     			},
     	        function(data){
     				var status = data.status;
@@ -136,6 +139,7 @@
     		var sourceAppId = document.getElementById("sourceAppId");
     		var targetAppId = document.getElementById("targetAppId");
     		var redisSourcePass = document.getElementById("redisSourcePass");
+    		var redisTargetPass = document.getElementById("redisTargetPass");
 
     		$.get(
     			'/data/migrate/start.json',
@@ -147,7 +151,8 @@
     				migrateMachineIp: migrateMachineIp,
     				sourceAppId: sourceAppId.value,
     				targetAppId: targetAppId.value,
-    				redisSourcePass: redisSourcePass.value
+    				redisSourcePass: redisSourcePass.value,
+    				redisTargetPass:redisTargetPass.value
     			},
     	        function(data){
     				var status = data.status;
@@ -350,6 +355,12 @@
 										
 										<div class="col-md-6">
 											<div class="form-group">
+												<label class="control-label col-md-3">
+													目标密码:
+												</label>
+												<div class="col-md-5">
+													<input type="text" id="redisTargetPass" name="redisTargetPass" placeholder="没有无需填写" class="form-control"/>
+												</div>
 											</div>
 										</div>
 									</div>
