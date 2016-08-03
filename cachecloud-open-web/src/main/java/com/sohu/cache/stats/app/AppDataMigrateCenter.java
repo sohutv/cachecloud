@@ -20,27 +20,17 @@ public interface AppDataMigrateCenter {
     
     /**
      * 检查配置
-     * @param migrateMachineIp
-     * @param sourceRedisMigrateEnum
-     * @param sourceServers
-     * @param targetAppId
-     * @return
-     */
-    AppDataMigrateResult check(String migrateMachineIp, AppDataMigrateEnum sourceRedisMigrateEnum, String sourceServers, long targetAppId);
-    
-
-    /**
-     * 检查配置
      * 
      * @param migrateMachineIp
      * @param sourceRedisMigrateEnum
      * @param sourceServers
      * @param targetRedisMigrateEnum
      * @param targetServers
-     * @return
+     * @param redisSourcePass
+     * @return 
      */
     AppDataMigrateResult check(String migrateMachineIp, AppDataMigrateEnum sourceRedisMigrateEnum, String sourceServers,
-            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers);
+            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers, String redisSourcePass);
 
     /**
      * 开始迁移

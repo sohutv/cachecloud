@@ -96,8 +96,10 @@ public class AppDataMigrateController extends BaseController {
         String targetRedisMigrateIndex = request.getParameter("targetRedisMigrateIndex");
         AppDataMigrateEnum targetRedisMigrateEnum = AppDataMigrateEnum.getByIndex(NumberUtils.toInt(targetRedisMigrateIndex, -1));
         String targetServers = request.getParameter("targetServers");
+        String redisSourcePass = request.getParameter("redisSourcePass");
+
         //检查返回结果
-        AppDataMigrateResult redisMigrateResult = appDataMigrateCenter.check(migrateMachineIp, sourceRedisMigrateEnum, sourceServers, targetRedisMigrateEnum, targetServers);
+        AppDataMigrateResult redisMigrateResult = appDataMigrateCenter.check(migrateMachineIp, sourceRedisMigrateEnum, sourceServers, targetRedisMigrateEnum, targetServers, redisSourcePass);
         model.addAttribute("status", redisMigrateResult.getStatus());
         model.addAttribute("message", redisMigrateResult.getMessage());
         return new ModelAndView("");

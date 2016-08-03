@@ -677,9 +677,9 @@ public class RedisCenterImpl implements RedisCenter {
                 jedis.close();
         }
     }
-
+    
     @Override
-    public boolean isRun(final String ip, final int port) {
+    public boolean isRun(final String ip, final int port, final String password) {
         boolean isRun = new IdempotentConfirmer() {
             private int timeOutFactor = 1;
 
@@ -689,6 +689,9 @@ public class RedisCenterImpl implements RedisCenter {
                 try {
                     jedis.getClient().setConnectionTimeout(Protocol.DEFAULT_TIMEOUT * (timeOutFactor++));
                     jedis.getClient().setSoTimeout(Protocol.DEFAULT_TIMEOUT * (timeOutFactor++));
+                    if (StringUtils.isNotBlank(password)) {
+                        jedis.auth(password);
+                    }
                     String pong = jedis.ping();
                     return pong != null && pong.equalsIgnoreCase("PONG");
                 } catch (JedisDataException e) {
@@ -707,6 +710,11 @@ public class RedisCenterImpl implements RedisCenter {
             }
         }.run();
         return isRun;
+    }
+
+    @Override
+    public boolean isRun(final String ip, final int port) {
+    	return isRun(ip, port, null);
     }
 
     @Override

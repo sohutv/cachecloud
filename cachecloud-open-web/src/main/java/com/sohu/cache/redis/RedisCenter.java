@@ -99,6 +99,16 @@ public interface RedisCenter {
     public HostAndPort getMaster(String ip, int port);
 
     /**
+     * 判断实例是否运行(带密码)
+     *
+     * @param ip
+     * @param port
+     * @param password
+     * @return
+     */
+    public boolean isRun(String ip, int port, String password);
+    
+    /**
      * 判断实例是否运行
      *
      * @param ip
@@ -106,7 +116,7 @@ public interface RedisCenter {
      * @return
      */
     public boolean isRun(String ip, int port);
-
+    
     /**
      * 下线指定实例
      *

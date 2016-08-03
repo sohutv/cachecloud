@@ -67,12 +67,11 @@
     	function checkMigrateFormat() {
     		var sourceRedisMigrateIndex = document.getElementById("sourceRedisMigrateIndex").value;
     		var targetRedisMigrateIndex = document.getElementById("targetRedisMigrateIndex").value;
-    		
     		var sourceServers = document.getElementById("sourceServers");
     		var sourceAppId = document.getElementById("sourceAppId");
     		var sourceDataType = document.getElementById("sourceDataType").value;
-    		
     		var migrateMachineIp = document.getElementById("migrateMachineIp").value;
+    		var redisSourcePass = document.getElementById("redisSourcePass");
     		
 			//非cachecloud
     		if (sourceDataType == 0 && sourceServers.value == "") {
@@ -111,7 +110,8 @@
     				targetRedisMigrateIndex: targetRedisMigrateIndex,
     				sourceServers:sourceServers.value,
     				targetServers:targetServers.value,
-    				migrateMachineIp:migrateMachineIp
+    				migrateMachineIp:migrateMachineIp,
+    				redisSourcePass:redisSourcePass.value
     			},
     	        function(data){
     				var status = data.status;

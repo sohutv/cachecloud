@@ -67,39 +67,8 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
 
     @Override
     public AppDataMigrateResult check(String migrateMachineIp, AppDataMigrateEnum sourceRedisMigrateEnum,
-            String sourceServers, long targetAppId) {
-        // 1.检查app是否存在
-        AppDesc appDesc = appService.getByAppId(targetAppId);
-        if (appDesc == null) {
-            return AppDataMigrateResult.fail("目标appId=" + targetAppId + "不存在");
-        }
-
-        // 2.转换Redis类型
-        AppDataMigrateEnum targetRedisMigrateEnum = TypeUtil.isRedisCluster(appDesc.getType()) ? AppDataMigrateEnum.REDIS_CLUSTER_NODE
-                : AppDataMigrateEnum.REDIS_NODE;
-
-        // 3.转换servers
-        List<InstanceInfo> instanceInfoList = appService.getAppInstanceInfo(targetAppId);
-        if (CollectionUtils.isEmpty(instanceInfoList)) {
-            return AppDataMigrateResult.fail("目标appId=" + targetAppId + "不存在任何redis节点!");
-        }
-        StringBuffer targetServers = new StringBuffer();
-        for (int i = 0; i < instanceInfoList.size(); i++) {
-            InstanceInfo instanceInfo = instanceInfoList.get(i);
-            targetServers.append(instanceInfo.getIp() + ":" + instanceInfo.getPort());
-            if (i != instanceInfoList.size() - 1) {
-                targetServers.append(ConstUtils.NEXT_LINE);
-            }
-        }
-
-        return check(migrateMachineIp, sourceRedisMigrateEnum, sourceServers, targetRedisMigrateEnum,
-                targetServers.toString());
-    }
-
-    @Override
-    public AppDataMigrateResult check(String migrateMachineIp, AppDataMigrateEnum sourceRedisMigrateEnum,
             String sourceServers,
-            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers) {
+            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers, String redisSourcePass) {
 
         // 1. 检查migrateMachineIp是否安装
         AppDataMigrateResult migrateMachineResult = checkMigrateMachine(migrateMachineIp);
@@ -108,13 +77,13 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
         }
 
         // 2. 检查源配置
-        AppDataMigrateResult sourceResult = checkMigrateConfig(migrateMachineIp, sourceRedisMigrateEnum, sourceServers, true);
+        AppDataMigrateResult sourceResult = checkMigrateConfig(migrateMachineIp, sourceRedisMigrateEnum, sourceServers, redisSourcePass, true);
         if (!sourceResult.isSuccess()) {
             return sourceResult;
         }
 
         // 3. 检查目标
-        AppDataMigrateResult targetResult = checkMigrateConfig(migrateMachineIp, targetRedisMigrateEnum, targetServers, false);
+        AppDataMigrateResult targetResult = checkMigrateConfig(migrateMachineIp, targetRedisMigrateEnum, targetServers, null, false);
         if (!targetResult.isSuccess()) {
             return targetResult;
         }
@@ -188,10 +157,11 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
      * @param migrateMachineIp
      * @param redisMigrateEnum
      * @param servers
+     * @param redisSourcePass 源密码
      * @return
      */
     private AppDataMigrateResult checkMigrateConfig(String migrateMachineIp, AppDataMigrateEnum redisMigrateEnum,
-            String servers, boolean isSource) {
+            String servers, String redisPassword, boolean isSource) {
         //target如果是rdb是没有路径的，不需要检测
         if (isSource || !AppDataMigrateEnum.isFileType(redisMigrateEnum)) {
             if (StringUtils.isBlank(servers)) {
@@ -233,9 +203,9 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
                     return AppDataMigrateResult.fail(server + "中的port不是整数");
                 }
                 int port = NumberUtils.toInt(portStr);
-                boolean isRun = redisCenter.isRun(ip, port);
+                boolean isRun = redisCenter.isRun(ip, port, redisPassword);
                 if (!isRun) {
-                    return AppDataMigrateResult.fail(server + "不是存活的");
+                    return AppDataMigrateResult.fail(server + "不是存活的或者密码错误!");
                 }
             }
         }
@@ -309,10 +279,10 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
         for (String server : sourceServerList) {
             config.append(" - " + server + ConstUtils.NEXT_LINE);
         }
-        config.append(ConstUtils.NEXT_LINE);
         if (StringUtils.isNotBlank(redisSourcePass)) {
             config.append("redis_auth: " + redisSourcePass + ConstUtils.NEXT_LINE);
         }
+        config.append(ConstUtils.NEXT_LINE);
 
         // target
         config.append("[target]" + ConstUtils.NEXT_LINE);
