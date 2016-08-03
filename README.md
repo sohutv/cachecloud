@@ -92,10 +92,7 @@ Redis的开发人员如同使用Mysql一样，不需要运维Mysql服务器，�
 
 <a name="cc9"/>
 ## 九、已知用户 ###
-<img src="http://i2.itc.cn/20160524/3084_d629c64a_470f_f0d1_2de6_6ac91761a292_1.png"/><img src="http://i2.itc.cn/20160524/3084_25214ef5_2489_64ef_853c_8429af315347_1.png"/><img src="http://i2.itc.cn/20160524/3084_688549c0_a4c5_aa8b_1c8a_a276f502df56_1.png"/>
-
-<img src="
-http://i2.itc.cn/20160722/3084_caa8142f_cdfc_6054_b64a_15553a844d62_1.png"/><img src="http://i3.itc.cn/20160524/3084_354a89c3_599a_54e5_0b6c_00d523ccd3ce_1.png"/><img width="200" height="100" src="http://i2.itc.cn/20160524/3084_c7455d89_b6d4_acf7_bfec_f54fbb39d11d_1.png"/><img src="http://i3.itc.cn/20160524/3084_70c582e9_41ed_f9a3_e370_377092ebc5ea_1.png"/>
+![](http://i3.itc.cn/20160803/3084_7cd6a9fa_2e71_c8e1_8b90_810e9f5db4cf_1.png)
 
 
 除此之外，还有天津联怡科技有限公司、瑞友科技、厦门美好出行物联网技术有限公司、北京九瑞网络科技有限公司、深圳市深软信息技术有限公司、欧乐在线科技有限公司、慧科教育、上海仁画信息股份有限公司等。
