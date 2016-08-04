@@ -26,6 +26,7 @@ import com.sohu.cache.constant.MachineInfoEnum;
 import com.sohu.cache.constant.AppDataMigrateEnum;
 import com.sohu.cache.constant.AppDataMigrateResult;
 import com.sohu.cache.constant.RedisMigrateToolConstant;
+import com.sohu.cache.entity.AppDataMigrateSearch;
 import com.sohu.cache.entity.AppDataMigrateStatus;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.AppUser;
@@ -240,9 +241,10 @@ public class AppDataMigrateController extends BaseController {
      * @return
      */
     @RequestMapping(value = "/list")
-    public ModelAndView list(HttpServletRequest request, HttpServletResponse response, Model model) {
-        List<AppDataMigrateStatus> appDataMigrateStatusList = appDataMigrateCenter.search();
+    public ModelAndView list(HttpServletRequest request, HttpServletResponse response, Model model, AppDataMigrateSearch appDataMigrateSearch) {
+        List<AppDataMigrateStatus> appDataMigrateStatusList = appDataMigrateCenter.search(appDataMigrateSearch);
         model.addAttribute("appDataMigrateStatusList", appDataMigrateStatusList);
+        model.addAttribute("appDataMigrateSearch", appDataMigrateSearch);
         return new ModelAndView("migrate/list");
     }
     

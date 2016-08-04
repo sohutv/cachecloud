@@ -31,6 +31,63 @@
 	    </div>
 	    
 	    <div class="row">
+        <div class="col-md-12">
+        	<form method="post" action="/data/migrate/list">
+				<div style="float:right">
+						<label style="font-weight:bold;text-align:left;">
+						 	源appId:
+						</label>
+						<input type="text" value="${appDataMigrateSearch.sourceAppId}" name="sourceAppId" size="4">
+						
+						<label style="font-weight:bold;text-align:left;">
+						 	目标appId:
+						</label>
+						<input type="text" value="${appDataMigrateSearch.targetAppId}" name="targetAppId" size="4">
+						
+						
+						<label style="font-weight:bold;text-align:left;">
+						 	源实例ip:
+						</label>
+						<input type="text" value="${appDataMigrateSearch.sourceInstanceIp}" name="sourceInstanceIp" size="9">
+						
+						<label style="font-weight:bold;text-align:left;">
+						 	目标实例ip:
+						</label>
+						<input type="text" value="${appDataMigrateSearch.targetInstanceIp}" name="targetInstanceIp" size="9">
+						
+						
+						<label style="font-weight:bold;text-align:left;">
+						 	&nbsp;开始日期:&nbsp;&nbsp;
+						</label>
+						<input type="text" size="9" name="startDate" id="startDate" value="${appDataMigrateSearch.startDate}" onFocus="WdatePicker({startDate:'%y-%M-01',dateFmt:'yyyy-MM-dd',alwaysUseStartDate:true})"/>
+						
+						<label style="font-weight:bold;text-align:left;">
+						 	结束日期:
+						</label>
+						<input type="text" size="9" name="endDate" id="endDate" value="${appDataMigrateSearch.endDate}" onFocus="WdatePicker({startDate:'%y-%M-01',dateFmt:'yyyy-MM-dd',alwaysUseStartDate:true})"/>
+						
+						<label style="font-weight:bold;text-align:left;">
+						 	状态:
+						</label>
+						<select name="status">
+							<option value="-2">
+								全部
+							</option>
+							<option value="0" <c:if test="${appDataMigrateSearch.status == 0}">selected</c:if>>
+								开始
+							</option>
+							<option value="1" <c:if test="${appDataMigrateSearch.status == 1}">selected</c:if>>
+								结束
+							</option>
+						</select>
+						
+						<label>&nbsp;<input type="submit" class="btn-4" value="查询"/></label>
+				</div>
+			</form>
+        </div>
+    </div>
+	    
+	    <div class="row">
 	        <div class="col-md-12">
 	            <div class="page-header">
 	                <h4>

@@ -7,6 +7,7 @@ import com.sohu.cache.constant.AppDataMigrateEnum;
 import com.sohu.cache.constant.AppDataMigrateResult;
 import com.sohu.cache.constant.CommandResult;
 import com.sohu.cache.constant.RedisMigrateToolConstant;
+import com.sohu.cache.entity.AppDataMigrateSearch;
 import com.sohu.cache.entity.AppDataMigrateStatus;
 
 /**
@@ -50,11 +51,11 @@ public interface AppDataMigrateCenter {
 
 
     /**
-     * 列表
+     * 搜索列表
+     * @param appDataMigrateSearch
      * @return
      */
-    List<AppDataMigrateStatus> search();
-
+	List<AppDataMigrateStatus> search(AppDataMigrateSearch appDataMigrateSearch);
 
     /**
      * 查看日志
@@ -94,5 +95,6 @@ public interface AppDataMigrateCenter {
      * @return
      */
     AppDataMigrateResult stopMigrate(long id);
+
     
 }

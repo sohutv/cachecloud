@@ -32,6 +32,7 @@ import com.sohu.cache.constant.CommandResult;
 import com.sohu.cache.constant.ErrorMessageEnum;
 import com.sohu.cache.constant.RedisMigrateToolConstant;
 import com.sohu.cache.dao.AppDataMigrateStatusDao;
+import com.sohu.cache.entity.AppDataMigrateSearch;
 import com.sohu.cache.entity.AppDataMigrateStatus;
 import com.sohu.cache.entity.MachineInfo;
 import com.sohu.cache.exception.SSHException;
@@ -365,14 +366,15 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
     }
     
     @Override
-    public List<AppDataMigrateStatus> search() {
-        try {
-            return appDataMigrateStatusDao.search(null);
+	public List<AppDataMigrateStatus> search(AppDataMigrateSearch appDataMigrateSearch) {
+    	try {
+            return appDataMigrateStatusDao.search(appDataMigrateSearch);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return Collections.emptyList();
         }
-    }
+	}
+    
     
     @Override
     public String showDataMigrateLog(long id, int pageSize) {
@@ -575,6 +577,8 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
     public void setAppDataMigrateStatusDao(AppDataMigrateStatusDao appDataMigrateStatusDao) {
         this.appDataMigrateStatusDao = appDataMigrateStatusDao;
     }
+
+	
 
     
 

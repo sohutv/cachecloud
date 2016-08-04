@@ -21,8 +21,40 @@
     	select id,<include refid="migrate_data_status_fields"/>
         from app_data_migrate_status where 1=1
         <choose>
-            <when test="status != null">
-            	and status = #{status}
+            <when test="appDataMigrateSearch.sourceAppId != null and appDataMigrateSearch.sourceAppId > 0">
+            	and source_app_id = #{appDataMigrateSearch.sourceAppId}
+       	 	</when>
+        </choose>
+        <choose>
+            <when test="appDataMigrateSearch.targetAppId != null and appDataMigrateSearch.targetAppId > 0">
+            	and target_app_id = #{appDataMigrateSearch.targetAppId}
+       	 	</when>
+        </choose>
+        
+        <choose>
+            <when test="appDataMigrateSearch.sourceInstanceIp != null and appDataMigrateSearch.sourceInstanceIp != ''">
+            	and source_servers like '%${appDataMigrateSearch.sourceInstanceIp}%'
+       	 	</when>
+        </choose>
+        <choose>
+            <when test="appDataMigrateSearch.targetInstanceIp != null and appDataMigrateSearch.targetInstanceIp != ''">
+            	and target_servers like '%${appDataMigrateSearch.targetInstanceIp}%'
+       	 	</when>
+        </choose>
+        
+        <choose>
+            <when test="appDataMigrateSearch.startDate != null and appDataMigrateSearch.startDate != ''">
+            	and start_time > #{appDataMigrateSearch.startDate} 
+       	 	</when>
+        </choose>
+        <choose>
+            <when test="appDataMigrateSearch.endDate != null and appDataMigrateSearch.endDate != ''">
+            	and end_time &lt;#{appDataMigrateSearch.endDate} 
+       	 	</when>
+        </choose>
+        <choose>
+            <when test="appDataMigrateSearch.status >= 0">
+            	and status = #{appDataMigrateSearch.status} 
        	 	</when>
         </choose>
     </select>
