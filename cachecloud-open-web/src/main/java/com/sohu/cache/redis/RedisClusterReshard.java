@@ -1,13 +1,13 @@
 package com.sohu.cache.redis;
 
 import com.sohu.cache.util.IdempotentConfirmer;
-import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisException;
 import redis.clients.util.ClusterNodeInformation;
+import redis.clients.util.ClusterNodeInformationParser;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -102,7 +102,8 @@ public class RedisClusterReshard {
                     }
                     String nodeInfo = clusterNodes.toString();
                     if (StringUtils.isNotBlank(nodeInfo)) {
-                        ClusterNodeInformation clusterNodeInfo = JedisClusterInfoCache.nodeInfoParser.parse(
+                        ClusterNodeInformationParser nodeInfoParser = new ClusterNodeInformationParser();
+                        ClusterNodeInformation clusterNodeInfo = nodeInfoParser.parse(
                                 nodeInfo, new HostAndPort(jedis.getClient().getHost(),
                                 jedis.getClient().getPort()));
                         masterNodeMap.put(getNodeKey(clusterNodeInfo.getNode()), clusterNodeInfo);
