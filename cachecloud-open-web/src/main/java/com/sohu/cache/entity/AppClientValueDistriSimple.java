@@ -20,7 +20,7 @@ public class AppClientValueDistriSimple {
     /**
      * 调用次数
      */
-    private int count;
+    private long count;
 
     public int getDistributeType() {
         return distributeType;
@@ -30,11 +30,12 @@ public class AppClientValueDistriSimple {
         this.distributeType = distributeType;
     }
 
-    public int getCount() {
+
+    public long getCount() {
         return count;
     }
 
-    public void setCount(int count) {
+    public void setCount(long count) {
         this.count = count;
     }
 

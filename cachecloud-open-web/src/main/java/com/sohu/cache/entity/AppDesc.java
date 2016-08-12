@@ -340,4 +340,13 @@ public class AppDesc implements Serializable {
         return "";
     }
 
+
+    /**
+     * 是否下线
+     * @return
+     */
+    public boolean isOffline() {
+        return status == AppStatusEnum.STATUS_OFFLINE.getStatus();
+    }
+
 }

@@ -48,4 +48,16 @@ public interface InstanceSlowLogDao {
      * @return
      */
     List<Map<String, Object>> getInstanceSlowLogCountMapByAppId(@Param("appId") long appId, @Param("startDate") Date startDate, @Param("endDate") Date endDate);
+    
+    
+    /**
+     * 获取指定日期慢查询个数
+     * @param appId
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    int getAppSlowLogCount(@Param("appId") long appId, @Param("startDate") Date startDate, @Param("endDate") Date endDate);
+    
+    
 }

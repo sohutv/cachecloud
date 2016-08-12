@@ -8,6 +8,7 @@ import com.sohu.cache.entity.TimeDimensionality;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by yijunzhang on 14-6-9.
@@ -159,6 +160,15 @@ public interface AppStatsDao {
      * @return
      */
     public List<AppCommandGroup> getAppCommandGroup(@Param("appId") long appId, @Param("td") TimeDimensionality td);
+
+    /**
+     * 应用分钟统计
+     * @param appId
+     * @param beginTime
+     * @param endTime
+     * @return
+     */
+    public Map<String, Object> getAppMinuteStat(@Param("appId") long appId, @Param("beginTime") long beginTime, @Param("endTime") long endTime);
 
     
 

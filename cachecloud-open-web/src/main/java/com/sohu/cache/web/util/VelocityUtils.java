@@ -4,6 +4,7 @@
 package com.sohu.cache.web.util;
 
 import com.sohu.cache.entity.AppAudit;
+import com.sohu.cache.entity.AppDailyData;
 import com.sohu.cache.entity.AppDesc;
 import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.Template;
@@ -44,7 +45,7 @@ public class VelocityUtils {
      * @param templatePath  模板路径
      * @param customCharset 编码
      */
-    public synchronized static String createText(VelocityEngine engine, AppDesc appDesc, AppAudit appAudit,
+    public synchronized static String createText(VelocityEngine engine, AppDesc appDesc, AppAudit appAudit, AppDailyData appDailyData, 
                                                  String templatePath, String customCharset) {
         if (!StringUtils.isEmpty(customCharset)) {
             charset = customCharset;
@@ -60,6 +61,7 @@ public class VelocityUtils {
         VelocityContext context = new VelocityContext();
         context.put("appDesc", appDesc);
         context.put("appAudit", appAudit);
+        context.put("appDailyData", appDailyData);
         context.put("numberTool", new NumberTool());
         context.put("decimalFormat", new DecimalFormat("###,###"));
         context.put("StringUtils", StringUtils.class);

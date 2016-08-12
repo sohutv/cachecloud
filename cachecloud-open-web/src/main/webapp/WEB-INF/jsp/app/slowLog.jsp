@@ -89,7 +89,7 @@ function search() {
 		                <td>ip</td>
 		                <td>port</td>
 		                <td>慢查询id</td>
-		                <td>耗时(单位:微妙)</td>
+		                <td>耗时(单位:微秒)</td>
 		                <td>命令</td>
 		                <td>发生时间</td>
 		            </tr>
