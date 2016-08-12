@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -15,10 +16,14 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.enums.SuccessEnum;
+import com.sohu.cache.web.util.AppEmailUtil;
 
 @Controller
 @RequestMapping("manage/notice")
 public class NoticeManageController extends BaseController {
+    
+    @Resource(name = "appEmailUtil")
+    private AppEmailUtil appEmailUtil;
 
     /**
      * 初始化系统通知
@@ -37,23 +42,14 @@ public class NoticeManageController extends BaseController {
     }
 
     /**
-     * 添加系统通知
-     * 
-     * @param notice 前端传过来的通知文本
-     * @return
+     * 发送邮件通知
      */
     @RequestMapping(value = "/add")
     public ModelAndView addNotice(HttpServletRequest request,
             HttpServletResponse response, Model model) {
         String notice = request.getParameter("notice");
-        SuccessEnum success = SuccessEnum.FAIL;
-        if (StringUtils.isNotBlank(notice)) {
-            String setResult = "";
-            if ("ok".equalsIgnoreCase(setResult)) {
-                success = SuccessEnum.SUCCESS;
-            }
-        }
-        model.addAttribute("success", success.value());
+        boolean result = appEmailUtil.noticeAllUser(notice);
+        model.addAttribute("success", result ? SuccessEnum.SUCCESS.value() : SuccessEnum.FAIL.value());
         return new ModelAndView("");
     }
 

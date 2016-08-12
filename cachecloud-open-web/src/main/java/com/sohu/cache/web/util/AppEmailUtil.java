@@ -3,18 +3,26 @@ package com.sohu.cache.web.util;
 import com.sohu.cache.constant.AppCheckEnum;
 import com.sohu.cache.constant.RedisConfigTemplateChangeEnum;
 import com.sohu.cache.entity.AppAudit;
+import com.sohu.cache.entity.AppDailyData;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.entity.InstanceConfig;
+import com.sohu.cache.stats.app.AppStatsCenter;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.component.EmailComponent;
 import com.sohu.cache.web.enums.SuccessEnum;
 import com.sohu.cache.web.service.UserService;
+import com.sohu.cache.web.vo.AppDetailVO;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.apache.velocity.app.VelocityEngine;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -31,6 +39,10 @@ public class AppEmailUtil {
     private UserService userService;
 
     private VelocityEngine velocityEngine;
+    
+    private AppStatsCenter appStatsCenter;
+    
+    private Logger logger = Logger.getLogger(AppEmailUtil.class);
 
     /**
      * 应用状态通知
@@ -38,7 +50,7 @@ public class AppEmailUtil {
      * @param appAudit
      */
     public void noticeAppResult(AppDesc appDesc, AppAudit appAudit) {
-        String mailContent = VelocityUtils.createText(velocityEngine, appDesc, appAudit, "appAudit.vm", "UTF-8");
+        String mailContent = VelocityUtils.createText(velocityEngine, appDesc, appAudit, new AppDailyData(), "appAudit.vm", "UTF-8");
         AppUser appUser = userService.get(appDesc.getUserId());
         emailComponent.sendMail("【CacheCloud】状态通知", mailContent, Arrays.asList(appUser.getEmail()), Arrays.asList(emailComponent.getAdminEmail().split(ConstUtils.COMMA)));
     }
@@ -83,11 +95,12 @@ public class AppEmailUtil {
      * @param isSuccess
      */
     public void noticeOfflineApp(AppUser appUser, Long appId, boolean isSuccess) {
+        AppDetailVO appDetailVO = appStatsCenter.getAppDetail(appId);
         StringBuilder mailContent = new StringBuilder();
         mailContent.append(appUser.getChName()).append(",对应用appid=").append(appId);
         mailContent.append("进行下线,操作结果是").append(isSuccess?"成功":"失败");
         mailContent.append(",请知晓!");
-        emailComponent.sendMail("【CacheCloud】状态通知", mailContent.toString(), Arrays.asList(appUser.getEmail()), Arrays.asList(emailComponent.getAdminEmail().split(ConstUtils.COMMA)));
+        emailComponent.sendMail("【CacheCloud】状态通知", mailContent.toString(), appDetailVO.getEmailList(), Arrays.asList(emailComponent.getAdminEmail().split(ConstUtils.COMMA)));
     }
     
     public void sendRedisConfigTemplateChangeEmail(AppUser appUser, InstanceConfig instanceConfig,
@@ -115,6 +128,41 @@ public class AppEmailUtil {
         }
         emailComponent.sendMail(mailTitle, mailContent.toString(), Arrays.asList(emailComponent.getAdminEmail().split(ConstUtils.COMMA)));
     }
+    
+    /**
+     * 系统通知
+     * @param noticeContent
+     * @return
+     */
+    public boolean noticeAllUser(String noticeContent) {
+        if (StringUtils.isBlank(noticeContent)) {
+            return false;
+        }
+        try {
+            String mailTitle = "【CacheCloud】-系统通知";
+            StringBuffer mailContent = new StringBuffer();
+            String[] noticeArray = noticeContent.split(ConstUtils.NEXT_LINE);
+            for(String noticeLine : noticeArray) {
+                mailContent.append(noticeLine).append("<br/>");
+            }
+            List<String> emailList = new ArrayList<String>();
+            List<AppUser> appUserList = userService.getUserList(null);
+            if (CollectionUtils.isEmpty(appUserList)) {
+                return false;
+            }
+            for (AppUser appUser: appUserList) {
+                String email = appUser.getEmail();
+                if (StringUtils.isBlank(email)) {
+                    continue;
+                }
+                emailList.add(email);
+            }
+            return emailComponent.sendMail(mailTitle, mailContent.toString(), emailList, Arrays.asList(emailComponent.getAdminEmail().split(ConstUtils.COMMA))); 
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        return false;
+    }
 
     public void setEmailComponent(EmailComponent emailComponent) {
         this.emailComponent = emailComponent;
@@ -128,7 +176,8 @@ public class AppEmailUtil {
         this.velocityEngine = velocityEngine;
     }
 
-    
-
+    public void setAppStatsCenter(AppStatsCenter appStatsCenter) {
+        this.appStatsCenter = appStatsCenter;
+    }
     
 }
