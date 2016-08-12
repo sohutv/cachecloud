@@ -1,6 +1,7 @@
 package com.sohu.cache.web.controller;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -120,7 +121,7 @@ public class InstanceManageController extends BaseController {
             pageSize = 100;
         }
         String instanceLogStr = instanceDeployCenter.showInstanceRecentLog(instanceId, pageSize);
-        model.addAttribute("instanceLogList", Arrays.asList(instanceLogStr.split("\n")));
+        model.addAttribute("instanceLogList", StringUtils.isBlank(instanceLogStr) ? Collections.emptyList() : Arrays.asList(instanceLogStr.split("\n")));
         return new ModelAndView("manage/instance/log");
     }
     
