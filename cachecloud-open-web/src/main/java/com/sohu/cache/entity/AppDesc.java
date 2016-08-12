@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import com.sohu.cache.constant.AppDescEnum;
 import com.sohu.cache.constant.AppStatusEnum;
 import com.sohu.cache.util.ConstUtils;
 
@@ -347,6 +348,14 @@ public class AppDesc implements Serializable {
      */
     public boolean isOffline() {
         return status == AppStatusEnum.STATUS_OFFLINE.getStatus();
+    }
+
+    /**
+     * 是否是测试
+     * @return
+     */
+    public boolean isTest() {
+        return isTest == AppDescEnum.AppTest.IS_TEST.getValue();
     }
 
 }

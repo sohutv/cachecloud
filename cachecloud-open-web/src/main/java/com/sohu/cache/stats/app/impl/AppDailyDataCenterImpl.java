@@ -1,7 +1,6 @@
 package com.sohu.cache.stats.app.impl;
 
 import java.text.DecimalFormat;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -104,7 +103,9 @@ public class AppDailyDataCenterImpl implements AppDailyDataCenter {
         }
         AppDesc appDesc = appDetailVO.getAppDesc();
         if (appDesc.isOffline()) {
-            logger.error("appId={} is offline", appId);
+            return null;
+        }
+        if (appDesc.isTest()) {
             return null;
         }
         AppDailyData appDailyData = new AppDailyData();

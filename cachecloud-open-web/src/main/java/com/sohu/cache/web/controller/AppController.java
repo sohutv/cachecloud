@@ -70,7 +70,7 @@ public class AppController extends BaseController {
     
     @Resource(name = "instanceStatsCenter")
     private InstanceStatsCenter instanceStatsCenter;
-
+    
     /**
      * 取命令的条数
      */
