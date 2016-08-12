@@ -34,4 +34,6 @@
     </bean>
     <bean id="userLoginStatusService" factory-bean="userLoginStatusFactory" factory-method="getUserLoginStatusService"/>
 	
+	<bean id="appDailyDataCenter" class="com.sohu.cache.stats.app.impl.AppDailyDataCenterImpl"/>
+	
 </beans>

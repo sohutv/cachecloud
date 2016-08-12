@@ -98,6 +98,7 @@
                 <ref bean="cleanUpStatisticsTrigger"/>
                 <ref bean="hostInspectorTrigger"/>
                 <ref bean="appInspectorTrigger"/>
+                <ref bean="appDailyTrigger"/>
             </array>
         </property>
         <property name="jobDetails">
@@ -109,6 +110,7 @@
                 <ref bean="redisSlowLogJobDetail"/>
                 <ref bean="cleanUpStatisticsJobDetail"/>
                 <ref bean="inspectorJobDetail"/>
+                <ref bean="appDailyJobDetail"/>
             </array>
         </property>
 
@@ -229,6 +231,23 @@
         <property name="jobDetail" ref="systemConfigRefreshJobDetail"/>
         <property name="cronExpression" value="0/30 * * ? * *"/>
     </bean>
+    
+    
+    <bean id="appDailyJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="name" value="appDailyJob"></property>
+        <property name="group" value="appDaily"></property>
+        <property name="jobClass" value="com.sohu.cache.schedule.jobs.AppDailyJob"></property>
+        <property name="requestsRecovery" value="true"/>
+        <property name="durability" value="true"/>
+    </bean>
+
+    <bean id="appDailyTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="name" value="appDailyTrigger"/>
+        <property name="group" value="appDaily"/>
+        <property name="jobDetail" ref="appDailyJobDetail"/>
+        <property name="cronExpression" value="0 0 10 * * ?"/>
+    </bean>
+    
     
 
 </beans>

@@ -62,11 +62,11 @@ public class AppEmailUtil {
      * @param appUser
      */
     public void noticeBecomeContributor(String groupName, String applyReason, AppUser appUser) {
-    	StringBuffer mailContent = new StringBuffer();
-    	mailContent.append(appUser.getChName() + "(项目组:"+groupName+")申请成为CacheCloud贡献者<br/>");
-    	mailContent.append("申请理由:<br/>" + applyReason);
+        StringBuffer mailContent = new StringBuffer();
+        mailContent.append(appUser.getChName() + "(项目组:"+groupName+")申请成为CacheCloud贡献者<br/>");
+        mailContent.append("申请理由:<br/>" + applyReason);
         emailComponent.sendMail("【CacheCloud】状态通知", mailContent.toString(), Arrays.asList(appUser.getEmail()), Arrays.asList(emailComponent.getAdminEmail().split(ConstUtils.COMMA)));
-	}
+    }
     
     /**
      * 注册用户通知

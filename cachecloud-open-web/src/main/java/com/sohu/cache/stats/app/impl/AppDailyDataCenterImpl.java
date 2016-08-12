@@ -25,7 +25,6 @@ import com.sohu.cache.entity.AppDailyData;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.stats.app.AppDailyDataCenter;
 import com.sohu.cache.stats.app.AppStatsCenter;
-import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.component.EmailComponent;
 import com.sohu.cache.web.service.AppService;
 import com.sohu.cache.web.util.DateUtil;
@@ -248,7 +247,7 @@ public class AppDailyDataCenterImpl implements AppDailyDataCenter {
         String startDateFormat = DateUtil.formatYYYYMMdd(startDate);
         String title = String.format("【CacheCloud】%s日报(appId=%s)", startDateFormat, appDetailVO.getAppDesc().getAppId());
         String mailContent = VelocityUtils.createText(velocityEngine, appDetailVO.getAppDesc(), null, appDailyData, "appDaily.vm","UTF-8");
-        emailComponent.sendMail(title, mailContent, appDetailVO.getEmailList(), Arrays.asList(emailComponent.getAdminEmail().split(ConstUtils.COMMA)));
+        emailComponent.sendMail(title, mailContent, appDetailVO.getEmailList());
     }
     
     public void setInstanceSlowLogDao(InstanceSlowLogDao instanceSlowLogDao) {
