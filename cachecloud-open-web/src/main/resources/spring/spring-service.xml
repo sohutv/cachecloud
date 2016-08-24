@@ -9,7 +9,7 @@
     <bean id="redisCenter" class="com.sohu.cache.redis.impl.RedisCenterImpl" init-method="init" destroy-method="destory"/>
 
     <!--machine调度接口-->
-    <bean id="machineCenter" class="com.sohu.cache.machine.impl.MachineCenterImpl" />
+    <bean id="machineCenter" class="com.sohu.cache.machine.impl.MachineCenterImpl"  init-method="init"/>
 
     <!--quartz调度接口-->
     <bean id="schedulerCenter" class="com.sohu.cache.schedule.impl.SchedulerCenterImpl" />
@@ -45,7 +45,7 @@
     
     <bean id="sshTemplate" class="com.sohu.cache.ssh.SSHTemplate"/>
     
-    <bean id="serverStatusCollector" class="com.sohu.cache.server.ServerStatusCollector"/>
+    <bean id="serverStatusCollector" class="com.sohu.cache.server.ServerStatusCollector" init-method="init"/>
     
     <bean id="serverDataService" class="com.sohu.cache.web.service.impl.ServerDataServiceImpl"/>
 

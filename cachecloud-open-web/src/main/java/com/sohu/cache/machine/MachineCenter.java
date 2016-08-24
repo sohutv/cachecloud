@@ -1,13 +1,13 @@
 package com.sohu.cache.machine;
 
+import java.util.List;
+import java.util.Map;
+
 import com.sohu.cache.constant.MachineInfoEnum.TypeEnum;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.entity.InstanceStats;
 import com.sohu.cache.entity.MachineInfo;
 import com.sohu.cache.entity.MachineStats;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * 基于host的操作
@@ -45,6 +45,15 @@ public interface MachineCenter {
      * @return              机器的信息
      */
     public Map<String, Object> collectMachineInfo(final long hostId, final long collectTime, final String ip);
+    
+    /**
+     * 异步收集host的状态信息
+     *
+     * @param hostId        机器id
+     * @param collectTime   收集时间
+     * @param ip            ip
+     */
+    public void asyncCollectMachineInfo(final long hostId, final long collectTime, final String ip);
 
     /**
      * 为当前机器的监控删除trigger
@@ -72,6 +81,15 @@ public interface MachineCenter {
      * @return
      */
     public void monitorMachineStats(final long hostId, final String ip);
+    
+    /**
+     * 异步监控机器的状态信息，向上层汇报或者报警
+     *
+     * @param hostId    机器id
+     * @param ip        ip
+     * @return
+     */
+    public void asyncMonitorMachineStats(final long hostId, final String ip);
 
     /**
      * 在主机ip上的端口port上启动一个进程，并check是否启动成功；

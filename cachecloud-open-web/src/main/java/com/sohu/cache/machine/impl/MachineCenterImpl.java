@@ -1,39 +1,6 @@
 package com.sohu.cache.machine.impl;
 
-import com.google.common.base.Strings;
-import com.sohu.cache.constant.InstanceStatusEnum;
-import com.sohu.cache.constant.MachineConstant;
-import com.sohu.cache.constant.MachineInfoEnum.TypeEnum;
-import com.sohu.cache.dao.InstanceDao;
-import com.sohu.cache.dao.InstanceStatsDao;
-import com.sohu.cache.dao.MachineDao;
-import com.sohu.cache.dao.MachineStatsDao;
-import com.sohu.cache.entity.*;
-import com.sohu.cache.exception.SSHException;
-import com.sohu.cache.machine.MachineCenter;
-import com.sohu.cache.machine.PortGenerator;
-import com.sohu.cache.protocol.MachineProtocol;
-import com.sohu.cache.redis.RedisCenter;
-import com.sohu.cache.schedule.SchedulerCenter;
-import com.sohu.cache.ssh.SSHUtil;
-import com.sohu.cache.stats.instance.InstanceStatsCenter;
-import com.sohu.cache.util.ConstUtils;
-import com.sohu.cache.util.IdempotentConfirmer;
-import com.sohu.cache.util.ObjectConvert;
-import com.sohu.cache.util.ScheduleUtil;
-import com.sohu.cache.util.TypeUtil;
-import com.sohu.cache.web.component.EmailComponent;
-import com.sohu.cache.web.component.MobileAlertComponent;
-
-import org.apache.commons.lang.StringUtils;
-import org.quartz.JobKey;
-import org.quartz.Trigger;
-import org.quartz.TriggerKey;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.Assert;
-
-import redis.clients.jedis.HostAndPort;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -50,7 +17,47 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import org.apache.commons.lang.StringUtils;
+import org.quartz.JobKey;
+import org.quartz.Trigger;
+import org.quartz.TriggerKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
+
+import redis.clients.jedis.HostAndPort;
+
+import com.google.common.base.Strings;
+import com.sohu.cache.async.AsyncService;
+import com.sohu.cache.async.AsyncThreadPoolFactory;
+import com.sohu.cache.async.KeyCallable;
+import com.sohu.cache.constant.InstanceStatusEnum;
+import com.sohu.cache.constant.MachineConstant;
+import com.sohu.cache.constant.MachineInfoEnum.TypeEnum;
+import com.sohu.cache.dao.InstanceDao;
+import com.sohu.cache.dao.InstanceStatsDao;
+import com.sohu.cache.dao.MachineDao;
+import com.sohu.cache.dao.MachineStatsDao;
+import com.sohu.cache.entity.InstanceInfo;
+import com.sohu.cache.entity.InstanceStats;
+import com.sohu.cache.entity.MachineInfo;
+import com.sohu.cache.entity.MachineMemInfo;
+import com.sohu.cache.entity.MachineStats;
+import com.sohu.cache.exception.SSHException;
+import com.sohu.cache.machine.MachineCenter;
+import com.sohu.cache.machine.PortGenerator;
+import com.sohu.cache.protocol.MachineProtocol;
+import com.sohu.cache.redis.RedisCenter;
+import com.sohu.cache.schedule.SchedulerCenter;
+import com.sohu.cache.ssh.SSHUtil;
+import com.sohu.cache.stats.instance.InstanceStatsCenter;
+import com.sohu.cache.util.ConstUtils;
+import com.sohu.cache.util.IdempotentConfirmer;
+import com.sohu.cache.util.ObjectConvert;
+import com.sohu.cache.util.ScheduleUtil;
+import com.sohu.cache.util.TypeUtil;
+import com.sohu.cache.web.component.EmailComponent;
+import com.sohu.cache.web.component.MobileAlertComponent;
 
 /**
  * 机器接口的实现
@@ -85,6 +92,13 @@ public class MachineCenterImpl implements MachineCenter {
      * 手机短信报警
      */
     private MobileAlertComponent mobileAlertComponent;
+    
+	private AsyncService asyncService;
+	
+	public void init() {
+		asyncService.assemblePool(AsyncThreadPoolFactory.MACHINE_POOL, 
+				AsyncThreadPoolFactory.MACHINE_THREAD_POOL);
+	}
 
     /**
      * 为当前机器收集信息创建trigger并部署
@@ -120,6 +134,21 @@ public class MachineCenterImpl implements MachineCenter {
         return schedulerCenter.unscheduleJob(collectionTriggerKey);
     }
     
+    //异步执行任务
+    public void asyncCollectMachineInfo(final long hostId, final long collectTime, final String ip) {
+    	String key = "collect-machine-"+hostId+"-"+ip+"-"+collectTime;
+		asyncService.submitFuture(AsyncThreadPoolFactory.MACHINE_POOL, new KeyCallable<Boolean>(key) {
+            public Boolean execute() {
+                try {
+                	collectMachineInfo(hostId, collectTime, ip);
+                    return true;
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
+                    return false;
+                }
+            }
+        });
+    }
     
     /**
      * 收集当前host的状态信息，保存到mysql；
@@ -205,6 +234,21 @@ public class MachineCenterImpl implements MachineCenter {
         return schedulerCenter.unscheduleJob(monitorTriggerKey);
     }
     
+    //异步执行任务
+    public void asyncMonitorMachineStats(final long hostId, final String ip) {
+    	String key = "monitor-machine-"+hostId+"-"+ip;
+		asyncService.submitFuture(AsyncThreadPoolFactory.MACHINE_POOL, new KeyCallable<Boolean>(key) {
+            public Boolean execute() {
+                try {
+                	monitorMachineStats(hostId, ip);
+                    return true;
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
+                    return false;
+                }
+            }
+        });
+    }
 
     /**
      * 监控机器的状态
@@ -650,6 +694,8 @@ public class MachineCenterImpl implements MachineCenter {
         return schedulerCenter.unscheduleJob(collectionTriggerKey);
 	}
 
-    
+	public void setAsyncService(AsyncService asyncService) {
+		this.asyncService = asyncService;
+	}
     
 }

@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -35,7 +36,7 @@ public abstract class AbstractInspectHandler implements InspectHandler {
     public void init() {
         asyncService.assemblePool(getThreadPoolKey(), new ThreadPoolExecutor(5, 100,
                 0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<Runnable>(),
+                new LinkedBlockingQueue<Runnable>(1024),
                 new NamedThreadFactory(getThreadPoolKey(), true)));
     }
 

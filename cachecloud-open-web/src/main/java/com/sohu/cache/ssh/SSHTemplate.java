@@ -5,6 +5,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +20,7 @@ import ch.ethz.ssh2.SCPClient;
 import ch.ethz.ssh2.Session;
 import ch.ethz.ssh2.StreamGobbler;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.sohu.cache.exception.SSHException;
 import com.sohu.cache.util.ConstUtils;
 /**
@@ -21,6 +28,14 @@ import com.sohu.cache.util.ConstUtils;
  */
 public class SSHTemplate {
 	private static final Logger logger = LoggerFactory.getLogger(SSHTemplate.class);
+	
+	private static final int CONNCET_TIMEOUT = 6000;
+	
+	private static final int OP_TIMEOUT = 12000;
+	
+	private static ThreadPoolExecutor taskPool = new ThreadPoolExecutor(
+			200, 200, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(1000), 
+			new ThreadFactoryBuilder().setNameFormat("SSH-%d").setDaemon(true).build());
 	
 	public Result execute(String ip, SSHCallback callback) throws SSHException{
 		return execute(ip,ConstUtils.DEFAULT_SSH_PORT_DEFAULT, ConstUtils.USERNAME, 
@@ -61,7 +76,7 @@ public class SSHTemplate {
     private Connection getConnection(String ip, int port, 
     		String username, String password) throws Exception {
     	Connection conn = new Connection(ip, port);
-        conn.connect(null, 6000, 6000);
+        conn.connect(null, CONNCET_TIMEOUT, CONNCET_TIMEOUT);
         boolean isAuthenticated = conn.authenticateWithPassword(username, password);
         if (isAuthenticated == false) {
             throw new Exception("SSH authentication failed with [ userName: " + 
@@ -79,10 +94,10 @@ public class SSHTemplate {
     	final StringBuilder buffer = new StringBuilder();
     	LineProcessor lp = new DefaultLineProcessor() {
 			public void process(String line, int lineNum) throws Exception {
-				buffer.append(line);
 				if(lineNum > 1) {
 					buffer.append(System.lineSeparator());
 				}
+				buffer.append(line);
 			}
     	};
     	processStream(is, lp);
@@ -163,7 +178,15 @@ public class SSHTemplate {
     	 *         执行异常Result为false，并携带异常
     	 */
     	public Result executeCommand(String cmd) {
-    		return executeCommand(cmd, null);
+    		return executeCommand(cmd, OP_TIMEOUT);
+    	}
+    	
+    	public Result executeCommand(String cmd, int timoutMillis) {
+    		return executeCommand(cmd, null, timoutMillis);
+    	}
+    	
+    	public Result executeCommand(String cmd, LineProcessor lineProcessor) {
+    		return executeCommand(cmd, lineProcessor, OP_TIMEOUT);
     	}
     	
     	/**
@@ -172,34 +195,51 @@ public class SSHTemplate {
     	 * @param lineProcessor 回调处理行
     	 * @return 如果lineProcessor不为null,那么永远返回Result.true
     	 */
-    	public Result executeCommand(String cmd, LineProcessor lineProcessor) {
+    	public Result executeCommand(String cmd, LineProcessor lineProcessor, int timoutMillis) {
     		Session session = null;
     		try {
     			session = conn.openSession();
-				session.execCommand(cmd);
-				String rst = null;
-				//如果客户端需要进行行处理，则直接进行回调
-				if(lineProcessor != null) {
-					processStream(session.getStdout(), lineProcessor);
-				} else {
-					//获取标准输出
-					rst = getResult(session.getStdout());
-				}
-				//返回为null代表可能有异常，需要检测标准错误输出，以便记录日志
-		    	if(rst == null) {
-		    		Result errResult = tryLogError(session.getStderr(), cmd);
-		    		if(errResult != null) {
-		    			return errResult;
-		    		}
-		    	}
-	    		return new Result(true, rst);
+    			return executeCommand(session, cmd, timoutMillis, lineProcessor);
 			} catch (Exception e) {
-				logger.error("execute cmd="+cmd, e);
-				new Result(e);
+				logger.error("execute ip:"+conn.getHostname()+" cmd:"+cmd, e);
+				return new Result(e);
 			} finally {
 				close(session);
 			}
-			return new Result(true, null);
+    	}
+    	
+    	public Result executeCommand(final Session session, final String cmd, 
+    			final int timoutMillis, final LineProcessor lineProcessor) throws Exception{
+    		Future<Result> future = taskPool.submit(new Callable<Result>() {
+				public Result call() throws Exception {
+					session.execCommand(cmd);
+					//如果客户端需要进行行处理，则直接进行回调
+					if(lineProcessor != null) {
+						processStream(session.getStdout(), lineProcessor);
+					} else {
+						//获取标准输出
+						String rst = getResult(session.getStdout());
+						if(rst != null) {
+							return new Result(true, rst);
+						}
+						//返回为null代表可能有异常，需要检测标准错误输出，以便记录日志
+						Result errResult = tryLogError(session.getStderr(), cmd);
+						if(errResult != null) {
+							return errResult;
+						}
+					}
+					return new Result(true, null);
+				}
+			});
+    		Result rst = null;
+    		try {
+    			rst = future.get(timoutMillis, TimeUnit.MILLISECONDS);
+    			future.cancel(true);
+    		} catch (TimeoutException e) {
+    			logger.error("exec ip:{} {} timeout:{}", conn.getHostname(), cmd, timoutMillis);
+    			throw new SSHException(e);
+    		}
+    		return rst;
     	}
     	
     	private Result tryLogError(InputStream is, String cmd) {
@@ -291,6 +331,11 @@ public class SSHTemplate {
 		}
 		public void setResult(String result) {
 			this.result = result;
+		}
+		@Override
+		public String toString() {
+			return "Result [success=" + success + ", result=" + result
+					+ ", excetion=" + excetion + "]";
 		}
     }
     

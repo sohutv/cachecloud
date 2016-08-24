@@ -3,6 +3,9 @@ package com.sohu.cache.server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sohu.cache.async.AsyncService;
+import com.sohu.cache.async.AsyncThreadPoolFactory;
+import com.sohu.cache.async.KeyCallable;
 import com.sohu.cache.server.data.OSInfo;
 import com.sohu.cache.server.data.Server;
 import com.sohu.cache.server.nmon.NMONService;
@@ -32,6 +35,29 @@ public class ServerStatusCollector {
 	private SSHTemplate sshTemplate;
 	//持久化
 	private ServerDataService serverDataService;
+	
+	private AsyncService asyncService;
+	
+	public void init() {
+		asyncService.assemblePool(AsyncThreadPoolFactory.MACHINE_POOL, 
+				AsyncThreadPoolFactory.MACHINE_THREAD_POOL);
+	}
+	
+	//异步执行任务
+	public void asyncFetchServerStatus(final String ip) {
+		String key = "collect-server-"+ip;
+		asyncService.submitFuture(AsyncThreadPoolFactory.MACHINE_POOL, new KeyCallable<Boolean>(key) {
+            public Boolean execute() {
+                try {
+                	fetchServerStatus(ip);
+                    return true;
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
+                    return false;
+                }
+            }
+        });
+	}
 	
 	/**
 	 * 抓取服务器状态
@@ -96,5 +122,8 @@ public class ServerStatusCollector {
 	}
 	public void setServerDataService(ServerDataService serverDataService) {
 		this.serverDataService = serverDataService;
+	}
+	public void setAsyncService(AsyncService asyncService) {
+		this.asyncService = asyncService;
 	}
 }

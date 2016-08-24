@@ -1,8 +1,6 @@
 package com.sohu.cache.schedule.jobs;
 
-import com.sohu.cache.machine.MachineCenter;
-import com.sohu.cache.util.ConstUtils;
-import com.sohu.cache.util.ScheduleUtil;
+import java.util.Date;
 
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -10,7 +8,9 @@ import org.quartz.SchedulerContext;
 import org.quartz.SchedulerException;
 import org.springframework.context.ApplicationContext;
 
-import java.util.Date;
+import com.sohu.cache.machine.MachineCenter;
+import com.sohu.cache.util.ConstUtils;
+import com.sohu.cache.util.ScheduleUtil;
 
 /**
  * 基于机器的job
@@ -30,7 +30,7 @@ public class MachineJob extends CacheBaseJob {
             MachineCenter machineCenter = applicationContext.getBean("machineCenter", MachineCenter.class);
             String ip = dataMap.getString(ConstUtils.HOST_KEY);
             long hostId = dataMap.getLong(ConstUtils.HOST_ID_KEY);
-            machineCenter.collectMachineInfo(hostId, ScheduleUtil.getCollectTime(new Date()), ip);
+            machineCenter.asyncCollectMachineInfo(hostId, ScheduleUtil.getCollectTime(new Date()), ip);
         } catch (SchedulerException e) {
             logger.error(e.getMessage(), e);
         } catch (Exception e) {

@@ -50,12 +50,12 @@
         <!-- 最大线程数 -->
         <property name="maxPoolSize" value="200"/>
         <!-- 队列最大长度 >=mainExecutor.maxSize -->
-        <property name="queueCapacity" value="1000"/>
+        <property name="queueCapacity" value="10"/>
         <!-- 线程池维护线程所允许的空闲时间 -->
         <property name="keepAliveSeconds" value="300"/>
         <!-- 拒绝任务策略:被拒绝后直接在调用者线程中运行当前被放弃任务 -->
         <property name="rejectedExecutionHandler">
-            <bean class="java.util.concurrent.ThreadPoolExecutor$CallerRunsPolicy"/>
+            <bean class="java.util.concurrent.ThreadPoolExecutor$AbortPolicy"/>
         </property>
     </bean>
  

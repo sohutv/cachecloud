@@ -28,11 +28,12 @@ public class RedisJob extends CacheBaseJob {
      */
     @Override
     public void action(JobExecutionContext context) {
+        JobDataMap dataMap = new JobDataMap();
         try {
             SchedulerContext schedulerContext = context.getScheduler().getContext();
             ApplicationContext applicationContext = (ApplicationContext) schedulerContext.get(APPLICATION_CONTEXT_KEY);
             RedisCenter redisCenter = (RedisCenter) applicationContext.getBean("redisCenter");
-            JobDataMap dataMap = context.getMergedJobDataMap();
+            dataMap = context.getMergedJobDataMap();
             String host = dataMap.getString(ConstUtils.HOST_KEY);
             int port = dataMap.getInt(ConstUtils.PORT_KEY);
             long appId = dataMap.getLong(ConstUtils.APP_KEY);
@@ -40,8 +41,12 @@ public class RedisJob extends CacheBaseJob {
             long collectTime = ScheduleUtil.getCollectTime(trigger.getPreviousFireTime());
             redisCenter.collectRedisInfo(appId, collectTime, host, port);
         } catch (SchedulerException e) {
+            logger.error("host: {}, appId: {}", dataMap.get(ConstUtils.HOST_KEY), dataMap.get(ConstUtils.APP_KEY));
+            logger.error("port: {}", dataMap.get(ConstUtils.PORT_KEY));
             logger.error(e.getMessage(), e);
         } catch (Exception e) {
+            logger.error("host: {}, appId: {}", dataMap.get(ConstUtils.HOST_KEY), dataMap.get(ConstUtils.APP_KEY));
+            logger.error("port: {}", dataMap.get(ConstUtils.PORT_KEY));
             logger.error(e.getMessage(), e);
         }
     }

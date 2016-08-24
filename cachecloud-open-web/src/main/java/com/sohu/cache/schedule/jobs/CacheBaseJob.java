@@ -8,8 +8,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 
-/** job父类，包含一个抽象函方法，将实现推迟到具体的子类
- *
+/**
+ * job父类，包含一个抽象函方法，将实现推迟到具体的子类
+ * <p/>
  * User: lingguo
  * Date: 14-5-15
  * Time: 下午6:04
@@ -25,6 +26,7 @@ public abstract class CacheBaseJob implements Job, Serializable {
 
     /**
      * 统计时间
+     *
      * @param context
      * @throws JobExecutionException
      */
@@ -33,7 +35,13 @@ public abstract class CacheBaseJob implements Job, Serializable {
         long start = System.currentTimeMillis();
         this.action(context);
         long end = System.currentTimeMillis();
-        logger.info("job: {}, trigger: {}, cost: {} ms",context.getJobDetail().getKey(),
-                context.getTrigger().getKey(), (end - start));
+        long cost = (start - end);
+        if (cost > 2000) {
+            logger.warn("slowJob: job: {}, trigger: {}, cost: {} ms", context.getJobDetail().getKey(),
+                    context.getTrigger().getKey(), (end - start));
+        } else {
+            logger.info("job: {}, trigger: {}, cost: {} ms", context.getJobDetail().getKey(),
+                    context.getTrigger().getKey(), (end - start));
+        }
     }
 }
