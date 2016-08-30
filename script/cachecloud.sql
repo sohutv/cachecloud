@@ -934,7 +934,7 @@ insert into instance_config(config_key,config_value,info,update_time, type, stat
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('daemonize','no','是否守护进程',now(),6,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('tcp-backlog','511','TCP连接完成队列',now(),6,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('timeout','0','客户端闲置多少秒后关闭连接,默认为0,永不关闭',now(),6,1);
-insert into instance_config(config_key,config_value,info,update_time, type, status) values('tcp-keepalive','0','检测客户端是否健康周期,默认关闭',now(),6,1);
+insert into instance_config(config_key,config_value,info,update_time, type, status) values('tcp-keepalive','60','检测客户端是否健康周期,默认关闭',now(),6,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('loglevel','notice','日志级别',now(),6,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('databases','16','可用的数据库数，默认值为16个,默认数据库为0',now(),6,1);
 insert into instance_config(config_key,config_value,info,update_time, type, status) values('dir','%s','redis工作目录',now(),6,1);
