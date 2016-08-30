@@ -61,6 +61,11 @@ public class ConstUtils {
     
     // 表示空字符串
     public static final String EMPTY = "";
+    
+    /**
+     * 服务端版本
+     */
+    public static final String CACHECLOUD_VERSION = "1.2";
 
     /**
      * 机器报警阀值
