@@ -65,7 +65,7 @@ public class ConstUtils {
     /**
      * 服务端版本
      */
-    public static final String CACHECLOUD_VERSION = "1.2";
+    public static final String CACHECLOUD_VERSION = "master";
 
     /**
      * 机器报警阀值
