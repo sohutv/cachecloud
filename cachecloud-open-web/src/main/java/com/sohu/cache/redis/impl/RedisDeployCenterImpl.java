@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Created by yijunzhang on 14-8-25.
+ * @author Hezf
  */
 public class RedisDeployCenterImpl implements RedisDeployCenter {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -274,56 +275,58 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
 
     @Override
     public boolean deploySentinelInstance(long appId, String masterHost, String slaveHost, int maxMemory, List<String> sentinelList) {
-        if (!isExist(appId)) {
-            return false;
-        }
-        //获取端口
-        Integer masterPort = machineCenter.getAvailablePort(masterHost, ConstUtils.CACHE_REDIS_STANDALONE);
-        if (masterPort == null) {
-            logger.error("masterHost={} getAvailablePort is null", masterHost);
-            return false;
-        }
-        Integer slavePort = machineCenter.getAvailablePort(slaveHost, ConstUtils.CACHE_REDIS_STANDALONE);
-        if (slavePort == null) {
-            logger.error("slaveHost={} getAvailablePort is null", slavePort);
-            return false;
-        }
-        //运行实例
-        boolean isMasterRun = runInstance(masterHost, masterPort, maxMemory, false);
-        if (!isMasterRun) {
-            return false;
-        }
-        boolean isSlaveRun = runInstance(slaveHost, slavePort, maxMemory, false);
-        if (!isSlaveRun) {
-            return false;
-        }
-        //添加slaveof配置
-        boolean isSlave = slaveOf(masterHost, masterPort, slaveHost, slavePort);
-        if (!isSlave) {
-            return false;
-        }
+    	 if (!isExist(appId)) {
+             return false;
+         }
+    	 //master
+         Integer masterPort = machineCenter.getAvailablePort(masterHost, ConstUtils.CACHE_REDIS_STANDALONE);
+         if (masterPort == null) {
+             logger.error("masterHost={} getAvailablePort is null", masterHost);
+             return false;
+         }
+         boolean isMasterRun = runInstance(masterHost, masterPort, maxMemory, false);
+         if (!isMasterRun) {
+             return false;
+         }
+         saveInstance(appId, masterHost, masterPort, maxMemory,
+                 ConstUtils.CACHE_REDIS_STANDALONE, "");
+         
+         //slave
+         Integer slavePort = machineCenter.getAvailablePort(slaveHost, ConstUtils.CACHE_REDIS_STANDALONE);
+         if (slavePort == null) {
+             logger.error("slaveHost={} getAvailablePort is null", slavePort);
+             return false;
+         }
+         boolean isSlaveRun = runInstance(slaveHost, slavePort, maxMemory, false);
+         if (!isSlaveRun) {
+             return false;
+         }
+         saveInstance(appId, slaveHost, slavePort, maxMemory, ConstUtils.CACHE_REDIS_STANDALONE, "");
 
-        //运行sentinel实例组
-        boolean isRunSentinel = runSentinelGroup(sentinelList, masterHost, masterPort, appId);
-        if (!isRunSentinel) {
-            return false;
-        }
+         //添加slaveof配置
+         boolean isSlave = slaveOf(masterHost, masterPort, slaveHost, slavePort);
+         if (!isSlave) {
+             return false;
+         }
 
-        //写入instanceInfo 信息
-        saveInstance(appId, masterHost, masterPort, maxMemory,
-                ConstUtils.CACHE_REDIS_STANDALONE, "");
-        saveInstance(appId, slaveHost, slavePort, maxMemory, ConstUtils.CACHE_REDIS_STANDALONE, "");
+         //运行sentinel实例组
+         boolean isRunSentinel = runSentinelGroup(sentinelList, masterHost, masterPort, appId);
+         if (!isRunSentinel) {
+             return false;
+         }
 
-        //启动监控trigger
-        boolean isMasterDeploy = redisCenter.deployRedisCollection(appId, masterHost, masterPort);
-        boolean isSlaveDeploy = redisCenter.deployRedisCollection(appId, slaveHost, slavePort);
-        if (!isMasterDeploy) {
-            logger.warn("host={},port={},isMasterDeploy=false", masterHost, masterPort);
-        }
-        if (!isSlaveDeploy) {
-            logger.warn("host={},port={},isSlaveDeploy=false", slaveHost, slavePort);
-        }
-        return true;
+         
+        
+         //启动监控trigger
+         boolean isMasterDeploy = redisCenter.deployRedisCollection(appId, masterHost, masterPort);
+         boolean isSlaveDeploy = redisCenter.deployRedisCollection(appId, slaveHost, slavePort);
+         if (!isMasterDeploy) {
+             logger.warn("host={},port={},isMasterDeploy=false", masterHost, masterPort);
+         }
+         if (!isSlaveDeploy) {
+             logger.warn("host={},port={},isSlaveDeploy=false", slaveHost, slavePort);
+         }
+         return true;
     }
 
     @Override
