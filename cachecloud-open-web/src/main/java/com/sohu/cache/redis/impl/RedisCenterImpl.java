@@ -458,17 +458,23 @@ public class RedisCenterImpl implements RedisCenter {
      */
     private Table<RedisConstant, String, Long> getCommandsDiff(Map<RedisConstant, Map<String, Object>> currentInfoMap,
             Map<String, Object> lastInfoMap) {
-        //没有上一次统计快照，忽略差值统计
+    	 //没有上一次统计快照，忽略差值统计
         if (lastInfoMap == null || lastInfoMap.isEmpty()) {
             return HashBasedTable.create();
         }
         Map<String, Object> map = currentInfoMap.get(RedisConstant.Commandstats);
         Map<String, Long> currentMap = transferLongMap(map);
-        Map<String, Object> lastObjectMap;
+        Map<String, Object> lastObjectMap=null;
         if (lastInfoMap.get(RedisConstant.Commandstats.getValue()) == null) {
             lastObjectMap = new HashMap<String, Object>();
         } else {
-            lastObjectMap = (Map<String, Object>) lastInfoMap.get(RedisConstant.Commandstats.getValue());
+        	Object lastObj=lastInfoMap.get(RedisConstant.Commandstats.getValue());
+        	if(lastObj instanceof Map<?, ?>){
+        		 lastObjectMap = (Map<String, Object>) lastObj;
+        	}else{
+        		logger.error("can't cast (Object)lastObj:{} to Map<String, Object>",lastObj.toString());
+        		throw new RuntimeException("can't cast (Object)lastObj to Map<String, Object>");
+        	}
         }
         Map<String, Long> lastMap = transferLongMap(lastObjectMap);
 
