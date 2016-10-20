@@ -14,7 +14,7 @@
             table_schema = 'cache-cloud' and table_name = @tn;
 	-->
 	<sql id="user_column">
-		id,name,ch_name,email,mobile,type
+		id,name,ch_name,email,mobile,type,avatar,nick_name,show_name,boss_id
     </sql>
     
     <select id="get" resultType="AppUser" parameterType="long">
@@ -22,6 +22,13 @@
         	<include refid="user_column"/>
         from app_user
         where id = #{id};
+    </select>
+    
+    <select id="getByBossId" resultType="AppUser" parameterType="long">
+        select           
+        	<include refid="user_column"/>
+        from app_user
+        where boss_id = #{bossId};
     </select>
     
     <select id="getByName" resultType="AppUser" parameterType="string">
@@ -35,7 +42,7 @@
     	insert into app_user
     		(<include refid="user_column"/>)
 		values
-			(#{id},#{name},#{chName},#{email},#{mobile},#{type})    	
+			(#{id},#{name},#{chName},#{email},#{mobile},#{type},#{avatar},#{nickName},#{showName},#{bossId})    	
     </insert>
     
     <delete id="delete" parameterType="long">

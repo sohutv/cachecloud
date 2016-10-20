@@ -64,7 +64,7 @@
         from machine_statistics
         <choose>
             <when test="ipLike != '' and ipLike != null">
-                where ip like '%${ipLike}%'
+                where ip like CONCAT('%',SUBSTR(#{ipLike}, 1, LENGTH(#{ipLike})),'%')
             </when>
         </choose>
     </select>

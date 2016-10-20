@@ -113,14 +113,32 @@
         command_count = command_count + #{commandCount},
         modify_time = #{modifyTime}
     </insert>
-
-    <select id="getAppStatsList" resultType="AppStats">
+    
+     <select id="getAppStatsList" resultType="AppStats">
         select
           <include refid="app_minute_statistics_columns"/> , create_time
         from <include refid="select_stat_table"/>
         where
           app_id = #{appId} and collect_time between #{td.begin} and #{td.end}
     </select>
+
+    <select id="getAppStatsByMinute" resultType="AppStats">
+        select
+          <include refid="app_minute_statistics_columns"/> , create_time
+        from app_minute_statistics
+        where
+          app_id = #{appId} and collect_time between #{beginTime} and #{endTime}
+    </select>
+    
+    
+    <select id="getAppStatsByHour" resultType="AppStats">
+        select
+          <include refid="app_minute_statistics_columns"/> , create_time
+        from app_hour_statistics
+        where
+          app_id = #{appId} and collect_time between #{beginTime} and #{endTime}
+    </select>
+    
     
     <select id="getAppCommandStatsList" resultType="AppCommandStats">
         select
@@ -131,6 +149,57 @@
           and command_name = #{commandName}
           and collect_time between #{td.begin} and #{td.end}
     </select>
+    
+    <select id="getAppAllCommandStatsListByMinute" resultType="AppCommandStats">
+        select
+        app_id,
+        collect_time,
+        'commands' command_name,
+        command_count,
+        create_time,
+        modify_time
+        from app_minute_statistics
+        where
+          app_id = #{appId}
+          and collect_time between #{beginTime} and #{endTime}
+    </select>
+    
+    
+    <select id="getAppAllCommandStatsListByHour" resultType="AppCommandStats">
+        select
+        app_id,
+        collect_time,
+        'commands' command_name,
+        command_count,
+        create_time,
+        modify_time
+        from app_hour_statistics
+        where
+          app_id = #{appId}
+          and collect_time between #{beginTime} and #{endTime}
+    </select>
+    
+    <select id="getAppCommandStatsListByMinuteWithCommand" resultType="AppCommandStats">
+        select
+          <include refid="app_minute_command_statistics_columns"/> , create_time
+        from app_minute_command_statistics
+        where
+          app_id = #{appId}
+          and command_name = #{commandName}
+          and collect_time between #{beginTime} and #{endTime}
+    </select>
+    
+    
+    <select id="getAppCommandStatsListByHourWithCommand" resultType="AppCommandStats">
+        select
+          <include refid="app_minute_command_statistics_columns"/> , create_time
+        from app_hour_command_statistics
+        where
+          app_id = #{appId}
+          and command_name = #{commandName}
+          and collect_time between #{beginTime} and #{endTime}
+    </select>
+    
 
     <select id="getAppAllCommandStatsList" resultType="AppCommandStats">
         select
@@ -198,5 +267,29 @@
         and t2.collect_time between #{td.begin} and #{td.end}
         limit 1;
     </select>
+    
+    <select id="getAppMinuteStat" resultType="hashmap">
+        select 
+        	avg(connected_clients) as avgClientCount,
+        	max(connected_clients) as maxClientCount,
+        	avg(command_count) as avgCommandCount, 
+        	max(command_count) as maxCommandCount,
+            sum(hits)/sum(command_count) as avgHitRatio,
+	        max(hits/command_count) as maxHitRatio,
+	        min(hits/command_count) as minHitRatio,
+	        avg(used_memory) as avgUsedMemory,
+	        max(used_memory) as maxUsedMemory,
+	        sum(expired_keys) as expiredKeys,
+	        sum(evicted_keys) as evictedKeys,
+	        avg(net_input_byte) as avgNetInputByte,
+	        max(net_input_byte) as maxNetInputByte,
+	        avg(net_output_byte) as avgNetOutputByte,
+	        max(net_output_byte) as maxNetOutputByte,
+	        avg(object_size) as avgObjectSize,
+	        max(object_size) as maxObjectSize
+        from app_minute_statistics
+        where app_id = #{appId} and collect_time between #{beginTime} and #{endTime}
+    </select>
+    
 
 </mapper>

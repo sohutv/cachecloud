@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.InstanceConfigDao">
+    <sql id="columns">
+    	config_key, config_value, info, update_time, type, status
+    </sql>
+
+    <select id="getByType" resultType="com.sohu.cache.entity.InstanceConfig">
+        select id,<include refid="columns"/> from instance_config where type = #{type}
+    </select>
+    
+    <select id="getById" resultType="com.sohu.cache.entity.InstanceConfig">
+        select id,<include refid="columns"/> from instance_config where id = #{id}
+    </select>
+    
+    <select id="getByConfigKeyAndType" resultType="com.sohu.cache.entity.InstanceConfig">
+        select id,<include refid="columns"/> from instance_config where config_key = #{configKey} and type = #{type}
+    </select>
+    
+    <select id="getAllInstanceConfig" resultType="com.sohu.cache.entity.InstanceConfig">
+        select id,<include refid="columns"/> from instance_config
+    </select>
+    
+    
+    <insert id="saveOrUpdate">
+		insert into instance_config(<include refid="columns" />)
+		values(#{configKey},#{configValue},#{info},now(),#{type},#{status})
+	    on duplicate key update
+	    config_value = #{configValue}, info = #{info}, 
+	    update_time = now(),status = #{status} 
+	</insert>
+	
+	<update id="updateStatus">
+		update instance_config set status = #{status} where id = #{id}
+	</update>
+	
+	<delete id="remove">
+		delete from instance_config where id = #{id}
+	</delete>
+
+</mapper>

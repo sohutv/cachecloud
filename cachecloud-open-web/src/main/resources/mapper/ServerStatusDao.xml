@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sohu.cache.dao.ServerStatusDao">
+	
+	<!-- 获取服务器信息 -->
+    <select id="queryServerInfo" resultType="ServerInfo">
+    	select ip,host,nmon,cpus,cpu_model cpuModel,dist,kernel,ulimit
+        from server where ip=#{ip}
+    </select>
+    
+    <!-- 保存服务器发行版信息 -->
+    <insert id="saveServerInfo">
+    	insert ignore into server(ip,dist) values (#{ip},#{dist})
+    </insert>
+    
+    <!-- 删除服务器信息 -->
+    <select id="deleteServerInfo">
+    	delete from server where ip=#{ip}
+    </select>
+    
+    <!-- 保存/更新服务器信息 -->
+    <insert id="saveAndUpdateServerInfo">
+    	insert into server (ip,host,nmon,cpus,cpu_model,kernel,ulimit) 
+		values (#{server.ip},#{server.host},#{server.nmon},#{server.cpus},#{server.cpuModel},#{server.kernel},#{server.ulimit})
+		on duplicate key update host=values(host), nmon=values(nmon), cpus=values(cpus),
+		cpu_model=values(cpu_model), kernel=values(kernel), ulimit=values(ulimit)
+    </insert>
+    
+    <!-- 获取服务器状态 -->
+    <select id="queryServerOverview" resultType="ServerStatus">
+    	select ip,cdate,ctime,cuser,csys,cwio,cload1,cload5,cload15,
+			   mtotal,mfree,mcache,mbuffer,mswap,mswap_free mswapFree,
+			   nin,nout,tuse,torphan,twait,
+			   dread,dwrite,diops,dbusy
+		from server_stat
+		where ip=#{ip} and cdate=#{cdate}
+    </select>
+    
+    <!-- 获取服务器cpu状态 -->
+    <select id="queryServerCpu" resultType="ServerStatus">
+    	select ctime, c_ext cExt
+		from server_stat
+		where ip=#{ip} and cdate=#{cdate}
+    </select>
+    
+    <!-- 获取服务器net状态 -->
+    <select id="queryServerNet" resultType="ServerStatus">
+    	select ctime, nin_ext ninExt,nout_ext noutExt
+		from server_stat
+		where ip=#{ip} and cdate=#{cdate}
+    </select>
+    
+    <!-- 获取服务器disk状态 -->
+    <select id="queryServerDisk" resultType="ServerStatus">
+    	select ctime, d_ext dExt,dspace
+		from server_stat
+		where ip=#{ip} and cdate=#{cdate}
+    </select>
+    
+    <!-- 获取服务器状态 -->
+    <select id="queryServerStat" resultType="ServerStatus">
+    	select ip,cdate,ctime,cuser,csys,cwio,c_ext cExt,cload1,cload5,cload15,
+			   mtotal,mfree,mcache,mbuffer,mswap,mswap_free mswapFree,
+			   nin,nout,nin_ext ninExt,nout_ext noutExt,tuse,torphan,twait,
+			   dread,dwrite,diops,dbusy,d_ext dExt,dspace"
+		from server_stat
+		where ip=#{ip} and cdate=#{cdate}
+    </select>
+    
+    <!-- 保存服务器状态-->
+    <insert id="saveServerStat">
+    	insert ignore into server_stat(ip,cdate,ctime,cuser,csys,cwio,c_ext,
+    		   cload1,cload5,cload15,
+    		   mtotal,mfree,mcache,mbuffer,mswap,mswap_free,
+    		   nin,nout,nin_ext,nout_ext,
+    		   tuse,torphan,twait,
+    		   dread,dwrite,diops,dbusy,d_ext,dspace)
+     	values(#{server.ip},#{server.collectTime},#{server.time},
+     		   #{server.cpu.user},#{server.cpu.sys},#{server.cpu.wait},#{server.cpu.ext},
+     		   #{server.load.load1},#{server.load.load5},#{server.load.load15},
+     		   #{server.mem.total},#{server.mem.totalFree},#{server.mem.cache},
+     		   #{server.mem.buffer},#{server.mem.swap},#{server.mem.swapFree},
+     		   #{server.net.nin},#{server.net.nout},#{server.net.ninDetail},#{server.net.noutDetail},
+     		   #{server.connection.established},#{server.connection.orphan},#{server.connection.timeWait},
+     		   #{server.disk.read},#{server.disk.write},#{server.disk.iops},#{server.disk.busy},
+     		   #{server.disk.ext},#{server.disk.space})
+    </insert>
+</mapper>

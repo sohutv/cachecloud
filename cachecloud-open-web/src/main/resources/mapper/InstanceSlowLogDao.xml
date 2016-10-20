@@ -30,5 +30,10 @@
         select concat(ip,":",port) as hostPort,count(*) as count
         from instance_slow_log where app_id = #{appId} and create_time between DATE_FORMAT(#{startDate}, '%Y-%m-%d') and DATE_FORMAT(#{endDate}, '%Y-%m-%d') group by hostPort order by count desc
     </select>
+    
+    <select id="getAppSlowLogCount" resultType="int">
+        select count(*) as count
+        from instance_slow_log where app_id = #{appId} and create_time between DATE_FORMAT(#{startDate}, '%Y-%m-%d') and DATE_FORMAT(#{endDate}, '%Y-%m-%d')
+    </select>
 
 </mapper>
