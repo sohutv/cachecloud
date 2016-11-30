@@ -12,6 +12,7 @@
 		function loginIn() {
 			var userName = document.getElementById("userName");
 			var password = document.getElementById("password");
+			var redirectUrl = document.getElementById("redirectUrl").value;
 			if(userName.value == ""){
 	        	alert("用户名不能为空!");
 	        	userName.focus();
@@ -33,10 +34,14 @@
 					var success = data.success;
 					var admin = data.admin;
 	                if(success==1){
-	                	if(admin == 1){
-		                	window.location = "/manage/total/list.do";
-	                	}else{
-		                	window.location = "/admin/app/list.do";
+	                	if (redirectUrl != "") {
+		                	window.location = redirectUrl;
+	                	} else {
+	                		if(admin == 1){
+			                	window.location = "/manage/total/list.do";
+		                	}else{
+			                	window.location = "/admin/app/list.do";
+		                	}
 	                	}
 	                }else if(success == 0){
 	                	alert("用户名或者密码错误，请重新输入!");
@@ -65,6 +70,8 @@
 		            <div class="input">
 		                <span class="info-user">密码</span><input type="password" id="password" name="password" autocomplete="off">
 		            </div>
+		            
+		            <input type="hidden" value="${redirectUrl}" id="redirectUrl" name="redirectUrl">
 		            
 		            <div class="input login">
 		                <input type="button" value="登 录" onclick="loginIn()">

@@ -9,6 +9,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import com.sohu.cache.entity.AppUser;
+import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.service.UserLoginStatusService;
 import com.sohu.cache.web.service.UserService;
 
@@ -33,8 +34,8 @@ public class FrontUserLoginInterceptor extends HandlerInterceptorAdapter {
         AppUser user = userService.get(userId);
         
         if (user == null) {
-            String path = request.getSession(true).getServletContext().getContextPath();
-            response.sendRedirect(path + "/manage/login");
+            String redirectUrl = LoginInterceptorUtil.getLoginRedirectUrl(request);
+            response.sendRedirect(redirectUrl);
             return false;
         }
         

@@ -1,5 +1,6 @@
 package com.sohu.cache.util;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -246,6 +247,19 @@ public class ConstUtils {
     public static int DEFAULT_MACHINE_STATS_CRON_MINUTE = 1;
     public static int MACHINE_STATS_CRON_MINUTE = DEFAULT_MACHINE_STATS_CRON_MINUTE;
     
+    
+    /**
+     * 网站域名
+     */
+    public static final String CC_DOMAIN = "http://your.domain.com";
+    
+    /**
+     * 领导邮件
+     */
+    public static List<String> LEADER_EMAIL_LIST = new ArrayList<String>();
+    static {
+    }
+    
     static {
         ResourceBundle applicationResourceBundle = ResourceBundle.getBundle("application");
         IS_DEBUG = "true".equals(applicationResourceBundle.getString("isDebug"));
@@ -277,6 +291,11 @@ public class ConstUtils {
      * 内部错误
      */
     public static final String INNER_ERROR = "cachecloud_inner_error";
+    
+    /**
+     * 登录跳转参数
+     */
+    public final static String RREDIRECT_URL_PARAM = "redirectUrl";
 
 }
 

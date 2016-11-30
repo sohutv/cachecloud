@@ -39,7 +39,8 @@ public class LoginController extends BaseController {
      * @return
      */
     @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public ModelAndView init(HttpServletRequest request) {
+    public ModelAndView init(HttpServletRequest request, HttpServletResponse response, Model model) {
+        model.addAttribute(ConstUtils.RREDIRECT_URL_PARAM, request.getParameter(ConstUtils.RREDIRECT_URL_PARAM));
         return new ModelAndView("manage/login");
     }
 

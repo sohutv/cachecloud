@@ -35,8 +35,8 @@ public class ManageUserLoginInterceptor extends HandlerInterceptorAdapter {
 
         //必须是管理员
         if (user == null || user.getType() != AppUserTypeEnum.ADMIN_USER.value()) {
-            String path = request.getSession(true).getServletContext().getContextPath();
-            response.sendRedirect(path + "/manage/login");
+            String redirectUrl = LoginInterceptorUtil.getLoginRedirectUrl(request);
+            response.sendRedirect(redirectUrl);
             return false;
         }
         
