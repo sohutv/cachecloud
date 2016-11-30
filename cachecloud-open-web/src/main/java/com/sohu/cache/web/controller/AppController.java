@@ -199,7 +199,7 @@ public class AppController extends BaseController {
         List<AppCommandStats> top5ClimaxList = new ArrayList<AppCommandStats>();
         if (CollectionUtils.isNotEmpty(top5Commands)) {
             for (AppCommandStats appCommandStats : top5Commands) {
-                AppCommandStats temp = appStatsCenter.getCommandClimax(appId, beginTime, endTime, appCommandStats.getCommandName());
+                AppCommandStats temp = appStatsCenter.getCommandClimax(appId, beginTime, endTime, appCommandStats.getCommandName(), true);
                 if (temp != null) {
                     top5ClimaxList.add(temp);
                 }
@@ -920,6 +920,36 @@ public class AppController extends BaseController {
         write(response, String.valueOf(result.value()));
         return null;
     }
+    
+    /**
+     * 修改应用信息
+     */
+    @RequestMapping(value = "/updateAppDetail")
+    public ModelAndView doUpdateAppDetail(HttpServletRequest request,
+                                               HttpServletResponse response, Model model) {
+        long appId = NumberUtils.toLong(request.getParameter("appId"), 0);
+        AppUser appUser = getUserInfo(request);
+        logger.warn("{} want to update appId={} info!", appUser.getName(), appId);
+        String appDescName =  request.getParameter("appDescName");
+        String appDescIntro =  request.getParameter("appDescIntro");
+        SuccessEnum successEnum = SuccessEnum.SUCCESS;
+        if (appId <= 0 || StringUtils.isBlank(appDescName) || StringUtils.isBlank(appDescIntro)) {
+            successEnum = SuccessEnum.FAIL;
+        } else {
+            try {
+                AppDesc appDesc = appService.getByAppId(appId);
+                appDesc.setName(appDescName);
+                appDesc.setIntro(appDescIntro);
+                appService.update(appDesc);
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+                successEnum = SuccessEnum.FAIL;
+            }
+        }
+        write(response, String.valueOf(successEnum.value()));
+        return null;
+    }
+    
 
     @RequestMapping(value = "/demo")
     public ModelAndView doDemo(HttpServletRequest request, HttpServletResponse response, Long appId, Model model) {
@@ -928,6 +958,7 @@ public class AppController extends BaseController {
             List<String> code = DemoCodeUtil.getCode(appDesc.getType(), appDesc.getAppId());
             List<String> dependency = DemoCodeUtil.getDependencyRedis();
             List<String> springConfig = DemoCodeUtil.getSpringConfig(appDesc.getType(), appDesc.getAppId());
+            String restApi = DemoCodeUtil.getRestAPI(appDesc.getType(), appDesc.getAppId());
             
             if(CollectionUtils.isNotEmpty(springConfig) && springConfig.size() > 0){
                 model.addAttribute("springConfig", springConfig);
@@ -935,6 +966,7 @@ public class AppController extends BaseController {
             model.addAttribute("dependency",dependency);
             model.addAttribute("code", code);
             model.addAttribute("status", 1);
+            model.addAttribute("restApi", restApi);
         } else {
             model.addAttribute("status", 0);
         }
@@ -1001,6 +1033,8 @@ public class AppController extends BaseController {
      */
     @RequestMapping(value = "/cleanAppData")
     public ModelAndView doCleanAppData(HttpServletRequest request, HttpServletResponse response, Model model, long appId) {
+        AppUser appUser = getUserInfo(request);
+        logger.warn("{} start to clean appId={} data!", appUser.getName(), appId);
         SuccessEnum successEnum = SuccessEnum.FAIL;
         if (appId > 0) {
             //验证用户对应用的权限 以及数据清理的结果
@@ -1008,6 +1042,7 @@ public class AppController extends BaseController {
                 successEnum = SuccessEnum.SUCCESS;
             }
         }
+        logger.warn("{} end to clean appId={} data, result is {}", appUser.getName(), appId, successEnum.info());
         write(response, String.valueOf(successEnum.value()));
         return null;
     }

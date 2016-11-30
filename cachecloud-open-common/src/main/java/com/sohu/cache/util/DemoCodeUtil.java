@@ -205,9 +205,7 @@ public class DemoCodeUtil {
         List<String> dependencyRedis = new ArrayList<String>();
         
         // redis版本
-        String[] redisGoodVersionArr = ConstUtils.GOOD_CLIENT_VERSIONS.split(ConstUtils.COMMA);
-        List<String> redisGoodVersions = Arrays.asList(redisGoodVersionArr);
-        String redisGoodVersion = redisGoodVersions.get(redisGoodVersions.size() - 1);
+        String redisGoodVersion = getGoodVersion();
         
         // 依赖
         dependencyRedis.add("&lt;dependency&gt;                                                     ");
@@ -224,6 +222,17 @@ public class DemoCodeUtil {
         dependencyRedis.add("&lt;/repositories&gt;                                                  ");
         
         return dependencyRedis;
+    }
+    
+    /**
+     * 获取最好的版本
+     * @return
+     */
+    private static String getGoodVersion() {
+        String[] redisGoodVersionArr = ConstUtils.GOOD_CLIENT_VERSIONS.split(ConstUtils.COMMA);
+        List<String> redisGoodVersions = Arrays.asList(redisGoodVersionArr);
+        String redisGoodVersion = redisGoodVersions.get(redisGoodVersions.size() - 1);
+        return redisGoodVersion;
     }
 
     public static List<String> getCode(int appType, long appId) {
@@ -282,6 +291,28 @@ public class DemoCodeUtil {
             }
         }
         return null;
+    }
+    
+    
+    public static String getRestAPI(int appType, long appId) {
+        String redisGoodVersion = getGoodVersion();
+        String appTypePath = "";
+        switch (appType) {
+            case ConstUtils.CACHE_REDIS_SENTINEL: {
+                appTypePath = "sentinel";
+                break;
+            }
+            case ConstUtils.CACHE_REDIS_STANDALONE: {
+                appTypePath = "standalone";
+                break;
+            }
+            case ConstUtils.CACHE_TYPE_REDIS_CLUSTER: {
+                appTypePath = "cluster";
+                break;
+            }
+        }
+        return ConstUtils.CC_DOMAIN + "/cache/client/redis/" + appTypePath + "/" + appId + ".json?clientVersion="
+                + redisGoodVersion;
     }
 
     

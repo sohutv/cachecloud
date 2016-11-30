@@ -2,6 +2,8 @@
 <%@ include file="/WEB-INF/jsp/manage/commons/taglibs.jsp" %>
 <div class="row">
     <br/>
+    
+    Maven Dependency：
     <div id="dependency" class="highlight">
         <pre class="prettyprint">
             <c:forEach var="line" items="${dependency}">
@@ -10,6 +12,7 @@
         </pre>
     </div>
 
+	Demo Code：
     <div id="code" class="highlight">
         <pre class="prettyprint">
         <c:forEach var="line" items="${code}">
@@ -18,7 +21,15 @@
         </pre>
     </div>
     
+    Rest API：
+    <div id="code" class="highlight">
+        <pre class="prettyprint">
+            ${restApi}<br/>
+        </pre>
+    </div>
+    
     <c:if test="${springConfig != null}">
+    	Spring Config Demo：
 	    <div id="springConfig" class="highlight">
 	        <pre class="prettyprint">
 	        <c:forEach var="line" items="${springConfig}">
