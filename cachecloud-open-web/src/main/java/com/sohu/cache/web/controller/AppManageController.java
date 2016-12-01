@@ -807,7 +807,7 @@ public class AppManageController extends BaseController {
 	}
     
     /**
-     * 应用日志级别
+     * 应用重要性级别
      */
     @RequestMapping(value = "/updateAppImportantLevel")
     public ModelAndView doUpdateAppImportantLevel(HttpServletRequest request, HttpServletResponse response, Model model) {

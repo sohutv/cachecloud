@@ -119,7 +119,7 @@ public interface AppStatsCenter {
      * @param commandName 命令名
      * @return
      */
-    public AppCommandStats getCommandClimax(long appId, Long beginTime, Long endTime, String commandName, boolean isNew);
+    public AppCommandStats getCommandClimax(long appId, Long beginTime, Long endTime, String commandName);
 
     /**
      * 获取应用详细信息

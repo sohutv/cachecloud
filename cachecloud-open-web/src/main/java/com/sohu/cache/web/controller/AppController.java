@@ -199,7 +199,7 @@ public class AppController extends BaseController {
         List<AppCommandStats> top5ClimaxList = new ArrayList<AppCommandStats>();
         if (CollectionUtils.isNotEmpty(top5Commands)) {
             for (AppCommandStats appCommandStats : top5Commands) {
-                AppCommandStats temp = appStatsCenter.getCommandClimax(appId, beginTime, endTime, appCommandStats.getCommandName(), true);
+                AppCommandStats temp = appStatsCenter.getCommandClimax(appId, beginTime, endTime, appCommandStats.getCommandName());
                 if (temp != null) {
                     top5ClimaxList.add(temp);
                 }
