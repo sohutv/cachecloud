@@ -1,11 +1,13 @@
 package com.sohu.cache.web.util;
 
+import com.sohu.cache.constant.AppAuditType;
 import com.sohu.cache.constant.AppCheckEnum;
 import com.sohu.cache.constant.RedisConfigTemplateChangeEnum;
 import com.sohu.cache.entity.AppAudit;
 import com.sohu.cache.entity.AppDailyData;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.AppUser;
+import com.sohu.cache.entity.InstanceAlertValueResult;
 import com.sohu.cache.entity.InstanceConfig;
 import com.sohu.cache.stats.app.AppStatsCenter;
 import com.sohu.cache.util.ConstUtils;
@@ -22,9 +24,11 @@ import org.apache.velocity.app.VelocityEngine;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * 邮件通知应用的申请流程(方法内是具体的文案)
@@ -44,17 +48,37 @@ public class AppEmailUtil {
     
     private Logger logger = Logger.getLogger(AppEmailUtil.class);
 
+    
     /**
      * 应用状态通知
      * @param appDesc
      * @param appAudit
      */
     public void noticeAppResult(AppDesc appDesc, AppAudit appAudit) {
-        String mailContent = VelocityUtils.createText(velocityEngine, appDesc, appAudit, new AppDailyData(), "appAudit.vm", "UTF-8");
+        List<String> ccEmailList = getCCEmailList(appDesc, appAudit);
+        String mailContent = VelocityUtils.createText(velocityEngine, appDesc, appAudit, new AppDailyData(), new ArrayList<InstanceAlertValueResult>(), "appAudit.vm", "UTF-8");
         AppUser appUser = userService.get(appDesc.getUserId());
-        emailComponent.sendMail("【CacheCloud】状态通知", mailContent, Arrays.asList(appUser.getEmail()), Arrays.asList(emailComponent.getAdminEmail().split(ConstUtils.COMMA)));
+        emailComponent.sendMail("【CacheCloud】状态通知", mailContent, Arrays.asList(appUser.getEmail()), ccEmailList);
     }
     
+    /**
+     * 重要应用抄送
+     * @param appDesc
+     * @param appAudit
+     * @return
+     */
+    private List<String> getCCEmailList(AppDesc appDesc, AppAudit appAudit) {
+        Set<String> ccEmailSet = new LinkedHashSet<String>();
+        for (String email : emailComponent.getAdminEmail().split(ConstUtils.COMMA)) {
+            ccEmailSet.add(email);
+        }
+        //S级别，且是开通邮件
+        if (appDesc.isSuperImportant() && AppAuditType.APP_AUDIT.getValue() == appAudit.getType()) {
+            ccEmailSet.addAll(ConstUtils.LEADER_EMAIL_LIST);
+        }
+        return new ArrayList<String>(ccEmailSet);
+    }
+
     /**
      * 贡献者通知
      * @param groupName

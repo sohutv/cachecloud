@@ -805,5 +805,27 @@ public class AppManageController extends BaseController {
 	    logger.warn("user {} sentinelFailOver, appId:{}, result is {}", appUser.getName(), appId, success);
 		write(response, String.valueOf(success == true ? SuccessEnum.SUCCESS.value() : SuccessEnum.FAIL.value()));
 	}
+    
+    /**
+     * 应用日志级别
+     */
+    @RequestMapping(value = "/updateAppImportantLevel")
+    public ModelAndView doUpdateAppImportantLevel(HttpServletRequest request, HttpServletResponse response, Model model) {
+        long appId = NumberUtils.toLong(request.getParameter("appId"));
+        int importantLevel = NumberUtils.toInt(request.getParameter("importantLevel"));
+        SuccessEnum successEnum = SuccessEnum.FAIL;
+        if (appId > 0 && importantLevel >= 0) {
+            try {
+                AppDesc appDesc = appService.getByAppId(appId);
+                appDesc.setImportantLevel(importantLevel);
+                appService.update(appDesc);
+                successEnum = SuccessEnum.SUCCESS;
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+        model.addAttribute("status", successEnum.value());
+        return new ModelAndView("");
+    }
 
 }

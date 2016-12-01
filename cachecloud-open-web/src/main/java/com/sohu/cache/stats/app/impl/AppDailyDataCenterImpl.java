@@ -1,10 +1,13 @@
 package com.sohu.cache.stats.app.impl;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.commons.collections.MapUtils;
@@ -24,6 +27,7 @@ import com.sohu.cache.entity.AppDailyData;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.stats.app.AppDailyDataCenter;
 import com.sohu.cache.stats.app.AppStatsCenter;
+import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.component.EmailComponent;
 import com.sohu.cache.web.service.AppService;
 import com.sohu.cache.web.util.DateUtil;
@@ -245,10 +249,31 @@ public class AppDailyDataCenterImpl implements AppDailyDataCenter {
      * @param appDailyData
      */
     public void noticeAppDaily(Date startDate, AppDetailVO appDetailVO, AppDailyData appDailyData) {
+        List<String> ccEmailList = getCCEmailList(appDetailVO.getAppDesc());
         String startDateFormat = DateUtil.formatYYYYMMdd(startDate);
         String title = String.format("【CacheCloud】%s日报(appId=%s)", startDateFormat, appDetailVO.getAppDesc().getAppId());
-        String mailContent = VelocityUtils.createText(velocityEngine, appDetailVO.getAppDesc(), null, appDailyData, "appDaily.vm","UTF-8");
-        emailComponent.sendMail(title, mailContent, appDetailVO.getEmailList());
+        String mailContent = VelocityUtils.createText(velocityEngine, appDetailVO.getAppDesc(), null, appDailyData, null, "appDaily.vm","UTF-8");
+        emailComponent.sendMail(title, mailContent, appDetailVO.getEmailList(), ccEmailList);
+    }
+    
+    /**
+     * A级以上抄送管理员，S级抄送领导
+     * @param appDesc
+     * @return
+     */
+    private List<String> getCCEmailList(AppDesc appDesc) {
+        Set<String> ccEmailSet = new LinkedHashSet<String>();
+        //A级
+        if (appDesc.isVeryImportant()) {
+            for (String email : emailComponent.getAdminEmail().split(ConstUtils.COMMA)) {
+                ccEmailSet.add(email);
+            }
+        }
+        //S级
+        if (appDesc.isSuperImportant()) {
+            ccEmailSet.addAll(ConstUtils.LEADER_EMAIL_LIST);
+        }
+        return new ArrayList<String>(ccEmailSet);
     }
     
     public void setInstanceSlowLogDao(InstanceSlowLogDao instanceSlowLogDao) {

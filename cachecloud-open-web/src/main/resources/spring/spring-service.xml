@@ -48,5 +48,7 @@
     <bean id="serverStatusCollector" class="com.sohu.cache.server.ServerStatusCollector" init-method="init"/>
     
     <bean id="serverDataService" class="com.sohu.cache.web.service.impl.ServerDataServiceImpl"/>
+    
+    <bean id="instanceAlertValueService" class="com.sohu.cache.stats.instance.impl.InstanceAlertValueServiceImpl"/>
 
 </beans>

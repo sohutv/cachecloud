@@ -125,6 +125,26 @@
 						</select>
 					 </div>
 					 <div class="form-group">
+						<select name="importantLevel" class="form-control">
+							<option value="">
+								全部级别
+							</option>
+							<option value="1" <c:if test="${appSearch.importantLevel == 1}">selected</c:if>>
+								S级
+							</option>
+							<option value="2" <c:if test="${appSearch.importantLevel == 2}">selected</c:if>>
+								A级
+							</option>
+							<option value="3" <c:if test="${appSearch.importantLevel == 3}">selected</c:if>>
+								B级
+							</option>
+		                    <option value="4" <c:if test="${appSearch.importantLevel == 4}">selected</c:if>>
+		                       	C级
+		                    </option>
+						</select>
+					 </div>
+					 
+					 <div class="form-group">
 						<select name="pageSize" class="form-control">
 							<option value="10" <c:if test="${page.pageSize == 10}">selected</c:if>>
 								10行
@@ -174,7 +194,7 @@
 			                   				${appDetail.appDesc.appId}
 			                    		</c:when>
 			                    		<c:when test="${appDetail.appDesc.status == 2 or appDetail.appDesc.status == 3 or appDetail.appDesc.status == 4}">
-			                    			<a target="_blank" href="/admin/app/index.do?appId=${appDetail.appDesc.appId}">${appDetail.appDesc.appId}</a>
+			                    			<a title="${appDetail.appDesc.intro}" target="_blank" href="/admin/app/index.do?appId=${appDetail.appDesc.appId}">${appDetail.appDesc.appId}</a>
 			                    		</c:when>
 			                    	</c:choose>
 			                    </td>
@@ -232,6 +252,7 @@
 			                    			<label class="label label-success">${appDetail.hitPercent}%</label>
 			                    		</c:otherwise>
 			                    	</c:choose>
+			                    	
 			                    </td>
 			                    <td>${appDetail.appDesc.appRunDays}天</td>
 			                    <td>

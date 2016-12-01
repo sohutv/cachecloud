@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import com.sohu.cache.constant.AppDescEnum;
+import com.sohu.cache.constant.AppDescEnum.AppImportantLevel;
 import com.sohu.cache.constant.AppStatusEnum;
 import com.sohu.cache.util.ConstUtils;
 
@@ -123,6 +124,11 @@ public class AppDesc implements Serializable {
      * 客户端机器机房
      */
     private String clientMachineRoom;
+    
+    /**
+     * 重要度，默认重要
+     */
+    private int importantLevel = AppImportantLevel.IMPORTANT.getValue();
 
     public long getAppId() {
         return appId;
@@ -288,6 +294,14 @@ public class AppDesc implements Serializable {
     public void setClientConnAlertValue(int clientConnAlertValue) {
         this.clientConnAlertValue = clientConnAlertValue;
     }
+    
+    public int getImportantLevel() {
+        return importantLevel;
+    }
+
+    public void setImportantLevel(int importantLevel) {
+        this.importantLevel = importantLevel;
+    }
 
     /**
      * 应用运行天数
@@ -322,6 +336,7 @@ public class AppDesc implements Serializable {
         return "";
     }
 
+
     @Override
     public String toString() {
         return "AppDesc [appId=" + appId + ", appKey=" + appKey + ", name=" + name + ", userId=" + userId + ", status="
@@ -330,7 +345,7 @@ public class AppDesc implements Serializable {
                 + ", hasBackStore=" + hasBackStore + ", needPersistence=" + needPersistence + ", forecaseQps="
                 + forecaseQps + ", needHotBackUp=" + needHotBackUp + ", forecastObjNum=" + forecastObjNum
                 + ", memAlertValue=" + memAlertValue + ", clientConnAlertValue=" + clientConnAlertValue
-                + ", clientMachineRoom=" + clientMachineRoom + "]";
+                + ", clientMachineRoom=" + clientMachineRoom + ", importantLevel=" + importantLevel + "]";
     }
 
     public String getStatusDesc() {
@@ -356,6 +371,22 @@ public class AppDesc implements Serializable {
      */
     public boolean isTest() {
         return isTest == AppDescEnum.AppTest.IS_TEST.getValue();
+    }
+
+    /**
+     * 非常重要
+     * @return
+     */
+    public boolean isVeryImportant() {
+        return importantLevel == AppDescEnum.AppImportantLevel.VERY_IMPORTANT.getValue();
+    }
+    
+    /**
+     * 超级重要
+     * @return
+     */
+    public boolean isSuperImportant() {
+        return importantLevel == AppDescEnum.AppImportantLevel.SUPER_IMPORTANT.getValue();
     }
 
 }

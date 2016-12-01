@@ -80,5 +80,12 @@
         from standard_statistics
         where <![CDATA[ created_time <=  #{createdTime}]]>
     </delete>
+    
+    <select id="getStandardStatsByCreateTime" resultType="StandardStats">
+        select id,collect_time,ip,port,db_type,info_json,diff_json,created_time
+        from standard_statistics
+        where created_time between #{beginTime} and #{endTime} and db_type=#{dbType}
+    </select>
+    
 
 </mapper>

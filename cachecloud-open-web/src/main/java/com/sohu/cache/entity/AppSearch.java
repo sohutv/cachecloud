@@ -36,6 +36,11 @@ public class AppSearch {
     private String orderBy;
     
     /**
+     * 重要度
+     */
+    private Integer importantLevel;
+    
+    /**
      * 分页
      */
     private Page page;
@@ -88,10 +93,19 @@ public class AppSearch {
         this.page = page;
     }
 
+    public Integer getImportantLevel() {
+        return importantLevel;
+    }
+
+    public void setImportantLevel(Integer importantLevel) {
+        this.importantLevel = importantLevel;
+    }
+
     @Override
     public String toString() {
         return "AppSearch [appId=" + appId + ", appName=" + appName + ", appType=" + appType + ", appStatus="
-                + appStatus + ", orderBy=" + orderBy + ", page=" + page + "]";
+                + appStatus + ", orderBy=" + orderBy + ", importantLevel=" + importantLevel + ", page=" + page + "]";
     }
+
 
 }

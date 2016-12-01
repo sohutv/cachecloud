@@ -226,8 +226,22 @@ public class AppStatsCenterImpl implements AppStatsCenter {
      * @return
      */
     @Override
-    public AppCommandStats getCommandClimax(long appId, Long beginTime, Long endTime, String commandName) {
-        return appStatsDao.getCommandClimax(appId, commandName, new TimeDimensionality(beginTime, endTime, COLLECT_DATE_FORMAT));
+    public AppCommandStats getCommandClimax(long appId, Long beginTime, Long endTime, String commandName, boolean isNew) {
+        TimeDimensionality td = new TimeDimensionality(beginTime, endTime, COLLECT_DATE_FORMAT);
+        if (!isNew) {
+            return appStatsDao.getCommandClimax(appId, commandName, td);
+        } else {
+            AppCommandStats appCommandStats = appStatsDao.getCommandClimaxCount(appId, commandName, td);
+            if (appCommandStats == null) {
+                return null;
+            }
+            appCommandStats.setCommandName(commandName);
+            AppCommandStats appCommandStatsTemp = appStatsDao.getCommandClimaxCreateTime(appId, commandName, appCommandStats.getCommandCount(), td);
+            if (appCommandStatsTemp != null) {
+                appCommandStats.setCreateTime(appCommandStatsTemp.getCreateTime());
+            }
+            return appCommandStats;
+        }
     }
 
     /**

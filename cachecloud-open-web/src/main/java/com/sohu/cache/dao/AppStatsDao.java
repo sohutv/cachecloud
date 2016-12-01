@@ -151,6 +151,11 @@ public interface AppStatsDao {
      * @return
      */
     public AppCommandStats getCommandClimax(@Param("appId") long appId, @Param("commandName") String commandName, @Param("td") TimeDimensionality td);
+    
+    public AppCommandStats getCommandClimaxCount(@Param("appId") long appId, @Param("commandName") String commandName, @Param("td") TimeDimensionality td);
+    
+    public AppCommandStats getCommandClimaxCreateTime(@Param("appId") long appId, @Param("commandName") String commandName, @Param("commandCount") long commandCount, @Param("td") TimeDimensionality td);
+    
 
     /**
      * 获取应用命令调用次数分布

@@ -48,7 +48,7 @@ public class ClientManageController extends BaseController {
     private ClientVersionService clientVersionService;
 
     /**
-     * http://cc.tv.sohuno.com:9999/manage/client/exception
+     * /manage/client/exception
      * @param request
      * @param response
      * @param model
@@ -91,7 +91,7 @@ public class ClientManageController extends BaseController {
     }
 
     /**
-     * http://cc.tv.sohuno.com:9999/manage/client/version
+     * /manage/client/version
      * @param request
      * @param response
      * @param model

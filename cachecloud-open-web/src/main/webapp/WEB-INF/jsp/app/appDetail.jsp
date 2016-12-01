@@ -5,7 +5,8 @@
     <div class="row">
         <div class="col-md-8">
             <div class="page-header">
-                <h4>应用详情</h4>
+                                        应用详情&nbsp;&nbsp;&nbsp;
+                <button type="button" class="btn default" data-target="#updateAppDetailModal" data-toggle="modal">修改应用信息</button>
             </div>
             <table class="table table-striped table-hover">
                 <tbody>
@@ -243,6 +244,55 @@
 				<div class="modal-footer">
 					<button type="button" data-dismiss="modal" class="btn" >Close</button>
 					<button type="button" id="appConfigChangeBtn" class="btn red" onclick="appAlertConfigChange('${appDetail.appDesc.appId}')">Ok</button>
+				</div>
+			
+			</form>
+		</div>
+	</div>
+</div>
+
+
+<div id="updateAppDetailModal" class="modal fade" tabindex="-1" data-width="400">
+	<div class="modal-dialog">
+		<div class="modal-content">
+		
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+				<h4 class="modal-title">应用信息修改</h4>
+			</div>
+			
+			<form class="form-horizontal form-bordered form-row-stripped">
+				<div class="modal-body">
+					<div class="row">
+						<!-- 控件开始 -->
+						<div class="col-md-12">
+							<!-- form-body开始 -->
+							<div class="form-body">
+								<div class="form-group">
+									<label class="control-label col-md-3">应用名:</label>
+									<div class="col-md-7">
+										<input type="text" name="appDescName" value="${appDetail.appDesc.name}" id="appDescName" class="form-control">
+									</div>
+								</div>
+								
+								<div class="form-group">
+									<label class="control-label col-md-3">应用描述:</label>
+									<div class="col-md-7">
+										<textarea class="form-control" name="appDescIntro" rows="3" id="appDescIntro" placeholder="应用描述">${appDetail.appDesc.intro}</textarea>
+									</div>
+								</div>
+								
+							</div>
+							<!-- form-body 结束 -->
+						</div>
+						<div id="updateAppDetailInfo"></div>
+						<!-- 控件结束 -->
+					</div>
+				</div>
+				
+				<div class="modal-footer">
+					<button type="button" data-dismiss="modal" class="btn" >Close</button>
+					<button type="button" id="updateAppDetailBtn" class="btn red" onclick="updateAppDetailChange('${appDetail.appDesc.appId}')">Ok</button>
 				</div>
 			
 			</form>

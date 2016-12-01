@@ -268,6 +268,18 @@
         limit 1;
     </select>
     
+    <select id="getCommandClimaxCount" resultType="AppCommandStats">
+        select max(command_count) as command_count
+        from <include refid="select_table"/> 
+        where app_id = #{appId} and collect_time between #{td.begin} and #{td.end} and command_name = #{commandName}
+    </select>
+    
+    <select id="getCommandClimaxCreateTime" resultType="AppCommandStats">
+        select create_time 
+        from <include refid="select_table"/> 
+        where app_id = #{appId} and collect_time between #{td.begin} and #{td.end} and command_name = #{commandName} and command_count=${commandCount} limit 1
+    </select>
+    
     <select id="getAppMinuteStat" resultType="hashmap">
         select 
         	avg(connected_clients) as avgClientCount,

@@ -1,8 +1,29 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ include file="/WEB-INF/jsp/manage/commons/taglibs.jsp"%>
+<script type="text/javascript">
+	function updateAppImportantLevel() {
+		var importantLevel = document.getElementById("importantLevel");
+		var appId = document.getElementById("hiddenAppId");
+		$.get(
+   			'/manage/app/updateAppImportantLevel.json',
+   			{
+   				importantLevel: importantLevel.value,
+   				appId: appId.value
+   			},
+   	        function(data){
+   				var status = data.status;
+   				if (status == 1) {
+   					alert("更新成功!");
+   				} else {
+   					alert("更新失败!");
+   				}
+   	        }
+   	     );
+	}
+</script>
 <div class="page-container">
 	<div class="page-content">
-		
+	
 		<%@include file="machineReferList.jsp" %>
 		
 		<div class="row">
@@ -88,6 +109,65 @@
 				</div>
 			</div>
 		</div>
+		
+		<div class="row">
+			<div class="col-md-12">
+				<h3 class="page-header">
+					应用评级(已经默认是B，如无调整无需提交)
+				</h3>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<div class="portlet box light-grey">
+					<div class="portlet-title">
+						<div class="caption"><i class="fa fa-globe"></i>应用评级</div>
+						<div class="tools">
+							<a href="javascript:;" class="collapse"></a>
+						</div>
+					</div>
+					<div class="portlet-body">
+						<div class="form">
+								<!-- BEGIN FORM-->
+								<form class="form-horizontal form-bordered form-row-stripped">
+									<div class="form-body">
+										<input type="hidden" id="hiddenAppId" name="hiddenAppId" value="${appId}">
+										<div class="form-group">
+											<label class="control-label col-md-3">
+												级别
+											</label>
+											<div class="col-md-5">
+												<select id="importantLevel" name="importantLevel" class="form-control">
+													<option <c:if test="${appDesc.importantLevel == 1}">selected</c:if> value="1">
+														S
+													</option>
+													<option <c:if test="${appDesc.importantLevel == 2}">selected</c:if> value="2">
+														A
+													</option>
+													<option <c:if test="${appDesc.importantLevel == 3}">selected</c:if> value="3">
+														B
+													</option>
+													<option <c:if test="${appDesc.importantLevel == 4}">selected</c:if> value="4">
+														C
+													</option>
+												</select>
+											</div>
+											
+											<div class="col-md-2">
+												<button type="button" class="btn green" onclick="updateAppImportantLevel()">
+													更新
+												</button>
+											</div>
+										</div>
+									</div>
+								</form>
+								<!-- END FORM-->
+							</div>
+						</div>
+					</div>
+					<!-- END TABLE PORTLET-->
+				</div>
+			</div>
 		
 		
 		<div class="row">

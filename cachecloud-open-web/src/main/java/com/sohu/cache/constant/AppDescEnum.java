@@ -29,6 +29,36 @@ public class AppDescEnum {
         public void setValue(int value) {
             this.value = value;
         }
+    }
+    
+    /**
+     * 应用重要度
+     */
+    public static enum AppImportantLevel {
+        SUPER_IMPORTANT(1, "S"),
+        VERY_IMPORTANT(2, "A"),
+        IMPORTANT(3, "B"),
+        COMMON(4, "C");
+
+        private int value;
+        
+        private String info;
+
+        private AppImportantLevel(int value, String info) {
+            this.value = value;
+            this.info = info;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public String getInfo() {
+            return info;
+        }
+
 
     }
+    
+    
 }

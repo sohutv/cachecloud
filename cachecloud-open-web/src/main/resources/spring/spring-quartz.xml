@@ -99,6 +99,7 @@
                 <ref bean="hostInspectorTrigger"/>
                 <ref bean="appInspectorTrigger"/>
                 <ref bean="appDailyTrigger"/>
+                <ref bean="instanceAlertValueTrigger"/>
             </array>
         </property>
         <property name="jobDetails">
@@ -111,6 +112,7 @@
                 <ref bean="cleanUpStatisticsJobDetail"/>
                 <ref bean="inspectorJobDetail"/>
                 <ref bean="appDailyJobDetail"/>
+                <ref bean="instanceAlertValueJobDetail"/>
             </array>
         </property>
 
@@ -248,6 +250,21 @@
         <property name="cronExpression" value="0 0 10 * * ?"/>
     </bean>
     
+    
+    <bean id="instanceAlertValueJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="name" value="instanceAlertValueJob"></property>
+        <property name="group" value="instanceAlertValue"></property>
+        <property name="jobClass" value="com.sohu.cache.schedule.jobs.InstanceAlertValueJob"></property>
+        <property name="requestsRecovery" value="true"/>
+        <property name="durability" value="true"/>
+    </bean>
+    
+    <bean id="instanceAlertValueTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="name" value="instanceAlertValueTrigger"/>
+        <property name="group" value="instanceAlertValue"/>
+        <property name="jobDetail" ref="instanceAlertValueJobDetail"/>
+        <property name="cronExpression" value="0 0/1 * ? * *"/>
+    </bean>
     
 
 </beans>
