@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.InstanceAlertValueDao">
+    <sql id="columns">
+    	config_key,alert_value,compare_type,info,status,order_id,value_type
+    </sql>
+    
+    <select id="getAllInstanceAlert" resultType="com.sohu.cache.entity.InstanceAlert">
+        select <include refid="columns"/> from instance_alert
+    </select>
+    
+    <insert id="saveOrUpdate">
+		insert into instance_alert(<include refid="columns" />)
+		values(#{configKey},#{alertValue},#{compareType},#{info},#{status},#{orderId},#{valueType})
+	    on duplicate key update
+	    alert_value = #{alertValue}, compare_type = #{compareType}, info = #{info}, status = #{status}, order_id = #{orderId}, value_type = #{valueType}
+	</insert>
+
+    <select id="getByConfigKey" resultType="com.sohu.cache.entity.InstanceAlert">
+        select <include refid="columns"/> from instance_alert where config_key = #{configKey}
+    </select>
+	
+	<update id="updateStatus">
+		update instance_alert set status = #{status} where config_key = #{configKey}
+	</update>
+	
+	<delete id="remove">
+		delete from instance_alert where config_key = #{configKey}
+	</delete>
+	
+	<select id="getByValueType" resultType="com.sohu.cache.entity.InstanceAlert">
+        select <include refid="columns"/> from instance_alert where value_type = #{valueType} and status = #{status}
+    </select>
+
+</mapper>

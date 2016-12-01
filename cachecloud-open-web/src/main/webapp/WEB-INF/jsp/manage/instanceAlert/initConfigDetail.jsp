@@ -28,7 +28,8 @@ function changeConfig(configKey) {
 	var alertValue = document.getElementById("alertValue" + configKey);
 	var info = document.getElementById("info" + configKey);
 	var status = document.getElementById("status" + configKey);
-	var compareType = document.getElementById("compareType" + configKey)
+	var compareType = document.getElementById("compareType" + configKey);
+	var valueType = document.getElementById("valueType" + configKey);
 	$.get(
 		'/manage/instanceAlert/update.json',
 		{
@@ -36,7 +37,8 @@ function changeConfig(configKey) {
 			alertValue: alertValue.value,
 			info: info.value,
 			status: status.value,
-			compareType: compareType.value
+			compareType: compareType.value,
+			valueType: valueType.value
 		},
         function(data){
 			var status = data.status;
@@ -66,7 +68,8 @@ function saveInstanceAlert() {
 		return false;
 	}
 	var orderId = document.getElementById("orderId");
-	var compareType = document.getElementById("compareType")
+	var compareType = document.getElementById("compareType");
+	var valueType = document.getElementById("valueType");
 	$.get(
 		'/manage/instanceAlert/add.json',
 		{
@@ -74,7 +77,8 @@ function saveInstanceAlert() {
 			alertValue: alertValue.value,
 			info: info.value,
 			orderId: orderId.value,
-			compareType: compareType.value
+			compareType: compareType.value,
+			valueType: valueType.value
 		},
         function(data){
 			var status = data.status;
@@ -127,11 +131,11 @@ function saveInstanceAlert() {
 												</c:choose>
 												${config.configKey}:
 											</label>
-											<div class="col-md-2">
+											<div class="col-md-3">
 												<input id="info${config.configKey}" type="text" name="info" class="form-control" value="${config.info}" />
 											</div>
 											
-											<div class="col-md-2">
+											<div class="col-md-1">
 												<select id="compareType${config.configKey}" name="compareType" class="form-control">
 													<option value="-1" <c:if test="${config.compareType == -1}">selected</c:if>>
 														小于
@@ -142,15 +146,29 @@ function saveInstanceAlert() {
 													<option value="1" <c:if test="${config.compareType == 1}">selected</c:if>>
 														大于
 													</option>
+													<option value="2" <c:if test="${config.compareType == 2}">selected</c:if>>
+														不等于
+													</option>
 												</select>
 											</div>
 											
 											<div class="col-md-2">
+												<select id="valueType${config.configKey}" name="valueType" class="form-control">
+													<option value="1" <c:if test="${config.valueType == 1}">selected</c:if>>
+														固定值
+													</option>
+													<option value="2" <c:if test="${config.valueType == 2}">selected</c:if>>
+														差值
+													</option>
+												</select>
+											</div>
+											
+											<div class="col-md-1">
 												<input id="alertValue${config.configKey}" type="text" name="info" class="form-control" value="${config.alertValue}" />
 											</div>
 											
 											
-											<div class="col-md-2">
+											<div class="col-md-1">
 												<select id="status${config.configKey}" name="status" class="form-control">
 													<option value="1" <c:if test="${config.status == 1}">selected</c:if>>
 														有效
@@ -210,7 +228,7 @@ function saveInstanceAlert() {
 								
 								<div class="form-group">
 									<label class="control-label col-md-3">
-										类型:
+										比较:
 									</label>
 									<div class="col-md-5">
 										<select name="compareType" id="compareType" class="form-control select2_category">
@@ -222,6 +240,25 @@ function saveInstanceAlert() {
 											</option>
 											<option value="1" >
 												大于
+											</option>
+											<option value="2" >
+												不等于
+											</option>
+										</select>
+									</div>
+								</div>
+								
+								<div class="form-group">
+									<label class="control-label col-md-3">
+										类型:
+									</label>
+									<div class="col-md-5">
+										<select name="valueType" id="valueType" class="form-control select2_category">
+											<option value="1">
+												固定值
+											</option>
+											<option value="2">
+												差值
 											</option>
 										</select>
 									</div>

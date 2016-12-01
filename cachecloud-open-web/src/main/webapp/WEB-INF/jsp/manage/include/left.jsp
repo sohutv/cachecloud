@@ -103,6 +103,17 @@
 			</a>
 		</li>
 		
+		<li <c:if test="${instanceAlertValueActive == 1}">class="active"</c:if>>
+			<a href="/manage/instanceAlert/init.do">
+				<i class="fa fa-map-marker"></i> 
+				<span class="title">Redis报警阀值</span>
+				<c:if test="${instanceAlertValueActive == 1}">
+					<span class="selected"></span>
+					<span class="arrow"></span>
+				</c:if>
+			</a>
+		</li>
+		
 		<li <c:if test="${configActive == 1}">class="active"</c:if>>
 			<a href="/manage/config/init.do">
 				<i class="fa fa-map-marker"></i> 

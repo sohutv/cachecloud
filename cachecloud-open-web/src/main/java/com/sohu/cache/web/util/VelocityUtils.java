@@ -6,6 +6,9 @@ package com.sohu.cache.web.util;
 import com.sohu.cache.entity.AppAudit;
 import com.sohu.cache.entity.AppDailyData;
 import com.sohu.cache.entity.AppDesc;
+import com.sohu.cache.entity.InstanceAlertValueResult;
+import com.sohu.cache.util.ConstUtils;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -23,6 +26,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.text.DecimalFormat;
+import java.util.List;
 import java.util.Properties;
 
 
@@ -46,7 +50,7 @@ public class VelocityUtils {
      * @param customCharset 编码
      */
     public synchronized static String createText(VelocityEngine engine, AppDesc appDesc, AppAudit appAudit, AppDailyData appDailyData, 
-                                                 String templatePath, String customCharset) {
+            List<InstanceAlertValueResult> instanceAlertValueResultList, String templatePath, String customCharset) {
         if (!StringUtils.isEmpty(customCharset)) {
             charset = customCharset;
         }
@@ -62,7 +66,9 @@ public class VelocityUtils {
         context.put("appDesc", appDesc);
         context.put("appAudit", appAudit);
         context.put("appDailyData", appDailyData);
+        context.put("instanceAlertValueResultList", instanceAlertValueResultList);
         context.put("numberTool", new NumberTool());
+        context.put("ccDomain", ConstUtils.CC_DOMAIN);
         context.put("decimalFormat", new DecimalFormat("###,###"));
         context.put("StringUtils", StringUtils.class);
         FileOutputStream fos = null;

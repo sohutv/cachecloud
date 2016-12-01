@@ -1060,3 +1060,17 @@ CREATE TABLE `server_stat` (
   `dspace` text COMMENT '磁盘各分区空间使用率',
   PRIMARY KEY (`ip`,`cdate`,`ctime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- 应用级别
+alter table app_desc add column important_level tinyint not null default 2 comment '应用级别，1:最重要，2:一般重要，3:一般'; 
+
+CREATE TABLE `instance_alert` (
+  `config_key` varchar(255) NOT NULL COMMENT '配置key',
+  `alert_value` varchar(512) NOT NULL COMMENT '报警阀值',
+  `info` varchar(255) NOT NULL COMMENT '配置说明',
+  `status` tinyint(4) NOT NULL COMMENT '1:可用,0:不可用',
+  `order_id` int(11) NOT NULL COMMENT '顺序',
+  `compare_type` tinyint(4) NOT NULL COMMENT '比较类型：-1小于,0等于,1大于',
+  `value_type` tinyint(4) NOT NULL DEFAULT '1' COMMENT '1固定值,2差值',
+  PRIMARY KEY (`config_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='实例报警阀值';

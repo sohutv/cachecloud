@@ -34,4 +34,5 @@ public interface InstanceStatsDao {
 
     public int deleteStandardStatsByCreatedTime(@Param("createdTime") Date createdTime);
 
+    public List<StandardStats> getStandardStatsByCreateTime(@Param("beginTime") Date beginTime, @Param("endTime") Date endTime, @Param("dbType") String dbType);
 }
