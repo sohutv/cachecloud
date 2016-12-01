@@ -13,7 +13,7 @@ set -o nounset
 set -o errexit
 
 readonly redisDir="/opt/cachecloud/redis"
-readonly redisTarGz="redis-3.0.6.tar.gz"
+readonly redisTarGz="redis-3.0.7.tar.gz"
 
 
 # check if the user exists
