@@ -159,7 +159,7 @@ public class InstanceAlertValueServiceImpl implements InstanceAlertValueService 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         String emailTitle = String.format("Redis实例分钟报警(%s~%s)", sdf.format(beginTime), sdf.format(endTime));
         String emailContent = VelocityUtils.createText(velocityEngine, null, null, null, instanceAlertValueResultList, "instanceAlert.vm","UTF-8");
-        emailComponent.sendMail(emailTitle, emailContent.toString(), Arrays.asList("leifu@sohu-inc.com", "yijunzhang@sohu-inc.com"));
+        emailComponent.sendMailToAdmin(emailTitle, emailContent.toString());
         
     }
 
