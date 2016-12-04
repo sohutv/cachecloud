@@ -671,7 +671,7 @@ public class AppDeployCenterImpl implements AppDeployCenter {
     private boolean isInProcess(Long appId) {
         ReshardProcess process = processMap.get(appId);
         if (process != null && process.getStatus() == 0) {
-            logger.warn("appId={} isInProcess", appId, process.getStatus());
+            logger.warn("appId={} is inProcess", appId);
             return true;
         } else {
             return false;
@@ -702,6 +702,11 @@ public class AppDeployCenterImpl implements AppDeployCenter {
     @Override
 	public HorizontalResult checkHorizontal(long appId, long appAuditId, long sourceId, long targetId, int startSlot,
 			int endSlot) {
+    	// 0.当前应用正在迁移
+        boolean isInProcess = isInProcess(appId);
+    	if (isInProcess) {
+			return HorizontalResult.fail("appId=" + appId + "正在迁移!");
+    	}
 		// 1.应用信息
 		AppDesc appDesc = appService.getByAppId(appId);
 		if (appDesc == null) {
@@ -786,8 +791,30 @@ public class AppDeployCenterImpl implements AppDeployCenter {
 	}
 
 	@Override
-	public HorizontalResult addHorizontal(long appId, long appAuditId, long sourceId, long targetId, int startSlot,
-			int endSlot) {
+	public HorizontalResult addHorizontal(final long appId, final long appAuditId, long sourceId, final long targetId, final int startSlot,
+			final int endSlot) {
+        final List<InstanceInfo> instanceInfoList = instanceDao.getInstListByAppId(appId);
+		final InstanceInfo sourceInstanceInfo = instanceDao.getInstanceInfoById(sourceId);
+		final InstanceInfo targetInstanceInfo = instanceDao.getInstanceInfoById(targetId);
+        processThreadPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                RedisClusterReshardV2 clusterReshardV2 = new RedisClusterReshardV2();
+                //添加进度
+                processMap.put(appId, clusterReshardV2.getReshardProcess());
+                boolean joinCluster = clusterReshardV2.migrateSlot(instanceInfoList, sourceInstanceInfo, targetInstanceInfo, startSlot, endSlot);
+                logger.warn("async:appId={} joinCluster={} done result={}", appId, joinCluster, clusterReshardV2.getReshardProcess());
+                if (joinCluster) {
+                    // 改变审核状态
+                    appAuditDao.updateAppAudit(appAuditId, AppCheckEnum.APP_ALLOCATE_RESOURCE.value());
+                    if (targetInstanceInfo != null && targetInstanceInfo.getStatus() != InstanceStatusEnum.GOOD_STATUS.getStatus()) {
+                    	targetInstanceInfo.setStatus(InstanceStatusEnum.GOOD_STATUS.getStatus());
+                        instanceDao.update(targetInstanceInfo);
+                    }
+                }
+            }
+        });
+        logger.warn("reshard appId={} instance={}:{} deploy done", appId, targetInstanceInfo.getIp(), targetInstanceInfo.getPort());
 		return HorizontalResult.scaleSuccess();
 	}
     
