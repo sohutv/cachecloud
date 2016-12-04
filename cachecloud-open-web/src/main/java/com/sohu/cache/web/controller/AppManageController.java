@@ -4,6 +4,7 @@ import com.sohu.cache.web.enums.RedisOperateEnum;
 import com.sohu.cache.constant.AppCheckEnum;
 import com.sohu.cache.constant.DataFormatCheckResult;
 import com.sohu.cache.constant.ErrorMessageEnum;
+import com.sohu.cache.constant.HorizontalResult;
 import com.sohu.cache.entity.*;
 import com.sohu.cache.machine.MachineCenter;
 import com.sohu.cache.redis.RedisCenter;
@@ -338,6 +339,50 @@ public class AppManageController extends BaseController {
 		}
         logger.warn("user {} horizontalScaleApply error param, ip:{}, port:{}, appId:{}, result is {}", appUser.getName(), ip, port, appId, isSuccess);
 		return new ModelAndView("redirect:/manage/app/handleHorizontalScale?appAuditId=" + appAuditId);
+	}
+	
+
+	/**
+	 * 水平扩容配置检查
+	 * @param sourceId 源实例ID
+	 * @param targetId 目标实例ID
+	 * @param startSlot 开始slot
+	 * @param endSlot 结束slot
+	 * @param appId 应用id
+	 * @param appAuditId 审批id
+	 * @return
+	 */
+	@RequestMapping(value = "/checkHorizontalScale")
+	public ModelAndView doCheckHorizontalScale(HttpServletRequest request, HttpServletResponse response, Model model,
+			long sourceId, long targetId, int startSlot, int endSlot, long appId, long appAuditId) {
+		HorizontalResult horizontalResult = appDeployCenter.checkHorizontal(appId, appAuditId, sourceId, targetId,
+				startSlot, endSlot);
+		model.addAttribute("status", horizontalResult.getStatus());
+		model.addAttribute("message", horizontalResult.getMessage());
+		return new ModelAndView("");
+	}
+	
+	/**
+	 * 开始水平扩容
+	 * @param sourceId 源实例ID
+	 * @param targetId 目标实例ID
+	 * @param startSlot 开始slot
+	 * @param endSlot 结束slot
+	 * @param appId 应用id
+	 * @param appAuditId 审批id
+	 * @return
+	 */
+	@RequestMapping(value = "/startHorizontalScale")
+	public ModelAndView doStartHorizontalScale(HttpServletRequest request, HttpServletResponse response, Model model,
+			long sourceId, long targetId, int startSlot, int endSlot, long appId, long appAuditId) {
+		AppUser appUser = getUserInfo(request);
+		logger.warn("user {} horizontalScaleApply appId {} appAuditId {} sourceId {} targetId {} startSlot {} endSlot {}",
+				appUser.getName(), appId, appAuditId, sourceId, targetId, startSlot, endSlot);
+		HorizontalResult horizontalResult = appDeployCenter.addHorizontal(appId, appAuditId, sourceId, targetId,
+				startSlot, endSlot);
+        model.addAttribute("status", horizontalResult.getStatus());
+		model.addAttribute("message", horizontalResult.getMessage());
+		return new ModelAndView("");
 	}
 
 	/**

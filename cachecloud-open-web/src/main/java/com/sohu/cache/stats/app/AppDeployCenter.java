@@ -1,6 +1,7 @@
 package com.sohu.cache.stats.app;
 
 import com.sohu.cache.constant.DataFormatCheckResult;
+import com.sohu.cache.constant.HorizontalResult;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.redis.ReshardProcess;
@@ -118,5 +119,33 @@ public interface AppDeployCenter {
      * @return
      */
     public boolean cleanAppData(long appId, AppUser appUser);
+
+    
+    /**
+     * 检查水平扩容的格式
+     * @param appId
+     * @param appAuditId
+     * @param sourceId
+     * @param targetId
+     * @param startSlot
+     * @param endSlot
+     * @return
+     */
+	public HorizontalResult checkHorizontal(long appId, long appAuditId, long sourceId, long targetId, int startSlot,
+			int endSlot);
+	
+	
+	/**
+     * 开始水平扩容
+     * @param appId
+     * @param appAuditId
+     * @param sourceId
+     * @param targetId
+     * @param startSlot
+     * @param endSlot
+     * @return
+     */
+	public HorizontalResult addHorizontal(long appId, long appAuditId, long sourceId, long targetId, int startSlot,
+			int endSlot);
 
 }

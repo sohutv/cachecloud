@@ -26,8 +26,10 @@ import com.sohu.cache.constant.AppUserTypeEnum;
 import com.sohu.cache.entity.AppToUser;
 import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.entity.InstanceInfo;
+import com.sohu.cache.entity.InstanceSlotModel;
 import com.sohu.cache.entity.InstanceStats;
 import com.sohu.cache.machine.MachineCenter;
+import com.sohu.cache.redis.RedisCenter;
 
 /**
  * 基类controller
@@ -45,6 +47,8 @@ public class BaseController {
     protected MachineCenter machineCenter;
     
     protected UserLoginStatusService userLoginStatusService;
+    
+    protected RedisCenter redisCenter;
 
     public void setUserService(UserService userService) {
         this.userService = userService;
@@ -62,7 +66,11 @@ public class BaseController {
         this.userLoginStatusService = userLoginStatusService;
     }
 
-    /**
+    public void setRedisCenter(RedisCenter redisCenter) {
+		this.redisCenter = redisCenter;
+	}
+
+	/**
      * 返回用户基本信息
      *
      * @param request
@@ -168,6 +176,11 @@ public class BaseController {
         }
         model.addAttribute("instanceList", instanceList);
         model.addAttribute("instanceStatsMap", instanceStatsMap);
+        
+        //slot分布
+        Map<String, InstanceSlotModel> clusterSlotsMap = redisCenter.getClusterSlotsMap(appId);
+		model.addAttribute("clusterSlotsMap", clusterSlotsMap);
+        
     }
     
     /**

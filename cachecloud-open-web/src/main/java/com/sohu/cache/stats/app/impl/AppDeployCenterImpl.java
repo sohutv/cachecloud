@@ -6,6 +6,7 @@ import com.sohu.cache.constant.AppAuditType;
 import com.sohu.cache.constant.AppCheckEnum;
 import com.sohu.cache.constant.AppStatusEnum;
 import com.sohu.cache.constant.DataFormatCheckResult;
+import com.sohu.cache.constant.HorizontalResult;
 import com.sohu.cache.constant.InstanceStatusEnum;
 import com.sohu.cache.dao.AppAuditDao;
 import com.sohu.cache.dao.AppAuditLogDao;
@@ -20,6 +21,8 @@ import com.sohu.cache.util.TypeUtil;
 import com.sohu.cache.web.service.AppService;
 import com.sohu.cache.web.util.AppEmailUtil;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
@@ -695,7 +698,99 @@ public class AppDeployCenterImpl implements AppDeployCenter {
         instanceDao.saveInstance(instanceInfo);
         return instanceInfo;
     }
+    
+    @Override
+	public HorizontalResult checkHorizontal(long appId, long appAuditId, long sourceId, long targetId, int startSlot,
+			int endSlot) {
+		// 1.应用信息
+		AppDesc appDesc = appService.getByAppId(appId);
+		if (appDesc == null) {
+			return HorizontalResult.fail("应用信息为空");
+		}
+		// 2.1 源实例信息
+		InstanceInfo sourceInstanceInfo = instanceDao.getInstanceInfoById(sourceId);
+		if (sourceInstanceInfo == null) {
+			return HorizontalResult.fail("源实例id=" + sourceId + "为空");
+		}
+		// 2.2 对比源实例的appId是否正确
+		long sourceAppId = sourceInstanceInfo.getAppId();
+		if (sourceAppId != appId) {
+			return HorizontalResult.fail("源实例id=" + sourceId + "不属于appId=" + appId);
+		}
+		// 2.3 源实例是否在线
+		boolean sourceIsRun = redisCenter.isRun(sourceInstanceInfo.getIp(), sourceInstanceInfo.getPort());
+		if (!sourceIsRun) {
+			return HorizontalResult.fail("源实例" + sourceInstanceInfo.getHostPort() + "必须运行中");
+		}
+		// 2.4必须是master节点
+		boolean sourceIsMaster = redisCenter.isMaster(sourceInstanceInfo.getIp(), sourceInstanceInfo.getPort());
+		if (!sourceIsMaster) {
+			return HorizontalResult.fail("迁移的实例" + sourceInstanceInfo.getHostPort() + "必须是主节点");
+		}
+		
 
+		// 3.1 目标实例信息
+		InstanceInfo targetInstanceInfo = instanceDao.getInstanceInfoById(targetId);
+		if (targetInstanceInfo == null) {
+			return HorizontalResult.fail("目标实例id=" + targetId + "为空");
+		}
+		// 3.2 对比目标实例的appId是否正确
+		long targetAppId = targetInstanceInfo.getAppId();
+		if (targetAppId != appId) {
+			return HorizontalResult.fail("目标实例id=" + targetId + "不属于appId=" + appId);
+		}
+		// 3.3 目标实例是否在线
+		boolean targetIsRun = redisCenter.isRun(targetInstanceInfo.getIp(), targetInstanceInfo.getPort());
+		if (!targetIsRun) {
+			return HorizontalResult.fail("目标实例" + targetInstanceInfo.getHostPort() + "必须运行中");
+		}
+		// 3.4 必须是master节点
+		boolean targetIsMaster = redisCenter.isMaster(targetInstanceInfo.getIp(), targetInstanceInfo.getPort());
+		if (!targetIsMaster) {
+			return HorizontalResult.fail("迁移的实例" + targetInstanceInfo.getHostPort() + "必须是主节点");
+		}
+		
+		// 4.startSlot和endSlot是否在源实例中
+		// 4.1 判断数值
+		int maxSlot = 16383;
+		if (startSlot < 0 || startSlot > maxSlot) {
+			return HorizontalResult.fail("startSlot=" + startSlot + "必须在0-" + maxSlot);
+		}
+		if (endSlot < 0 || endSlot > maxSlot) {
+			return HorizontalResult.fail("endSlot=" + endSlot + "必须在0-" + maxSlot);
+		}
+		if (startSlot > endSlot) {
+			return HorizontalResult.fail("startSlot不能大于endSlot");
+		}
+		
+		// 4.2 判断startSlot和endSlot属于sourceId
+		// 获取所有slot分布
+		Map<String, InstanceSlotModel> clusterSlotsMap = redisCenter.getClusterSlotsMap(appId);
+		if (MapUtils.isEmpty(clusterSlotsMap)) {
+			return HorizontalResult.fail("无法获取slot分布!");
+		}
+		// 获取源实例负责的slot
+		String sourceHostPort = sourceInstanceInfo.getHostPort();
+		InstanceSlotModel instanceSlotModel = clusterSlotsMap.get(sourceHostPort);
+		if (instanceSlotModel == null || CollectionUtils.isEmpty(instanceSlotModel.getSlotList())) {
+			return HorizontalResult.fail("源实例上没有slot!");
+		}
+		List<Integer> slotList = instanceSlotModel.getSlotList();
+		for (int i = startSlot; i <= endSlot; i++) {
+			if (!slotList.contains(i)) {
+				return HorizontalResult.fail("源实例没有包含尽startSlot=" + startSlot + "到endSlot=" + endSlot + "的slot");
+			}
+		}
+		
+		return HorizontalResult.checkSuccess();
+	}
+
+	@Override
+	public HorizontalResult addHorizontal(long appId, long appAuditId, long sourceId, long targetId, int startSlot,
+			int endSlot) {
+		return HorizontalResult.scaleSuccess();
+	}
+    
     public void setAppService(AppService appService) {
         this.appService = appService;
     }
@@ -731,7 +826,4 @@ public class AppDeployCenterImpl implements AppDeployCenter {
     public void setAppDao(AppDao appDao) {
         this.appDao = appDao;
     }
-
-    
-
 }

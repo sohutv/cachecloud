@@ -1526,8 +1526,119 @@ public class RedisCenterImpl implements RedisCenter {
         }.run();
         return isRun;
     }
+    
+    @Override
+    public Map<String, InstanceSlotModel> getClusterSlotsMap(long appId) {
+		// 最终结果
+		Map<String, InstanceSlotModel> resultMap = new HashMap<String, InstanceSlotModel>();
 
+		// 找到一个运行的节点用来执行cluster slots
+		List<InstanceInfo> instanceList = instanceDao.getInstListByAppId(appId);
+		String host = null;
+		int port = 0;
+		for (InstanceInfo instanceInfo : instanceList) {
+			if (instanceInfo.isOffline()) {
+				continue;
+			}
+			host = instanceInfo.getIp();
+			port = instanceInfo.getPort();
+			boolean isRun = isRun(host, port);
+			if (isRun) {
+				break;
+			}
+		}
+		if (StringUtils.isBlank(host) || port <= 0) {
+			return Collections.emptyMap();
+		}
 
+		// 获取cluster slots
+		List<Object> clusterSlotList = null;
+		Jedis jedis = null;
+		try {
+			jedis = new Jedis(host, port);
+			clusterSlotList = jedis.clusterSlots();
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		} finally {
+			if (jedis != null)
+				jedis.close();
+		}
+		if (clusterSlotList == null || clusterSlotList.size() == 0) {
+			return Collections.emptyMap();
+		}
+		//clusterSlotList形如：
+//		[0, 1, [[B@5caf905d, 6380], [[B@27716f4, 6379]]
+//		[3, 4096, [[B@8efb846, 6380], [[B@2a84aee7, 6379]]
+//		[12291, 16383, [[B@a09ee92, 6383], [[B@30f39991, 6382]]
+//		[2, 2, [[B@452b3a41, 6381], [[B@4a574795, 6382]]
+//		[8194, 12290, [[B@f6f4d33, 6381], [[B@23fc625e, 6382]]
+//		[4097, 8193, [[B@3f99bd52, 6380], [[B@4f023edb, 6381]]
+
+		for (Object clusterSlotObj : clusterSlotList) {
+			List<Object> slotInfoList = (List<Object>) clusterSlotObj;
+			if (slotInfoList.size() <= 2) {
+				continue;
+			}
+			//获取slot的start到end相关
+			int startSlot = ((Long) slotInfoList.get(0)).intValue();
+			int endSlot = ((Long) slotInfoList.get(1)).intValue();
+			String slotDistribute = getStartToEndSlotDistribute(startSlot, endSlot);
+			List<Integer> slotList = getStartToEndSlotList(startSlot, endSlot);
+
+			List<Object> masterInfoList = (List<Object>) slotInfoList.get(2);
+			String tempHost = SafeEncoder.encode((byte[]) masterInfoList.get(0));
+			int tempPort = ((Long) masterInfoList.get(1)).intValue();
+			String hostPort = tempHost + ":" + tempPort;
+			if (resultMap.containsKey(hostPort)) {
+				InstanceSlotModel instanceSlotModel = resultMap.get(hostPort);
+				instanceSlotModel.getSlotDistributeList().add(slotDistribute);
+				instanceSlotModel.getSlotList().addAll(slotList);
+			} else {
+				InstanceSlotModel instanceSlotModel = new InstanceSlotModel();
+				instanceSlotModel.setHost(tempHost);
+				instanceSlotModel.setPort(tempPort);
+				List<String> slotDistributeList = new ArrayList<String>();
+				slotDistributeList.add(slotDistribute);
+				instanceSlotModel.setSlotDistributeList(slotDistributeList);
+				instanceSlotModel.setSlotList(slotList);
+				resultMap.put(hostPort, instanceSlotModel);
+			}
+		}
+		return resultMap;
+	}
+
+	/**
+	 * 获取slot列表
+	 * @param startSlot
+	 * @param endSlot
+	 * @return
+	 */
+	private List<Integer> getStartToEndSlotList(int startSlot, int endSlot) {
+		List<Integer> slotList = new ArrayList<Integer>();
+		if (startSlot == endSlot) {
+			slotList.add(startSlot);
+		} else {
+			for (int i = startSlot; i <= endSlot; i++) {
+				slotList.add(i);
+			}
+		}
+		return slotList;
+	}
+
+	/**
+     * 0,4096 0-4096
+     * 2,2 2-2
+     * @param slotInfo
+     * @return
+     */
+	private String getStartToEndSlotDistribute(int startSlot, int endSlot) {
+		if (startSlot == endSlot) {
+			return String.valueOf(startSlot);
+		} else {
+			return startSlot + "-" + endSlot;
+		}
+    }
+	
     public void setSchedulerCenter(SchedulerCenter schedulerCenter) {
         this.schedulerCenter = schedulerCenter;
     }

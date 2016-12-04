@@ -339,7 +339,7 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
                 try {
                     bufferedWriter.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                	logger.error(e.getMessage(), e);
                 }
             }
         }
