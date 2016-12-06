@@ -63,6 +63,22 @@
                                         </div>
                                     </div>
                                     
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3">
+                                             	批量migrate<font color='red'>(*)</font>:
+                                        </label>
+                                        <div class="col-md-5">
+											<select id="migrateType" name="migrateType" class="form-control select2_category">
+												<option value="0">
+													否
+												</option>
+												<option value="1">
+													是
+												</option>
+											</select>
+										</div>
+                                    </div>
+                                    
                                     <input type="hidden" name="appId" id="appId" value="${appAudit.appId}">
                                     <input type="hidden" name="appAuditId" id="appAuditId" value="${appAudit.id}">
 

@@ -295,5 +295,13 @@ public interface RedisCenter {
      * @return
      */
     Map<String, InstanceSlotModel> getClusterSlotsMap(long appId);
+
+    /**
+     * 获取Redis版本
+     * @param ip
+     * @param port
+     * @return
+     */
+    public String getRedisVersion(String ip, int port);
     
 }

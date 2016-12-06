@@ -211,6 +211,8 @@ function checkHorizontalScale(){
 		return false;
 	}
 	
+	var migrateType = document.getElementById("migrateType");
+	
 	var appId = document.getElementById("appId");
 	var appAuditId = document.getElementById("appAuditId");
 	$.get(
@@ -221,7 +223,8 @@ function checkHorizontalScale(){
 			startSlot: startSlot.value,
 			endSlot: endSlot.value,
 			appId: appId.value,
-			appAuditId: appAuditId.value
+			appAuditId: appAuditId.value,
+			migrateType: migrateType.value
 		},
         function(data){
 			var status = data.status;
@@ -236,6 +239,7 @@ function checkHorizontalScale(){
 	    		targetId.disabled = true;
 	    		startSlot.disabled = true;
 	    		endSlot.disabled = true;
+	    		migrateType.disabled = true;
 			}
         }
      );
@@ -251,6 +255,7 @@ function startHorizontalScale(){
 	var endSlot = document.getElementById("endSlot");
 	var appId = document.getElementById("appId");
 	var appAuditId = document.getElementById("appAuditId");
+	var migrateType = document.getElementById("migrateType");
 	
 	var submitButton = document.getElementById("submitButton");
     submitButton.disabled = true;
@@ -263,7 +268,8 @@ function startHorizontalScale(){
 			startSlot: startSlot.value,
 			endSlot: endSlot.value,
 			appId: appId.value,
-			appAuditId: appAuditId.value
+			appAuditId: appAuditId.value,
+			migrateType: migrateType.value
 		},
         function(data){
 			var status = data.status;

@@ -1,13 +1,12 @@
 package com.sohu.cache.redis;
 
+import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.util.IdempotentConfirmer;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisException;
-import redis.clients.util.ClusterNodeInformation;
-import redis.clients.util.ClusterNodeInformationParser;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -30,6 +29,8 @@ public class RedisClusterReshard {
     private int migrateBatch = 100;
 
     private final Set<HostAndPort> hosts;
+    
+    private RedisCenter redisCenter;
 
     private static final int allSlots = 16384;
 
@@ -37,24 +38,14 @@ public class RedisClusterReshard {
         System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
     }
 
-    public RedisClusterReshard(Set<HostAndPort> hosts) {
+    public RedisClusterReshard(Set<HostAndPort> hosts, RedisCenter redisCenter) {
         for (HostAndPort host : hosts) {
             String key = JedisClusterInfoCache.getNodeKey(host);
             nodeMap.put(key, host);
         }
         this.hosts = hosts;
+        this.redisCenter = redisCenter;
         reshardProcess = new ReshardProcess();
-    }
-
-    private boolean isInCluster(Jedis jedis, List<ClusterNodeInformation> masterNodes) {
-        for (ClusterNodeInformation info : masterNodes) {
-            String nodeKey = getNodeKey(info.getNode());
-            String jedisKey = getNodeKey(jedis);
-            if (nodeKey.equals(jedisKey)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     protected String getNodeKey(HostAndPort hnp) {
@@ -65,249 +56,29 @@ public class RedisClusterReshard {
         return jedis.getClient().getHost() + ":" + jedis.getClient().getPort();
     }
 
-    private List<ClusterNodeInformation> getMasterNodes() {
-        Map<String, ClusterNodeInformation> masterNodeMap = new LinkedHashMap<String, ClusterNodeInformation>();
+    private List<HostAndPort> getMasterNodes() {
+        List<HostAndPort> list = new ArrayList<HostAndPort>();
         JedisCluster jedisCluster = new JedisCluster(hosts, defaultTimeout);
-        //所有节点
+        // 所有节点
         Collection<JedisPool> allNodes = jedisCluster.getConnectionHandler().getNodes().values();
         try {
             for (JedisPool jedisPool : allNodes) {
-                final String host = jedisPool.getHost();
-                final int port = jedisPool.getPort();
-                final Jedis jedis = getJedis(host, port, defaultTimeout);
-                if(!isMaster(jedis)){
+                String host = jedisPool.getHost();
+                int port = jedisPool.getPort();
+                if (!redisCenter.isMaster(host, port)) {
                     continue;
                 }
-                try {
-                    final StringBuilder clusterNodes = new StringBuilder();
-                    boolean isGetNodes = new IdempotentConfirmer() {
-                        @Override
-                        public boolean execute() {
-                            String nodes = jedis.clusterNodes();
-                            if (nodes != null && nodes.length() > 0) {
-                                String[] array = nodes.split("\n");
-                                for (String node : array) {
-                                    if (node.contains(host + ":" + port)) {
-                                        clusterNodes.append(node);
-                                    }
-                                }
-                                return true;
-                            }
-                            return false;
-                        }
-                    }.run();
-                    if (!isGetNodes) {
-                        logger.error("clusterNodes" + failedInfo(jedis, -1));
-                        continue;
-                    }
-                    String nodeInfo = clusterNodes.toString();
-                    if (StringUtils.isNotBlank(nodeInfo)) {
-                        ClusterNodeInformationParser nodeInfoParser = new ClusterNodeInformationParser();
-                        ClusterNodeInformation clusterNodeInfo = nodeInfoParser.parse(
-                                nodeInfo, new HostAndPort(jedis.getClient().getHost(),
-                                jedis.getClient().getPort()));
-                        masterNodeMap.put(getNodeKey(clusterNodeInfo.getNode()), clusterNodeInfo);
-                    }
-                } catch (Exception e) {
-                    logger.error(e.getMessage(), e);
-                } finally {
-                    jedis.close();
-                }
+                list.add(new HostAndPort(host, port));
             }
         } finally {
             jedisCluster.close();
         }
-        List<ClusterNodeInformation> resultList = new ArrayList<ClusterNodeInformation>(masterNodeMap.values());
-        //按slot大小排序
-        Collections.sort(resultList, new Comparator<ClusterNodeInformation>() {
-            @Override
-            public int compare(ClusterNodeInformation node1, ClusterNodeInformation node2) {
-                if (node1 == node2) {
-                    return 0;
-                }
-                int slotNum1 = 0;
-                int slotNum2 = 0;
-                List<Integer> slots1 = node1.getAvailableSlots();
-                for (Integer slot : slots1) {
-                    slotNum1 += slot;
-                }
-                List<Integer> slots2 = node2.getAvailableSlots();
-                for (Integer slot : slots2) {
-                    slotNum2 += slot;
-                }
-                if (slots2.isEmpty()) {
-                    if (slots1.isEmpty()) {
-                        return 0;
-                    } else {
-                        return 1;
-                    }
-                }
-                if (slots1.isEmpty()) {
-                    if (slots2.isEmpty()) {
-                        return 0;
-                    } else {
-                        return -1;
-                    }
-                }
-                slotNum1 = slotNum1 / slots1.size();
-                slotNum2 = slotNum2 / slots2.size();
-                if (slotNum1 == slotNum2) {
-                    return 0;
-                } else if (slotNum1 > slotNum2) {
-                    return 1;
-                } else {
-                    return -1;
-                }
-            }
-        });
-        return resultList;
+        return list;
     }
 
-    private boolean isMaster(final Jedis jedis) {
-        return new IdempotentConfirmer() {
-            @Override
-            public boolean execute() {
-                String replications = jedis.info("Replication");
-                if (StringUtils.isNotBlank(replications)) {
-                    String[] data = replications.split("\r\n");
-                    for (String line : data) {
-                        String[] arr = line.split(":");
-                        if (arr.length > 1) {
-                            String value = arr[1];
-                            if (value.equalsIgnoreCase("master")) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-                return false;
-            }
-        }.run();
-    }
-
-    public boolean offLineMaster(String host, int port) {
-        long begin = System.currentTimeMillis();
-        reshardProcess.setType(1);
-        final Jedis offJedis = getJedis(host, port, defaultTimeout);
-        boolean isRun = isRun(offJedis);
-        if (!isRun) {
-            throw new JedisException(String.format("clusterReshard:host=%s,port=%s is not run", host, port));
-        }
-        List<ClusterNodeInformation> masterNodes = getMasterNodes();
-        if (!isInCluster(offJedis, masterNodes)) {
-            throw new JedisException(String.format("clusterReshard:host=%s,port=%s not inCluster", host, port));
-        }
-        boolean isCheckAndMoveSlot = checkAndMovingSlot(masterNodes);
-        if (!isCheckAndMoveSlot) {
-            logger.error("checkAndMovingSlot error!");
-            return false;
-        }
-
-        ClusterNodeInformation offNode = null;
-        for (ClusterNodeInformation nodeInfo : masterNodes) {
-            if (nodeInfo.getNode().getHost().equals(host)
-                    && nodeInfo.getNode().getPort() == port) {
-                offNode = nodeInfo;
-                break;
-            }
-        }
-        if (offNode == null) {
-            throw new JedisException(String.format("clusterReshard:host=%s,port=%s not find in masters", host, port));
-        }
-        List<Integer> slots = new ArrayList<Integer>(offNode.getAvailableSlots());
-        if (slots.isEmpty()) {
-            logger.warn(String.format("clusterReshard:host=%s,port=%s slots is null", host, port));
-            reshardProcess.setStatus(1);
-            return true;
-        }
-        //设置slots数量
-        reshardProcess.setTotalSlot(slots.size());
-        List<ClusterNodeInformation> allocatNodes = new ArrayList<ClusterNodeInformation>(masterNodes);
-        for (Iterator<ClusterNodeInformation> i = allocatNodes.iterator(); i.hasNext(); ) {
-            ClusterNodeInformation nodeInfo = i.next();
-            if (nodeInfo.getNode().getHost().equals(host)
-                    && nodeInfo.getNode().getPort() == port) {
-                //移除自身
-                i.remove();
-            }
-        }
-
-        Map<String, Integer> balanceSlotMap = getBalanceSlotMap(allocatNodes, false);
-        boolean hasError = false;
-        for (ClusterNodeInformation nodeInfo : allocatNodes) {
-            if (hasError) {
-                reshardProcess.setStatus(2);
-                break;
-            }
-            String nodeKey = getNodeKey(nodeInfo.getNode());
-            Integer thresholdSize = balanceSlotMap.get(nodeKey);
-            if (thresholdSize == null || thresholdSize == 0) {
-                continue;
-            }
-            Jedis targetJedis = getJedis(nodeInfo.getNode().getHost(), nodeInfo.getNode().getPort(), defaultTimeout);
-            try {
-                int moveSize = 0;
-                for (Iterator<Integer> i = slots.iterator(); i.hasNext(); ) {
-                    final Integer slot = i.next();
-                    logger.info("startMigrateSlot={}", slot);
-                    if (moveSize++ >= thresholdSize) {
-                        break;
-                    }
-                    try {
-                        int num = migrateSlotData(offJedis, targetJedis, slot);
-                        reshardProcess.addReshardSlot(slot, num);
-                        logger.warn("clusterReshard:{} -> {} ; slot={};num={}", getNodeKey(offJedis), getNodeKey(targetJedis), slot, num);
-                        i.remove();
-                    } catch (Throwable e) {
-                        logger.error(e.getMessage(), e);
-                        hasError = true;
-                        break;
-                    }
-                }
-            } finally {
-                targetJedis.close();
-            }
-        }
-
-        if (reshardProcess.getStatus() != 2) {
-            reshardProcess.setStatus(1);
-        }
-        offJedis.close();
-        long end = System.currentTimeMillis();
-        logger.warn("{}:{} joinNewMaster cost:{} ms", host, port, (end - begin));
-
-        return reshardProcess.getStatus() != 2;
-    }
 
     private Jedis getJedis(String host, int port, int timeout) {
         return new Jedis(host, port, timeout);
-    }
-
-    /**
-     * 返回平衡的迁移slot数量
-     *
-     */
-    private Map<String, Integer> getBalanceSlotMap(List<ClusterNodeInformation> allocatNodes, boolean isAdd) {
-        return getBalanceSlotMap(allocatNodes, isAdd, 1);
-    }
-
-    private Map<String, Integer> getBalanceSlotMap(List<ClusterNodeInformation> allocatNodes, boolean isAdd, int addNodeCount) {
-        int nodeSize = allocatNodes.size();
-        int perSize = (int) Math.ceil((double) allSlots / nodeSize);
-        Map<String, Integer> resultMap = new HashMap<String, Integer>();
-        for (ClusterNodeInformation node : allocatNodes) {
-            String key = getNodeKey(node.getNode());
-            int balanceSize;
-            if (isAdd) {
-                balanceSize = node.getAvailableSlots().size() - perSize;
-            } else {
-                balanceSize = perSize - node.getAvailableSlots().size();
-            }
-            if (balanceSize > 0) {
-                resultMap.put(key, balanceSize / addNodeCount);
-            }
-        }
-        return resultMap;
     }
 
     /**
@@ -315,7 +86,7 @@ public class RedisClusterReshard {
      */
     public boolean joinCluster(String masterHost, int masterPort, final String slaveHost, final int slavePort) {
         final Jedis masterJedis = getJedis(masterHost, masterPort, defaultTimeout);
-        boolean isRun = isRun(masterJedis);
+        boolean isRun = redisCenter.isRun(masterHost, masterPort);
         if (!isRun) {
             logger.error(String.format("joinCluster:host=%s,port=%s is not run", masterHost, masterPort));
             return false;
@@ -323,28 +94,24 @@ public class RedisClusterReshard {
         boolean hasSlave = StringUtils.isNotBlank(slaveHost) && slavePort > 0;
         final Jedis slaveJedis = hasSlave ? getJedis(slaveHost, slavePort, defaultTimeout) : null;
         if (hasSlave) {
-            isRun = isRun(slaveJedis);
+            isRun = redisCenter.isRun(slaveHost, slavePort);
             if (!isRun) {
                 logger.error(String.format("joinCluster:host=%s,port=%s is not run", slaveHost, slavePort));
                 return false;
             }
         }
 
-        List<ClusterNodeInformation> masterNodes = getMasterNodes();
-        if (!isInCluster(masterJedis, masterNodes)) {
-            boolean isClusterMeet = clusterMeet(masterNodes, masterHost, masterPort);
-            if (!isClusterMeet) {
-                logger.error("isClusterMeet failed {}:{}", masterHost, masterPort);
-                return false;
-            }
+        List<HostAndPort> masterHostAndPostList = getMasterNodes();
+        boolean isClusterMeet = clusterMeet(masterHostAndPostList, masterHost, masterPort);
+        if (!isClusterMeet) {
+            logger.error("isClusterMeet failed {}:{}", masterHost, masterPort);
+            return false;
         }
         if (hasSlave) {
-            if (!isInCluster(slaveJedis, masterNodes)) {
-                boolean isClusterMeet = clusterMeet(masterNodes, slaveHost, slavePort);
-                if (!isClusterMeet) {
-                    logger.error("isClusterMeet failed {}:{}", slaveHost, slavePort);
-                    return false;
-                }
+            isClusterMeet = clusterMeet(masterHostAndPostList, slaveHost, slavePort);
+            if (!isClusterMeet) {
+                logger.error("isClusterMeet failed {}:{}", slaveHost, slavePort);
+                return false;
             }
         }
         if (hasSlave) {
@@ -372,10 +139,17 @@ public class RedisClusterReshard {
         }
     }
 
-    private boolean clusterMeet(List<ClusterNodeInformation> masterNodes, final String host, final int port) {
-        for (ClusterNodeInformation info : masterNodes) {
-            String clusterHost = info.getNode().getHost();
-            int clusterPort = info.getNode().getPort();
+    private boolean clusterMeet(List<HostAndPort> masterHostAndPostList, final String host, final int port) {
+        boolean isSingleNode = redisCenter.isSingleClusterNode(host, port);
+        if (!isSingleNode) {
+            logger.error("{}:{} isNotSingleNode", host, port);
+            return false;
+        } else {
+            logger.warn("{}:{} isSingleNode", host, port);
+        }
+        for (HostAndPort hostAndPort : masterHostAndPostList) {
+            String clusterHost = hostAndPort.getHost();
+            int clusterPort = hostAndPort.getPort();
             final Jedis jedis = new Jedis(clusterHost, clusterPort, defaultTimeout);
             try {
                 boolean isClusterMeet = new IdempotentConfirmer() {
@@ -391,190 +165,59 @@ public class RedisClusterReshard {
                 }
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
+            } finally {
+                if (jedis != null)
+                    jedis.close();
             }
         }
         return false;
     }
-
-    private boolean isRun(final Jedis jedis) {
-        return new IdempotentConfirmer() {
-            @Override
-            public boolean execute() {
-                String pong = jedis.ping();
-                return pong != null && pong.equalsIgnoreCase("PONG");
-            }
-        }.run();
-    }
-
-
+    
     /**
-     * 对新加入的节点 尽心solt重分配
-     * @param machines 泛型string的格式为ip:port
-     */
-    public boolean joinNewMasters(Set<String> machines) {
-        Map<String, Integer> balanceSlotMap = null;
-        for (String ipPort : machines) {
-            String[] ipPorts = ipPort.split(":");
-            String host = ipPorts[0];
-            int port = Integer.parseInt(ipPorts[1]);
-            long begin = System.currentTimeMillis();
-            reshardProcess.setType(0);
-            HostAndPort newHost = new HostAndPort(host, port);
-            Jedis newJedis = getJedis(host, port, defaultTimeout);
-            boolean isRun = isRun(newJedis);
-            if (!isRun) {
-                throw new JedisException(String.format("clusterReshard:host=%s,port=%s no ping response", host, port));
-            }
-            List<ClusterNodeInformation> masterNodes = getMasterNodes();
-            ClusterNodeInformation newNode = null;
-            //判定是否在集群中
-            if (!isInCluster(newJedis, masterNodes)) {
-                boolean isClusterMeet = clusterMeet(masterNodes, host, port);
-                if (!isClusterMeet) {
-                    logger.error("clusterMeet error {}:{}", host, port);
-                    return false;
-                }
-            } else {
-                //判断是否有存在slot
-                for (ClusterNodeInformation nodeInfo : masterNodes) {
-                    if (getNodeKey(nodeInfo.getNode()).equals(getNodeKey(newHost))) {
-                        newNode = nodeInfo;
-                    }
-                }
-            }
-
-            if (newNode == null) {
-                newNode = new ClusterNodeInformation(newHost);
-                //加入到masterNodes中,计算平均slot
-                masterNodes.add(newNode);
-            } else {
-                //检查未导完slot并续传.
-                boolean isCheckAndMoveSlot = checkAndMovingSlot(masterNodes);
-                if (!isCheckAndMoveSlot) {
-                    logger.error("checkAndMovingSlot error!");
-                    return false;
-                }
-            }
-            if (balanceSlotMap == null) {
-                balanceSlotMap = getBalanceSlotMap(masterNodes, true, machines.size());
-            }
-
-            //设置总slots数量
-            int totalSlot = 0;
-            for (Integer num : balanceSlotMap.values()) {
-                if (num != null && num > 0) {
-                    totalSlot += num;
-                }
-            }
-            reshardProcess.setTotalSlot(totalSlot);
-
-            boolean hasError = false;
-            Jedis targetJedis = getJedis(newNode.getNode().getHost(), newNode.getNode().getPort(), defaultTimeout);
-            for (ClusterNodeInformation nodeInfo : masterNodes) {
-                if (hasError) {
-                    reshardProcess.setStatus(2);
-                    break;
-                }
-
-                if (machines.contains(getNodeKey(nodeInfo.getNode()))) {
-//                    if (machines.contains(getNodeKey(newHost))) {
-                    //忽略自身
-                    continue;
-                }
-                Integer moveSlot = balanceSlotMap.get(getNodeKey(nodeInfo.getNode()));
-                if (moveSlot == null || moveSlot <= 0) {
-                    continue;
-                }
-                List<Integer> slots = new ArrayList<Integer>(nodeInfo.getAvailableSlots());
-                Collections.sort(slots);
-                Collections.reverse(slots);
-
-                Jedis sourceJedis = getJedis(nodeInfo.getNode().getHost(), nodeInfo.getNode().getPort(), defaultTimeout);
-                int index = 0;
-                try {
-                    for (Iterator<Integer> i = slots.iterator(); i.hasNext(); ) {
-                        if (index++ == moveSlot) {
-                            break;
-                        }
-                        Integer slot = i.next();
-                        try {
-                            int num = migrateSlotData(sourceJedis, targetJedis, slot);
-                            reshardProcess.addReshardSlot(slot, num);
-                            logger.warn("clusterReshard:{} -> {} ; slot={};num={}", getNodeKey(sourceJedis), getNodeKey(targetJedis), slot, num);
-                            i.remove();
-                        } catch (Exception e) {
-                            logger.error(e.getMessage(), e);
-                            hasError = true;
-                            break;
-                        }
-                    }
-                } finally {
-                    sourceJedis.close();
-                }
-            }
-            targetJedis.close();
-            if (reshardProcess.getStatus() != 2) {
-                reshardProcess.setStatus(1);
-            }
-            long end = System.currentTimeMillis();
-            logger.warn("{}:{} joinNewMaster cost:{} ms", host, port, (end - begin));
-            if (reshardProcess.getStatus() != 1) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * 集群中加入一个新节点,并reshard集群已有数据
+     * 将source中的startSlot到endSlot迁移到target
      *
      */
-    public boolean joinNewMaster(final String host, final int port) {
-        return joinNewMasters(new HashSet<String>(Arrays.asList(host + ":" + port)));
-    }
-
-    //检查&导入 moveslot
-    private boolean checkAndMovingSlot(List<ClusterNodeInformation> masterNodes) {
-        Map<String, List<Integer>> importedMap = new LinkedHashMap<String, List<Integer>>();
-        Map<String, List<Integer>> migratedMap = new LinkedHashMap<String, List<Integer>>();
-        for (ClusterNodeInformation node : masterNodes) {
-            if (node.getSlotsBeingImported().size() > 0) {
-                importedMap.put(getNodeKey(node.getNode()), node.getSlotsBeingImported());
-            }
-            if (node.getSlotsBeingMigrated().size() > 0) {
-                migratedMap.put(getNodeKey(node.getNode()), node.getSlotsBeingMigrated());
+    public boolean migrateSlot(List<InstanceInfo> instanceInfoList, InstanceInfo sourceInstanceInfo,
+            InstanceInfo targetInstanceInfo, int startSlot, int endSlot) {
+        long startTime = System.currentTimeMillis();
+        //上线类型
+        reshardProcess.setType(0);
+        //迁移的总slot个数
+        reshardProcess.setTotalSlot(endSlot - startSlot + 1);
+        //源和目标Jedis
+        Jedis sourceJedis = getJedis(sourceInstanceInfo.getIp(), sourceInstanceInfo.getPort(), defaultTimeout);
+        Jedis targetJedis = getJedis(targetInstanceInfo.getIp(), targetInstanceInfo.getPort(), defaultTimeout);
+        //
+        boolean hasError = false;
+        for (int slot = startSlot; slot <= endSlot; slot++) {
+            long slotStartTime = System.currentTimeMillis();
+            try {
+                //num是迁移key的总数
+                int num = migrateSlotData(sourceJedis, targetJedis, slot);
+                reshardProcess.addReshardSlot(slot, num);
+                logger.warn("clusterReshard:{}->{}, slot={}, keys={}, costTime={} ms", sourceInstanceInfo.getHostPort(),
+                        targetInstanceInfo.getHostPort(), slot, num, (System.currentTimeMillis() - slotStartTime));
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+                hasError = true;
+                break;
             }
         }
-        if (importedMap.isEmpty() && migratedMap.isEmpty()) {
+        if (reshardProcess.getStatus() != 2) {
+            reshardProcess.setStatus(1);
+        }
+        long endTime = System.currentTimeMillis();
+        logger.warn("clusterReshard:{}->{}, slot:{}->{}, costTime={} ms", sourceInstanceInfo.getHostPort(),
+                targetInstanceInfo.getHostPort(), startSlot, endSlot, (endTime - startTime));
+        if (hasError) {
+            reshardProcess.setStatus(2);
+            return false;
+        } else {
+            reshardProcess.setStatus(1);
             return true;
         }
-        for (String hostPort : importedMap.keySet()) {
-            List<Integer> importedSlots = importedMap.get(hostPort);
-            for (Integer slot : importedSlots) {
-                for (String subHostPort : migratedMap.keySet()) {
-                    List<Integer> migratedSlots = migratedMap.get(subHostPort);
-                    if (migratedSlots.contains(slot)) {
-                        Jedis source = new Jedis(subHostPort.split(":")[0], Integer.parseInt(subHostPort.split(":")[1]), defaultTimeout);
-                        Jedis target = new Jedis(hostPort.split(":")[0], Integer.parseInt(hostPort.split(":")[1]), defaultTimeout);
-                        try {
-                            int num = moveSlotData(source, target, slot);
-                            for(ClusterNodeInformation node : masterNodes){
-                                //完成迁移后删除对应slot
-                                node.getAvailableSlots().remove(slot);
-                            }
-                            logger.warn("beingMoveSlotData:{} -> {} slot={} num={}", subHostPort, hostPort, slot, num);
-                        } catch (Exception e) {
-                            logger.error(e.getMessage(), e);
-                            return false;
-                        }
-                        break;
-                    }
-                }
-            }
-
-        }
-        return true;
     }
+
 
     /**
      * 迁移slot数据，并稳定slot配置
