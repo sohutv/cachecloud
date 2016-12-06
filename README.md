@@ -92,7 +92,7 @@ Redis的开发人员如同使用Mysql一样，不需要运维Mysql服务器，�
 
 <a name="cc9"/>
 ## 九、已知用户 ###
-<img src="https://raw.githubusercontent.com/sohutv/cachecloud/master/cachecloud-open-web/src/main/webapp/WEB-INF/resources/img/all.jpg">
+<img src="http://i1.itc.cn/20161206/3084_edf0931f_f442_1852_9940_4a1579f310a7_1.png">
 
 除此之外，还有天津联怡科技有限公司、瑞友科技、厦门美好出行物联网技术有限公司、北京九瑞网络科技有限公司、深圳市深软信息技术有限公司、欧乐在线科技有限公司、慧科教育、上海仁画信息股份有限公司等。
 
