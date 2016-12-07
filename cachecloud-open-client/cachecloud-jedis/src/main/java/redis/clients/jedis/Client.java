@@ -953,6 +953,11 @@ public class Client extends BinaryClient implements Commands {
       final int timeout) {
     migrate(SafeEncoder.encode(host), port, SafeEncoder.encode(key), destinationDb, timeout);
   }
+  
+  public void migrate(final String host, final int port, final int destinationDb,
+          final int timeout, final String... keys) {
+    migrate(SafeEncoder.encode(host), port, destinationDb, timeout, SafeEncoder.encodeMany(keys));
+}
 
   @Override
   public void hincrByFloat(final String key, final String field, double increment) {

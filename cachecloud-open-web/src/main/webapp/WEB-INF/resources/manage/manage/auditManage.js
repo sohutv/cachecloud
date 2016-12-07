@@ -275,7 +275,7 @@ function startHorizontalScale(){
 			var status = data.status;
 			alert(data.message);
 			if (status == 1) {
-	    		submitButton.disabled = false;
+				window.location.href="/manage/app/handleHorizontalScale?appAuditId=" + appAuditId.value;
 			}
         }
      );

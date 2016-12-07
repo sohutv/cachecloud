@@ -1147,6 +1147,21 @@ public class BinaryClient extends Connection {
     sendCommand(MIGRATE, host, toByteArray(port), key, toByteArray(destinationDb),
       toByteArray(timeout));
   }
+  
+  public void migrate(final byte[] host, final int port, final int destinationDb,
+          final int timeout, final byte[]... keys) {
+      final List<byte[]> args = new ArrayList<byte[]>();
+      args.add(host);
+      args.add(toByteArray(port));
+      args.add(SafeEncoder.encode(""));
+      args.add(toByteArray(destinationDb));
+      args.add(toByteArray(timeout));
+      args.add(SafeEncoder.encode("keys"));
+      for (final byte[] key : keys) {
+          args.add(key);
+      }
+      sendCommand(MIGRATE, args.toArray(new byte[args.size()][]));
+  }
 
   public void hincrByFloat(final byte[] key, final byte[] field, double increment) {
     sendCommand(HINCRBYFLOAT, key, field, toByteArray(increment));

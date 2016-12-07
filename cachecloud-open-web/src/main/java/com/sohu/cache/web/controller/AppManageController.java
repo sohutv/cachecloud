@@ -21,7 +21,6 @@ import com.sohu.cache.web.util.DateUtil;
 
 import net.sf.json.JSONArray;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -341,7 +340,7 @@ public class AppManageController extends BaseController {
 		AppUser appUser = getUserInfo(request);
 		logger.warn("user {} horizontalScaleApply appId {} appAuditId {} sourceId {} targetId {} startSlot {} endSlot {}",
 				appUser.getName(), appId, appAuditId, sourceId, targetId, startSlot, endSlot);
-		HorizontalResult horizontalResult = appDeployCenter.addHorizontal(appId, appAuditId, sourceId, targetId,
+		HorizontalResult horizontalResult = appDeployCenter.startHorizontal(appId, appAuditId, sourceId, targetId,
 				startSlot, endSlot, migrateType);
         model.addAttribute("status", horizontalResult.getStatus());
 		model.addAttribute("message", horizontalResult.getMessage());

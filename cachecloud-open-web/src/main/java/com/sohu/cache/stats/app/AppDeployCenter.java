@@ -106,7 +106,7 @@ public interface AppDeployCenter {
      * @param migrateType
      * @return
      */
-    public HorizontalResult addHorizontal(long appId, long appAuditId, long sourceId, long targetId, int startSlot,
+    public HorizontalResult startHorizontal(long appId, long appAuditId, long sourceId, long targetId, int startSlot,
             int endSlot, int migrateType);
     
     /**

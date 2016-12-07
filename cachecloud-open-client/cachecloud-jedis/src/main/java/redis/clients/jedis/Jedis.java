@@ -3129,6 +3129,13 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
     client.migrate(host, port, key, destinationDb, timeout);
     return client.getStatusCodeReply();
   }
+  
+  public String migrate(final String host, final int port,
+          final int destinationDb, final int timeout, final String... keys) {
+      checkIsInMultiOrPipeline();
+      client.migrate(host, port, destinationDb, timeout, keys);
+      return client.getStatusCodeReply();
+  }
 
   @Override
   public ScanResult<String> scan(final String cursor) {

@@ -36,6 +36,10 @@
 	function deployNodes(){
 		var masterSizeSlave = document.getElementById("masterSizeSlave");
 		var appAuditId = document.getElementById("appAuditId");
+		
+		var nodeDeployBtn = document.getElementById("nodeDeployBtn");
+		nodeDeployBtn.disabled = true;
+		
 		$.get(
 			'/manage/app/addHorizontalNodes.json',
 			{
@@ -45,11 +49,11 @@
 			function(data){
 				var status = data.status;
 				if (status == 1) {
-					alert("添加部署成功,确认后将跳转到集群slot管理页面!");
+					alert("添加部署成功,确认后将跳转到ReShard页面!");
+					window.location.href="/manage/app/handleHorizontalScale?appAuditId=" + appAuditId.value;
 				} else {
 					alert("节点部署失败,请查看系统日志确认相关原因!");
 				}
-				window.location.href="/manage/app/handleHorizontalScale?appAuditId=" + appAuditId.value;
 	        }
 	     );
 	}
@@ -96,7 +100,7 @@
 										<div class="form-actions fluid">
 											<div class="row">
 												<div class="col-md-12">
-													<div class="col-md-offset-3 col-md-3">
+													<div class="col-md-offset-3 col-md-6">
 														<button disabled="disabled" id="nodeDeployBtn" type="button" class="btn green" onclick="deployNodes()">
 															<i class="fa fa-check"></i>
 															部署节点
@@ -106,6 +110,8 @@
 															<i class="fa fa-check"></i>
 															验证格式
 														</button>
+														&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+														<a target="_blank" class="btn green" href="/manage/app/handleHorizontalScale?appAuditId=${appAudit.id}">ReShard页面</a>
 													</div>
 												</div>
 											</div>

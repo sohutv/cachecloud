@@ -304,4 +304,13 @@ public interface RedisCenter {
      */
     public String getRedisVersion(String ip, int port);
     
+    
+    /**
+     * 获取nodeId
+     * @param ip
+     * @param port
+     * @return
+     */
+    public String getNodeId(String ip, int port);
+    
 }
