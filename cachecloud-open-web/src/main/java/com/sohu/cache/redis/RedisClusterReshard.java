@@ -1,6 +1,7 @@
 package com.sohu.cache.redis;
 
 import com.sohu.cache.entity.InstanceInfo;
+import com.sohu.cache.redis.ReshardProcess.ReshardStatusEnum;
 import com.sohu.cache.util.IdempotentConfirmer;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -33,7 +34,7 @@ public class RedisClusterReshard {
     /**
      * 每次迁移key个数
      */
-    private int migrateBatch = 100;
+    private int migrateBatch = 10;
 
     /**
      * 所有有效节点
@@ -173,7 +174,7 @@ public class RedisClusterReshard {
         //源和目标Jedis
         Jedis sourceJedis = getJedis(sourceInstanceInfo.getIp(), sourceInstanceInfo.getPort(), defaultTimeout);
         Jedis targetJedis = getJedis(targetInstanceInfo.getIp(), targetInstanceInfo.getPort(), defaultTimeout);
-        //
+        //逐个slot迁移
         boolean hasError = false;
         for (int slot = startSlot; slot <= endSlot; slot++) {
             long slotStartTime = System.currentTimeMillis();
@@ -189,17 +190,17 @@ public class RedisClusterReshard {
                 break;
             }
         }
-        if (reshardProcess.getStatus() != 2) {
-            reshardProcess.setStatus(1);
+        if (reshardProcess.getStatus() != ReshardStatusEnum.ERROR.getValue()) {
+            reshardProcess.setStatus(ReshardStatusEnum.FINISH.getValue());
         }
         long endTime = System.currentTimeMillis();
         logger.warn("clusterReshard:{}->{}, slot:{}->{}, costTime={} ms", sourceInstanceInfo.getHostPort(),
                 targetInstanceInfo.getHostPort(), startSlot, endSlot, (endTime - startTime));
         if (hasError) {
-            reshardProcess.setStatus(2);
+            reshardProcess.setStatus(ReshardStatusEnum.ERROR.getValue());
             return false;
         } else {
-            reshardProcess.setStatus(1);
+            reshardProcess.setStatus(ReshardStatusEnum.FINISH.getValue());
             return true;
         }
     }

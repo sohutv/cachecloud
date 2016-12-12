@@ -194,7 +194,7 @@ public class AppManageController extends BaseController {
 	
 
     /**
-     * 添加分片
+     * 添加水平扩容节点
      * 
      * @return
      */
@@ -207,7 +207,7 @@ public class AppManageController extends BaseController {
         boolean isAdd = false;
         AppAudit appAudit = appService.getAppAuditById(appAuditId);
         // 解析配置
-        String[] configArr = masterSizeSlave.split(":");
+        String[] configArr = masterSizeSlave.split(ConstUtils.COLON);
         String masterHost = configArr[0];
         String memSize = configArr[1];
         int memSizeInt = NumberUtils.toInt(memSize);
@@ -226,7 +226,7 @@ public class AppManageController extends BaseController {
     }
 
     /**
-     * 检测
+     * 检测水平扩容节点
      * @param masterSizeSlave
      * @param appAuditId
      * @return

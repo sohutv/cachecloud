@@ -4,6 +4,7 @@ import com.sohu.cache.web.util.DateUtil;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -44,6 +45,43 @@ public class ReshardProcess {
     private volatile Date beginTime;
 
     private volatile Date endTime;
+    
+    
+    /**
+     * Reshard状态
+     */
+    public static enum ReshardStatusEnum {
+        RUNNING(0, "运行中"), 
+        FINISH(1, "完成"), 
+        ERROR(2, "出错");
+
+        private int value;
+        private String info;
+        
+        private final static Map<Integer, ReshardStatusEnum> MAP = new HashMap<Integer, ReshardStatusEnum>();
+        static {
+            for (ReshardStatusEnum reshardStatusEnum : ReshardStatusEnum.values()) {
+                MAP.put(reshardStatusEnum.getValue(), reshardStatusEnum);
+            }
+        }
+        
+        public static ReshardStatusEnum getReshardStatusEnum(int value) {
+            return MAP.get(value);
+        }
+
+        private ReshardStatusEnum(int value, String info) {
+            this.value = value;
+            this.info = info;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public String getInfo() {
+            return info;
+        }
+    }
 
     public ReshardProcess() {
         beginTime = new Date();
@@ -72,19 +110,14 @@ public class ReshardProcess {
 
     public void setStatus(int status) {
         this.status = status;
-        if (Arrays.asList(1,2).contains(status) && endTime == null) {
+        if (Arrays.asList(ReshardStatusEnum.FINISH.getValue(), ReshardStatusEnum.ERROR.getValue()).contains(status) && endTime == null) {
             endTime = new Date();
         }
     }
 
     public String getStatusDesc() {
-        if (status == 0) {
-            return "运行中";
-        } else if (status == 1) {
-            return "完成";
-        } else {
-            return "出错";
-        }
+        ReshardStatusEnum reshardStatusEnum = ReshardStatusEnum.getReshardStatusEnum(status);
+        return reshardStatusEnum == null ? "" : reshardStatusEnum.getInfo();
     }
 
     public void setReshardSlot(int reshardSlot) {
