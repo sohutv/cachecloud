@@ -1440,7 +1440,7 @@ public class RedisCenterImpl implements RedisCenter {
         dataMap.put(ConstUtils.APP_KEY, appId);
         JobKey jobKey = JobKey.jobKey(ConstUtils.REDIS_SLOWLOG_JOB_NAME, ConstUtils.REDIS_SLOWLOG_JOB_GROUP);
         TriggerKey triggerKey = TriggerKey.triggerKey(ObjectConvert.linkIpAndPort(host, port), ConstUtils.REDIS_SLOWLOG_TRIGGER_GROUP + appId);
-        boolean result = schedulerCenter.deployJobByCron(jobKey, triggerKey, dataMap, ScheduleUtil.getRandomHourCron(appId), false);
+        boolean result = schedulerCenter.deployJobByCron(jobKey, triggerKey, dataMap, ScheduleUtil.getRedisSlowLogCron(appId), false);
         return result;
     }
 
