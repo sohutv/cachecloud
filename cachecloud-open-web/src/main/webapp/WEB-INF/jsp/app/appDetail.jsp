@@ -282,6 +282,13 @@
 									</div>
 								</div>
 								
+								<div class="form-group">
+									<label class="control-label col-md-3">负责人:</label>
+									<div class="col-md-7">
+										<input type="text" name="officer" value="${appDetail.appDesc.officer}" id="officer" class="form-control">
+									</div>
+								</div>
+								
 							</div>
 							<!-- form-body 结束 -->
 						</div>

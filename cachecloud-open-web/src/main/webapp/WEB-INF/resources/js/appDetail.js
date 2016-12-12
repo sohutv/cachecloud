@@ -36,6 +36,12 @@ function updateAppDetailChange(appId){
 		appDescIntro.focus();
 		return false;
 	}
+	var officer = document.getElementById("officer");
+	if(officer.value == ""){
+		alert("负责人不能为空");
+		officer.focus();
+		return false;
+	}
 	var updateAppDetailBtn = document.getElementById("updateAppDetailBtn");
 	updateAppDetailBtn.disabled = true;
 	$.post(
@@ -43,7 +49,8 @@ function updateAppDetailChange(appId){
 		{
 			appId: appId,
 			appDescName: appDescName.value,
-			appDescIntro: appDescIntro.value
+			appDescIntro: appDescIntro.value,
+			officer: officer.value
 		},
         function(data){
             if(data==1){
