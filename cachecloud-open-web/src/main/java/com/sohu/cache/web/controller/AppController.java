@@ -131,8 +131,8 @@ public class AppController extends BaseController {
         String slowLogEndDateParam = request.getParameter("slowLogEndDate");
         if (StringUtils.isBlank(slowLogStartDateParam) || StringUtils.isBlank(slowLogEndDateParam)) {
             Date startDate = new Date();
-            slowLogEndDateParam = DateUtil.formatDate(startDate, "yyyy-MM-dd");
-            slowLogStartDateParam = DateUtil.formatDate(DateUtils.addDays(startDate, -2), "yyyy-MM-dd");
+            slowLogStartDateParam = DateUtil.formatDate(startDate, "yyyy-MM-dd");
+            slowLogEndDateParam = DateUtil.formatDate(DateUtils.addDays(startDate, 1), "yyyy-MM-dd");
         }
         
         model.addAttribute("startDate", startDateParam);
@@ -932,14 +932,16 @@ public class AppController extends BaseController {
         logger.warn("{} want to update appId={} info!", appUser.getName(), appId);
         String appDescName =  request.getParameter("appDescName");
         String appDescIntro =  request.getParameter("appDescIntro");
+        String officer = request.getParameter("officer");
         SuccessEnum successEnum = SuccessEnum.SUCCESS;
-        if (appId <= 0 || StringUtils.isBlank(appDescName) || StringUtils.isBlank(appDescIntro)) {
+        if (appId <= 0 || StringUtils.isBlank(appDescName) || StringUtils.isBlank(appDescIntro) || StringUtils.isBlank(officer)) {
             successEnum = SuccessEnum.FAIL;
         } else {
             try {
                 AppDesc appDesc = appService.getByAppId(appId);
                 appDesc.setName(appDescName);
                 appDesc.setIntro(appDescIntro);
+                appDesc.setOfficer(officer);
                 appService.update(appDesc);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
@@ -992,8 +994,8 @@ public class AppController extends BaseController {
         Date startDate;
         Date endDate;
         if (StringUtils.isBlank(slowLogStartDateParam) || StringUtils.isBlank(slowLogEndDateParam)) {
-            endDate = new Date();
-            startDate = DateUtils.addDays(endDate, -7);
+            startDate = new Date();
+            endDate = DateUtils.addDays(startDate, 1);
         } else {
             startDate = DateUtil.parseYYYY_MM_dd(slowLogStartDateParam);
             endDate = DateUtil.parseYYYY_MM_dd(slowLogEndDateParam);
