@@ -1,35 +1,58 @@
 package com.sohu.cache.stats.app.impl;
 
-import com.sohu.cache.async.NamedThreadFactory;
-import com.sohu.cache.constant.AppAuditLogTypeEnum;
-import com.sohu.cache.constant.AppAuditType;
-import com.sohu.cache.constant.AppCheckEnum;
-import com.sohu.cache.constant.AppStatusEnum;
-import com.sohu.cache.constant.DataFormatCheckResult;
-import com.sohu.cache.constant.InstanceStatusEnum;
-import com.sohu.cache.dao.AppAuditDao;
-import com.sohu.cache.dao.AppAuditLogDao;
-import com.sohu.cache.dao.AppDao;
-import com.sohu.cache.dao.InstanceDao;
-import com.sohu.cache.entity.*;
-import com.sohu.cache.machine.MachineCenter;
-import com.sohu.cache.redis.*;
-import com.sohu.cache.stats.app.AppDeployCenter;
-import com.sohu.cache.util.ConstUtils;
-import com.sohu.cache.util.TypeUtil;
-import com.sohu.cache.web.service.AppService;
-import com.sohu.cache.web.util.AppEmailUtil;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
-import redis.clients.jedis.HostAndPort;
+import com.sohu.cache.async.NamedThreadFactory;
+import com.sohu.cache.constant.AppAuditLogTypeEnum;
+import com.sohu.cache.constant.AppAuditType;
+import com.sohu.cache.constant.AppCheckEnum;
+import com.sohu.cache.constant.AppStatusEnum;
+import com.sohu.cache.constant.DataFormatCheckResult;
+import com.sohu.cache.constant.HorizontalResult;
+import com.sohu.cache.constant.InstanceStatusEnum;
+import com.sohu.cache.dao.AppAuditDao;
+import com.sohu.cache.dao.AppAuditLogDao;
+import com.sohu.cache.dao.AppDao;
+import com.sohu.cache.dao.InstanceDao;
+import com.sohu.cache.entity.AppAudit;
+import com.sohu.cache.entity.AppAuditLog;
+import com.sohu.cache.entity.AppDesc;
+import com.sohu.cache.entity.AppUser;
+import com.sohu.cache.entity.InstanceInfo;
+import com.sohu.cache.entity.InstanceSlotModel;
+import com.sohu.cache.entity.MachineInfo;
+import com.sohu.cache.machine.MachineCenter;
+import com.sohu.cache.redis.RedisCenter;
+import com.sohu.cache.redis.RedisClusterNode;
+import com.sohu.cache.redis.RedisClusterReshard;
+import com.sohu.cache.redis.RedisDeployCenter;
+import com.sohu.cache.redis.ReshardProcess;
+import com.sohu.cache.stats.app.AppDeployCenter;
+import com.sohu.cache.util.ConstUtils;
+import com.sohu.cache.util.TypeUtil;
+import com.sohu.cache.web.service.AppService;
+import com.sohu.cache.web.util.AppEmailUtil;
 
-import java.util.*;
-import java.util.concurrent.*;
+import redis.clients.jedis.HostAndPort;
 
 /**
  * Created by yijunzhang on 14-10-20.
@@ -477,25 +500,11 @@ public class AppDeployCenterImpl implements AppDeployCenter {
     }
 
     @Override
-    public boolean addAppClusterSharding(Long appId, String masterHost, String slaveHost, int memory) {
-        Assert.isTrue(appId != null && appId > 0L);
-        Assert.isTrue(StringUtils.isNotBlank(masterHost));
-        Assert.isTrue(memory > 0);
-        AppDesc appDesc = appService.getByAppId(appId);
-        Assert.isTrue(appDesc != null);
-        int type = appDesc.getType();
-        if (!TypeUtil.isRedisCluster(type)) {
-            logger.error("appId={};type={} is not redis cluster!", appDesc, type);
-            return false;
-        }
-        List<InstanceInfo> instanceInfos = instanceDao.getInstListByAppId(appId);
-        if (instanceInfos == null || instanceInfos.isEmpty()) {
-            logger.error("app:{} instanceInfos isEmpty", appId);
-            return false;
-        }
+    public boolean addHorizontalNodes(Long appId, String masterHost, String slaveHost, int memory) {
+        //1. 寻找主从节点的可用端口
         Integer masterPort = machineCenter.getAvailablePort(masterHost, ConstUtils.CACHE_TYPE_REDIS_CLUSTER);
         if (masterPort == null) {
-            logger.error("host={} getAvailablePort is null", masterHost);
+            logger.error("master host={} getAvailablePort is null", masterHost);
             return false;
         }
         Integer slavePort = 0;
@@ -503,12 +512,12 @@ public class AppDeployCenterImpl implements AppDeployCenter {
         if (hasSlave) {
             slavePort = machineCenter.getAvailablePort(slaveHost, ConstUtils.CACHE_TYPE_REDIS_CLUSTER);
             if (slavePort == null) {
-                logger.error("host={} getAvailablePort is null", slaveHost);
+                logger.error("slave host={} getAvailablePort is null", slaveHost);
                 return false;
             }
         }
 
-        //运行节点
+        //2. 启动主从节点
         boolean isMasterCreate = redisDeployCenter.createRunNode(masterHost, masterPort, memory, true);
         if (!isMasterCreate) {
             logger.error("createRunNode master failed {}:{}", masterHost, masterPort);
@@ -522,18 +531,16 @@ public class AppDeployCenterImpl implements AppDeployCenter {
                 return false;
             }
         }
-        Set<HostAndPort> clusterHosts = new LinkedHashSet<HostAndPort>();
-        for (InstanceInfo instance : instanceInfos) {
-            clusterHosts.add(new HostAndPort(instance.getIp(), instance.getPort()));
-        }
-        clusterHosts.add(new HostAndPort(masterHost, masterPort));
-        if (hasSlave) {
-            clusterHosts.add(new HostAndPort(slaveHost, slavePort));
-        }
-        RedisClusterReshard clusterReshard = new RedisClusterReshard(clusterHosts);
+        
+        //3. 获取应用下有效节点
+        Set<HostAndPort> clusterHosts = getEffectiveInstanceList(appId);
+        
+        
+        //4. 添加新节点: meet,复制，不做slot分配
+        RedisClusterReshard clusterReshard = new RedisClusterReshard(clusterHosts, redisCenter);
         boolean joinCluster = clusterReshard.joinCluster(masterHost, masterPort, slaveHost, slavePort);
         if (joinCluster) {
-            //保存实例
+            //5. 保存实例,开启统计功能
             saveInstance(appId, masterHost, masterPort, memory);
             redisCenter.deployRedisCollection(appId, masterHost, masterPort);
             if (hasSlave) {
@@ -542,58 +549,6 @@ public class AppDeployCenterImpl implements AppDeployCenter {
             }
         }
         return joinCluster;
-    }
-
-    @Override
-    public boolean offLineClusterNode(final Long appId, final String host, final int port) {
-        Assert.isTrue(appId != null && appId > 0L);
-        Assert.isTrue(StringUtils.isNotBlank(host));
-        Assert.isTrue(port > 0);
-        AppDesc appDesc = appService.getByAppId(appId);
-        Assert.isTrue(appDesc != null);
-        int type = appDesc.getType();
-        if (!TypeUtil.isRedisCluster(type)) {
-            logger.error("appId={};type={} is not redis cluster!", appDesc, type);
-            return false;
-        }
-        boolean isInProcess = isInProcess(appId);
-        if (isInProcess) {
-            return false;
-        }
-        final List<InstanceInfo> instanceInfos = instanceDao.getInstListByAppId(appId);
-        if (instanceInfos == null || instanceInfos.isEmpty()) {
-            logger.error("app:{} instanceInfos isEmpty", appId);
-            return false;
-        }
-        Set<HostAndPort> clusterHosts = new LinkedHashSet<HostAndPort>();
-        for (InstanceInfo instance : instanceInfos) {
-            clusterHosts.add(new HostAndPort(instance.getIp(), instance.getPort()));
-        }
-        processThreadPool.execute(new Runnable() {
-            @Override
-            public void run() {
-                Set<HostAndPort> clusterHosts = new LinkedHashSet<HostAndPort>();
-                for (InstanceInfo instance : instanceInfos) {
-                    clusterHosts.add(new HostAndPort(instance.getIp(), instance.getPort()));
-                }
-                RedisClusterReshard clusterReshard = new RedisClusterReshard(clusterHosts);
-                //添加进度
-                processMap.put(appId, clusterReshard.getReshardProcess());
-
-                boolean joinCluster = clusterReshard.offLineMaster(host, port);
-                if (joinCluster) {
-                    InstanceInfo instanceInfo = instanceDao.getInstByIpAndPort(host, port);
-                    if (instanceInfo != null) {
-                        //更新实例下线
-                        instanceInfo.setStatus(InstanceStatusEnum.OFFLINE_STATUS.getStatus());
-                        instanceDao.update(instanceInfo);
-                    }
-                }
-                logger.warn("async:appId={} joinCluster={} done result={}", appId, joinCluster, clusterReshard.getReshardProcess());
-            }
-        });
-
-        return false;
     }
 
     @Override
@@ -614,61 +569,10 @@ public class AppDeployCenterImpl implements AppDeployCenter {
         }
     }
     
-
-    @Override
-    public boolean horizontalExpansion(final Long appId, final String host, final int port, final Long appAuditId) {
-        Assert.isTrue(appId != null && appId > 0L);
-        Assert.isTrue(StringUtils.isNotBlank(host));
-        Assert.isTrue(port > 0);
-        boolean isInProcess = isInProcess(appId);
-        if (isInProcess) {
-            return false;
-        }
-        AppDesc appDesc = appService.getByAppId(appId);
-        Assert.isTrue(appDesc != null);
-        int type = appDesc.getType();
-        if (!TypeUtil.isRedisCluster(type)) {
-            logger.error("appId={};type={} is not redis cluster!", appDesc, type);
-            return false;
-        }
-        final List<InstanceInfo> instanceInfos = instanceDao.getInstListByAppId(appId);
-        if (instanceInfos == null || instanceInfos.isEmpty()) {
-            logger.error("app:{} instanceInfos isEmpty", appId);
-            return false;
-        }
-        processThreadPool.execute(new Runnable() {
-            @Override
-            public void run() {
-                Set<HostAndPort> clusterHosts = new LinkedHashSet<HostAndPort>();
-                for (InstanceInfo instance : instanceInfos) {
-                    clusterHosts.add(new HostAndPort(instance.getIp(), instance.getPort()));
-                }
-                RedisClusterReshard clusterReshard = new RedisClusterReshard(clusterHosts);
-                //添加进度
-                processMap.put(appId, clusterReshard.getReshardProcess());
-
-                boolean joinCluster = clusterReshard.joinNewMaster(host, port);
-                logger.warn("async:appId={} joinCluster={} done result={}", appId, joinCluster, clusterReshard.getReshardProcess());
-                if (joinCluster) {
-                    // 改变审核状态
-                    appAuditDao.updateAppAudit(appAuditId, AppCheckEnum.APP_ALLOCATE_RESOURCE.value());
-                    InstanceInfo instanceInfo = instanceDao.getAllInstByIpAndPort(host, port);
-                    if (instanceInfo != null && instanceInfo.getStatus() != InstanceStatusEnum.GOOD_STATUS.getStatus()) {
-                        instanceInfo.setStatus(InstanceStatusEnum.GOOD_STATUS.getStatus());
-                        instanceDao.update(instanceInfo);
-                    }
-                }
-            }
-        });
-
-        logger.warn("reshard appId={} instance={}:{} deploy done", appId, host, port);
-        return true;
-    }
-
     private boolean isInProcess(Long appId) {
         ReshardProcess process = processMap.get(appId);
         if (process != null && process.getStatus() == 0) {
-            logger.warn("appId={} isInProcess", appId, process.getStatus());
+            logger.warn("appId={} is inProcess", appId);
             return true;
         } else {
             return false;
@@ -695,7 +599,277 @@ public class AppDeployCenterImpl implements AppDeployCenter {
         instanceDao.saveInstance(instanceInfo);
         return instanceInfo;
     }
+    
+    @Override
+	public HorizontalResult checkHorizontal(long appId, long appAuditId, long sourceId, long targetId, int startSlot,
+			int endSlot, int migrateType) {
+    	// 0.当前应用正在迁移
+        boolean isInProcess = isInProcess(appId);
+    	if (isInProcess) {
+			return HorizontalResult.fail(String.format("appId=%s正在迁移!", appId));
+    	}
+		// 1.应用信息
+		AppDesc appDesc = appService.getByAppId(appId);
+		if (appDesc == null) {
+			return HorizontalResult.fail("应用信息为空");
+		}
+		
+		// 2.0 源实例ID不能等于目标实例ID
+		if (sourceId == targetId) {
+            return HorizontalResult.fail(String.format("源实例ID=%s不能等于目标实例ID=%s", sourceId, targetId));
+		}
+		
+		// 2.1 源实例信息
+		InstanceInfo sourceInstanceInfo = instanceDao.getInstanceInfoById(sourceId);
+		if (sourceInstanceInfo == null) {
+			return HorizontalResult.fail(String.format("源实例id=%s为空", sourceId));
+		}
+		// 2.2 对比源实例的appId是否正确
+		long sourceAppId = sourceInstanceInfo.getAppId();
+		if (sourceAppId != appId) {
+			return HorizontalResult.fail(String.format("源实例id=%s不属于appId=%s", sourceId, appId));
+		}
+		// 2.3 源实例是否在线
+		boolean sourceIsRun = redisCenter.isRun(sourceInstanceInfo.getIp(), sourceInstanceInfo.getPort());
+		if (!sourceIsRun) {
+			return HorizontalResult.fail(String.format("源实例%s必须运行中", sourceInstanceInfo.getHostPort()));
+		}
+		// 2.4必须是master节点
+		boolean sourceIsMaster = redisCenter.isMaster(sourceInstanceInfo.getIp(), sourceInstanceInfo.getPort());
+		if (!sourceIsMaster) {
+			return HorizontalResult.fail(String.format("源实例%s必须是主节点", sourceInstanceInfo.getHostPort()));
+		}
+		
 
+		// 3.1 目标实例信息
+		InstanceInfo targetInstanceInfo = instanceDao.getInstanceInfoById(targetId);
+		if (targetInstanceInfo == null) {
+			return HorizontalResult.fail(String.format("目标实例id=%s为空", targetId));
+		}
+		// 3.2 对比目标实例的appId是否正确
+		long targetAppId = targetInstanceInfo.getAppId();
+		if (targetAppId != appId) {
+			return HorizontalResult.fail(String.format("目标实例id=%s不属于appId=%s", targetId, appId));
+		}
+		// 3.3 目标实例是否在线
+		boolean targetIsRun = redisCenter.isRun(targetInstanceInfo.getIp(), targetInstanceInfo.getPort());
+		if (!targetIsRun) {
+			return HorizontalResult.fail(String.format("目标实例%s必须运行中", targetInstanceInfo.getHostPort()));
+		}
+		// 3.4 必须是master节点
+		boolean targetIsMaster = redisCenter.isMaster(targetInstanceInfo.getIp(), targetInstanceInfo.getPort());
+		if (!targetIsMaster) {
+			return HorizontalResult.fail(String.format("目标实例%s必须是主节点", targetInstanceInfo.getHostPort()));
+		}
+		
+		// 4.startSlot和endSlot是否在源实例中
+		// 4.1 判断数值
+		int maxSlot = 16383;
+		if (startSlot < 0 || startSlot > maxSlot) {
+			return HorizontalResult.fail(String.format("startSlot=%s必须在0-%s", startSlot, maxSlot));
+		}
+		if (endSlot < 0 || endSlot > maxSlot) {
+			return HorizontalResult.fail(String.format("endSlot=%s必须在0-%s", endSlot, maxSlot));
+		}
+		if (startSlot > endSlot) {
+			return HorizontalResult.fail("startSlot不能大于endSlot");
+		}
+		
+		// 4.2 判断startSlot和endSlot属于sourceId
+		// 获取所有slot分布
+		Map<String, InstanceSlotModel> clusterSlotsMap = redisCenter.getClusterSlotsMap(appId);
+		if (MapUtils.isEmpty(clusterSlotsMap)) {
+			return HorizontalResult.fail("无法获取slot分布!");
+		}
+		// 获取源实例负责的slot
+		String sourceHostPort = sourceInstanceInfo.getHostPort();
+		InstanceSlotModel instanceSlotModel = clusterSlotsMap.get(sourceHostPort);
+		if (instanceSlotModel == null || CollectionUtils.isEmpty(instanceSlotModel.getSlotList())) {
+			return HorizontalResult.fail("源实例上没有slot!");
+		}
+		List<Integer> slotList = instanceSlotModel.getSlotList();
+		for (int i = startSlot; i <= endSlot; i++) {
+			if (!slotList.contains(i)) {
+				return HorizontalResult.fail(String.format("源实例没有包含尽startSlot=%s到endSlot=%s", startSlot, endSlot));
+			}
+		}
+		
+		//5.是否支持批量，版本要大于等于3.0.6
+		String sourceRedisVersion = redisCenter.getRedisVersion(sourceInstanceInfo.getIp(), sourceInstanceInfo.getPort());
+		if (StringUtils.isBlank(sourceRedisVersion)) {
+            return HorizontalResult.fail(String.format("源实例%s版本为空", sourceInstanceInfo.getHostPort()));
+		}
+	    String targetRedisVersion = redisCenter.getRedisVersion(targetInstanceInfo.getIp(), targetInstanceInfo.getPort());
+	    if (StringUtils.isBlank(targetRedisVersion)) {
+            return HorizontalResult.fail(String.format("目标实例%s版本为空", targetInstanceInfo.getHostPort()));
+        }
+	    RedisVersion sourceRedisVersionModel = getRedisVersion(sourceRedisVersion);
+	    //选择了批量，但是当前版本不支持pipeline
+	    if (migrateType == 1 && !sourceRedisVersionModel.isSupportPipelineMigrate()) {
+            return HorizontalResult.fail(String.format("源实例%s版本为%s,不支持pipeline migrate!", sourceInstanceInfo.getHostPort(), sourceRedisVersion));
+	    }
+	    
+	    RedisVersion targetRedisVersionModel = getRedisVersion(targetRedisVersion);
+	    //选择了批量，但是当前版本不支持pipeline
+        if (migrateType == 1 && !targetRedisVersionModel.isSupportPipelineMigrate()) {
+            return HorizontalResult.fail(String.format("目标实例%s版本为%s,不支持pipeline migrate!", targetInstanceInfo.getHostPort(), targetRedisVersion));
+        }
+		
+		return HorizontalResult.checkSuccess();
+	}
+
+    private RedisVersion getRedisVersion(String redisVersion) {
+        String[] versionArr = redisVersion.split("\\.");
+        if (versionArr.length == 1) {
+            return new RedisVersion(NumberUtils.toInt(versionArr[0]), 0, 0);
+        } else if (versionArr.length == 2) {
+            return new RedisVersion(NumberUtils.toInt(versionArr[0]), NumberUtils.toInt(versionArr[1]), 0);
+        } else if (versionArr.length >= 3) {
+            return new RedisVersion(NumberUtils.toInt(versionArr[0]), NumberUtils.toInt(versionArr[1]),
+                    NumberUtils.toInt(versionArr[2]));
+        }
+        return null;
+    }
+	
+	private class RedisVersion {
+	    int majorVersion;
+	    int minorVersion;
+	    int patchVersion;
+        public RedisVersion(int majorVersion, int minorVersion, int patchVersion) {
+            super();
+            this.majorVersion = majorVersion;
+            this.minorVersion = minorVersion;
+            this.patchVersion = patchVersion;
+        }
+        
+        /**
+         * 大于等于3.0.6
+         * @return
+         */
+        public boolean isSupportPipelineMigrate() {
+            if (majorVersion < 3) {
+                return false;
+            } else if (majorVersion == 3) {
+                if (minorVersion > 0) {
+                    return true;
+                } else {
+                    return patchVersion >= 6;
+                }
+            } else {
+                return true;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "RedisVersion [majorVersion=" + majorVersion + ", minorVersion=" + minorVersion + ", patchVersion="
+                    + patchVersion + "]";
+        }
+	}
+	
+	/**
+	 * 获取应用下有效节点
+	 * @param appId
+	 * @return
+	 */
+	private Set<HostAndPort> getEffectiveInstanceList(long appId) {
+	    Set<HostAndPort> clusterHosts = new HashSet<HostAndPort>();
+	    //全部节点
+        List<InstanceInfo> instanceInfos = instanceDao.getInstListByAppId(appId);
+        for (InstanceInfo instance : instanceInfos) {
+            if (instance.isOffline()) {
+                continue;
+            }
+            clusterHosts.add(new HostAndPort(instance.getIp(), instance.getPort()));
+        }
+        return clusterHosts;
+	}
+
+    @Override
+	public HorizontalResult startHorizontal(final long appId, final long appAuditId, long sourceId, final long targetId, final int startSlot,
+            final int endSlot, final int migrateType) {
+		final InstanceInfo sourceInstanceInfo = instanceDao.getInstanceInfoById(sourceId);
+		final InstanceInfo targetInstanceInfo = instanceDao.getInstanceInfoById(targetId);
+        processThreadPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                //所有节点用户clustersetslot
+                Set<HostAndPort> clusterHosts = getEffectiveInstanceList(appId);
+                RedisClusterReshard clusterReshard = new RedisClusterReshard(clusterHosts, redisCenter);
+                //添加进度
+                processMap.put(appId, clusterReshard.getReshardProcess());
+                boolean joinCluster = clusterReshard.migrateSlot(sourceInstanceInfo, targetInstanceInfo, startSlot, endSlot, migrateType == 1);
+                logger.warn("async:appId={} joinCluster={} done result={}", appId, joinCluster, clusterReshard.getReshardProcess());
+                if (joinCluster) {
+                    // 改变审核状态
+                    appAuditDao.updateAppAudit(appAuditId, AppCheckEnum.APP_ALLOCATE_RESOURCE.value());
+                    if (targetInstanceInfo != null && targetInstanceInfo.getStatus() != InstanceStatusEnum.GOOD_STATUS.getStatus()) {
+                    	targetInstanceInfo.setStatus(InstanceStatusEnum.GOOD_STATUS.getStatus());
+                        instanceDao.update(targetInstanceInfo);
+                    }
+                }
+            }
+        });
+        logger.warn("reshard appId={} instance={}:{} deploy done", appId, targetInstanceInfo.getIp(), targetInstanceInfo.getPort());
+		return HorizontalResult.scaleSuccess();
+	}
+    
+    @Override
+    public DataFormatCheckResult checkHorizontalNodes(Long appAuditId, String masterSizeSlave) {
+        if (appAuditId == null) {
+            logger.error("appAuditId is null");
+            return DataFormatCheckResult.fail("审核id不能为空!");
+        }
+        if (StringUtils.isBlank(masterSizeSlave)) {
+            logger.error("masterSizeSlave is null");
+            return DataFormatCheckResult.fail("添加节点不能为空!");
+        }
+        AppAudit appAudit = appAuditDao.getAppAudit(appAuditId);
+        if (appAudit == null) {
+            logger.error("appAudit:id={} is not exist", appAuditId);
+            return DataFormatCheckResult.fail(String.format("审核id=%s不存在", appAuditId));
+        }
+        long appId = appAudit.getAppId();
+        AppDesc appDesc = appService.getByAppId(appId);
+        if (appDesc == null) {
+            logger.error("appDesc:id={} is not exist");
+            return DataFormatCheckResult.fail(String.format("appId=%s不存在", appId));
+        }
+        //节点数组 master:memSize:slave
+        String[] array = masterSizeSlave.split(ConstUtils.COLON);
+        if (array == null || array.length == 0) {
+            return DataFormatCheckResult.fail(String.format("添加节点%s格式错误", masterSizeSlave));
+        }
+        //检查格式
+        String masterHost = null;
+        String memSize = null;
+        String slaveHost = null;
+        if (array.length == 2) {
+            masterHost = array[0];
+            memSize = array[1];
+        } else if (array.length == 3) {
+            masterHost = array[0];
+            memSize = array[1];
+            slaveHost = array[2];
+        } else {
+            return DataFormatCheckResult.fail(String.format("添加节点%s, 格式错误!", masterSizeSlave));
+        }
+        //检查主节点机器是否存在
+        if (!checkHostExist(masterHost)) {
+            return DataFormatCheckResult.fail(String.format("%s中的ip=%s不存在，请在机器管理中添加!", masterSizeSlave, masterHost));
+        }
+        //检查memSize格式
+        if (StringUtils.isNotBlank(memSize) && !NumberUtils.isDigits(memSize)) {
+            return DataFormatCheckResult.fail(String.format("%s中的中的memSize=%s不是整数!", masterSizeSlave, memSize));
+        }
+        //检查从节点格式
+        if (StringUtils.isNotBlank(slaveHost) && !checkHostExist(slaveHost)) {
+            return DataFormatCheckResult.fail(String.format("%s中的ip=%s不存在，请在机器管理中添加!", masterSizeSlave, slaveHost));
+        }
+        return DataFormatCheckResult.success("添加节点格式正确，可以开始部署了!");
+    }
+    
+    
     public void setAppService(AppService appService) {
         this.appService = appService;
     }
@@ -731,7 +905,5 @@ public class AppDeployCenterImpl implements AppDeployCenter {
     public void setAppDao(AppDao appDao) {
         this.appDao = appDao;
     }
-
-    
 
 }

@@ -40,6 +40,12 @@ public class ScheduleUtil {
         String baseCron = (hostId % 50) + " 0/5 * ? * *";
         return baseCron;
     }
+    
+    public static String getRedisSlowLogCron(long appId) {
+        Random random = new Random();
+        String baseCron = random.nextInt(60) + " 0/20 * ? * *";
+        return baseCron;
+    }
 
     /**
      * cron表达式：每小时，根据hostId计算小时的分钟数
@@ -54,19 +60,6 @@ public class ScheduleUtil {
         return String.format(hourCron, minute);
     }
 
-    /**
-     * 小时cron:分钟和秒都随机
-     * @param id
-     * @return
-     */
-    public static String getRandomHourCron(long id) {
-        Random random = new Random();
-        long second = (id + random.nextInt(Integer.MAX_VALUE)) % 60;
-        long minute = (id + random.nextInt(Integer.MAX_VALUE)) % 60;
-        String resultCron = second + " " + minute + " 0/1 ? * *";
-        return resultCron;
-    }
-    
     /**
      * 计算前一分钟的时间，并格式化
      *

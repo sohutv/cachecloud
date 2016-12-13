@@ -252,5 +252,9 @@ public class InstanceInfo implements Serializable {
             return roleDesc;
         }
     }
+    
+    public String getHostPort() {
+    	return ip + ":" + port;
+    }
 
 }

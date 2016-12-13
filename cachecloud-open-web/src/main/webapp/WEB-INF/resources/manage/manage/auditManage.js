@@ -172,24 +172,116 @@ function checkAddShardParam(){
 	return true;
 }
 
+function testisNum(id){
+   var value =document.getElementById(id).value;
+   if(value != "" && isNaN(value)){
+      alert("请输入数字类型!");
+      document.getElementById(id).value="";
+      document.getElementById(id).focus();
+   }
+}
+
 //添加水平扩容验证
-function checkHorizontalScaleParam(){
-	var ip = document.getElementById("ip");
-	if(ip.value == ""){
-		alert("ip不能为空");
-		ip.focus();
+function checkHorizontalScale(){
+	var sourceId = document.getElementById("sourceId");
+	if(sourceId.value == ""){
+		alert("源实例ID不能为空");
+		sourceId.focus();
 		return false;
 	}
 	
-	var port = document.getElementById("port");
-	if(port.value == ""){
-		alert("port不能为空");
-		port.focus();
+	var targetId = document.getElementById("targetId");
+	if(targetId.value == ""){
+		alert("目标实例ID不能为空");
+		targetId.focus();
 		return false;
 	}
 	
+	var startSlot = document.getElementById("startSlot");
+	if(startSlot.value == ""){
+		alert("开始slot不能为空");
+		startSlot.focus();
+		return false;
+	}
+	
+	var endSlot = document.getElementById("endSlot");
+	if(endSlot.value == ""){
+		alert("结束slot不能为空");
+		endSlot.focus();
+		return false;
+	}
+	
+	var migrateType = document.getElementById("migrateType");
+	
+	var appId = document.getElementById("appId");
+	var appAuditId = document.getElementById("appAuditId");
+	$.get(
+		'/manage/app/checkHorizontalScale.json',
+		{
+			sourceId: sourceId.value,
+			targetId: targetId.value,
+			startSlot: startSlot.value,
+			endSlot: endSlot.value,
+			appId: appId.value,
+			appAuditId: appAuditId.value,
+			migrateType: migrateType.value
+		},
+        function(data){
+			var status = data.status;
+			alert(data.message);
+			if (status == 1) {
+				var submitButton = document.getElementById("submitButton");
+	    		submitButton.disabled = false;
+	    		
+	    		var checkButton = document.getElementById("checkButton");
+	    		checkButton.disabled = true;
+	    		sourceId.disabled = true;
+	    		targetId.disabled = true;
+	    		startSlot.disabled = true;
+	    		endSlot.disabled = true;
+	    		migrateType.disabled = true;
+			}
+        }
+     );
 	return true;
 }
+
+
+//开始水平扩容
+function startHorizontalScale(){
+	var sourceId = document.getElementById("sourceId");
+	var targetId = document.getElementById("targetId");
+	var startSlot = document.getElementById("startSlot");
+	var endSlot = document.getElementById("endSlot");
+	var appId = document.getElementById("appId");
+	var appAuditId = document.getElementById("appAuditId");
+	var migrateType = document.getElementById("migrateType");
+	
+	var submitButton = document.getElementById("submitButton");
+    submitButton.disabled = true;
+	
+	$.get(
+		'/manage/app/startHorizontalScale.json',
+		{
+			sourceId: sourceId.value,
+			targetId: targetId.value,
+			startSlot: startSlot.value,
+			endSlot: endSlot.value,
+			appId: appId.value,
+			appAuditId: appAuditId.value,
+			migrateType: migrateType.value
+		},
+        function(data){
+			var status = data.status;
+			alert(data.message);
+			if (status == 1) {
+				window.location.href="/manage/app/handleHorizontalScale?appAuditId=" + appAuditId.value;
+			}
+        }
+     );
+	return true;
+}
+
 //添加下线分片验证
 function checkOffLineInstanceParam(){
 	var ip = document.getElementById("dropIp");

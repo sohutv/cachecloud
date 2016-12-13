@@ -386,12 +386,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
 
     @Override
     public boolean createRunNode(String host, Integer port, int maxMemory, boolean isCluster) {
-        boolean isRun = isRun(host, port);
-        if (isRun) {
-            return true;
-        }
-        boolean isCreate = runInstance(host, port, maxMemory, isCluster);
-        return isCreate;
+        return runInstance(host, port, maxMemory, isCluster);
     }
 
     private boolean runInstance(String host, Integer port, int maxMemory, boolean isCluster) {
@@ -858,7 +853,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
                     logger.error("{}:{} cluster is failed", slaveHost, slaveHost);
                     return isClusterMeet;
                 }
-                final String nodeId = getNodeId(masterJedis);
+                final String nodeId = redisCenter.getNodeId(masterHost, masterPort);
                 if (StringUtils.isBlank(nodeId)) {
                     logger.error("{}:{} getNodeId failed", masterHost, masterPort);
                     return false;
@@ -1000,36 +995,6 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
             logger.warn("{}:{} clusterFailover Done! ", slaveHost, slavePort);
         }
         return true;
-    }
-
-    private String getNodeId(final Jedis jedis) {
-        try {
-            final StringBuilder clusterNodes = new StringBuilder();
-            boolean isGetNodes = new IdempotentConfirmer() {
-                @Override
-                public boolean execute() {
-                    String nodes = jedis.clusterNodes();
-                    if (nodes != null && nodes.length() > 0) {
-                        clusterNodes.append(nodes);
-                        return true;
-                    }
-                    return false;
-                }
-            }.run();
-            if (!isGetNodes) {
-                logger.error("{}:{} clusterNodes failed", jedis.getClient().getHost(), jedis.getClient().getPort());
-                return null;
-            }
-            for (String infoLine : clusterNodes.toString().split("\n")) {
-                if (infoLine.contains("myself")) {
-                    String nodeId = infoLine.split(" ")[0];
-                    return nodeId;
-                }
-            }
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-        }
-        return null;
     }
 
     /**

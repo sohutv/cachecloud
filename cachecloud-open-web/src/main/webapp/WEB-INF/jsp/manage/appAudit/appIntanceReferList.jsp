@@ -27,6 +27,8 @@
                         <td>角色</td>
                         <%--<td>主实例ID</td>--%>
                         <td>实例所在机器信息可用内存</td>
+                        <td>对象数</td>
+                        <td>slot分布</td>
                     </tr>
                     </thead>
                     <tbody>
@@ -64,6 +66,12 @@
                             <td><fmt:formatNumber
                                     value="${(machineCanUseMem[instance.ip])/1024/1024/1024}"
                                     pattern="0.00"/>G
+                            </td>
+                            <td>
+                            	${instanceStatsMap[instanceStatsMapKey].currItems}
+                            </td>
+                            <td>
+                            	${clusterSlotsMap[instanceStatsMapKey].slotDistributeList}
                             </td>
                         </tr>
                     </c:forEach>

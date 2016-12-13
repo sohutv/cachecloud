@@ -4,6 +4,7 @@ import com.sohu.cache.constant.RedisConstant;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.entity.InstanceInfo;
+import com.sohu.cache.entity.InstanceSlotModel;
 import com.sohu.cache.entity.InstanceSlowLog;
 import com.sohu.cache.web.vo.RedisSlowLog;
 
@@ -287,5 +288,29 @@ public interface RedisCenter {
      * @return
      */
     public boolean isSentinelNode(String ip, int port);
+    
+    /**
+     * 获取集群的slots分布
+     * @param appId
+     * @return
+     */
+    Map<String, InstanceSlotModel> getClusterSlotsMap(long appId);
+
+    /**
+     * 获取Redis版本
+     * @param ip
+     * @param port
+     * @return
+     */
+    public String getRedisVersion(String ip, int port);
+    
+    
+    /**
+     * 获取nodeId
+     * @param ip
+     * @param port
+     * @return
+     */
+    public String getNodeId(String ip, int port);
     
 }

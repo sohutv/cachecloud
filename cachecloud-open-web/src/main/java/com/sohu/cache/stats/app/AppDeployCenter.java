@@ -1,6 +1,7 @@
 package com.sohu.cache.stats.app;
 
 import com.sohu.cache.constant.DataFormatCheckResult;
+import com.sohu.cache.constant.HorizontalResult;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.redis.ReshardProcess;
@@ -72,16 +73,42 @@ public interface AppDeployCenter {
     public boolean verticalExpansion(Long appId, Long appAuditId, int memory);
 
     /**
-     * 水平扩展(幂等操作)
-     *
-     * @param appId
-     * @param host
-     * @param por
+     * 检测水平扩容节点
      * @param appAuditId
+     * @param masterSizeSlave
      * @return
      */
-    public boolean horizontalExpansion(Long appId, String host, int port, Long appAuditId);
-
+    public DataFormatCheckResult checkHorizontalNodes(Long appAuditId, String masterSizeSlave);
+    
+    /**
+     * 检查水平扩容的格式
+     * @param appId
+     * @param appAuditId
+     * @param sourceId
+     * @param targetId
+     * @param startSlot
+     * @param endSlot
+     * @param migrateType
+     * @return
+     */
+    public HorizontalResult checkHorizontal(long appId, long appAuditId, long sourceId, long targetId, int startSlot,
+            int endSlot, int migrateType);
+    
+    
+    /**
+     * 开始水平扩容
+     * @param appId
+     * @param appAuditId
+     * @param sourceId
+     * @param targetId
+     * @param startSlot
+     * @param endSlot
+     * @param migrateType
+     * @return
+     */
+    public HorizontalResult startHorizontal(long appId, long appAuditId, long sourceId, long targetId, int startSlot,
+            int endSlot, int migrateType);
+    
     /**
      * 添加cluster一个主(从)节点
      *
@@ -91,17 +118,8 @@ public interface AppDeployCenter {
      * @param memory
      * @return
      */
-    public boolean addAppClusterSharding(Long appId, String masterHost, String slaveHost, int memory);
-
-    /**
-     * 下线集群节点
-     *
-     * @param appId
-     * @param host
-     * @param port
-     * @return
-     */
-    public boolean offLineClusterNode(Long appId, String host, int port);
+    public boolean addHorizontalNodes(Long appId, String masterHost, String slaveHost, int memory);
+    
 
     /**
      * 获取当前水平扩展进度列表
@@ -118,5 +136,7 @@ public interface AppDeployCenter {
      * @return
      */
     public boolean cleanAppData(long appId, AppUser appUser);
+
+    
 
 }

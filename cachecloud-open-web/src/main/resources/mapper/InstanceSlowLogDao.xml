@@ -23,7 +23,7 @@
     
     <select id="search" resultType="InstanceSlowLog">
         select id,<include refid="instance_slow_log_columns"/>
-        from instance_slow_log where app_id = #{appId} and create_time between DATE_FORMAT(#{startDate}, '%Y-%m-%d') and DATE_FORMAT(#{endDate}, '%Y-%m-%d')
+        from instance_slow_log where app_id = #{appId} and create_time between DATE_FORMAT(#{startDate}, '%Y-%m-%d') and DATE_FORMAT(#{endDate}, '%Y-%m-%d') order by execute_time desc
     </select>
     
     <select id="getInstanceSlowLogCountMapByAppId" resultType="hashmap">
