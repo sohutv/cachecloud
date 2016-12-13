@@ -606,64 +606,70 @@ public class AppDeployCenterImpl implements AppDeployCenter {
     	// 0.当前应用正在迁移
         boolean isInProcess = isInProcess(appId);
     	if (isInProcess) {
-			return HorizontalResult.fail("appId=" + appId + "正在迁移!");
+			return HorizontalResult.fail(String.format("appId=%s正在迁移!", appId));
     	}
 		// 1.应用信息
 		AppDesc appDesc = appService.getByAppId(appId);
 		if (appDesc == null) {
 			return HorizontalResult.fail("应用信息为空");
 		}
+		
+		// 2.0 源实例ID不能等于目标实例ID
+		if (sourceId == targetId) {
+            return HorizontalResult.fail(String.format("源实例ID=%s不能等于目标实例ID=%s", sourceId, targetId));
+		}
+		
 		// 2.1 源实例信息
 		InstanceInfo sourceInstanceInfo = instanceDao.getInstanceInfoById(sourceId);
 		if (sourceInstanceInfo == null) {
-			return HorizontalResult.fail("源实例id=" + sourceId + "为空");
+			return HorizontalResult.fail(String.format("源实例id=%s为空", sourceId));
 		}
 		// 2.2 对比源实例的appId是否正确
 		long sourceAppId = sourceInstanceInfo.getAppId();
 		if (sourceAppId != appId) {
-			return HorizontalResult.fail("源实例id=" + sourceId + "不属于appId=" + appId);
+			return HorizontalResult.fail(String.format("源实例id=%s不属于appId=%s", sourceId, appId));
 		}
 		// 2.3 源实例是否在线
 		boolean sourceIsRun = redisCenter.isRun(sourceInstanceInfo.getIp(), sourceInstanceInfo.getPort());
 		if (!sourceIsRun) {
-			return HorizontalResult.fail("源实例" + sourceInstanceInfo.getHostPort() + "必须运行中");
+			return HorizontalResult.fail(String.format("源实例%s必须运行中", sourceInstanceInfo.getHostPort()));
 		}
 		// 2.4必须是master节点
 		boolean sourceIsMaster = redisCenter.isMaster(sourceInstanceInfo.getIp(), sourceInstanceInfo.getPort());
 		if (!sourceIsMaster) {
-			return HorizontalResult.fail("迁移的实例" + sourceInstanceInfo.getHostPort() + "必须是主节点");
+			return HorizontalResult.fail(String.format("源实例%s必须是主节点", sourceInstanceInfo.getHostPort()));
 		}
 		
 
 		// 3.1 目标实例信息
 		InstanceInfo targetInstanceInfo = instanceDao.getInstanceInfoById(targetId);
 		if (targetInstanceInfo == null) {
-			return HorizontalResult.fail("目标实例id=" + targetId + "为空");
+			return HorizontalResult.fail(String.format("目标实例id=%s为空", targetId));
 		}
 		// 3.2 对比目标实例的appId是否正确
 		long targetAppId = targetInstanceInfo.getAppId();
 		if (targetAppId != appId) {
-			return HorizontalResult.fail("目标实例id=" + targetId + "不属于appId=" + appId);
+			return HorizontalResult.fail(String.format("目标实例id=%s不属于appId=%s", targetId, appId));
 		}
 		// 3.3 目标实例是否在线
 		boolean targetIsRun = redisCenter.isRun(targetInstanceInfo.getIp(), targetInstanceInfo.getPort());
 		if (!targetIsRun) {
-			return HorizontalResult.fail("目标实例" + targetInstanceInfo.getHostPort() + "必须运行中");
+			return HorizontalResult.fail(String.format("目标实例%s必须运行中", targetInstanceInfo.getHostPort()));
 		}
 		// 3.4 必须是master节点
 		boolean targetIsMaster = redisCenter.isMaster(targetInstanceInfo.getIp(), targetInstanceInfo.getPort());
 		if (!targetIsMaster) {
-			return HorizontalResult.fail("迁移的实例" + targetInstanceInfo.getHostPort() + "必须是主节点");
+			return HorizontalResult.fail(String.format("目标实例%s必须是主节点", targetInstanceInfo.getHostPort()));
 		}
 		
 		// 4.startSlot和endSlot是否在源实例中
 		// 4.1 判断数值
 		int maxSlot = 16383;
 		if (startSlot < 0 || startSlot > maxSlot) {
-			return HorizontalResult.fail("startSlot=" + startSlot + "必须在0-" + maxSlot);
+			return HorizontalResult.fail(String.format("startSlot=%s必须在0-%s", startSlot, maxSlot));
 		}
 		if (endSlot < 0 || endSlot > maxSlot) {
-			return HorizontalResult.fail("endSlot=" + endSlot + "必须在0-" + maxSlot);
+			return HorizontalResult.fail(String.format("endSlot=%s必须在0-%s", endSlot, maxSlot));
 		}
 		if (startSlot > endSlot) {
 			return HorizontalResult.fail("startSlot不能大于endSlot");
@@ -684,29 +690,29 @@ public class AppDeployCenterImpl implements AppDeployCenter {
 		List<Integer> slotList = instanceSlotModel.getSlotList();
 		for (int i = startSlot; i <= endSlot; i++) {
 			if (!slotList.contains(i)) {
-				return HorizontalResult.fail("源实例没有包含尽startSlot=" + startSlot + "到endSlot=" + endSlot + "的slot");
+				return HorizontalResult.fail(String.format("源实例没有包含尽startSlot=%s到endSlot=%s", startSlot, endSlot));
 			}
 		}
 		
 		//5.是否支持批量，版本要大于等于3.0.6
 		String sourceRedisVersion = redisCenter.getRedisVersion(sourceInstanceInfo.getIp(), sourceInstanceInfo.getPort());
 		if (StringUtils.isBlank(sourceRedisVersion)) {
-            return HorizontalResult.fail("源实例" + sourceInstanceInfo.getHostPort() + "版本为空");
+            return HorizontalResult.fail(String.format("源实例%s版本为空", sourceInstanceInfo.getHostPort()));
 		}
 	    String targetRedisVersion = redisCenter.getRedisVersion(targetInstanceInfo.getIp(), targetInstanceInfo.getPort());
 	    if (StringUtils.isBlank(targetRedisVersion)) {
-            return HorizontalResult.fail("目标实例" + targetInstanceInfo.getHostPort() + "版本为空");
+            return HorizontalResult.fail(String.format("目标实例%s版本为空", targetInstanceInfo.getHostPort()));
         }
 	    RedisVersion sourceRedisVersionModel = getRedisVersion(sourceRedisVersion);
 	    //选择了批量，但是当前版本不支持pipeline
 	    if (migrateType == 1 && !sourceRedisVersionModel.isSupportPipelineMigrate()) {
-            return HorizontalResult.fail("源实例" + sourceInstanceInfo.getHostPort() + "版本为" + sourceRedisVersion + " ,不支持pipeline migrate!");
+            return HorizontalResult.fail(String.format("源实例%s版本为%s,不支持pipeline migrate!", sourceInstanceInfo.getHostPort(), sourceRedisVersion));
 	    }
 	    
 	    RedisVersion targetRedisVersionModel = getRedisVersion(targetRedisVersion);
 	    //选择了批量，但是当前版本不支持pipeline
         if (migrateType == 1 && !targetRedisVersionModel.isSupportPipelineMigrate()) {
-            return HorizontalResult.fail("目标实例" + targetInstanceInfo.getHostPort() + "版本为" + sourceRedisVersion + " ,不支持pipeline migrate!");
+            return HorizontalResult.fail(String.format("目标实例%s版本为%s,不支持pipeline migrate!", targetInstanceInfo.getHostPort(), targetRedisVersion));
         }
 		
 		return HorizontalResult.checkSuccess();

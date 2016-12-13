@@ -8,13 +8,21 @@
         <%@include file="appIntanceReferList.jsp" %>
     	<%@include file="horizontalScaleProcessList.jsp" %>
 
+		<div class="row">
+		    <div class="col-md-12">
+		        <h3 class="page-title">
+		        	迁移计划
+		        </h3>
+		    </div>
+		</div>
+
         <div class="row">
             <div class="col-md-12">
                 <div class="portlet box light-grey">
                     <div class="portlet-title">
                         <div class="caption">
                             <i class="fa fa-globe"></i>
-                            	填写扩容配置
+                            	填写迁移计划
                             &nbsp;
                         </div>
                         <div class="tools">
