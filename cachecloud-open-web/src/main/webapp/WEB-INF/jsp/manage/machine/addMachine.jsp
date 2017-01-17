@@ -112,6 +112,23 @@
                                     </div>
                                 </div>
                                 
+                               <div class="form-group">
+                                    <label class="control-label col-md-3">
+                                        状态收集:
+                                    </label>
+                                    <div class="col-md-5">
+                                        <select name="collect" id="collect${machine.info.id}" class="form-control select2_category">
+                                            <option value="0" <c:if test="${machine.info.collect == 0}">selected="selected"</c:if>>
+                                                关闭
+                                            </option>
+                                            <option value="1" <c:if test="${machine.info.collect == 1 || empty machine.info.id}">selected="selected"</c:if>>
+                                                开启
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+
+
 
 								<input type="hidden" id="machineId${machine.info.id}" name="machineId" value="${machine.info.id}"/>
 							</div>

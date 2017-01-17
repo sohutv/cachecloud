@@ -1,4 +1,4 @@
-<%@ page language="java"  contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ include file="/WEB-INF/jsp/manage/commons/taglibs.jsp"%>
 <div class="page-container">
 	<div class="page-content">
@@ -171,6 +171,8 @@
                                        		</c:otherwise>
                                        	</c:choose>
                                         <td>
+                                        	<a href="/server/index.do?ip=${machine.info.ip}" class="btn btn-info" target="_blank">监控</a>
+                                        	&nbsp;
                                             <a href="javascript;" data-target="#addMachineModal${machine.info.id}" class="btn btn-info" data-toggle="modal">修改</a>
                                             &nbsp;
                                             

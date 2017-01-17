@@ -32,6 +32,7 @@ function saveOrUpdateMachine(machineId){
     var realIp = document.getElementById("realIp" + machineId);
     var machineType = document.getElementById("machineType" + machineId);
     var extraDesc = document.getElementById("extraDesc" + machineId);
+    var collect = document.getElementById("collect" + machineId);
 
 	if(ip.value == ""){
     	alert("IP不能为空!");
@@ -72,7 +73,8 @@ function saveOrUpdateMachine(machineId){
             realIp: realIp.value,
             id:machineId,
             machineType: machineType.value,
-            extraDesc: extraDesc.value
+            extraDesc: extraDesc.value,
+            collect: collect.value
 		},
         function(data){
             if(data.result){
