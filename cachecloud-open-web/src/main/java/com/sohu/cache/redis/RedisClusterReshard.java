@@ -230,44 +230,23 @@ public class RedisClusterReshard {
             if (keys.isEmpty()) {
                 break;
             }
-            //批量
-            if (isPipelineMigrate) {
-                boolean isKeysMigrate = new IdempotentConfirmer() {
+            for (final String key : keys) {
+                boolean isKeyMigrate = new IdempotentConfirmer() {
                     // 失败后，迁移时限加倍
                     private int migrateTimeOutFactor = 1;
 
                     @Override
                     public boolean execute() {
                         String response = source.migrate(target.getClient().getHost(), target.getClient().getPort(),
-                                0, migrateTimeout * (migrateTimeOutFactor++), keys.toArray(new String[keys.size()]));
+                                key, 0, migrateTimeout * (migrateTimeOutFactor++));
                         return response != null && (response.equalsIgnoreCase("OK") || response.equalsIgnoreCase("NOKEY"));
                     }
                 }.run();
-                if (!isKeysMigrate) {
-                    throw new RuntimeException("migrate keys=" + keys + failedInfo(source, slot));
+                if (!isKeyMigrate) {
+                    throw new RuntimeException("migrate key=" + key + failedInfo(source, slot));
                 } else {
-                    num += keys.size();
-                    logger.info("migrate keys={};response=OK", keys);
-                }
-            } else {
-                for (final String key : keys) {
-                    boolean isKeyMigrate = new IdempotentConfirmer() {
-                        // 失败后，迁移时限加倍
-                        private int migrateTimeOutFactor = 1;
-
-                        @Override
-                        public boolean execute() {
-                            String response = source.migrate(target.getClient().getHost(), target.getClient().getPort(),
-                                    key, 0, migrateTimeout * (migrateTimeOutFactor++));
-                            return response != null && (response.equalsIgnoreCase("OK") || response.equalsIgnoreCase("NOKEY"));
-                        }
-                    }.run();
-                    if (!isKeyMigrate) {
-                        throw new RuntimeException("migrate key=" + key + failedInfo(source, slot));
-                    } else {
-                        num++;
-                        logger.info("migrate key={};response=OK", key);
-                    }
+                    num++;
+                    logger.info("migrate key={};response=OK", key);
                 }
             }
         }
