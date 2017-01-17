@@ -48,7 +48,7 @@ public class PortGenerator {
         }
 
         if (StringUtils.isBlank(maxPortStr) || !StringUtils.isNumeric(maxPortStr)) {
-            logger.warn("the max port of redis is invalid, maxPortStr: {}", maxPortStr);
+            logger.warn("{} the max port of redis is invalid, maxPortStr: {}", ip, maxPortStr);
             return new Long(redisPortHolder.getAndIncrement(ip)).intValue();
         }
 
