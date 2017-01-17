@@ -386,12 +386,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
 
     @Override
     public boolean createRunNode(String host, Integer port, int maxMemory, boolean isCluster) {
-        boolean isRun = isRun(host, port);
-        if (isRun) {
-            return true;
-        }
-        boolean isCreate = runInstance(host, port, maxMemory, isCluster);
-        return isCreate;
+        return runInstance(host, port, maxMemory, isCluster);
     }
 
     private boolean runInstance(String host, Integer port, int maxMemory, boolean isCluster) {
