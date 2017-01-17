@@ -67,7 +67,7 @@ function search() {
 	                    <tr>
 	                        <td>${stats.index + 1}</td>
 	                        <td>
-	                            <a href="#${stats.index + 1}">${item.key}</a>
+	                            <a href="#${item.key}">${item.key}</a>
 	                        </td>
 	                        <td>${item.value}</td>
 	                    </tr>
@@ -79,7 +79,7 @@ function search() {
     
     <c:forEach items="${instaceSlowLogMap}" var="item" varStatus="stats">
 	    <div style="margin-top: 20px">
-	    	<div class="page-header" id="${stats.index + 1}">
+	    	<div class="page-header" id="${item.key}">
                 <h4>${item.key}</h4>
             </div>
 	        <table class="table table-bordered table-striped table-hover">

@@ -31,7 +31,7 @@
 							<span class="glyphicon glyphicon-star"></span>	                         
 	                     </c:if>
                     </td>
-                    <td>${instance.ip}:${instance.port}</td>
+                    <td><a href="/server/index.do?ip=${instance.ip}" target="_blank">${instance.ip}</a>:${instance.port}</td>
                     <td>${instance.statusDesc}</td>
 					<td>
 						<c:choose>
