@@ -418,6 +418,31 @@ Highcharts.setOptions({
 	<div id="containerClients"
 		style="min-width: 310px; height: 350px; margin: 0 auto"></div>
 	
+	
+	<!-- bsize相关 -->
+	<script type="text/javascript">
+		//查询一天出每分钟数据
+			$(document).ready(
+				function() {
+					var options = getOption("containerDbsize", "<b>键个数统计</b>", "个");
+					var commandsUrl = "/admin/app/getMutiDatesAppStats.json?appId=" + appId + "&statName=objectSize"+betweenParams;
+					$.ajax({
+						type : "get",
+						url : commandsUrl,
+						async : true,
+						success : function(data) {
+							var dates = new Array();
+							dates.push(startDate); 
+							dates.push(yesterDate);
+							pushOptionSeries(options, data, dates, "键个数趋势图", "个");
+							new Highcharts.Chart(options);
+						}
+					});
+			 });
+	</script>
+	<div id="containerDbsize"
+		style="min-width: 310px; height: 350px; margin: 0 auto"></div>
+	
 	<br/>
 	<br/>
 	<br/>
