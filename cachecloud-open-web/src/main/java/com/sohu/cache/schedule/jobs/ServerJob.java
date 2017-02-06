@@ -1,6 +1,13 @@
 package com.sohu.cache.schedule.jobs;
 
+import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
+import org.quartz.SchedulerContext;
+import org.quartz.SchedulerException;
+import org.springframework.context.ApplicationContext;
+
+import com.sohu.cache.server.ServerStatusCollector;
+import com.sohu.cache.util.ConstUtils;
 
 /**
  * 基于服务器的job

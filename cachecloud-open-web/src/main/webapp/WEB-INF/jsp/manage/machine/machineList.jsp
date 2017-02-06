@@ -44,6 +44,7 @@
 									<th>CPU使用率</th>
 									<th>网络流量</th>
 									<th>机器负载</th>
+									<th>核数/实例数</th>
 									<th>最后统计时间</th>
 									<th>是否虚机</th>
 									<th>机房</th>
@@ -141,6 +142,28 @@
 													${machine.load}
 												</c:otherwise>
 											</c:choose>
+										</td>
+										<td>
+											<fmt:formatNumber var="fmtInstanceCpuRatio" value="${machineInstanceCountMap[machine.info.ip] * 100.0 /machine.info.cpu}" pattern="0.00"/>
+	                                        	<span style="display:none"><fmt:formatNumber value="${fmtInstanceCpuRatio / 100}" pattern="0.00"/></span>
+	                                            <div class="progress margin-custom-bottom0">
+	                                            	<c:choose>
+						                        		<c:when test="${fmtInstanceCpuRatio >= 80.00}">
+															<c:set var="instanceCpuProgressBarStatus" value="progress-bar-danger"/>
+						                        		</c:when>
+						                        		<c:otherwise>
+															<c:set var="instanceCpuProgressBarStatus" value="progress-bar-success"/>
+						                        		</c:otherwise>
+						                        	</c:choose>
+	                                                    <div class="progress-bar ${instanceCpuProgressBarStatus}"
+	                                                         role="progressbar" aria-valuenow="${fmtInstanceCpuRatio}" aria-valuemax="100"
+	                                                         aria-valuemin="0" style="width: ${fmtInstanceCpuRatio}%">
+	                                                        <label style="color: #000000">
+	                                                            <fmt:formatNumber value="${machineInstanceCountMap[machine.info.ip]}"/>&nbsp;&nbsp;实例/
+	                                                            <fmt:formatNumber value="${machine.info.cpu}"/>&nbsp;&nbsp;核
+	                                                        </label>
+	                                                    </div>
+	                                                </div>
 										</td>
 										<td><fmt:formatDate value="${machine.modifyTime}" type="time" timeStyle="full" pattern="yyyy-MM-dd HH:mm"/></td>
                                         <th>

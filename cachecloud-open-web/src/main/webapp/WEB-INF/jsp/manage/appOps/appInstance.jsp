@@ -464,7 +464,7 @@
 		
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
-					<h4 class="modal-title">添加slave节点</h4>
+					<h4 class="modal-title">添加slave节点(主节点:${instance.id}, ${instance.ip}:${instance.port})</h4>
 				</div>
 			
 				<form class="form-horizontal form-bordered form-row-stripped">
@@ -502,7 +502,7 @@
 		
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
-					<h4 class="modal-title">添加slave节点</h4>
+					<h4 class="modal-title">添加slave节点(主节点:${instance.id}, ${instance.ip}:${instance.port})</h4>
 				</div>
 			
 				<form class="form-horizontal form-bordered form-row-stripped">

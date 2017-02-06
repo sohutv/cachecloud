@@ -110,6 +110,10 @@
         WHERE ip = #{ip} and status != 2
         ORDER BY id;
     </select>
+    
+    <select id="getMachineInstanceCountMap" resultType="hashmap">
+    	select ip, count(*) as count from instance_info where status=1 group by ip;
+    </select>
 
 
 </mapper>

@@ -198,5 +198,11 @@ public interface MachineCenter {
      * @return      取消部署成功返回true， 否则返回false
      */
     public boolean unDeployServerCollection(final long hostId, final String ip);
+
+    /**
+     * 获取机器下实例数map
+     * @return
+     */
+    public Map<String, Integer> getMachineInstanceCountMap();
     
 }

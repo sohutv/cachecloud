@@ -5,6 +5,7 @@ import com.sohu.cache.entity.InstanceInfo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 基于instance的dao操作
@@ -93,5 +94,13 @@ public interface InstanceDao {
      * @return
      */
     public List<InstanceInfo> getInstListByIp(@Param("ip") String ip);
+    
+    
+    /**
+     * 机器实例数map
+     * @return
+     */
+    public List<Map<String, Object>> getMachineInstanceCountMap();
+    
 
 }

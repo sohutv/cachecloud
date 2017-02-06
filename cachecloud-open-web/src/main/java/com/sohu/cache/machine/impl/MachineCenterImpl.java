@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.quartz.JobKey;
 import org.quartz.Trigger;
@@ -693,9 +695,30 @@ public class MachineCenterImpl implements MachineCenter {
         }
         return schedulerCenter.unscheduleJob(collectionTriggerKey);
 	}
+	
+	@Override
+    public Map<String, Integer> getMachineInstanceCountMap() {
+	    List<Map<String,Object>> mapList = instanceDao.getMachineInstanceCountMap();
+	    if (CollectionUtils.isEmpty(mapList)) {
+	        return Collections.emptyMap();
+	    }
+	    
+	    Map<String, Integer> resultMap = new HashMap<String, Integer>();
+	    for(Map<String,Object> map : mapList) {
+	        String ip = MapUtils.getString(map, "ip", "");
+	        if (StringUtils.isBlank(ip)) {
+	            continue;
+	        }
+	        int count = MapUtils.getIntValue(map, "count");
+	        resultMap.put(ip, count);
+	    }
+        return resultMap;
+    }
 
 	public void setAsyncService(AsyncService asyncService) {
 		this.asyncService = asyncService;
 	}
+
+    
     
 }
