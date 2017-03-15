@@ -92,9 +92,9 @@
 
 ## 六、CacheCloud环境需求
 
-+ Java 7
++ JDK 7+
 + Maven 3
-+ MySQL
++ MySQL 5.5
 + Redis 3
 
 <a name="cc7"/>
