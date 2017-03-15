@@ -44,20 +44,20 @@ CacheCloud提供一个Redis云管理平台：实现多种类型(**Redis Standalo
 ![](http://i3.itc.cn/20160125/3084_e6f2f51c_54cf_4081_450f_c69998e74d01_1.png)
 
 #### 1.部署成本
-Redis多机(Redis-Sentinel, Redis-Cluster)部署和配置相对比较复杂，较容易出错。例如：100个redis数据节点组成的redis-cluster集群，如果单纯手工安装，既耗时又容易出错。
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Redis多机(Redis-Sentinel, Redis-Cluster)部署和配置相对比较复杂，较容易出错。例如：100个redis数据节点组成的redis-cluster集群，如果单纯手工安装，既耗时又容易出错。
 
 #### 2.实例碎片化
 
-作为一个Redis管理员(可以看做redis DBA)需要帮助开发者管理上百个Redis-Cluster集群，分布在数百台机器上，人工维护成本很高，需要自动化运维工具。
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;作为一个Redis管理员(可以看做redis DBA)需要帮助开发者管理上百个Redis-Cluster集群，分布在数百台机器上，人工维护成本很高，需要自动化运维工具。
 
 #### 3. 监控、统计和管理不完善
 
-一些开源的Redis监控和管理工具，例如：RedisLive(Python)、Redis Commander(Node.js)，Redmon(Ruby)无论从功能的全面性(例如配置管理，支持Redis-Cluster等等)、扩展性很难满足需求。
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;一些开源的Redis监控和管理工具，例如：RedisLive(Python)、Redis Commander(Node.js)，Redmon(Ruby)无论从功能的全面性(例如配置管理，支持Redis-Cluster等等)、扩展性很难满足需求。
 
 #### 4. 运维成本
 
-Redis的使用者需要维护各自的Redis，但是用户可能更加善于使用Redis实现各种功能，但是没有足够的精力和经验维护Redis。
-Redis的开发人员如同使用Mysql一样，不需要运维Mysql服务器，同样使用Redis服务，不要自己运维Redis，Redis由一些在Redis运维方面更有经验的人来维护（保证高可用，高扩展性），使得开发者更加关注于Redis使用本身。
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Redis的使用者需要维护各自的Redis，但是用户可能更加善于使用Redis实现各种功能，但是没有足够的精力和经验维护Redis。Redis的开发人员如同使用MySQL一样，不需要运维Mysql服务器，同样使用Redis服务，不要自己运维Redis，Redis由一些在Redis运维方面更有经验的人来维护（保证高可用，高扩展性），使得开发者更加关注于Redis使用本身。
 
 #### 5. 伸缩性
 
@@ -65,11 +65,11 @@ Redis的开发人员如同使用Mysql一样，不需要运维Mysql服务器，�
 
 #### 6. 经济成本
 
-机器利用率低，各个项目组的Redis较为分散的部署在各自服务器上，造成了大量闲置资源没有有效利用。 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;机器利用率低，各个项目组的Redis较为分散的部署在各自服务器上，造成了大量闲置资源没有有效利用。 
 
 #### 7. 版本不统一 
 
-各个项目的Redis使用各种不同的版本，不便于管理和交互。
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;各个项目的Redis使用各种不同的版本，不便于管理和交互。
 
 <a name="cc4"/>
 
@@ -77,7 +77,7 @@ Redis的开发人员如同使用Mysql一样，不需要运维Mysql服务器，�
 
 + 规模化自动运维：	降低运维成本，降低人为操作出错率。
 + 自由伸缩：	    提供灵活的伸缩性，应用扩容/收缩成本降低，机器资源得到重复利用。
-+ 团队提升，开源贡献:提升云产品开发设计经验,自己作为开发者和使用者，Eating your own dog food。
++ 团队提升，开源贡献:提升云产品开发设计经验,自己作为开发者和使用者。
 
 <a name="cc5"/>
 
