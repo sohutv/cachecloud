@@ -18,7 +18,7 @@
 
 ## 一、CacheCloud是做什么的
 
-CacheCloud提供一个Redis云管理平台：实现多种类型(**Redis Standalone**、**Redis Sentinel**、**Redis Cluster**)自动部署、解决Redis实例碎片化现象、提供完善统计、监控、运维功能、减少运维成本和误操作，提高机器的利用率，提供灵活的伸缩性，提供方便的接入客户端。
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CacheCloud提供一个Redis云管理平台：实现多种类型(**Redis Standalone**、**Redis Sentinel**、**Redis Cluster**)自动部署、解决Redis实例碎片化现象、提供完善统计、监控、运维功能、减少运维成本和误操作，提高机器的利用率，提供灵活的伸缩性，提供方便的接入客户端。
 
 ![](http://i3.itc.cn/20160125/3084_5393fb5d_7350_f249_9e37_c0d06d00b908_1.png)
 
@@ -122,7 +122,7 @@ CacheCloud提供一个Redis云管理平台：实现多种类型(**Redis Standalo
 
 ![](http://i0.itc.cn/20170315/3084_f3e50a44_c732_9ac2_e117_90759d8e406b_1.png)
 
-除此之外，还有天津联怡科技有限公司、瑞友科技、厦门美好出行物联网技术有限公司、北京九瑞网络科技有限公司、深圳市深软信息技术有限公司、欧乐在线科技有限公司、慧科教育、上海仁画信息股份有限公司等。
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;除此之外，还有天津联怡科技有限公司、瑞友科技、厦门美好出行物联网技术有限公司、北京九瑞网络科技有限公司、深圳市深软信息技术有限公司、欧乐在线科技有限公司、慧科教育、上海仁画信息股份有限公司等。
 
 
  
