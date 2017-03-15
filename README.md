@@ -32,9 +32,7 @@ CacheCloud提供一个Redis云管理平台：实现多种类型(**Redis Standalo
 + **方便的客户端：**方便快捷的客户端接入。
 + **元数据管理：**    提供机器、应用、实例、用户信息管理。
 + **流程化：**      提供申请，运维，伸缩，修改等完善的处理流程
-+ **一键导入：**      [一键导入已经存在Redis]
-
-[http://cachecloud.github.io/2016/04/17/%E5%B7%B2%E5%AD%98%E5%9C%A8Redis%E6%8E%A5%E5%85%A5CacheCloud/](http://cachecloud.github.io/2016/04/17/%E5%B7%B2%E5%AD%98%E5%9C%A8Redis%E6%8E%A5%E5%85%A5CacheCloud/)
++ **一键导入：**      [一键导入已经存在Redis](http://cachecloud.github.io/2016/04/17/%E5%B7%B2%E5%AD%98%E5%9C%A8Redis%E6%8E%A5%E5%85%A5CacheCloud/)
 
 
 <a name="cc3"/>
