@@ -15,14 +15,16 @@
 * [九、CacheCloud已知用户](#cc9)
 
 <a name="cc1"/>
-## 一、CacheCloud是做什么的
+
+### 一、CacheCloud是做什么的
 
 CacheCloud提供一个Redis云管理平台：实现多种类型(**Redis Standalone**、**Redis Sentinel**、**Redis Cluster**)自动部署、解决Redis实例碎片化现象、提供完善统计、监控、运维功能、减少运维成本和误操作，提高机器的利用率，提供灵活的伸缩性，提供方便的接入客户端。
 
 ![](http://i3.itc.cn/20160125/3084_5393fb5d_7350_f249_9e37_c0d06d00b908_1.png)
 
 <a name="cc2"/>
-## 二、CacheCloud提供哪些功能
+
+### 二、CacheCloud提供哪些功能
 
 + **监控统计：**	提供了机器、应用、实例下各个维度数据的监控和统计界面。
 + **一键开启：**	Redis Standalone、Redis Sentinel、Redis Cluster三种类型的应用，无需手动配置初始化。
@@ -36,7 +38,8 @@ CacheCloud提供一个Redis云管理平台：实现多种类型(**Redis Standalo
 
 
 <a name="cc3"/>
-## 三、CacheCloud解决什么问题
+
+### 三、CacheCloud解决什么问题
 
 ![](http://i3.itc.cn/20160125/3084_e6f2f51c_54cf_4081_450f_c69998e74d01_1.png)
 
