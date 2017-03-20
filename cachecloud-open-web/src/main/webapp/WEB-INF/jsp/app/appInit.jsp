@@ -196,6 +196,15 @@
 											
 											<div class="form-group">
 												<label class="control-label col-md-3">
+													密码:
+												</label>
+												<div class="col-md-5">
+													<input type="text" name="password" id="password" placeholder="redis密码,非必填" class="form-control"/>
+												</div>
+											</div>
+											
+											<div class="form-group">
+												<label class="control-label col-md-3">
 													内存报警阀值<font color='red'>(*)</font>:
 												</label>
 												<div class="col-md-5">
