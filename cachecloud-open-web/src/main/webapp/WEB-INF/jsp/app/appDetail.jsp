@@ -74,7 +74,10 @@
         
         <div class="col-md-4">
             <div class="page-header">
-                <h4>报警指标</h4>
+                <h4>
+                		报警指标
+                		<button type="button" class="btn default" data-target="#appAlertConfigModal" data-toggle="modal">应用报警配置</button>
+                </h4>
             </div>
             <table class="table table-striped table-hover">
                 <thead>
@@ -142,18 +145,6 @@
    		</div>
     </div>
 
- 	<div class="row">
-   	 	<div class="col-md-12 page-header">
-            <h4>管理操作</h4>
-        </div>
-   		<div class="col-md-12">
-   		   				<div class="col-md-2"></div>
-   		
-   			<button class="col-md-3" type="button" class="btn default" data-target="#appAddUserModal" data-toggle="modal">添加报警接收用户</button>
-   				<div class="col-md-2"></div>
-   			<button class="col-md-3" type="button" class="btn default" data-target="#appAlertConfigModal" data-toggle="modal">应用报警配置</button>
-   		</div>
-    </div>
     <br/><br/><br/>
     <br/><br/><br/>
 	
