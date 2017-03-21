@@ -334,6 +334,8 @@ public interface RedisCenter {
     public String getNodeId(long appId, String ip, int port);
     
     Jedis getJedis(String host, int port, String password);
+    
+    Jedis getJedis(String host, int port);
 	
 	Jedis getJedis(long appId, String host, int port);
 

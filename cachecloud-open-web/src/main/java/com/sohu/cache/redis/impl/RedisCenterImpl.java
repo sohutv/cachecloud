@@ -945,7 +945,8 @@ public class RedisCenterImpl implements RedisCenter {
                 return "online app only support read-only and safe command ";
             }
         }
-        String shell = RedisProtocol.getExecuteCommandShell(host, port, command);
+        String password = appDesc.getPassword();
+        String shell = RedisProtocol.getExecuteCommandShell(host, port, password, command);
         //记录客户端发送日志
         logger.warn("executeRedisShell={}", shell);
         return machineCenter.executeShell(host, shell);
@@ -1764,6 +1765,11 @@ public class RedisCenterImpl implements RedisCenter {
 			jedis.auth(password);
 		}
 		return jedis;
+	}
+	
+	@Override
+	public Jedis getJedis(String host, int port) {
+		return getJedis(host, port, null);
 	}
 
 }

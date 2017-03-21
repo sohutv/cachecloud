@@ -938,7 +938,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
                     logger.warn("{} cmd is null", instanceInfo);
                     continue;
                 }
-                boolean isRun = redisCenter.isRun(appId, host, port);
+                boolean isRun = redisCenter.isRun(host, port);
                 if (!isRun) {
                     logger.warn("{} is not run");
                     continue;
@@ -947,7 +947,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
                     @Override
                     public boolean execute() {
                     	
-                        Jedis jedis = redisCenter.getJedis(appId, host, port, Protocol.DEFAULT_TIMEOUT, Protocol.DEFAULT_TIMEOUT);
+                        Jedis jedis = redisCenter.getJedis(host, port);
                         try {
                             String response = jedis.sentinelFailover(masterName);
                             return response != null && response.equalsIgnoreCase("OK");
