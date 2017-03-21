@@ -581,7 +581,8 @@ public class MachineCenterImpl implements MachineCenter {
                     }
                     String host = instanceInfo.getIp();
                     int port = instanceInfo.getPort();
-                    Boolean isMaster = redisCenter.isMaster(host, port);
+                    long appId = instanceInfo.getAppId();
+                    Boolean isMaster = redisCenter.isMaster(appId, host, port);
                     instanceInfo.setRoleDesc(isMaster);
                     if(isMaster != null && !isMaster){
                         HostAndPort hap = redisCenter.getMaster(host, port);

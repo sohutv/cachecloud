@@ -2,13 +2,14 @@
 <%@ include file="/WEB-INF/jsp/manage/commons/taglibs.jsp"%>
 <script type="text/javascript">
 
-	function startInstance(instanceId){
+	function startInstance(appId, instanceId){
 		if(confirm("确认要开启"+instanceId+"实例吗?")){
 			$.ajax({
 	            type: "get",
 	            url: "/manage/instance/startInstance.json",
 	            data: 
 	            {
+	            	appId: appId,
 	            	instanceId: instanceId
 	            },
 	            success: function (result) {
@@ -23,13 +24,14 @@
 	    }
 	}
 
-	function shutdownInstance(instanceId){
+	function shutdownInstance(appId, instanceId){
 		if(confirm("确认要下线"+instanceId+"实例吗?")){
 			$.ajax({
 	            type: "get",
 	            url: "/manage/instance/shutdownInstance.json",
 	            data: 
 	            {
+	            	appId: appId,
 	            	instanceId: instanceId
 	            },
 	            success: function (result) {
@@ -317,15 +319,15 @@
 	                    	<div>
                                 <c:choose>
                                    <c:when test="${instance.status ==2}">
-                                     <button type="button" class="btn btn-small btn-success" onclick="startInstance('${instance.id}')">
+                                     <button type="button" class="btn btn-small btn-success" onclick="startInstance('${appDesc.appId}','${instance.id}')">
                                         	启动实例
                                      </button>
                                    </c:when>
                                     <c:when test="${instance.status ==0}">
-                                        <button type="button" class="btn btn-small btn-success" onclick="startInstance('${instance.id}')">
+                                        <button type="button" class="btn btn-small btn-success" onclick="startInstance('${appDesc.appId}','${instance.id}')">
                                             	启动实例
                                         </button>
-                                        <button type="button" class="btn btn-small btn-danger" onclick="shutdownInstance('${instance.id}')">
+                                        <button type="button" class="btn btn-small btn-danger" onclick="shutdownInstance('${appDesc.appId}','${instance.id}')">
                                             	下线实例
                                         </button>
                                         <c:choose>
@@ -335,7 +337,7 @@
 		                                </c:choose>
                                     </c:when>
                                    <c:when test="${instance.status == 1}">
-                                     <button type="button" class="btn btn-small btn-danger" onclick="shutdownInstance('${instance.id}')">
+                                     <button type="button" class="btn btn-small btn-danger" onclick="shutdownInstance('${appDesc.appId}', '${instance.id}')">
                                         下线实例
                                      </button>
                                        <c:if test="${instance.masterInstanceId == 0 and instance.type != 5}">

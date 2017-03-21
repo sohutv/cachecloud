@@ -35,7 +35,7 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
     private AppAuditDao appAuditDao;
 
     @Override
-    public boolean startExistInstance(int instanceId) {
+    public boolean startExistInstance(long appId, int instanceId) {
         Assert.isTrue(instanceId > 0L);
         InstanceInfo instanceInfo = instanceDao.getInstanceInfoById(instanceId);
         Assert.isTrue(instanceInfo != null);
@@ -44,7 +44,7 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
         int port = instanceInfo.getPort();
         boolean isRun;
         if (TypeUtil.isRedisType(type)) {
-            isRun = redisCenter.isRun(host, port);
+            isRun = redisCenter.isRun(appId, host, port);
             if (isRun) {
                 logger.warn("{}:{} instance is Running", host, port);
             } else {
@@ -63,7 +63,7 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
                 } else {
                     logger.warn("{}:{} instance has Run", host, port);
                 }
-                isRun = redisCenter.isRun(host, port);
+                isRun = redisCenter.isRun(appId, host, port);
             }
         } else {
             logger.error("type={} not match!", type);
@@ -81,7 +81,7 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
     }
 
     @Override
-    public boolean shutdownExistInstance(int instanceId) {
+    public boolean shutdownExistInstance(long appId, int instanceId) {
         Assert.isTrue(instanceId > 0L);
         InstanceInfo instanceInfo = instanceDao.getInstanceInfoById(instanceId);
         Assert.isTrue(instanceInfo != null);
@@ -90,7 +90,7 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
         int port = instanceInfo.getPort();
         boolean isShutdown;
         if (TypeUtil.isRedisType(type)) {
-            isShutdown = redisCenter.shutdown(host, port);
+            isShutdown = redisCenter.shutdown(appId, host, port);
             if (isShutdown) {
                 logger.warn("{}:{} redis is shutdown", host, port);
             } else {
@@ -126,14 +126,14 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
     }
     
     @Override
-    public boolean modifyInstanceConfig(Long appAuditId, String host, int port, String instanceConfigKey,
+    public boolean modifyInstanceConfig(long appId, Long appAuditId, String host, int port, String instanceConfigKey,
             String instanceConfigValue) {
         Assert.isTrue(appAuditId != null && appAuditId > 0L);
         Assert.isTrue(StringUtils.isNotBlank(host));
         Assert.isTrue(port > 0);
         Assert.isTrue(StringUtils.isNotBlank(instanceConfigKey));
         Assert.isTrue(StringUtils.isNotBlank(instanceConfigValue));
-        boolean isModify = redisDeployCenter.modifyInstanceConfig(host, port, instanceConfigKey, instanceConfigValue);
+        boolean isModify = redisDeployCenter.modifyInstanceConfig(appId, host, port, instanceConfigKey, instanceConfigValue);
         if (isModify) {
             // 改变审核状态
             appAuditDao.updateAppAudit(appAuditId, AppCheckEnum.APP_ALLOCATE_RESOURCE.value());

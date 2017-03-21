@@ -75,6 +75,8 @@
     		var officer = document.getElementById("officer").value;
     		//内存报警阀值
     		var memAlertValue = document.getElementById("memAlertValue").value;
+    		//redis密码
+    		var password = document.getElementById("password").value;
     		//实例详情
     		var appInstanceInfo = document.getElementById("appInstanceInfo").value;
     		//应用类型
@@ -92,6 +94,7 @@
     				intro: appIntro,
     				officer: officer,
     				memAlertValue: memAlertValue,
+    				password: password,
     				type: appType,
     				isTest: isTest,
     				appInstanceInfo: appInstanceInfo
@@ -207,6 +210,18 @@
 															是
 														</option>
 													</select>
+												</div>
+											</div>
+											
+											<div class="form-group">
+												<label class="control-label col-md-3">
+													redis密码:
+												</label>
+												<div class="col-md-5">
+													<input type="text" name="password" id="password" placeholder="redis密码" class="form-control"/>
+													<span class="help-block">
+														redis密码，如果没有则为空
+													</span>
 												</div>
 											</div>
 											

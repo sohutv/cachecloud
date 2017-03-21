@@ -32,7 +32,7 @@ public class InstanceStatsCenterImpl implements InstanceStatsCenter {
     private InstanceStatsDao instanceStatsDao;
 
     private RedisCenter redisCenter;
-
+    
     @Override
     public InstanceInfo getInstanceInfo(long instanceId) {
         return instanceDao.getInstanceInfoById(instanceId);
@@ -47,10 +47,10 @@ public class InstanceStatsCenterImpl implements InstanceStatsCenter {
         }
         InstanceInfo instanceInfo = instanceDao.getInstanceInfoById(instanceId);
         int type = instanceInfo.getType();
-        boolean isRun = isRun(type, instanceInfo.getIp(), instanceInfo.getPort());
+        boolean isRun = redisCenter.isRun(instanceInfo.getAppId(), instanceInfo.getIp(), instanceInfo.getPort());
         instanceStats.setRun(isRun);
         if (isRun) {
-            Map<String, Object> infoMap = getInfoMap(type, instanceInfo.getIp(), instanceInfo.getPort());
+            Map<String, Object> infoMap = getInfoMap(instanceInfo.getAppId(), type, instanceInfo.getIp(), instanceInfo.getPort());
             instanceStats.setInfoMap(infoMap);
             if (infoMap == null || infoMap.isEmpty()) {
                 instanceStats.setRun(false);
@@ -59,12 +59,8 @@ public class InstanceStatsCenterImpl implements InstanceStatsCenter {
         return instanceStats;
     }
 
-    private boolean isRun(int type, String ip, int port) {
-        return redisCenter.isRun(ip, port);
-    }
-
-    private Map<String, Object> getInfoMap(int type, String ip, int port) {
-        Map<RedisConstant, Map<String, Object>> infoMap = redisCenter.getInfoStats(ip, port);
+    private Map<String, Object> getInfoMap(long appId, int type, String ip, int port) {
+        Map<RedisConstant, Map<String, Object>> infoMap = redisCenter.getInfoStats(appId, ip, port);
         Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
         if (infoMap != null) {
             for (RedisConstant redisConstant : infoMap.keySet()) {
@@ -117,7 +113,7 @@ public class InstanceStatsCenterImpl implements InstanceStatsCenter {
             String ip = instance.getIp();
             int port = instance.getPort();
             int type = instance.getType();
-            Boolean isMaster = redisCenter.isMaster(ip, port);
+            Boolean isMaster = redisCenter.isMaster(appId, ip, port);
             if (BooleanUtils.isNotTrue(isMaster)){
                 continue;
             }

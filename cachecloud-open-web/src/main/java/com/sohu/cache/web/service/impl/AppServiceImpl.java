@@ -191,7 +191,7 @@ public class AppServiceImpl implements AppService {
                     }
                     String host = instanceInfo.getIp();
                     int port = instanceInfo.getPort();
-                    Boolean isMaster = redisCenter.isMaster(host, port);
+                    Boolean isMaster = redisCenter.isMaster(appId, host, port);
                     instanceInfo.setRoleDesc(isMaster);
                     if(isMaster != null && !isMaster){
                         HostAndPort hap = redisCenter.getMaster(host, port);

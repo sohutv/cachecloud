@@ -81,6 +81,7 @@ public class ImportAppController extends BaseController {
         appDesc.setType(NumberUtils.toInt(request.getParameter("type")));
         appDesc.setIsTest(NumberUtils.toInt(request.getParameter("isTest")));
         appDesc.setMemAlertValue(NumberUtils.toInt(request.getParameter("memAlertValue")));
+        appDesc.setPassword(request.getParameter("password"));
         appDesc.setUserId(currentUser.getId());
         appDesc.setStatus(2);
         appDesc.setCreateTime(date);
