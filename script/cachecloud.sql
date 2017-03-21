@@ -1076,4 +1076,3 @@ CREATE TABLE `instance_alert` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='实例报警阀值';
 
 alter table app_desc add column password varchar(255) comment 'redis密码';
-alter table instance_info add column password varchar(255) comment 'redis密码';

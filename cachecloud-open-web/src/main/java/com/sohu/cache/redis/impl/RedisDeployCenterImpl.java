@@ -399,13 +399,11 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         List<String> configs = handleCommonConfig(port, maxMemory);
         if (isCluster) {
             configs.addAll(handleClusterConfig(port));
-        } else {
-			if (StringUtils.isNotBlank(password)) {
-				//加两个选项
-				configs.add(RedisConfigEnum.REQUIREPASS.getKey() + ConstUtils.SPACE + password);
-				configs.add(RedisConfigEnum.MASTERAUTH.getKey() + ConstUtils.SPACE + password);
-			}
-		}
+        } 
+		//加两个选项
+		configs.add(RedisConfigEnum.REQUIREPASS.getKey() + ConstUtils.SPACE + password);
+		configs.add(RedisConfigEnum.MASTERAUTH.getKey() + ConstUtils.SPACE + password);
+		
         printConfig(configs);
         String fileName;
         String runShell;

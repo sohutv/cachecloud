@@ -311,14 +311,6 @@ public interface RedisCenter {
     public Map<String, Long> getInstanceSlowLogCountMapByAppId(Long appId, Date startDate, Date endDate);
     
     /**
-     * 判断当前节点是否是sentinel节点
-     * @param ip
-     * @param port
-     * @return
-     */
-    public boolean isSentinelNode(String ip, int port);
-    
-    /**
      * 获取集群的slots分布
      * @param appId
      * @return

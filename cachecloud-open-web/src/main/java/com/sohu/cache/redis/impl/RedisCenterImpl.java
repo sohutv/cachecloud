@@ -1536,33 +1536,6 @@ public class RedisCenterImpl implements RedisCenter {
     }
 
     @Override
-    public boolean isSentinelNode(final String ip, final int port) {
-        boolean isRun = new IdempotentConfirmer() {
-            private int timeOutFactor = 1;
-
-            @Override
-            public boolean execute() {
-                Jedis jedis = getJedis(ip, port);
-                try {
-                    jedis.getClient().setConnectionTimeout(Protocol.DEFAULT_TIMEOUT * (timeOutFactor++));
-                    jedis.getClient().setSoTimeout(Protocol.DEFAULT_TIMEOUT * (timeOutFactor++));
-                    String info = jedis.info(RedisConstant.Server.getValue());
-                    Map<RedisConstant, Map<String, Object>> infoMap = processRedisStats(info);
-                    Map<String, Object> map = infoMap.get(RedisConstant.Server);
-                    String redisMode = MapUtils.getString(map, "redis_mode", null);
-                    return redisMode != null && redisMode.equalsIgnoreCase("sentinel");
-                } catch (Exception e) {
-                    logger.warn("{}:{} error message is {} ", ip, port, e.getMessage());
-                    return false;
-                } finally {
-                    jedis.close();
-                }
-            }
-        }.run();
-        return isRun;
-    }
-    
-    @Override
     public Map<String, InstanceSlotModel> getClusterSlotsMap(long appId) {
     		AppDesc appDesc = appDao.getAppDescById(appId);
     		if (!TypeUtil.isRedisCluster(appDesc.getType())) {
