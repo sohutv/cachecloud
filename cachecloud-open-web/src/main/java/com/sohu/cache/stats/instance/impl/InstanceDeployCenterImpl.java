@@ -44,7 +44,11 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
         int port = instanceInfo.getPort();
         boolean isRun;
         if (TypeUtil.isRedisType(type)) {
-            isRun = redisCenter.isRun(appId, host, port);
+        		if (TypeUtil.isRedisSentinel(type)) {
+                isRun = redisCenter.isRun(host, port);
+            } else {
+                isRun = redisCenter.isRun(appId, host, port);
+            }
             if (isRun) {
                 logger.warn("{}:{} instance is Running", host, port);
             } else {
@@ -63,7 +67,11 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
                 } else {
                     logger.warn("{}:{} instance has Run", host, port);
                 }
-                isRun = redisCenter.isRun(appId, host, port);
+                if (TypeUtil.isRedisSentinel(type)) {
+                    isRun = redisCenter.isRun(host, port);
+                } else {
+                    isRun = redisCenter.isRun(appId, host, port);
+                }
             }
         } else {
             logger.error("type={} not match!", type);

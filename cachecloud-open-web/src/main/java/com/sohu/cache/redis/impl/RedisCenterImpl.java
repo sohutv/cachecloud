@@ -691,14 +691,15 @@ public class RedisCenterImpl implements RedisCenter {
     }
     
     @Override
-	public boolean isRun(final String ip, final int port, final String redisPassword) {
+	public boolean isRun(final String ip, final int port, final String password) {
    		boolean isRun = new IdempotentConfirmer() {
             private int timeOutFactor = 1;
 
             @Override
             public boolean execute() {
-                Jedis jedis = getJedis(ip, port, redisPassword);
+                Jedis jedis = null;
                 try {
+                		jedis = getJedis(ip, port, password);
                     jedis.getClient().setConnectionTimeout(Protocol.DEFAULT_TIMEOUT * (timeOutFactor++));
                     jedis.getClient().setSoTimeout(Protocol.DEFAULT_TIMEOUT * (timeOutFactor++));
                     String pong = jedis.ping();
@@ -714,7 +715,9 @@ public class RedisCenterImpl implements RedisCenter {
                     logger.warn("{}:{} error message is {} ", ip, port, e.getMessage());
                     return false;
                 } finally {
-                    jedis.close();
+                		if (jedis != null) {
+                			jedis.close();
+					}
                 }
             }
         }.run();
