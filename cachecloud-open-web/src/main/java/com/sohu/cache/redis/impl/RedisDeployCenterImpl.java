@@ -486,7 +486,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         }
         List<String> masterSentinelConfigs = handleSentinelConfig(masterName, masterHost, masterPort, sentinelPort);
         if (StringUtils.isNotBlank(password)) {
-        		masterSentinelConfigs.add(RedisConfigEnum.AUTH_PASS.getKey() + ConstUtils.SPACE + password);
+        		masterSentinelConfigs.add("sentinel " + RedisConfigEnum.AUTH_PASS.getKey() + ConstUtils.SPACE + masterName + ConstUtils.SPACE + password);
         }
         
         printConfig(masterSentinelConfigs);
