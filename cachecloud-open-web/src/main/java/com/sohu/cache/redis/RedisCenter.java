@@ -110,6 +110,16 @@ public interface RedisCenter {
      */
     public boolean isRun(final long appId, String ip, int port);
     
+    
+    /**
+     * 判断实例是否运行
+     *
+     * @param ip
+     * @param port
+     * @return
+     */
+	public boolean isRun(String ip, int port);
+    
     /**
      * 判断实例是否运行
      *

@@ -56,15 +56,17 @@
                 <tr>
                     <td>appKey</td>
                     <td>
-                    <c:choose>
-                    	<c:when test="${appDetail.appDesc.appKey == null || appDetail.appDesc.appKey == ''}">
-                    		暂无
-                    	</c:when>
-                    	<c:otherwise>
-                    		${appDetail.appDesc.appKey}
-                    	</c:otherwise>
-                    </c:choose>
+	                    <c:choose>
+		                    	<c:when test="${appDetail.appDesc.appKey == null || appDetail.appDesc.appKey == ''}">
+		                    		暂无
+		                    	</c:when>
+		                    	<c:otherwise>
+		                    		${appDetail.appDesc.appKey}
+		                    	</c:otherwise>
+	                    </c:choose>
                     </td>
+                    <td>redis密码</td>
+                    <td>${appDetail.appDesc.password}</td>
                 </tr>
                 </tbody>
             </table>

@@ -678,6 +678,11 @@ public class RedisCenterImpl implements RedisCenter {
                 jedis.close();
         }
     }
+    
+    @Override
+	public boolean isRun(final String ip, final int port) {
+    		return isRun(ip, port, null);
+    }
 
     @Override
     public boolean isRun(final long appId, final String ip, final int port) {

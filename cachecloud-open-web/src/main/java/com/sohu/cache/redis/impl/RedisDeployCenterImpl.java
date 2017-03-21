@@ -504,7 +504,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
             return false;
         }
         //验证实例
-        if (!redisCenter.isRun(appId, sentinelHost, sentinelPort)) {
+        if (!redisCenter.isRun(sentinelHost, sentinelPort)) {
             logger.error("host:{};port:{} not run", sentinelHost, sentinelPort);
             return false;
         } else {
