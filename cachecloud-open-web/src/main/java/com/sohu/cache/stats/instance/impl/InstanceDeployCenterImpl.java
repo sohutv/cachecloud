@@ -90,7 +90,11 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
         int port = instanceInfo.getPort();
         boolean isShutdown;
         if (TypeUtil.isRedisType(type)) {
-            isShutdown = redisCenter.shutdown(appId, host, port);
+        		if (TypeUtil.isRedisSentinel(type)) {
+        			isShutdown = redisCenter.shutdown(host, port);
+        		} else {
+        			isShutdown = redisCenter.shutdown(appId, host, port);
+        		}
             if (isShutdown) {
                 logger.warn("{}:{} redis is shutdown", host, port);
             } else {

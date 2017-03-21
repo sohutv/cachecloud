@@ -746,6 +746,31 @@ public class RedisCenterImpl implements RedisCenter {
             jedis.close();
         }
     }
+    
+    @Override
+	public boolean shutdown(String ip, int port) {
+    		boolean isRun = isRun(ip, port);
+        if (!isRun) {
+            return true;
+        }
+        final Jedis jedis = getJedis(ip, port);
+        try {
+            //关闭实例节点
+            boolean isShutdown = new IdempotentConfirmer() {
+                @Override
+                public boolean execute() {
+                    jedis.shutdown();
+                    return true;
+                }
+            }.run();
+            if (!isShutdown) {
+                logger.error("{}:{} redis not shutdown!", ip, port);
+            }
+            return isShutdown;
+        } finally {
+            jedis.close();
+        }
+	}
 
     /**
      * 返回当前实例的一些关键指标
@@ -1771,5 +1796,7 @@ public class RedisCenterImpl implements RedisCenter {
 	public Jedis getJedis(String host, int port) {
 		return getJedis(host, port, null);
 	}
+
+	
 
 }

@@ -131,10 +131,21 @@ public interface RedisCenter {
      */
 	public boolean isRun(String ip, int port, String redisPassword);
 
-    
+	/**
+     * 下线指定实例
+     *
+     * @param appId
+     * @param ip
+     * @param port
+     * @return
+     */
+    public boolean shutdown(String ip, int port);
+	
+	
     /**
      * 下线指定实例
      *
+     * @param appId
      * @param ip
      * @param port
      * @return
