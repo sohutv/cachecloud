@@ -178,6 +178,9 @@ public class AppServiceImpl implements AppService {
 
     @Override
     public List<InstanceInfo> getAppInstanceInfo(Long appId) {
+    		AppDesc appDesc = appDao.getAppDescById(appId);
+    		String password = appDesc.getPassword();
+    		
         List<InstanceInfo> resultList = instanceDao.getInstListByAppId(appId);
         if (resultList != null && resultList.size() > 0) {
             for (InstanceInfo instanceInfo : resultList) {
@@ -194,7 +197,7 @@ public class AppServiceImpl implements AppService {
                     Boolean isMaster = redisCenter.isMaster(appId, host, port);
                     instanceInfo.setRoleDesc(isMaster);
                     if(isMaster != null && !isMaster){
-                        HostAndPort hap = redisCenter.getMaster(host, port);
+                        HostAndPort hap = redisCenter.getMaster(host, port, password);
                         if (hap != null) {
                             instanceInfo.setMasterHost(hap.getHost());
                             instanceInfo.setMasterPort(hap.getPort());

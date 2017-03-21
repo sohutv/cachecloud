@@ -93,7 +93,7 @@ public class RedisCenterImpl implements RedisCenter {
                 .deployJobByCron(jobKey, triggerKey, dataMap, ScheduleUtil.getMinuteCronByAppId(appId), false);
     }
 
-    private JedisPool maintainJedisPool(String host, int port) {
+    private JedisPool maintainJedisPool(String host, int port, String password) {
         String hostAndPort = ObjectConvert.linkIpAndPort(host, port);
         JedisPool jedisPool = jedisPoolMap.get(hostAndPort);
         if (jedisPool == null) {
@@ -103,7 +103,7 @@ public class RedisCenterImpl implements RedisCenter {
                 jedisPool = jedisPoolMap.get(hostAndPort);
                 if (jedisPool == null) {
                     try {
-                        jedisPool = new JedisPool(new GenericObjectPoolConfig(), host, port, Protocol.DEFAULT_TIMEOUT);
+                        jedisPool = new JedisPool(new GenericObjectPoolConfig(), host, port, Protocol.DEFAULT_TIMEOUT, password);
                         jedisPoolMap.put(hostAndPort, jedisPool);
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
@@ -653,8 +653,8 @@ public class RedisCenterImpl implements RedisCenter {
     }
 
     @Override
-    public HostAndPort getMaster(String ip, int port) {
-        JedisPool jedisPool = maintainJedisPool(ip, port);
+    public HostAndPort getMaster(String ip, int port, String password) {
+        JedisPool jedisPool = maintainJedisPool(ip, port, password);
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();

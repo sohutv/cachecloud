@@ -96,9 +96,10 @@ public interface RedisCenter {
      *
      * @param ip
      * @param port
+     * @param password
      * @return
      */
-    public HostAndPort getMaster(String ip, int port);
+    public HostAndPort getMaster(String ip, int port, String password);
 
     /**
      * 判断实例是否运行
