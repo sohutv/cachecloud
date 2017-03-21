@@ -1535,6 +1535,10 @@ public class RedisCenterImpl implements RedisCenter {
     
     @Override
     public Map<String, InstanceSlotModel> getClusterSlotsMap(long appId) {
+    		AppDesc appDesc = appDao.getAppDescById(appId);
+    		if (!TypeUtil.isRedisCluster(appDesc.getType())) {
+    			return Collections.emptyMap();
+    		}
 		// 最终结果
 		Map<String, InstanceSlotModel> resultMap = new HashMap<String, InstanceSlotModel>();
 
