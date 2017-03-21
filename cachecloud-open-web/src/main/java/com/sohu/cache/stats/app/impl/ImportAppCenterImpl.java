@@ -106,14 +106,20 @@ public class ImportAppCenterImpl implements ImportAppCenter {
                 return ImportAppResult.fail(appInstance + "中ip:port已经在instance_statistics存在");
             }
             // 4.4.检查Redis实例是否存活
-            boolean isRun = redisCenter.isRun(ip, port, appDesc.getPassword());
+            String memoryOrMasterName = instanceItems[2];
+            int memoryOrMasterNameInt = NumberUtils.toInt(memoryOrMasterName);
+            boolean isRun;
+            if (memoryOrMasterNameInt > 0) {
+            		isRun = redisCenter.isRun(ip, port, appDesc.getPassword());
+            } else {
+            		isRun = redisCenter.isRun(ip, port);
+            }
             if (!isRun) {
                 return ImportAppResult.fail(appInstance + "中的节点不是存活的");
             }
 
             // 4.5.检查内存是否为整数
-            String memoryOrMasterName = instanceItems[2];
-            boolean isSentinelNode = redisCenter.isSentinelNode(ip, port);
+            boolean isSentinelNode = memoryOrMasterNameInt <= 0;
             if (isSentinelNode) {
                 // 4.5.1 sentinel节点masterName判断
                 if (StringUtils.isEmpty(memoryOrMasterName)) {
@@ -162,7 +168,7 @@ public class ImportAppCenterImpl implements ImportAppCenter {
                 int port = NumberUtils.toInt(instanceItems[1]);
 
                 String memoryOrMasterName = instanceItems[2];
-                boolean isSentinelNode = redisCenter.isSentinelNode(host, port);
+                boolean isSentinelNode = NumberUtils.toInt(memoryOrMasterName) <= 0;
                 if (isSentinelNode) {
                     saveInstance(appId, host, port, 0, ConstUtils.CACHE_REDIS_SENTINEL, memoryOrMasterName);
                 } else {
