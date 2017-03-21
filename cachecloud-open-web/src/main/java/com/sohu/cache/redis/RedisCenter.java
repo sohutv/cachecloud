@@ -316,7 +316,7 @@ public interface RedisCenter {
      * @param port
      * @return
      */
-    public boolean isSentinelNode(long appId, String ip, int port);
+    public boolean isSentinelNode(String ip, int port);
     
     /**
      * 获取集群的slots分布

@@ -1536,13 +1536,13 @@ public class RedisCenterImpl implements RedisCenter {
     }
 
     @Override
-    public boolean isSentinelNode(final long appId, final String ip, final int port) {
+    public boolean isSentinelNode(final String ip, final int port) {
         boolean isRun = new IdempotentConfirmer() {
             private int timeOutFactor = 1;
 
             @Override
             public boolean execute() {
-                Jedis jedis = getJedis(appId, ip, port);
+                Jedis jedis = getJedis(ip, port);
                 try {
                     jedis.getClient().setConnectionTimeout(Protocol.DEFAULT_TIMEOUT * (timeOutFactor++));
                     jedis.getClient().setSoTimeout(Protocol.DEFAULT_TIMEOUT * (timeOutFactor++));

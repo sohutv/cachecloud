@@ -113,7 +113,7 @@ public class ImportAppCenterImpl implements ImportAppCenter {
 
             // 4.5.检查内存是否为整数
             String memoryOrMasterName = instanceItems[2];
-            boolean isSentinelNode = redisCenter.isSentinelNode(appDesc.getAppId(), ip, port);
+            boolean isSentinelNode = redisCenter.isSentinelNode(ip, port);
             if (isSentinelNode) {
                 // 4.5.1 sentinel节点masterName判断
                 if (StringUtils.isEmpty(memoryOrMasterName)) {
@@ -162,7 +162,7 @@ public class ImportAppCenterImpl implements ImportAppCenter {
                 int port = NumberUtils.toInt(instanceItems[1]);
 
                 String memoryOrMasterName = instanceItems[2];
-                boolean isSentinelNode = redisCenter.isSentinelNode(appId, host, port);
+                boolean isSentinelNode = redisCenter.isSentinelNode(host, port);
                 if (isSentinelNode) {
                     saveInstance(appId, host, port, 0, ConstUtils.CACHE_REDIS_SENTINEL, memoryOrMasterName);
                 } else {

@@ -46,10 +46,13 @@
     			appInstanceInfo.focus();
     			return false;
     		}
+    		var password = document.getElementById("password");
+    		
     		$.get(
     			'/import/app/check.json',
     			{
     				name: appName.value,
+    				password: password.value,
     				appInstanceInfo: appInstanceInfo.value
     			},
     	        function(data){
