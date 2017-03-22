@@ -66,7 +66,12 @@
 	                    </c:choose>
                     </td>
                     <td>redis密码</td>
-                    <td>${appDetail.appDesc.password}</td>
+                    <td>
+                    		<c:choose>
+	        		            <c:when test="${appDetail.appDesc.password != ''}">${appDetail.appDesc.password}</c:when>
+	        		            <c:otherwise>无</c:otherwise>
+	                    	</c:choose>
+                    </td>
                 </tr>
                 </tbody>
             </table>

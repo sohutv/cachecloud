@@ -20,6 +20,25 @@
    	        }
    	     );
 	}
+	function updateAppPassword() {
+		var password = document.getElementById("password");
+		var appId = document.getElementById("hiddenAppId");
+		$.get(
+   			'/manage/app/updateAppPassword.json',
+   			{
+   				password: password.value,
+   				appId: appId.value
+   			},
+   	        function(data){
+   				var status = data.status;
+   				if (status == 1) {
+   					alert("设置成功!");
+   				} else {
+   					alert("设置失败!");
+   				}
+   	        }
+   	     );
+	}
 </script>
 <div class="page-container">
 	<div class="page-content">
@@ -168,6 +187,51 @@
 					<!-- END TABLE PORTLET-->
 				</div>
 			</div>
+			
+		<div class="row">
+			<div class="col-md-12">
+				<h3 class="page-header">
+					redis密码(默认是空，如无调整无需提交)
+				</h3>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<div class="portlet box light-grey">
+					<div class="portlet-title">
+						<div class="caption"><i class="fa fa-globe"></i>redis密码</div>
+						<div class="tools">
+							<a href="javascript:;" class="collapse"></a>
+						</div>
+					</div>
+					<div class="portlet-body">
+						<div class="form">
+							<!-- BEGIN FORM-->
+							<form class="form-horizontal form-bordered form-row-stripped">
+								<div class="form-body">
+									<input type="hidden" id="hiddenAppId" name="hiddenAppId" value="${appId}">
+									<div class="form-group">
+										<label class="control-label col-md-3">
+											redis密码
+										</label>
+										<div class="col-md-5">
+											<input type="text" name="password" id="password" class="form-control"/>
+										</div>
+										<div class="col-md-2">
+											<button type="button" class="btn green" onclick="updateAppPassword()">
+												更新
+											</button>
+										</div>
+									</div>
+								</div>
+							</form>
+							<!-- END FORM-->
+						</div>
+					</div>
+				</div>
+					<!-- END TABLE PORTLET-->
+			</div>
+		</div>
 		
 		
 		<div class="row">

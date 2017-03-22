@@ -210,7 +210,10 @@
 			                    	</c:choose>
 			                    </td>
 			                    <td>
-			                    		${appDetail.appDesc.password}
+			                    		<c:choose>
+				        		            <c:when test="${appDetail.appDesc.password != ''}">${appDetail.appDesc.password}</c:when>
+				        		            <c:otherwise>无</c:otherwise>
+				                    	</c:choose>
 			                    </td>
 			                    <td>
 			                    	<c:choose>
