@@ -36,26 +36,22 @@ public class SSHTemplate {
 	private static ThreadPoolExecutor taskPool = new ThreadPoolExecutor(
 			200, 200, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(1000), 
 			new ThreadFactoryBuilder().setNameFormat("SSH-%d").setDaemon(true).build());
-	
+
 	public Result execute(String ip, SSHCallback callback) throws SSHException{
-		return execute(ip,ConstUtils.DEFAULT_SSH_PORT_DEFAULT, ConstUtils.USERNAME, 
-				ConstUtils.PASSWORD, callback);
+		return execute(ip, ConstUtils.SSH_PORT_DEFAULT, callback);
 	}
-	
+
 	/**
 	 * 通过回调执行命令
 	 * @param ip
 	 * @param port
-	 * @param username
-	 * @param password
 	 * @param callback 可以使用Session执行多个命令
 	 * @throws SSHException 
 	 */
-    public Result execute(String ip, int port, String username, String password, 
-    		SSHCallback callback) throws SSHException{
+    public Result execute(String ip, int port, SSHCallback callback) throws SSHException{
         Connection conn = null;
         try {
-            conn = getConnection(ip, port, username, password);
+            conn = getConnection(ip, port);
             return callback.call(new SSHSession(conn, ip+":"+port));
         } catch (Exception e) {
             throw new SSHException("SSH err: " + e.getMessage(), e);
@@ -65,18 +61,17 @@ public class SSHTemplate {
     }
     
     /**
-     * 获取连接并校验
+     * 获取连接并校验, 使用默认的用户名、密码
      * @param ip
      * @param port
-     * @param username
-     * @param password
      * @return Connection
      * @throws Exception
      */
-    private Connection getConnection(String ip, int port, 
-    		String username, String password) throws Exception {
+    private Connection getConnection(String ip, int port) throws Exception {
     	Connection conn = new Connection(ip, port);
         conn.connect(null, CONNCET_TIMEOUT, CONNCET_TIMEOUT);
+		String username = ConstUtils.USERNAME,
+				password = ConstUtils.PASSWORD;
         boolean isAuthenticated = conn.authenticateWithPassword(username, password);
         if (isAuthenticated == false) {
             throw new Exception("SSH authentication failed with [ userName: " + 

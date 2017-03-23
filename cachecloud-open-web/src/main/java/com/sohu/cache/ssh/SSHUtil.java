@@ -80,7 +80,7 @@ public class SSHUtil {
         final MachineStats systemPerformanceEntity =  new MachineStats();
         systemPerformanceEntity.setIp(ip);
         
-        sshTemplate.execute(ip, port, userName, password, new SSHCallback() {
+        sshTemplate.execute(ip, port, new SSHCallback() {
 			public Result call(SSHSession session) {
 				//解析top命令
 				session.executeCommand(COMMAND_TOP, new DefaultLineProcessor() {
@@ -196,7 +196,7 @@ public class SSHUtil {
         }
         port = IntegerUtil.defaultIfSmallerThan0(port, ConstUtils.SSH_PORT_DEFAULT);
         
-        Result rst = sshTemplate.execute(ip, port, username, password, new SSHCallback() {
+        Result rst = sshTemplate.execute(ip, port, new SSHCallback() {
 			public Result call(SSHSession session) {
 				return session.executeCommand(command);
 			}
@@ -219,7 +219,7 @@ public class SSHUtil {
      */
     private static boolean scpFileToRemote(String ip, int port, String username,
     		String password, final String localPath, final String remoteDir) throws SSHException{
-    	Result rst = sshTemplate.execute(ip, port, username, password, new SSHCallback() {
+        Result rst = sshTemplate.execute(ip, port, new SSHCallback() {
 			public Result call(SSHSession session) {
 				return session.scpToDir(localPath, remoteDir, "0644");
 			}
