@@ -1,5 +1,6 @@
 package com.sohu.test.util;
 
+import com.sohu.cache.util.ConstUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -24,7 +25,9 @@ public class SSHUtilTest extends Assert{
         int port = 22;
         String userName = "cachecloud-open";
         String password = "cachecloud-open";
-        MachineStats machineStats = SSHUtil.getMachineInfo(ip, port, userName, password);
+        ConstUtils.USERNAME = userName;
+        ConstUtils.PASSWORD = password;
+        MachineStats machineStats = SSHUtil.getMachineInfo(ip, port);
         logger.info("ip {} machineStats: {}", machineStats);
     }
     
