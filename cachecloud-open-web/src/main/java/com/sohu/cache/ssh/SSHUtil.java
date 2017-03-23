@@ -47,6 +47,17 @@ public class SSHUtil {
     private final static SSHTemplate sshTemplate = new SSHTemplate();
 
     /**
+     * 重载，使用默认用户名和密码
+     * @param ip
+     * @param port
+     * @return
+     * @throws SSHException
+     */
+    public static MachineStats getMachineInfo(String ip, int port) throws SSHException {
+        return getMachineInfo(ip, port, ConstUtils.USERNAME, ConstUtils.PASSWORD);
+    }
+
+    /**
      * Get HostPerformanceEntity[cpuUsage, memUsage, load] by ssh.<br>
      * 方法返回前已经释放了所有资源，调用方不需要关心
      *
@@ -56,7 +67,7 @@ public class SSHUtil {
      * @throws Exception
      * @since 1.0.0
      */
-    public static MachineStats getMachineInfo(String ip, int port, String userName, 
+    private static MachineStats getMachineInfo(String ip, int port, String userName,
     		String password) throws SSHException {
         if (StringUtil.isBlank(ip)) {
             try {
@@ -177,7 +188,7 @@ public class SSHUtil {
      * @param password 密码
      * @param command  要执行的命令
      */
-    public static String execute(String ip, int port, String username, String password, 
+    private static String execute(String ip, int port, String username, String password,
     		final String command) throws SSHException {
 
         if (StringUtil.isBlank(command)) {
@@ -206,7 +217,7 @@ public class SSHUtil {
      * @return
      * @throws SSHException
      */
-    public static boolean scpFileToRemote(String ip, int port, String username, 
+    private static boolean scpFileToRemote(String ip, int port, String username,
     		String password, final String localPath, final String remoteDir) throws SSHException{
     	Result rst = sshTemplate.execute(ip, port, username, password, new SSHCallback() {
 			public Result call(SSHSession session) {
@@ -247,6 +258,18 @@ public class SSHUtil {
     public static String execute(String ip, String cmd) throws SSHException {
         int sshPort = SSHUtil.getSshPort(ip);
         return execute(ip, sshPort, ConstUtils.USERNAME, ConstUtils.PASSWORD, cmd);
+    }
+
+    /**
+     * 重载，使用默认用户名和密码
+     * @param ip
+     * @param port
+     * @param cmd
+     * @return
+     * @throws SSHException
+     */
+    public static String execute(String ip, int port, String cmd) throws SSHException {
+        return execute(ip, port, ConstUtils.USERNAME, ConstUtils.PASSWORD, cmd);
     }
 
     /**

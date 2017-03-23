@@ -167,7 +167,7 @@ public class MachineCenterImpl implements MachineCenter {
         MachineStats machineStats = null;
         try {
             int sshPort = SSHUtil.getSshPort(ip);
-            machineStats = SSHUtil.getMachineInfo(ip, sshPort, ConstUtils.USERNAME, ConstUtils.PASSWORD);
+            machineStats = SSHUtil.getMachineInfo(ip, sshPort);
             machineStats.setHostId(hostId);
             if (machineStats != null) {
                 infoMap.put(MachineConstant.Ip.getValue(), machineStats.getIp());

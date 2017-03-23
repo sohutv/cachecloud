@@ -75,7 +75,7 @@ public class PortGenerator {
     public static String getMaxPortStrOld(String ip, int sshPort) throws SSHException {
         String redisPidCmd = "ps -ef | grep redis | grep -v 'grep' |  awk -F '*:' '{print $2}' " +
                 " | awk -F ' ' '{print $1}' | sort -r | head -1";
-        return SSHUtil.execute(ip, sshPort, ConstUtils.USERNAME, ConstUtils.PASSWORD, redisPidCmd);
+        return SSHUtil.execute(ip, sshPort, redisPidCmd);
     }
     
     /**
@@ -87,7 +87,7 @@ public class PortGenerator {
      */
      public static String getMaxPortStr(String ip, int sshPort) throws SSHException {
         String redisPidCmd = "ps -ef | grep redis | grep -v 'grep'";
-        String redisProcessStr = SSHUtil.execute(ip, sshPort, ConstUtils.USERNAME, ConstUtils.PASSWORD, redisPidCmd);
+        String redisProcessStr = SSHUtil.execute(ip, sshPort, redisPidCmd);
         if (StringUtils.isBlank(redisProcessStr)) {
             return EmptyObjectConstant.EMPTY_STRING;
         }
