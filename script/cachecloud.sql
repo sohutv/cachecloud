@@ -851,7 +851,8 @@ CREATE TABLE `system_config` (
 --
 
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.ssh.name','cachecloud','机器ssh用户名',1,1);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.ssh.password','cachecloud','机器ssh密码',1,2);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.ssh.password','cachecloud','机器ssh密码或私钥密码',1,2);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.ssh.privatekey.path','','机器ssh私钥路径',1,2);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.ssh.port','22','机器ssh端口',1,3);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.admin.user.name','admin','cachecloud-admin用户名',1,4);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.admin.user.password','admin','cachelcoud-admin密码',1,5);

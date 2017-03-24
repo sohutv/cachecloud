@@ -1,9 +1,6 @@
 package com.sohu.cache.ssh;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -72,10 +69,19 @@ public class SSHTemplate {
         conn.connect(null, CONNCET_TIMEOUT, CONNCET_TIMEOUT);
 		String username = ConstUtils.USERNAME,
 				password = ConstUtils.PASSWORD;
-        boolean isAuthenticated = conn.authenticateWithPassword(username, password);
-        if (isAuthenticated == false) {
-            throw new Exception("SSH authentication failed with [ userName: " + 
-            		username + ", password: " + password + "]");
+		File privateKey = ConstUtils.SSH_PRIVATE_KEY;
+        boolean isAuthenticated = false;
+		String errMesg = null;
+		if (null != privateKey) {
+			isAuthenticated = conn.authenticateWithPublicKey(username, privateKey, password);
+			errMesg = "privateKeyPath: " + privateKey.getAbsolutePath();
+		} else {
+			isAuthenticated = conn.authenticateWithPassword(username, password);
+			errMesg = "password: " + password;
+		}
+        if (!isAuthenticated) {
+            throw new Exception("SSH authentication failed with [ userName: " +
+					username + ", " + errMesg + "]");
         }
         return conn;
     }

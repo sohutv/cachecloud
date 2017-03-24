@@ -1,5 +1,6 @@
 package com.sohu.cache.util;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -95,6 +96,9 @@ public class ConstUtils {
 
     public static String DEFAULT_PASSWORD = "cachecloud";
     public static String PASSWORD = DEFAULT_PASSWORD;
+
+    public static String SSH_PRIVATE_KEY_FILE_PATH = null;
+    public static File SSH_PRIVATE_KEY = null;
 
     public static int DEFAULT_SSH_PORT_DEFAULT = 22;
     public static int SSH_PORT_DEFAULT = DEFAULT_SSH_PORT_DEFAULT;

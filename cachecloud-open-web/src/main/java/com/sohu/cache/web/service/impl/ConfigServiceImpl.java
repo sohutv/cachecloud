@@ -1,5 +1,6 @@
 package com.sohu.cache.web.service.impl;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -72,7 +73,25 @@ public class ConfigServiceImpl implements ConfigService {
                 ConstUtils.DEFAULT_PASSWORD);
         logger.info("{}: {}", "ConstUtils.PASSWORD", ConstUtils.PASSWORD);
 
-        
+        ConstUtils.SSH_PRIVATE_KEY_FILE_PATH = MapUtils.getString(configMap, "cachecloud.machine.ssh.privatekey.path", null);
+        logger.info("{}: {}", "ConstUtils.SSH_PRIVATE_KEY_FILE_PATH", ConstUtils.SSH_PRIVATE_KEY_FILE_PATH);
+
+        // check the validation of key file path
+        if (null != ConstUtils.SSH_PRIVATE_KEY_FILE_PATH && !ConstUtils.SSH_PRIVATE_KEY_FILE_PATH.trim().isEmpty()) {
+            File keyFile = new File(ConstUtils.SSH_PRIVATE_KEY_FILE_PATH);
+            if (keyFile.exists()) {
+                if (keyFile.isFile()) {
+                    ConstUtils.SSH_PRIVATE_KEY = keyFile;
+                    logger.info("Load SSH key file: {}, use key file to authorize instead of password",
+                            ConstUtils.SSH_PRIVATE_KEY_FILE_PATH);
+                } else {
+                    logger.error("SSH key file: {} exist, but not file", ConstUtils.SSH_PRIVATE_KEY_FILE_PATH);
+                }
+            } else {
+                logger.error("SSH key file: {} not exist", ConstUtils.SSH_PRIVATE_KEY_FILE_PATH);
+            }
+        }
+
         ConstUtils.SSH_PORT_DEFAULT = Integer.parseInt(MapUtils.getString(configMap, "cachecloud.machine.ssh.port",
                 String.valueOf(ConstUtils.DEFAULT_SSH_PORT_DEFAULT)));
         logger.info("{}: {}", "ConstUtils.SSH_PORT_DEFAULT", ConstUtils.SSH_PORT_DEFAULT);
