@@ -48,7 +48,7 @@
     		}
     		var password = document.getElementById("password");
     		
-    		$.get(
+    		$.post(
     			'/import/app/check.json',
     			{
     				name: appName.value,
