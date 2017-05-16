@@ -1076,3 +1076,33 @@ CREATE TABLE `instance_alert` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='实例报警阀值';
 
 alter table app_desc add column password varchar(255) default '' comment 'redis密码';
+
+CREATE TABLE `app_daily` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增id',
+  `app_id` bigint(20) NOT NULL COMMENT '应用id',
+  `date` date NOT NULL COMMENT '日期',
+  `create_time` datetime NOT NULL,
+  `slow_log_count` bigint(20) NOT NULL COMMENT '慢查询个数',
+  `client_exception_count` bigint(20) NOT NULL COMMENT '客户端异常个数',
+  `max_minute_client_count` bigint(20) NOT NULL COMMENT '每分钟最大客户端连接数',
+  `avg_minute_client_count` bigint(20) NOT NULL COMMENT '每分钟平均客户端连接数',
+  `max_minute_command_count` bigint(20) NOT NULL COMMENT '每分钟最大命令数',
+  `avg_minute_command_count` bigint(20) NOT NULL COMMENT '每分钟平均命令数',
+  `avg_hit_ratio` double NOT NULL COMMENT '平均命中率',
+  `min_minute_hit_ratio` double NOT NULL COMMENT '每分钟最小命中率',
+  `max_minute_hit_ratio` double NOT NULL COMMENT '每分钟最大命中率',
+  `avg_used_memory` bigint(20) NOT NULL COMMENT '最大内存使用量',
+  `max_used_memory` bigint(20) NOT NULL COMMENT '平均内存使用量',
+  `expired_keys_count` bigint(20) NOT NULL COMMENT '过期键个数',
+  `evicted_keys_count` bigint(20) NOT NULL COMMENT '剔除键个数',
+  `avg_minute_net_input_byte` double NOT NULL COMMENT '每分钟平均网络input量',
+  `max_minute_net_input_byte` double NOT NULL COMMENT '每分钟最大网络input量',
+  `avg_minute_net_output_byte` double NOT NULL COMMENT '每分钟平均网络output量',
+  `max_minute_net_output_byte` double NOT NULL COMMENT '每分钟最大网络output量',
+  `avg_object_size` bigint(20) NOT NULL COMMENT '键个数平均值',
+  `max_object_size` bigint(20) NOT NULL COMMENT '键个数最大值',
+  `big_key_times` bigint(20) NOT NULL COMMENT 'bigkey次数',
+  `big_key_info` varchar(512) COLLATE utf8_bin NOT NULL COMMENT 'bigkey详情',
+  PRIMARY KEY (`id`),
+  KEY `idx_appid_date` (`app_id`,`date`)
+) ENGINE=InnoDB AUTO_INCREMENT=933 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='app日报';
