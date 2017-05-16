@@ -308,16 +308,16 @@ public class AppDesc implements Serializable {
     public void setImportantLevel(int importantLevel) {
         this.importantLevel = importantLevel;
     }
-
+    
     public String getPassword() {
-		return password;
-	}
+        return password;
+    }
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-	/**
+    /**
      * 应用运行天数
      */
     public int getAppRunDays() {
@@ -353,7 +353,7 @@ public class AppDesc implements Serializable {
 
     @Override
     public String toString() {
-    	 	return JSONObject.toJSONString(this);
+        return JSONObject.toJSONString(this);
     }
 
     public String getStatusDesc() {

@@ -264,10 +264,7 @@ public class RedisClusterReshard {
                         jedis = redisCenter.getJedis(appId, hostAndPort.getHost(), hostAndPort.getPort());
                         String response = jedis.clusterSetSlotNode(slot, targetNodeId);
                         isOk = response != null && response.equalsIgnoreCase("OK");
-                        if (isOk) {
-                            response = source.clusterSetSlotNode(slot, targetNodeId);
-                            isOk = response != null && response.equalsIgnoreCase("OK");
-                        } else {
+                        if (!isOk) {
                             logger.error("clusterSetSlotNode-{}={}", getNodeId(appId, target), response);
                             break;
                         }
