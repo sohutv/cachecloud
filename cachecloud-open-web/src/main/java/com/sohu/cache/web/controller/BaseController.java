@@ -2,7 +2,9 @@ package com.sohu.cache.web.controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,9 +17,13 @@ import javax.servlet.http.HttpServletResponse;
 import com.sohu.cache.web.service.AppService;
 import com.sohu.cache.web.service.UserLoginStatusService;
 import com.sohu.cache.web.service.UserService;
+import com.sohu.cache.web.util.DateUtil;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ui.Model;
@@ -28,6 +34,7 @@ import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.entity.InstanceSlotModel;
 import com.sohu.cache.entity.InstanceStats;
+import com.sohu.cache.entity.TimeBetween;
 import com.sohu.cache.machine.MachineCenter;
 import com.sohu.cache.redis.RedisCenter;
 
@@ -69,6 +76,39 @@ public class BaseController {
     public void setRedisCenter(RedisCenter redisCenter) {
 		this.redisCenter = redisCenter;
 	}
+    
+    protected TimeBetween getJsonTimeBetween(HttpServletRequest request) throws ParseException {
+        String startDateParam = request.getParameter("startDate");
+        String endDateParam = request.getParameter("endDate");
+        Date startDate = DateUtil.parseYYYY_MM_dd(startDateParam);
+        Date endDate = DateUtil.parseYYYY_MM_dd(endDateParam);
+        long beginTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(startDate));
+        long endTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(endDate));
+        return new TimeBetween(beginTime, endTime, startDate, endDate);
+    }
+    
+    protected TimeBetween getTimeBetween(HttpServletRequest request, Model model, String startDateAtr,
+            String endDateAtr) throws ParseException {
+        String startDateParam = request.getParameter(startDateAtr);
+        String endDateParam = request.getParameter(endDateAtr);
+        Date startDate;
+        Date endDate;
+        if (StringUtils.isBlank(startDateParam) || StringUtils.isBlank(endDateParam)) {
+            startDate = new Date();
+            endDate = DateUtils.addDays(startDate, 1);
+        } else {
+            endDate = DateUtil.parseYYYY_MM_dd(endDateParam);
+            startDate = DateUtil.parseYYYY_MM_dd(startDateParam);
+        }
+        Date yesterDay = DateUtils.addDays(startDate, -1);
+        
+        long beginTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(startDate));
+        long endTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(endDate));
+        model.addAttribute(startDateAtr, startDateParam);
+        model.addAttribute(endDateAtr, endDateParam);
+        model.addAttribute("yesterDay", DateUtil.formatDate(yesterDay, "yyyy-MM-dd"));
+        return new TimeBetween(beginTime, endTime, startDate, endDate);
+    }
 
 	/**
      * 返回用户基本信息
