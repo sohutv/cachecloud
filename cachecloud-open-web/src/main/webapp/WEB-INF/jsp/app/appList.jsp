@@ -177,7 +177,6 @@
 		                <tr>
 		                    <td>应用ID</td>
 		                    <td>应用名</td>
-		                    <td>redis密码</td>
 		                    <td>应用类型</td>
 		                    <td>内存详情</td>
 		                    <td>命中率</td>
@@ -208,12 +207,6 @@
 			                    			<a target="_blank" href="/admin/app/index.do?appId=${appDetail.appDesc.appId}">${appDetail.appDesc.name}</a>
 			                    		</c:when>
 			                    	</c:choose>
-			                    </td>
-			                    <td>
-			                    		<c:choose>
-				        		            <c:when test="${appDetail.appDesc.password != ''}">${appDetail.appDesc.password}</c:when>
-				        		            <c:otherwise>无</c:otherwise>
-				                    	</c:choose>
 			                    </td>
 			                    <td>
 			                    	<c:choose>
