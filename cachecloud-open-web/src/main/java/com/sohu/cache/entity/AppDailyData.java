@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import org.apache.commons.collections.MapUtils;
 
+import com.alibaba.fastjson.JSONObject;
 import com.sohu.cache.web.vo.AppDetailVO;
 
 /**
@@ -31,6 +32,21 @@ public class AppDailyData {
      * 结束日期
      */
     private Date endDate;
+    
+    /**
+     * 日期
+     */
+    private Date date;
+    
+    /**
+     * bigkey次数
+     */
+    private long bigKeyTimes;
+    
+    /**
+     * bigkey信息
+     */
+    private String bigKeyInfo;
     
     /**
      * 慢查询次数
@@ -327,6 +343,10 @@ public class AppDailyData {
         }
         return desc.toString();
     }
+    
+    public String getValueSizeDistributeCountDescHtml() {
+        return bigKeyInfo.replace("\n", "<br/>").replace(":", ":\t");
+    }
 
     public void setValueSizeDistributeCountMap(Map<String, Long> valueSizeDistributeCountMap) {
         this.valueSizeDistributeCountMap = valueSizeDistributeCountMap;
@@ -338,6 +358,35 @@ public class AppDailyData {
 
     public void setAppDetailVO(AppDetailVO appDetailVO) {
         this.appDetailVO = appDetailVO;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public long getBigKeyTimes() {
+        return bigKeyTimes;
+    }
+
+    public void setBigKeyTimes(long bigKeyTimes) {
+        this.bigKeyTimes = bigKeyTimes;
+    }
+
+    public String getBigKeyInfo() {
+        return bigKeyInfo;
+    }
+
+    public void setBigKeyInfo(String bigKeyInfo) {
+        this.bigKeyInfo = bigKeyInfo;
+    }
+
+    @Override
+    public String toString() {
+        return JSONObject.toJSONString(this);
     }
 
 }

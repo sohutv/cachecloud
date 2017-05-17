@@ -26,7 +26,7 @@ public class InstanceAlertValueJob extends CacheBaseJob {
             ApplicationContext applicationContext = (ApplicationContext) schedulerContext.get(APPLICATION_CONTEXT_KEY);
             InstanceAlertValueService instanceAlertValueService = applicationContext.getBean("instanceAlertValueService", InstanceAlertValueService.class);
             int instanceSize = instanceAlertValueService.monitorLastMinuteAllInstanceInfo();
-            logger.warn("InstanceAlertValueJob monitor {} instance, costtime {} ms", instanceSize, (System.currentTimeMillis() - startTime));
+            logger.info("InstanceAlertValueJob monitor {} instance, costtime {} ms", instanceSize, (System.currentTimeMillis() - startTime));
         } catch (SchedulerException e) {
             logger.error(e.getMessage(), e);
         }

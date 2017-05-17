@@ -146,7 +146,7 @@ public class AppStatsCenterImpl implements AppStatsCenter {
                 for (InstanceInfo instance : instanceInfoList) {
                     machineSet.add(instance.getHostId());
                     totalMemory += instance.getMem();
-                    Boolean isMaster = redisCenter.isMaster(instance.getIp(), instance.getPort());
+                    Boolean isMaster = redisCenter.isMaster(appId, instance.getIp(), instance.getPort());
                     if (isMaster == null) {
                         continue;
                     }

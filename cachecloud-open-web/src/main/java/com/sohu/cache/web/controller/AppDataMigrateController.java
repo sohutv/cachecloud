@@ -273,7 +273,7 @@ public class AppDataMigrateController extends BaseController {
                     if (TypeUtil.isRedisSentinel(instanceInfo.getType())) {
                         continue;
                     }
-                    if (!redisCenter.isMaster(instanceInfo.getIp(), instanceInfo.getPort())) {
+                    if (!redisCenter.isMaster(appId, instanceInfo.getIp(), instanceInfo.getPort())) {
                         continue;
                     }
                 }

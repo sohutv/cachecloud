@@ -4,6 +4,8 @@ import com.sohu.cache.web.util.DateUtil;
 
 import java.util.Date;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Created by yijunzhang on 14-11-26.
  */
@@ -17,8 +19,6 @@ public class RedisProtocol {
 
     private static final String COMMON_CONFIG = "redis-sentinel-%d.conf";
 
-    private static final String EXECUTE_COMMAND = "redis-cli -h %s -p %s --raw %s";
-
     public static String getRunShell(int port, boolean isCluster) {
         return String.format(RUN_SHELL, MachineProtocol.CONF_DIR + getConfig(port, isCluster), port, DateUtil.formatYYYYMMddHHMM(new Date()));
     }
@@ -27,8 +27,14 @@ public class RedisProtocol {
         return String.format(SENTINEL_SHELL, MachineProtocol.CONF_DIR + getConfig(port, false), port, DateUtil.formatYYYYMMddHHMM(new Date()));
     }
 
-    public static String getExecuteCommandShell(String host, int port, String command) {
-        return String.format(EXECUTE_COMMAND, host, port, command);
+    public static String getExecuteCommandShell(String host, int port, String password, String command) {
+    		StringBuffer shell = new StringBuffer();
+    		shell.append(String.format("redis-cli -h %s -p %s", host, port));
+    		if (StringUtils.isNotBlank(password)) {
+    			shell.append(String.format(" -a %s", password));
+    		}
+    		shell.append(String.format(" --raw %s", command));
+    		return shell.toString();
     }
 
     public static String getConfig(int port, boolean isCluster) {

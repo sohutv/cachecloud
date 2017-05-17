@@ -54,13 +54,13 @@ public class InstanceManageController extends BaseController {
      * @param instanceId
      */
     @RequestMapping(value = "/startInstance")
-    public ModelAndView doStartInstance(HttpServletRequest request, HttpServletResponse response, Model model, int instanceId) {
+    public ModelAndView doStartInstance(HttpServletRequest request, HttpServletResponse response, Model model, long appId, int instanceId) {
         AppUser appUser = getUserInfo(request);
         logger.warn("user {} startInstance {} ", appUser.getName(), instanceId);
         boolean result = false;
         if (instanceId > 0) {
             try {
-                result = instanceDeployCenter.startExistInstance(instanceId);
+                result = instanceDeployCenter.startExistInstance(appId, instanceId);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
                 model.addAttribute("message", e.getMessage());
@@ -85,13 +85,13 @@ public class InstanceManageController extends BaseController {
      * @param ip
      */
     @RequestMapping(value = "/shutdownInstance")
-    public ModelAndView doShutdownInstance(HttpServletRequest request, HttpServletResponse response, Model model, int instanceId) {
+    public ModelAndView doShutdownInstance(HttpServletRequest request, HttpServletResponse response, Model model, long appId, int instanceId) {
         AppUser appUser = getUserInfo(request);
         logger.warn("user {} shutdownInstance {} ", appUser.getName(), instanceId);
         boolean result = false;
         if (instanceId > 0) {
             try {
-                result = instanceDeployCenter.shutdownExistInstance(instanceId);
+                result = instanceDeployCenter.shutdownExistInstance(appId, instanceId);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
                 model.addAttribute("message", e.getMessage());
@@ -174,7 +174,7 @@ public class InstanceManageController extends BaseController {
         boolean isModify = false;
         if (StringUtils.isNotBlank(host) && port > 0 && appAuditId != null && StringUtils.isNotBlank(instanceConfigKey) && StringUtils.isNotBlank(instanceConfigValue)) {
             try {
-                isModify = instanceDeployCenter.modifyInstanceConfig(appAuditId, host, port, instanceConfigKey, instanceConfigValue);
+                isModify = instanceDeployCenter.modifyInstanceConfig(appId, appAuditId, host, port, instanceConfigKey, instanceConfigValue);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }

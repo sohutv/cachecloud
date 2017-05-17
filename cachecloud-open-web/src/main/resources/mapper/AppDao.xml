@@ -6,7 +6,7 @@
     <sql id="app_desc_fields">
         app_id,name,user_id,status,intro,create_time,passed_time,type,officer,
         ver_id,is_test,has_back_store,need_persistence,need_hot_back_up,forecase_qps,
-        forecast_obj_num,mem_alert_value,client_machine_room,app_key,client_conn_alert_value,important_level
+        forecast_obj_num,mem_alert_value,client_machine_room,app_key,client_conn_alert_value,important_level,password
     </sql>
     <!--通过appId查询app的信息-->
     <select id="getAppDescById" resultType="AppDesc" parameterType="long">
@@ -31,19 +31,19 @@
 		values
 			(#{appId},#{name},#{userId},#{status},#{intro},#{createTime},#{passedTime},
 			#{type},#{officer},#{verId},#{isTest},#{hasBackStore},#{needPersistence},
-			#{needHotBackUp},#{forecaseQps},#{forecastObjNum},#{memAlertValue},#{clientMachineRoom},#{appKey},#{clientConnAlertValue},#{importantLevel})    	
+			#{needHotBackUp},#{forecaseQps},#{forecastObjNum},#{memAlertValue},#{clientMachineRoom},#{appKey},#{clientConnAlertValue},#{importantLevel},#{password})    	
     </insert>
     
     <update id="update" parameterType="AppDesc">
     	update app_desc 
     		set name=#{name}, user_id=#{userId}, status=#{status}, intro=#{intro}, create_time=#{createTime},
     			passed_time=#{passedTime},type=#{type},
-    			officer=#{officer},ver_id=#{verId},mem_alert_value=#{memAlertValue},client_conn_alert_value=#{clientConnAlertValue},important_level=#{importantLevel}
+    			officer=#{officer},ver_id=#{verId},mem_alert_value=#{memAlertValue},client_conn_alert_value=#{clientConnAlertValue},important_level=#{importantLevel},password=#{password}
     	where app_id=#{appId}
     </update>
     
     <sql id="app_desc_select_column">
-    	app_desc.app_id,name,app_desc.user_id,status,intro,create_time,passed_time,type,officer,ver_id,app_key
+    	app_desc.app_id,name,app_desc.user_id,status,intro,create_time,passed_time,type,officer,ver_id,app_key,password
     </sql>
     <select id="getAppDescList" resultType="AppDesc" parameterType="long">
     	select           

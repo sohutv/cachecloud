@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sohu.cache.dao.AppDailyDao">
+	<sql id="app_daily_column">
+		app_id,date,create_time,slow_log_count,client_exception_count,max_minute_client_count,
+		avg_minute_client_count,max_minute_command_count,avg_minute_command_count,avg_hit_ratio,
+		min_minute_hit_ratio,max_minute_hit_ratio,avg_used_memory,max_used_memory,expired_keys_count,
+		evicted_keys_count,avg_minute_net_input_byte,max_minute_net_input_byte,avg_minute_net_output_byte,
+		max_minute_net_output_byte,avg_object_size,max_object_size,big_key_times,big_key_info
+    </sql>
+    
+    <insert id="save" parameterType="AppDailyData" keyProperty="id" useGeneratedKeys="true">
+    	insert into app_daily
+    		(<include refid="app_daily_column"/>)
+		values
+		(#{appId},#{date},now(),#{slowLogCount},#{clientExceptionCount},#{maxMinuteClientCount},
+		#{avgMinuteClientCount},#{maxMinuteCommandCount},#{avgMinuteCommandCount},#{avgHitRatio},
+		#{minMinuteHitRatio},#{maxMinuteHitRatio},#{avgUsedMemory},#{maxUsedMemory},#{expiredKeysCount},
+		#{evictedKeysCount},#{avgMinuteNetInputByte},#{maxMinuteNetInputByte},#{avgMinuteNetOutputByte}
+		,#{maxMinuteNetOutputByte},#{avgObjectSize},#{maxObjectSize},#{bigKeyTimes},#{bigKeyInfo})
+    </insert>
+    
+    <select id="getAppDaily" resultType="AppDailyData">
+		select id,<include refid="app_daily_column"/> from app_daily where app_id=#{appId} and date =#{date}
+	</select>
+    
+</mapper>
+
+

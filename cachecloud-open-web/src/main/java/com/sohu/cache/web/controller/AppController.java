@@ -6,6 +6,7 @@ import com.sohu.cache.constant.AppStatusEnum;
 import com.sohu.cache.constant.AppUserTypeEnum;
 import com.sohu.cache.constant.TimeDimensionalityEnum;
 import com.sohu.cache.entity.*;
+import com.sohu.cache.stats.app.AppDailyDataCenter;
 import com.sohu.cache.stats.app.AppDeployCenter;
 import com.sohu.cache.stats.app.AppStatsCenter;
 import com.sohu.cache.stats.instance.InstanceStatsCenter;
@@ -71,11 +72,9 @@ public class AppController extends BaseController {
     @Resource(name = "instanceStatsCenter")
     private InstanceStatsCenter instanceStatsCenter;
     
-    /**
-     * 取命令的条数
-     */
-    private final static int commandsCount = 20;
-
+    @Resource(name = "appDailyDataCenter")
+    private AppDailyDataCenter appDailyDataCenter;
+    
     /**
      * 初始化贡献者页面
      * @return
@@ -127,6 +126,8 @@ public class AppController extends BaseController {
             startDateParam = DateUtil.formatDate(startDate, "yyyy-MM-dd");
             endDateParam = DateUtil.formatDate(DateUtils.addDays(startDate, 1), "yyyy-MM-dd");
         }
+        
+        //慢查询
         String slowLogStartDateParam = request.getParameter("slowLogStartDate");
         String slowLogEndDateParam = request.getParameter("slowLogEndDate");
         if (StringUtils.isBlank(slowLogStartDateParam) || StringUtils.isBlank(slowLogEndDateParam)) {
@@ -135,10 +136,17 @@ public class AppController extends BaseController {
             slowLogEndDateParam = DateUtil.formatDate(DateUtils.addDays(startDate, 1), "yyyy-MM-dd");
         }
         
+        //日报
+        String dailyDateParam = request.getParameter("dailyDate");
+        if (StringUtils.isBlank(dailyDateParam)) {
+            dailyDateParam = DateUtil.formatDate(DateUtils.addDays(new Date(), -1), "yyyy-MM-dd");
+        }
+        
         model.addAttribute("startDate", startDateParam);
         model.addAttribute("endDate", endDateParam);
         model.addAttribute("slowLogStartDate", slowLogStartDateParam);
         model.addAttribute("slowLogEndDate", slowLogEndDateParam);
+        model.addAttribute("dailyDate", dailyDateParam);
         model.addAttribute("appId", appId);
         model.addAttribute("tabTag", tabTag);
         model.addAttribute("firstCommand", firstCommand);
@@ -257,7 +265,7 @@ public class AppController extends BaseController {
         }
 
         /** 3.获取top5命令 */
-        List<AppCommandStats> allCommands = appStatsCenter.getTopLimitAppCommandStatsList(appId, beginTime, endTime, commandsCount);
+        List<AppCommandStats> allCommands = appStatsCenter.getTopLimitAppCommandStatsList(appId, beginTime, endTime, 20);
         model.addAttribute("allCommands", allCommands);
         if (StringUtils.isBlank(firstCommand) && CollectionUtils.isNotEmpty(allCommands)) {
             model.addAttribute("firstCommand", allCommands.get(0).getCommandName());
@@ -336,25 +344,18 @@ public class AppController extends BaseController {
     @RequestMapping("/getCommandStats")
     public ModelAndView getCommandStats(HttpServletRequest request,
                                         HttpServletResponse response, Model model, Long appId) throws ParseException {
-        String startDateParam = request.getParameter("startDate");
-        String endDateParam = request.getParameter("endDate");
-        Date startDate = DateUtil.parseYYYY_MM_dd(startDateParam);
-        Date endDate = DateUtil.parseYYYY_MM_dd(endDateParam);
-        String result = "[]";
-        if (appId != null) {
-            long beginTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(startDate));
-            long endTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(endDate));
-
-            // 命令参数
-            String commandName = request.getParameter("commandName");
-            List<AppCommandStats> appCommandStatsList;
-            if (StringUtils.isNotBlank(commandName)) {
-                appCommandStatsList = appStatsCenter.getCommandStatsList(appId, beginTime, endTime, commandName);
-            } else {
-                appCommandStatsList = appStatsCenter.getCommandStatsList(appId, beginTime, endTime);
-            }
-            result = assembleJson(appCommandStatsList);
+        TimeBetween timeBetween = getJsonTimeBetween(request);
+        long beginTime = timeBetween.getStartTime();
+        long endTime = timeBetween.getEndTime();
+        // 命令参数
+        String commandName = request.getParameter("commandName");
+        List<AppCommandStats> appCommandStatsList;
+        if (StringUtils.isNotBlank(commandName)) {
+            appCommandStatsList = appStatsCenter.getCommandStatsList(appId, beginTime, endTime, commandName);
+        } else {
+            appCommandStatsList = appStatsCenter.getCommandStatsList(appId, beginTime, endTime);
         }
+        String result = assembleJson(appCommandStatsList);
         write(response, result);
         return null;
     }
@@ -368,25 +369,16 @@ public class AppController extends BaseController {
     @RequestMapping("/getMutiDatesCommandStats")
     public ModelAndView getMutiDatesCommandStats(HttpServletRequest request,
                                         HttpServletResponse response, Model model, Long appId) throws ParseException {
-        String startDateParam = request.getParameter("startDate");
-        String endDateParam = request.getParameter("endDate");
-        Date startDate = DateUtil.parseYYYY_MM_dd(startDateParam);
-        Date endDate = DateUtil.parseYYYY_MM_dd(endDateParam);
-        String result = "[]";
-        if (appId != null) {
-            long beginTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(startDate));
-            long endTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(endDate));
-
-            // 命令参数
-            String commandName = request.getParameter("commandName");
-            List<AppCommandStats> appCommandStatsList;
-            if (StringUtils.isNotBlank(commandName)) {
-                appCommandStatsList = appStatsCenter.getCommandStatsListV2(appId, beginTime, endTime, TimeDimensionalityEnum.MINUTE, commandName);
-            } else {
-                appCommandStatsList = appStatsCenter.getCommandStatsListV2(appId, beginTime, endTime, TimeDimensionalityEnum.MINUTE);
-            }
-            result = assembleMutilDateAppCommandJsonMinute(appCommandStatsList, startDate, endDate);
+        TimeBetween timeBetween = getJsonTimeBetween(request);
+        // 命令参数
+        String commandName = request.getParameter("commandName");
+        List<AppCommandStats> appCommandStatsList;
+        if (StringUtils.isNotBlank(commandName)) {
+            appCommandStatsList = appStatsCenter.getCommandStatsListV2(appId, timeBetween.getStartTime(), timeBetween.getEndTime(), TimeDimensionalityEnum.MINUTE, commandName);
+        } else {
+            appCommandStatsList = appStatsCenter.getCommandStatsListV2(appId, timeBetween.getStartTime(), timeBetween.getEndTime(), TimeDimensionalityEnum.MINUTE);
         }
+        String result = assembleMutilDateAppCommandJsonMinute(appCommandStatsList, timeBetween.getStartDate(), timeBetween.getEndDate());
         model.addAttribute("data", result);
         return new ModelAndView("");
     }
@@ -403,17 +395,9 @@ public class AppController extends BaseController {
     public ModelAndView getAppStats(HttpServletRequest request,
                                     HttpServletResponse response, Model model, Long appId,
                                     String statName) throws ParseException {
-        String startDateParam = request.getParameter("startDate");
-        String endDateParam = request.getParameter("endDate");
-        Date startDate = DateUtil.parseYYYY_MM_dd(startDateParam);
-        Date endDate = DateUtil.parseYYYY_MM_dd(endDateParam);
-        String result = "[]";
-        if (appId != null) {
-            long beginTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(startDate));
-            long endTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(endDate));
-            List<AppStats> appStats = appStatsCenter.getAppStatsListByMinuteTime(appId, beginTime, endTime);
-            result = assembleAppStatsJson(appStats, statName);
-        }
+        TimeBetween timeBetween = getJsonTimeBetween(request);
+        List<AppStats> appStats = appStatsCenter.getAppStatsListByMinuteTime(appId, timeBetween.getStartTime(), timeBetween.getEndTime());
+        String result = assembleAppStatsJson(appStats, statName);
         write(response, result);
         return null;
     }
@@ -430,24 +414,12 @@ public class AppController extends BaseController {
                                     HttpServletResponse response, Model model, Long appId) throws ParseException {
         String statNames = request.getParameter("statName");
         List<String> statNameList = Arrays.asList(statNames.split(ConstUtils.COMMA));
-        
-        String startDateParam = request.getParameter("startDate");
-        String endDateParam = request.getParameter("endDate");
-        Date startDate = DateUtil.parseYYYY_MM_dd(startDateParam);
-        Date endDate = DateUtil.parseYYYY_MM_dd(endDateParam);
-        String result = "[]";
-        if (appId != null) {
-            long beginTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(startDate));
-            long endTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(endDate));
-            List<AppStats> appStats = appStatsCenter.getAppStatsList(appId, beginTime, endTime, TimeDimensionalityEnum.MINUTE);
-            result = assembleMutiStatAppStatsJsonMinute(appStats, statNameList, startDate);
-        }
+        TimeBetween timeBetween = getJsonTimeBetween(request);
+        List<AppStats> appStats = appStatsCenter.getAppStatsList(appId, timeBetween.getStartTime(), timeBetween.getEndTime(), TimeDimensionalityEnum.MINUTE);
+        String result = assembleMutiStatAppStatsJsonMinute(appStats, statNameList, timeBetween.getStartDate());
         model.addAttribute("data", result);
         return new ModelAndView("");
     }
-    
-
-   
 
     /**
      * 获取命中率、丢失率等分布
@@ -460,18 +432,9 @@ public class AppController extends BaseController {
     public ModelAndView getMutiDatesAppStats(HttpServletRequest request,
                                     HttpServletResponse response, Model model, Long appId,
                                     String statName, Integer addDay) throws ParseException {
-        
-        String startDateParam = request.getParameter("startDate");
-        String endDateParam = request.getParameter("endDate");
-        Date startDate = DateUtil.parseYYYY_MM_dd(startDateParam);
-        Date endDate = DateUtil.parseYYYY_MM_dd(endDateParam);
-        String result = "[]";
-        if (appId != null) {
-            long beginTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(startDate));
-            long endTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(endDate));
-            List<AppStats> appStats = appStatsCenter.getAppStatsList(appId, beginTime, endTime, TimeDimensionalityEnum.MINUTE);
-            result = assembleMutilDateAppStatsJsonMinute(appStats, statName, startDate, endDate);
-        }
+        TimeBetween timeBetween = getJsonTimeBetween(request);
+        List<AppStats> appStats = appStatsCenter.getAppStatsList(appId, timeBetween.getStartTime(), timeBetween.getEndTime(), TimeDimensionalityEnum.MINUTE);
+        String result = assembleMutilDateAppStatsJsonMinute(appStats, statName, timeBetween.getStartDate(), timeBetween.getEndDate());
         model.addAttribute("data", result);
         return new ModelAndView("");
     }
@@ -515,12 +478,7 @@ public class AppController extends BaseController {
     @RequestMapping("/getAppInstancesNetStat")
     public ModelAndView getAppInstancesNetStat(HttpServletRequest request, HttpServletResponse response, Model model, Long appId) throws ParseException {
         //时间转换
-        String startDateParam = request.getParameter("startDate");
-        String endDateParam = request.getParameter("endDate");
-        Date startDate = DateUtil.parseYYYY_MM_dd(startDateParam);
-        Date endDate = DateUtil.parseYYYY_MM_dd(endDateParam);
-        long beginTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(startDate));
-        long endTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(endDate));
+        TimeBetween timeBetween = getJsonTimeBetween(request);
         
         //缩减字段
         String netInCommand = "total_net_input_bytes";
@@ -531,7 +489,7 @@ public class AppController extends BaseController {
         
         //获取应用下所有实例网络流量统计
         Map<Integer, Map<String, List<InstanceCommandStats>>> appInstancesNetStat = instanceStatsCenter
-                .getStandardStatsList(appId, beginTime, endTime,
+                .getStandardStatsList(appId, timeBetween.getStartTime(), timeBetween.getEndTime(),
                         Arrays.asList(netInCommand, netOutCommand));
 
         //解析成json数组
@@ -591,18 +549,9 @@ public class AppController extends BaseController {
     @RequestMapping("/getTop5Commands")
     public ModelAndView getAppTop5Commands(HttpServletRequest request,
                                            HttpServletResponse response, Model model, Long appId) throws ParseException {
-        String startDateParam = request.getParameter("startDate");
-        String endDateParam = request.getParameter("endDate");
-        Date startDate = DateUtil.parseYYYY_MM_dd(startDateParam);
-        Date endDate = DateUtil.parseYYYY_MM_dd(endDateParam);
-        String result = "[]";
-        if (appId != null) {
-            long beginTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(startDate));
-            long endTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(endDate));
-            List<AppCommandStats> appCommandStats = appStatsCenter
-                    .getTop5AppCommandStatsList(appId, beginTime, endTime);
-            result = assembleJson(appCommandStats);
-        }
+        TimeBetween timeBetween = getJsonTimeBetween(request);
+        List<AppCommandStats> appCommandStats = appStatsCenter.getTop5AppCommandStatsList(appId, timeBetween.getStartTime(), timeBetween.getEndTime());
+        String result = assembleJson(appCommandStats);
         write(response, result);
         return null;
     }
@@ -617,18 +566,9 @@ public class AppController extends BaseController {
     @RequestMapping("/appCommandDistribute")
     public ModelAndView appCommandDistribute(HttpServletRequest request,
                                              HttpServletResponse response, Model model, Long appId) throws ParseException {
-        String startDateParam = request.getParameter("startDate");
-        String endDateParam = request.getParameter("endDate");
-        Date startDate = DateUtil.parseYYYY_MM_dd(startDateParam);
-        Date endDate = DateUtil.parseYYYY_MM_dd(endDateParam);
-        String result = "[]";
-        if (appId != null) {
-            long beginTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(startDate));
-            long endTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(endDate));
-            List<AppCommandGroup> appCommandGroupList = appStatsCenter
-                    .getAppCommandGroup(appId, beginTime, endTime);
-            result = assembleGroupJson(appCommandGroupList);
-        }
+        TimeBetween timeBetween = getJsonTimeBetween(request);
+        List<AppCommandGroup> appCommandGroupList = appStatsCenter.getAppCommandGroup(appId, timeBetween.getStartTime(), timeBetween.getEndTime());
+        String result = assembleGroupJson(appCommandGroupList);
         write(response, result);
         return null;
     }
@@ -973,6 +913,33 @@ public class AppController extends BaseController {
             model.addAttribute("status", 0);
         }
         return new ModelAndView("app/appDemo");
+    }
+
+    /**
+     * 应用日报查询
+     */
+    @RequestMapping("/daily")
+    public ModelAndView appDaily(HttpServletRequest request,
+                                  HttpServletResponse response, Model model, Long appId) throws ParseException {
+        // 1. 应用信息
+        AppDesc appDesc = appService.getByAppId(appId);
+        model.addAttribute("appDesc", appDesc);
+
+        // 2. 日期
+        String dailyDateParam = request.getParameter("dailyDate");
+        Date date;
+        if (StringUtils.isBlank(dailyDateParam)) {
+            date = DateUtils.addDays(new Date(), -1);
+        } else {
+            date = DateUtil.parseYYYY_MM_dd(dailyDateParam);
+        }
+        model.addAttribute("dailyDate", dailyDateParam);
+
+        // 3. 日报
+        AppDailyData appDailyData = appDailyDataCenter.getAppDailyData(appId, date);
+        model.addAttribute("appDailyData", appDailyData);
+
+        return new ModelAndView("app/appDaily");
     }
 
     /**

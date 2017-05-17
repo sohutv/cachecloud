@@ -1,12 +1,14 @@
 package com.sohu.cache.stats.app.impl;
 
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -20,6 +22,7 @@ import org.springframework.util.Assert;
 
 import com.sohu.cache.dao.AppClientExceptionStatDao;
 import com.sohu.cache.dao.AppClientValueStatDao;
+import com.sohu.cache.dao.AppDailyDao;
 import com.sohu.cache.dao.AppStatsDao;
 import com.sohu.cache.dao.InstanceSlowLogDao;
 import com.sohu.cache.entity.AppClientValueDistriSimple;
@@ -58,6 +61,8 @@ public class AppDailyDataCenterImpl implements AppDailyDataCenter {
 
     private AppClientValueStatDao appClientValueStatDao;
     
+    private AppDailyDao appDailyDao;
+    
     private AppService appService;
 
     private final static int STAT_ERROR = 0;
@@ -88,6 +93,9 @@ public class AppDailyDataCenterImpl implements AppDailyDataCenter {
             if (appDailyData == null) {
                 return false;
             }
+            fillAppDailyData(appDailyData);
+            //保存每天的日报，后期查询和分析
+            appDailyDao.save(appDailyData);
             AppDetailVO appDetailVO = appDailyData.getAppDetailVO();
             noticeAppDaily(startDate, appDetailVO, appDailyData);
             return true;
@@ -97,7 +105,26 @@ public class AppDailyDataCenterImpl implements AppDailyDataCenter {
         }
     }
 
-    @Override
+    /**
+     * 填充信息
+     * @param appDailyData
+     */
+    private void fillAppDailyData(AppDailyData appDailyData) {
+        appDailyData.setAppId(appDailyData.getAppDetailVO().getAppDesc().getAppId());
+        appDailyData.setDate(appDailyData.getStartDate());
+        Map<String, Long> valueSizeDistributeCountMap = appDailyData.getValueSizeDistributeCountMap();
+        //@TODO 暂时不计数
+        long bigKeyTimes = 0;
+        StringBuffer bigKeyInfo = new StringBuffer();
+        for(Entry<String, Long> entry : valueSizeDistributeCountMap.entrySet()) {
+            String key = entry.getKey();
+            long times = entry.getValue();
+            bigKeyInfo.append(key + ":" + times + "\n");
+        }
+        appDailyData.setBigKeyInfo(bigKeyInfo.toString());
+        appDailyData.setBigKeyTimes(bigKeyTimes);
+    }
+
     public AppDailyData generateAppDaily(long appId, Date startDate, Date endDate) {
         Assert.isTrue(appId > 0L);
         AppDetailVO appDetailVO = appStatsCenter.getAppDetail(appId);
@@ -276,6 +303,16 @@ public class AppDailyDataCenterImpl implements AppDailyDataCenter {
         return new ArrayList<String>(ccEmailSet);
     }
     
+    @Override
+    public AppDailyData getAppDailyData(long appId, Date date) {
+        try {
+            return appDailyDao.getAppDaily(appId, new SimpleDateFormat("yyyy-MM-dd").format(date));
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return null;
+        }
+    }
+    
     public void setInstanceSlowLogDao(InstanceSlowLogDao instanceSlowLogDao) {
         this.instanceSlowLogDao = instanceSlowLogDao;
     }
@@ -306,6 +343,10 @@ public class AppDailyDataCenterImpl implements AppDailyDataCenter {
 
     public void setAppService(AppService appService) {
         this.appService = appService;
+    }
+
+    public void setAppDailyDao(AppDailyDao appDailyDao) {
+        this.appDailyDao = appDailyDao;
     }
 
 }

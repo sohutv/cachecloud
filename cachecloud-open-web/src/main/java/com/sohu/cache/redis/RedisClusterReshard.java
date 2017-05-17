@@ -59,18 +59,18 @@ public class RedisClusterReshard {
     /**
      * 加入主从分片
      */
-    public boolean joinCluster(String masterHost, int masterPort, final String slaveHost, final int slavePort) {
+    public boolean joinCluster(long appId, String masterHost, int masterPort, final String slaveHost, final int slavePort) {
         //1. 确认主从节点是否正常
-        final Jedis masterJedis = getJedis(masterHost, masterPort, defaultTimeout);
-        boolean isRun = redisCenter.isRun(masterHost, masterPort);
+        final Jedis masterJedis = redisCenter.getJedis(appId, masterHost, masterPort, defaultTimeout, defaultTimeout);
+        boolean isRun = redisCenter.isRun(appId, masterHost, masterPort);
         if (!isRun) {
             logger.error(String.format("joinCluster: master host=%s,port=%s is not run", masterHost, masterPort));
             return false;
         }
         boolean hasSlave = StringUtils.isNotBlank(slaveHost) && slavePort > 0;
-        final Jedis slaveJedis = hasSlave ? getJedis(slaveHost, slavePort, defaultTimeout) : null;
+        final Jedis slaveJedis = hasSlave ? redisCenter.getJedis(appId, slaveHost, slavePort, defaultTimeout, defaultTimeout) : null;
         if (hasSlave) {
-            isRun = redisCenter.isRun(slaveHost, slavePort);
+            isRun = redisCenter.isRun(appId, slaveHost, slavePort);
             if (!isRun) {
                 logger.error(String.format("joinCluster: slave host=%s,port=%s is not run", slaveHost, slavePort));
                 return false;
@@ -79,15 +79,15 @@ public class RedisClusterReshard {
 
         //2. 对主从节点进行meet操作
         //获取所有主节点 
-        List<HostAndPort> masterHostAndPostList = getMasterNodeList();
+        List<HostAndPort> masterHostAndPostList = getMasterNodeList(appId);
         //meet master
-        boolean isClusterMeet = clusterMeet(masterHostAndPostList, masterHost, masterPort);
+        boolean isClusterMeet = clusterMeet(appId, masterHostAndPostList, masterHost, masterPort);
         if (!isClusterMeet) {
             logger.error("master isClusterMeet failed {}:{}", masterHost, masterPort);
             return false;
         }
         if (hasSlave) {
-            isClusterMeet = clusterMeet(masterHostAndPostList, slaveHost, slavePort);
+            isClusterMeet = clusterMeet(appId, masterHostAndPostList, slaveHost, slavePort);
             if (!isClusterMeet) {
                 logger.error("slave isClusterMeet failed {}:{}", slaveHost, slavePort);
                 return false;
@@ -96,7 +96,7 @@ public class RedisClusterReshard {
         
         //3.复制
         if (hasSlave) {
-            final String masterNodeId = getNodeId(masterJedis);
+            final String masterNodeId = getNodeId(appId, masterJedis);
             if (masterNodeId == null) {
                 logger.error(String.format("joinCluster:host=%s,port=%s nodeId is null", masterHost, masterPort));
                 return false;
@@ -127,8 +127,8 @@ public class RedisClusterReshard {
      * @param port
      * @return
      */
-    private boolean clusterMeet(List<HostAndPort> masterHostAndPostList, final String host, final int port) {
-        boolean isSingleNode = redisCenter.isSingleClusterNode(host, port);
+    private boolean clusterMeet(long appId, List<HostAndPort> masterHostAndPostList, final String host, final int port) {
+        boolean isSingleNode = redisCenter.isSingleClusterNode(appId, host, port);
         if (!isSingleNode) {
             logger.error("{}:{} isNotSingleNode", host, port);
             return false;
@@ -138,7 +138,7 @@ public class RedisClusterReshard {
         for (HostAndPort hostAndPort : masterHostAndPostList) {
             String clusterHost = hostAndPort.getHost();
             int clusterPort = hostAndPort.getPort();
-            final Jedis jedis = new Jedis(clusterHost, clusterPort, defaultTimeout);
+            final Jedis jedis = redisCenter.getJedis(appId, clusterHost, clusterPort, defaultTimeout, defaultTimeout);
             try {
                 boolean isClusterMeet = new IdempotentConfirmer() {
                     @Override
@@ -165,22 +165,22 @@ public class RedisClusterReshard {
      * 将source中的startSlot到endSlot迁移到target
      *
      */
-    public boolean migrateSlot(InstanceInfo sourceInstanceInfo, InstanceInfo targetInstanceInfo, int startSlot, int endSlot, boolean isPipelineMigrate) {
+    public boolean migrateSlot(long appId, InstanceInfo sourceInstanceInfo, InstanceInfo targetInstanceInfo, int startSlot, int endSlot, boolean isPipelineMigrate) {
         long startTime = System.currentTimeMillis();
         //上线类型
         reshardProcess.setType(0);
         //迁移的总slot个数
         reshardProcess.setTotalSlot(endSlot - startSlot + 1);
         //源和目标Jedis
-        Jedis sourceJedis = getJedis(sourceInstanceInfo.getIp(), sourceInstanceInfo.getPort(), defaultTimeout);
-        Jedis targetJedis = getJedis(targetInstanceInfo.getIp(), targetInstanceInfo.getPort(), defaultTimeout);
+        Jedis sourceJedis = redisCenter.getJedis(appId, sourceInstanceInfo.getIp(), sourceInstanceInfo.getPort(), defaultTimeout, defaultTimeout);
+        Jedis targetJedis = redisCenter.getJedis(appId, targetInstanceInfo.getIp(), targetInstanceInfo.getPort(), defaultTimeout, defaultTimeout);
         //逐个slot迁移
         boolean hasError = false;
         for (int slot = startSlot; slot <= endSlot; slot++) {
             long slotStartTime = System.currentTimeMillis();
             try {
                 //num是迁移key的总数
-                int num = migrateSlotData(sourceJedis, targetJedis, slot, isPipelineMigrate);
+                int num = migrateSlotData(appId, sourceJedis, targetJedis, slot, isPipelineMigrate);
                 reshardProcess.addReshardSlot(slot, num);
                 logger.warn("clusterReshard:{}->{}, slot={}, keys={}, costTime={} ms", sourceInstanceInfo.getHostPort(),
                         targetInstanceInfo.getHostPort(), slot, num, (System.currentTimeMillis() - slotStartTime));
@@ -210,7 +210,7 @@ public class RedisClusterReshard {
      * 迁移slot数据，并稳定slot配置
      * @throws Exception
      */
-    private int moveSlotData(final Jedis source, final Jedis target, final int slot, boolean isPipelineMigrate) throws Exception {
+    private int moveSlotData(final long appId, final Jedis source, final Jedis target, final int slot, boolean isPipelineMigrate) throws Exception {
         int num = 0;
         while (true) {
             final Set<String> keys = new HashSet<String>();
@@ -250,25 +250,22 @@ public class RedisClusterReshard {
                 }
             }
         }
-        final String targetNodeId = getNodeId(target);
+        final String targetNodeId = getNodeId(appId, target);
         boolean isClusterSetSlotNode;
         //设置 slot新归属节点
         isClusterSetSlotNode = new IdempotentConfirmer() {
             @Override
             public boolean execute() {
                 boolean isOk = false;
-                List<HostAndPort> masterNodesList = getMasterNodeList();
+                List<HostAndPort> masterNodesList = getMasterNodeList(appId);
                 for (HostAndPort hostAndPort : masterNodesList) {
                     Jedis jedis = null;
                     try {
-                        jedis = new Jedis(hostAndPort.getHost(), hostAndPort.getPort());
+                        jedis = redisCenter.getJedis(appId, hostAndPort.getHost(), hostAndPort.getPort());
                         String response = jedis.clusterSetSlotNode(slot, targetNodeId);
                         isOk = response != null && response.equalsIgnoreCase("OK");
-                        if (isOk) {
-                            response = source.clusterSetSlotNode(slot, targetNodeId);
-                            isOk = response != null && response.equalsIgnoreCase("OK");
-                        } else {
-                            logger.error("clusterSetSlotNode-{}={}", getNodeId(target), response);
+                        if (!isOk) {
+                            logger.error("clusterSetSlotNode-{}={}", getNodeId(appId, target), response);
                             break;
                         }
                     } catch (Exception e) {
@@ -295,10 +292,10 @@ public class RedisClusterReshard {
      * MIGRATE host port key destination-db timeout [COPY] [REPLACE]
      * CLUSTER SETSLOT <slot> NODE <node_id> 将槽 slot 指派给 node_id 指定的节点，如果槽已经指派给另一个节点，那么先让另一个节点删除该槽>，然后再进行指派。
      */
-    private int migrateSlotData(final Jedis source, final Jedis target, final int slot, boolean isPipelineMigrate) {
+    private int migrateSlotData(long appId, final Jedis source, final Jedis target, final int slot, boolean isPipelineMigrate) {
         int num = 0;
-        final String sourceNodeId = getNodeId(source);
-        final String targetNodeId = getNodeId(target);
+        final String sourceNodeId = getNodeId(appId, source);
+        final String targetNodeId = getNodeId(appId, target);
         boolean isError = false;
         if (sourceNodeId == null || targetNodeId == null) {
             throw new JedisException(String.format("sourceNodeId = %s || targetNodeId = %s", sourceNodeId, targetNodeId));
@@ -330,7 +327,7 @@ public class RedisClusterReshard {
         }
 
         try {
-            num = moveSlotData(source, target, slot, isPipelineMigrate);
+            num = moveSlotData(appId, source, target, slot, isPipelineMigrate);
         } catch (Exception e) {
             isError = true;
             logger.error(e.getMessage(), e);
@@ -351,7 +348,7 @@ public class RedisClusterReshard {
      * 获取所有主节点
      * @return
      */
-    private List<HostAndPort> getMasterNodeList() {
+    private List<HostAndPort> getMasterNodeList(long appId) {
         List<HostAndPort> masterNodeList = new ArrayList<HostAndPort>();
         //获取RedisCluster所有节点
         JedisCluster jedisCluster = new JedisCluster(hosts, defaultTimeout);
@@ -360,7 +357,7 @@ public class RedisClusterReshard {
             for (JedisPool jedisPool : allNodes) {
                 String host = jedisPool.getHost();
                 int port = jedisPool.getPort();
-                if (!redisCenter.isMaster(host, port)) {
+                if (!redisCenter.isMaster(appId, host, port)) {
                     continue;
                 }
                 masterNodeList.add(new HostAndPort(host, port));
@@ -371,19 +368,14 @@ public class RedisClusterReshard {
         return masterNodeList;
     }
 
-
-    private Jedis getJedis(String host, int port, int timeout) {
-        return new Jedis(host, port, timeout);
-    }
-
     private final Map<String, String> nodeIdCachedMap = new HashMap<String, String>();
 
-    public String getNodeId(final Jedis jedis) {
+    public String getNodeId(final long appId, final Jedis jedis) {
         String nodeKey = getNodeKey(jedis);
         if (nodeIdCachedMap.get(nodeKey) != null) {
             return nodeIdCachedMap.get(nodeKey);
         } else {
-            String nodeId = redisCenter.getNodeId(jedis.getClient().getHost(), jedis.getClient().getPort());
+            String nodeId = redisCenter.getNodeId(appId, jedis.getClient().getHost(), jedis.getClient().getPort());
             nodeIdCachedMap.put(nodeKey, nodeId);
             return nodeId;
         }
@@ -404,5 +396,13 @@ public class RedisClusterReshard {
     public ReshardProcess getReshardProcess() {
         return reshardProcess;
     }
+
+	public RedisCenter getRedisCenter() {
+		return redisCenter;
+	}
+
+	public void setRedisCenter(RedisCenter redisCenter) {
+		this.redisCenter = redisCenter;
+	}
 
 }

@@ -44,7 +44,7 @@
 									<th>CPU使用率</th>
 									<th>网络流量</th>
 									<th>机器负载</th>
-									<th>核数/实例数</th>
+									<th>实例数/核数</th>
 									<th>最后统计时间</th>
 									<th>是否虚机</th>
 									<th>机房</th>
@@ -155,12 +155,20 @@
 															<c:set var="instanceCpuProgressBarStatus" value="progress-bar-success"/>
 						                        		</c:otherwise>
 						                        	</c:choose>
+						                        	<c:choose>
+						                        		<c:when test="${fmtInstanceCpuRatio == 0.00}">
+															<c:set var="instanceCount" value="0"/>
+						                        		</c:when>
+						                        		<c:otherwise>
+															<c:set var="instanceCount" value="${machineInstanceCountMap[machine.info.ip]}"/>
+						                        		</c:otherwise>
+						                        	</c:choose>
 	                                                    <div class="progress-bar ${instanceCpuProgressBarStatus}"
 	                                                         role="progressbar" aria-valuenow="${fmtInstanceCpuRatio}" aria-valuemax="100"
 	                                                         aria-valuemin="0" style="width: ${fmtInstanceCpuRatio}%">
 	                                                        <label style="color: #000000">
-	                                                            <fmt:formatNumber value="${machineInstanceCountMap[machine.info.ip]}"/>&nbsp;&nbsp;实例/
-	                                                            <fmt:formatNumber value="${machine.info.cpu}"/>&nbsp;&nbsp;核
+	                                                            <fmt:formatNumber value="${instanceCount}"/>&nbsp;&nbsp;/
+	                                                            <fmt:formatNumber value="${machine.info.cpu}"/>&nbsp;&nbsp;
 	                                                        </label>
 	                                                    </div>
 	                                                </div>

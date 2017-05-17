@@ -52,7 +52,12 @@ public class InstanceRunInspector extends BaseAlertService implements Inspector 
             final int type = info.getType();
             long appId = info.getAppId();
             if (TypeUtil.isRedisType(type)) {
-                boolean isRun = redisCenter.isRun(host, port);
+            		boolean isRun;
+            		if (TypeUtil.isRedisSentinel(type)) {
+            			isRun = redisCenter.isRun(host, port);
+            		} else {
+            			isRun = redisCenter.isRun(appId, host, port);
+            		}
                 Boolean isUpdate = updateInstanceByRun(isRun, info);
                 if (isUpdate == null) {
                     continue;

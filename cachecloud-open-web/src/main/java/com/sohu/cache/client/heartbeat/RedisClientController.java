@@ -72,7 +72,7 @@ public class RedisClientController {
 
     private void getRedisClusterInfo(HttpServletRequest request, long appId, Model model) {
         String clientVersion = request.getParameter("clientVersion");
-        if (!checkClientVersion(clientVersion, model)) {
+        if (!checkClientVersion(appId, clientVersion, model)) {
             return;
         }
 
@@ -88,11 +88,12 @@ public class RedisClientController {
             model.addAttribute("message", "ERROR: appId:" + appId + "shardsInfo为空 ");
             return;
         }
+//        AppDesc appDesc = appDao.getAppDescById(appId);
         int shardNum = shardsInfo.split(" ").length;
         model.addAttribute("appId", appId);
         model.addAttribute("shardNum", shardNum);
         model.addAttribute("shardInfo", shardsInfo);
-        
+//        model.addAttribute("password", appDesc.getPassword());
         //保存版本信息
         try {
             clientVersionService.saveOrUpdateClientVersion(appId, IpUtil.getIpAddr(request), clientVersion);
@@ -130,7 +131,7 @@ public class RedisClientController {
 
     private void getRedisSentinelInfo(HttpServletRequest request, long appId, Model model) {
         String clientVersion = request.getParameter("clientVersion");
-        if (!checkClientVersion(clientVersion, model)) {
+        if (!checkClientVersion(appId, clientVersion, model)) {
             return;
         }
 
@@ -156,10 +157,12 @@ public class RedisClientController {
             }
         }
         String sentinels = StringUtils.join(sentinelList, " ");
+//        AppDesc appDesc = appDao.getAppDescById(appId);
         model.addAttribute("sentinels", sentinels);
         model.addAttribute("masterName", masterName);
         model.addAttribute("appId", appId);
         model.addAttribute("status", ClientStatusEnum.GOOD.getStatus());
+//        model.addAttribute("password", appDesc.getPassword());
         
         //保存版本信息
         try {
@@ -199,7 +202,7 @@ public class RedisClientController {
 
     private void getRedisStandaloneInfo(HttpServletRequest request, long appId, Model model) {
         String clientVersion = request.getParameter("clientVersion");
-        if (!checkClientVersion(clientVersion, model)) {
+        if (!checkClientVersion(appId, clientVersion, model)) {
             return;
         }
 
@@ -211,8 +214,10 @@ public class RedisClientController {
             }
             standalone = instanceInfo.getIp() + ":" + instanceInfo.getPort();
         }
+//        AppDesc appDesc = appDao.getAppDescById(appId);
         model.addAttribute("standalone", standalone);
         model.addAttribute("status", ClientStatusEnum.GOOD.getStatus());
+//        model.addAttribute("password", appDesc.getPassword());
         
         //保存版本信息
         try {
@@ -258,7 +263,7 @@ public class RedisClientController {
         return true;
     }
 
-    private boolean checkClientVersion(String clientVersion, Model model) {
+    private boolean checkClientVersion(long appId, String clientVersion, Model model) {
         /** 检查客户端的版本 **/
         List<String> goodVersions = Lists.newArrayList(ConstUtils.GOOD_CLIENT_VERSIONS.split(ConstUtils.COMMA));
         List<String> warnVersions = Lists.newArrayList(ConstUtils.WARN_CLIENT_VERSIONS.split(ConstUtils.COMMA));
@@ -267,7 +272,7 @@ public class RedisClientController {
 
         if (goodVersions.contains(clientVersion)) {
             model.addAttribute("status", ClientStatusEnum.GOOD.getStatus());
-            model.addAttribute("message", "client is up to date, Cheers!");
+            model.addAttribute("message", "appId:" + appId + " client is up to date, Cheers!");
         } else if (warnVersions.contains(clientVersion)) {
             model.addAttribute("status", ClientStatusEnum.WARN.getStatus());
             model.addAttribute("message", "WARN: client is NOT the newest, please update!");

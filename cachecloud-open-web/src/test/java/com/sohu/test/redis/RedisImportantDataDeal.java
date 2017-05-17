@@ -77,7 +77,7 @@ public class RedisImportantDataDeal extends BaseTest {
             String host = instance.getIp();
             int port = instance.getPort();
             // master + 非sentinel节点
-            Boolean isMater = redisCenter.isMaster(host, port);
+            Boolean isMater = redisCenter.isMaster(appId, host, port);
             if (isMater != null && isMater.equals(true) && !TypeUtil.isRedisSentinel(instance.getType())) {
                 Jedis jedis = new Jedis(host, port, 30000);
                 try {

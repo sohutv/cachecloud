@@ -5,6 +5,7 @@ import com.sohu.cache.constant.InstanceStatusEnum;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.inspect.InspectParamEnum;
 import com.sohu.cache.inspect.Inspector;
+import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.util.IdempotentConfirmer;
 import com.sohu.cache.util.TypeUtil;
 
@@ -25,6 +26,8 @@ import java.util.concurrent.TimeUnit;
 public class RedisIsolationPersistenceInspector extends BaseAlertService implements Inspector {
     
     public static final int REDIS_DEFAULT_TIME = 5000;
+    
+    private RedisCenter redisCenter;
 
     @Override
     public boolean inspect(Map<InspectParamEnum, Object> paramMap) {
@@ -34,13 +37,14 @@ public class RedisIsolationPersistenceInspector extends BaseAlertService impleme
         for (InstanceInfo info : list) {
             final int port = info.getPort();
             final int type = info.getType();
+            final long appId = info.getAppId();
             int status = info.getStatus();
             //非正常节点
             if (status != InstanceStatusEnum.GOOD_STATUS.getStatus()) {
                 continue;
             }
             if (TypeUtil.isRedisDataType(type)) {
-                Jedis jedis = new Jedis(host, port, REDIS_DEFAULT_TIME);
+                Jedis jedis = redisCenter.getJedis(appId, host, port, REDIS_DEFAULT_TIME, REDIS_DEFAULT_TIME);
                 try {
                     Map<String, String> persistenceMap = parseMap(jedis);
                     if (persistenceMap.isEmpty()) {
@@ -176,4 +180,9 @@ public class RedisIsolationPersistenceInspector extends BaseAlertService impleme
             }
         }.run();
     }
+
+	public void setRedisCenter(RedisCenter redisCenter) {
+		this.redisCenter = redisCenter;
+	}
+
 }

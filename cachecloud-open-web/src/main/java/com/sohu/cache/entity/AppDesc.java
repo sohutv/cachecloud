@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import com.alibaba.fastjson.JSONObject;
 import com.sohu.cache.constant.AppDescEnum;
 import com.sohu.cache.constant.AppDescEnum.AppImportantLevel;
 import com.sohu.cache.constant.AppStatusEnum;
@@ -124,6 +125,11 @@ public class AppDesc implements Serializable {
      * 客户端机器机房
      */
     private String clientMachineRoom;
+    
+    /**
+     * redis密码
+     */
+    private String password;
     
     /**
      * 重要度，默认重要
@@ -302,6 +308,14 @@ public class AppDesc implements Serializable {
     public void setImportantLevel(int importantLevel) {
         this.importantLevel = importantLevel;
     }
+    
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
     /**
      * 应用运行天数
@@ -339,13 +353,7 @@ public class AppDesc implements Serializable {
 
     @Override
     public String toString() {
-        return "AppDesc [appId=" + appId + ", appKey=" + appKey + ", name=" + name + ", userId=" + userId + ", status="
-                + status + ", intro=" + intro + ", createTime=" + createTime + ", passedTime=" + passedTime + ", type="
-                + type + ", typeDesc=" + typeDesc + ", officer=" + officer + ", verId=" + verId + ", isTest=" + isTest
-                + ", hasBackStore=" + hasBackStore + ", needPersistence=" + needPersistence + ", forecaseQps="
-                + forecaseQps + ", needHotBackUp=" + needHotBackUp + ", forecastObjNum=" + forecastObjNum
-                + ", memAlertValue=" + memAlertValue + ", clientConnAlertValue=" + clientConnAlertValue
-                + ", clientMachineRoom=" + clientMachineRoom + ", importantLevel=" + importantLevel + "]";
+        return JSONObject.toJSONString(this);
     }
 
     public String getStatusDesc() {

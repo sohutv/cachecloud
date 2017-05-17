@@ -9,6 +9,7 @@ import com.sohu.cache.entity.InstanceSlowLog;
 import com.sohu.cache.web.vo.RedisSlowLog;
 
 import redis.clients.jedis.HostAndPort;
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisSentinelPool;
 
 import java.util.Date;
@@ -79,7 +80,7 @@ public interface RedisCenter {
      * @param port
      * @return
      */
-    public Map<RedisConstant, Map<String, Object>> getInfoStats(String host, int port);
+    public Map<RedisConstant, Map<String, Object>> getInfoStats(long appId, String host, int port);
 
     /**
      * 根据ip和port判断redis实例当前是主还是从
@@ -88,26 +89,28 @@ public interface RedisCenter {
      * @param port port
      * @return 主返回true，从返回false；
      */
-    public Boolean isMaster(String ip, int port);
+    public Boolean isMaster(long appId, String ip, int port);
 
     /**
      * 获取从节点的主节点地址
      *
      * @param ip
      * @param port
-     * @return
-     */
-    public HostAndPort getMaster(String ip, int port);
-
-    /**
-     * 判断实例是否运行(带密码)
-     *
-     * @param ip
-     * @param port
      * @param password
      * @return
      */
-    public boolean isRun(String ip, int port, String password);
+    public HostAndPort getMaster(String ip, int port, String password);
+
+    /**
+     * 判断实例是否运行
+     *
+     * @param appId
+     * @param ip
+     * @param port
+     * @return
+     */
+    public boolean isRun(final long appId, String ip, int port);
+    
     
     /**
      * 判断实例是否运行
@@ -116,16 +119,38 @@ public interface RedisCenter {
      * @param port
      * @return
      */
-    public boolean isRun(String ip, int port);
+	public boolean isRun(String ip, int port);
     
     /**
+     * 判断实例是否运行
+     *
+     * @param ip
+     * @param port
+     * @param password
+     * @return
+     */
+	public boolean isRun(String ip, int port, String redisPassword);
+
+	/**
      * 下线指定实例
      *
+     * @param appId
      * @param ip
      * @param port
      * @return
      */
     public boolean shutdown(String ip, int port);
+	
+	
+    /**
+     * 下线指定实例
+     *
+     * @param appId
+     * @param ip
+     * @param port
+     * @return
+     */
+    public boolean shutdown(long appId, String ip, int port);
 
     /**
      * 执行redis命令返回结果
@@ -184,16 +209,17 @@ public interface RedisCenter {
      *
      * @return
      */
-    public boolean configRewrite(final String host, final int port);
+    public boolean configRewrite(final long appId, final String host, final int port);
 
     /**
      * 获取maxmemory配置
      *
+     * @param appId
      * @param host
      * @param port
      * @return
      */
-    public Long getRedisMaxMemory(String host, int port);
+    public Long getRedisMaxMemory(long appId, String host, int port);
 
     /**
      * 清理app数据
@@ -206,11 +232,12 @@ public interface RedisCenter {
 
     /**
      * 判断是否为孤立节点
+     * @param appId
      * @param host
      * @param port
      * @return
      */
-    public boolean isSingleClusterNode(String host, int port);
+    public boolean isSingleClusterNode(long appId, String host, int port);
 
     
     /**
@@ -222,21 +249,23 @@ public interface RedisCenter {
     
     /**
      * 获取集群中失联的slots
+     * @param appId
      * @param host
      * @param port
      * @return
      */
-    public List<Integer> getClusterLossSlots(String host, int port);
+    public List<Integer> getClusterLossSlots(long appId, String host, int port);
 
     /**
      * 获取集群中失联的slots
+     * @param appId
      * @param healthyHost
      * @param healthyPort
      * @param lossSlotsHost
      * @param lossSlotsPort
      * @return
      */
-    public List<Integer> getInstanceSlots(String healthyHost, int healthyPort, String lossSlotsHost, int lossSlotsPort);
+    public List<Integer> getInstanceSlots(long appId, String healthyHost, int healthyPort, String lossSlotsHost, int lossSlotsPort);
 
     /**
      * 从一个应用中获取一个健康的实例
@@ -282,14 +311,6 @@ public interface RedisCenter {
     public Map<String, Long> getInstanceSlowLogCountMapByAppId(Long appId, Date startDate, Date endDate);
     
     /**
-     * 判断当前节点是否是sentinel节点
-     * @param ip
-     * @param port
-     * @return
-     */
-    public boolean isSentinelNode(String ip, int port);
-    
-    /**
      * 获取集群的slots分布
      * @param appId
      * @return
@@ -298,19 +319,30 @@ public interface RedisCenter {
 
     /**
      * 获取Redis版本
+     * @param appId
      * @param ip
      * @param port
      * @return
      */
-    public String getRedisVersion(String ip, int port);
+    public String getRedisVersion(long appId, String ip, int port);
     
     
     /**
      * 获取nodeId
+     * @param appId
      * @param ip
      * @param port
      * @return
      */
-    public String getNodeId(String ip, int port);
+    public String getNodeId(long appId, String ip, int port);
+    
+    Jedis getJedis(String host, int port, String password);
+    
+    Jedis getJedis(String host, int port);
+	
+	Jedis getJedis(long appId, String host, int port);
+
+	Jedis getJedis(long appId, String host, int port, int connectionTimeout, int soTimeout);
+
     
 }

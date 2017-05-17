@@ -33,6 +33,7 @@ import com.sohu.cache.entity.AppClientExceptionStat;
 import com.sohu.cache.entity.AppClientValueDistriSimple;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.AppInstanceClientRelation;
+import com.sohu.cache.entity.TimeBetween;
 import com.sohu.cache.stats.instance.InstanceStatsCenter;
 import com.sohu.cache.web.service.AppService;
 import com.sohu.cache.web.util.DateUtil;
@@ -406,49 +407,6 @@ public class AppClientDataShowController extends BaseController {
         long startTime = NumberUtils.toLong(DateUtil.formatDate(startDate, COLLECT_TIME_FORMAT));
         long endTime = NumberUtils.toLong(DateUtil.formatDate(endDate, COLLECT_TIME_FORMAT));
         return new TimeBetween(startTime, endTime, startDate, endDate);
-    }
-
-    public static class TimeBetween {
-        private long startTime = 0;
-        private long endTime = 0;
-        private Date startDate;
-        private Date endDate;
-
-
-        public TimeBetween(long startTime, long endTime, Date startDate, Date endDate) {
-            super();
-            this.startTime = startTime;
-            this.endTime = endTime;
-            this.startDate = startDate;
-            this.endDate = endDate;
-        }
-
-        public TimeBetween() {
-        }
-
-        public long getStartTime() {
-            return startTime;
-        }
-
-        public long getEndTime() {
-            return endTime;
-        }
-
-        public Date getStartDate() {
-            return startDate;
-        }
-
-        public Date getEndDate() {
-            return endDate;
-        }
-
-        @Override
-        public String toString() {
-            return "TimeBetween [startTime=" + startTime + ", endTime=" + endTime + ", startDate=" + startDate
-                    + ", endDate=" + endDate + "]";
-        }
-
-
     }
     
 }
