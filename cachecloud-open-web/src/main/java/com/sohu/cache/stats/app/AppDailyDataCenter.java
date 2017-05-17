@@ -14,15 +14,6 @@ import com.sohu.cache.entity.AppDailyData;
 public interface AppDailyDataCenter {
 
     /**
-     * 获取指定日期指定应用的相关统计
-     * @param appId
-     * @param startDate
-     * @param endDate
-     * @return
-     */
-    AppDailyData generateAppDaily(long appId, Date startDate, Date endDate);
-
-    /**
      * 发送所有应用日报
      */
     int sendAppDailyEmail();
@@ -31,5 +22,11 @@ public interface AppDailyDataCenter {
      * 发送单个应用日报
      */
     boolean sendAppDailyEmail(long appId, Date startDate, Date endDate);
+    
+    /**
+     * 获取单天应用日报
+     */
+    AppDailyData getAppDailyData(long appId, Date date);
+    
     
 }

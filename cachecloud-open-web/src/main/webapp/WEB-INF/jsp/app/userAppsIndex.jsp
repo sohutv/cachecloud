@@ -38,6 +38,9 @@
                    data-toggle="tab">慢查询</a>
             </li>
             <li><a href="#app_top_pic" data-url="/admin/app/machineInstancesTopology.do?appId=${appId}" data-toggle="tab">应用拓扑</a></li>
+            <li><a href="#app_daily" data-url="/admin/app/daily?appId=${appId}&dailyDate=${dailyDate}"
+                   data-toggle="tab">日报统计</a>
+            </li>
         </ul>
         <div class="tab-content">
             <div class="tab-pane active" id="app_stat">
@@ -59,6 +62,8 @@
             <div class="tab-pane" id="app_slow_log">
             </div>
             <div class="tab-pane" id="app_top_pic">
+            </div>
+            <div class="tab-pane" id="app_daily">
             </div>
         </div>
     </div>

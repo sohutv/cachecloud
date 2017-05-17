@@ -1,8 +1,5 @@
 package com.sohu.cache.dao;
 
-import java.util.Date;
-import java.util.List;
-
 import org.apache.ibatis.annotations.Param;
 
 import com.sohu.cache.entity.AppDailyData;
@@ -18,6 +15,6 @@ public interface AppDailyDao {
 
     void save(AppDailyData appDailyData);
     
-    List<AppDailyData> getAppDailyList(@Param("appId") long appId, @Param("startDate") Date startDate, @Param("endDate") Date endDate);
+    AppDailyData getAppDaily(@Param("appId") long appId, @Param("date") String date);
 
 }

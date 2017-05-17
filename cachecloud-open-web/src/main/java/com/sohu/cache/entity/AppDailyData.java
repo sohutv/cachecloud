@@ -343,6 +343,10 @@ public class AppDailyData {
         }
         return desc.toString();
     }
+    
+    public String getValueSizeDistributeCountDescHtml() {
+        return bigKeyInfo.replace("\n", "<br/>").replace(":", ":\t");
+    }
 
     public void setValueSizeDistributeCountMap(Map<String, Long> valueSizeDistributeCountMap) {
         this.valueSizeDistributeCountMap = valueSizeDistributeCountMap;

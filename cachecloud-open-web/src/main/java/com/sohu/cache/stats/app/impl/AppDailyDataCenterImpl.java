@@ -1,6 +1,7 @@
 package com.sohu.cache.stats.app.impl;
 
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -124,7 +125,6 @@ public class AppDailyDataCenterImpl implements AppDailyDataCenter {
         appDailyData.setBigKeyTimes(bigKeyTimes);
     }
 
-    @Override
     public AppDailyData generateAppDaily(long appId, Date startDate, Date endDate) {
         Assert.isTrue(appId > 0L);
         AppDetailVO appDetailVO = appStatsCenter.getAppDetail(appId);
@@ -301,6 +301,16 @@ public class AppDailyDataCenterImpl implements AppDailyDataCenter {
             ccEmailSet.addAll(ConstUtils.LEADER_EMAIL_LIST);
         }
         return new ArrayList<String>(ccEmailSet);
+    }
+    
+    @Override
+    public AppDailyData getAppDailyData(long appId, Date date) {
+        try {
+            return appDailyDao.getAppDaily(appId, new SimpleDateFormat("yyyy-MM-dd").format(date));
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return null;
+        }
     }
     
     public void setInstanceSlowLogDao(InstanceSlowLogDao instanceSlowLogDao) {

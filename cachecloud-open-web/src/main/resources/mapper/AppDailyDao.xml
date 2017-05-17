@@ -22,8 +22,8 @@
 		,#{maxMinuteNetOutputByte},#{avgObjectSize},#{maxObjectSize},#{bigKeyTimes},#{bigKeyInfo})
     </insert>
     
-    <select id="getAppDailyList" resultType="AppDailyData">
-		select id,<include refid="app_daily_column"/> from app_daily where app_id=#{appId} and date between #{startDate} and #{endDate}
+    <select id="getAppDaily" resultType="AppDailyData">
+		select id,<include refid="app_daily_column"/> from app_daily where app_id=#{appId} and date =#{date}
 	</select>
     
 </mapper>

@@ -6,6 +6,7 @@ import com.sohu.cache.constant.AppStatusEnum;
 import com.sohu.cache.constant.AppUserTypeEnum;
 import com.sohu.cache.constant.TimeDimensionalityEnum;
 import com.sohu.cache.entity.*;
+import com.sohu.cache.stats.app.AppDailyDataCenter;
 import com.sohu.cache.stats.app.AppDeployCenter;
 import com.sohu.cache.stats.app.AppStatsCenter;
 import com.sohu.cache.stats.instance.InstanceStatsCenter;
@@ -71,11 +72,9 @@ public class AppController extends BaseController {
     @Resource(name = "instanceStatsCenter")
     private InstanceStatsCenter instanceStatsCenter;
     
-    /**
-     * 取命令的条数
-     */
-    private final static int commandsCount = 20;
-
+    @Resource(name = "appDailyDataCenter")
+    private AppDailyDataCenter appDailyDataCenter;
+    
     /**
      * 初始化贡献者页面
      * @return
@@ -127,6 +126,8 @@ public class AppController extends BaseController {
             startDateParam = DateUtil.formatDate(startDate, "yyyy-MM-dd");
             endDateParam = DateUtil.formatDate(DateUtils.addDays(startDate, 1), "yyyy-MM-dd");
         }
+        
+        //慢查询
         String slowLogStartDateParam = request.getParameter("slowLogStartDate");
         String slowLogEndDateParam = request.getParameter("slowLogEndDate");
         if (StringUtils.isBlank(slowLogStartDateParam) || StringUtils.isBlank(slowLogEndDateParam)) {
@@ -135,10 +136,17 @@ public class AppController extends BaseController {
             slowLogEndDateParam = DateUtil.formatDate(DateUtils.addDays(startDate, 1), "yyyy-MM-dd");
         }
         
+        //日报
+        String dailyDateParam = request.getParameter("dailyDate");
+        if (StringUtils.isBlank(dailyDateParam)) {
+            dailyDateParam = DateUtil.formatDate(DateUtils.addDays(new Date(), -1), "yyyy-MM-dd");
+        }
+        
         model.addAttribute("startDate", startDateParam);
         model.addAttribute("endDate", endDateParam);
         model.addAttribute("slowLogStartDate", slowLogStartDateParam);
         model.addAttribute("slowLogEndDate", slowLogEndDateParam);
+        model.addAttribute("dailyDate", dailyDateParam);
         model.addAttribute("appId", appId);
         model.addAttribute("tabTag", tabTag);
         model.addAttribute("firstCommand", firstCommand);
@@ -257,7 +265,7 @@ public class AppController extends BaseController {
         }
 
         /** 3.获取top5命令 */
-        List<AppCommandStats> allCommands = appStatsCenter.getTopLimitAppCommandStatsList(appId, beginTime, endTime, commandsCount);
+        List<AppCommandStats> allCommands = appStatsCenter.getTopLimitAppCommandStatsList(appId, beginTime, endTime, 20);
         model.addAttribute("allCommands", allCommands);
         if (StringUtils.isBlank(firstCommand) && CollectionUtils.isNotEmpty(allCommands)) {
             model.addAttribute("firstCommand", allCommands.get(0).getCommandName());
@@ -905,6 +913,33 @@ public class AppController extends BaseController {
             model.addAttribute("status", 0);
         }
         return new ModelAndView("app/appDemo");
+    }
+
+    /**
+     * 应用日报查询
+     */
+    @RequestMapping("/daily")
+    public ModelAndView appDaily(HttpServletRequest request,
+                                  HttpServletResponse response, Model model, Long appId) throws ParseException {
+        // 1. 应用信息
+        AppDesc appDesc = appService.getByAppId(appId);
+        model.addAttribute("appDesc", appDesc);
+
+        // 2. 日期
+        String dailyDateParam = request.getParameter("dailyDate");
+        Date date;
+        if (StringUtils.isBlank(dailyDateParam)) {
+            date = DateUtils.addDays(new Date(), -1);
+        } else {
+            date = DateUtil.parseYYYY_MM_dd(dailyDateParam);
+        }
+        model.addAttribute("dailyDate", dailyDateParam);
+
+        // 3. 日报
+        AppDailyData appDailyData = appDailyDataCenter.getAppDailyData(appId, date);
+        model.addAttribute("appDailyData", appDailyData);
+
+        return new ModelAndView("app/appDaily");
     }
 
     /**

@@ -103,7 +103,11 @@ public class RedisCenterImpl implements RedisCenter {
                 jedisPool = jedisPoolMap.get(hostAndPort);
                 if (jedisPool == null) {
                     try {
-                        jedisPool = new JedisPool(new GenericObjectPoolConfig(), host, port, Protocol.DEFAULT_TIMEOUT, password);
+                        if (StringUtils.isNotBlank(password)) {
+                            jedisPool = new JedisPool(new GenericObjectPoolConfig(), host, port, Protocol.DEFAULT_TIMEOUT, password);
+                        } else {
+                            jedisPool = new JedisPool(new GenericObjectPoolConfig(), host, port, Protocol.DEFAULT_TIMEOUT);
+                        }
                         jedisPoolMap.put(hostAndPort, jedisPool);
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
