@@ -134,7 +134,7 @@
 
 ### 相关样章
 
-1.[Redis架构之防雪崩设计：网站不宕机背后的兵法](https://mp.weixin.qq.com/s?src=3&timestamp=1495868654&ver=1&signature=yO1wZWTzuPKHtHBc*kpq7vTzK8U*Gz7ljQXU6ujD1RIh44RRiRFxvFp9zWHmTfCUAag*9jzCi1Ul6ENPdeGmtaJX1zQKgbupROxh634tfCqxUS36C0wnDfxaq3WT6xvJjv3OgYT0n-ORlwsuKvx6KkOaIC6FLe-MV-Ii595QUGM=)
+1.[Redis架构之防雪崩设计：网站不宕机背后的兵法](https://mp.weixin.qq.com/s/TBCEwLVAXdsTszRVpXhVug)
 
 2.[Redis的内存优化](https://cachecloud.github.io/2017/02/16/Redis%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96/)
 
