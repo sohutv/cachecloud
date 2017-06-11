@@ -1188,6 +1188,10 @@ public class Client extends BinaryClient implements Commands {
   public void clusterFailoverForce() {
     cluster(Protocol.CLUSTER_FAILOVER, "force");
   }
+  
+  public void clusterFailoverTakeOver() {
+      cluster(Protocol.CLUSTER_FAILOVER, "takeover");
+  }
 
   public void configRewrite() {
     sendCommand(CONFIG, "rewrite");

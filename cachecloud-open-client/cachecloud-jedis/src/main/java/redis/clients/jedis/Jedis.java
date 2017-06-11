@@ -3525,6 +3525,12 @@ public class Jedis extends BinaryJedis implements JedisCommands, MultiKeyCommand
     client.clusterFailoverForce();
     return client.getStatusCodeReply();
   }
+  
+  public String clusterFailoverTakeOver() {
+      checkIsInMultiOrPipeline();
+      client.clusterFailoverTakeOver();
+      return client.getStatusCodeReply();
+   }
 
   public String configRewrite() {
     checkIsInMultiOrPipeline();
