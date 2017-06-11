@@ -30,7 +30,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 import redis.clients.jedis.*;
+import redis.clients.jedis.exceptions.JedisAskDataException;
 import redis.clients.jedis.exceptions.JedisDataException;
+import redis.clients.jedis.exceptions.JedisMovedDataException;
 import redis.clients.util.*;
 
 import java.sql.Timestamp;
@@ -877,6 +879,7 @@ public class RedisCenterImpl implements RedisCenter {
         }
         int type = appDesc.getType();
         long appId = appDesc.getAppId();
+        String password = appDesc.getPassword();
         if (type == ConstUtils.CACHE_REDIS_SENTINEL) {
             JedisSentinelPool jedisSentinelPool = getJedisSentinelPool(appDesc);
             if (jedisSentinelPool == null) {
@@ -928,32 +931,49 @@ public class RedisCenterImpl implements RedisCenter {
             if (clusterHosts.isEmpty()) {
                 return "no run instance";
             }
-            String host = null;
-            int port = 0;
-            JedisCluster jedisCluster = new JedisCluster(clusterHosts, REDIS_DEFAULT_TIME);
-            try {
-                String commandKey = getCommandKey(command);
-                int slot;
-                if (StringUtils.isBlank(commandKey)) {
-                    slot = 0;
-                } else {
-                    slot = JedisClusterCRC16.getSlot(commandKey);
+            String commandKey = getCommandKey(command);
+            for (HostAndPort hostAndPort : clusterHosts) {
+                HostAndPort rightHostAndPort = getClusterRightHostAndPort(hostAndPort.getHost(), hostAndPort.getPort(), password, commandKey);
+                if (rightHostAndPort != null) {
+                    try {
+                        return executeCommand(appId, rightHostAndPort.getHost(), rightHostAndPort.getPort(), command);
+                    } catch (Exception e) {
+                        logger.error(e.getMessage(), e);
+                        return "运行出错:" + e.getMessage();
+                    }
                 }
-                JedisPool jedisPool = jedisCluster.getConnectionHandler().getJedisPoolFromSlot(slot);
-                host = jedisPool.getHost();
-                port = jedisPool.getPort();
-            } finally {
-                jedisCluster.close();
             }
-
-            try {
-                return executeCommand(appId, host, port, command);
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-                return "运行出错:" + e.getMessage();
-            }
+            
         }
         return "不支持应用类型";
+    }
+    
+    /**
+     * 获取key对应的节点
+     * @param host
+     * @param port
+     * @param password
+     * @param key
+     * @return
+     */
+    private HostAndPort getClusterRightHostAndPort(String host, int port, String password, String key) {
+        Jedis jedis = null;
+        try {
+            jedis = getJedis(host, port, password);
+            jedis.type(key);
+            return new HostAndPort(host, port);
+        } catch (JedisMovedDataException e) {
+            return e.getTargetNode();
+        } catch (JedisAskDataException e) {
+            return e.getTargetNode();
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return null;
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
     }
 
     private String getCommandKey(String command) {
