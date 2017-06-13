@@ -159,41 +159,21 @@ public class AppController extends BaseController {
     
     /**
      * 应用统计相关
-     *
-     * @param appId 应用id
-     * @return
-     * @throws ParseException
      */
     @RequestMapping("/stat")
     public ModelAndView appStat(HttpServletRequest request,
                                 HttpServletResponse response, Model model, Long appId) throws ParseException {
-        String startDateParam = request.getParameter("startDate");
-        String endDateParam = request.getParameter("endDate");
-
-        /** 1.获取app的VO */
+        // 1.获取app的VO
         AppDetailVO appDetail = appStatsCenter.getAppDetail(appId);
         model.addAttribute("appDetail", appDetail);
 
-        /** 2. 时间. */
-        Date startDate;
-        Date endDate;
-        if (StringUtils.isBlank(startDateParam) || StringUtils.isBlank(endDateParam)) {
-            startDate = new Date();
-            endDate = DateUtils.addDays(startDate, 1);
-        } else {
-            endDate = DateUtil.parseYYYY_MM_dd(endDateParam);
-            startDate = DateUtil.parseYYYY_MM_dd(startDateParam);
-        }
-        Date yesterDay = DateUtils.addDays(startDate, -1);
-
-        long beginTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(startDate));
-        long endTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(endDate));
-        model.addAttribute("startDate", startDateParam);
-        model.addAttribute("endDate", endDateParam);
-        model.addAttribute("yesterDay", DateUtil.formatDate(yesterDay, "yyyy-MM-dd"));
-
+        // 2. 时间
+        TimeBetween timeBetween = getTimeBetween(request, model, "startDate", "endDate");
+        long beginTime = timeBetween.getStartTime();
+        long endTime = timeBetween.getEndTime();
+        
         // 3.是否超过1天
-        if (endDate.getTime() - startDate.getTime() > TimeUnit.DAYS.toMillis(1)) {
+        if (endTime - beginTime > TimeUnit.DAYS.toMillis(1)) {
             model.addAttribute("betweenOneDay", 0);
         } else {
             model.addAttribute("betweenOneDay", 1);
@@ -213,7 +193,6 @@ public class AppController extends BaseController {
                 }
             }
         }
-
         model.addAttribute("top5ClimaxList", top5ClimaxList);
 
         model.addAttribute("appId", appId);
@@ -222,50 +201,27 @@ public class AppController extends BaseController {
     
     /**
      * 命令曲线
-     *
-     * @param appId
      * @param firstCommand 第一条命令
-     * @throws ParseException
      */
     @RequestMapping("/commandAnalysis")
     public ModelAndView appCommandAnalysis(HttpServletRequest request,
                                            HttpServletResponse response, Model model, Long appId, String firstCommand) throws ParseException {
-        String startDateParam = request.getParameter("startDate");
-        String endDateParam = request.getParameter("endDate");
-
-        /** 1.获取app的VO */
+        // 1.获取app的VO
         AppDetailVO appDetail = appStatsCenter.getAppDetail(appId);
         model.addAttribute("appDetail", appDetail);
 
-        /** 2.返回日期 */
-        Date endDate;
-        Date startDate;
-        if (StringUtils.isBlank(startDateParam) || StringUtils.isBlank(endDateParam)) {
-            startDate = new Date();
-            endDate = DateUtils.addDays(startDate, 1);
-            startDateParam = DateUtil.formatDate(startDate, "yyyy-MM-dd");
-            endDateParam = DateUtil.formatDate(endDate, "yyyy-MM-dd");
-        } else {
-            endDate = DateUtil.parseYYYY_MM_dd(endDateParam);
-            startDate = DateUtil.parseYYYY_MM_dd(startDateParam);
-        }
-        Date yesterDay = DateUtils.addDays(startDate, -1);
-        model.addAttribute("yesterDay", DateUtil.formatDate(yesterDay, "yyyy-MM-dd"));
-
-        model.addAttribute("startDate", startDateParam);
-        model.addAttribute("endDate", endDateParam);
-        long beginTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(startDate));
-        long endTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(endDate));
+        // 2.返回日期
+        TimeBetween timeBetween = getTimeBetween(request, model, "startDate", "endDate");
 
         // 3.是否超过1天
-        if (endDate.getTime() - startDate.getTime() > TimeUnit.DAYS.toMillis(1)) {
+        if (timeBetween.getEndTime() - timeBetween.getStartTime() > TimeUnit.DAYS.toMillis(1)) {
             model.addAttribute("betweenOneDay", 0);
         } else {
             model.addAttribute("betweenOneDay", 1);
         }
 
-        /** 3.获取top5命令 */
-        List<AppCommandStats> allCommands = appStatsCenter.getTopLimitAppCommandStatsList(appId, beginTime, endTime, 20);
+        // 4.获取top命令
+        List<AppCommandStats> allCommands = appStatsCenter.getTopLimitAppCommandStatsList(appId, timeBetween.getStartTime(), timeBetween.getEndTime(), 20);
         model.addAttribute("allCommands", allCommands);
         if (StringUtils.isBlank(firstCommand) && CollectionUtils.isNotEmpty(allCommands)) {
             model.addAttribute("firstCommand", allCommands.get(0).getCommandName());
@@ -451,21 +407,8 @@ public class AppController extends BaseController {
         model.addAttribute("appId", appId);
 
         // 日期格式转换
-        Date endDate;
-        Date startDate;
-        String startDateParam = request.getParameter("startDate");
-        String endDateParam = request.getParameter("endDate");
-        if (StringUtils.isBlank(startDateParam) || StringUtils.isBlank(endDateParam)) {
-            startDate = new Date();
-            endDate = DateUtils.addDays(startDate, 1);
-            startDateParam = DateUtil.formatDate(startDate, "yyyy-MM-dd");
-            endDateParam = DateUtil.formatDate(endDate, "yyyy-MM-dd");
-        } else {
-            endDate = DateUtil.parseYYYY_MM_dd(endDateParam);
-            startDate = DateUtil.parseYYYY_MM_dd(startDateParam);
-        }
-        model.addAttribute("startDate", startDateParam);
-        model.addAttribute("endDate", endDateParam);
+        getTimeBetween(request, model, "startDate", "endDate");
+        
         return new ModelAndView("app/appInstanceNetStat");
     }
     
@@ -956,19 +899,9 @@ public class AppController extends BaseController {
         model.addAttribute("appDesc", appDesc);
         
         // 开始和结束日期
-        String slowLogStartDateParam = request.getParameter("slowLogStartDate");
-        String slowLogEndDateParam = request.getParameter("slowLogEndDate");
-        Date startDate;
-        Date endDate;
-        if (StringUtils.isBlank(slowLogStartDateParam) || StringUtils.isBlank(slowLogEndDateParam)) {
-            startDate = new Date();
-            endDate = DateUtils.addDays(startDate, 1);
-        } else {
-            startDate = DateUtil.parseYYYY_MM_dd(slowLogStartDateParam);
-            endDate = DateUtil.parseYYYY_MM_dd(slowLogEndDateParam);
-        }
-        model.addAttribute("slowLogStartDate", slowLogStartDateParam);
-        model.addAttribute("slowLogEndDate", slowLogEndDateParam);
+        TimeBetween timeBetween = getTimeBetween(request, model, "slowLogStartDate", "slowLogEndDate");
+        Date startDate = timeBetween.getStartDate();
+        Date endDate = timeBetween.getEndDate();
         
         // 应用慢查询日志
         Map<String,Long> appInstanceSlowLogCountMap = appStatsCenter.getInstanceSlowLogCountMapByAppId(appId, startDate, endDate);

@@ -1,8 +1,5 @@
 package com.sohu.cache.entity;
 
-import java.util.HashMap;
-import java.util.Map;
-
 
 /**
  * 实例报警阀值
