@@ -402,9 +402,9 @@
                                 <c:choose>
                                    <c:when test="${instance.status == 1}">
                                        <c:if test="${instance.masterInstanceId > 0 and instance.type == 2}">
-                                           <button type="button" class="btn btn-small btn-primary" data-target="#redisClusterFailOverManualModal${instance.id}" data-toggle="modal">&nbsp;&nbsp;Manual&nbsp;</button><br/><br/>
+                                           <button type="button" class="btn btn-small btn-success" data-target="#redisClusterFailOverManualModal${instance.id}" data-toggle="modal">&nbsp;&nbsp;Manual&nbsp;</button><br/><br/>
                                            <button type="button" class="btn btn-small btn-primary" data-target="#redisClusterFailOverForceModal${instance.id}" data-toggle="modal">&nbsp;&nbsp;&nbsp;Force&nbsp;&nbsp;</button><br/><br/>
-                                           <button type="button" class="btn btn-small btn-primary" data-target="#redisClusterFailOverTakeOverModal${instance.id}" data-toggle="modal">TakeOver</button><br/>
+                                           <button type="button" class="btn btn-small btn-danger" data-target="#redisClusterFailOverTakeOverModal${instance.id}" data-toggle="modal">TakeOver</button><br/>
                                        </c:if>
                                    </c:when>
                                 </c:choose>
