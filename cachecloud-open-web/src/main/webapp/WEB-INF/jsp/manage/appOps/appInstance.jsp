@@ -47,24 +47,73 @@
 	}
 
 
-	function redisClusterFailOver(appId, instanceId){
-		var redisClusterFailOverBtn = document.getElementById("redisClusterFailOverBtn" + instanceId);
-		redisClusterFailOverBtn.disabled = true;
+	function redisClusterFailOverManual(appId, instanceId){
+		var redisClusterFailOverManualBtn = document.getElementById("redisClusterFailOverManualBtn" + instanceId);
+		redisClusterFailOverManualBtn.disabled = true;
 		$.post(
 			'/manage/app/clusterSlaveFailOver.do',
 			{
 				appId: appId,
-				slaveInstanceId: instanceId
+				slaveInstanceId: instanceId,
+				failoverParam: ''
 			},
 	        function(data){
 	            if(data==1){
 	                alert("执行成功!");
-	            	$("#redisClusterFailOverInfo" + instanceId).html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Success!</strong>执行成功，应用的拓扑结构要1分钟之后生效，请耐心等待</div>");
-	                var targetId = "#redisClusterFailOverModal" + instanceId;
-	            	setTimeout("$('" + targetId +"').modal('hide');window.location.reload();",1000);
+	            		$("#redisClusterFailOverManualInfo" + instanceId).html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Success!</strong>执行成功，应用的拓扑结构要1分钟之后生效，请耐心等待</div>");
+	                var targetId = "#redisClusterFailOverManualModal" + instanceId;
+	            		setTimeout("$('" + targetId +"').modal('hide');window.location.reload();",1000);
 	            }else{
-	            	redisClusterFailOverBtn.disabled = false;
-	                $("#redisClusterFailOverInfo" + instanceId).html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Error!</strong>执行失败，请查找原因！</div>");
+	            		redisClusterFailOverManualBtn.disabled = false;
+	                $("#redisClusterFailOverManualInfo" + instanceId).html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Error!</strong>执行失败，请查找原因！</div>");
+	            }
+	        }
+	     );
+	}
+	
+	function redisClusterFailOverForce(appId, instanceId){
+		var redisClusterFailOverForceBtn = document.getElementById("redisClusterFailOverForceBtn" + instanceId);
+		redisClusterFailOverForceBtn.disabled = true;
+		$.post(
+			'/manage/app/clusterSlaveFailOver.do',
+			{
+				appId: appId,
+				slaveInstanceId: instanceId,
+				failoverParam: 'force'
+			},
+	        function(data){
+	            if(data==1){
+	                alert("执行成功!");
+	            		$("#redisClusterFailOverForceInfo" + instanceId).html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Success!</strong>执行成功，应用的拓扑结构要1分钟之后生效，请耐心等待</div>");
+	                var targetId = "#redisClusterFailOverForceModal" + instanceId;
+	            		setTimeout("$('" + targetId +"').modal('hide');window.location.reload();",1000);
+	            }else{
+	            		redisClusterFailOverForceBtn.disabled = false;
+	                $("#redisClusterFailOverForceInfo" + instanceId).html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Error!</strong>执行失败，请查找原因！</div>");
+	            }
+	        }
+	     );
+	}
+	
+	function redisClusterFailOverTakeOver(appId, instanceId){
+		var redisClusterFailOverTakeOverBtn = document.getElementById("redisClusterFailOverTakeOverBtn" + instanceId);
+		redisClusterFailOverTakeOverBtn.disabled = true;
+		$.post(
+			'/manage/app/clusterSlaveFailOver.do',
+			{
+				appId: appId,
+				slaveInstanceId: instanceId,
+				failoverParam: 'takeover'
+			},
+	        function(data){
+	            if(data==1){
+	                alert("执行成功!");
+	            		$("#redisClusterFailOverTakeOverInfo" + instanceId).html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Success!</strong>执行成功，应用的拓扑结构要1分钟之后生效，请耐心等待</div>");
+	                var targetId = "#redisClusterFailOverTakeOverModal" + instanceId;
+	            		setTimeout("$('" + targetId +"').modal('hide');window.location.reload();",1000);
+	            }else{
+	            		redisClusterFailOverTakeOverBtn.disabled = false;
+	                $("#redisClusterFailOverTakeOverInfo" + instanceId).html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Error!</strong>执行失败，请查找原因！</div>");
 	            }
 	        }
 	     );
@@ -243,9 +292,9 @@
 	                <th>连接数</th>
 	                <th>命中率</th>
 	                <th>碎片率</th>
-	                <th>AOF阻塞数</th>
 	                <th>日志</th>
-	                <th>操作</th>
+	                <th>节点运维</th>
+	                	<th>故障转移</th>
 	            </tr>
             </thead>
             <tbody>
@@ -311,7 +360,6 @@
 		                  </c:choose>
 		                  <label class="label ${memFragmentationRatioLabel}">${memFragmentationRatio}</label>
 	                    </td>
-	                    <td>${(instanceStatsMap[instanceStatsMapKey]).aofDelayedFsync}</td>
 	                    <td>
 	                    	<a target="_blank" href="/manage/instance/log?instanceId=${instance.id}">查看</a>
 	                    </td>
@@ -337,18 +385,30 @@
 		                                </c:choose>
                                     </c:when>
                                    <c:when test="${instance.status == 1}">
-                                     <button type="button" class="btn btn-small btn-danger" onclick="shutdownInstance('${appDesc.appId}', '${instance.id}')">
-                                        下线实例
-                                     </button>
+                                   	  <button type="button" class="btn btn-small btn-danger" onclick="shutdownInstance('${appDesc.appId}', '${instance.id}')">
+	                                        &nbsp;下线实例&nbsp;
+	                                   </button>
+	                                   
                                        <c:if test="${instance.masterInstanceId == 0 and instance.type != 5}">
+                                       	  <br/><br/>
                                            <button type="button" class="btn btn-small btn-primary" data-target="#redisClusterAddSlaveModal${instance.id}" data-toggle="modal">添加Slave</button>
-                                       </c:if>
-                                       <c:if test="${instance.masterInstanceId > 0 and instance.type == 2}">
-                                           <button type="button" class="btn btn-small btn-primary" data-target="#redisClusterFailOverModal${instance.id}" data-toggle="modal">&nbsp;FailOver&nbsp;</button>
                                        </c:if>
                                    </c:when>
                                 </c:choose>
 	                    	</div>
+	                    </td>
+	                    <td>
+	                    		<div>
+                                <c:choose>
+                                   <c:when test="${instance.status == 1}">
+                                       <c:if test="${instance.masterInstanceId > 0 and instance.type == 2}">
+                                           <button type="button" class="btn btn-small btn-primary" data-target="#redisClusterFailOverManualModal${instance.id}" data-toggle="modal">&nbsp;&nbsp;Manual&nbsp;</button><br/><br/>
+                                           <button type="button" class="btn btn-small btn-primary" data-target="#redisClusterFailOverForceModal${instance.id}" data-toggle="modal">&nbsp;&nbsp;&nbsp;Force&nbsp;&nbsp;</button><br/><br/>
+                                           <button type="button" class="btn btn-small btn-primary" data-target="#redisClusterFailOverTakeOverModal${instance.id}" data-toggle="modal">TakeOver</button><br/>
+                                       </c:if>
+                                   </c:when>
+                                </c:choose>
+	                    		</div>
 	                    </td>
 	                </tr>
 	            </c:forEach>
@@ -431,12 +491,12 @@
 
 
 <c:forEach var="instance" items="${instanceList}" varStatus="status">
-	<div id="redisClusterFailOverModal${instance.id}" class="modal fade" tabindex="-1" data-width="400">
+	<div id="redisClusterFailOverManualModal${instance.id}" class="modal fade" tabindex="-1" data-width="400">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
-					<h4 class="modal-title">redis-Cluster从节点FailOver操作</h4>
+					<h4 class="modal-title">redis-Cluster从节点FailOver Manual操作</h4>
 				</div>
 				
 				<div class="modal-body">
@@ -444,8 +504,8 @@
 						<!-- 控件开始 -->
 						<div class="container">
 							<div class="col-md-12">
-								<div>你确定对实例${instance.id}执行failOver操作?</div>
-								<div id="redisClusterFailOverInfo${instance.id}"></div>
+								<div>你确定对实例${instance.id}执行FailOver Manual操作?</div>
+								<div id="redisClusterFailOverManualInfo${instance.id}"></div>
 							</div>
 						</div>
 					</div>
@@ -453,7 +513,64 @@
 				
 				<div class="modal-footer">
 					<button type="button" data-dismiss="modal" class="btn" >Close</button>
-					<button type="button" id="redisClusterFailOverBtn${instance.id}" class="btn red" onclick="redisClusterFailOver('${appDesc.appId}', '${instance.id}')">Ok</button>
+					<button type="button" id="redisClusterFailOverManualBtn${instance.id}" class="btn red" onclick="redisClusterFailOverManual('${appDesc.appId}', '${instance.id}')">Ok</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div id="redisClusterFailOverForceModal${instance.id}" class="modal fade" tabindex="-1" data-width="400">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+					<h4 class="modal-title">redis-Cluster从节点FailOver ForceM操作</h4>
+				</div>
+				
+				<div class="modal-body">
+					<div class="row">
+						<!-- 控件开始 -->
+						<div class="container">
+							<div class="col-md-12">
+								<div>你确定对实例${instance.id}执行FailOver ForceM操作?</div>
+								<div id="redisClusterFailOverForceInfo${instance.id}"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="modal-footer">
+					<button type="button" data-dismiss="modal" class="btn" >Close</button>
+					<button type="button" id="redisClusterFailOverForceBtn${instance.id}" class="btn red" onclick="redisClusterFailOverForce('${appDesc.appId}', '${instance.id}')">Ok</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
+	<div id="redisClusterFailOverTakeOverModal${instance.id}" class="modal fade" tabindex="-1" data-width="400">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+					<h4 class="modal-title">redis-Cluster从节点FailOver TakeOver操作</h4>
+				</div>
+				
+				<div class="modal-body">
+					<div class="row">
+						<!-- 控件开始 -->
+						<div class="container">
+							<div class="col-md-12">
+								<div>你确定对实例${instance.id}执行FailOver TakeOver操作?</div>
+								<div id="redisClusterFailOverTakeOverInfo${instance.id}"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="modal-footer">
+					<button type="button" data-dismiss="modal" class="btn" >Close</button>
+					<button type="button" id="redisClusterFailOverTakeOverBtn${instance.id}" class="btn red" onclick="redisClusterFailOverTakeOver('${appDesc.appId}', '${instance.id}')">Ok</button>
 				</div>
 			</div>
 		</div>

@@ -968,7 +968,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
     }
 
     @Override
-    public boolean clusterFailover(long appId, int slaveInstanceId) throws Exception {
+    public boolean clusterFailover(final long appId, int slaveInstanceId, final String failoverParam) throws Exception {
         Assert.isTrue(appId > 0);
         Assert.isTrue(slaveInstanceId > 0);
         AppDesc appDesc = appDao.getAppDescById(appId);
@@ -986,16 +986,24 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         boolean isClusterFailOver = new IdempotentConfirmer() {
             @Override
             public boolean execute() {
-
-                String response = slaveJedis.clusterFailoverForce();
+                String response = null;
+                if (StringUtils.isBlank(failoverParam)) {
+                    response = slaveJedis.clusterFailover();
+                } else if ("force".equals(failoverParam)) {
+                    response = slaveJedis.clusterFailoverForce();
+                } else if ("takeover".equals(failoverParam)) {
+                    response = slaveJedis.clusterFailoverTakeOver();
+                } else {
+                    logger.error("appId {} failoverParam {} is wrong", appId, failoverParam);
+                }
                 return response != null && response.equalsIgnoreCase("OK");
             }
         }.run();
         if (!isClusterFailOver) {
-            logger.error("{}:{} clusterFailover failed", slaveHost, slavePort);
+            logger.error("{}:{} clusterFailover {} failed", slaveHost, slavePort, failoverParam);
             return false;
         } else {
-            logger.warn("{}:{} clusterFailover Done! ", slaveHost, slavePort);
+            logger.warn("{}:{} clusterFailover {} Done! ", slaveHost, slavePort, failoverParam);
         }
         return true;
     }

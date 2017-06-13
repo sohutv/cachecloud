@@ -116,9 +116,11 @@ public interface RedisDeployCenter {
      * cluster类型应用执行Failover,主从切换,只能在从节点执行
      *
      * @param appId
+     * @param slaveInstanceId
+     * @param failoverParam
      * @return
      */
-    public boolean clusterFailover(long appId, int slaveInstanceId) throws Exception;
+    public boolean clusterFailover(long appId, int slaveInstanceId, String failoverParam) throws Exception;
 
 
 

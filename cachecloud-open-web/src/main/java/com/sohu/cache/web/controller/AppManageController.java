@@ -636,17 +636,18 @@ public class AppManageController extends BaseController {
 	public void clusterSlaveFailOver(HttpServletRequest request, HttpServletResponse response, Model model, Long appId,
 			int slaveInstanceId) {
 		boolean success = false;
-		logger.warn("clusterSlaveFailOver: appId:{}, slaveInstanceId:{}", appId, slaveInstanceId);
+		String failoverParam = request.getParameter("failoverParam");
+		logger.warn("clusterSlaveFailOver: appId:{}, slaveInstanceId:{}, failoverParam:{}", appId, slaveInstanceId, failoverParam);
 		if (appId != null && appId > 0 && slaveInstanceId > 0) {
 			try {
-				success = redisDeployCenter.clusterFailover(appId,slaveInstanceId);
+				success = redisDeployCenter.clusterFailover(appId, slaveInstanceId, failoverParam);
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 			}
 		} else {
-			logger.error("error param clusterSlaveFailOver: appId:{}, slaveInstanceId:{}", appId, slaveInstanceId);
+			logger.error("error param clusterSlaveFailOver: appId:{}, slaveInstanceId:{}, failoverParam:{}", appId, slaveInstanceId, failoverParam);
 		}
-	    logger.warn("clusterSlaveFailOver: appId:{}, slaveInstanceId:{}, result is {}", appId, slaveInstanceId, success);
+	    logger.warn("clusterSlaveFailOver: appId:{}, slaveInstanceId:{}, failoverParam:{}, result is {}", appId, slaveInstanceId, failoverParam, success);
 		write(response, String.valueOf(success == true ? SuccessEnum.SUCCESS.value() : SuccessEnum.FAIL.value()));
 	}
 
