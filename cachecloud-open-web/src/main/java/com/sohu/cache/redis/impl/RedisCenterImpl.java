@@ -1174,27 +1174,32 @@ public class RedisCenterImpl implements RedisCenter {
             }
             String host = instance.getIp();
             int port = instance.getPort();
-            // master + 非sentinel节点
+            // 非sentinel节点
+            if (TypeUtil.isRedisSentinel(instance.getType())) {
+                continue;
+            }
+            // 非slave节点
             Boolean isMater = isMaster(appId, host, port);
-            if (isMater != null && isMater.equals(true) && !TypeUtil.isRedisSentinel(instance.getType())) {
-            		Jedis jedis = getJedis(appId, host, port);
-            		jedis.getClient().setConnectionTimeout(REDIS_DEFAULT_TIME);
-            		jedis.getClient().setSoTimeout(30000);
-                try {
-                    logger.warn("{}:{} start clear data", host, port);
-                    long start = System.currentTimeMillis();
-                    String result = jedis.flushAll();
-                    if (!"ok".equalsIgnoreCase(result)) {
-                        return false;
-                    }
-                    logger.warn("{}:{} finish clear data, cost time:{} ms", host, port,
-                            (System.currentTimeMillis() - start));
-                } catch (Exception e) {
-                    logger.error("clear redis: " + e.getMessage(), e);
+            if (isMater == null || !isMater.equals(true)){
+                continue;
+            }
+        		Jedis jedis = getJedis(appId, host, port);
+        		jedis.getClient().setConnectionTimeout(REDIS_DEFAULT_TIME);
+        		jedis.getClient().setSoTimeout(60000);
+            try {
+                logger.warn("{}:{} start clear data", host, port);
+                long start = System.currentTimeMillis();
+                String result = jedis.flushAll();
+                if (!"ok".equalsIgnoreCase(result)) {
                     return false;
-                } finally {
-                    jedis.close();
                 }
+                logger.warn("{}:{} finish clear data, cost time:{} ms", host, port,
+                        (System.currentTimeMillis() - start));
+            } catch (Exception e) {
+                logger.error("clear redis: " + e.getMessage(), e);
+                return false;
+            } finally {
+                jedis.close();
             }
         }
 
