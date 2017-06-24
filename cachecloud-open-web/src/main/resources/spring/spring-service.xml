@@ -49,6 +49,6 @@
     
     <bean id="serverDataService" class="com.sohu.cache.web.service.impl.ServerDataServiceImpl"/>
     
-    <bean id="instanceAlertValueService" class="com.sohu.cache.stats.instance.impl.InstanceAlertValueServiceImpl"/>
+    <bean id="instanceAlertConfigService" class="com.sohu.cache.stats.instance.impl.InstanceAlertConfigServiceImpl"/>
 
 </beans>

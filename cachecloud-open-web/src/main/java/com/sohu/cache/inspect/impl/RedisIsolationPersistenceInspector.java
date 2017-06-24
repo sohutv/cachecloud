@@ -6,6 +6,7 @@ import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.inspect.InspectParamEnum;
 import com.sohu.cache.inspect.Inspector;
 import com.sohu.cache.redis.RedisCenter;
+import com.sohu.cache.redis.enums.RedisInfoEnum;
 import com.sohu.cache.util.IdempotentConfirmer;
 import com.sohu.cache.util.TypeUtil;
 
@@ -54,8 +55,8 @@ public class RedisIsolationPersistenceInspector extends BaseAlertService impleme
                     if (!isAofEnabled(persistenceMap)) {
                         continue;
                     }
-                    long aofCurrentSize = MapUtils.getLongValue(persistenceMap, "aof_current_size");
-                    long aofBaseSize = MapUtils.getLongValue(persistenceMap, "aof_base_size");
+                    long aofCurrentSize = MapUtils.getLongValue(persistenceMap, RedisInfoEnum.aof_current_size.getValue());
+                    long aofBaseSize = MapUtils.getLongValue(persistenceMap, RedisInfoEnum.aof_base_size.getValue());
                     //阀值大于60%
                     long aofThresholdSize = (long) (aofBaseSize * 1.6);
                     double percentage = getPercentage(aofCurrentSize, aofBaseSize);

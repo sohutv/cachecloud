@@ -6,7 +6,7 @@ import org.quartz.SchedulerException;
 import org.springframework.context.ApplicationContext;
 
 import com.sohu.cache.schedule.jobs.CacheBaseJob;
-import com.sohu.cache.stats.instance.InstanceAlertValueService;
+import com.sohu.cache.stats.instance.InstanceAlertConfigService;
 
 /**
  * 实例分钟报警
@@ -24,9 +24,9 @@ public class InstanceAlertValueJob extends CacheBaseJob {
             long startTime = System.currentTimeMillis();
             SchedulerContext schedulerContext = context.getScheduler().getContext();
             ApplicationContext applicationContext = (ApplicationContext) schedulerContext.get(APPLICATION_CONTEXT_KEY);
-            InstanceAlertValueService instanceAlertValueService = applicationContext.getBean("instanceAlertValueService", InstanceAlertValueService.class);
-            int instanceSize = instanceAlertValueService.monitorLastMinuteAllInstanceInfo();
-            logger.info("InstanceAlertValueJob monitor {} instance, costtime {} ms", instanceSize, (System.currentTimeMillis() - startTime));
+            InstanceAlertConfigService instanceAlertConfigService = applicationContext.getBean("instanceAlertConfigService", InstanceAlertConfigService.class);
+            instanceAlertConfigService.monitorLastMinuteAllInstanceInfo();
+            logger.info("InstanceAlertValueJob cost time {} ms", (System.currentTimeMillis() - startTime));
         } catch (SchedulerException e) {
             logger.error(e.getMessage(), e);
         }

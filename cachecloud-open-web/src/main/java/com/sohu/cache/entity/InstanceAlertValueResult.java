@@ -1,39 +1,29 @@
 package com.sohu.cache.entity;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.alibaba.fastjson.JSONObject;
 
 /**
  * 实例报警结果
  * @author leifu
- * @Date 2016年9月13日
- * @Time 上午10:54:49
+ * @Date 2017年6月19日
+ * @Time 下午10:50:23
  */
 public class InstanceAlertValueResult {
-    /**
-     * 监控项
-     */
-    private String configKey;
-
-    /**
-     * 阀值
-     */
-    private String alertValue;
     
     /**
-     * 比较类型：小于、等于、大于、不等于
+     * 实例报警配置
      */
-    private int compareType;
+    private InstanceAlertConfig instanceAlertConfig;
+    
+    /**
+     * 实例信息
+     */
+    private InstanceInfo instanceInfo;
 
     /**
-     * 监控说明
+     * 当前值
      */
     private String currentValue;
-
-    /**
-     * 1固定值,2差值
-     */
-    private int valueType;
     
     /**
      * 应用id
@@ -41,92 +31,46 @@ public class InstanceAlertValueResult {
     private long appId;
     
     /**
-     * 实例ip
+     * 单位
      */
-    private String ip;
-    
-    /**
-     * 实例端口
-     */
-    private int port;
-    
+    private String unit;
+
     /**
      * 应用信息
      */
     private AppDesc appDesc;
-
-
-    public String getConfigKey() {
-        return configKey;
-    }
-
-    public void setConfigKey(String configKey) {
-        this.configKey = configKey;
-    }
-
-    public String getAlertValue() {
-        return alertValue;
-    }
-
-    public void setAlertValue(String alertValue) {
-        this.alertValue = alertValue;
-    }
     
-    public String getCompareInfo() {
-        CompareTypeEnum compareTypeEnum = CompareTypeEnum.getByValue(compareType);
-        return compareTypeEnum == null ? "" : compareTypeEnum.getInfo();
-    }
-    
-    public static enum CompareTypeEnum {
-        SMALLER(-1, "小于"),
-        EQUAL(0, "等于"),
-        BIGGER(1, "大于"),
-        NOT_EQUAL(2, "不等于");
+    /**
+     * 其他信息
+     */
+    private String otherInfo;
 
-        public static Map<Integer, CompareTypeEnum> MAP = new HashMap<Integer, InstanceAlertValueResult.CompareTypeEnum>();
-        static {
-            for (CompareTypeEnum compareTypeEnum : CompareTypeEnum.values()) {
-                MAP.put(compareTypeEnum.value, compareTypeEnum);
-            }
-        }
-        
-        public static CompareTypeEnum getByValue(int compareType) {
-            return MAP.get(compareType);
-        }
-        
-        private int value;
-        
-        private String info;
-
-        private CompareTypeEnum(int value, String info) {
-            this.value = value;
-            this.info = info;
-        }
-
-        public int getValue() {
-            return value;
-        }
-
-        public String getInfo() {
-            return info;
-        }
-
+    public InstanceAlertValueResult() {
     }
 
-    public int getCompareType() {
-        return compareType;
+    public InstanceAlertValueResult(InstanceAlertConfig instanceAlertConfig, InstanceInfo instanceInfo,
+            String currentValue, long appId, String unit) {
+        this.instanceAlertConfig = instanceAlertConfig;
+        this.instanceInfo = instanceInfo;
+        this.currentValue = currentValue;
+        this.appId = appId;
+        this.unit = unit;
     }
 
-    public void setCompareType(int compareType) {
-        this.compareType = compareType;
+    public InstanceAlertConfig getInstanceAlertConfig() {
+        return instanceAlertConfig;
     }
 
-    public int getValueType() {
-        return valueType;
+    public void setInstanceAlertConfig(InstanceAlertConfig instanceAlertConfig) {
+        this.instanceAlertConfig = instanceAlertConfig;
     }
 
-    public void setValueType(int valueType) {
-        this.valueType = valueType;
+    public InstanceInfo getInstanceInfo() {
+        return instanceInfo;
+    }
+
+    public void setInstanceInfo(InstanceInfo instanceInfo) {
+        this.instanceInfo = instanceInfo;
     }
 
     public String getCurrentValue() {
@@ -145,22 +89,6 @@ public class InstanceAlertValueResult {
         this.appId = appId;
     }
 
-    public String getIp() {
-        return ip;
-    }
-
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
-
     public AppDesc getAppDesc() {
         return appDesc;
     }
@@ -169,14 +97,29 @@ public class InstanceAlertValueResult {
         this.appDesc = appDesc;
     }
 
+    public String getUnit() {
+        return unit;
+    }
+
+    public String getOtherInfo() {
+        return otherInfo;
+    }
+
+    public void setOtherInfo(String otherInfo) {
+        this.otherInfo = otherInfo;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
+
     public String getAlertMessage() {
-        return String.format("实际值为%s,%s预设值%s", currentValue, getCompareInfo(), alertValue);
+        return String.format("实际值为%s%s,%s预设值%s%s", currentValue, unit, instanceAlertConfig.getCompareInfo(),
+                instanceAlertConfig.getAlertValue(), unit);
     }
     
     @Override
     public String toString() {
-        return "InstanceAlertValueResult [configKey=" + configKey + ", alertValue=" + alertValue + ", compareType="
-                + compareType + ", currentValue=" + currentValue + ", valueType=" + valueType + ", appId=" + appId
-                + ", ip=" + ip + ", port=" + port + "]";
+        return JSONObject.toJSONString(this);
     }
 }
