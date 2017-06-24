@@ -2,7 +2,6 @@ package com.sohu.cache.stats.instance.impl;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -310,8 +309,7 @@ public class InstanceAlertConfigServiceImpl implements InstanceAlertConfigServic
         String emailTitle = String.format("Redis实例分钟报警(%s~%s)", sdf.format(beginTime), sdf.format(endTime));
         String emailContent = VelocityUtils.createText(velocityEngine, null, null, null, instanceAlertValueResultList,
                 "instanceAlert.vm", "UTF-8");
-        emailComponent.sendMail(emailTitle, emailContent.toString(),
-                Arrays.asList("leifu@sohu-inc.com", "yijunzhang@sohu-inc.com"));
+        emailComponent.sendMailToAdmin(emailTitle, emailContent.toString());
     }
 
     /**
