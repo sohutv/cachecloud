@@ -1,7 +1,9 @@
 package com.sohu.cache.redis;
 
+import com.sohu.cache.constant.ReshardStatusEnum;
+import com.sohu.cache.dao.InstanceReshardProcessDao;
 import com.sohu.cache.entity.InstanceInfo;
-import com.sohu.cache.redis.ReshardProcess.ReshardStatusEnum;
+import com.sohu.cache.entity.InstanceReshardProcess;
 import com.sohu.cache.util.IdempotentConfirmer;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -46,14 +48,13 @@ public class RedisClusterReshard {
      */
     private RedisCenter redisCenter;
     
-    /**
-     * 迁移状态
-     */
-    private final ReshardProcess reshardProcess = new ReshardProcess();
+    private InstanceReshardProcessDao instanceReshardProcessDao;
     
-    public RedisClusterReshard(Set<HostAndPort> hosts, RedisCenter redisCenter) {
+    
+    public RedisClusterReshard(Set<HostAndPort> hosts, RedisCenter redisCenter, InstanceReshardProcessDao instanceReshardProcessDao) {
         this.hosts = hosts;
         this.redisCenter = redisCenter;
+        this.instanceReshardProcessDao = instanceReshardProcessDao;
     }
 
     /**
@@ -165,12 +166,9 @@ public class RedisClusterReshard {
      * 将source中的startSlot到endSlot迁移到target
      *
      */
-    public boolean migrateSlot(long appId, InstanceInfo sourceInstanceInfo, InstanceInfo targetInstanceInfo, int startSlot, int endSlot, boolean isPipelineMigrate) {
+    public boolean migrateSlot(long appId, long appAuditId, InstanceInfo sourceInstanceInfo, InstanceInfo targetInstanceInfo, int startSlot, int endSlot, boolean isPipelineMigrate) {
         long startTime = System.currentTimeMillis();
-        //上线类型
-        reshardProcess.setType(0);
-        //迁移的总slot个数
-        reshardProcess.setTotalSlot(endSlot - startSlot + 1);
+        InstanceReshardProcess instanceReshardProcess = saveInstanceReshardProcess(appId, appAuditId, sourceInstanceInfo, targetInstanceInfo, startSlot, endSlot);
         //源和目标Jedis
         Jedis sourceJedis = redisCenter.getJedis(appId, sourceInstanceInfo.getIp(), sourceInstanceInfo.getPort(), defaultTimeout, defaultTimeout);
         Jedis targetJedis = redisCenter.getJedis(appId, targetInstanceInfo.getIp(), targetInstanceInfo.getPort(), defaultTimeout, defaultTimeout);
@@ -179,9 +177,10 @@ public class RedisClusterReshard {
         for (int slot = startSlot; slot <= endSlot; slot++) {
             long slotStartTime = System.currentTimeMillis();
             try {
+                instanceReshardProcessDao.updateMigratingSlot(instanceReshardProcess.getId(), slot);
                 //num是迁移key的总数
                 int num = migrateSlotData(appId, sourceJedis, targetJedis, slot, isPipelineMigrate);
-                reshardProcess.addReshardSlot(slot, num);
+                instanceReshardProcessDao.increaseFinishSlotNum(instanceReshardProcess.getId());
                 logger.warn("clusterReshard:{}->{}, slot={}, keys={}, costTime={} ms", sourceInstanceInfo.getHostPort(),
                         targetInstanceInfo.getHostPort(), slot, num, (System.currentTimeMillis() - slotStartTime));
             } catch (Exception e) {
@@ -190,21 +189,52 @@ public class RedisClusterReshard {
                 break;
             }
         }
-        if (reshardProcess.getStatus() != ReshardStatusEnum.ERROR.getValue()) {
-            reshardProcess.setStatus(ReshardStatusEnum.FINISH.getValue());
-        }
         long endTime = System.currentTimeMillis();
         logger.warn("clusterReshard:{}->{}, slot:{}->{}, costTime={} ms", sourceInstanceInfo.getHostPort(),
                 targetInstanceInfo.getHostPort(), startSlot, endSlot, (endTime - startTime));
         if (hasError) {
-            reshardProcess.setStatus(ReshardStatusEnum.ERROR.getValue());
+            instanceReshardProcessDao.updateStatus(instanceReshardProcess.getId(), ReshardStatusEnum.ERROR.getValue());
             return false;
         } else {
-            reshardProcess.setStatus(ReshardStatusEnum.FINISH.getValue());
+            instanceReshardProcessDao.updateStatus(instanceReshardProcess.getId(), ReshardStatusEnum.FINISH.getValue());
+            instanceReshardProcessDao.updateEndTime(instanceReshardProcess.getId(), new Date());
             return true;
         }
     }
 
+
+    /**
+     * 保存进度
+     * @param appId
+     * @param appAuditId
+     * @param sourceInstanceInfo
+     * @param targetInstanceInfo
+     * @param startSlot
+     * @param endSlot
+     * @return
+     */
+    private InstanceReshardProcess saveInstanceReshardProcess(long appId, long appAuditId,
+            InstanceInfo sourceInstanceInfo, InstanceInfo targetInstanceInfo, int startSlot, int endSlot) {
+        Date now = new Date();
+        InstanceReshardProcess instanceReshardProcess = new InstanceReshardProcess();
+        instanceReshardProcess.setAppId(appId);
+        instanceReshardProcess.setAuditId(appAuditId);
+        instanceReshardProcess.setFinishSlotNum(0);
+        instanceReshardProcess.setSourceInstanceId(sourceInstanceInfo.getId());
+        instanceReshardProcess.setTargetInstanceId(targetInstanceInfo.getId());
+        instanceReshardProcess.setMigratingSlot(startSlot);
+        instanceReshardProcess.setStartSlot(startSlot);
+        instanceReshardProcess.setEndSlot(endSlot);
+        instanceReshardProcess.setStatus(ReshardStatusEnum.RUNNING.getValue());
+        instanceReshardProcess.setStartTime(now);
+        //用status控制显示结束时间
+        instanceReshardProcess.setEndTime(now);
+        instanceReshardProcess.setCreateTime(now);
+        instanceReshardProcess.setUpdateTime(now);
+        
+        instanceReshardProcessDao.save(instanceReshardProcess);
+        return instanceReshardProcess;
+    }
 
     /**
      * 迁移slot数据，并稳定slot配置
@@ -393,15 +423,11 @@ public class RedisClusterReshard {
         this.defaultTimeout = defaultTimeout;
     }
 
-    public ReshardProcess getReshardProcess() {
-        return reshardProcess;
+	public void setInstanceReshardProcessDao(InstanceReshardProcessDao instanceReshardProcessDao) {
+        this.instanceReshardProcessDao = instanceReshardProcessDao;
     }
 
-	public RedisCenter getRedisCenter() {
-		return redisCenter;
-	}
-
-	public void setRedisCenter(RedisCenter redisCenter) {
+    public void setRedisCenter(RedisCenter redisCenter) {
 		this.redisCenter = redisCenter;
 	}
 

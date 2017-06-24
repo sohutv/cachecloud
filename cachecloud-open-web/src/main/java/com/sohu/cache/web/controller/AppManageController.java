@@ -5,11 +5,11 @@ import com.sohu.cache.constant.AppCheckEnum;
 import com.sohu.cache.constant.DataFormatCheckResult;
 import com.sohu.cache.constant.ErrorMessageEnum;
 import com.sohu.cache.constant.HorizontalResult;
+import com.sohu.cache.dao.InstanceReshardProcessDao;
 import com.sohu.cache.entity.*;
 import com.sohu.cache.machine.MachineCenter;
 import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.redis.RedisDeployCenter;
-import com.sohu.cache.redis.ReshardProcess;
 import com.sohu.cache.stats.app.AppDailyDataCenter;
 import com.sohu.cache.stats.app.AppDeployCenter;
 import com.sohu.cache.stats.instance.InstanceDeployCenter;
@@ -21,7 +21,6 @@ import com.sohu.cache.web.util.DateUtil;
 
 import net.sf.json.JSONArray;
 
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang.time.DateUtils;
@@ -38,8 +37,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import java.text.ParseException;
 import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * 应用后台管理
@@ -73,6 +70,9 @@ public class AppManageController extends BaseController {
 
 	@Resource(name = "appDailyDataCenter")
     private AppDailyDataCenter appDailyDataCenter;
+	
+    @Resource(name = "instanceReshardProcessDao")
+	private InstanceReshardProcessDao instanceReshardProcessDao;
 	
 	@RequestMapping("/appDaily")
     public ModelAndView appDaily(HttpServletRequest request, HttpServletResponse response, Model model) throws ParseException {
@@ -261,8 +261,8 @@ public class AppManageController extends BaseController {
 		model.addAttribute("appId", appAudit.getAppId());
 
 		// 2. 进度
-		ConcurrentMap<Long, ReshardProcess> appScaleProcessMap = appDeployCenter.getHorizontalProcess();
-		model.addAttribute("appScaleProcessMap", appScaleProcessMap);
+		List<InstanceReshardProcess> instanceReshardProcessList = instanceReshardProcessDao.getByAuditId(appAudit.getId());
+		model.addAttribute("instanceReshardProcessList", instanceReshardProcessList);
 
 		// 3. 实例列表和统计
 		fillAppInstanceStats(appAudit.getAppId(), model);
@@ -277,32 +277,33 @@ public class AppManageController extends BaseController {
 	 */
 	@RequestMapping(value = "/showReshardProcess")
 	public ModelAndView doShowReshardProcess(HttpServletRequest request, HttpServletResponse response, Model model) {
-	    ConcurrentMap<Long, ReshardProcess> appScaleProcessMap = appDeployCenter.getHorizontalProcess();
-        write(response, filterMapToJsonArray(appScaleProcessMap));
+	    long auditId = NumberUtils.toLong(request.getParameter("auditId"));
+        List<InstanceReshardProcess> instanceReshardProcessList = instanceReshardProcessDao.getByAuditId(auditId);
+        write(response, JSONArray.fromObject(instanceReshardProcessList).toString());
         return null;
 	}
 
-	/**
-     * 把Map组装成JsonArray
-     * 
-     * @param appScaleProcessMap
-     * @return
-     */
-    private String filterMapToJsonArray(ConcurrentMap<Long, ReshardProcess> appScaleProcessMap) {
-        if (MapUtils.isEmpty(appScaleProcessMap)) {
-            return "[]";
-        }
-        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-        for (Entry<Long, ReshardProcess> entry : appScaleProcessMap.entrySet()) {
-            Map<String, Object> map = new HashMap<String, Object>();
-            map.put("appId", entry.getKey());
-            map.put("reshardSlot", entry.getValue().getReshardSlot());
-            map.put("totalSlot", entry.getValue().getTotalSlot());
-            map.put("status", entry.getValue().getStatus());
-            list.add(map);
-        }
-        return JSONArray.fromObject(list).toString();
-    }
+//	/**
+//     * 把Map组装成JsonArray
+//     * 
+//     * @param appScaleProcessMap
+//     * @return
+//     */
+//    private String filterMapToJsonArray(ConcurrentMap<Long, ReshardProcess> appScaleProcessMap) {
+//        if (MapUtils.isEmpty(appScaleProcessMap)) {
+//            return "[]";
+//        }
+//        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+//        for (Entry<Long, ReshardProcess> entry : appScaleProcessMap.entrySet()) {
+//            Map<String, Object> map = new HashMap<String, Object>();
+//            map.put("appId", entry.getKey());
+//            map.put("reshardSlot", entry.getValue().getReshardSlot());
+//            map.put("totalSlot", entry.getValue().getTotalSlot());
+//            map.put("status", entry.getValue().getStatus());
+//            list.add(map);
+//        }
+//        return JSONArray.fromObject(list).toString();
+//    }
 
 	/**
 	 * 水平扩容配置检查

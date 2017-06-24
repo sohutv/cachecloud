@@ -1,6 +1,7 @@
 package com.sohu.cache.stats.app.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -33,11 +34,13 @@ import com.sohu.cache.dao.AppAuditDao;
 import com.sohu.cache.dao.AppAuditLogDao;
 import com.sohu.cache.dao.AppDao;
 import com.sohu.cache.dao.InstanceDao;
+import com.sohu.cache.dao.InstanceReshardProcessDao;
 import com.sohu.cache.entity.AppAudit;
 import com.sohu.cache.entity.AppAuditLog;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.entity.InstanceInfo;
+import com.sohu.cache.entity.InstanceReshardProcess;
 import com.sohu.cache.entity.InstanceSlotModel;
 import com.sohu.cache.entity.MachineInfo;
 import com.sohu.cache.machine.MachineCenter;
@@ -45,7 +48,6 @@ import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.redis.RedisClusterNode;
 import com.sohu.cache.redis.RedisClusterReshard;
 import com.sohu.cache.redis.RedisDeployCenter;
-import com.sohu.cache.redis.ReshardProcess;
 import com.sohu.cache.stats.app.AppDeployCenter;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.TypeUtil;
@@ -77,8 +79,8 @@ public class AppDeployCenterImpl implements AppDeployCenter {
     private AppAuditLogDao appAuditLogDao;
     
     private AppDao appDao;
-
-    private ConcurrentMap<Long, ReshardProcess> processMap = new ConcurrentSkipListMap<Long, ReshardProcess>();
+    
+    private InstanceReshardProcessDao instanceReshardProcessDao;
 
     private ExecutorService processThreadPool = new ThreadPoolExecutor(0, 256,
             0L, TimeUnit.MILLISECONDS,
@@ -538,7 +540,7 @@ public class AppDeployCenterImpl implements AppDeployCenter {
         
         
         //4. 添加新节点: meet,复制，不做slot分配
-        RedisClusterReshard clusterReshard = new RedisClusterReshard(clusterHosts, redisCenter);
+        RedisClusterReshard clusterReshard = new RedisClusterReshard(clusterHosts, redisCenter, instanceReshardProcessDao);
         boolean joinCluster = clusterReshard.joinCluster(appId, masterHost, masterPort, slaveHost, slavePort);
         if (joinCluster) {
             //5. 保存实例,开启统计功能
@@ -570,20 +572,15 @@ public class AppDeployCenterImpl implements AppDeployCenter {
         }
     }
     
+    /**
+     * todo
+     * @param appId
+     * @return
+     */
     private boolean isInProcess(Long appId) {
-        ReshardProcess process = processMap.get(appId);
-        if (process != null && process.getStatus() == 0) {
-            logger.warn("appId={} is inProcess", appId);
-            return true;
-        } else {
-            return false;
-        }
+        return false;
     }
 
-    @Override
-    public ConcurrentMap<Long, ReshardProcess> getHorizontalProcess() {
-        return processMap;
-    }
 
     private InstanceInfo saveInstance(long appId, String host, int port, int maxMemory) {
         InstanceInfo instanceInfo = new InstanceInfo();
@@ -604,11 +601,11 @@ public class AppDeployCenterImpl implements AppDeployCenter {
     @Override
 	public HorizontalResult checkHorizontal(long appId, long appAuditId, long sourceId, long targetId, int startSlot,
 			int endSlot, int migrateType) {
-    	// 0.当前应用正在迁移
+        // 0.当前应用正在迁移
         boolean isInProcess = isInProcess(appId);
-    	if (isInProcess) {
+    	    if (isInProcess) {
 			return HorizontalResult.fail(String.format("appId=%s正在迁移!", appId));
-    	}
+    	    }
 		// 1.应用信息
 		AppDesc appDesc = appService.getByAppId(appId);
 		if (appDesc == null) {
@@ -796,11 +793,9 @@ public class AppDeployCenterImpl implements AppDeployCenter {
             public void run() {
                 //所有节点用户clustersetslot
                 Set<HostAndPort> clusterHosts = getEffectiveInstanceList(appId);
-                RedisClusterReshard clusterReshard = new RedisClusterReshard(clusterHosts, redisCenter);
+                RedisClusterReshard clusterReshard = new RedisClusterReshard(clusterHosts, redisCenter, instanceReshardProcessDao);
                 //添加进度
-                processMap.put(appId, clusterReshard.getReshardProcess());
-                boolean joinCluster = clusterReshard.migrateSlot(appId, sourceInstanceInfo, targetInstanceInfo, startSlot, endSlot, migrateType == 1);
-                logger.warn("async:appId={} joinCluster={} done result={}", appId, joinCluster, clusterReshard.getReshardProcess());
+                boolean joinCluster = clusterReshard.migrateSlot(appId, appAuditId, sourceInstanceInfo, targetInstanceInfo, startSlot, endSlot, migrateType == 1);
                 if (joinCluster) {
                     // 改变审核状态
                     appAuditDao.updateAppAudit(appAuditId, AppCheckEnum.APP_ALLOCATE_RESOURCE.value());
@@ -870,6 +865,16 @@ public class AppDeployCenterImpl implements AppDeployCenter {
         return DataFormatCheckResult.success("添加节点格式正确，可以开始部署了!");
     }
     
+    @Override
+    public List<InstanceReshardProcess> getHorizontalProcess(long auditId) {
+        try {
+            return instanceReshardProcessDao.getByAuditId(auditId);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return Collections.emptyList();
+        }
+    }
+    
     
     public void setAppService(AppService appService) {
         this.appService = appService;
@@ -905,6 +910,10 @@ public class AppDeployCenterImpl implements AppDeployCenter {
 
     public void setAppDao(AppDao appDao) {
         this.appDao = appDao;
+    }
+
+    public void setInstanceReshardProcessDao(InstanceReshardProcessDao instanceReshardProcessDao) {
+        this.instanceReshardProcessDao = instanceReshardProcessDao;
     }
 
 }

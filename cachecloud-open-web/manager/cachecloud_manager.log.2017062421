@@ -1,0 +1,1 @@
+21:58:17.082 [http-nio-9999-exec-2] WARN  c.s.c.w.c.AppManageController - user admin horizontalScaleApply appId 10001 appAuditId 4 sourceId 7 targetId 9 startSlot 15 endSlot 100

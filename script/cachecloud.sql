@@ -1127,4 +1127,23 @@ CREATE TABLE `instance_alert_configs` (
 alter table standard_statistics add column cluster_info_json varchar(20480) not null default '' comment '收集的cluster info json数据';
 
 
+DROP TABLE IF EXISTS `instance_reshard_process`;
+CREATE TABLE `instance_reshard_process` (
+  id int not null auto_increment comment '自增id',
+  app_id bigint not null comment '应用id',
+  audit_id bigint not null comment '审核id',
+  source_instance_id int not null comment '源实例id',
+  target_instance_id int not null comment '目标实例id',
+  start_slot int not null comment '开始slot',
+  end_slot int not null comment '结束slot',
+  migrating_slot int not null comment '正在迁移的slot',
+  finish_slot_num int not null comment '已经完成迁移的slot数量',
+  status tinyint not null comment '0:运行中 1:完成 2:出错',
+  start_time datetime NOT NULL COMMENT '迁移开始时间',
+  end_time datetime NOT NULL COMMENT '迁移结束时间',
+  create_time datetime NOT NULL COMMENT '创建时间',
+  update_time datetime NOT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_audit` (`audit_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='实例Reshard进度';
 
