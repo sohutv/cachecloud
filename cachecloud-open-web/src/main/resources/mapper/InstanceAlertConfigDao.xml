@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.InstanceAlertConfigDao">
+
+    <sql id="instance_alert_config_column">
+    	alert_config,alert_value,config_info,type,instance_id,status,compare_type,
+    	check_cycle,update_time,last_check_time
+    </sql>
+    
+    <insert id="save" parameterType="InstanceAlertConfig"  keyProperty="id" useGeneratedKeys="true">
+		insert into instance_alert_configs(<include refid="instance_alert_config_column" />)
+		values(#{alertConfig},#{alertValue},#{configInfo},#{type},#{instanceId},#{status},#{compareType},
+		#{checkCycle},#{updateTime},#{lastCheckTime})
+		on duplicate key update 
+		alert_value = #{alertValue},check_cycle = #{checkCycle}, update_time = now(),status = #{status},last_check_time=now()      	
+	</insert>
+    
+    <select id="getAll" resultType="InstanceAlertConfig">
+        select id,<include refid="instance_alert_config_column"/> from instance_alert_configs
+    </select>
+    
+    <select id="get" resultType="InstanceAlertConfig">
+        select id,<include refid="instance_alert_config_column"/> from instance_alert_configs where id = #{id}
+    </select>
+	
+	<delete id="remove">
+		delete from instance_alert_configs where id = #{id}
+	</delete>
+	
+	<select id="getByType" resultType="InstanceAlertConfig">
+        select id,<include refid="instance_alert_config_column"/> from instance_alert_configs where type = #{type}
+    </select>
+    
+    <select id="getByAlertConfig" resultType="InstanceAlertConfig">
+        select id,<include refid="instance_alert_config_column"/> from instance_alert_configs where alert_config = #{alertConfig}
+    </select>
+    
+    <update id="update">
+    		update instance_alert_configs set alert_value = #{alertValue}, check_cycle = #{checkCycle} where id = #{id}
+    </update>
+    
+    <update id="updateLastCheckTime">
+    		update instance_alert_configs set last_check_time = #{lastCheckTime} where id = #{id}
+    </update>
+
+</mapper>

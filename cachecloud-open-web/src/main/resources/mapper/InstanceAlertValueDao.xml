@@ -6,7 +6,7 @@
     	config_key,alert_value,compare_type,info,status,order_id,value_type
     </sql>
     
-    <select id="getAllInstanceAlert" resultType="com.sohu.cache.entity.InstanceAlert">
+    <select id="getAllInstanceAlert" resultType="com.sohu.cache.entity.InstanceAlertConfig">
         select <include refid="columns"/> from instance_alert
     </select>
     
@@ -17,7 +17,7 @@
 	    alert_value = #{alertValue}, compare_type = #{compareType}, info = #{info}, status = #{status}, order_id = #{orderId}, value_type = #{valueType}
 	</insert>
 
-    <select id="getByConfigKey" resultType="com.sohu.cache.entity.InstanceAlert">
+    <select id="getByConfigKey" resultType="com.sohu.cache.entity.InstanceAlertConfig">
         select <include refid="columns"/> from instance_alert where config_key = #{configKey}
     </select>
 	
@@ -29,7 +29,7 @@
 		delete from instance_alert where config_key = #{configKey}
 	</delete>
 	
-	<select id="getByValueType" resultType="com.sohu.cache.entity.InstanceAlert">
+	<select id="getByValueType" resultType="com.sohu.cache.entity.InstanceAlertConfig">
         select <include refid="columns"/> from instance_alert where value_type = #{valueType} and status = #{status}
     </select>
 

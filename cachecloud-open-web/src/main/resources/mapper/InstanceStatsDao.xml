@@ -57,12 +57,12 @@
     </select>
 
     <insert id="mergeStandardStats" parameterType="StandardStats">
-        replace into standard_statistics(collect_time,ip,port,db_type,info_json,diff_json)
-        values (#{collectTime},#{ip},#{port},#{dbType},#{infoJson},#{diffJson})
+        replace into standard_statistics(collect_time,ip,port,db_type,info_json,diff_json,cluster_info_json)
+        values (#{collectTime},#{ip},#{port},#{dbType},#{infoJson},#{diffJson},#{clusterInfoJson})
     </insert>
 
     <select id="getStandardStats" resultType="StandardStats">
-        select id,collect_time,ip,port,db_type,info_json,diff_json,created_time
+        select id,collect_time,ip,port,db_type,info_json,diff_json,cluster_info_json,created_time
         from standard_statistics
         where  ip=#{ip} and port=#{port} and db_type=#{dbType}
           and collect_time = #{collectTime}
@@ -82,7 +82,7 @@
     </delete>
     
     <select id="getStandardStatsByCreateTime" resultType="StandardStats">
-        select id,collect_time,ip,port,db_type,info_json,diff_json,created_time
+        select id,collect_time,ip,port,db_type,info_json,diff_json,cluster_info_json,created_time
         from standard_statistics
         where created_time between #{beginTime} and #{endTime} and db_type=#{dbType}
     </select>
