@@ -524,7 +524,7 @@
 			<div class="modal-content">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
-					<h4 class="modal-title">redis-Cluster从节点FailOver ForceM操作</h4>
+					<h4 class="modal-title">redis-Cluster从节点FailOver Force操作</h4>
 				</div>
 				
 				<div class="modal-body">
@@ -532,7 +532,7 @@
 						<!-- 控件开始 -->
 						<div class="container">
 							<div class="col-md-12">
-								<div>你确定对实例${instance.id}执行FailOver ForceM操作?</div>
+								<div>你确定对实例${instance.id}执行FailOver Force操作?</div>
 								<div id="redisClusterFailOverForceInfo${instance.id}"></div>
 							</div>
 						</div>
