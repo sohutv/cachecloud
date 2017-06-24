@@ -277,32 +277,32 @@ public class AppManageController extends BaseController {
 	 */
 	@RequestMapping(value = "/showReshardProcess")
 	public ModelAndView doShowReshardProcess(HttpServletRequest request, HttpServletResponse response, Model model) {
-		ConcurrentMap<Long, ReshardProcess> appScaleProcessMap = appDeployCenter.getHorizontalProcess();
-		write(response, filterMapToJsonArray(appScaleProcessMap));
-		return null;
+	    ConcurrentMap<Long, ReshardProcess> appScaleProcessMap = appDeployCenter.getHorizontalProcess();
+        write(response, filterMapToJsonArray(appScaleProcessMap));
+        return null;
 	}
 
 	/**
-	 * 把Map组装成JsonArray
-	 * 
-	 * @param appScaleProcessMap
-	 * @return
-	 */
-	private String filterMapToJsonArray(ConcurrentMap<Long, ReshardProcess> appScaleProcessMap) {
-		if (MapUtils.isEmpty(appScaleProcessMap)) {
-			return "[]";
-		}
-		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-		for (Entry<Long, ReshardProcess> entry : appScaleProcessMap.entrySet()) {
-			Map<String, Object> map = new HashMap<String, Object>();
-			map.put("appId", entry.getKey());
-			map.put("reshardSlot", entry.getValue().getReshardSlot());
-			map.put("totalSlot", entry.getValue().getTotalSlot());
-			map.put("status", entry.getValue().getStatus());
-			list.add(map);
-		}
-		return JSONArray.fromObject(list).toString();
-	}
+     * 把Map组装成JsonArray
+     * 
+     * @param appScaleProcessMap
+     * @return
+     */
+    private String filterMapToJsonArray(ConcurrentMap<Long, ReshardProcess> appScaleProcessMap) {
+        if (MapUtils.isEmpty(appScaleProcessMap)) {
+            return "[]";
+        }
+        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+        for (Entry<Long, ReshardProcess> entry : appScaleProcessMap.entrySet()) {
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("appId", entry.getKey());
+            map.put("reshardSlot", entry.getValue().getReshardSlot());
+            map.put("totalSlot", entry.getValue().getTotalSlot());
+            map.put("status", entry.getValue().getStatus());
+            list.add(map);
+        }
+        return JSONArray.fromObject(list).toString();
+    }
 
 	/**
 	 * 水平扩容配置检查
