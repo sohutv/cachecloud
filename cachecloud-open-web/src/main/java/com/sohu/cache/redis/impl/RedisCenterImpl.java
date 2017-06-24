@@ -291,7 +291,7 @@ public class RedisCenterImpl implements RedisCenter {
             }
         });
         if (!isOk) {
-            logger.error("slowlog submitFuture failed,appId:{},collectTime:{},host:{},ip:{}", appId, collectTime, host, port);
+            logger.error("slowlog submitFuture failed,appId:{},collectTime:{},host:{},port:{}", appId, collectTime, host, port);
         }
         return instanceSlowLogList;
     }
@@ -342,7 +342,7 @@ public class RedisCenterImpl implements RedisCenter {
         }
         Map<RedisConstant, Map<String, Object>> infoMap = this.getInfoStats(appId, host, port);
         if (infoMap == null || infoMap.isEmpty()) {
-            logger.error("appId:{},collectTime:{},host:{},ip:{} cost={} ms redis infoMap is null",
+            logger.error("appId:{},collectTime:{},host:{},port:{} cost={} ms redis infoMap is null",
                     new Object[]{appId, collectTime, host, port, (System.currentTimeMillis() - start)});
             return infoMap;
         }
@@ -351,7 +351,7 @@ public class RedisCenterImpl implements RedisCenter {
         
         boolean isOk = asyncService.submitFuture(new RedisKeyCallable(appId, collectTime, host, port, infoMap, clusterInfoMap));
         if (!isOk) {
-            logger.error("submitFuture failed,appId:{},collectTime:{},host:{},ip:{} cost={} ms",
+            logger.error("submitFuture failed,appId:{},collectTime:{},host:{},port:{} cost={} ms",
                     new Object[]{appId, collectTime, host, port, (System.currentTimeMillis() - start)});
         }
         return infoMap;
@@ -392,7 +392,7 @@ public class RedisCenterImpl implements RedisCenter {
             logger.error(e.getMessage() + " {}:{}", host, port, e);
         }
         if (infoMap == null || infoMap.isEmpty()) {
-            logger.error("host:{},ip:{} redis infoMap is null", host, port);
+            logger.error("host:{},port:{} redis infoMap is null", host, port);
             return infoMap;
         }
         return infoMap;
@@ -692,7 +692,7 @@ public class RedisCenterImpl implements RedisCenter {
                 }
                 Map<String, Object> sectionMap = new LinkedHashMap<String, Object>();
                 while (i < length && data[i].contains(":")) {
-                    String[] pair = data[i].split(":");
+                    String[] pair = StringUtils.splitByWholeSeparator(data[i], ":");
                     sectionMap.put(pair[0], pair[1]);
                     i++;
                 }
