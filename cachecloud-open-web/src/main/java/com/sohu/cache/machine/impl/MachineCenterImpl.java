@@ -189,7 +189,7 @@ public class MachineCenterImpl implements MachineCenter {
                 infoMap.put(MachineConstant.Traffic.getValue(), machineStats.getTraffic());
                 infoMap.put(MachineConstant.DiskUsage.getValue(), machineStats.getDiskUsageMap());
                 infoMap.put(ConstUtils.COLLECT_TIME, collectTime);
-                instanceStatsCenter.saveStandardStats(infoMap, ip, (int) hostId, ConstUtils.MACHINE);
+                instanceStatsCenter.saveStandardStats(infoMap, new HashMap<String, Object>(0), ip, (int) hostId, ConstUtils.MACHINE);
                 machineStats.setMemoryFree(Long.valueOf(machineStats.getMemoryFree()) * ConstUtils._1024 + "");
                 machineStats.setMemoryTotal(Long.valueOf(machineStats.getMemoryTotal()) * ConstUtils._1024 + "");
                 machineStats.setModifyTime(new Date());

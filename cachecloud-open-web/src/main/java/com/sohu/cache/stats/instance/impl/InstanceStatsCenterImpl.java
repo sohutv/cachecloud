@@ -195,7 +195,7 @@ public class InstanceStatsCenterImpl implements InstanceStatsCenter {
     }
 
     @Override
-    public boolean saveStandardStats(Map<String, Object> infoMap, String ip, int port, String dbType) {
+    public boolean saveStandardStats(Map<String, Object> infoMap, Map<String, Object> clusterInfoMap, String ip, int port, String dbType) {
         Assert.isTrue(infoMap != null && infoMap.size() > 0);
         Assert.isTrue(StringUtils.isNotBlank(ip));
         Assert.isTrue(port > 0);
@@ -214,6 +214,7 @@ public class InstanceStatsCenterImpl implements InstanceStatsCenter {
             ss.setDiffMap(new HashMap<String, Object>(0));
         }
         ss.setInfoMap(infoMap);
+        ss.setClusterInfoMap(clusterInfoMap);
 
         int mergeCount = instanceStatsDao.mergeStandardStats(ss);
         return mergeCount > 0;

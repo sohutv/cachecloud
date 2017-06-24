@@ -1106,3 +1106,25 @@ CREATE TABLE `app_daily` (
   PRIMARY KEY (`id`),
   KEY `idx_appid_date` (`app_id`,`date`)
 ) ENGINE=InnoDB AUTO_INCREMENT=933 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='app日报';
+
+DROP TABLE IF EXISTS `instance_alert_configs`;
+CREATE TABLE `instance_alert_configs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增id',
+  `alert_config` varchar(255) NOT NULL COMMENT '报警配置',
+  `alert_value` varchar(512) NOT NULL COMMENT '报警阀值',
+  `config_info` varchar(255) NOT NULL COMMENT '配置说明',
+  `type` tinyint(4) NOT NULL COMMENT '1:全局报警,2:实例报警',
+  `instance_id` bigint(20) NOT NULL DEFAULT 0 COMMENT '0:全局配置，其他代表实例id',
+  `status` tinyint(4) NOT NULL COMMENT '1:可用,0:不可用',
+  `compare_type` tinyint(4) NOT NULL COMMENT '比较类型：1小于,2等于,3大于,4不等于',
+  `check_cycle` tinyint(4) NOT NULL COMMENT '1:一分钟,2:五分钟,3:半小时4:一个小时,5:一天',
+  `update_time` datetime not null comment '报警配置更新时间',
+  `last_check_time` datetime not null comment '上次检查时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_index` (`type`,`instance_id`,`alert_config`,`compare_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='实例报警阀值配置';
+
+alter table standard_statistics add column cluster_info_json varchar(20480) not null default '' comment '收集的cluster info json数据';
+
+
+
