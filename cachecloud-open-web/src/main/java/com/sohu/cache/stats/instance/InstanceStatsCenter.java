@@ -90,12 +90,13 @@ public interface InstanceStatsCenter {
      * 将一个对象（如统计信息）保存到mysql里
      *
      * @param infoMap 统计信息对象
+     * @param clusterInfoMap clusterinfo统计信息
      * @param ip      ip
      * @param port    port
      * @param dbType
      * @return 成功保存返回true，否则返回false
      */
-    public boolean saveStandardStats(Map<String, Object> infoMap, String ip, int port, String dbType);
+    public boolean saveStandardStats(Map<String, Object> infoMap, Map<String, Object> clusterInfoMap, String ip, int port, String dbType);
 
     /**
      * 根据收集时间查询某一个实例或机器的统计信息

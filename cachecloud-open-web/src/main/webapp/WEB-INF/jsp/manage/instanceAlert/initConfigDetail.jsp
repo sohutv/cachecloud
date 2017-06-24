@@ -1,44 +1,58 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@page import="com.sohu.cache.redis.enums.RedisAlertConfigEnum"%>
+<%@page import="com.sohu.cache.redis.enums.InstanceAlertCompareTypeEnum"%>
+<%@page import="com.sohu.cache.redis.enums.InstanceAlertCheckCycleEnum"%>
 <%@ include file="/WEB-INF/jsp/manage/commons/taglibs.jsp"%>
 
 <script type="text/javascript">
 
-function removeConfig(configKey) {
-	if (confirm("确认要删除key="+configKey+"配置?")) {
-		$.get(
-			'/manage/instanceAlert/remove.json',
+//查看实例是否存在
+function checkInstanceExist(){
+	var instanceHostPort = document.getElementById("instanceHostPort").value;
+	if(instanceHostPort != ''){
+		$.post(
+			'/manage/instanceAlert/checkInstanceHostPort.json',
 			{
-				configKey: configKey
+				instanceHostPort: instanceHostPort,
 			},
 	        function(data){
-				var status = data.status;
-				if (status == 1) {
-            		alert("删除成功!");
-				} else {
-            		alert("删除失败, msg: " + result.message);
-				}
-                window.location.reload();
+				var success = data.status;
+	            if(success==0){
+	            		alert(data.message);
+	            		document.getElementById("instanceHostPort").focus();
+	            }
 	        }
 	     );
-		
-    }
+	}
 }
 
-function changeConfig(configKey) {
-	var alertValue = document.getElementById("alertValue" + configKey);
-	var info = document.getElementById("info" + configKey);
-	var status = document.getElementById("status" + configKey);
-	var compareType = document.getElementById("compareType" + configKey);
-	var valueType = document.getElementById("valueType" + configKey);
+function removeAlertConfig(id) {
+	$.get(
+		'/manage/instanceAlert/remove.json',
+		{
+			id: id
+		},
+        function(data){
+			var status = data.status;
+			if (status == 1) {
+           		alert("删除成功!");
+			} else {
+           		alert("删除失败, msg: " + result.message);
+			}
+               window.location.reload();
+        }
+     );
+}
+
+function changeAlertConfig(id) {
+	var alertValue = document.getElementById("alertValue" + id);
+	var checkCycle = document.getElementById("checkCycle" + id);
 	$.get(
 		'/manage/instanceAlert/update.json',
 		{
-			configKey: configKey,
+			id: id,
 			alertValue: alertValue.value,
-			info: info.value,
-			status: status.value,
-			compareType: compareType.value,
-			valueType: valueType.value
+			checkCycle: checkCycle.value
 		},
         function(data){
 			var status = data.status;
@@ -53,32 +67,30 @@ function changeConfig(configKey) {
      );
 }
 
-function saveInstanceAlert() {
-	var configKey = document.getElementById("configKey");
-	if (configKey.value == ""){
-		alert("请填写配置名");
-		configKey.focus();
-		return false;
-	}
+function saveInstanceAlertConfig() {
+	var alertConfig = document.getElementById("alertConfig");
 	var alertValue = document.getElementById("alertValue");
-	var info = document.getElementById("configInfo");
-	if (info.value == "") {
-		alert("请填写配置说明");
-		info.focus();
+	if (alertValue.value == ""){
+		alert("请填写阈值");
+		alertValue.focus();
 		return false;
 	}
-	var orderId = document.getElementById("orderId");
 	var compareType = document.getElementById("compareType");
-	var valueType = document.getElementById("valueType");
+	var checkCycle = document.getElementById("checkCycle");
+	var instanceHostPort = document.getElementById("instanceHostPort");
+	var type = 1;
+	if (instanceHostPort.value != null && instanceHostPort.value != '') {
+		type = 2;
+	}
 	$.get(
 		'/manage/instanceAlert/add.json',
 		{
-			configKey: configKey.value,
+			alertConfig: alertConfig.value,
 			alertValue: alertValue.value,
-			info: info.value,
-			orderId: orderId.value,
 			compareType: compareType.value,
-			valueType: valueType.value
+			checkCycle: checkCycle.value,
+			instanceHostPort: instanceHostPort.value,
+			type: type
 		},
         function(data){
 			var status = data.status;
@@ -109,7 +121,7 @@ function saveInstanceAlert() {
 						<div class="portlet-title">
 							<div class="caption">
 								<i class="fa fa-globe"></i>
-								填写实例报警项:
+								全局实例报警项:
 								&nbsp;
 							</div>
 							<div class="tools">
@@ -117,86 +129,142 @@ function saveInstanceAlert() {
 							</div>
 						</div>
 						
-						
-						<c:forEach items="${instanceAlertList}" var="config" varStatus="stats">
-							<div class="form">
-								<form class="form-horizontal form-bordered form-row-stripped">
-									<div class="form-body">
-										<div class="form-group">
-											<label class="control-label col-md-2">
-												<c:choose>
-													<c:when test="${config.status == 0}">
-														<font color='red'>（无效配置）</font>
-													</c:when>
-												</c:choose>
-												${config.configKey}:
-											</label>
-											<div class="col-md-3">
-												<input id="info${config.configKey}" type="text" name="info" class="form-control" value="${config.info}" />
-											</div>
-											
-											<div class="col-md-1">
-												<select id="compareType${config.configKey}" name="compareType" class="form-control">
-													<option value="-1" <c:if test="${config.compareType == -1}">selected</c:if>>
-														小于
-													</option>
-													<option value="0" <c:if test="${config.compareType == 0}">selected</c:if>>
-														等于
-													</option>
-													<option value="1" <c:if test="${config.compareType == 1}">selected</c:if>>
-														大于
-													</option>
-													<option value="2" <c:if test="${config.compareType == 2}">selected</c:if>>
-														不等于
-													</option>
-												</select>
-											</div>
-											
-											<div class="col-md-2">
-												<select id="valueType${config.configKey}" name="valueType" class="form-control">
-													<option value="1" <c:if test="${config.valueType == 1}">selected</c:if>>
-														固定值
-													</option>
-													<option value="2" <c:if test="${config.valueType == 2}">selected</c:if>>
-														差值
-													</option>
-												</select>
-											</div>
-											
-											<div class="col-md-1">
-												<input id="alertValue${config.configKey}" type="text" name="info" class="form-control" value="${config.alertValue}" />
-											</div>
-											
-											
-											<div class="col-md-1">
-												<select id="status${config.configKey}" name="status" class="form-control">
-													<option value="1" <c:if test="${config.status == 1}">selected</c:if>>
-														有效
-													</option>
-													<option value="0" <c:if test="${config.status == 0}">selected</c:if>>
-														无效
-													</option>
-												</select>
-											</div>
-											<div class="col-md-2">
-												<button type="button" class="btn btn-small" onclick="changeConfig('${config.configKey}')">
-													修改
-												</button>
-												<button type="button" class="btn btn-small" onclick="removeConfig('${config.configKey}')">
-													删除
-												</button>
-											</div>
-										</div>
-									</div>
-									<input type="hidden" name="configKey" value="${config.configKey}">
-								</form>
-								<!-- END FORM-->
+						<div class="portlet-body">
+	                        <div class="table-toolbar">
+								<table class="table table-striped table-bordered table-hover" id="tableDataList">
+									<thead>
+										<tr>
+											<th>id</th>
+											<th>配置名</th>
+											<th>配置说明</th>
+											<th>关系</th>
+											<th>阀值</th>
+											<th>周期</th>
+											<th>最近检测时间</th>
+											<th>操作</th>
+										</tr>
+									</thead>
+									<tbody>
+										<c:forEach items="${instanceAlertAllList}" var="config">
+											<tr class="odd gradeX">
+												<td>
+													${config.id}
+												</td>
+												<td>
+													${config.alertConfig}
+												</td>
+												<td>
+													${config.configInfo}
+												</td>
+												<td>
+													<c:forEach items="${instanceAlertCompareTypeEnumList}" var="instanceAlertCompareTypeEnum">
+														<c:if test="${config.compareType == instanceAlertCompareTypeEnum.value}">${instanceAlertCompareTypeEnum.info}</c:if>
+													</c:forEach>
+												</td>
+												<td>
+													${config.alertValue}
+												</td>				
+												<td>
+													<c:forEach items="${instanceAlertCheckCycleEnumList}" var="instanceAlertCheckCycleEnum">
+														<c:if test="${config.checkCycle == instanceAlertCheckCycleEnum.value}">${instanceAlertCheckCycleEnum.info}</c:if>
+													</c:forEach>
+												</td>
+												<td>
+		                    							<fmt:formatDate value="${config.lastCheckTime}" pattern="yyyy-MM-dd HH:mm:ss"/>
+												</td>
+												<td>
+													<button type="button" class="btn btn-info" data-target="#changeInstanceAlertModal${config.id}" data-toggle="modal" href="#">修改</button>
+			                    						<button type="button" class="btn btn-info" onclick="if(window.confirm('确认要清除id=${config.id}的配置?!')){removeAlertConfig('${config.id}');return true;}else{return false;}">删除</button>
+												</td>
+											</tr>
+										</c:forEach>
+									</tbody>
+								</table>
 							</div>
-						</c:forEach>
+						</div>
 					</div>
 					<!-- END TABLE PORTLET-->
-				</div>
 			</div>
+		</div>
+		
+		<div class="row">
+			<div class="col-md-12">
+				<div class="portlet box light-grey">
+						<div class="portlet-title">
+							<div class="caption">
+								<i class="fa fa-globe"></i>
+								特殊实例报警:
+								&nbsp;
+							</div>
+							<div class="tools">
+								<a href="javascript:;" class="collapse"></a>
+							</div>
+						</div>
+						
+						<div class="portlet-body">
+	                        <div class="table-toolbar">
+								<table class="table table-striped table-bordered table-hover" id="tableDataList">
+									<thead>
+										<tr>
+											<th>id</th>
+											<th>实例信息</th>
+											<th>配置名</th>
+											<th>配置说明</th>
+											<th>关系</th>
+											<th>阀值</th>
+											<th>周期</th>
+											<th>最近检测时间</th>
+											<th>操作</th>
+										</tr>
+									</thead>
+									<tbody>
+										<c:forEach items="${instanceAlertSpecialList}" var="config">
+											<tr class="odd gradeX">
+												<td>
+													${config.id}
+												</td>
+		                							<c:set var="instanceId" value="${config.instanceId}"/>
+												<td>
+													${config.instanceInfo.hostPort}
+													<a target="_blank" href="/admin/app/index.do?appId=${config.instanceInfo.appId}">(${config.instanceInfo.appId})</a>
+												</td>
+												<td>
+													${config.alertConfig}
+												</td>
+												<td>
+													${config.configInfo}
+												</td>
+												<td>
+													<c:forEach items="${instanceAlertCompareTypeEnumList}" var="instanceAlertCompareTypeEnum">
+														<c:if test="${config.compareType == instanceAlertCompareTypeEnum.value}">${instanceAlertCompareTypeEnum.info}</c:if>
+													</c:forEach>
+												</td>
+												<td>
+													${config.alertValue}
+												</td>
+												<td>
+													<c:forEach items="${instanceAlertCheckCycleEnumList}" var="instanceAlertCheckCycleEnum">
+														<c:if test="${config.checkCycle == instanceAlertCheckCycleEnum.value}">${instanceAlertCheckCycleEnum.info}</c:if>
+													</c:forEach>
+												</td>
+												<td>
+		                    							<fmt:formatDate value="${config.lastCheckTime}" pattern="yyyy-MM-dd HH:mm:ss"/>
+												</td>
+												<td>
+													<button type="button" class="btn btn-info" data-target="#changeInstanceAlertModal${config.id}" data-toggle="modal" href="#">修改</button>
+			                    						<button type="button" class="btn btn-info" onclick="if(window.confirm('确认要清除id=${config.id}的配置?!')){removeAlertConfig('${config.id}');return true;}else{return false;}">删除</button>
+												</td>
+											</tr>
+										</c:forEach>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+					<!-- END TABLE PORTLET-->
+			</div>
+		</div>
+		
 	</div>
 </div>
 
@@ -221,8 +289,13 @@ function saveInstanceAlert() {
 										配置名:
 									</label>
 									<div class="col-md-5">
-										<input type="text" name="configKey" id="configKey"
-											class="form-control" />
+										<select name="alertConfig" id="alertConfig" class="form-control select2_category">
+											<c:forEach items="${redisAlertConfigEnumList}" var="redisAlertConfig">
+												<option value="${redisAlertConfig.value}">
+													${redisAlertConfig.info}
+												</option>
+											</c:forEach>
+										</select>
 									</div>
 								</div>
 								
@@ -232,37 +305,15 @@ function saveInstanceAlert() {
 									</label>
 									<div class="col-md-5">
 										<select name="compareType" id="compareType" class="form-control select2_category">
-											<option value="-1">
-												小于
-											</option>
-											<option value="0">
-												等于
-											</option>
-											<option value="1" >
-												大于
-											</option>
-											<option value="2" >
-												不等于
-											</option>
+											<c:forEach items="${instanceAlertCompareTypeEnumList}" var="instanceAlertCompareTypeEnum">
+												<option value="${instanceAlertCompareTypeEnum.value}">
+													${instanceAlertCompareTypeEnum.info}
+												</option>
+											</c:forEach>
 										</select>
 									</div>
 								</div>
 								
-								<div class="form-group">
-									<label class="control-label col-md-3">
-										类型:
-									</label>
-									<div class="col-md-5">
-										<select name="valueType" id="valueType" class="form-control select2_category">
-											<option value="1">
-												固定值
-											</option>
-											<option value="2">
-												差值
-											</option>
-										</select>
-									</div>
-								</div>
 								
 								<div class="form-group">
 									<label class="control-label col-md-3">
@@ -276,25 +327,28 @@ function saveInstanceAlert() {
 								
 								<div class="form-group">
 									<label class="control-label col-md-3">
-										说明:
+										实例:
 									</label>
 									<div class="col-md-5">
-										<input type="text" name="info" id="configInfo"
-											class="form-control" />
+										<input type="text" name="instanceHostPort" id="instanceHostPort"
+											class="form-control" placeholder="全部则为空,单个实例ip:port" onchange="checkInstanceExist()"/>
 									</div>
 								</div>
 								
 								<div class="form-group">
 									<label class="control-label col-md-3">
-										序号:
+										周期:
 									</label>
 									<div class="col-md-5">
-										<input type="text" name="orderId" id="orderId"
-											class="form-control" />
+										<select name="checkCycle" id="checkCycle" class="form-control select2_category">
+											<c:forEach items="${instanceAlertCheckCycleEnumList}" var="instanceAlertCheckCycleEnum">
+												<option value="${instanceAlertCheckCycleEnum.value}">
+													${instanceAlertCheckCycleEnum.info}
+												</option>
+											</c:forEach>
+										</select>
 									</div>
 								</div>
-								
-								
 							</div>
 							<!-- form-body 结束 -->
 						</div>
@@ -303,11 +357,67 @@ function saveInstanceAlert() {
 				
 				<div class="modal-footer">
 					<button type="button" data-dismiss="modal" class="btn" >Close</button>
-					<button type="button" id="configBtn" class="btn red" onclick="saveInstanceAlert()">Ok</button>
+					<button type="button" id="configBtn" class="btn red" onclick="saveInstanceAlertConfig()">Ok</button>
 				</div>
-			
 			</form>
 		</div>
 	</div>
 </div>
+
+<c:forEach items="${instanceAlertList}" var="config">
+	<div id="changeInstanceAlertModal${config.id}" class="modal fade" tabindex="-1" data-width="400">
+		<div class="modal-dialog">
+			<div class="modal-content">
+			
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+					<h4 class="modal-title">修改实例报警项</h4>
+				</div>
+				
+				<form class="form-horizontal form-bordered form-row-stripped">
+					<div class="modal-body">
+						<div class="row">
+							<!-- 控件开始 -->
+							<div class="col-md-12">
+								<!-- form-body开始 -->
+								<div class="form-body">
+									<div class="form-group">
+										<label class="control-label col-md-3">
+											阀值:
+										</label>
+										<div class="col-md-5">
+											<input type="text" name="alertValue${config.id}" id="alertValue${config.id}" value="${config.alertValue}"
+												class="form-control" />
+										</div>
+									</div>
+									
+									<div class="form-group">
+										<label class="control-label col-md-3">
+											周期:
+										</label>
+										<div class="col-md-5">
+											<select name="checkCycle${config.id}" id="checkCycle${config.id}" class="form-control select2_category">
+												<c:forEach items="${instanceAlertCheckCycleEnumList}" var="instanceAlertCheckCycleEnum">
+													<option value="${instanceAlertCheckCycleEnum.value}" <c:if test="${config.checkCycle == instanceAlertCheckCycleEnum.value}">selected</c:if>>
+														${instanceAlertCheckCycleEnum.info}
+													</option>
+												</c:forEach>
+											</select>
+										</div>
+									</div>
+								</div>
+								<!-- form-body 结束 -->
+							</div>
+						</div>
+					</div>
+					
+					<div class="modal-footer">
+						<button type="button" data-dismiss="modal" class="btn" >Close</button>
+						<button type="button" id="configBtn${config.id}" class="btn red" onclick="changeAlertConfig('${config.id}')">Ok</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</c:forEach>
 

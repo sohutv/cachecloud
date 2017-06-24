@@ -14,7 +14,7 @@
         <td></td>
         <td style="padding-top:20px; padding-left:27px;">
         	<ul>
-                <li><span style="font-weight: bold; padding-top:20px; color:#3f3f3f;">Redis实例分钟报警：$!appDesc.appId</span></li>
+                <li><span style="font-weight: bold; padding-top:20px; color:#3f3f3f;">Redis实例分钟报警：</span></li>
             </ul>
             <table style="table-layout:fixed;width: 872px;border-collapse: collapse;word-break: break-all;word-wrap:break-word;border-top: 1px dotted #676767;text-align: center;color: #000; font-family:'宋体'; font-size:12px; margin-top:10px; margin-left: 24px">
                 <tr>
@@ -39,11 +39,14 @@
                     <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 140px;">
                     		说明
                     </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 140px;">
+                    		其他信息
+                    </td>
                 </tr>
                 #foreach($!item in $!instanceAlertValueResultList)
                 	<tr>
 	                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 50px;">
-	                    		<a href='${ccDomain}/admin/app/index.do?appId=$!item.appId'>${item.appId}</a>
+	                    		<a href='${ccDomain}/admin/app/index?appId=$!item.appId'>${item.appId}</a>
 	                    </td>
 	                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 50px;">
 	                        	$!item.appDesc.name
@@ -52,16 +55,19 @@
 	                        	$!item.appDesc.officer
 	                    </td>
 	                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 50px;">
-	                        	$!item.ip
+	                        	$!item.instanceInfo.ip
 	                    </td>
 	                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 50px;">
-	                    		$!item.port
+	                    		$!item.instanceInfo.port
 	                    </td>
 	                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 140px;">
-	                    		$!item.configKey
+	                    		$!item.instanceAlertConfig.alertConfig
 	                    </td>
 	                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 140px;">
 	                    		$!item.alertMessage
+	                    </td>
+	                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 140px;">
+	                    		$!item.otherInfo
 	                    </td>
 	                </tr>
                 #end

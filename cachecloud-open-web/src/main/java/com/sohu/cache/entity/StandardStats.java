@@ -51,6 +51,11 @@ public class StandardStats {
      * 与上一次收集差异的json数据
      */
     private String diffJson;
+    
+    /**
+     * 实例收集的cluster info json数据
+     */
+    private String clusterInfoJson;
 
     /**
      * infoJson的Map输出
@@ -61,6 +66,12 @@ public class StandardStats {
      * diffJson的Map输出
      */
     private Map<String, Object> diffMap;
+    
+    /**
+     * clusterInfoJson的Map输出
+     */
+    private Map<String, Object> clusterInfoMap;
+
 
     private Date createdTime;
 
@@ -208,6 +219,45 @@ public class StandardStats {
             }
         }
         this.diffMap = diffMap;
+    }
+
+    public String getClusterInfoJson() {
+        return clusterInfoJson;
+    }
+
+    public void setClusterInfoJson(String clusterInfoJson) {
+        this.clusterInfoJson = clusterInfoJson;
+    }
+
+    public Map<String, Object> getClusterInfoMap() {
+        if (clusterInfoMap != null) {
+            return clusterInfoMap;
+        } else {
+            if (StringUtils.isNotBlank(clusterInfoJson)) {
+                JSONObject jsonObject;
+                try {
+                    jsonObject = JSONObject.fromObject(clusterInfoJson);
+                    Map<String, Object> map = transferMapByJson(jsonObject);
+                    clusterInfoMap = map;
+                } catch (Exception e) {
+                    logger.error(e.getMessage());
+                }
+            }
+        }
+        return clusterInfoMap;
+    }
+
+    public void setClusterInfoMap(Map<String, Object> clusterInfoMap) {
+        if (clusterInfoJson == null) {
+            JSONObject jsonObject;
+            try {
+                jsonObject = JSONObject.fromObject(clusterInfoMap);
+                clusterInfoJson = jsonObject.toString();
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+            }
+        }
+        this.clusterInfoMap = clusterInfoMap;
     }
 
     public Date getCreatedTime() {

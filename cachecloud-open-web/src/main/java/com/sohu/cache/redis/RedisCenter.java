@@ -81,6 +81,23 @@ public interface RedisCenter {
      * @return
      */
     public Map<RedisConstant, Map<String, Object>> getInfoStats(long appId, String host, int port);
+    
+    /**
+     * 节点cluster info信息
+     * @param appId
+     * @param host
+     * @param port
+     * @return
+     */
+    public Map<String, Object> getClusterInfoStats(long appId, String host, int port);
+    
+    /**
+     * 节点cluster info信息
+     * @param appId
+     * @param instanceInfo
+     * @return
+     */
+    public Map<String, Object> getClusterInfoStats(long appId, InstanceInfo instanceInfo);
 
     /**
      * 根据ip和port判断redis实例当前是主还是从
