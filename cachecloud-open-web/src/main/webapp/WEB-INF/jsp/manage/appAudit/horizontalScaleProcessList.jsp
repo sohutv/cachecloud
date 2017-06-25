@@ -21,43 +21,61 @@
                 <table class="table table-striped table-bordered table-hover" id="tableDataList">
                     <thead>
                     <tr>
-                        <td>应用id</td>
+                        <td>id</td>
                         <td>slot迁移进度</td>
+                        <td>目标源实例</td>
+                        <td>开始结束slot</td>
+                        <td>正在迁移的slot</td>
                         <td>状态</td>
                         <td>开始时间</td>
                         <td>结束时间 </td>
                     </tr>
                     </thead>
                     <tbody>
-                    <c:forEach var="instanceReshardProcess" items="${instanceReshardProcessList}">
-                        <tr>
-                            <td>${instanceReshardProcess.appId}</td>
-                            <td>
-	                          <div class="progress margin-custom-bottom0">
-						      	  <div id="reshardSlotProgress${instanceReshardProcess.id}" class="progress-bar progress-bar-success"
-						           role="progressbar" aria-valuenow="${instanceReshardProcess.finishSlotNum}" aria-valuemax="${instanceReshardProcess.totalSlot}"
-						           aria-valuemin="0" style="width: ${instanceReshardProcess.finishSlotNum / instanceReshardProcess.totalSlot}">
-						             <label style="color: #000000">
-						                 <span id="finishSlotNum${instanceReshardProcess.id}">${instanceReshardProcess.finishSlotNum}</span>&nbsp;&nbsp;Finish/<span id="totalSlot${instanceReshardProcess.id}">${instanceReshardProcess.totalSlot}</span>&nbsp;&nbsp;Total
-						             </label>
-						           </div>
-						       </div>
-                            </td>
-                            <td id="statusDesc${instanceReshardProcess.id}">
-                            	<c:choose>
-                            		<c:when test="${instanceReshardProcess.status == 0}">运行中</c:when>
-                            		<c:when test="${instanceReshardProcess.status == 1}">完成</c:when>
-                            		<c:when test="${instanceReshardProcess.status == 2}">出错</c:when>
-                            	</c:choose>
-                            </td>
-                            <td>
-                            	<fmt:formatDate value="${instanceReshardProcess.startTime}" type="time" timeStyle="full" pattern="yyyy-MM-dd HH:mm:ss"/>
-                            </td>
-                            <td>
-                            	<fmt:formatDate value="${instanceReshardProcess.endTime}" type="time" timeStyle="full" pattern="yyyy-MM-dd HH:mm:ss"/>
-                            </td>
-                        </tr>
-                    </c:forEach>
+	                    <c:forEach var="instanceReshardProcess" items="${instanceReshardProcessList}">
+	                        <tr>
+	                            <td>${instanceReshardProcess.id}</td>
+	                            <td>
+		                          <div class="progress margin-custom-bottom0">
+							      	  <div id="reshardSlotProgress${instanceReshardProcess.id}" class="progress-bar progress-bar-success"
+							           role="progressbar" aria-valuenow="${instanceReshardProcess.finishSlotNum}" aria-valuemax="${instanceReshardProcess.totalSlot}"
+							           aria-valuemin="0" style="width: ${instanceReshardProcess.finishSlotNum / instanceReshardProcess.totalSlot}">
+							             <label style="color: #000000">
+							                 <span id="finishSlotNum${instanceReshardProcess.id}">${instanceReshardProcess.finishSlotNum}</span>&nbsp;&nbsp;Finish/<span id="totalSlot${instanceReshardProcess.id}">${instanceReshardProcess.totalSlot}</span>&nbsp;&nbsp;Total
+							             </label>
+							           </div>
+							       </div>
+	                            </td>
+	                            <td id="sourceTargetInstance${instanceReshardProcess.id}">
+	                                ${instanceReshardProcess.sourceInstanceId}(${instanceInfoMap[instanceReshardProcess.sourceInstanceId].ip}:${instanceInfoMap[instanceReshardProcess.sourceInstanceId].port})
+	                            		-->
+	                            		${instanceReshardProcess.targetInstanceId}(${instanceInfoMap[instanceReshardProcess.targetInstanceId].ip}:${instanceInfoMap[instanceReshardProcess.targetInstanceId].port})
+	                            </td>
+	                            <td id="startEndSlot${instanceReshardProcess.id}">
+	                            		${instanceReshardProcess.startSlot} 
+	                            		-->
+	                            		${instanceReshardProcess.endSlot} 
+	                            </td>
+	                            <td id="migratingSlot${instanceReshardProcess.id}">
+	                            		${instanceReshardProcess.migratingSlot} 
+	                            </td>
+	                            <td id="statusDesc${instanceReshardProcess.id}">
+		                            	<c:choose>
+		                            		<c:when test="${instanceReshardProcess.status == 0}">运行中</c:when>
+		                            		<c:when test="${instanceReshardProcess.status == 1}">完成</c:when>
+		                            		<c:when test="${instanceReshardProcess.status == 2}">出错</c:when>
+		                            	</c:choose>
+	                            </td>
+	                            <td>
+	                            		<fmt:formatDate value="${instanceReshardProcess.startTime}" type="time" timeStyle="full" pattern="yyyy-MM-dd HH:mm:ss"/>
+	                            </td>
+	                            <td id="startTime${instanceReshardProcess.id}">
+	                            		<c:if test="${instanceReshardProcess.status == 1}">
+	                            			<fmt:formatDate value="${instanceReshardProcess.endTime}" type="time" timeStyle="full" pattern="yyyy-MM-dd HH:mm:ss"/>
+	                            		</c:if>
+	                            </td>
+	                        </tr>
+	                    </c:forEach>
                     </tbody>
                 </table>
             </div>
@@ -79,11 +97,19 @@
   					var appId = data.appId;
   					var finishSlotNum = data.finishSlotNum;
   					var totalSlot = data.totalSlot;
+  					var status = data.status;
   					var statusDesc = data.statusDesc;
+  					var migratingSlot = data.migratingSlot;
+  					var endTimeFormat = data.endTimeFormat;
   					document.getElementById("finishSlotNum" + id).innerHTML = finishSlotNum;
   					document.getElementById("totalSlot" + id).innerHTML = totalSlot;
   					document.getElementById("reshardSlotProgress" + id).style.width = (finishSlotNum * 100 / totalSlot ) + "%";
   					document.getElementById("statusDesc" + id).innerHTML = statusDesc;
+  					document.getElementById("migratingSlot" + id).innerHTML = migratingSlot;
+  					//如果完成显示结束时间
+  					if (status == 1) {
+  	  					document.getElementById("startTime" + id).innerHTML = endTimeFormat;
+  					}
   				}
   			});
 		}

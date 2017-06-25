@@ -3,6 +3,7 @@ package com.sohu.cache.entity;
 import com.alibaba.fastjson.JSONObject;
 import com.sohu.cache.constant.ReshardStatusEnum;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -81,6 +82,8 @@ public class InstanceReshardProcess {
      * 更新时间
      */
     private Date updateTime;
+    
+    private final static String dateTimeFormat = "yyyy-MM-dd HH:mm:ss";
 
     public int getId() {
         return id;
@@ -170,6 +173,11 @@ public class InstanceReshardProcess {
     public Date getStartTime() {
         return startTime;
     }
+    
+    public String getStartTimeFormat() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateTimeFormat);
+        return simpleDateFormat.format(startTime);
+    }
 
     public void setStartTime(Date startTime) {
         this.startTime = startTime;
@@ -178,9 +186,19 @@ public class InstanceReshardProcess {
     public Date getEndTime() {
         return endTime;
     }
+    
+    public String getEndTimeFormat() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateTimeFormat);
+        return simpleDateFormat.format(endTime);
+    }
 
     public Date getCreateTime() {
         return createTime;
+    }
+    
+    public String getCreateTimeFormat() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateTimeFormat);
+        return simpleDateFormat.format(createTime);
     }
 
     public void setCreateTime(Date createTime) {
@@ -189,6 +207,11 @@ public class InstanceReshardProcess {
 
     public Date getUpdateTime() {
         return updateTime;
+    }
+    
+    public String getUpdateTimeFormat() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateTimeFormat);
+        return simpleDateFormat.format(updateTime);
     }
 
     public void setUpdateTime(Date updateTime) {

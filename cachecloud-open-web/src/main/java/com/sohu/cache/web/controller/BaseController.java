@@ -206,15 +206,23 @@ public class BaseController {
      * @param model
      */
     protected void fillAppInstanceStats(Long appId, Model model) {
+        // 实例列表
         List<InstanceInfo> instanceList = appService.getAppInstanceInfo(appId);
+        model.addAttribute("instanceList", instanceList);
+        
+        // 实例Map
+        Map<Integer, InstanceInfo> instanceInfoMap = new HashMap<Integer, InstanceInfo>();
+        for (InstanceInfo instanceInfo : instanceList) {
+            instanceInfoMap.put(instanceInfo.getId(), instanceInfo);
+        }
+        model.addAttribute("instanceInfoMap", instanceInfoMap);
+        
+        // 实例统计
         List<InstanceStats> appInstanceStats = appService.getAppInstanceStats(appId);
-
         Map<String, InstanceStats> instanceStatsMap = new HashMap<String, InstanceStats>();
-
         for (InstanceStats instanceStats : appInstanceStats) {
             instanceStatsMap.put(instanceStats.getIp() + ":" + instanceStats.getPort(), instanceStats);
         }
-        model.addAttribute("instanceList", instanceList);
         model.addAttribute("instanceStatsMap", instanceStatsMap);
         
         //slot分布
