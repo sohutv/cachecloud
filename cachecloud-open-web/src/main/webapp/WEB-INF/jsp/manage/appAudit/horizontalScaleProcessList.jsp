@@ -28,7 +28,8 @@
                         <td>正在迁移的slot</td>
                         <td>状态</td>
                         <td>开始时间</td>
-                        <td>结束时间 </td>
+                        <td>结束时间</td>
+                        <td>操作</td>
                     </tr>
                     </thead>
                     <tbody>
@@ -73,6 +74,11 @@
 	                            		<c:if test="${instanceReshardProcess.status == 1}">
 	                            			<fmt:formatDate value="${instanceReshardProcess.endTime}" type="time" timeStyle="full" pattern="yyyy-MM-dd HH:mm:ss"/>
 	                            		</c:if>
+	                            </td>
+	                            <td>
+	                           	   <button id="retryBtn${instanceReshardProcess.id}" style="display:none"  type="button" class="btn btn-small" onclick="retryHorizontalScale('${instanceReshardProcess.id}')">
+                                        	重试
+                                    </button>
 	                            </td>
 	                        </tr>
 	                    </c:forEach>

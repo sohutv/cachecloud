@@ -787,7 +787,7 @@ public class AppDeployCenterImpl implements AppDeployCenter {
 	public HorizontalResult startHorizontal(final long appId, final long appAuditId, long sourceId, final long targetId, final int startSlot,
             final int endSlot, final int migrateType) {
 		final InstanceInfo sourceInstanceInfo = instanceDao.getInstanceInfoById(sourceId);
-		final InstanceInfo targetInstanceInfo = instanceDao.getInstanceInfoById(targetId);
+	    final InstanceInfo targetInstanceInfo = instanceDao.getInstanceInfoById(targetId);
         processThreadPool.execute(new Runnable() {
             @Override
             public void run() {

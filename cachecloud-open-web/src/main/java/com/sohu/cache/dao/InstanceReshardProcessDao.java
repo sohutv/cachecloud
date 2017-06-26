@@ -28,5 +28,7 @@ public interface InstanceReshardProcessDao {
 
     int updateMigratingSlot(@Param("id") int id, @Param("migratingSlot") int migratingSlot);
 
+    InstanceReshardProcess get(@Param("id") int id);
+
 
 }

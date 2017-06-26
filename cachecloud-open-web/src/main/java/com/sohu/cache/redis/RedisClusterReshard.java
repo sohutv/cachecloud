@@ -423,12 +423,12 @@ public class RedisClusterReshard {
         this.defaultTimeout = defaultTimeout;
     }
 
-	public void setInstanceReshardProcessDao(InstanceReshardProcessDao instanceReshardProcessDao) {
+    public void setInstanceReshardProcessDao(InstanceReshardProcessDao instanceReshardProcessDao) {
         this.instanceReshardProcessDao = instanceReshardProcessDao;
     }
 
     public void setRedisCenter(RedisCenter redisCenter) {
-		this.redisCenter = redisCenter;
-	}
+        this.redisCenter = redisCenter;
+    }
 
 }

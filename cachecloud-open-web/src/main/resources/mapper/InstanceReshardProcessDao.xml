@@ -17,6 +17,10 @@
     <select id="getByAuditId" resultType="InstanceReshardProcess">
         select id,<include refid="instance_reshard_process_column"/> from instance_reshard_process where audit_id = #{auditId}
     </select>
+    
+    <select id="get" resultType="InstanceReshardProcess">
+        select id,<include refid="instance_reshard_process_column"/> from instance_reshard_process where id = #{id}
+    </select>
 	
     <update id="updateStatus">
     		update instance_reshard_process set status = #{status} where id = #{id}
