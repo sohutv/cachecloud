@@ -703,6 +703,27 @@ public class RedisCenterImpl implements RedisCenter {
         }
         return redisStatMap;
     }
+    
+    /**
+     * 根据infoMap的结果判断实例的主从
+     *
+     * @param infoMap
+     * @return
+     */
+    private Boolean hasSlaves(Map<RedisConstant, Map<String, Object>> infoMap) {
+        Map<String, Object> replicationMap = infoMap.get(RedisConstant.Replication);
+        if (MapUtils.isEmpty(replicationMap)) {
+            return null;
+        }
+        for (Entry<String, Object> entry : replicationMap.entrySet()) {
+            String key = entry.getKey();
+            //判断一个即可
+            if (key != null && key.contains("slave0")) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * 根据infoMap的结果判断实例的主从
@@ -742,6 +763,26 @@ public class RedisCenterImpl implements RedisCenter {
             jedis.close();
         }
     }
+    
+    /**
+     * 根据ip和port判断redis实例当前是否有从节点
+     * @param ip   ip
+     * @param port port
+     * @return 主返回true，从返回false；
+     */
+    public Boolean hasSlaves(long appId, String ip, int port) {
+        Jedis jedis = getJedis(appId, ip, port, REDIS_DEFAULT_TIME, REDIS_DEFAULT_TIME);
+        try {
+            String info = jedis.info("all");
+            Map<RedisConstant, Map<String, Object>> infoMap = processRedisStats(info);
+            return hasSlaves(infoMap);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return null;
+        } finally {
+            jedis.close();
+        }
+    }   
 
     @Override
     public HostAndPort getMaster(String ip, int port, String password) {

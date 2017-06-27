@@ -2,6 +2,7 @@ package com.sohu.cache.redis;
 
 import java.util.List;
 
+import com.sohu.cache.constant.ClusterOperateResult;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.web.enums.RedisOperateEnum;
 
@@ -121,6 +122,22 @@ public interface RedisDeployCenter {
      * @return
      */
     public boolean clusterFailover(long appId, int slaveInstanceId, String failoverParam) throws Exception;
+
+    /**
+     * 检查是否具备forget的条件
+     * @param appId
+     * @param forgetInstanceId
+     * @return
+     */
+    public ClusterOperateResult checkClusterForget(Long appId, int forgetInstanceId);
+
+    /**
+     * 删除节点
+     * @param appId
+     * @param delNodeInstanceId
+     * @return
+     */
+    public ClusterOperateResult delNode(Long appId, int delNodeInstanceId);
 
 
 

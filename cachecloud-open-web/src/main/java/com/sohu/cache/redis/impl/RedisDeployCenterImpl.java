@@ -1,11 +1,13 @@
 package com.sohu.cache.redis.impl;
 
+import com.sohu.cache.constant.ClusterOperateResult;
 import com.sohu.cache.constant.InstanceStatusEnum;
 import com.sohu.cache.dao.AppDao;
 import com.sohu.cache.dao.InstanceDao;
 import com.sohu.cache.dao.MachineDao;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.InstanceInfo;
+import com.sohu.cache.entity.InstanceSlotModel;
 import com.sohu.cache.entity.MachineInfo;
 import com.sohu.cache.machine.MachineCenter;
 import com.sohu.cache.protocol.MachineProtocol;
@@ -15,6 +17,7 @@ import com.sohu.cache.redis.RedisClusterNode;
 import com.sohu.cache.redis.RedisConfigTemplateService;
 import com.sohu.cache.redis.RedisDeployCenter;
 import com.sohu.cache.redis.enums.RedisConfigEnum;
+import com.sohu.cache.stats.instance.InstanceDeployCenter;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.IdempotentConfirmer;
 import com.sohu.cache.util.TypeUtil;
@@ -50,6 +53,8 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
     private AppDao appDao;
     
     private RedisConfigTemplateService redisConfigTemplateService;
+    
+    private InstanceDeployCenter instanceDeployCenter;
     
     @Override
     public boolean deployClusterInstance(long appId, List<RedisClusterNode> clusterNodes, int maxMemory) {
@@ -975,7 +980,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         Assert.isTrue(appDesc != null);
         int type = appDesc.getType();
         if (!TypeUtil.isRedisCluster(type)) {
-            logger.error("{} is not redis type", appDesc);
+            logger.error("{} is not redis cluster type", appDesc);
             return false;
         }
         InstanceInfo instanceInfo = instanceDao.getInstanceInfoById(slaveInstanceId);
@@ -1006,6 +1011,115 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
             logger.warn("{}:{} clusterFailover {} Done! ", slaveHost, slavePort, failoverParam);
         }
         return true;
+    }
+    
+    @Override
+    public ClusterOperateResult delNode(final Long appId, int delNodeInstanceId) {
+        final InstanceInfo forgetInstanceInfo = instanceDao.getInstanceInfoById(delNodeInstanceId);
+        final String forgetNodeId = redisCenter.getNodeId(appId, forgetInstanceInfo.getIp(),
+                forgetInstanceInfo.getPort());
+        if (StringUtils.isBlank(forgetNodeId)) {
+            logger.warn("{} nodeId is null", forgetInstanceInfo.getHostPort());
+            return ClusterOperateResult.fail(String.format("%s nodeId is null", forgetInstanceInfo.getHostPort()));
+        }
+        List<InstanceInfo> instanceInfos = instanceDao.getInstListByAppId(appId);
+        for (InstanceInfo instanceInfo : instanceInfos) {
+            if (instanceInfo == null) {
+                continue;
+            }
+            if (instanceInfo.isOffline()) {
+                continue;
+            }
+            // 过滤当前节点
+            if (forgetInstanceInfo.getHostPort().equals(instanceInfo.getHostPort())) {
+                continue;
+            }
+            final String instanceHost = instanceInfo.getIp();
+            final int instancePort = instanceInfo.getPort();
+            boolean isForget = new IdempotentConfirmer() {
+                @Override
+                public boolean execute() {
+                    String response = null;
+                    Jedis jedis = null;
+                    try {
+                        jedis = redisCenter.getJedis(appId, instanceHost, instancePort);
+                        logger.warn("{}:{} is forgetting {}", instanceHost, instancePort, forgetNodeId);
+                        response = jedis.clusterForget(forgetNodeId);
+                        boolean success = response != null && response.equalsIgnoreCase("OK");
+                        logger.warn("{}:{} is forgetting {} result is {}", instanceHost, instancePort, forgetNodeId,
+                                success);
+                        return success;
+                    } catch (Exception e) {
+                        logger.error(e.getMessage());
+                    } finally {
+                        if (jedis != null) {
+                            jedis.close();
+                        }
+                    }
+                    return response != null && response.equalsIgnoreCase("OK");
+                }
+            }.run();
+            if (!isForget) {
+                logger.warn("{}:{} forget {} failed", instanceHost, instancePort, forgetNodeId);
+                return ClusterOperateResult.fail(String.format("%s:%s forget %s failed", instanceHost, instancePort, forgetNodeId));
+            }
+        }
+        
+        // shutdown
+        boolean isShutdown = instanceDeployCenter.shutdownExistInstance(appId, delNodeInstanceId);
+        if (!isShutdown) {
+            logger.warn("{} shutdown failed", forgetInstanceInfo.getHostPort());
+            return ClusterOperateResult.fail(String.format("%s shutdown failed", forgetInstanceInfo.getHostPort()));
+        }
+        
+        return ClusterOperateResult.success();
+    }
+    
+    
+    /**
+     * 1. 被forget的节点必须在线(这个条件有待验证) 
+     * 2. 被forget的节点不能有从节点 
+     * 3. 被forget的节点不能有slots
+     */
+    @Override
+    public ClusterOperateResult checkClusterForget(Long appId, int forgetInstanceId) {
+        // 0.各种验证
+        Assert.isTrue(appId > 0);
+        Assert.isTrue(forgetInstanceId > 0);
+        AppDesc appDesc = appDao.getAppDescById(appId);
+        Assert.isTrue(appDesc != null);
+        int type = appDesc.getType();
+        if (!TypeUtil.isRedisCluster(type)) {
+            logger.error("{} is not redis cluster type", appDesc);
+            return ClusterOperateResult.fail(String.format("instanceId: %s must be cluster type", forgetInstanceId));
+        }
+        InstanceInfo instanceInfo = instanceDao.getInstanceInfoById(forgetInstanceId);
+        Assert.isTrue(instanceInfo != null);
+        String forgetHost = instanceInfo.getIp();
+        int forgetPort = instanceInfo.getPort();
+        // 1.是否在线
+        boolean isRun = redisCenter.isRun(appId, forgetHost, forgetPort);
+        if (!isRun) {
+            logger.warn("{}:{} is not run", forgetHost, forgetPort);
+            return ClusterOperateResult.fail(String.format("被forget的节点(%s:%s)必须在线", forgetHost, forgetPort));
+        }
+        // 2.被forget的节点不能有从节点
+        Boolean hasSlaves = redisCenter.hasSlaves(appId, forgetHost, forgetPort);
+        if (hasSlaves == null || hasSlaves) {
+            logger.warn("{}:{} has slave", forgetHost, forgetPort);
+            return ClusterOperateResult.fail(String.format("被forget的节点(%s:%s)不能有从节点", forgetHost, forgetPort));
+        }
+
+        // 3.被forget的节点不能有slots
+        Map<String, InstanceSlotModel> clusterSlotsMap = redisCenter.getClusterSlotsMap(appId);
+        InstanceSlotModel instanceSlotModel = clusterSlotsMap.get(instanceInfo.getHostPort());
+        if (instanceSlotModel != null && instanceSlotModel.getSlotList() != null
+                && instanceSlotModel.getSlotList().size() > 0) {
+            logger.warn("{}:{} has slots", forgetHost, forgetPort);
+            return ClusterOperateResult.fail(String.format("被forget的节点(%s:%s)不能持有slot", forgetHost, forgetPort));
+        }
+
+        return ClusterOperateResult.success();
     }
 
     /**

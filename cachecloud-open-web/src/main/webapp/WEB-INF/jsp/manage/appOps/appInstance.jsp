@@ -119,6 +119,32 @@
 	     );
 	}
 	
+	function redisClusterDelNode(appId, instanceId){
+		var redisClusterDelNodeBtn = document.getElementById("redisClusterDelNodeBtn" + instanceId);
+		redisClusterDelNodeBtn.disabled = true;
+		$.post(
+			'/manage/app/clusterDelNode.json',
+			{
+				appId: appId,
+				delNodeInstanceId: instanceId,
+			},
+	        function(data){
+				var success = data.success;
+				var message = data.message;
+	            if(success==1){
+	                alert("执行成功!");
+	            		$("#redisClusterDelNodeInfo" + instanceId).html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Success!</strong>执行成功，应用的拓扑结构要1分钟之后生效，请耐心等待</div>");
+	                var targetId = "#redisClusterDelNodeModal" + instanceId;
+	            		setTimeout("$('" + targetId +"').modal('hide');window.location.reload();",1000);
+	            }else{
+	            	    alert(message);
+	            		redisClusterDelNodeBtn.disabled = false;
+	                $("#redisClusterDelNodeInfo" + instanceId).html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Error!</strong>执行失败，请查找原因！</div>");
+	            }
+	        }
+	     );
+	}
+	
 	function redisClusterAddSlave(appId, instanceId){
 		var slaveIp = document.getElementById("slaveIp" + instanceId);
 		if(slaveIp.value == ""){
@@ -368,16 +394,25 @@
                                 <c:choose>
                                    <c:when test="${instance.status ==2}">
                                      <button type="button" class="btn btn-small btn-success" onclick="startInstance('${appDesc.appId}','${instance.id}')">
-                                        	启动实例
+                                        	&nbsp;启动实例&nbsp;
                                      </button>
+                                     <br/><br/>
+                                      <button type="button" class="btn btn-small btn-danger" data-target="#redisClusterDelNodeModal${instance.id}" data-toggle="modal">
+                                           &nbsp;删除实例&nbsp;
+                                       </button>
                                    </c:when>
                                     <c:when test="${instance.status ==0}">
                                         <button type="button" class="btn btn-small btn-success" onclick="startInstance('${appDesc.appId}','${instance.id}')">
-                                            	启动实例
+                                            	&nbsp;启动实例&nbsp;
                                         </button>
+                                        <br/><br/>
                                         <button type="button" class="btn btn-small btn-danger" onclick="shutdownInstance('${appDesc.appId}','${instance.id}')">
-                                            	下线实例
+                                            	&nbsp;暂停实例&nbsp;
                                         </button>
+                                        <br/><br/>
+                                       <button type="button" class="btn btn-small btn-danger" data-target="#redisClusterDelNodeModal${instance.id}" data-toggle="modal">
+                                           &nbsp;删除实例&nbsp;
+                                       </button>
                                         <c:choose>
 		                                   <c:when test="${instance.masterInstanceId == 0 && appDesc.type == 2 && lossSlotsSegmentMap[instanceStatsMapKey] != null && lossSlotsSegmentMap[instanceStatsMapKey] != ''}">
 		                                      <button type="button" class="btn btn-small btn-primary" data-target="#redisAddFailSlotsMasterModal${instance.id}" data-toggle="modal">修复slot丢失数据</button>
@@ -386,13 +421,21 @@
                                     </c:when>
                                    <c:when test="${instance.status == 1}">
                                    	  <button type="button" class="btn btn-small btn-danger" onclick="shutdownInstance('${appDesc.appId}', '${instance.id}')">
-	                                        &nbsp;下线实例&nbsp;
+	                                        &nbsp;暂停实例&nbsp;
 	                                   </button>
+	                                   
+	                                   <br/><br/>
+                                       <button type="button" class="btn btn-small btn-danger" data-target="#redisClusterDelNodeModal${instance.id}" data-toggle="modal">
+                                           &nbsp;删除实例&nbsp;
+                                       </button>
 	                                   
                                        <c:if test="${instance.masterInstanceId == 0 and instance.type != 5}">
                                        	  <br/><br/>
                                            <button type="button" class="btn btn-small btn-primary" data-target="#redisClusterAddSlaveModal${instance.id}" data-toggle="modal">添加Slave</button>
                                        </c:if>
+                                       
+                                       
+                                       
                                    </c:when>
                                 </c:choose>
 	                    	</div>
@@ -576,6 +619,33 @@
 		</div>
 	</div>
 	
+	
+	<div id="redisClusterDelNodeModal${instance.id}" class="modal fade" tabindex="-1" data-width="400">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+					<h4 class="modal-title">redis-Cluster节点删除操作</h4>
+				</div>
+				
+				<div class="modal-body">
+					<div class="row">
+						<div class="container">
+							<div class="col-md-12">
+								<div>你确定对实例${instance.id}执行删除操作?</div>
+								<div id="redisClusterDelNodeInfo${instance.id}"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="modal-footer">
+					<button type="button" data-dismiss="modal" class="btn" >Close</button>
+					<button type="button" id="redisClusterDelNodeBtn${instance.id}" class="btn red" onclick="redisClusterDelNode('${appDesc.appId}', '${instance.id}')">Ok</button>
+				</div>
+			</div>
+		</div>
+	</div>
 	
 	<div id="redisClusterAddSlaveModal${instance.id}" class="modal fade" tabindex="-1" data-width="400">
 		<div class="modal-dialog">

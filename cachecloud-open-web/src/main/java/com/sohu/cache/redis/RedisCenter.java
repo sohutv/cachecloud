@@ -107,6 +107,14 @@ public interface RedisCenter {
      * @return 主返回true，从返回false；
      */
     public Boolean isMaster(long appId, String ip, int port);
+    
+    /**
+     * 根据ip和port判断redis实例当前是否有从节点
+     * @param ip   ip
+     * @param port port
+     * @return 主返回true，从返回false；
+     */
+    public Boolean hasSlaves(long appId, String ip, int port);
 
     /**
      * 获取从节点的主节点地址

@@ -2,6 +2,7 @@ package com.sohu.cache.web.controller;
 
 import com.sohu.cache.web.enums.RedisOperateEnum;
 import com.sohu.cache.constant.AppCheckEnum;
+import com.sohu.cache.constant.ClusterOperateResult;
 import com.sohu.cache.constant.DataFormatCheckResult;
 import com.sohu.cache.constant.ErrorMessageEnum;
 import com.sohu.cache.constant.HorizontalResult;
@@ -625,6 +626,46 @@ public class AppManageController extends BaseController {
 		}
 		return new ModelAndView("manage/appOps/appInfoAndAudit");
 	}
+	
+	/**
+     * redisCluster节点删除: forget + shutdown
+     * 
+     * @param appId 应用id
+     * @param forgetInstanceId 需要被forget的节点
+     * @return
+     */
+    @RequestMapping("/clusterDelNode")
+    public ModelAndView clusterDelNode(HttpServletRequest request, HttpServletResponse response, Model model, Long appId,
+            int delNodeInstanceId) {
+        AppUser appUser = getUserInfo(request);
+        logger.warn("user {}, clusterForget: appId:{}, instanceId:{}", appUser.getName(), appId, delNodeInstanceId);
+        // 检测forget条件
+        ClusterOperateResult checkClusterForgetResult = null;
+        try {
+            checkClusterForgetResult = redisDeployCenter.checkClusterForget(appId, delNodeInstanceId);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        if (checkClusterForgetResult == null || !checkClusterForgetResult.isSuccess()) {
+            model.addAttribute("success", checkClusterForgetResult.getStatus());
+            model.addAttribute("message", checkClusterForgetResult.getMessage());
+            return new ModelAndView("");
+        }
+        
+        // 执行delnode:forget + shutdown
+        ClusterOperateResult delNodeResult = null;
+        try {
+            delNodeResult = redisDeployCenter.delNode(appId, delNodeInstanceId);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        model.addAttribute("success", delNodeResult.getStatus());
+        model.addAttribute("message", delNodeResult.getMessage());
+        logger.warn("user {}, clusterForget: appId:{}, instanceId:{}, result is {}", appUser.getName(), appId, delNodeInstanceId, delNodeResult.getStatus());
+        
+        return new ModelAndView("");
+        
+    }
 
 	/**
 	 * redisCluster从节点failover
