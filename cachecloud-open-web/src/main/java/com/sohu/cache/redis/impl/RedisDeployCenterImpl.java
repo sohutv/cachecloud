@@ -1195,4 +1195,8 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         this.redisConfigTemplateService = redisConfigTemplateService;
     }
 
+    public void setInstanceDeployCenter(InstanceDeployCenter instanceDeployCenter) {
+        this.instanceDeployCenter = instanceDeployCenter;
+    }
+
 }
