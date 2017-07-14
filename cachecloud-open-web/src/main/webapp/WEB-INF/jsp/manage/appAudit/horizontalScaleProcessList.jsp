@@ -70,15 +70,17 @@
 	                            <td>
 	                            		<fmt:formatDate value="${instanceReshardProcess.startTime}" type="time" timeStyle="full" pattern="yyyy-MM-dd HH:mm:ss"/>
 	                            </td>
-	                            <td id="startTime${instanceReshardProcess.id}">
+	                            <td id="endTime${instanceReshardProcess.id}">
 	                            		<c:if test="${instanceReshardProcess.status == 1}">
 	                            			<fmt:formatDate value="${instanceReshardProcess.endTime}" type="time" timeStyle="full" pattern="yyyy-MM-dd HH:mm:ss"/>
 	                            		</c:if>
 	                            </td>
 	                            <td>
-	                           	   <button id="retryBtn${instanceReshardProcess.id}" style="display:none"  type="button" class="btn btn-small" onclick="retryHorizontalScale('${instanceReshardProcess.id}')">
-                                        	重试
-                                    </button>
+	                            	   <c:if test="${instanceReshardProcess.status == 2}">
+		                            	   <button id="retryBtn${instanceReshardProcess.id}"  type="button" class="btn btn-small" onclick="retryHorizontalScale('${instanceReshardProcess.id}')">
+	                                        	重试
+	                                    </button>
+	                            	   </c:if>
 	                            </td>
 	                        </tr>
 	                    </c:forEach>
@@ -114,7 +116,14 @@
   					document.getElementById("migratingSlot" + id).innerHTML = migratingSlot;
   					//如果完成显示结束时间
   					if (status == 1) {
-  	  					document.getElementById("startTime" + id).innerHTML = endTimeFormat;
+  	  					document.getElementById("endTime" + id).innerHTML = endTimeFormat;
+  					}
+  					//非出错不显示
+  					if (status != 2) {
+  	  					var retryBtn = document.getElementById("retryBtn" + id);
+  	  					if (retryBtn != null) {
+  	  						retryBtn.style.display = "none";
+  	  					}
   					}
   				}
   			});

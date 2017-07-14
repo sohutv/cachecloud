@@ -5,13 +5,13 @@
 
     <sql id="instance_reshard_process_column">
 	    	app_id,audit_id,source_instance_id,target_instance_id,start_slot,end_slot,
-	    	migrating_slot,finish_slot_num,status,start_time,end_time,create_time,update_time
+	    	migrating_slot,is_pipeline,finish_slot_num,status,start_time,end_time,create_time,update_time
     </sql>
     
     <insert id="save" parameterType="InstanceReshardProcess"  keyProperty="id" useGeneratedKeys="true">
 		insert into instance_reshard_process(<include refid="instance_reshard_process_column" />)
 		values(#{appId},#{auditId},#{sourceInstanceId},#{targetInstanceId},#{startSlot},#{endSlot},
-		#{migratingSlot},#{finishSlotNum},#{status},#{startTime},#{endTime},#{createTime},#{updateTime})
+		#{migratingSlot},#{isPipeline},#{finishSlotNum},#{status},#{startTime},#{endTime},#{createTime},#{updateTime})
 	</insert>
     
     <select id="getByAuditId" resultType="InstanceReshardProcess">

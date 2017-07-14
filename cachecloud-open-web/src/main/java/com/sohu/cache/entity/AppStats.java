@@ -1,7 +1,11 @@
 package com.sohu.cache.entity;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Date;
 import java.util.List;
+
+import org.apache.commons.lang.math.NumberUtils;
 
 /**
  * Created by yijunzhang on 14-6-9.
@@ -106,7 +110,21 @@ public class AppStats {
     public long getHits() {
         return hits;
     }
-
+    
+    /**
+     * 命中率
+     * @return
+     */
+    public long getHitPercent() {
+        long total = hits + misses;
+        if (total == 0) {
+            return 0;
+        } else {
+            NumberFormat formatter = new DecimalFormat("0");
+            return NumberUtils.toLong(formatter.format(hits * 100.0 / total));
+        }
+    }
+    
     public void setHits(long hits) {
         this.hits = hits;
     }

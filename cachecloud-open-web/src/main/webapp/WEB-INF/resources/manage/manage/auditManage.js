@@ -282,6 +282,29 @@ function startHorizontalScale(){
 	return true;
 }
 
+//重试水平扩容
+function retryHorizontalScale(instanceReshardProcessId){
+	var appAuditId = document.getElementById("appAuditId");
+	var retryButton = document.getElementById("retryBtn" + instanceReshardProcessId);
+	instanceReshardProcessId.disabled = true;
+	$.get(
+		'/manage/app/retryHorizontalScale.json',
+		{
+			instanceReshardProcessId: instanceReshardProcessId
+		},
+        function(data){
+			var status = data.status;
+			alert(data.message);
+			if (status == 1) {
+				window.location.href="/manage/app/handleHorizontalScale?appAuditId=" + appAuditId.value;
+			}
+        }
+     );
+	return true;
+}
+
+
+
 //添加下线分片验证
 function checkOffLineInstanceParam(){
 	var ip = document.getElementById("dropIp");

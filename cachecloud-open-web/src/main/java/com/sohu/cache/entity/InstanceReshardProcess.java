@@ -31,11 +31,22 @@ public class InstanceReshardProcess {
      * 源实例id
      */
     private int sourceInstanceId;
-
+    
+    
+    /**
+     * 源实例
+     */
+    private InstanceInfo sourceInstanceInfo;
+    
     /**
      * 目标实例id
      */
     private int targetInstanceId;
+    
+    /**
+     * 目标实例
+     */
+    private InstanceInfo targetInstanceInfo;
 
     /**
      * 开始slot
@@ -51,6 +62,11 @@ public class InstanceReshardProcess {
      * 正在迁移的slot
      */
     private int migratingSlot;
+   
+    /**
+     * 0是,1否
+     */
+    private int isPipeline;
     
     /**
      * 已完成迁移的slot数量
@@ -174,6 +190,30 @@ public class InstanceReshardProcess {
         return startTime;
     }
     
+    public int getIsPipeline() {
+        return isPipeline;
+    }
+
+    public void setIsPipeline(int isPipeline) {
+        this.isPipeline = isPipeline;
+    }
+
+    public InstanceInfo getSourceInstanceInfo() {
+        return sourceInstanceInfo;
+    }
+
+    public void setSourceInstanceInfo(InstanceInfo sourceInstanceInfo) {
+        this.sourceInstanceInfo = sourceInstanceInfo;
+    }
+
+    public InstanceInfo getTargetInstanceInfo() {
+        return targetInstanceInfo;
+    }
+
+    public void setTargetInstanceInfo(InstanceInfo targetInstanceInfo) {
+        this.targetInstanceInfo = targetInstanceInfo;
+    }
+
     public String getStartTimeFormat() {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateTimeFormat);
         return simpleDateFormat.format(startTime);

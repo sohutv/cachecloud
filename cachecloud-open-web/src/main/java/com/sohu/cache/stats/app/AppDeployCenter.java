@@ -109,6 +109,13 @@ public interface AppDeployCenter {
             int endSlot, int migrateType);
     
     /**
+     * 重试水平扩容
+     * @param instanceReshardProcessId
+     * @return
+     */
+    public HorizontalResult retryHorizontal(final int instanceReshardProcessId);
+    
+    /**
      * 添加cluster一个主(从)节点
      *
      * @param appId

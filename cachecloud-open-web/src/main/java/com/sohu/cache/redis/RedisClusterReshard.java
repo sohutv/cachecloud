@@ -166,20 +166,66 @@ public class RedisClusterReshard {
      * 将source中的startSlot到endSlot迁移到target
      *
      */
-    public boolean migrateSlot(long appId, long appAuditId, InstanceInfo sourceInstanceInfo, InstanceInfo targetInstanceInfo, int startSlot, int endSlot, boolean isPipelineMigrate) {
+//    public boolean migrateSlotOld(long appId, long appAuditId, InstanceInfo sourceInstanceInfo, InstanceInfo targetInstanceInfo, int startSlot, int endSlot, PipelineEnum pipelineEnum) {
+//        long startTime = System.currentTimeMillis();
+//        InstanceReshardProcess instanceReshardProcess = saveInstanceReshardProcess(appId, appAuditId, sourceInstanceInfo, targetInstanceInfo, startSlot, endSlot, pipelineEnum);
+//        //源和目标Jedis
+//        Jedis sourceJedis = redisCenter.getJedis(appId, sourceInstanceInfo.getIp(), sourceInstanceInfo.getPort(), defaultTimeout, defaultTimeout);
+//        Jedis targetJedis = redisCenter.getJedis(appId, targetInstanceInfo.getIp(), targetInstanceInfo.getPort(), defaultTimeout, defaultTimeout);
+//        //逐个slot迁移
+//        boolean hasError = false;
+//        for (int slot = startSlot; slot <= endSlot; slot++) {
+//            long slotStartTime = System.currentTimeMillis();
+//            try {
+//                instanceReshardProcessDao.updateMigratingSlot(instanceReshardProcess.getId(), slot);
+//                //num是迁移key的总数
+//                int num = migrateSlotData(appId, sourceJedis, targetJedis, slot, pipelineEnum);
+//                instanceReshardProcessDao.increaseFinishSlotNum(instanceReshardProcess.getId());
+//                logger.warn("clusterReshard:{}->{}, slot={}, keys={}, costTime={} ms", sourceInstanceInfo.getHostPort(),
+//                        targetInstanceInfo.getHostPort(), slot, num, (System.currentTimeMillis() - slotStartTime));
+//            } catch (Exception e) {
+//                logger.error(e.getMessage(), e);
+//                hasError = true;
+//                break;
+//            }
+//        }
+//        long endTime = System.currentTimeMillis();
+//        logger.warn("clusterReshard:{}->{}, slot:{}->{}, costTime={} ms", sourceInstanceInfo.getHostPort(),
+//                targetInstanceInfo.getHostPort(), startSlot, endSlot, (endTime - startTime));
+//        if (hasError) {
+//            instanceReshardProcessDao.updateStatus(instanceReshardProcess.getId(), ReshardStatusEnum.ERROR.getValue());
+//            return false;
+//        } else {
+//            instanceReshardProcessDao.updateStatus(instanceReshardProcess.getId(), ReshardStatusEnum.FINISH.getValue());
+//            instanceReshardProcessDao.updateEndTime(instanceReshardProcess.getId(), new Date());
+//            return true;
+//        }
+//    }
+    
+    /**
+     * 将source中的startSlot到endSlot迁移到target
+     *
+     */
+    public boolean migrateSlot(InstanceReshardProcess instanceReshardProcess) {
+        long appId = instanceReshardProcess.getAppId();
+        int migratingSlot = instanceReshardProcess.getMigratingSlot();
+        int endSlot = instanceReshardProcess.getEndSlot();
+        int isPipeline = instanceReshardProcess.getIsPipeline();
+        InstanceInfo sourceInstanceInfo = instanceReshardProcess.getSourceInstanceInfo();
+        InstanceInfo targetInstanceInfo = instanceReshardProcess.getTargetInstanceInfo();
+        
         long startTime = System.currentTimeMillis();
-        InstanceReshardProcess instanceReshardProcess = saveInstanceReshardProcess(appId, appAuditId, sourceInstanceInfo, targetInstanceInfo, startSlot, endSlot);
         //源和目标Jedis
         Jedis sourceJedis = redisCenter.getJedis(appId, sourceInstanceInfo.getIp(), sourceInstanceInfo.getPort(), defaultTimeout, defaultTimeout);
         Jedis targetJedis = redisCenter.getJedis(appId, targetInstanceInfo.getIp(), targetInstanceInfo.getPort(), defaultTimeout, defaultTimeout);
         //逐个slot迁移
         boolean hasError = false;
-        for (int slot = startSlot; slot <= endSlot; slot++) {
+        for (int slot = migratingSlot; slot <= endSlot; slot++) {
             long slotStartTime = System.currentTimeMillis();
             try {
                 instanceReshardProcessDao.updateMigratingSlot(instanceReshardProcess.getId(), slot);
                 //num是迁移key的总数
-                int num = migrateSlotData(appId, sourceJedis, targetJedis, slot, isPipelineMigrate);
+                int num = migrateSlotData(appId, sourceJedis, targetJedis, slot, isPipeline);
                 instanceReshardProcessDao.increaseFinishSlotNum(instanceReshardProcess.getId());
                 logger.warn("clusterReshard:{}->{}, slot={}, keys={}, costTime={} ms", sourceInstanceInfo.getHostPort(),
                         targetInstanceInfo.getHostPort(), slot, num, (System.currentTimeMillis() - slotStartTime));
@@ -191,7 +237,7 @@ public class RedisClusterReshard {
         }
         long endTime = System.currentTimeMillis();
         logger.warn("clusterReshard:{}->{}, slot:{}->{}, costTime={} ms", sourceInstanceInfo.getHostPort(),
-                targetInstanceInfo.getHostPort(), startSlot, endSlot, (endTime - startTime));
+                targetInstanceInfo.getHostPort(), migratingSlot, endSlot, (endTime - startTime));
         if (hasError) {
             instanceReshardProcessDao.updateStatus(instanceReshardProcess.getId(), ReshardStatusEnum.ERROR.getValue());
             return false;
@@ -202,45 +248,11 @@ public class RedisClusterReshard {
         }
     }
 
-
-    /**
-     * 保存进度
-     * @param appId
-     * @param appAuditId
-     * @param sourceInstanceInfo
-     * @param targetInstanceInfo
-     * @param startSlot
-     * @param endSlot
-     * @return
-     */
-    private InstanceReshardProcess saveInstanceReshardProcess(long appId, long appAuditId,
-            InstanceInfo sourceInstanceInfo, InstanceInfo targetInstanceInfo, int startSlot, int endSlot) {
-        Date now = new Date();
-        InstanceReshardProcess instanceReshardProcess = new InstanceReshardProcess();
-        instanceReshardProcess.setAppId(appId);
-        instanceReshardProcess.setAuditId(appAuditId);
-        instanceReshardProcess.setFinishSlotNum(0);
-        instanceReshardProcess.setSourceInstanceId(sourceInstanceInfo.getId());
-        instanceReshardProcess.setTargetInstanceId(targetInstanceInfo.getId());
-        instanceReshardProcess.setMigratingSlot(startSlot);
-        instanceReshardProcess.setStartSlot(startSlot);
-        instanceReshardProcess.setEndSlot(endSlot);
-        instanceReshardProcess.setStatus(ReshardStatusEnum.RUNNING.getValue());
-        instanceReshardProcess.setStartTime(now);
-        //用status控制显示结束时间
-        instanceReshardProcess.setEndTime(now);
-        instanceReshardProcess.setCreateTime(now);
-        instanceReshardProcess.setUpdateTime(now);
-        
-        instanceReshardProcessDao.save(instanceReshardProcess);
-        return instanceReshardProcess;
-    }
-
     /**
      * 迁移slot数据，并稳定slot配置
      * @throws Exception
      */
-    private int moveSlotData(final long appId, final Jedis source, final Jedis target, final int slot, boolean isPipelineMigrate) throws Exception {
+    private int moveSlotData(final long appId, final Jedis source, final Jedis target, final int slot, int isPipeline) throws Exception {
         int num = 0;
         while (true) {
             final Set<String> keys = new HashSet<String>();
@@ -322,7 +334,7 @@ public class RedisClusterReshard {
      * MIGRATE host port key destination-db timeout [COPY] [REPLACE]
      * CLUSTER SETSLOT <slot> NODE <node_id> 将槽 slot 指派给 node_id 指定的节点，如果槽已经指派给另一个节点，那么先让另一个节点删除该槽>，然后再进行指派。
      */
-    private int migrateSlotData(long appId, final Jedis source, final Jedis target, final int slot, boolean isPipelineMigrate) {
+    private int migrateSlotData(long appId, final Jedis source, final Jedis target, final int slot, int isPipeline) {
         int num = 0;
         final String sourceNodeId = getNodeId(appId, source);
         final String targetNodeId = getNodeId(appId, target);
@@ -357,7 +369,7 @@ public class RedisClusterReshard {
         }
 
         try {
-            num = moveSlotData(appId, source, target, slot, isPipelineMigrate);
+            num = moveSlotData(appId, source, target, slot, isPipeline);
         } catch (Exception e) {
             isError = true;
             logger.error(e.getMessage(), e);

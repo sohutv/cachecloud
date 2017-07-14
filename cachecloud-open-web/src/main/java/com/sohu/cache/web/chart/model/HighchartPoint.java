@@ -119,6 +119,8 @@ public class HighchartPoint {
             count = appStat.getConnectedClients();
         } else if ("objectSize".equals(statName)) {
             count = appStat.getObjectSize();
+        } else if ("hitPercent".equals(statName)) {
+            count = appStat.getHitPercent();
         }
         //为了显示在一个时间范围内
         if (diffDays > 0) {

@@ -128,6 +128,8 @@ public class SimpleChartData {
 		    count = appStat.getNetInputByte();
 		} else if ("netOutput".equals(statName)) {
             count = appStat.getNetOutputByte();
+        } else if ("hitPercent".equals(statName)) {
+            count = appStat.getHitPercent();
         }
 		Date dateTime = null;
 		try {

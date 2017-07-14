@@ -1137,6 +1137,7 @@ CREATE TABLE `instance_reshard_process` (
   start_slot int not null comment '开始slot',
   end_slot int not null comment '结束slot',
   migrating_slot int not null comment '正在迁移的slot',
+  is_pipeline tinyint not null comment '是否为pipeline,0:否,1:是',
   finish_slot_num int not null comment '已经完成迁移的slot数量',
   status tinyint not null comment '0:运行中 1:完成 2:出错',
   start_time datetime NOT NULL COMMENT '迁移开始时间',
