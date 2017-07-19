@@ -88,12 +88,15 @@ public class RedisClientController {
             model.addAttribute("message", "ERROR: appId:" + appId + "shardsInfo为空 ");
             return;
         }
-//        AppDesc appDesc = appDao.getAppDescById(appId);
         int shardNum = shardsInfo.split(" ").length;
         model.addAttribute("appId", appId);
         model.addAttribute("shardNum", shardNum);
         model.addAttribute("shardInfo", shardsInfo);
-//        model.addAttribute("password", appDesc.getPassword());
+        AppDesc appDesc = appDao.getAppDescById(appId);
+        String password = appDesc.getPassword();
+        if (StringUtils.isNotBlank(password)) {
+            model.addAttribute("password", appDesc.getPassword());
+        }
         //保存版本信息
         try {
             clientVersionService.saveOrUpdateClientVersion(appId, IpUtil.getIpAddr(request), clientVersion);
@@ -157,12 +160,15 @@ public class RedisClientController {
             }
         }
         String sentinels = StringUtils.join(sentinelList, " ");
-//        AppDesc appDesc = appDao.getAppDescById(appId);
         model.addAttribute("sentinels", sentinels);
         model.addAttribute("masterName", masterName);
         model.addAttribute("appId", appId);
         model.addAttribute("status", ClientStatusEnum.GOOD.getStatus());
-//        model.addAttribute("password", appDesc.getPassword());
+        AppDesc appDesc = appDao.getAppDescById(appId);
+        String password = appDesc.getPassword();
+        if (StringUtils.isNotBlank(password)) {
+            model.addAttribute("password", appDesc.getPassword());
+        }
         
         //保存版本信息
         try {
@@ -214,10 +220,13 @@ public class RedisClientController {
             }
             standalone = instanceInfo.getIp() + ":" + instanceInfo.getPort();
         }
-//        AppDesc appDesc = appDao.getAppDescById(appId);
         model.addAttribute("standalone", standalone);
         model.addAttribute("status", ClientStatusEnum.GOOD.getStatus());
-//        model.addAttribute("password", appDesc.getPassword());
+        AppDesc appDesc = appDao.getAppDescById(appId);
+        String password = appDesc.getPassword();
+        if (StringUtils.isNotBlank(password)) {
+            model.addAttribute("password", appDesc.getPassword());
+        }
         
         //保存版本信息
         try {

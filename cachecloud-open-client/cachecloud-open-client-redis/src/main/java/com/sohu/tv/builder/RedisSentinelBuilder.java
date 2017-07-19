@@ -1,7 +1,6 @@
 package com.sohu.tv.builder;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.alibaba.fastjson.JSONObject;
 import com.sohu.tv.cachecloud.client.basic.heartbeat.ClientStatusEnum;
 import com.sohu.tv.cachecloud.client.basic.util.ConstUtils;
 import com.sohu.tv.cachecloud.client.basic.util.HttpUtils;
@@ -27,12 +26,13 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class RedisSentinelBuilder {
     private static Logger logger = LoggerFactory.getLogger(RedisSentinelBuilder.class);
-
+    
     /**
      * 应用id
      */
     private final long appId;
     
+
     /**
      * jedis对象池配置
      */
@@ -47,7 +47,7 @@ public class RedisSentinelBuilder {
      * jedis读写超时(单位:毫秒)
      */
     private int soTimeout = Protocol.DEFAULT_TIMEOUT;
-    
+
     /**
      * jedis sentinel连接池
      */
@@ -57,6 +57,11 @@ public class RedisSentinelBuilder {
      * 构建锁
      */
     private static final Lock LOCK = new ReentrantLock();
+    
+    /**
+     * 是否开启统计
+     */
+    private boolean clientStatIsOpen = true;
 
     /**
      * 构造函数package访问域，package外不能直接构造实例；
@@ -88,36 +93,37 @@ public class RedisSentinelBuilder {
                             logger.warn("get response from remote server error, appId: {}, continue...", appId);
                             continue;
                         }
-
+                        
                         /**
                          * http请求返回的结果是无效的；
                          */
-                        ObjectMapper mapper = new ObjectMapper();
-                        JsonNode heartbeatInfo = null;
+                        JSONObject jsonObject = null;
                         try {
-                            heartbeatInfo = mapper.readTree(response);
+                            jsonObject = JSONObject.parseObject(response);
                         } catch (Exception e) {
                             logger.error("heartbeat error, appId: {}. continue...", appId, e);
                         }
-                        if (heartbeatInfo == null) {
+                        if (jsonObject == null) {
                             logger.error("get sentinel info for appId: {} error. continue...", appId);
                             continue;
                         }
+                        int status = jsonObject.getIntValue("status");
+                        String message = jsonObject.getString("message");
 
                         /** 检查客户端版本 **/
-                        if (heartbeatInfo.get("status").intValue() == ClientStatusEnum.ERROR.getStatus()) {
-                            throw new IllegalStateException(heartbeatInfo.get("message").textValue());
-                        } else if (heartbeatInfo.get("status").intValue() == ClientStatusEnum.WARN.getStatus()) {
-                            logger.warn(heartbeatInfo.get("message").textValue());
+                        if (status == ClientStatusEnum.ERROR.getStatus()) {
+                            throw new IllegalStateException(message);
+                        } else if (status == ClientStatusEnum.WARN.getStatus()) {
+                            logger.warn(message);
                         } else {
-                            logger.info(heartbeatInfo.get("message").textValue());
+                            logger.info(message);
                         }
 
                         /**
                          * 有效的请求：取出masterName和sentinels，并创建JedisSentinelPool的实例；
                          */
-                        String masterName = heartbeatInfo.get("masterName").asText();
-                        String sentinels = heartbeatInfo.get("sentinels").asText();
+                        String masterName = jsonObject.getString("masterName");
+                        String sentinels = jsonObject.getString("sentinels");
                         Set<String> sentinelSet = new HashSet<String>();
                         for (String sentinelStr : sentinels.split(" ")) {
                             String[] sentinelArr = sentinelStr.split(":");
@@ -127,7 +133,9 @@ public class RedisSentinelBuilder {
                         }
                         
                         //收集上报数据
-//                        ClientDataCollectReportExecutor.getInstance();
+                        if (clientStatIsOpen) {
+                            ClientDataCollectReportExecutor.getInstance();
+                        }
                         
                         sentinelPool = new JedisSentinelPool(masterName, sentinelSet, poolConfig, connectionTimeout, soTimeout, null, Protocol.DEFAULT_DATABASE);
                         return sentinelPool;
@@ -157,7 +165,7 @@ public class RedisSentinelBuilder {
         this.poolConfig = poolConfig;
         return this;
     }
-    
+
     /**
      * 设置jedis连接超时时间
      * @param connectionTimeout
@@ -175,5 +183,26 @@ public class RedisSentinelBuilder {
         this.soTimeout = soTimeout;
         return this;
     }
+    
+    /**
+     * (兼容老客户端)
+     * @param timeout 单位:毫秒
+     * @return
+     */
+    public RedisSentinelBuilder setTimeout(int timeout) {
+        //兼容老版本
+        this.connectionTimeout = timeout;
+        this.soTimeout = timeout;
+        return this;
+    }
 
+    /**
+     * 是否开启统计
+     * @param clientStatIsOpen
+     * @return
+     */
+    public RedisSentinelBuilder setClientStatIsOpen(boolean clientStatIsOpen) {
+        this.clientStatIsOpen = clientStatIsOpen;
+        return this;
+    }
 }

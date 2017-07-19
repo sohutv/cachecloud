@@ -1,7 +1,6 @@
 package com.sohu.tv.builder;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.alibaba.fastjson.JSONObject;
 import com.sohu.tv.cachecloud.client.basic.util.ConstUtils;
 import com.sohu.tv.cachecloud.client.basic.util.HttpUtils;
 import com.sohu.tv.cachecloud.client.jedis.stat.ClientDataCollectReportExecutor;
@@ -31,6 +30,10 @@ public class RedisStandaloneBuilder {
     private GenericObjectPoolConfig poolConfig;
     private final long appId;
     private int timeout = Protocol.DEFAULT_TIMEOUT;
+    /**
+     * 是否开启统计
+     */
+    private boolean clientStatIsOpen = true;
 
     /**
      * 构造函数package访问域，package外直接构造实例；
@@ -61,27 +64,20 @@ public class RedisStandaloneBuilder {
                             logger.warn("cannot get response from server, appId={}. continue...", appId);
                             continue;
                         }
-
-                        /**
-                         * 心跳返回的请求无效；
-                         */
-                        ObjectMapper mapper = new ObjectMapper();
-                        JsonNode responseJson = null;
+                        JSONObject jsonObject = null;
                         try {
-                            responseJson = mapper.readTree(response);
+                            jsonObject = JSONObject.parseObject(response);
                         } catch (Exception e) {
                             logger.error("read json from response error, appId: {}.", appId, e);
                         }
-
-                        if (responseJson == null) {
+                        if (jsonObject == null) {
                             logger.warn("invalid response, appId: {}. continue...", appId);
                             continue;
                         }
-
                         /**
                          * 从心跳中提取HostAndPort，构造JedisPool实例；
                          */
-                        String instance = responseJson.get("standalone").asText();
+                        String instance = jsonObject.getString("standalone");
                         String[] instanceArr = instance.split(":");
                         if (instanceArr.length != 2) {
                             logger.warn("instance info is invalid, instance: {}, appId: {}, continue...", instance, appId);
@@ -89,7 +85,9 @@ public class RedisStandaloneBuilder {
                         }
                         
                         //收集上报数据
-//                        ClientDataCollectReportExecutor.getInstance();
+                        if (clientStatIsOpen) {
+                            ClientDataCollectReportExecutor.getInstance();
+                        }
 
                         jedisPool = new JedisPool(poolConfig, instanceArr[0], Integer.valueOf(instanceArr[1]), timeout);
                         return jedisPool;
@@ -120,6 +118,16 @@ public class RedisStandaloneBuilder {
      */
     public RedisStandaloneBuilder setTimeout(int timeout) {
         this.timeout = timeout;
+        return this;
+    }
+    
+    /**
+     * 是否开启统计
+     * @param clientStatIsOpen
+     * @return
+     */
+    public RedisStandaloneBuilder setClientStatIsOpen(boolean clientStatIsOpen) {
+        this.clientStatIsOpen = clientStatIsOpen;
         return this;
     }
 }

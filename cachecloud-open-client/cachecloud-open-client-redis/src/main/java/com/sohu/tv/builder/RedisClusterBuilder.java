@@ -1,8 +1,7 @@
 package com.sohu.tv.builder;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.alibaba.fastjson.JSONObject;
 import com.sohu.tv.cachecloud.client.basic.heartbeat.ClientStatusEnum;
-import com.sohu.tv.cachecloud.client.basic.heartbeat.HeartbeatInfo;
 import com.sohu.tv.cachecloud.client.basic.util.ConstUtils;
 import com.sohu.tv.cachecloud.client.basic.util.HttpUtils;
 import com.sohu.tv.cachecloud.client.jedis.stat.ClientDataCollectReportExecutor;
@@ -15,7 +14,6 @@ import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.Protocol;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -64,6 +62,11 @@ public class RedisClusterBuilder {
      * 构建锁
      */
     private final Lock lock = new ReentrantLock();
+    
+    /**
+     * 是否开启统计
+     */
+    private boolean clientStatIsOpen = true;
 
     /**
      * 构造函数package访问域，package外不能直接构造实例；
@@ -93,29 +96,31 @@ public class RedisClusterBuilder {
                     }
                     String url = String.format(ConstUtils.REDIS_CLUSTER_URL, String.valueOf(appId));
                     String response = HttpUtils.doGet(url);
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    HeartbeatInfo heartbeatInfo = null;
+                    JSONObject jsonObject = null;
                     try {
-                        heartbeatInfo = objectMapper.readValue(response, HeartbeatInfo.class);
-                    } catch (IOException e) {
+                        jsonObject = JSONObject.parseObject(response);
+                    } catch (Exception e) {
                         logger.error("remote build error, appId: {}", appId, e);
                     }
-                    if (heartbeatInfo == null) {
+                    if (jsonObject == null) {
+                        logger.error("get cluster info for appId: {} error. continue...", appId);
                         continue;
                     }
+                    int status = jsonObject.getIntValue("status");
+                    String message = jsonObject.getString("message");
 
                     /** 检查客户端版本 **/
-                    if (heartbeatInfo.getStatus() == ClientStatusEnum.ERROR.getStatus()) {
-                        throw new IllegalStateException(heartbeatInfo.getMessage());
-                    } else if (heartbeatInfo.getStatus() == ClientStatusEnum.WARN.getStatus()) {
-                        logger.warn(heartbeatInfo.getMessage());
+                    if (status == ClientStatusEnum.ERROR.getStatus()) {
+                        throw new IllegalStateException(message);
+                    } else if (status == ClientStatusEnum.WARN.getStatus()) {
+                        logger.warn(message);
                     } else {
-                        logger.info(heartbeatInfo.getMessage());
+                        logger.info(message);
                     }
 
                     Set<HostAndPort> nodeList = new HashSet<HostAndPort>();
                     //形如 ip1:port1,ip2:port2,ip3:port3
-                    String nodeInfo = heartbeatInfo.getShardInfo();
+                    String nodeInfo = jsonObject.getString("shardInfo");
                     //为了兼容,如果允许直接nodeInfo.split(" ")
                     nodeInfo = nodeInfo.replace(" ", ",");
                     String[] nodeArray = nodeInfo.split(",");
@@ -130,7 +135,9 @@ public class RedisClusterBuilder {
                     }
                     
                     //收集上报数据
-//                    ClientDataCollectReportExecutor.getInstance();
+                    if (clientStatIsOpen) {
+                        ClientDataCollectReportExecutor.getInstance();
+                    }
                     
                     jedisCluster = new JedisCluster(nodeList, connectionTimeout, soTimeout, maxRedirections, jedisPoolConfig);
                     return jedisCluster;
@@ -185,6 +192,16 @@ public class RedisClusterBuilder {
      */
     public RedisClusterBuilder setMaxRedirections(final int maxRedirections) {
         this.maxRedirections = maxRedirections;
+        return this;
+    }
+    
+    /**
+     * 是否开启统计
+     * @param clientStatIsOpen
+     * @return
+     */
+    public RedisClusterBuilder setClientStatIsOpen(boolean clientStatIsOpen) {
+        this.clientStatIsOpen = clientStatIsOpen;
         return this;
     }
 }

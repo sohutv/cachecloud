@@ -458,10 +458,6 @@ public class AppDeployCenterImpl implements AppDeployCenter {
         Assert.isTrue(appId != null && appId > 0L);
         Assert.isTrue(appAuditId != null && appAuditId > 0L);
         Assert.isTrue(memory > 0);
-        boolean isInProcess = isInProcess(appId);
-        if (isInProcess) {
-            return false;
-        }
         AppDesc appDesc = appService.getByAppId(appId);
         Assert.isTrue(appDesc != null);
         int type = appDesc.getType();
@@ -571,13 +567,15 @@ public class AppDeployCenterImpl implements AppDeployCenter {
             return false;
         }
     }
-    
+
     /**
-     * todo
      * @param appId
+     * @param appAuditId
+     * @param startSlot
+     * @param endSlot
      * @return
      */
-    private boolean isInProcess(Long appId) {
+    private boolean isInProcess(Long appId, long appAuditId, int startSlot, int endSlot) {
         return false;
     }
 
@@ -601,9 +599,9 @@ public class AppDeployCenterImpl implements AppDeployCenter {
     @Override
 	public HorizontalResult checkHorizontal(long appId, long appAuditId, long sourceId, long targetId, int startSlot,
 			int endSlot, int migrateType) {
-        boolean isInProcess = isInProcess(appId);
+        boolean isInProcess = isInProcess(appId, appAuditId, startSlot, endSlot);
     	    if (isInProcess) {
-			return HorizontalResult.fail(String.format("appId=%s正在迁移!", appId));
+			return HorizontalResult.fail(String.format("appId=%s %s:%s正在迁移!", appId, startSlot, endSlot));
     	    }
 		// 1.应用信息
 		AppDesc appDesc = appService.getByAppId(appId);
