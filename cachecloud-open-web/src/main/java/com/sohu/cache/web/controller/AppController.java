@@ -533,7 +533,10 @@ public class AppController extends BaseController {
         if (userAppCount == 0 && !AppUserTypeEnum.ADMIN_USER.value().equals(currentUser.getType())) {
             return new ModelAndView("redirect:/admin/app/init");
         }
-        
+        // 默认只出运行中的
+        if (appSearch.getAppStatus() == null) {
+            appSearch.setAppStatus(AppStatusEnum.STATUS_PUBLISHED.getStatus());
+        }
         // 2.1 分页相关
         int totalCount = appService.getAppDescCount(currentUser, appSearch);
         int pageNo = NumberUtils.toInt(request.getParameter("pageNo"), 1);

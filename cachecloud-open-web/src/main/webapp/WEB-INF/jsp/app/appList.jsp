@@ -104,7 +104,7 @@
 					 </div>
 					 <div class="form-group">
 						<select name="appStatus" class="form-control">
-							<option value="">
+							<option value="-1">
 								全部状态
 							</option>
 							<option value="0" <c:if test="${appSearch.appStatus == 0}">selected</c:if>>
