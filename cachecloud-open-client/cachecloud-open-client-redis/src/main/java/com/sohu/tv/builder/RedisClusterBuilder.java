@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.sohu.tv.cachecloud.client.basic.heartbeat.ClientStatusEnum;
 import com.sohu.tv.cachecloud.client.basic.util.ConstUtils;
 import com.sohu.tv.cachecloud.client.basic.util.HttpUtils;
+import com.sohu.tv.cachecloud.client.basic.util.StringUtil;
 import com.sohu.tv.cachecloud.client.jedis.stat.ClientDataCollectReportExecutor;
 
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Protocol;
 
 import java.util.HashSet;
@@ -139,7 +141,13 @@ public class RedisClusterBuilder {
                         ClientDataCollectReportExecutor.getInstance();
                     }
                     
-                    jedisCluster = new JedisCluster(nodeList, connectionTimeout, soTimeout, maxRedirections, jedisPoolConfig);
+                    String password = jsonObject.getString("password");
+                    if (StringUtil.isBlank(password)) {
+                        jedisCluster = new JedisCluster(nodeList, connectionTimeout, soTimeout, maxRedirections, jedisPoolConfig);
+                    } else {
+                        jedisCluster = new JedisCluster(nodeList, connectionTimeout, soTimeout, maxRedirections, password, jedisPoolConfig);
+                    }
+                    
                     return jedisCluster;
                 } catch (Throwable e) {
                     logger.error(e.getMessage(), e);

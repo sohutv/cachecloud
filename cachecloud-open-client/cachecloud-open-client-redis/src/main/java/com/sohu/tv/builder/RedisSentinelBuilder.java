@@ -4,12 +4,14 @@ import com.alibaba.fastjson.JSONObject;
 import com.sohu.tv.cachecloud.client.basic.heartbeat.ClientStatusEnum;
 import com.sohu.tv.cachecloud.client.basic.util.ConstUtils;
 import com.sohu.tv.cachecloud.client.basic.util.HttpUtils;
+import com.sohu.tv.cachecloud.client.basic.util.StringUtil;
 import com.sohu.tv.cachecloud.client.jedis.stat.ClientDataCollectReportExecutor;
 
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisSentinelPool;
 import redis.clients.jedis.Protocol;
 
@@ -137,7 +139,13 @@ public class RedisSentinelBuilder {
                             ClientDataCollectReportExecutor.getInstance();
                         }
                         
-                        sentinelPool = new JedisSentinelPool(masterName, sentinelSet, poolConfig, connectionTimeout, soTimeout, null, Protocol.DEFAULT_DATABASE);
+                        String password = jsonObject.getString("password");
+                        if (StringUtil.isBlank(password)) {
+                            sentinelPool = new JedisSentinelPool(masterName, sentinelSet, poolConfig, connectionTimeout, soTimeout, null, Protocol.DEFAULT_DATABASE);
+                        } else {
+                            sentinelPool = new JedisSentinelPool(masterName, sentinelSet, poolConfig, connectionTimeout, soTimeout, password, Protocol.DEFAULT_DATABASE);
+                        }
+                        
                         return sentinelPool;
                     }
                 } catch (Throwable e) {//容错

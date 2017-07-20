@@ -3,6 +3,7 @@ package com.sohu.tv.builder;
 import com.alibaba.fastjson.JSONObject;
 import com.sohu.tv.cachecloud.client.basic.util.ConstUtils;
 import com.sohu.tv.cachecloud.client.basic.util.HttpUtils;
+import com.sohu.tv.cachecloud.client.basic.util.StringUtil;
 import com.sohu.tv.cachecloud.client.jedis.stat.ClientDataCollectReportExecutor;
 
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -88,8 +89,14 @@ public class RedisStandaloneBuilder {
                         if (clientStatIsOpen) {
                             ClientDataCollectReportExecutor.getInstance();
                         }
+                        
+                        String password = jsonObject.getString("password");
+                        if (StringUtil.isBlank(password)) {
+                            jedisPool = new JedisPool(poolConfig, instanceArr[0], Integer.valueOf(instanceArr[1]), timeout);
+                        } else {
+                            jedisPool = new JedisPool(poolConfig, instanceArr[0], Integer.valueOf(instanceArr[1]), timeout, password);
+                        }
 
-                        jedisPool = new JedisPool(poolConfig, instanceArr[0], Integer.valueOf(instanceArr[1]), timeout);
                         return jedisPool;
                     }
                 } catch (InterruptedException e) {
