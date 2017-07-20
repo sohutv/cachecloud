@@ -21,11 +21,9 @@ import java.util.Map;
 public class EmailComponentImpl implements EmailComponent {
     private final Logger logger = LoggerFactory.getLogger(EmailComponentImpl.class);
 
-    private String adminEmail = ConstUtils.EMAILS;
-
     @Override
     public boolean sendMailToAdmin(String title, String content) {
-        return sendMail(title, content, Arrays.asList(adminEmail));
+        return sendMail(title, content, Arrays.asList(ConstUtils.EMAILS));
     }
 
     @Override
@@ -60,15 +58,9 @@ public class EmailComponentImpl implements EmailComponent {
         }
 	}
 
-    public void setAdminEmail(String adminEmail) {
-        this.adminEmail = adminEmail;
-    }
-
 	@Override
 	public String getAdminEmail() {
-		return adminEmail;
+		return ConstUtils.EMAILS;
 	}
-
-	
 
 }
