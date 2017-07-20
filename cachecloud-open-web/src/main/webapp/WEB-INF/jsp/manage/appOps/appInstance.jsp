@@ -396,10 +396,6 @@
                                      <button type="button" class="btn btn-small btn-success" onclick="startInstance('${appDesc.appId}','${instance.id}')">
                                         	&nbsp;启动实例&nbsp;
                                      </button>
-                                     <br/><br/>
-                                      <button type="button" class="btn btn-small btn-danger" data-target="#redisClusterDelNodeModal${instance.id}" data-toggle="modal">
-                                           &nbsp;删除实例&nbsp;
-                                       </button>
                                    </c:when>
                                     <c:when test="${instance.status ==0}">
                                         <button type="button" class="btn btn-small btn-success" onclick="startInstance('${appDesc.appId}','${instance.id}')">
@@ -407,12 +403,8 @@
                                         </button>
                                         <br/><br/>
                                         <button type="button" class="btn btn-small btn-danger" onclick="shutdownInstance('${appDesc.appId}','${instance.id}')">
-                                            	&nbsp;暂停实例&nbsp;
+                                            	&nbsp;下线实例&nbsp;
                                         </button>
-                                        <br/><br/>
-                                       <button type="button" class="btn btn-small btn-danger" data-target="#redisClusterDelNodeModal${instance.id}" data-toggle="modal">
-                                           &nbsp;删除实例&nbsp;
-                                       </button>
                                         <c:choose>
 		                                   <c:when test="${instance.masterInstanceId == 0 && appDesc.type == 2 && lossSlotsSegmentMap[instanceStatsMapKey] != null && lossSlotsSegmentMap[instanceStatsMapKey] != ''}">
 		                                      <button type="button" class="btn btn-small btn-primary" data-target="#redisAddFailSlotsMasterModal${instance.id}" data-toggle="modal">修复slot丢失数据</button>
@@ -421,13 +413,8 @@
                                     </c:when>
                                    <c:when test="${instance.status == 1}">
                                    	  <button type="button" class="btn btn-small btn-danger" onclick="shutdownInstance('${appDesc.appId}', '${instance.id}')">
-	                                        &nbsp;暂停实例&nbsp;
+	                                        &nbsp;下线实例&nbsp;
 	                                   </button>
-	                                   
-	                                   <br/><br/>
-                                       <button type="button" class="btn btn-small btn-danger" data-target="#redisClusterDelNodeModal${instance.id}" data-toggle="modal">
-                                           &nbsp;删除实例&nbsp;
-                                       </button>
 	                                   
                                        <c:if test="${instance.masterInstanceId == 0 and instance.type != 5}">
                                        	  <br/><br/>
