@@ -74,6 +74,7 @@
 		                        <th>负责人</th>
 		                        <td>服务器ip:port</td>
 		                        <td>实例空间使用情况</td>
+		                        <td>连接数</td>
 		                        <td>角色</td>
 		                        <td>实例所在机器信息可用内存(G)</td>
 		                        <td>实例操作</td>
@@ -120,7 +121,8 @@
 		                                     </div>
 		                                </div>
 		                            </td>
-                            		<td>${instance.roleDesc}</td>
+                            		   <td>${(instanceStatsMap[instanceStatsMapKey]).currConnections}</td>
+                            		   <td>${instance.roleDesc}</td>
 		                            <td><fmt:formatNumber
 		                                    value="${(machineCanUseMem[instance.ip])/1024/1024/1024}"
 		                                    pattern="0.00"/>
