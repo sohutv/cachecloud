@@ -49,7 +49,7 @@ public class CleanUpStatisticsJob extends CacheBaseJob {
             InstanceStatsCenter InstanceStatsCenter =  applicationContext.getBean("instanceStatsCenter", InstanceStatsCenter.class);
 
             try {
-                InstanceStatsCenter.cleanUpStandardStats(5);
+                InstanceStatsCenter.cleanUpStandardStats(2);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }
