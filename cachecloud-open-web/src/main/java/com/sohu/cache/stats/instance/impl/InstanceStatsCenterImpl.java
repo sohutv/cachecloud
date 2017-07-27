@@ -15,11 +15,14 @@ import com.sohu.cache.web.util.DateUtil;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by yijunzhang on 14-9-17.
@@ -258,12 +261,32 @@ public class InstanceStatsCenterImpl implements InstanceStatsCenter {
 
     @Override
     public void cleanUpStandardStats(int day) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.add(Calendar.DAY_OF_MONTH, -Math.abs(day));
-        Date deleteTime = calendar.getTime();
-        int deleteCount = instanceStatsDao.deleteStandardStatsByCreatedTime(deleteTime);
-        logger.warn("cleanUpStandardStats: {} day deleteCount={}", day, deleteCount);
+        try {
+            SimpleDateFormat minSdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat hourSdf = new SimpleDateFormat("yyyy-MM-dd HH");
+            // 基准时间
+            Date baseTime = DateUtils.addDays(hourSdf.parse(minSdf.format(new Date())), 0 - day);
+            Date startTime = null;          //删除开始时间
+            Date endTime = null;            //删除结束时间
+            int mins = 24 * 60 * (day - 1); //天换算分钟数,保留一天数据
+            int perMin = 10;                //每10分钟区间做一次删除
+            long beginTime = System.currentTimeMillis();
+            for (int count = 1; count <= mins / perMin; count++) {
+                startTime = DateUtils.addMinutes(baseTime, perMin * (count - 1));
+                endTime = DateUtils.addMinutes(baseTime, perMin * count);
+                long startMills = System.currentTimeMillis();
+                instanceStatsDao.deleteStandardStatsByScanTime(startTime, endTime);
+                logger.warn("execute delete task cost：{} ms ,time :{},{}", System.currentTimeMillis() - startMills, minSdf.format(startTime), minSdf.format(endTime));
+                try {
+                    TimeUnit.MILLISECONDS.sleep(10);
+                } catch (InterruptedException e) {
+                    logger.error(e.getMessage(), e);
+                }
+            }
+            logger.info("cleanUpStandardStats total costTime =" + (System.currentTimeMillis() - beginTime) / 1000 + " s");
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
     }
 
     public void setInstanceDao(InstanceDao instanceDao) {

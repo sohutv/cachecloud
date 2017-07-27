@@ -80,6 +80,11 @@
         from standard_statistics
         where <![CDATA[ created_time <=  #{createdTime}]]>
     </delete>
+
+    <delete id="deleteStandardStatsByScanTime">
+        DELETE FROM standard_statistics
+        where created_time BETWEEN #{startTime} AND #{endTime}
+    </delete>
     
     <select id="getStandardStatsByCreateTime" resultType="StandardStats">
         select id,collect_time,ip,port,db_type,info_json,diff_json,cluster_info_json,created_time
