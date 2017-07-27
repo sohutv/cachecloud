@@ -1469,6 +1469,46 @@ public class RedisCenterImpl implements RedisCenter {
     }
 
     /**
+     * 从一个应用中获取所有健康master节点
+     *
+     * @param appId
+     * @return 应用对应master节点列表
+     */
+    public List<InstanceInfo> getAllHealthyInstanceInfo(long appId) {
+        // return instances
+        List<InstanceInfo> allInstance = new ArrayList<InstanceInfo>();
+        List<InstanceInfo> appInstanceInfoList = instanceDao.getInstListByAppId(appId);
+        if (CollectionUtils.isEmpty(appInstanceInfoList)) {
+            logger.error("appId {} has not instances", appId);
+            return null;
+        }
+        for (InstanceInfo instanceInfo : appInstanceInfoList) {
+            int instanceType = instanceInfo.getType();
+            if (!TypeUtil.isRedisCluster(instanceType)) {
+                continue;
+            }
+            final String host = instanceInfo.getIp();
+            final int port = instanceInfo.getPort();
+            if (instanceInfo.getStatus() != InstanceStatusEnum.GOOD_STATUS.getStatus()) {
+                continue;
+            }
+            boolean isRun = isRun(appId, host, port);
+            if (!isRun) {
+                logger.warn("{}:{} is not run", host, port);
+                continue;
+            }
+            boolean isMaster = isMaster(appId, host, port);
+            if (!isMaster) {
+                logger.warn("{}:{} is not master", host, port);
+                continue;
+            }
+            // add exist redis
+            allInstance.add(instanceInfo);
+        }
+        return allInstance;
+    }
+
+    /**
      * clusterslots命令拼接成Map<Integer slot, String host:port>
      *
      * @param host

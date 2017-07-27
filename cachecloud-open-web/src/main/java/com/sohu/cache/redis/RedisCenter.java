@@ -298,7 +298,14 @@ public interface RedisCenter {
      * @return
      */
     public InstanceInfo getHealthyInstanceInfo(long appId);
-    
+
+    /**
+     * 从一个应用中获取所有健康的master实例
+     * @param appId
+     * @return
+     */
+    public List<InstanceInfo> getAllHealthyInstanceInfo(long appId);
+
     /**
      * 收集redis慢查询日志
      *

@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisSentinelPool;
 import redis.clients.jedis.Protocol;
+import redis.clients.jedis.exceptions.JedisDataException;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -692,7 +693,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
     }
     
     @Override
-    public RedisOperateEnum addSlotsFailMaster(long appId, int lossSlotsInstanceId, String newMasterHost) throws Exception {
+    public RedisOperateEnum addSlotsFailMaster(final long appId, int lossSlotsInstanceId,final String newMasterHost) throws Exception {
         // 1.参数、应用、实例信息确认
         Assert.isTrue(appId > 0);
         Assert.isTrue(lossSlotsInstanceId > 0);
@@ -709,7 +710,14 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         Assert.isTrue(lossSlotsInstanceInfo != null);
 
         // 2.获取集群中一个健康的master作为clusterInfo Nodes的数据源
-        InstanceInfo sourceMasterInstance = redisCenter.getHealthyInstanceInfo(appId);
+        List<InstanceInfo> allInstanceInfo = redisCenter.getAllHealthyInstanceInfo(appId);
+        //InstanceInfo sourceMasterInstance = redisCenter.getHealthyInstanceInfo(appId);
+        if (allInstanceInfo == null || allInstanceInfo.size() == 0) {
+            logger.warn("appId {} get all instance is zero", appId);
+            return RedisOperateEnum.FAIL;
+        }
+        //默认获取第一个master节点
+        InstanceInfo sourceMasterInstance = allInstanceInfo.get(0);
         // 并未找到一个合适的实例可以
         if (sourceMasterInstance == null) {
             logger.warn("appId {} does not have right instance", appId);
@@ -727,7 +735,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
             return RedisOperateEnum.ALREADY_SUCCESS;
         }
         // 3.2 查看目标实例丢失slots 
-        List<Integer> clusterLossSlots = redisCenter.getInstanceSlots(appId, healthyMasterHost, healthyMasterPort, lossSlotsInstanceInfo.getIp(), lossSlotsInstanceInfo.getPort());
+        final List<Integer> clusterLossSlots = redisCenter.getInstanceSlots(appId, healthyMasterHost, healthyMasterPort, lossSlotsInstanceInfo.getIp(), lossSlotsInstanceInfo.getPort());
         // 4.开启新的节点
         // 4.1 从newMasterHost找到可用的端口newMasterPort
         final Integer newMasterPort = machineCenter.getAvailablePort(newMasterHost, ConstUtils.CACHE_TYPE_REDIS_CLUSTER);
@@ -771,17 +779,58 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         }
         
         // 6. 分配slots
-        String addSlotsResult = "";
+        //String addSlotsResult = "";
         Jedis newMasterJedis = null;
-        Jedis healthyMasterJedis = null;
+        //Jedis healthyMasterJedis = null;
         try {
             newMasterJedis = redisCenter.getJedis(appId, newMasterHost, newMasterPort, 5000, 5000);
-            healthyMasterJedis = redisCenter.getJedis(appId, healthyMasterHost, healthyMasterPort, 5000, 5000);
-            //获取新的补救节点的nodid
+            //获取新的补救节点的nodeid
             final String nodeId = getClusterNodeId(newMasterJedis);
-            for (Integer slot : clusterLossSlots) {
-                addSlotsResult = healthyMasterJedis.clusterSetSlotNode(slot, nodeId);
-                logger.warn("set slot {}, result is {}", slot, addSlotsResult);
+            //healthyMasterJedis = redisCenter.getJedis(appId, healthyMasterHost, healthyMasterPort, 5000, 5000);
+            for (InstanceInfo instance : allInstanceInfo) {
+                final Jedis masterJedis = redisCenter.getJedis(appId, instance.getIp(), instance.getPort(), 5000, 5000);
+                logger.warn("{}:{} set {}:{} slots start", instance.getIp(), instance.getPort(), newMasterHost, newMasterPort);
+                // 1. nodes meet 2. nodes set
+                boolean setSlotStatus = true;
+                try {
+                    setSlotStatus = new IdempotentConfirmer() {
+                        @Override
+                        public boolean execute() {
+                            String setSlotsResult = null;
+                            try {
+                                for (final Integer slot : clusterLossSlots) {
+                                    setSlotsResult = masterJedis.clusterSetSlotNode(slot, nodeId);
+                                    logger.warn("set slot {}, result is {}", slot, setSlotsResult);
+                                }
+                            } catch (JedisDataException exception) {
+                                logger.warn(exception.getMessage());
+                                // unkown jedis node
+                                try {
+                                    TimeUnit.SECONDS.sleep(2);
+                                } catch (InterruptedException e) {
+                                    logger.error(e.getMessage(), e);
+                                }
+                            }
+                            // result
+                            boolean nodeSetStatus = setSlotsResult != null && setSlotsResult.equalsIgnoreCase("OK");
+                            return nodeSetStatus;
+                        }
+                    }.run();
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
+                } finally {
+                    //close jedis
+                    if (masterJedis != null) {
+                        masterJedis.close();
+                    }
+                }
+                // set slots result
+                if (setSlotStatus) {
+                    logger.warn("{}:{} set {}:{} slots success", instance.getIp(), instance.getPort(), newMasterHost, newMasterPort);
+                } else {
+                    logger.warn("{}:{} set {}:{} slots faily", instance.getIp(), instance.getPort(), newMasterHost, newMasterPort);
+                    return RedisOperateEnum.FAIL;
+                }
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -789,14 +838,11 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
             if (newMasterJedis != null) {
                 newMasterJedis.close();
             }
-            if (healthyMasterJedis != null) {
-                healthyMasterJedis.close();
-            }
         }
-        if (!"OK".equalsIgnoreCase(addSlotsResult)) {
+        /*if (!"OK".equalsIgnoreCase(addSlotsResult)) {
             logger.warn("{}:{} set slots faily", newMasterHost, newMasterPort);
             return RedisOperateEnum.FAIL;
-        }
+        }*/
         
         // 7.保存实例信息、并开启收集信息
         saveInstance(appId, newMasterHost, newMasterPort, healthyMasterMem, ConstUtils.CACHE_TYPE_REDIS_CLUSTER, "");
@@ -1135,7 +1181,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         String[] compareConfigs = new String[] {"maxmemory-policy", "maxmemory", "cluster-node-timeout",
                 "cluster-require-full-coverage", "repl-backlog-size", "appendonly", "hash-max-ziplist-entries",
                 "hash-max-ziplist-value", "list-max-ziplist-entries", "list-max-ziplist-value", "set-max-intset-entries",
-                "zset-max-ziplist-entries", "zset-max-ziplist-value"};
+                "zset-max-ziplist-entries", "zset-max-ziplist-value", "timeout", "tcp-keepalive"};
         try {
             for (String config : compareConfigs) {
                 String sourceValue = getConfigValue(appId, sourceHost, sourcePort, config);
