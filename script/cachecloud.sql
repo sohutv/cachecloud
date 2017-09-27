@@ -741,7 +741,7 @@ CREATE TABLE `machine_info` (
   `cpu` mediumint(24) unsigned NOT NULL COMMENT 'cpu数量',
   `virtual` tinyint(8) unsigned NOT NULL DEFAULT '1' COMMENT '是否虚拟，0表示否，1表示是',
   `real_ip` varchar(16) COLLATE utf8_bin NOT NULL COMMENT '宿主机ip',
-  `service_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '上线时间',
+  `service_time` timestamp NOT NULL DEFAULT NOW() COMMENT '上线时间',
   `fault_count` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '故障次数',
   `modify_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
   `warn` tinyint(255) unsigned NOT NULL DEFAULT '1' COMMENT '是否启用报警，0不启用，1启用',
