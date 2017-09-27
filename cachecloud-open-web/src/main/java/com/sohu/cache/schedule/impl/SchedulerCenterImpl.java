@@ -121,6 +121,7 @@ public class SchedulerCenterImpl implements SchedulerCenter {
                     .forJob(jobDetail)
                     .withSchedule(simpleSchedule()
                             .withIntervalInSeconds(1)
+
                             .withRepeatCount(0)
                             )
                     .startAt(startAtDate)
@@ -152,7 +153,10 @@ public class SchedulerCenterImpl implements SchedulerCenter {
             Trigger trigger = TriggerBuilder.newTrigger()
                     .withIdentity(triggerKey)
                     .forJob(jobDetail)
-                    .withSchedule(CronScheduleBuilder.cronSchedule(cron))
+                    .withSchedule(
+                            CronScheduleBuilder.cronSchedule(cron)
+                            .withMisfireHandlingInstructionDoNothing()// 忽略misfire处理
+                    )
                     .startAt(startDate)
                     .build();
             if (dataMap != null && dataMap.size() > 0) {

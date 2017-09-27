@@ -122,7 +122,6 @@
         <property name="name" value="redisJob"></property>
         <property name="group" value="redis"></property>
         <property name="jobClass" value="com.sohu.cache.schedule.jobs.RedisJob"></property>
-        <property name="requestsRecovery" value="true"/>
         <property name="durability" value="true"/>
     </bean>
 
@@ -130,14 +129,12 @@
         <property name="name" value="machineJob"/>
         <property name="group" value="machine"/>
         <property name="jobClass" value="com.sohu.cache.schedule.jobs.MachineJob"/>
-        <property name="requestsRecovery" value="true"/>
         <property name="durability" value="true"/>
     </bean>
     <bean id="serverJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="name" value="serverJob"/>
         <property name="group" value="server"/>
         <property name="jobClass" value="com.sohu.cache.schedule.jobs.ServerJob"/>
-        <property name="requestsRecovery" value="true"/>
         <property name="durability" value="true"/>
     </bean>
 
@@ -145,7 +142,6 @@
         <property name="name" value="machineMonitorJob"/>
         <property name="group" value="machineMonitor"/>
         <property name="jobClass" value="com.sohu.cache.schedule.jobs.MachineMonitorJob"/>
-        <property name="requestsRecovery" value="true"/>
         <property name="durability" value="true"/>
     </bean>
     
@@ -153,7 +149,6 @@
         <property name="name" value="redisSlowLogJob"/>
         <property name="group" value="redisSlowLog"/>
         <property name="jobClass" value="com.sohu.cache.schedule.jobs.RedisSlowLogJob"/>
-        <property name="requestsRecovery" value="true"/>
         <property name="durability" value="true"/>
     </bean>
     
@@ -183,7 +178,6 @@
         <property name="name" value="inspectorJob"></property>
         <property name="group" value="inspector"></property>
         <property name="jobClass" value="com.sohu.cache.inspect.InspectorJob"></property>
-        <property name="requestsRecovery" value="true"/>
         <property name="durability" value="true"/>
     </bean>
 
@@ -239,7 +233,6 @@
         <property name="name" value="appDailyJob"></property>
         <property name="group" value="appDaily"></property>
         <property name="jobClass" value="com.sohu.cache.schedule.jobs.AppDailyJob"></property>
-        <property name="requestsRecovery" value="true"/>
         <property name="durability" value="true"/>
     </bean>
 
@@ -255,7 +248,6 @@
         <property name="name" value="instanceAlertValueJob"></property>
         <property name="group" value="instanceAlertValue"></property>
         <property name="jobClass" value="com.sohu.cache.schedule.jobs.InstanceAlertValueJob"></property>
-        <property name="requestsRecovery" value="true"/>
         <property name="durability" value="true"/>
     </bean>
     
