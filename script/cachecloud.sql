@@ -1,4 +1,4 @@
--- MySQL dump 10.13  Distrib 5.5.16, for Linux (x86_64)
+﻿-- MySQL dump 10.13  Distrib 5.5.16, for Linux (x86_64)
 --
 -- Host: 10.10.19.167    Database: cache-cloud
 -- ------------------------------------------------------
@@ -18,6 +18,10 @@
 --
 -- Table structure for table `QRTZ_BLOB_TRIGGERS`
 --
+
+CREATE DATABASE IF NOT EXISTS `cache-cloud` DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
+
+use `cache-cloud`;
 
 DROP TABLE IF EXISTS `QRTZ_BLOB_TRIGGERS`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -799,6 +803,8 @@ CREATE TABLE `standard_statistics` (
   UNIQUE KEY `uniq_index` (`ip`,`port`,`db_type`,`collect_time`),
   KEY `idx_create_time` (`created_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+
+DROP TABLE IF EXISTS `instance_slow_log`;
 
 CREATE TABLE `instance_slow_log` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增id',
