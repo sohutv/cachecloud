@@ -11,6 +11,7 @@ import com.sohu.cache.entity.AppToUser;
 import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.web.enums.SuccessEnum;
 import com.sohu.cache.web.service.UserService;
+import org.springframework.stereotype.Service;
 
 /**
  * 用户管理实现
@@ -18,6 +19,7 @@ import com.sohu.cache.web.service.UserService;
  * @Date 2014年10月27日
  * @Time 上午9:57:43
  */
+@Service
 public class UserServiceImpl implements UserService {
     private Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 

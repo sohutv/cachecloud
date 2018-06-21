@@ -9,16 +9,14 @@ import com.sohu.cache.util.AppKeyUtil;
 import com.sohu.cache.util.TypeUtil;
 import com.sohu.cache.web.enums.SuccessEnum;
 import com.sohu.cache.web.service.AppService;
-
-import org.springframework.util.Assert;
-
-import java.util.*;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import redis.clients.jedis.HostAndPort;
+
+import java.util.*;
 
 /**
  * 应用操作实现类
@@ -26,6 +24,7 @@ import redis.clients.jedis.HostAndPort;
  * @author leifu
  * @Time 2014年10月21日
  */
+@Service
 public class AppServiceImpl implements AppService {
 
     private Logger logger = LoggerFactory.getLogger(AppServiceImpl.class);

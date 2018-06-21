@@ -7,6 +7,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.lang.math.NumberUtils;
 
 import com.sohu.cache.web.service.UserLoginStatusService;
+import org.springframework.stereotype.Service;
 
 
 /**
@@ -15,6 +16,7 @@ import com.sohu.cache.web.service.UserLoginStatusService;
  * @Date 2016年6月15日
  * @Time 下午1:31:05
  */
+@Service
 public class UserLoginStatusSessionServiceImpl implements UserLoginStatusService {
 
     @Override

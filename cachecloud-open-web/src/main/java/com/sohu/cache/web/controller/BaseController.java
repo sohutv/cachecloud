@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -47,14 +48,19 @@ import com.sohu.cache.redis.RedisCenter;
 public class BaseController {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
+    @Resource
     protected UserService userService;
-    
+
+    @Resource
     protected AppService appService;
-    
+
+    @Resource
     protected MachineCenter machineCenter;
-    
+
+    @Resource
     protected UserLoginStatusService userLoginStatusService;
-    
+
+    @Resource
     protected RedisCenter redisCenter;
 
     public void setUserService(UserService userService) {

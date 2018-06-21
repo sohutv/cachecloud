@@ -11,7 +11,9 @@ import com.sohu.cache.entity.ServerInfo;
 import com.sohu.cache.entity.ServerStatus;
 import com.sohu.cache.server.data.Server;
 import com.sohu.cache.web.service.ServerDataService;
+import org.springframework.stereotype.Service;
 
+@Service
 public class ServerDataServiceImpl implements ServerDataService {
 	private static final Logger logger = LoggerFactory.getLogger(ServerDataServiceImpl.class);
 	//持久化接口

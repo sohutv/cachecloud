@@ -17,12 +17,14 @@ import com.sohu.cache.entity.SystemConfig;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.enums.SuccessEnum;
 import com.sohu.cache.web.service.ConfigService;
+import org.springframework.stereotype.Service;
 
 /**
  * @author leifu
  * @Date 2016年5月23日
  * @Time 上午10:35:26
  */
+@Service
 public class ConfigServiceImpl implements ConfigService {
 
     private Logger logger = LoggerFactory.getLogger(ConfigServiceImpl.class);
