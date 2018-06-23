@@ -24,7 +24,7 @@
           max_instance_port = if(hundred_max>#{hundredMax},max_instance_port,#{maxInstancePort}),
           max_instance_id =   if(hundred_max>#{hundredMax},max_instance_id,#{maxInstanceId}),
           max_client_ip =     if(hundred_max>#{hundredMax},max_client_ip,#{maxClientIp}),
-          mean = format(total_cost/total_count,2),
+          mean = CONVERT(total_cost/total_count,DECIMAL(12,2)),
           create_time = now(),
           accumulation = accumulation + 1;
 	</insert>
@@ -47,7 +47,7 @@
           max_instance_port = if(hundred_max>#{clientCostTime.hundredMax},max_instance_port,#{clientCostTime.maxInstancePort}),
           max_instance_id =   if(hundred_max>#{clientCostTime.hundredMax},max_instance_id,#{clientCostTime.maxInstanceId}),
           max_client_ip =     if(hundred_max>#{clientCostTime.hundredMax},max_client_ip,#{clientCostTime.maxClientIp}),
-          mean = format(total_cost/total_count,2),
+          mean = CONVERT(total_cost/total_count,DECIMAL(12,2)),
           create_time = now(),
           accumulation = accumulation + 1;
 	</insert>
