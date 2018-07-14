@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
+import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisSentinelPool;
 import redis.clients.jedis.Protocol;
@@ -779,59 +780,12 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         }
         
         // 6. 分配slots
-        //String addSlotsResult = "";
+        String nodeId = null;
         Jedis newMasterJedis = null;
-        //Jedis healthyMasterJedis = null;
         try {
             newMasterJedis = redisCenter.getJedis(appId, newMasterHost, newMasterPort, 5000, 5000);
             //获取新的补救节点的nodeid
-            final String nodeId = getClusterNodeId(newMasterJedis);
-            //healthyMasterJedis = redisCenter.getJedis(appId, healthyMasterHost, healthyMasterPort, 5000, 5000);
-            for (InstanceInfo instance : allInstanceInfo) {
-                final Jedis masterJedis = redisCenter.getJedis(appId, instance.getIp(), instance.getPort(), 5000, 5000);
-                logger.warn("{}:{} set {}:{} slots start", instance.getIp(), instance.getPort(), newMasterHost, newMasterPort);
-                // 1. nodes meet 2. nodes set
-                boolean setSlotStatus = true;
-                try {
-                    setSlotStatus = new IdempotentConfirmer() {
-                        @Override
-                        public boolean execute() {
-                            String setSlotsResult = null;
-                            try {
-                                for (final Integer slot : clusterLossSlots) {
-                                    setSlotsResult = masterJedis.clusterSetSlotNode(slot, nodeId);
-                                    logger.warn("set slot {}, result is {}", slot, setSlotsResult);
-                                }
-                            } catch (JedisDataException exception) {
-                                logger.warn(exception.getMessage());
-                                // unkown jedis node
-                                try {
-                                    TimeUnit.SECONDS.sleep(2);
-                                } catch (InterruptedException e) {
-                                    logger.error(e.getMessage(), e);
-                                }
-                            }
-                            // result
-                            boolean nodeSetStatus = setSlotsResult != null && setSlotsResult.equalsIgnoreCase("OK");
-                            return nodeSetStatus;
-                        }
-                    }.run();
-                } catch (Exception e) {
-                    logger.error(e.getMessage(), e);
-                } finally {
-                    //close jedis
-                    if (masterJedis != null) {
-                        masterJedis.close();
-                    }
-                }
-                // set slots result
-                if (setSlotStatus) {
-                    logger.warn("{}:{} set {}:{} slots success", instance.getIp(), instance.getPort(), newMasterHost, newMasterPort);
-                } else {
-                    logger.warn("{}:{} set {}:{} slots faily", instance.getIp(), instance.getPort(), newMasterHost, newMasterPort);
-                    return RedisOperateEnum.FAIL;
-                }
-            }
+            nodeId = getClusterNodeId(newMasterJedis);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         } finally {
@@ -839,10 +793,66 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
                 newMasterJedis.close();
             }
         }
-        /*if (!"OK".equalsIgnoreCase(addSlotsResult)) {
-            logger.warn("{}:{} set slots faily", newMasterHost, newMasterPort);
+        final String newNodeId = nodeId;
+        if (StringUtils.isBlank(nodeId)) {
+            logger.warn("{}:{} nodeId is empty!");
             return RedisOperateEnum.FAIL;
-        }*/
+        }
+        
+        //需要做setslot的实例列表
+        final List<HostAndPort> hostAndPorts = new ArrayList<>();
+        hostAndPorts.add(new HostAndPort(newMasterHost, newMasterPort));
+        for (InstanceInfo instance : allInstanceInfo) {
+            hostAndPorts.add(new HostAndPort(instance.getIp(), instance.getPort()));
+        }
+        
+        final Map<String, Jedis> jedisMap = new HashMap<String, Jedis>();
+        for (final Integer slot : clusterLossSlots) {
+            logger.warn("set slot {} start", slot);
+            boolean setSlotStatus = new IdempotentConfirmer() {
+                @Override
+                public boolean execute() {
+                    String setSlotsResult = null;
+                    for (HostAndPort hostAndPort : hostAndPorts) {
+                        Jedis masterJedis = null;
+                        try {
+                            String hostPort = hostAndPort.toString();
+                            if (jedisMap.containsKey(hostAndPort)) {
+                                masterJedis = jedisMap.get(hostAndPort);
+                            } else {
+                                masterJedis = redisCenter.getJedis(appId, hostAndPort.getHost(), hostAndPort.getPort(), 5000, 5000);
+                                jedisMap.put(hostPort, masterJedis);
+                            }
+                            setSlotsResult = masterJedis.clusterSetSlotNode(slot, newNodeId);
+                            logger.warn("\t {} set slot {}, result is {}", hostAndPort.toString(), slot, setSlotsResult);
+                        } catch (JedisDataException exception) {
+                            logger.warn(exception.getMessage());
+                            // unkown jedis node
+                            try {
+                                TimeUnit.SECONDS.sleep(2);
+                            } catch (InterruptedException e) {
+                                logger.error(e.getMessage(), e);
+                            } 
+                        }
+                    }
+                    boolean nodeSetStatus = setSlotsResult != null && setSlotsResult.equalsIgnoreCase("OK");
+                    return nodeSetStatus;
+                }
+            }.run();
+            // set slots result
+            if (setSlotStatus) {
+                logger.warn("set slot {} success", slot);
+            } else {
+                logger.warn("set slot {} faily", slot);
+                return RedisOperateEnum.FAIL;
+            }
+        }
+        //统一关闭
+        for (Jedis jedis : jedisMap.values()) {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
         
         // 7.保存实例信息、并开启收集信息
         saveInstance(appId, newMasterHost, newMasterPort, healthyMasterMem, ConstUtils.CACHE_TYPE_REDIS_CLUSTER, "");

@@ -741,7 +741,7 @@ CREATE TABLE `machine_info` (
   `cpu` mediumint(24) unsigned NOT NULL COMMENT 'cpu数量',
   `virtual` tinyint(8) unsigned NOT NULL DEFAULT '1' COMMENT '是否虚拟，0表示否，1表示是',
   `real_ip` varchar(16) COLLATE utf8_bin NOT NULL COMMENT '宿主机ip',
-  `service_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '上线时间',
+  `service_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '上线时间',
   `fault_count` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '故障次数',
   `modify_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
   `warn` tinyint(255) unsigned NOT NULL DEFAULT '1' COMMENT '是否启用报警，0不启用，1启用',
@@ -800,6 +800,7 @@ CREATE TABLE `standard_statistics` (
   KEY `idx_create_time` (`created_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 
+DROP TABLE IF EXISTS `instance_slow_log`;
 CREATE TABLE `instance_slow_log` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增id',
   `instance_id` bigint(20) NOT NULL COMMENT '实例的id',
@@ -816,6 +817,7 @@ CREATE TABLE `instance_slow_log` (
   KEY `idx_app_create_time` (`app_id`,`create_time`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='实例慢查询列表';
 
+DROP TABLE IF EXISTS `app_client_value_minute_stats`;
 CREATE TABLE `app_client_value_minute_stats` (
   `app_id` bigint(20) NOT NULL COMMENT '应用id',
   `collect_time` bigint(20) NOT NULL COMMENT '统计时间:格式yyyyMMddHHmm00',
@@ -827,6 +829,7 @@ CREATE TABLE `app_client_value_minute_stats` (
   KEY `idx_collect_time` (`collect_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='客户端每分钟值分布上报数据统计';
 
+DROP TABLE IF EXISTS `app_client_instance`;
 CREATE TABLE `app_client_instance` (
   `app_id` bigint(20) NOT NULL COMMENT '应用id',
   `client_ip` varchar(20) NOT NULL COMMENT '客户端ip',
@@ -837,6 +840,7 @@ CREATE TABLE `app_client_instance` (
   PRIMARY KEY (`app_id`,`day`,`client_ip`,`instance_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='应用实例与客户端对应关系表';
 
+DROP TABLE IF EXISTS `system_config`;
 CREATE TABLE `system_config` (
   `config_key` varchar(255) NOT NULL COMMENT '配置key',
   `config_value` varchar(512) NOT NULL COMMENT '配置value',
@@ -853,37 +857,41 @@ CREATE TABLE `system_config` (
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.ssh.name','cachecloud','机器ssh用户名',1,1);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.ssh.password','cachecloud','机器ssh密码',1,2);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.ssh.port','22','机器ssh端口',1,3);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.admin.user.name','admin','cachecloud-admin用户名',1,4);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.admin.user.password','admin','cachelcoud-admin密码',1,5);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.superAdmin','admin,xx,yy','超级管理员组',1,6);
-insert into system_config(config_key,config_value,info,status,order_id) values('machine.cpu.alert.ratio','80.0','机器cpu报警阀值',1,7);
-insert into system_config(config_key,config_value,info,status,order_id) values('machine.mem.alert.ratio','80.0','机器内存报警阀值',1,8);
-insert into system_config(config_key,config_value,info,status,order_id) values('machine.load.alert.ratio','8.0','机器负载报警阀值',1,9);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.documentUrl','http://cachecloud.github.io','文档地址',1,10);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.owner.email','xx@sohu.com,yy@qq.com','邮件报警(逗号隔开)',1,11);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.owner.phone','13812345678,13787654321','手机号报警(逗号隔开)',1,12);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.mavenWareHouse','http://your_maven_house','maven仓库地址(客户端)',1,13);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.contact','user1:(xx@zz.com, user1:135xxxxxxxx)<br/>user2: (user2@zz.com, user2:138xxxxxxxx)','值班联系人信息',1,14);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.good.client','1.0-SNAPSHOT','可用客户端版本(用逗号隔开)',1,15);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.warn.client','0.1','警告客户端版本(用逗号隔开)',1,16);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.error.client','0.0','不可用客户端版本(用逗号隔开)',1,17);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.ssh.auth.type','1','ssh授权方式',1,4);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.public.key.pem','','公钥地址',1,5);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.admin.user.name','admin','cachecloud-admin用户名',1,6);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.admin.user.password','admin','cachelcoud-admin密码',1,7);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.superAdmin','admin,xx,yy','超级管理员组',1,8);
+insert into system_config(config_key,config_value,info,status,order_id) values('machine.cpu.alert.ratio','80.0','机器cpu报警阀值',1,9);
+insert into system_config(config_key,config_value,info,status,order_id) values('machine.mem.alert.ratio','80.0','机器内存报警阀值',1,10);
+insert into system_config(config_key,config_value,info,status,order_id) values('machine.load.alert.ratio','8.0','机器负载报警阀值',1,11);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.documentUrl','http://cachecloud.github.io','文档地址',1,12);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.owner.email','xx@sohu.com,yy@qq.com','邮件报警(逗号隔开)',1,13);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.owner.phone','13812345678,13787654321','手机号报警(逗号隔开)',1,14);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.mavenWareHouse','http://your_maven_house','maven仓库地址(客户端)',1,15);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.contact','user1:(xx@zz.com, user1:135xxxxxxxx)<br/>user2: (user2@zz.com, user2:138xxxxxxxx)','值班联系人信息',1,16);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.good.client','1.0-SNAPSHOT','可用客户端版本(用逗号隔开)',1,17);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.warn.client','0.1','警告客户端版本(用逗号隔开)',1,18);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.error.client','0.0','不可用客户端版本(用逗号隔开)',1,19);
 
-insert into system_config(config_key,config_value,info,status,order_id) values('redis.migrate.tool.home','/opt/cachecloud/redis-migrate-tool/','redis-migrate-tool安装路径',1,18);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.user.login.type','1','用户登录状态保存方式(session或cookie)',1,19);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.cookie.domain','','cookie登录方式所需要的域名',1,20);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.base.dir','/opt','cachecloud根目录，要和cachecloud-init.sh脚本中的目录一致',1,21);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.app.client.conn.threshold','2000','应用连接数报警阀值',1,22);
+insert into system_config(config_key,config_value,info,status,order_id) values('redis.migrate.tool.home','/opt/cachecloud/redis-migrate-tool/','redis-migrate-tool安装路径',1,20);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.user.login.type','1','用户登录状态保存方式(session或cookie)',1,21);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.cookie.domain','','cookie登录方式所需要的域名',1,22);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.base.dir','/opt','cachecloud根目录，要和cachecloud-init.sh脚本中的目录一致',1,23);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.app.client.conn.threshold','2000','应用连接数报警阀值',1,24);
 
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.email.alert.interface','','邮件报警接口(说明:http://cachecloud.github.io 邮件和短信报警接口规范)',1,23);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.mobile.alert.interface','','短信报警接口(说明:http://cachecloud.github.io 邮件和短信报警接口规范)',1,24);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.ldap.url','','LDAP接口地址(例如:ldap://ldap.xx.com)',1,25);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.email.alert.interface','','邮件报警接口(说明:http://cachecloud.github.io 邮件和短信报警接口规范)',1,25);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.mobile.alert.interface','','短信报警接口(说明:http://cachecloud.github.io 邮件和短信报警接口规范)',1,26);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.ldap.url','','LDAP接口地址(例如:ldap://ldap.xx.com)',1,27);
 
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.whether.schedule.clean.data','false','是否定期清理统计数据',1,26);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.whether.schedule.clean.data','false','是否定期清理统计数据',1,28);
 
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.app.secret.base.key','cachecloud-2014','appkey秘钥基准key',1,27);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.stats.cron.minute','1','机器性能统计周期(分钟)',1,28);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.app.secret.base.key','cachecloud-2014','appkey秘钥基准key',1,29);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.stats.cron.minute','1','机器性能统计周期(分钟)',1,30);
 
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.nmon.dir','/opt/cachecloud','nmon安装目录',1,31);
 
+DROP TABLE IF EXISTS `app_data_migrate_status`;
 CREATE TABLE `app_data_migrate_status` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增id',
   `migrate_machine_ip` varchar(255) NOT NULL COMMENT '迁移工具所在机器ip',
@@ -905,7 +913,7 @@ CREATE TABLE `app_data_migrate_status` (
 
 insert into app_user(name,ch_name,email,mobile,type) values('admin','admin','admin@sohu-inc.com','13500000000',0);
 
-
+DROP TABLE IF EXISTS `instance_config`;
 CREATE TABLE `instance_config` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `config_key` varchar(128) NOT NULL COMMENT '配置名',
@@ -1064,6 +1072,7 @@ CREATE TABLE `server_stat` (
 -- 应用级别
 alter table app_desc add column important_level tinyint not null default 2 comment '应用级别，1:最重要，2:一般重要，3:一般'; 
 
+DROP TABLE IF EXISTS `instance_alert`;
 CREATE TABLE `instance_alert` (
   `config_key` varchar(255) NOT NULL COMMENT '配置key',
   `alert_value` varchar(512) NOT NULL COMMENT '报警阀值',
@@ -1077,6 +1086,7 @@ CREATE TABLE `instance_alert` (
 
 alter table app_desc add column password varchar(255) default '' comment 'redis密码';
 
+DROP TABLE IF EXISTS `app_daily`;
 CREATE TABLE `app_daily` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增id',
   `app_id` bigint(20) NOT NULL COMMENT '应用id',

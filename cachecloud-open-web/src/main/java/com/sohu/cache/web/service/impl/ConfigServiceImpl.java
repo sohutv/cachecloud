@@ -172,6 +172,17 @@ public class ConfigServiceImpl implements ConfigService {
         ConstUtils.MACHINE_STATS_CRON_MINUTE = MapUtils.getIntValue(configMap, "cachecloud.machine.stats.cron.minute", ConstUtils.DEFAULT_MACHINE_STATS_CRON_MINUTE);
         logger.info("{}: {}", "ConstUtils.MACHINE_STATS_CRON_MINUTE", ConstUtils.MACHINE_STATS_CRON_MINUTE);
         
+        //ssh授权方式
+        ConstUtils.SSH_AUTH_TYPE = MapUtils.getIntValue(configMap, "cachecloud.ssh.auth.type", ConstUtils.DEFAULT_SSH_AUTH_TYPE);
+        logger.info("{}: {}", "ConstUtils.SSH_AUTH", ConstUtils.SSH_AUTH_TYPE);
+        
+        //public key pem
+        ConstUtils.PUBLIC_KEY_PEM = MapUtils.getString(configMap, "cachecloud.public.key.pem", ConstUtils.DEFAULT_PUBLIC_KEY_PEM);
+        logger.info("{}: {}", "ConstUtils.PUBLIC_KEY_PEM", ConstUtils.PUBLIC_KEY_PEM);
+        
+        //nmon根目录
+        ConstUtils.NMON_DIR = MapUtils.getString(configMap, "cachecloud.nmon.dir", ConstUtils.DEFAULT_NMON_DIR);
+        logger.info("{}: {}", "ConstUtils.NMON_DIR", ConstUtils.NMON_DIR);
         
         logger.info("===========ConfigServiceImpl reload config end============");
     }
