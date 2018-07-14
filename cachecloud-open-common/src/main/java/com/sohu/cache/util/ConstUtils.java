@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import com.sohu.cache.enums.SshAuthTypeEnum;
+
 /**
  * cachecloud常量
  * @author leifu
@@ -228,6 +230,12 @@ public class ConstUtils {
     public static String CACHECLOUD_BASE_DIR = DEFAULT_CACHECLOUD_BASE_DIR;
     
     /**
+     * MNON_DIR根目录
+     */
+    public static String DEFAULT_NMON_DIR = "/opt/cachecloud";
+    public static String NMON_DIR = DEFAULT_NMON_DIR;
+    
+    /**
      * 是否定期清理各种统计数据：(详见CleanUpStatisticsJob)
      */
     public static boolean DEFAULT_WHETHER_SCHEDULE_CLEAN_DATA = false;
@@ -247,6 +255,18 @@ public class ConstUtils {
     public static int DEFAULT_MACHINE_STATS_CRON_MINUTE = 1;
     public static int MACHINE_STATS_CRON_MINUTE = DEFAULT_MACHINE_STATS_CRON_MINUTE;
     
+    
+    /**
+     * ssh授权方式：参考SshAuthTypeEnum
+     */
+    public static int DEFAULT_SSH_AUTH_TYPE = SshAuthTypeEnum.PASSWORD.getValue();
+    public static int SSH_AUTH_TYPE = DEFAULT_SSH_AUTH_TYPE;
+    
+    /**
+     * public key pem
+     */
+    public static String DEFAULT_PUBLIC_KEY_PEM = "";
+    public static String PUBLIC_KEY_PEM = DEFAULT_PUBLIC_KEY_PEM;
     
     /**
      * 网站域名

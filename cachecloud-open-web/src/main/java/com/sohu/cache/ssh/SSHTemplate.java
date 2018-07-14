@@ -1,6 +1,7 @@
 package com.sohu.cache.ssh;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -21,6 +22,7 @@ import ch.ethz.ssh2.Session;
 import ch.ethz.ssh2.StreamGobbler;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.sohu.cache.enums.SshAuthTypeEnum;
 import com.sohu.cache.exception.SSHException;
 import com.sohu.cache.util.ConstUtils;
 /**
@@ -77,10 +79,21 @@ public class SSHTemplate {
     		String username, String password) throws Exception {
     	Connection conn = new Connection(ip, port);
         conn.connect(null, CONNCET_TIMEOUT, CONNCET_TIMEOUT);
-        boolean isAuthenticated = conn.authenticateWithPassword(username, password);
+        boolean isAuthenticated = false;
+        if (ConstUtils.SSH_AUTH_TYPE == SshAuthTypeEnum.PASSWORD.getValue()) {
+        	isAuthenticated = conn.authenticateWithPassword(username, password);
+        } else if (ConstUtils.SSH_AUTH_TYPE == SshAuthTypeEnum.PUBLIC_KEY.getValue()) {
+        	isAuthenticated = conn.authenticateWithPublicKey(username, new File(ConstUtils.PUBLIC_KEY_PEM), password);
+        } 
         if (isAuthenticated == false) {
-            throw new Exception("SSH authentication failed with [ userName: " + 
-            		username + ", password: " + password + "]");
+        	if (ConstUtils.SSH_AUTH_TYPE == SshAuthTypeEnum.PASSWORD.getValue()) {
+        		throw new Exception("SSH authentication failed with [ userName: " + 
+                		username + ", password: " + password + "]");
+            } else if (ConstUtils.SSH_AUTH_TYPE == SshAuthTypeEnum.PUBLIC_KEY.getValue()) {
+            	throw new Exception("SSH authentication failed with [ userName: " + 
+                		username + ", pemfile: " + ConstUtils.PUBLIC_KEY_PEM + "]");
+            }
+            
         }
         return conn;
     }
