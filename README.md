@@ -1,6 +1,6 @@
 ### CacheCloud团队于2017年3月出版实体书《Redis开发与运维》，[更多详情请见](#cc10)
 
-## <a name="index"/>目录&nbsp;&nbsp;(具体细节[wiki文档](https://github.com/sohutv/cachecloud/wiki "Cachecloud Wiki")、[博客](http://cachecloud.github.io/ "Cachecloud page")、QQ群：534429768)
+## <a name="index"/>目录&nbsp;&nbsp;(具体细节[wiki文档](https://github.com/sohutv/cachecloud/wiki "Cachecloud Wiki")、[博客](http://cachecloud.github.io/ "Cachecloud page")、[相关交流群](#cc11))
 * [一、CacheCloud是做什么的](#cc1)
 * [二、CacheCloud提供哪些功能](#cc2)
 * [三、CacheCloud解决什么问题](#cc3)
@@ -151,6 +151,13 @@
 
 
 ## 十一、支持与帮助
+
+QQ群：534429768
+
+微信群：
+
+![微信二维码](https://camo.githubusercontent.com/92f3577e84b06d61f52b7f548dfddf60349b476b/687474703a2f2f69302e6974632e636e2f32303139303232312f6161635f38343333316366395f306361645f643063345f353436645f3164356530356161373661365f312e6a706567)
+
 
 如果你觉得CacheCloud对你有帮助，欢迎Star。
  
