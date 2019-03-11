@@ -35,8 +35,12 @@ public class ClusterNodeInformationParser {
     String stringHostAndPort = nodeInfoPartArray[HOST_AND_PORT_INDEX];
 
     String[] arrayHostAndPort = stringHostAndPort.split(":");
+    
+    // 兼容Redis4.0
+    String portStr = arrayHostAndPort[1].split("@")[0];
+
     return new HostAndPort(arrayHostAndPort[0].isEmpty() ? current.getHost() : arrayHostAndPort[0],
-        arrayHostAndPort[1].isEmpty() ? current.getPort() : Integer.valueOf(arrayHostAndPort[1]));
+            portStr.isEmpty() ? current.getPort() : Integer.valueOf(portStr));
   }
 
   private void fillSlotInformation(String[] slotInfoPartArray, ClusterNodeInformation info) {
