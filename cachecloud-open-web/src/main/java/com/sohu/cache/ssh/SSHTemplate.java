@@ -40,7 +40,7 @@ public class SSHTemplate {
 			new ThreadFactoryBuilder().setNameFormat("SSH-%d").setDaemon(true).build());
 	
 	public Result execute(String ip, SSHCallback callback) throws SSHException{
-		return execute(ip,ConstUtils.DEFAULT_SSH_PORT_DEFAULT, ConstUtils.USERNAME, 
+		return execute(ip,ConstUtils.SSH_PORT_DEFAULT, ConstUtils.USERNAME,
 				ConstUtils.PASSWORD, callback);
 	}
 	
