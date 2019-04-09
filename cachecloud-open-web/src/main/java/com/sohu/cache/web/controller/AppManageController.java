@@ -646,7 +646,7 @@ public class AppManageController extends BaseController {
      * redisCluster节点删除: forget + shutdown
      * 
      * @param appId 应用id
-     * @param forgetInstanceId 需要被forget的节点
+     * @param delNodeInstanceId 需要被forget的节点
      * @return
      */
     @RequestMapping("/clusterDelNode")
@@ -705,7 +705,7 @@ public class AppManageController extends BaseController {
 			logger.error("error param clusterSlaveFailOver: appId:{}, slaveInstanceId:{}, failoverParam:{}", appId, slaveInstanceId, failoverParam);
 		}
 	    logger.warn("clusterSlaveFailOver: appId:{}, slaveInstanceId:{}, failoverParam:{}, result is {}", appId, slaveInstanceId, failoverParam, success);
-		write(response, String.valueOf(success == true ? SuccessEnum.SUCCESS.value() : SuccessEnum.FAIL.value()));
+		write(response, String.valueOf(success ? SuccessEnum.SUCCESS.value() : SuccessEnum.FAIL.value()));
 	}
 
 	/**
@@ -730,7 +730,7 @@ public class AppManageController extends BaseController {
             }
         } 
         logger.warn("user {} addSlave: appId:{},masterInstanceId:{},slaveHost:{} result is {}", appUser.getName(), appId, masterInstanceId, slaveHost, success);
-        write(response, String.valueOf(success == true ? SuccessEnum.SUCCESS.value() : SuccessEnum.FAIL.value()));
+        write(response, String.valueOf(success ? SuccessEnum.SUCCESS.value() : SuccessEnum.FAIL.value()));
     }
 
     /**
@@ -752,7 +752,7 @@ public class AppManageController extends BaseController {
 			}
 		}
 	    logger.warn("user {} addSentinel: appId:{}, sentinelHost:{} result is {}", appUser.getName(), appId, sentinelHost, success);
-		write(response, String.valueOf(success == true ? SuccessEnum.SUCCESS.value() : SuccessEnum.FAIL.value()));
+		write(response, String.valueOf(success ? SuccessEnum.SUCCESS.value() : SuccessEnum.FAIL.value()));
 	}
 	
 	/**
@@ -799,7 +799,7 @@ public class AppManageController extends BaseController {
 			logger.error("error param, sentinelFailOver: appId:{}", appId);
 		}
 	    logger.warn("user {} sentinelFailOver, appId:{}, result is {}", appUser.getName(), appId, success);
-		write(response, String.valueOf(success == true ? SuccessEnum.SUCCESS.value() : SuccessEnum.FAIL.value()));
+		write(response, String.valueOf(success ? SuccessEnum.SUCCESS.value() : SuccessEnum.FAIL.value()));
 	}
     
     /**
