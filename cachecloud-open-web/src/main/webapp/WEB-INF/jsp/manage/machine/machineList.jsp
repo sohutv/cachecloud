@@ -204,7 +204,7 @@
                                         <td>
                                         	<a href="/server/index.do?ip=${machine.info.ip}" class="btn btn-info" target="_blank">监控</a>
                                         	&nbsp;
-                                            <a href="javascript;" data-target="#addMachineModal${machine.info.id}" class="btn btn-info" data-toggle="modal">修改</a>
+                                            <a href="javascript:void(0);" data-target="#addMachineModal${machine.info.id}" class="btn btn-info" data-toggle="modal">修改</a>
                                             &nbsp;
                                             
                                             <button id="removeMachineBtn${machine.info.id}" onclick="removeMachine(this.id,'${machine.info.ip}')" type="button" class="btn btn-info">删除</button>               
