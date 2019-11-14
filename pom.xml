@@ -26,7 +26,7 @@
         <mybatis.version>3.2.8</mybatis.version>
         <jedis.version>2.8.0</jedis.version>
         <jackson.version>2.9.10.1</jackson.version>
-        <httpcoponents.version>4.3.2</httpcoponents.version>
+        <httpcoponents.version>4.3.6</httpcoponents.version>
         <apache.commons.collections>4.0</apache.commons.collections>
         <maven.compiler.plugin>3.1</maven.compiler.plugin>
         <maven.compiler.target>1.7</maven.compiler.target>
