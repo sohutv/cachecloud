@@ -121,7 +121,13 @@ public class ConstUtils {
      */
     public static String DEFAULT_LDAP_URL = EMPTY;
     public static String LDAP_URL = DEFAULT_LDAP_URL;
-    
+    public static String DEFAULT_LDAP_BASEDN = EMPTY;
+    public static String LDAP_BASEDN = DEFAULT_LDAP_BASEDN;
+    public static String DEFAULT_LDAP_BINDDN = EMPTY;
+    public static String LDAP_BINDDN = DEFAULT_LDAP_BINDDN;
+    public static String DEFAULT_LDAP_BINDDN_PASSWORD = EMPTY;
+    public static String LDAP_BINDDN_PASSWORD = DEFAULT_LDAP_BINDDN_PASSWORD;
+
     /**
      * 登陆邮箱后缀
      */

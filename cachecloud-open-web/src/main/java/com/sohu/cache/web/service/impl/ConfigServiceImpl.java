@@ -159,7 +159,19 @@ public class ConfigServiceImpl implements ConfigService {
         //LDAP登录地址
         ConstUtils.LDAP_URL = MapUtils.getString(configMap, "cachecloud.ldap.url", ConstUtils.DEFAULT_LDAP_URL);
         logger.info("{}: {}", "ConstUtils.LDAP_URL", ConstUtils.LDAP_URL);
-        
+
+        //LDAP BaseDN
+        ConstUtils.LDAP_BASEDN = MapUtils.getString(configMap, "cachecloud.ldap.basedn", ConstUtils.DEFAULT_LDAP_BASEDN);
+        logger.info("{}: {}", "ConstUtils.LDAP_BASEDN", ConstUtils.LDAP_BASEDN);
+
+        //LDAP BindDN
+        ConstUtils.LDAP_BINDDN = MapUtils.getString(configMap, "cachecloud.ldap.binddn", ConstUtils.DEFAULT_LDAP_BINDDN);
+        logger.info("{}: {}", "ConstUtils.LDAP_BINDDN", ConstUtils.LDAP_BINDDN);
+
+        //LDAP BindDN Password
+        ConstUtils.LDAP_BINDDN_PASSWORD = MapUtils.getString(configMap, "cachecloud.ldap.bindpassword", ConstUtils.DEFAULT_LDAP_BINDDN_PASSWORD);
+        logger.info("{}: {}", "ConstUtils.LDAP_BINDDN_PASSWORD", ConstUtils.LDAP_BINDDN_PASSWORD);
+
         //是否定期清理各种统计数据(详见CleanUpStatisticsJob)
         ConstUtils.WHETHER_SCHEDULE_CLEAN_DATA = MapUtils.getBooleanValue(configMap, "cachecloud.whether.schedule.clean.data", ConstUtils.DEFAULT_WHETHER_SCHEDULE_CLEAN_DATA);
         logger.info("{}: {}", "ConstUtils.WHETHER_SCHEDULE_CLEAN_DATA", ConstUtils.WHETHER_SCHEDULE_CLEAN_DATA);
