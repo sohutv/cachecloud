@@ -13,9 +13,8 @@
     * [3.开发计划](#cc7)
     * [4.已存在Redis接入CacheCloud](#cc7)
     * [5.迁移工具](#cc7)
-* [八、CacheCloud开发计划TODO LIST](#cc8)
-* [九、CacheCloud已知用户](#cc9)
-* [十、Redis开发与运维图书](#cc10)
+* [八、CacheCloud已知用户](#cc8)
+* [九、Redis开发与运维图书](#cc9)
 
 <a name="cc1"/>
 
@@ -115,26 +114,20 @@
 
 <a name="cc8"/>
 
-## 八、开发计划-TODO LIST
-
-[后期开发计划](http://cachecloud.github.io/2016/04/17/v2%E8%AE%A1%E5%88%92/)
-
-<a name="cc9"/>
-
-## 九、已知用户
+## 八、已知用户
 
 ![](http://i0.itc.cn/20170315/3084_f3e50a44_c732_9ac2_e117_90759d8e406b_1.png)
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;除此之外，还有天津联怡科技有限公司、瑞友科技、厦门美好出行物联网技术有限公司、北京九瑞网络科技有限公司、深圳市深软信息技术有限公司、欧乐在线科技有限公司、慧科教育、上海仁画信息股份有限公司等。
 
-<a name="cc10"/>
+<a name="cc9"/>
 
-## 十、图书
+## 九、图书
 由CacheCloud团队撰写的实体书《Redis开发与运维》(机械工业出版)已在各大网店售卖，本书包含了CacheCloud团队在Redis规模化开发运维大量经验，以及Cachecloud更为系统的介绍，[目录介绍和购买地址](https://cachecloud.github.io/2016/10/24/Redis3%E5%BC%80%E5%8F%91%E8%BF%90%E7%BB%B4%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5-%E7%9B%AE%E5%BD%95/)，欢迎大家指教和购买。
 
 ### 相关样章
 
-1.[Redis架构之防雪崩设计：网站不宕机背后的兵法](https://mp.weixin.qq.com/s/TBCEwLVAXdsTszRVpXhVug)
+1.[Redis架构之防雪崩设计](https://mp.weixin.qq.com/s/TBCEwLVAXdsTszRVpXhVug)
 
 2.[Redis的内存优化](https://cachecloud.github.io/2017/02/16/Redis%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96/)
 
