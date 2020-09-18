@@ -16,9 +16,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.version>4.2.4.RELEASE</spring.version>
-        <quartz.version>2.2.1</quartz.version>
+        <quartz.version>2.3.2</quartz.version>
         <logback.version>1.1.1</logback.version>
-        <mysql.java.version>5.1.29</mysql.java.version>
+        <mysql.java.version>8.0.16</mysql.java.version>
         <junit.version>4.11</junit.version>
         <servlet.api.version>3.1</servlet.api.version>
         <jetty.version>9.2.3.v20140905</jetty.version>
@@ -26,8 +26,8 @@
         <mybatis.version>3.2.8</mybatis.version>
         <jedis.version>2.8.0</jedis.version>
         <jackson.version>2.9.10.1</jackson.version>
-        <httpcoponents.version>4.3.2</httpcoponents.version>
-        <apache.commons.collections>4.0</apache.commons.collections>
+        <httpcoponents.version>4.3.6</httpcoponents.version>
+        <apache.commons.collections>4.1</apache.commons.collections>
         <maven.compiler.plugin>3.1</maven.compiler.plugin>
         <maven.compiler.target>1.7</maven.compiler.target>
         <maven.war.plugin>2.4</maven.war.plugin>
@@ -143,7 +143,7 @@
                 <artifactId>commons-collections4</artifactId>
                 <version>${apache.commons.collections}</version>
             </dependency>
-            
+
             <dependency>
 			    <groupId>commons-io</groupId>
 			    <artifactId>commons-io</artifactId>
@@ -155,13 +155,13 @@
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
             </dependency>
-            
+
             <dependency>
 				<groupId>commons-lang</groupId>
 				<artifactId>commons-lang</artifactId>
 				<version>${commons-lang.version}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>net.sf.json-lib</groupId>
 				<artifactId>json-lib</artifactId>
@@ -201,7 +201,7 @@
 			  <artifactId>fastjson</artifactId>
 			  <version>${fastjson.version}</version>
 			</dependency>
-            
+
         </dependencies>
     </dependencyManagement>
 
@@ -285,13 +285,13 @@
                         </filesets>
                     </configuration>
                 </plugin>
-                
+
                 <plugin>
 	            	<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-deploy-plugin</artifactId>
 					<version>${maven.deloy.plugin}</version>
 				</plugin>
-				
+
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
@@ -308,7 +308,7 @@
 						</execution>
 					</executions>
 				</plugin>
-				
+
 				<plugin>
 	                <groupId>org.apache.maven.plugins</groupId>
 	                <artifactId>maven-resources-plugin</artifactId>
@@ -317,11 +317,11 @@
 	                    <encoding>UTF-8</encoding>
 	                </configuration>
 	            </plugin>
-                
+
             </plugins>
         </pluginManagement>
     </build>
-    
+
 	<repositories>
 	<repository>
 		<id>central</id>
@@ -350,7 +350,7 @@
 		</snapshots>
 	</repository>
 
-</repositories>  
-    
+</repositories>
+
 
 </project>
