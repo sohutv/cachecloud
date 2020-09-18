@@ -325,7 +325,7 @@
 	<repositories>
 	<repository>
 		<id>central</id>
-		<url>http://repo1.maven.org/maven2</url>
+		<url>https://repo1.maven.org/maven2</url>
 		<snapshots>
 			<enabled>false</enabled>
 		</snapshots>
@@ -333,7 +333,7 @@
 
 	<repository>
 		<id>com.springsource.repository.maven.release</id>
-		<url>http://repo.springsource.org/release/</url>
+		<url>https://repo.springsource.org/release/</url>
 		<snapshots>
 			<enabled>false</enabled>
 		</snapshots>
@@ -341,7 +341,7 @@
 	<repository>
 		<id>nexus</id>
 		<name>local private nexus</name>
-		<url>http://maven.oschina.net/content/groups/public/</url>
+		<url>https://maven.oschina.net/content/groups/public/</url>
 		<releases>
 			<enabled>true</enabled>
 		</releases>
