@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.TaskStepMetaDao">
+
+    <sql id="task_step_meta_columns">
+    	class_name, step_name, step_desc, ops_device,
+    	timeout, order_no, create_time, update_time
+    </sql>
+    
+    <sql id="task_step_meta_fields">
+    	#{className}, #{stepName}, #{stepDesc}, #{opsDevice},
+    	#{timeout}, #{orderNo}, #{createTime}, #{updateTime}
+    </sql>
+
+    <insert id="save" parameterType="TaskStepMeta" keyProperty="id" useGeneratedKeys="true">
+        insert into task_step_meta
+        	(<include refid="task_step_meta_columns"/>)
+        values
+        	(<include refid="task_step_meta_fields"/>)
+    </insert>
+    
+    <select id="getTaskStepMetaList" resultType="TaskStepMeta">
+        select id,<include refid="task_step_meta_columns"/>
+        from task_step_meta
+        where class_name = #{className}
+    </select>
+    
+</mapper>

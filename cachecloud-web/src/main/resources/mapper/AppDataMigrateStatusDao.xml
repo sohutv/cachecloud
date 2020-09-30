@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sohu.cache.dao.AppDataMigrateStatusDao">
+    <sql id="migrate_data_status_fields">
+        migrate_id,migrate_tool,migrate_machine_ip,migrate_machine_port,source_migrate_type,source_servers,target_migrate_type,target_servers,
+        source_app_id,target_app_id,redis_source_version,redis_target_version,
+        user_id,status,start_time,end_time,log_path,config_path
+    </sql>
+
+    <insert id="save" parameterType="AppDataMigrateStatus" keyProperty="id" useGeneratedKeys="true">
+        insert into app_data_migrate_status
+        (<include refid="migrate_data_status_fields"/>)
+        values
+        (#{migrateId},#{migrateTool},#{migrateMachineIp},#{migrateMachinePort},#{sourceMigrateType},#{sourceServers},#{targetMigrateType},#{targetServers},
+        #{sourceAppId},#{targetAppId},#{redisSourceVersion},#{redisTargetVersion},
+        #{userId},#{status},#{startTime},#{endTime},#{logPath},#{configPath})
+    </insert>
+
+    <select id="getMigrateTaskCount" resultType="int">
+        select count(*)
+        from app_data_migrate_status where 1=1
+        <choose>
+            <when test="appDataMigrateSearch.sourceAppId != null and appDataMigrateSearch.sourceAppId > 0">
+                and source_app_id = #{appDataMigrateSearch.sourceAppId}
+            </when>
+        </choose>
+        <choose>
+            <when test="appDataMigrateSearch.targetAppId != null and appDataMigrateSearch.targetAppId > 0">
+                and target_app_id = #{appDataMigrateSearch.targetAppId}
+            </when>
+        </choose>
+
+        <choose>
+            <when test="appDataMigrateSearch.sourceInstanceIp != null and appDataMigrateSearch.sourceInstanceIp != ''">
+                and source_servers like '%${appDataMigrateSearch.sourceInstanceIp}%'
+            </when>
+        </choose>
+        <choose>
+            <when test="appDataMigrateSearch.targetInstanceIp != null and appDataMigrateSearch.targetInstanceIp != ''">
+                and target_servers like '%${appDataMigrateSearch.targetInstanceIp}%'
+            </when>
+        </choose>
+
+        <choose>
+            <when test="appDataMigrateSearch.startDate != null and appDataMigrateSearch.startDate != ''">
+                and start_time > #{appDataMigrateSearch.startDate}
+            </when>
+        </choose>
+        <choose>
+            <when test="appDataMigrateSearch.endDate != null and appDataMigrateSearch.endDate != ''">
+                and end_time &lt;#{appDataMigrateSearch.endDate}
+            </when>
+        </choose>
+        <choose>
+            <when test="appDataMigrateSearch.status >= 0">
+                and status = #{appDataMigrateSearch.status}
+            </when>
+        </choose>
+        <choose>
+            <when test="appDataMigrateSearch.migrateMachine != null and appDataMigrateSearch.migrateMachine != ''">
+                and migrate_machine_ip = #{appDataMigrateSearch.migrateMachine}
+            </when>
+        </choose>
+        <choose>
+            <when test="appDataMigrateSearch.userId != null and appDataMigrateSearch.userId>0">
+                and user_id = #{appDataMigrateSearch.userId}
+            </when>
+        </choose>
+    </select>
+
+    <select id="search" resultType="AppDataMigrateStatus">
+        select app_data_migrate_status.id,<include refid="migrate_data_status_fields"/>,app_user.ch_name as user_name
+        from app_data_migrate_status, app_user where 1=1 and app_data_migrate_status.user_id=app_user.id
+        <choose>
+            <when test="appDataMigrateSearch.sourceAppId != null and appDataMigrateSearch.sourceAppId > 0">
+                and source_app_id = #{appDataMigrateSearch.sourceAppId}
+            </when>
+        </choose>
+        <choose>
+            <when test="appDataMigrateSearch.targetAppId != null and appDataMigrateSearch.targetAppId > 0">
+                and target_app_id = #{appDataMigrateSearch.targetAppId}
+            </when>
+        </choose>
+
+        <choose>
+            <when test="appDataMigrateSearch.sourceInstanceIp != null and appDataMigrateSearch.sourceInstanceIp != ''">
+                and source_servers like '%${appDataMigrateSearch.sourceInstanceIp}%'
+            </when>
+        </choose>
+        <choose>
+            <when test="appDataMigrateSearch.targetInstanceIp != null and appDataMigrateSearch.targetInstanceIp != ''">
+                and target_servers like '%${appDataMigrateSearch.targetInstanceIp}%'
+            </when>
+        </choose>
+
+        <choose>
+            <when test="appDataMigrateSearch.startDate != null and appDataMigrateSearch.startDate != ''">
+                and start_time > #{appDataMigrateSearch.startDate}
+            </when>
+        </choose>
+        <choose>
+            <when test="appDataMigrateSearch.endDate != null and appDataMigrateSearch.endDate != ''">
+                and end_time &lt;#{appDataMigrateSearch.endDate}
+            </when>
+        </choose>
+        <choose>
+            <when test="appDataMigrateSearch.status >= 0">
+                and status = #{appDataMigrateSearch.status}
+            </when>
+        </choose>
+        <choose>
+            <when test="appDataMigrateSearch.migrateMachine != null and appDataMigrateSearch.migrateMachine != ''">
+                and migrate_machine_ip = #{appDataMigrateSearch.migrateMachine}
+            </when>
+        </choose>
+        <choose>
+            <when test="appDataMigrateSearch.userId != null and appDataMigrateSearch.userId >0">
+                and user_id = #{appDataMigrateSearch.userId}
+            </when>
+        </choose>
+        order by start_time desc
+        <choose>
+            <when test="appDataMigrateSearch.page != null">
+                <choose>
+                    <when test="appDataMigrateSearch.page.totalCount > appDataMigrateSearch.page.pageSize">
+                        limit #{appDataMigrateSearch.page.start},#{appDataMigrateSearch.page.pageSize}
+                    </when>
+                    <otherwise>
+                        limit #{appDataMigrateSearch.page.totalCount}
+                    </otherwise>
+                </choose>
+            </when>
+        </choose>
+    </select>
+
+    <select id="get" resultType="AppDataMigrateStatus">
+        select id,
+        <include refid="migrate_data_status_fields"/>
+        from app_data_migrate_status where id = #{id}
+    </select>
+
+    <update id="updateStatus">
+    	update app_data_migrate_status set status = #{status}, end_time=now() where id = #{id}
+    </update>
+
+    <select id="getAllOnMigrateId" resultType="long">
+        select id from app_data_migrate_status where status !=1;
+    </select>
+
+</mapper>
+
+

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                     http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                     http://www.springframework.org/schema/context
+                     http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <bean id="cacheCloudDB" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
+        <property name="driverClassName" value="${cachecloud.jdbc.driver}" />
+        <property name="jdbcUrl" value="${cachecloud.primary.url}" />
+        <property name="username" value="${cachecloud.primary.user}" />
+        <property name="password" value="${cachecloud.primary.password}" />
+        <property name="maximumPoolSize" value="${cachecloud.primary.maxPoolSize}" />
+        <property name="minimumIdle" value="${cachecloud.primary.initialPoolSize}" />
+        <property name="connectionTimeout" value="60000" />
+        <property name="idleTimeout" value="600000" />
+    </bean>
+
+    <bean id="mysqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean" primary="true">
+        <property name="dataSource" ref="cacheCloudDB"/>
+        <!-- mybatis配置文件的位置 -->
+        <property name="configLocation" value="classpath:mybatis-config.xml"/>
+        <!-- domain的包路径，类似MyBatis的typeAliases配置 -->
+        <property name="vfs" value="org.mybatis.spring.boot.autoconfigure.SpringBootVFS"/>
+        <property name="typeAliasesPackage" value="com.sohu.cache.entity,com.sohu.cache.task.entity"/>
+        <!-- mapper配置文件的路径，类似MyBatis的mappers配置 -->
+        <property name="mapperLocations" value="classpath:mapper/*.xml"/>
+    </bean>
+
+    <!-- 扫描接口类的包路径 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="mysqlSessionFactory"/>
+        <property name="basePackage" value="com.sohu.cache.dao"/>
+    </bean>
+
+</beans>

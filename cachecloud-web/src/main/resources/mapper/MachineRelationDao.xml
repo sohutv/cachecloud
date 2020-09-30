@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.MachineRelationDao">
+
+    <sql id="columns">
+        ip,real_ip,update_time,status,extra_desc
+    </sql>
+
+    <insert id="saveOrUpdateMachineRelation" parameterType="MachineRelation" keyProperty="id" useGeneratedKeys="true">
+        insert into machine_relation(<include refid="columns"/>)
+        values(#{ip},#{realIp},#{updateTime},#{status},#{extraDesc})
+        on duplicate key
+        update ip=#{ip},real_ip=#{realIp},update_time=#{updateTime},status=#{status},extra_desc=#{extraDesc}
+    </insert>
+
+    <update id="updateMachineRelation">
+        update machine_relation set taskid = #{taskid}, is_sync= #{is_sync} where id = #{id}
+    </update>
+
+    <select id="getRelationList" resultType="MachineRelation">
+        select * from machine_relation
+        <choose>
+            <when test="ip != '' and ip != null">
+                where ip = #{ip}
+            </when>
+        </choose>
+        ORDER BY ip,update_time DESC
+    </select>
+
+    <select id="getOnlinePodList" resultType="MachineRelation">
+        select * from machine_relation where 1 = 1 and status = #{status}
+        <choose>
+            <when test="ip != '' and ip != null">
+                and ip = #{ip}
+            </when>
+        </choose>
+        ORDER BY ip,update_time DESC
+    </select>
+
+    <select id="getUnSyncRelationList" resultType="MachineRelation">
+        select * from machine_relation where ip = #{ip} and real_ip= #{real_ip} and is_sync in (0,-1)
+    </select>
+
+    <update id="updateMachineSyncStatus">
+        update machine_relation set is_sync=#{is_sync},sync_time=now() where id = #{id}
+    </update>
+    
+    <select id="getMachineSyncStatus" resultType="MachineRelation">
+        select * from machine_relation where ip = #{ip} and real_ip= #{real_ip} and is_sync = #{is_sync}
+    </select>
+    
+</mapper>

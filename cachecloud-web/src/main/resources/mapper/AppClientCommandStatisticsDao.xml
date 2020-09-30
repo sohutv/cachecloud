@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.AppClientCommandStatisticsDao">
+    <sql id="columns">
+		app_id,current_min,client_ip,command,cost,count,bytes_in,bytes_out
+	</sql>
+
+    <insert id="batchSave">
+        insert ignore into app_client_command_minute_statistics (<include refid="columns"/>)
+        values
+        <foreach collection="list" item="clientException" separator=",">
+            (#{clientException.appId},#{clientException.currentMin},#{clientException.clientIp},
+            #{clientException.command},#{clientException.cost},#{clientException.count},#{clientException.bytesIn},#{clientException.bytesOut})
+        </foreach>
+    </insert>
+
+    <select id="getAppDistinctCommand" resultType="string">
+   		select command from app_client_command_minute_statistics where app_id=#{appId} and current_min between #{startTime} and #{endTime} group by command order by sum(count) desc;
+    </select>
+
+    <select id="getAppDistinctClients" resultType="string">
+   		select distinct client_ip from app_client_command_minute_statistics where app_id=#{appId} and current_min between #{startTime} and #{endTime};
+    </select>
+
+    <select id="getAppCommandStatistics" resultType="hashmap">
+        select
+        app_id,current_min,UNIX_TIMESTAMP(current_min) timestamp,client_ip,command,sum(cost)/sum(count) cost,sum(count)
+        count,sum(bytes_in) bytes_in,sum(bytes_out) bytes_out
+        from app_client_command_minute_statistics
+        where app_id=#{appId} and current_min between #{startTime} and #{endTime}
+        <choose>
+            <when test="command != null and command != ''">
+                and command=#{command}
+            </when>
+        </choose>
+        <choose>
+            <when test="clientIp != null and clientIp != ''">
+                and client_ip=#{clientIp}
+            </when>
+        </choose>
+        group by client_ip,current_min
+        order by current_min asc
+    </select>
+
+    <select id="getAppClientCmdStat" resultType="AppClientStatisticGather">
+        select app_id, sum(count) as cmd_count, SUM(cost)/sum(count) as avg_cmd_cost, DATE_FORMAT(current_min,'%Y-%m-%d') gather_time
+        from app_client_command_minute_statistics
+        where current_min between #{startTime} and #{endTime}
+        group by app_id
+    </select>
+
+    <select id="getSumCmdStatByCmd" resultType="hashmap">
+        select app_id,client_ip,sum(count) count,sum(cost)/sum(count) cost
+        from app_client_command_minute_statistics
+        where app_id=#{appId}
+        <choose>
+            <when test="command != null and command != 'all' and command != ''">
+                and command=#{command}
+            </when>
+        </choose>
+        and current_min between #{startTime} and #{endTime}
+        group by client_ip
+    </select>
+
+    <select id="getSumCmdStatByClient" resultType="hashmap">
+        select app_id,command,sum(count) count,sum(cost)/sum(count) cost
+        from app_client_command_minute_statistics
+        where app_id=#{appId}
+        <choose>
+            <when test="clientIp != null and clientIp != 'all' and clientIp != ''">
+                and client_ip=#{clientIp}
+            </when>
+        </choose>
+        and current_min between #{startTime} and #{endTime}
+        group by command
+    </select>
+
+    <delete id="cleanCommandStatisticsBeforeCurrentMin">
+        delete from app_client_command_minute_statistics
+        where current_min &lt;#{currentMin}
+    </delete>
+
+</mapper>

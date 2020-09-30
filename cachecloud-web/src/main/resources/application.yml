@@ -1,0 +1,49 @@
+spring:
+  profiles:
+    active: local
+  mvc:
+    servlet:
+      load-on-startup: 1
+    view:
+      prefix: /WEB-INF/jsp/
+      suffix: .jsp
+    freemarker:
+      expose-request-attributes: true
+      request-context-attribute: request
+      suffix: .jsp
+      settings:
+        number_format: computer
+    log-resolved-exception: true
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+cachecloud:
+  jdbc:
+    driver: com.mysql.jdbc.Driver
+    validationQuery: select 1 from dual
+management:
+  security:
+    enabled: false
+  port: 8888
+  context-path: /actuator
+#关闭不安全控制endpoints
+endpoints:
+  shutdown:
+    enabled: false
+  restart:
+    enabled: false
+  pause:
+    enabled: false
+  heapdump:
+    enabled: false
+  refresh:
+    enabled: false
+  auditevents:
+    enabled: false
+  jolokia:
+    enabled: false
+  env:
+    post:
+      enabled: false

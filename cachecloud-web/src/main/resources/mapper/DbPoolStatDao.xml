@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sohu.cache.dao.DbPoolStatDao">
+    <sql id="db_pool_columns">
+        db_pool_name, ip, port, collect_time, collect_date, max_size,
+        min_size, busy_size, idle_size, total_size, create_time, update_time
+    </sql>
+    
+    <sql id="db_pool_fields">
+        #{dbPoolName}, #{ip}, #{port}, #{collectTime}, #{collectDate}, #{maxSize}, 
+        #{minSize}, #{busySize}, #{idleSize}, #{totalSize}, #{createTime}, #{updateTime}
+    </sql>
+
+    <insert id="save" parameterType="DbPoolStat" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
+        insert into db_pool_stat (<include refid="db_pool_columns"/>)
+        value(<include refid="db_pool_fields"/>);
+    </insert>
+    
+</mapper>
+
+

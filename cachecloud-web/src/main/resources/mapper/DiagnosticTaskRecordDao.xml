@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.DiagnosticTaskRecordDao">
+    <sql id="columns">
+    	app_id,type,task_id,parent_task_id,audit_id,status,cost,redis_key,node,diagnostic_condition,param1,param2
+    </sql>
+
+    <insert id="insertDiagnosticTaskRecord" parameterType="com.sohu.cache.entity.DiagnosticTaskRecord" keyProperty="id"
+            useGeneratedKeys="true">
+        insert into diagnostic_task_record (<include refid="columns"/>)
+        values(#{appId},#{type},#{taskId},#{parentTaskId},#{auditId},#{status},#{cost},#{redisKey},#{node},#{diagnosticCondition},#{param1},#{param2})
+    </insert>
+
+    <update id="updateDiagnosticStatus">
+        update diagnostic_task_record
+        set redis_key = #{redisKey},status = #{status}, cost = #{cost}
+        where id=#{id}
+    </update>
+
+    <select id="getDiagnosticTaskRecords" resultType="DiagnosticTaskRecord">
+        select *,concat(concat(cost div 60000, 'm:'), concat(cost mod 60000 div 1000 , 's:'), concat(cost mod 1000, 'ms')) as format_cost_time
+        from diagnostic_task_record
+        where 1=1
+        <choose>
+            <when test="appId != null and appId > 0">
+                and app_id = #{appId}
+            </when>
+        </choose>
+        <choose>
+            <when test="parentTaskId != null and parentTaskId > 0">
+                and parent_task_id = #{parentTaskId}
+            </when>
+        </choose>
+        <choose>
+            <when test="auditId != null and auditId > 0">
+                and audit_id = #{auditId}
+            </when>
+        </choose>
+        <choose>
+            <when test="type != null and type > -1">
+                and type = #{type}
+            </when>
+        </choose>
+        <choose>
+            <when test="status != null and status > -1">
+                and status = #{status}
+            </when>
+        </choose>
+        order by create_time desc
+    </select>
+</mapper>

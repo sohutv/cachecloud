@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.MachineDao">
+    <sql id="machine_info_columns">
+        ssh_user,ssh_passwd,ip,room,mem,cpu,`virtual`,real_ip,service_time,fault_count,warn,available,type,groupId,extra_desc,collect,version_install,use_type,k8s_type,rack,disk
+    </sql>
+
+    <sql id="machine_men_stat_info_columns">
+        ip,mem,cpu,use_type,room,real_ip,rack
+    </sql>
+
+    <sql id="machine_info_fields">
+        #{sshUser},#{sshPasswd},#{ip},#{room},#{mem},#{cpu},#{virtual},#{realIp},#{serviceTime},
+        #{faultCount},#{warn},#{available},#{type},#{groupId},#{extraDesc},#{collect},#{versionInstall},#{useType},#{k8sType},#{rack},#{disk}
+    </sql>
+
+    <!--返回所有可用的机器资源-->
+    <select id="getAllMachines" resultType="MachineInfo">
+        select
+        id, modify_time, <include refid="machine_info_columns"/>
+        from machine_info
+        where available = 1
+    </select>
+
+    <!--通过ip查找机器-->
+    <select id="getMachineInfoByIp" resultType="MachineInfo">
+        select
+          id, modify_time, <include refid="machine_info_columns"/>
+        from machine_info
+        where ip = #{ip};
+    </select>
+
+    <!--通过ip查找机器-->
+    <select id="getMachineInfoByLikeIp" resultType="MachineInfo">
+        select
+          id, modify_time, <include refid="machine_info_columns"/>
+        from machine_info where available = 1
+        <choose>
+            <when test="ipLike != '' and ipLike != null">
+                and ip like '%${ipLike}%'
+            </when>
+        </choose>
+    </select>
+
+    <!--通过ip查找机器-->
+    <select id="getMachineInfoByCondition" resultType="MachineInfo">
+        select
+        id, modify_time, <include refid="machine_info_columns"/>
+        from machine_info where available = 1
+        <choose>
+            <when test="ipLike != '' and ipLike != null">
+                and ip like '%${ipLike}%'
+            </when>
+        </choose>
+        <choose>
+            <when test="useType != '-1'.toString() and useType != null">
+                and use_type = #{useType}
+            </when>
+        </choose>
+        <choose>
+            <when test="type != '-1'.toString() and type != null">
+                and type = #{type}
+            </when>
+        </choose>
+        <choose>
+            <when test="versionStr != '' and versionStr != null">
+                and version_install like '%${versionStr}%'
+            </when>
+        </choose>
+        <choose>
+            <when test="k8sType != '-1'.toString() and k8sType != null">
+                and k8s_type = #{k8sType}
+            </when>
+        </choose>
+        <choose>
+            <when test="realip != '' and realip != null">
+                and real_ip = #{realip}
+            </when>
+        </choose>
+    </select>
+
+    <!--通过ip real_ip查找机器-->
+    <select id="existk8sMachine" resultType="MachineInfo">
+        select
+        id, modify_time, <include refid="machine_info_columns"/>
+        from machine_info where ip = #{ip} and k8s_type=1
+    </select>
+
+    <select id="getK8sMachineList" resultType="MachineInfo">
+        select
+        id, modify_time, <include refid="machine_info_columns"/>
+        from machine_info where available = 1 and k8s_type=1
+    </select>
+
+    <!--通过room和useType查找机器-->
+    <select id="getMachineMemStatInfoByCondition" resultType="MachineMemStatInfo">
+        select
+        id, <include refid="machine_men_stat_info_columns"/>
+        from machine_info where available = 1
+        <choose>
+            <when test="room != null">
+                and room like '%${room}%'
+            </when>
+        </choose>
+        <choose>
+            <when test="useType != '' and useType != null">
+                and use_type = #{useType}
+            </when>
+        </choose>
+    </select>
+
+    <select id="getMachineMemStatInfoByIp" resultType="MachineMemStatInfo">
+        select
+        id, <include refid="machine_men_stat_info_columns"/>
+        from machine_info where available = 1
+        where ip = #{ip};
+    </select>
+
+    <select id="getMachineMemStatInfoByIpList" resultType="MachineMemStatInfo" parameterType="java.util.List">
+        select
+        id, <include refid="machine_men_stat_info_columns"/>
+        from machine_info where available = 1
+        and ip IN
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+        #{item}
+        </foreach>
+    </select>
+
+    <!--保存机器信息-->
+    <insert id="saveMachineInfo" parameterType="MachineInfo">
+        insert into machine_info
+          (<include refid="machine_info_columns"/>)
+        values
+          (<include refid="machine_info_fields"/>)
+        on duplicate key
+        update ssh_user=#{sshUser},ssh_passwd=#{sshPasswd},room=#{room},mem=#{mem},cpu=#{cpu},disk=#{disk},
+        `virtual`=#{virtual},real_ip=#{realIp},service_time=#{serviceTime},fault_count=#{faultCount},
+        warn=#{warn},available=#{available},type=#{type},groupId=#{groupId},extra_desc=#{extraDesc},collect=#{collect},version_install=#{versionInstall},
+        use_type=#{useType},k8s_type=#{k8sType},rack=#{rack}
+    </insert>
+
+    <!--根据ip删除一台机器的信息:置无效-->
+    <update id="removeMachineInfoByIp" parameterType="string">
+        update machine_info set available = 0 WHERE ip = #{ip}
+    </update>
+
+    <!--根据ip更新物理机ip-->
+    <update id="updateMachineRealIpByIp" parameterType="string">
+        update machine_info set real_ip = #{real_ip} WHERE ip = #{ip}
+    </update>
+
+    <!--通过type查找机器-->
+    <select id="getMachineInfoByType" resultType="MachineInfo">
+        select
+          id, modify_time, <include refid="machine_info_columns"/>
+        from machine_info where type = #{type} and available = 1
+    </select>
+
+    <!-- 更新机器类型 -->
+    <update id="updateMachineType">
+    	update machine_info set type = #{type} where id = #{id}
+    </update>
+
+    <select id="getTotalMachineMem" resultType="hashmap">
+        SELECT sum(memory_total)/1024/1024/1024 machineTotal,sum(memory_free)/1024/1024/1024 machineFreeTotal from  machine_statistics ;
+    </select>
+
+    <select id="getRoomStat" resultType="hashmap">
+        SELECT room as name,count(room) as num from machine_info where available=1 group by room;
+    </select>
+
+    <update id="updateMachineAllocate">
+    	update machine_info set is_allocating = #{status} where ip = #{ip}
+    </update>
+
+</mapper>

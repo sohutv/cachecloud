@@ -1,57 +1,109 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.sohu.tv</groupId>
-    <artifactId>cachecloud-open-parent</artifactId>
-    <name>cachecloud-open-parent</name>
+    <artifactId>cachecloud-parent</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <modules>
-        <module>cachecloud-open-web</module>
-        <module>cachecloud-open-client</module>
-        <module>cachecloud-open-common</module>
+        <module>cachecloud-web</module>
+        <module>cachecloud-client</module>
+        <module>cachecloud-custom</module>
     </modules>
 
     <properties>
+        <spring.boot.version>1.5.7.RELEASE</spring.boot.version>
+        <spring.cloud.version>Dalston.SR4</spring.cloud.version>
+        <spring.version>4.3.11.RELEASE</spring.version>
+        <logback.version>1.1.11</logback.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.version>4.2.4.RELEASE</spring.version>
-        <quartz.version>2.3.2</quartz.version>
-        <logback.version>1.1.1</logback.version>
+        <quartz.version>2.2.1</quartz.version>
         <mysql.java.version>8.0.16</mysql.java.version>
-        <junit.version>4.11</junit.version>
-        <servlet.api.version>3.1</servlet.api.version>
-        <jetty.version>9.2.3.v20140905</jetty.version>
-        <mybatis.spring.version>1.2.3</mybatis.spring.version>
-        <mybatis.version>3.2.8</mybatis.version>
-        <jedis.version>2.8.0</jedis.version>
-        <jackson.version>2.9.10.1</jackson.version>
-        <httpcoponents.version>4.3.6</httpcoponents.version>
-        <apache.commons.collections>4.1</apache.commons.collections>
+        <druid-version>1.1.3</druid-version>
+        <mybatis-spring-boot.version>1.3.1</mybatis-spring-boot.version>
+        <junit.version>4.12</junit.version>
+        <jedis.version>3.1.0-CC-4-RELEASE</jedis.version>
+        <jackson.version>2.3.2</jackson.version>
+        <httpcoponents.version>4.3.2</httpcoponents.version>
+        <apache.commons.collections>4.0</apache.commons.collections>
         <maven.compiler.plugin>3.1</maven.compiler.plugin>
-        <maven.compiler.target>1.7</maven.compiler.target>
-        <maven.war.plugin>2.4</maven.war.plugin>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <maven.surefire.plugin>2.16</maven.surefire.plugin>
         <maven.clean.plugin>2.5</maven.clean.plugin>
         <ganymed.ssh.version>build210</ganymed.ssh.version>
+        <sshj.version>0.26.0</sshj.version>
         <commons.collections.version>3.2.1</commons.collections.version>
-        <commons.io.version>2.4</commons.io.version>
-        <guava.version>15.0</guava.version>
-        <commons-lang.version>2.3</commons-lang.version>
-        <json-lib.version>2.2.1</json-lib.version>
+        <guava.version>20.0</guava.version>
+        <janino.version>3.0.6</janino.version>
+        <commons-lang.version>3.8.1</commons-lang.version>
+        <json-lib.version>2.4</json-lib.version>
         <slf4j.version>1.7.6</slf4j.version>
         <commons.configuration.version>1.6</commons.configuration.version>
         <velocity.version>1.7</velocity.version>
         <velocity-tool.version>2.0</velocity-tool.version>
-        <velocity-tools-generic.version>2.1.0-SNAPSHOT</velocity-tools-generic.version>
+        <velocity-tools-generic.version>3.0</velocity-tools-generic.version>
+        <poi-ooxml.version>3.15-beta2</poi-ooxml.version>
+        <swagger-starter.version>1.0.3-SNAPSHOT</swagger-starter.version>
+        <flexmark.version>0.42.12</flexmark.version>
         <fastjson.version>1.2.70</fastjson.version>
+        <hystrix.version>1.5.6</hystrix.version>
         <maven.deloy.plugin>2.8.1</maven.deloy.plugin>
         <maven-source-plugin>2.2.1</maven-source-plugin>
         <maven-resources-plugin>2.6</maven-resources-plugin>
+        <logstash-logback-encoder.version>5.3</logstash-logback-encoder.version>
+        <!-- open -->
+        <cachecloud-cloud.version>1.0-SNAPSHOT</cachecloud-cloud.version>
+        <springfox-swagger2.version>2.9.2</springfox-swagger2.version>
+        <swagger-ui.version>2.9.2</swagger-ui.version>
+        <!-- sohutv dependencies -->
+        <cloud-metrics.version>3.4.0-RELEASE</cloud-metrics.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <!--spring-->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-core</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context-support</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-web</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-webmvc</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-jdbc</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-orm</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-test</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <!--spring end-->
+
             <dependency>
                 <groupId>org.quartz-scheduler</groupId>
                 <artifactId>quartz</artifactId>
@@ -90,39 +142,9 @@
             </dependency>
 
             <dependency>
-                <groupId>org.mybatis</groupId>
-                <artifactId>mybatis-spring</artifactId>
-                <version>${mybatis.spring.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.mybatis</groupId>
-                <artifactId>mybatis</artifactId>
-                <version>${mybatis.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-context-support</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.mybatis.spring.boot</groupId>
-                <artifactId>mybatis-spring-boot-starter</artifactId>
-                <version>${mybatis-spring-boot.version}</version>
-            </dependency>
-
-            <dependency>
                 <groupId>redis.clients</groupId>
                 <artifactId>jedis</artifactId>
                 <version>${jedis.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson.version}</version>
             </dependency>
 
             <dependency>
@@ -138,17 +160,18 @@
                 <version>${ganymed.ssh.version}</version>
             </dependency>
 
+            <!-- ssh -->
+            <dependency>
+                <groupId>com.hierynomus</groupId>
+                <artifactId>sshj</artifactId>
+                <version>${sshj.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-collections4</artifactId>
                 <version>${apache.commons.collections}</version>
             </dependency>
-
-            <dependency>
-			    <groupId>commons-io</groupId>
-			    <artifactId>commons-io</artifactId>
-			    <version>${commons.io.version}</version>
-			</dependency>
 
             <dependency>
                 <groupId>com.google.guava</groupId>
@@ -157,16 +180,17 @@
             </dependency>
 
             <dependency>
-				<groupId>commons-lang</groupId>
-				<artifactId>commons-lang</artifactId>
-				<version>${commons-lang.version}</version>
-			</dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang.version}</version>
+            </dependency>
 
-			<dependency>
-				<groupId>net.sf.json-lib</groupId>
-				<artifactId>json-lib</artifactId>
-				<version>${json-lib.version}</version>
-			</dependency>
+            <dependency>
+                <groupId>net.sf.json-lib</groupId>
+                <artifactId>json-lib</artifactId>
+                <version>${json-lib.version}</version>
+                <classifier>jdk15</classifier>
+            </dependency>
 
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -191,67 +215,87 @@
                 <version>${velocity-tool.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.velocity</groupId>
+                <groupId>org.apache.velocity.tools</groupId>
                 <artifactId>velocity-tools-generic</artifactId>
                 <version>${velocity-tools-generic.version}</version>
             </dependency>
 
             <dependency>
-			  <groupId>com.alibaba</groupId>
-			  <artifactId>fastjson</artifactId>
-			  <version>${fastjson.version}</version>
-			</dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.netflix.hystrix</groupId>
+                <artifactId>hystrix-core</artifactId>
+                <version>${hystrix.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.codehaus.janino</groupId>
+                <artifactId>janino</artifactId>
+                <version>${janino.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>${poi-ooxml.version}</version>
+            </dependency>
+
+
+
+            <!--markdown to html-->
+            <dependency>
+                <groupId>com.vladsch.flexmark</groupId>
+                <artifactId>flexmark</artifactId>
+                <version>${flexmark.version}</version>
+            </dependency>
+            <!--表格渲染插件-->
+            <dependency>
+                <groupId>com.vladsch.flexmark</groupId>
+                <artifactId>flexmark-ext-tables</artifactId>
+                <version>${flexmark.version}</version>
+            </dependency>
+            <!--markdown to html end-->
+
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid</artifactId>
+                <version>${druid-version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis-spring-boot.version}</version>
+            </dependency>
+
+            <!-- sohu dependency -->
+            <dependency>
+                <groupId>com.sohu.tv.custom</groupId>
+                <artifactId>cachecloud-custom</artifactId>
+                <version>${cachecloud-cloud.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger2</artifactId>
+                <version>${springfox-swagger2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger-ui</artifactId>
+                <version>${swagger-ui.version}</version>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>
 
-    <developers>
-
-        <developer>
-            <name>yijunzhang</name>
-            <email>yijunzhang@sohu-inc.com</email>
-            <organization>sohu-tv</organization>
-            <roles>
-                <role>developer</role>
-            </roles>
-        </developer>
-
-        <developer>
-            <name>leifu</name>
-            <email>leifu@sohu-inc.com</email>
-            <organization>sohu-tv</organization>
-            <roles>
-                <role>developer</role>
-            </roles>
-        </developer>
-
-        <developer>
-            <name>lingguo</name>
-            <email>lingguo@sohu-inc.com</email>
-            <organization>sohu-tv</organization>
-            <roles>
-                <role>developer</role>
-            </roles>
-        </developer>
-    </developers>
-
     <build>
         <pluginManagement>
             <plugins>
-                <plugin>
-                    <groupId>org.eclipse.jetty</groupId>
-                    <artifactId>jetty-maven-plugin</artifactId>
-                    <configuration>
-                        <webAppConfig>
-                            <allowDuplicateFragmentNames>true</allowDuplicateFragmentNames>
-                        </webAppConfig>
-                        <httpConnector>
-                            <port>8585</port>
-                        </httpConnector>
-                    </configuration>
-                    <version>${jetty.version}</version>
-                </plugin>
-
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -322,35 +366,28 @@
         </pluginManagement>
     </build>
 
-	<repositories>
-	<repository>
-		<id>central</id>
-		<url>https://repo1.maven.org/maven2</url>
-		<snapshots>
-			<enabled>false</enabled>
-		</snapshots>
-	</repository>
-
-	<repository>
-		<id>com.springsource.repository.maven.release</id>
-		<url>https://repo.springsource.org/release/</url>
-		<snapshots>
-			<enabled>false</enabled>
-		</snapshots>
-	</repository>
-	<repository>
-		<id>nexus</id>
-		<name>local private nexus</name>
-		<url>https://maven.oschina.net/content/groups/public/</url>
-		<releases>
-			<enabled>true</enabled>
-		</releases>
-		<snapshots>
-			<enabled>false</enabled>
-		</snapshots>
-	</repository>
-
-</repositories>
-
+    <repositories>
+        <repository>
+            <id>central</id>
+            <url>http://central.maven.org/maven2/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>com.springsource.repository.maven.release</id>
+            <url>http://repo.springsource.org/release/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>aliyunmaven</id>
+            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
 </project>

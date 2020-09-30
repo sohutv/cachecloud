@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sohu.cache.dao.ErrorLogStatDao">
+    <sql id="error_log_columns">
+        class_name, collect_time, ip, port, diff_error_count, total_error_count, create_time, update_time
+    </sql>
+    
+    <sql id="error_log_fields">
+        #{className}, #{collectTime}, #{ip}, #{port}, #{diffErrorCount}, #{totalErrorCount}, #{createTime}, #{updateTime}
+    </sql>
+
+    <insert id="save" parameterType="ErrorLogStat" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
+        insert into error_log_stat (<include refid="error_log_columns"/>)
+        value(<include refid="error_log_fields"/>);
+    </insert>
+
+    <select id="getLastErrorCount" resultType="Long">
+    	select total_error_count from error_log_stat 
+    	where ip=#{ip} and port=#{port} and class_name=#{className} order by id desc limit 1
+    </select>
+
+</mapper>
+
+

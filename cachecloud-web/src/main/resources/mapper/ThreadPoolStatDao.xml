@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sohu.cache.dao.ThreadPoolStatDao">
+    <sql id="thread_pool_columns">
+        thread_pool_name, ip, port, collect_time, collect_date, maximum_pool_size,
+        core_pool_size, active_count, diff_task_count, task_count,
+        completed_task_count, queue_size, create_time, update_time
+    </sql>
+    
+    <sql id="thread_pool_fields">
+        #{threadPoolName}, #{ip}, #{port}, #{collectTime}, #{collectDate}, #{maximumPoolSize}, 
+        #{corePoolSize}, #{activeCount}, #{diffTaskCount}, #{taskCount}, 
+        #{completedTaskCount},#{queueSize}, #{createTime}, #{updateTime}
+    </sql>
+
+    <insert id="save" parameterType="ThreadPoolStat" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
+        insert into thread_pool_stat (<include refid="thread_pool_columns"/>)
+        value(<include refid="thread_pool_fields"/>);
+    </insert>
+    
+    <select id="getLastTaskCount" resultType="Long">
+    	select task_count from thread_pool_stat 
+    	where ip=#{ip} and port=#{port} and thread_pool_name=#{threadPoolName} order by id desc limit 1
+    </select>
+
+</mapper>
+
+

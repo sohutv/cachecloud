@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.InstanceReshardProcessDao">
+
+    <sql id="instance_reshard_process_column">
+	    	app_id,audit_id,source_instance_id,target_instance_id,start_slot,end_slot,
+	    	migrating_slot,is_pipeline,finish_slot_num,status,start_time,end_time,create_time,update_time
+    </sql>
+    
+    <insert id="save" parameterType="InstanceReshardProcess"  keyProperty="id" useGeneratedKeys="true">
+		insert into instance_reshard_process(<include refid="instance_reshard_process_column" />)
+		values(#{appId},#{auditId},#{sourceInstanceId},#{targetInstanceId},#{startSlot},#{endSlot},
+		#{migratingSlot},#{isPipeline},#{finishSlotNum},#{status},#{startTime},#{endTime},#{createTime},#{updateTime})
+	</insert>
+    
+    <select id="getByAuditId" resultType="InstanceReshardProcess">
+        select id,<include refid="instance_reshard_process_column"/> from instance_reshard_process where audit_id = #{auditId}
+    </select>
+    
+    <select id="get" resultType="InstanceReshardProcess">
+        select id,<include refid="instance_reshard_process_column"/> from instance_reshard_process where id = #{id}
+    </select>
+	
+    <update id="updateStatus">
+    		update instance_reshard_process set status = #{status} where id = #{id}
+    </update>
+    
+    <update id="updateEndTime">
+    		update instance_reshard_process set end_time = #{endTime} where id = #{id}
+    </update>
+    
+    <update id="increaseFinishSlotNum">
+    		update instance_reshard_process set finish_slot_num = finish_slot_num + 1 where id = #{id}
+    </update>
+    
+    <update id="updateMigratingSlot">
+    		update instance_reshard_process set migrating_slot = #{migratingSlot} where id = #{id}
+    </update>
+
+</mapper>

@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.AppClientStatisticGatherDao">
+    <sql id="columns">
+		app_id,gather_time,
+		cmd_count,avg_cmd_cost,
+		conn_exp_count,avg_conn_exp_cost,
+		cmd_exp_count,avg_cmd_exp_cost,
+		instance_count,avg_mem_frag_ratio,mem_used_ratio,
+		exception_count,
+		slow_log_count,
+		latency_count,
+		connected_clients,
+		object_size,
+		used_memory,
+		used_memory_rss,
+		max_cpu_sys,
+		max_cpu_user,
+		topology_exam_result
+	</sql>
+
+    <insert id="batchSave">
+        insert into app_client_statistic_gather (<include refid="columns"/>)
+        values
+        <foreach collection="list" item="stat" separator=",">
+            (#{stat.appId},#{stat.gatherTime},#{stat.cmdCount},#{stat.cmdCost},#{stat.expCount},#{stat.expCost})
+        </foreach>
+    </insert>
+
+    <insert id="batchSaveCmdStats" parameterType="list">
+        insert into app_client_statistic_gather
+        (app_id,gather_time,cmd_count,avg_cmd_cost)
+        values
+        <foreach collection="list" item="stat" separator=",">
+            (#{stat.appId},#{stat.gatherTime},#{stat.cmdCount},#{stat.avgCmdCost})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        app_id=values(app_id),
+        gather_time=values(gather_time),
+        cmd_count=values(cmd_count),
+        avg_cmd_cost=values(avg_cmd_cost)
+    </insert>
+    <insert id="batchAddCmdStats" parameterType="list">
+        insert into app_client_statistic_gather
+        (app_id,gather_time,cmd_count,avg_cmd_cost)
+        values
+        <foreach collection="list" item="stat" separator=",">
+            (#{stat.appId},#{stat.gatherTime},#{stat.cmdCount},#{stat.avgCmdCost})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        app_id=values(app_id),
+        gather_time=values(gather_time),
+        cmd_count=cmd_count+values(cmd_count),
+        avg_cmd_cost=values(avg_cmd_cost)
+    </insert>
+
+    <insert id="batchSaveConnExpStats" parameterType="list">
+        insert into app_client_statistic_gather
+        (app_id,gather_time,conn_exp_count,avg_conn_exp_cost)
+        values
+        <foreach collection="list" item="stat" separator=",">
+            (#{stat.appId},#{stat.gatherTime},#{stat.connExpCount},#{stat.avgConnExpCost})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        app_id=values(app_id),
+        gather_time=values(gather_time),
+        conn_exp_count=values(conn_exp_count),
+        avg_conn_exp_cost=values(avg_conn_exp_cost)
+    </insert>
+    <insert id="batchAddConnExpStats" parameterType="list">
+        insert into app_client_statistic_gather
+        (app_id,gather_time,conn_exp_count,avg_conn_exp_cost)
+        values
+        <foreach collection="list" item="stat" separator=",">
+            (#{stat.appId},#{stat.gatherTime},#{stat.connExpCount},#{stat.avgConnExpCost})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        app_id=values(app_id),
+        gather_time=values(gather_time),
+        conn_exp_count=conn_exp_count+values(conn_exp_count),
+        avg_conn_exp_cost=values(avg_conn_exp_cost)
+    </insert>
+
+    <insert id="batchSaveCmdExpStats" parameterType="list">
+        insert into app_client_statistic_gather
+        (app_id,gather_time,cmd_exp_count,avg_cmd_exp_cost)
+        values
+        <foreach collection="list" item="stat" separator=",">
+            (#{stat.appId},#{stat.gatherTime},#{stat.cmdExpCount},#{stat.avgCmdExpCost})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        app_id=values(app_id),
+        gather_time=values(gather_time),
+        cmd_exp_count=values(cmd_exp_count),
+        avg_cmd_exp_cost=values(avg_cmd_exp_cost)
+    </insert>
+    <insert id="batchAddCmdExpStats" parameterType="list">
+        insert into app_client_statistic_gather
+        (app_id,gather_time,cmd_exp_count,avg_cmd_exp_cost)
+        values
+        <foreach collection="list" item="stat" separator=",">
+            (#{stat.appId},#{stat.gatherTime},#{stat.cmdExpCount},#{stat.avgCmdExpCost})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        app_id=values(app_id),
+        gather_time=values(gather_time),
+        cmd_exp_count=cmd_exp_count+values(cmd_exp_count),
+        avg_cmd_exp_cost=values(avg_cmd_exp_cost)
+    </insert>
+
+    <insert id="batchSaveMemFragRatio" parameterType="list">
+        insert into app_client_statistic_gather
+        (app_id,gather_time,instance_count,avg_mem_frag_ratio,mem_used_ratio)
+        values
+        <foreach collection="list" item="stat" separator=",">
+            (#{stat.appId},#{stat.gatherTime},#{stat.instanceCount},#{stat.avgMemFragRatio},#{stat.memUsedRatio})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        app_id=values(app_id),
+        gather_time=values(gather_time),
+        instance_count=values(instance_count),
+        avg_mem_frag_ratio=values(avg_mem_frag_ratio),
+        mem_used_ratio=values(mem_used_ratio)
+    </insert>
+
+    <insert id="batchSaveSlowLogCount" parameterType="list">
+        insert into app_client_statistic_gather
+        (app_id,gather_time,slow_log_count)
+        values
+        <foreach collection="list" item="stat" separator=",">
+            (#{stat.appId},#{stat.gatherTime},#{stat.slowLogCount})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        app_id=values(app_id),
+        gather_time=values(gather_time),
+        slow_log_count=values(slow_log_count)
+    </insert>
+    <insert id="batchAddSlowLogCount" parameterType="list">
+        insert into app_client_statistic_gather
+        (app_id,gather_time,slow_log_count)
+        values
+        <foreach collection="list" item="stat" separator=",">
+            (#{stat.appId},#{stat.gatherTime},#{stat.slowLogCount})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        app_id=values(app_id),
+        gather_time=values(gather_time),
+        slow_log_count=slow_log_count+values(slow_log_count)
+    </insert>
+
+    <insert id="batchSaveLatencyCount" parameterType="list">
+        insert into app_client_statistic_gather
+        (app_id,gather_time,latency_count)
+        values
+        <foreach collection="list" item="stat" separator=",">
+            (#{stat.appId},#{stat.gatherTime},#{stat.latencyCount})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        app_id=values(app_id),
+        gather_time=values(gather_time),
+        latency_count=values(latency_count)
+    </insert>
+    <insert id="batchAddLatencyCount" parameterType="list">
+        insert into app_client_statistic_gather
+        (app_id,gather_time,latency_count)
+        values
+        <foreach collection="list" item="stat" separator=",">
+            (#{stat.appId},#{stat.gatherTime},#{stat.latencyCount})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        app_id=values(app_id),
+        gather_time=values(gather_time),
+        latency_count=latency_count+values(latency_count)
+    </insert>
+
+
+    <insert id="batchSaveAppStats" parameterType="list">
+        insert into app_client_statistic_gather
+        (app_id,gather_time,object_size,used_memory,used_memory_rss,avg_mem_frag_ratio,max_cpu_sys,max_cpu_user)
+        values
+        <foreach collection="list" item="stat" separator=",">
+            (#{stat.appId},#{stat.gatherTime},#{stat.objectSize},#{stat.usedMemory},#{stat.usedMemoryRss},#{stat.avgMemFragRatio},#{stat.maxCpuSys},#{stat.maxCpuUser})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        app_id=values(app_id),
+        gather_time=values(gather_time),
+        object_size=values(object_size),
+        used_memory=values(used_memory),
+        used_memory_rss=values(used_memory_rss),
+        avg_mem_frag_ratio=values(avg_mem_frag_ratio),
+        max_cpu_sys=GREATEST(max_cpu_sys,values(max_cpu_sys)),
+        max_cpu_user=GREATEST(max_cpu_user,values(max_cpu_user))
+    </insert>
+
+
+    <insert id="batchSaveConnClients" parameterType="list">
+        insert into app_client_statistic_gather
+        (app_id,gather_time,connected_clients)
+        values
+        <foreach collection="list" item="stat" separator=",">
+            (#{stat.appId},#{stat.gatherTime},#{stat.connectedClients})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        app_id=values(app_id),
+        gather_time=values(gather_time),
+        connected_clients=values(connected_clients)
+    </insert>
+
+    <insert id="batchSaveTopologyExam" parameterType="list">
+        insert into app_client_statistic_gather
+        (app_id,gather_time,topology_exam_result)
+        values
+        <foreach collection="list" item="stat" separator=",">
+            (#{stat.appId},#{stat.gatherTime},#{stat.topologyExamResult})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        app_id=values(app_id),
+        gather_time=values(gather_time),
+        topology_exam_result=values(topology_exam_result)
+    </insert>
+
+
+    <select id="getAppClientStatisticByGatherTime" resultType="hashmap">
+        select
+        <include refid="columns"/>
+        from app_client_statistic_gather
+        where gather_time = #{gatherTime}
+        <choose>
+            <when test="appId != null and appId > 0">
+                and app_id = #{appId}
+            </when>
+        </choose>
+    </select>
+
+    <select id="getExpAppStatisticByGatherTime" resultType="hashmap">
+        select
+        <include refid="columns"/>,(conn_exp_count+cmd_exp_count) as exp_count
+        from app_client_statistic_gather
+        where gather_time = #{gatherTime}
+        ORDER BY exp_count DESC
+    </select>
+
+
+    <select id="getExpAppStatsByGatherTime" resultType="hashmap">
+        select app_client_statistic_gather.app_id as app_id,is_test,
+        (conn_exp_count + cmd_exp_count) as exp_count,
+        conn_exp_count,cmd_exp_count,
+        slow_log_count,latency_count
+        from app_client_statistic_gather,app_desc
+        where gather_time = #{gatherTime}
+        and app_client_statistic_gather.app_id = app_desc.app_id
+        and app_desc.is_test = 0
+        and conn_exp_count + cmd_exp_count > 0
+        ORDER BY exp_count DESC
+    </select>
+
+
+    <select id="getLatencyAppStatsByGatherTime" resultType="hashmap">
+        select app_client_statistic_gather.app_id as app_id,is_test,
+        slow_log_count,latency_count
+        from app_client_statistic_gather,app_desc
+        where gather_time = #{gatherTime}
+        and app_client_statistic_gather.app_id = app_desc.app_id
+        and app_desc.is_test = 0
+        and slow_log_count>100
+        ORDER BY slow_log_count DESC
+        LIMIT 10
+    </select>
+
+
+    <select id="getMemAlterAppStatsByGatherTime" resultType="hashmap">
+        select app_client_statistic_gather.app_id as app_id,is_test,
+        mem_used_ratio,round(used_memory/1024/1024,2) as format_used_memory
+        from app_client_statistic_gather,app_desc
+        where gather_time = #{gatherTime}
+        and app_client_statistic_gather.app_id = app_desc.app_id
+        and app_desc.is_test = 0
+        and mem_used_ratio &lt; 50
+        ORDER BY mem_used_ratio asc
+        LIMIT 10
+    </select>
+
+
+    <select id="getFragRatioAppStatsByGatherTime" resultType="hashmap">
+        select app_client_statistic_gather.app_id as app_id,is_test,
+        round(used_memory/1024/1024,2) as format_used_memory,
+        round(used_memory_rss/1024/1024,2) as format_used_memory_rss,
+        avg_mem_frag_ratio
+        from app_client_statistic_gather,app_desc
+        where gather_time = '2020-06-03'
+        and app_client_statistic_gather.app_id = app_desc.app_id
+        and app_desc.is_test = 0
+        and avg_mem_frag_ratio>1.2
+        ORDER BY avg_mem_frag_ratio DESC;
+    </select>
+</mapper>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.TaskQueueDao">
+
+    <sql id="task_queue_columns">
+    	app_id, class_name, param, init_param, status, parent_task_id, create_time, update_time,
+    	start_time, end_time, priority, error_code, error_msg, task_note, important_info
+    </sql>
+    
+    <sql id="task_queue_fields">
+    	#{appId}, #{className}, #{param}, #{initParam}, #{status}, #{parentTaskId}, #{createTime}, #{updateTime},
+    	#{startTime}, #{endTime}, #{priority}, #{errorCode}, #{errorMsg}, #{taskNote}, #{importantInfo}
+    </sql>
+
+    <insert id="save" parameterType="TaskQueue" keyProperty="id" useGeneratedKeys="true">
+        insert into task_queue
+        	(<include refid="task_queue_columns"/>)
+        values
+        	(<include refid="task_queue_fields"/>)
+    </insert>
+    
+    <select id="getById" resultType="TaskQueue">
+        select id,<include refid="task_queue_columns"/>, execute_ip_port
+        from task_queue
+        where id = #{taskId}
+    </select>
+    
+    <select id="getChildTaskQueueList" resultType="TaskQueue">
+    	select id,<include refid="task_queue_columns"/>, execute_ip_port
+        from task_queue
+        where parent_task_id = #{taskId}
+    </select>
+    
+    <update id="updateStatus">
+    	update task_queue set status = #{status} where id = #{taskId}
+    </update>
+    
+    <select id="getTaskQueueListByStatus" resultType="TaskQueue">
+        select id,<include refid="task_queue_columns"/>, execute_ip_port
+        from task_queue where status = #{status} order by id
+    </select>
+    
+    <select id="getByAppAndClass" resultType="TaskQueue">
+        select id,<include refid="task_queue_columns"/>, execute_ip_port
+        from task_queue where app_id = #{appId} and class_name=#{className}
+    </select>
+    
+    
+    <update id="updateParam">
+    	update task_queue set param = #{param} where id = #{taskId}
+    </update>
+
+	<update id="updateStartTime">
+    	update task_queue set start_time = #{startTime} where id = #{taskId}
+    </update>
+    
+    <update id="updateEndTime">
+    	update task_queue set end_time = #{endTime} where id = #{taskId}
+    </update>
+    
+    <update id="updateExecuteIpPort">
+    	update task_queue set execute_ip_port = #{executeIpPort} where id = #{taskId}
+    </update>
+    
+    <select id="getTaskQueueCount" resultType="int">
+        select count(*) from task_queue where 1=1
+        <choose>
+            <when test="className != null and className != ''">
+                 and class_name = #{className}
+            </when>
+        </choose>
+        <choose>
+            <when test="appId != null and appId > 0">
+                 and app_id = #{appId}
+            </when>
+        </choose>
+        <choose>
+            <when test="status >= 0">
+                 and status = #{status}
+            </when>
+        </choose>
+    </select>
+    
+    <select id="getTaskQueueList" resultType="TaskQueue">
+        select id,<include refid="task_queue_columns"/>, execute_ip_port
+        from task_queue where 1=1
+        <choose>
+            <when test="className != null and className != ''">
+                 and class_name = #{className}
+            </when>
+        </choose>
+        <choose>
+            <when test="appId != null and appId > 0">
+                 and app_id = #{appId}
+            </when>
+        </choose>
+        <choose>
+            <when test="status >= 0">
+                 and status = #{status}
+            </when>
+        </choose>
+        <choose>
+        	<when test="page != null">
+        		<choose>
+		        	<when test="page.totalCount > page.pageSize">
+            			limit #{page.start},#{page.pageSize};
+		        	</when>
+		        	<otherwise>
+		        	    limit #{page.totalCount}
+		        	</otherwise>
+		        </choose>
+        	</when>
+        </choose>
+    </select>
+    
+    <select id="getStatusCount" resultType="int">
+        select count(*) from task_queue where status = #{status}
+    </select>
+    
+    
+</mapper>

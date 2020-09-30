@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.AppClientReportDataSizeDao">
+	<sql id="columns">
+		collect_time,client_ip,report_time,create_time,cost_map_size,value_map_size,exception_map_size,collect_map_size
+	</sql>
+
+	<insert id="save" parameterType="AppClientDataSizeStat"
+		keyProperty="id" useGeneratedKeys="true">
+		insert into app_client_datasize_minute_stat(<include refid="columns" />)
+		values(#{collectTime},#{clientIp},#{reportTime},#{createTime},#{costMapSize},
+		#{valueMapSize},#{exceptionMapSize},#{collectMapSize})
+	</insert>
+
+</mapper>

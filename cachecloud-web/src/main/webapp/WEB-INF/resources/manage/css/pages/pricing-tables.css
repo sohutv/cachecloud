@@ -1,0 +1,390 @@
+/***
+Pricing table
+***/
+
+.pricing-table {
+  border: 3px solid transparent;
+  padding: 10px;
+  background-color: #f1f2f2;
+}
+
+.pricing-table:hover {
+  border-color: #4b8df8;
+}
+
+.pricing-table h3 {
+  margin-left: -2px;
+  padding-left: 0px;
+  font-size: 26px;
+  margin-bottom: 5px;
+  line-height: 26px;
+  color: #111;
+  margin-top: 0px;
+}
+
+.pricing-table .desc {
+  margin-bottom: 10px;
+  padding-bottom: 15px;
+  color: #666;
+  border-bottom: 1px solid #ddd;
+}
+
+.pricing-table ul {
+  margin: 0px;
+  margin-bottom: 15px;
+  padding: 0px;
+  list-style: none;
+}
+
+.pricing-table ul li {
+  padding: 6px 0px;
+  padding-left: 11px;
+  font-size: 13px;
+  line-height: 13px;
+  color: #666;
+}
+
+.pricing-table ul li i {
+  position: absolute;
+  margin-right: 0px;
+  margin-top: -2px;
+  margin-left: -17px;
+  color: #35aa47;
+  font-size: 16px;
+}
+
+.pricing-table .rate {
+  border-top: 1px solid #ddd;
+  margin-bottom: 10px; 
+  padding-top: 15px;
+  clear: both;
+}
+
+.pricing-table.selected .rate {
+  border-top-color: #fff;
+}
+
+.pricing-table .rate:before,
+.pricing-table .rate:after {
+  display: table;
+  line-height: 0;
+  content: "";
+}
+.pricing-table .rate:after {
+  clear: both;
+}
+
+.pricing-table .rate .price {
+  display: inline-block;
+  float: left; 
+  clear: both;
+}
+
+.pricing-table .rate .btn {
+  margin-top: 3px;
+  float: right;
+  display: block;
+}
+
+.pricing-table .rate .price .currency {
+  padding-top: 4px;
+  float: left;
+  width: 50px;
+  text-align: right;
+  font-size: 13px;
+  line-height: 14px;
+  font-weight: 300;
+  margin-right: 2px;
+}
+
+.pricing-table .rate .price .amount {
+  padding-top: 4px;  
+  letter-spacing: -3px;
+  float: left;
+  text-align: right;
+  font-size: 36px;
+  line-height: 30px;
+  font-weight: 300;
+}
+
+.pricing-table.selected {
+  background-color: #4b8df8;
+}
+
+.pricing-table.selected:hover {
+  border-color: #ddd;
+}
+
+.pricing-table.selected .desc {
+  border-bottom-color: #fff;
+}
+
+.pricing-table.selected h3,
+.pricing-table.selected .desc,
+.pricing-table.selected ul li,
+.pricing-table.selected ul li i,
+.pricing-table.selected .rate {
+  color: #fff;
+}
+
+/***
+Pricing table(Alternative)
+***/
+
+.pricing-table2 {
+  border: 3px solid transparent;
+  padding: 10px;
+  background-color: #f1f2f2;
+}
+
+.pricing-table2:hover {
+  border-color: #4b8df8;
+}
+
+.pricing-table2 h3 {
+  margin-left: -2px;
+  padding-left: 0px;
+  font-size: 26px;
+  margin-bottom: 5px;
+  line-height: 26px;
+  margin-top: 0px;
+  color: #111;
+}
+
+.pricing-table2 .desc {
+  margin-bottom: 10px;
+  padding-bottom: 0px;
+  color: #666;
+}
+
+.pricing-table2 ul {
+  margin: 0px;
+  margin-bottom: 0px;
+  padding: 0px;
+  list-style: none;
+}
+
+.pricing-table2 ul li {
+  padding: 6px 0px;
+  padding-left: 11px;
+  font-size: 13px;
+  line-height: 13px;
+  color: #666;
+}
+
+.pricing-table2 ul li i {
+  position: absolute;
+  margin-right: 0px;
+  margin-top: -2px;
+  margin-left: -17px;
+  color: #35aa47;
+  font-size: 16px;
+}
+
+.pricing-table2 .rate { 
+  margin-bottom: 10px; 
+  padding: 15px 15px;
+  margin-left: -15px;
+  margin-right: -15px;
+  background-color: #35aa47;
+  color: #fff;
+  clear: both;
+}
+
+.pricing-table2.selected .rate {
+  border-top-color: #fff;
+}
+
+.pricing-table2 .rate:before,
+.pricing-table2 .rate:after {
+  display: table;
+  line-height: 0;
+  content: "";
+}
+.pricing-table2 .rate:after {
+  clear: both;
+}
+
+.pricing-table2 .rate .price {
+  display: inline-block;
+  float: left; 
+  clear: both;
+}
+
+.pricing-table2 .rate .btn {
+  margin-top: 3px;
+  float: right;
+  display: block;
+}
+
+.pricing-table2 .rate .price .currency {
+  padding-top: 4px;
+  float: left;
+  width: 50px;
+  text-align: right;
+  font-size: 13px;
+  line-height: 14px;
+  font-weight: 300;
+}
+
+.pricing-table2 .rate .price .amount {
+  padding-top: 4px;
+  float: left;
+  text-align: right;
+  font-size: 36px;
+  line-height: 30px;
+  font-weight: 300;
+}
+
+.pricing-table2.selected {
+  background-color: #4b8df8;
+}
+
+.pricing-table2.selected .rate {
+  background-color: #ffb848;
+}
+
+.pricing-table2.selected:hover {
+  border-color: #ddd;
+}
+
+.pricing-table2.selected .desc {
+  border-bottom-color: #fff;
+}
+
+.pricing-table2.selected h3,
+.pricing-table2.selected .desc,
+.pricing-table2.selected ul li,
+.pricing-table2.selected ul li i,
+.pricing-table2.selected .rate .currency,
+.pricing-table2.selected .rate .amount {
+  color: #fff !important;
+}
+
+
+/***
+Pricing table(Alternative 2)
+***/
+.pricing {
+  position:relative;
+  margin-bottom:15px;
+  border:3px solid #eee;
+}
+.pricing-active {
+  border:3px solid #35aa47;
+}
+.pricing:hover {
+  border:3px solid #35aa47;
+}
+.pricing:hover h4 {
+  color:#35aa47;
+}
+.pricing-head {
+  text-align:center;
+}
+.pricing-head h3,
+.pricing-head h4 {
+  margin:0;
+  line-height:normal;
+}
+.pricing-head h3 span, 
+.pricing-head h4 span {
+  display:block;
+  margin-top:5px;
+  font-size:14px;
+  font-style:italic;
+}
+.pricing-head h3 {
+  font-weight: 300;
+  color:#fafafa;
+  padding:12px 0;
+  font-size:27px;
+  background:#35aa47;
+  border-bottom:solid 1px #41b91c;
+}
+.pricing-head h4 {
+  color:#bac39f;
+  padding:5px 0;
+  font-size:54px;
+  font-weight:300;
+  background:#fbfef2;
+  border-bottom:solid 1px #f5f9e7;
+}
+.pricing-head-active h4 {
+  color:#35aa47;
+}
+.pricing-head h4 i {
+  top:-8px;
+  font-size:28px;
+  font-style:normal;
+  position:relative;
+}
+.pricing-head h4 span {
+  top:-10px;
+  font-size:14px;
+  font-style:normal;
+  position:relative;
+}
+  
+/*Pricing Content*/
+.pricing-content li {
+  color:#888;
+  font-size:12px;
+  padding:7px 15px;
+  border-bottom:solid 1px #f5f9e7;
+}
+.pricing-content li i {
+  top:2px;
+  color:#35aa47;
+  font-size:16px;
+  margin-right:5px;
+  position:relative;
+}
+
+/*Pricing Footer*/
+.pricing-footer {
+  color:#777;
+  font-size:11px;
+  line-height:17px;
+  text-align:center;
+  padding:0 20px 19px;
+}
+
+/*Priceing Active*/
+.price-active,
+.pricing:hover {
+  z-index:9;
+}
+.price-active h4 {
+  color:#35aa47;
+}
+
+.no-space-pricing .pricing:hover {
+  -webkit-transition:box-shadow 0.3s ease-in-out;
+  -moz-transition:box-shadow 0.3s ease-in-out;
+  -o-transition:box-shadow 0.3s ease-in-out;
+  transition:box-shadow 0.2s ease-in-out;
+}
+.no-space-pricing .price-active .pricing-head h4,
+.no-space-pricing .pricing:hover .pricing-head h4 {
+  color:#35aa47;
+  padding:15px 0;
+  font-size:80px;
+  -webkit-transition:color 0.5s ease-in-out;
+  -moz-transition:color 0.5s ease-in-out;
+  -o-transition:color 0.5s ease-in-out;
+  transition:color 0.5s ease-in-out;
+}
+
+
+@media (min-width: 768px) and (max-width: 1280px) { 
+
+  .pricing-table .rate .price,
+  .pricing-table2 .rate .price {
+    width: 100%;
+    display: block;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+} 

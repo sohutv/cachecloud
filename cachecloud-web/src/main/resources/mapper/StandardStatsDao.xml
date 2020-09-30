@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.StandardStatsDao">
+
+    <insert id="mergeStandardStats" parameterType="StandardStats">
+        replace into standard_statistics(collect_time,ip,port,db_type,info_json,diff_json,cluster_info_json)
+        values (#{collectTime},#{ip},#{port},#{dbType},#{infoJson},#{diffJson},#{clusterInfoJson})
+    </insert>
+
+    <!-- StandardStats保留10分钟 -->
+    <insert id="mergeInstanceMinuteStats" parameterType="StandardStats">
+        replace into instance_minute_stats(collect_time,ip,port,db_type,json)
+        values (#{collectTime},#{ip},#{port},#{dbType},#{diffJson})
+    </insert>
+
+    <!-- instance_minute_stats默认保留7天,清理逻辑见:CleanupDayDimensionalityJob -->
+    <select id="getDiffJsonList" resultType="StandardStats">
+        select collect_time , json as diff_json
+        from instance_minute_stats
+        where  ip=#{ip} and port=#{port} and db_type=#{dbType}
+        and collect_time between #{beginTime} and #{endTime}
+    </select>
+
+    <select id="getStandardStats" resultType="StandardStats">
+        select id,collect_time,ip,port,db_type,info_json,diff_json,cluster_info_json,created_time
+        from standard_statistics
+        where  ip=#{ip} and port=#{port} and db_type=#{dbType}
+          and collect_time = #{collectTime}
+    </select>
+
+    <delete id="deleteStandardStatsLessCreatedTime">
+        delete
+        from standard_statistics
+        where <![CDATA[ created_time <=  #{createdTime}
+        ]]>
+    </delete>
+
+    <select id="getStandardStatsByCreateTime" resultType="StandardStats">
+        select id,collect_time,ip,port,db_type,info_json,diff_json,cluster_info_json,created_time
+        from standard_statistics
+        where created_time between #{beginTime} and #{endTime} and db_type=#{dbType}
+    </select>
+
+</mapper>

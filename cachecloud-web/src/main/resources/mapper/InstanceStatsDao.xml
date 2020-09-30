@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.InstanceStatsDao">
+
+    <sql id="instance_statistics_columns">
+        inst_id,app_id,host_id,ip,port,role,max_memory,used_memory,curr_items,curr_connections,misses,hits,modify_time,mem_fragmentation_ratio,aof_delayed_fsync
+    </sql>
+
+    <insert id="updateInstanceStats" parameterType="InstanceStats">
+        INSERT INTO instance_statistics
+          (<include refid="instance_statistics_columns"/>)
+        VALUES (#{instId},#{appId},#{hostId},#{ip},#{port},#{role},#{maxMemory},#{usedMemory},#{currItems},#{currConnections},#{misses},#{hits},
+                  #{modifyTime},#{memFragmentationRatio},#{aofDelayedFsync})
+        ON DUPLICATE KEY UPDATE
+          inst_id = #{instId},
+          host_id = #{hostId},
+          role = #{role},
+          max_memory = #{maxMemory},
+          used_memory = #{usedMemory},
+          curr_items = #{currItems},
+          curr_connections = #{currConnections},
+          misses = #{misses},
+          hits = #{hits},
+          modify_time = #{modifyTime},
+          mem_fragmentation_ratio = #{memFragmentationRatio},
+          aof_delayed_fsync = #{aofDelayedFsync}
+    </insert>
+
+    <select id="getInstanceStatsByHost" resultType="InstanceStats">
+        select id,<include refid="instance_statistics_columns"/>
+        from instance_statistics
+        where ip = #{ip} and port = #{port}
+    </select>
+
+    <select id="getInstanceStatsByIp" resultType="InstanceStats">
+        select id,<include refid="instance_statistics_columns"/>
+        from instance_statistics
+        where ip = #{ip}
+    </select>
+
+    <select id="getInstanceStatsByInsId" resultType="InstanceStats">
+        select id,<include refid="instance_statistics_columns"/>
+        from instance_statistics
+        where inst_id = #{id}
+    </select>
+
+    <select id="getInstanceStatsByAppId" resultType="InstanceStats">
+        select id,<include refid="instance_statistics_columns"/>
+        from instance_statistics
+        where app_id = #{appId}
+    </select>
+
+    <select id="getInstanceStats" resultType="InstanceStats">
+        select id,<include refid="instance_statistics_columns"/>
+        from instance_statistics
+    </select>
+
+    <select id="getMachineMemByIp" resultType="java.util.Map">
+        SELECT count(statistic.id) instanceNum, sum(statistic.max_memory) applyMem, sum(statistic.used_memory) usedMem,
+        sum(statistic.mem_fragmentation_ratio*statistic.used_memory) usedMemRss
+        FROM instance_statistics statistic, instance_info info
+        WHERE statistic.inst_id = info.id
+        AND info.status = 1
+        AND statistic.ip = #{ip}
+    </select>
+
+    <select id="getTotalMem" resultType="hashmap">
+        SELECT SUM(max_memory)/1024/1024/1024 totalMem,sum(used_memory)/1024/1024/1024 totalUsedMem from instance_statistics;
+    </select>
+
+    <select id="getTotalAppMem" resultType="hashmap">
+        SELECT SUM(max_memory)/1024/1024/1024 totalAppMem,sum(used_memory)/1024/1024/1024 totalAppUsedMem from instance_statistics where inst_id in
+        <foreach collection="list" item="item" index="instancelist" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and role=1;
+    </select>
+
+    <select id="getMachineInstanceStatList" resultType="MachineInstanceStat">
+        SELECT stat.ip,sum(stat.max_memory) as max_memory,sum(stat.used_memory) as used_memory
+        from instance_statistics stat,instance_info info
+        where stat.inst_id = info.id and info.status=1 group by stat.ip;
+    </select>
+
+</mapper>

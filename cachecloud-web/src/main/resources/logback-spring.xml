@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Example LOGBACK Configuration File
+  http://logback.qos.ch/manual/configuration.html
+  -->
+<configuration scan="true" scanPeriod="30 seconds">
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <jmxConfigurator/>
+
+    <springProfile name="local,open">
+        <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            </encoder>
+        </appender>
+        <root level="INFO">
+            <appender-ref ref="console"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="test,online">
+        <if condition='isDefined("MY_POD_NAME")'>
+            <then>
+                <property name="log.dir" value="/data/${MY_POD_NAME}/logs"/>
+            </then>
+            <else>
+                <property name="log.dir" value="/data/logs"/>
+            </else>
+        </if>
+
+        <property name="log.level" value="INFO"/>
+        <appender name="stdout" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${log.dir}/cachecloud.log</file>
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <pattern>${FILE_LOG_PATTERN}</pattern>
+            </encoder>
+
+            <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+                <level>${log.level}</level>
+            </filter>
+
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <FileNamePattern>${log.dir}/otherdays/cachecloud.%d{yyyy-MM-dd}.log</FileNamePattern>
+                <MaxHistory>30</MaxHistory>
+            </rollingPolicy>
+        </appender>
+
+        <appender name="stderr" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${log.dir}/cachecloud_stderr.log</file>
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <pattern>${FILE_LOG_PATTERN}</pattern>
+            </encoder>
+
+            <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+                <level>WARN</level>
+            </filter>
+
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <FileNamePattern>${log.dir}/otherdays/cachecloud_stderr.%d{yyyy-MM-dd}.log</FileNamePattern>
+                <MaxHistory>30</MaxHistory>
+            </rollingPolicy>
+        </appender>
+
+        <appender name="managerAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${log.dir}/manager/cachecloud_manager.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>${log.dir}/manager/cachecloud_manager.%d{yyyyMMddHH}.log
+                </fileNamePattern>
+                <maxHistory>30</maxHistory>
+            </rollingPolicy>
+            <encoder>
+                <pattern>${FILE_LOG_PATTERN}</pattern>
+            </encoder>
+        </appender>
+
+        <appender name="quartzAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${log.dir}/quartz.log</file>
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <pattern>${FILE_LOG_PATTERN}</pattern>
+            </encoder>
+
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <FileNamePattern>${log.dir}/otherdays/quartz.%d{yyyy-MM-dd}.log</FileNamePattern>
+                <MaxHistory>30</MaxHistory>
+            </rollingPolicy>
+        </appender>
+
+        <springProperty scope="context" name="appName" source="spring.application.name"/>
+        <appender name="json" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${log.dir}/json.log</file>
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <customFields>
+                    {
+                    "cluster_name": "${CLUSTER_NAME}",
+                    "my_pod_namespace": "${MY_POD_NAMESPACE}",
+                    "my_pod_name": "${MY_POD_NAME}",
+                    "my_node_name": "${MY_NODE_NAME}",
+                    "my_pod_ip": "${MY_POD_IP}"
+                    }
+                </customFields>
+            </encoder>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <FileNamePattern>${log.dir}/json.%d{yyyy-MM-dd}.log</FileNamePattern>
+                <MaxHistory>1</MaxHistory>
+            </rollingPolicy>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="stdout"/>
+            <appender-ref ref="stderr"/>
+            <if condition='isDefined("MY_POD_NAME")'>
+                <then>
+                    <appender-ref ref="json"/>
+                </then>
+            </if>
+        </root>
+
+        <logger name="com.sohu.cache.web.controller.AppManageController" level="WARN">
+            <appender-ref ref="managerAppender"/>
+        </logger>
+
+        <logger name="com.sohu.cache.web.controller.InstanceManageController" level="WARN">
+            <appender-ref ref="managerAppender"/>
+        </logger>
+
+        <logger name="org.quartz" level="INFO" additivity="false">
+            <appender-ref ref="quartzAppender"/>
+        </logger>
+
+        <logger name="org.quartz.core.QuartzSchedulerThread" level="DEBUG" additivity="false">
+            <appender-ref ref="quartzAppender"/>
+        </logger>
+
+        <logger name="net.schmizz.sshj.transport.TransportImpl" level="off"/>
+        <logger name="net.schmizz.sshj.transport.random.BouncyCastleRandom" level="off"/>
+    </springProfile>
+
+
+</configuration>

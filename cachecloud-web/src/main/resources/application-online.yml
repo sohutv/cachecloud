@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: cloud.cachecloud-web.open.online
+    import: classpath:spring/spring.xml
+
+server:
+  port: 8080
+  domain: 127.0.0.1:8080
+
+cachecloud:
+  primary:
+    url: jdbc:mysql://10.18.57.35:3306/redis_open
+    user: redis_open_rw
+    password: 67b033tE104089l
+    initialPoolSize: 10
+    maxPoolSize: 50
+  redis: # task redis log
+    main:
+      host: 127.0.0.1
+      port: 6379
+      password:
+  #区分资源
+  web:
+    clients: 127.0.0.1

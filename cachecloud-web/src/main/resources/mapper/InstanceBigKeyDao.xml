@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.InstanceBigKeyDao">
+
+    <sql id="instance_big_key_columns">
+        instance_id,app_id,audit_id,role,ip,port,big_key,type,length,create_time
+    </sql>
+
+    <insert id="batchSave">
+        insert into instance_big_key(<include refid="instance_big_key_columns"/>)
+        values
+        <foreach collection="instanceBigKeyList" item="instanceBigKey" separator=",">
+        	(#{instanceBigKey.instanceId},#{instanceBigKey.appId},#{instanceBigKey.auditId},
+        	#{instanceBigKey.role},#{instanceBigKey.ip},#{instanceBigKey.port},#{instanceBigKey.bigKey},
+        	#{instanceBigKey.type},#{instanceBigKey.length},#{instanceBigKey.createTime})
+	    </foreach>
+    </insert>
+    
+    <select id="getAppBigKeyCount" resultType="int">
+        select count(*) as count
+        from instance_big_key where app_id = #{appId} and audit_id = #{auditId}
+    </select>
+    
+    <select id="getAppBigKeyList" resultType="InstanceBigKey">
+        select id,<include refid="instance_big_key_columns"/>
+        from instance_big_key where app_id = #{appId} and audit_id = #{auditId}
+        <choose>
+        	<when test="page != null">
+        		<choose>
+		        	<when test="page.totalCount > page.pageSize">
+            			limit #{page.start},#{page.pageSize};
+		        	</when>
+		        	<otherwise>
+		        	    limit #{page.totalCount}
+		        	</otherwise>
+		        </choose>
+        	</when>
+        </choose>
+    </select>
+
+</mapper>

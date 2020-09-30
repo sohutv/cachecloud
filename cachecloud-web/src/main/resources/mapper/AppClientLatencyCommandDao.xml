@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.AppClientLatencyCommandDao">
+    <sql id="columns">
+		command,args,size,invoke_time
+	</sql>
+
+    <insert id="batchSave" parameterType="List" useGeneratedKeys="true" keyProperty="id">
+        insert into app_client_latency_command (id,<include refid="columns"/>)
+        values
+        <foreach collection="list" item="latencyCommand" separator=",">
+            (#{latencyCommand.id},#{latencyCommand.command},#{latencyCommand.args},#{latencyCommand.size},#{latencyCommand.invokeTime})
+        </foreach>
+    </insert>
+
+    <select id="getLatencyCommandByIds" resultType="hashmap" parameterType="java.util.List">
+        SELECT id,<include refid="columns"/>,FROM_UNIXTIME(invoke_time/1000,'%Y-%m-%d %H:%i:%s') as format_invoke_time
+        FROM app_client_latency_command
+        WHERE id in
+        <foreach collection="ids" index="index" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        order by create_time desc
+    </select>
+</mapper>

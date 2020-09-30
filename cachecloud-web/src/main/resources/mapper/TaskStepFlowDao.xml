@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.TaskStepFlowDao">
+
+    <sql id="task_step_flow_columns">
+    	task_id, class_name, step_name, order_no, status,
+    	log, start_time, end_time, create_time, update_time, child_task_id
+    </sql>
+
+    <sql id="task_step_flow_fields">
+    	#{taskId}, #{className}, #{stepName}, #{orderNo}, #{status},
+    	#{log}, #{startTime}, #{endTime}, #{createTime}, #{updateTime}, #{childTaskId}
+    </sql>
+
+    <insert id="save" parameterType="TaskStepFlow" keyProperty="id" useGeneratedKeys="true">
+        insert into task_step_flow
+        (<include refid="task_step_flow_columns"/>)
+        values
+        (<include refid="task_step_flow_fields"/>)
+    </insert>
+
+    <select id="getByTaskClassStep" resultType="TaskStepFlow">
+        select id,<include refid="task_step_flow_columns"/>, execute_ip_port
+        from task_step_flow
+        where task_id = #{taskId} and class_name = #{className} and step_name = #{stepName}
+    </select>
+
+    <update id="updateStatus">
+    	update task_step_flow set status = #{status} where id = #{id}
+    </update>
+
+    <update id="updateLog">
+    	update task_step_flow set log = #{log} where id = #{id}
+    </update>
+
+    <update id="updateStartTime">
+    	update task_step_flow set start_time = #{startTime} where id = #{id}
+    </update>
+
+    <update id="updateEndTime">
+    	update task_step_flow set end_Time = #{endTime} where id = #{id}
+    </update>
+
+    <update id="updateChildTaskId">
+    	update task_step_flow set child_task_id = #{childTaskId} where id = #{id}
+    </update>
+
+    <update id="updateExecuteIpPort">
+    	update task_step_flow set execute_ip_port = #{executeIpPort} where id = #{taskId}
+    </update>
+
+    <select id="getTaskStepFlowList" resultType="TaskStepFlow">
+        select id,<include refid="task_step_flow_columns"/>, execute_ip_port
+        from task_step_flow
+        where task_id = #{taskId} order by order_no
+    </select>
+
+</mapper>

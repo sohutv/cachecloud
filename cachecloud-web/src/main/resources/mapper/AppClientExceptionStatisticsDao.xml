@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.AppClientExceptionStatisticsDao">
+    <sql id="columns">
+		app_id,current_min,client_ip,redis_pool_config,type,node,cost,count,latency_commands
+	</sql>
+
+    <insert id="batchSave">
+        insert ignore into app_client_exception_minute_statistics (<include refid="columns"/>)
+        values
+        <foreach collection="list" item="clientException" separator=",">
+            (#{clientException.appId},#{clientException.currentMin},#{clientException.clientIp},#{clientException.redisPoolConfig},
+            #{clientException.type},#{clientException.node},#{clientException.cost},#{clientException.count},#{clientException.latencyCommands})
+        </foreach>
+    </insert>
+
+    <select id="getAppExceptionStatistics" resultType="hashmap">
+        select app_id,type,current_min,UNIX_TIMESTAMP(current_min) timestamp,client_ip,sum(cost)/sum(count)
+        cost,sum(count) count
+        from app_client_exception_minute_statistics
+        where app_id=#{appId} and current_min between #{startTime} and #{endTime}
+        <choose>
+            <when test="type != null and type != '-1'">
+                and type=#{type}
+            </when>
+        </choose>
+        <choose>
+            <when test="clientIp != null and clientIp != ''">
+                and client_ip=#{clientIp}
+            </when>
+        </choose>
+        group by client_ip,current_min
+        order by current_min asc
+    </select>
+
+    <select id="getDistinctClientNodeStatistics" resultType="hashmap">
+        select node, sum(count) count, sum(cost)/sum(count) cost
+        from app_client_exception_minute_statistics
+        where app_id=#{appId}
+        <choose>
+            <when test="type != null and type != '-1'">
+                and type=#{type}
+            </when>
+        </choose>
+        and client_ip=#{clientIp} and current_min between #{startTime} and #{endTime}
+        group by node
+        order by count desc;
+    </select>
+
+    <select id="getAppDistinctClientConfig" resultType="hashmap">
+        select distinct client_ip, redis_pool_config
+        from app_client_exception_minute_statistics
+        where app_id=#{appId}
+        <choose>
+            <when test="type != null and type != '-1'">
+                and type=#{type}
+            </when>
+        </choose>
+        and current_min between #{startTime} and #{endTime};
+    </select>
+
+    <select id="getAppClientConfigs" resultType="hashmap">
+        select client_ip, redis_pool_config, DATE_FORMAT(min(current_min),'%Y-%m-%d %H:%i:%s') as change_time
+        from app_client_exception_minute_statistics
+        where app_id=#{appId}
+        <choose>
+            <when test="type != null and type != '-1'">
+                and type=#{type}
+            </when>
+        </choose>
+        and current_min between #{startTime} and #{endTime}
+        group by client_ip, redis_pool_config
+        order by change_time desc;
+    </select>
+
+    <select id="getLatencyCommandsByNode" resultType="string">
+        select latency_commands, count, cost
+        from app_client_exception_minute_statistics
+        where client_ip=#{clientIp}
+        and type=1
+        and node=#{node}
+        and current_min between #{startTime} and #{endTime}
+    </select>
+
+
+    <select id="getLatencyCommandsByNodeV2" resultType="string">
+        select latency_commands
+        from app_client_exception_minute_statistics
+        where current_min=#{searchTime}
+        and node=#{node}
+        and type=1
+    </select>
+
+    <select id="getSumCmdExpStatGroupByNode" resultType="hashmap">
+        select node,sum(count) count,sum(cost)/sum(count) cost
+        from app_client_exception_minute_statistics
+        where current_min=#{searchTime} and app_id=#{appId} and type=1
+        group by node
+    </select>
+
+    <select id="getAppClientConnExpStat" resultType="AppClientStatisticGather">
+        select app_id, sum(count) as conn_exp_count, sum(cost)/sum(count) as avg_conn_exp_cost, DATE_FORMAT(current_min,'%Y-%m-%d') gather_time
+        from app_client_exception_minute_statistics
+        where type=0 and current_min between #{startTime} and #{endTime}
+        group by app_id
+    </select>
+
+    <select id="getAppClientCmdExpStat" resultType="AppClientStatisticGather">
+        select app_id, sum(count) as cmd_exp_count, sum(cost)/sum(count) as avg_cmd_exp_cost, DATE_FORMAT(current_min,'%Y-%m-%d') gather_time
+        from app_client_exception_minute_statistics
+        where type=1 and current_min between #{startTime} and #{endTime}
+        group by app_id
+    </select>
+</mapper>

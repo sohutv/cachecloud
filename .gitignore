@@ -6,3 +6,18 @@ target/
 .settings
 .classpath
 .project
+
+<<<<<<< HEAD
+.gitignore-sohu
+cachecloud-custom-sohu/
+cachecloud-client/*/src/test/*
+cachecloud-web/src/test/*
+*application-local-sohu.yml
+*application-test-sohu.yml
+*application-online-sohu.yml
+*bootstrap.yml
+*Jenkinsfile
+=======
+
+>>>>>>> master
+

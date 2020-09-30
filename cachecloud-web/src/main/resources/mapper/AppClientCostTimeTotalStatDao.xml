@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.AppClientCostTimeTotalStatDao">
+	<sql id="columns">
+		app_id,collect_time,create_time,command,mean,median,ninety_percent_max,ninety_nine_percent_max,
+		hundred_max,total_cost,total_count,max_instance_host,max_instance_port,max_instance_id,max_client_ip,accumulation
+	</sql>
+	<sql id="duplicate_update">
+        on duplicate key update
+            total_cost = total_cost + VALUES(total_cost),
+            total_count = total_count + VALUES(total_count),
+            median = if(median>VALUES(median),median,VALUES(median)),
+            ninety_percent_max = if(ninety_percent_max>VALUES(ninety_percent_max),ninety_percent_max,VALUES(ninety_percent_max)),
+            ninety_nine_percent_max = if(ninety_nine_percent_max>VALUES(ninety_nine_percent_max),ninety_nine_percent_max,VALUES(ninety_nine_percent_max)),
+            hundred_max = if(hundred_max>VALUES(hundred_max),hundred_max,VALUES(hundred_max)),
+            max_instance_host = if(hundred_max>VALUES(hundred_max),max_instance_host,VALUES(max_instance_host)),
+            max_instance_port = if(hundred_max>VALUES(hundred_max),max_instance_port,VALUES(max_instance_port)),
+            max_instance_id =   if(hundred_max>VALUES(hundred_max),max_instance_id,VALUES(max_instance_id)),
+            max_client_ip =     if(hundred_max>VALUES(hundred_max),max_client_ip,VALUES(max_client_ip)),
+            mean = format(total_cost/total_count,2),
+            create_time = now(),
+            accumulation = accumulation + 1;
+    </sql>
+	<insert id="save" parameterType="AppClientCostTimeTotalStat" keyProperty="id" useGeneratedKeys="true">
+		 insert into app_client_costtime_minute_stat_total
+		 (<include refid="columns"/>)
+        values
+          (#{appId},#{collectTime},#{createTime},#{command},#{mean},#{median},
+          #{ninetyPercentMax},#{ninetyNinePercentMax},#{hundredMax},#{totalCost},#{totalCount},#{maxInstanceHost},#{maxInstancePort},#{maxInstanceId},#{maxClientIp}, 1)
+        <include refid="duplicate_update"/>
+	</insert>
+	
+	<insert id="batchSave">
+		insert into app_client_costtime_minute_stat_total(<include refid="columns"/>)
+		values
+		<foreach collection="list" item="clientCostTime" separator=",">
+			 (#{clientCostTime.appId},#{clientCostTime.collectTime},#{clientCostTime.createTime},#{clientCostTime.command},#{clientCostTime.mean},#{clientCostTime.median},
+          #{clientCostTime.ninetyPercentMax},#{clientCostTime.ninetyNinePercentMax},#{clientCostTime.hundredMax},#{clientCostTime.totalCost},#{clientCostTime.totalCount},#{clientCostTime.maxInstanceHost},#{clientCostTime.maxInstancePort},#{clientCostTime.maxInstanceId},#{clientCostTime.maxClientIp}, 1)
+	    </foreach>
+        <include refid="duplicate_update"/>
+	</insert>
+	
+    <select id="getAppDistinctCommand" resultType="string">
+   		select command from app_client_costtime_minute_stat_total where app_id=#{appId} and collect_time between #{startTime} and #{endTime} group by command order by sum(total_count) desc;
+    </select>
+    
+    <select id="getAppClientCommandStat" resultType="AppClientCostTimeTotalStat">
+    	select id,<include refid="columns"/> from app_client_costtime_minute_stat_total
+    	where app_id=#{appId} and collect_time between #{startTime} and #{endTime} and command=#{command}
+    </select>
+
+</mapper>

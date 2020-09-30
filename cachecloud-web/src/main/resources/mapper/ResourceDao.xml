@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.ResourceDao">
+	<sql id="resource_columns">
+		id,name,intro,type,lastmodify,dir,url,ispush,status,username,task_id
+	</sql>
+
+	<sql id="resource_fields">
+		#{id}, #{name}, #{intro}, #{type}, #{lastmodify}, #{dir}, #{url}, #{ispush}, #{status}, #{username},#{taskId}
+	</sql>
+
+	<select id="getResourceList" resultType="com.sohu.cache.entity.SystemResource">
+		select
+		<include refid="resource_columns" />
+		from system_resource where status = 1
+		<choose>
+            <when test="resourceType > 0">
+                and type = #{resourceType}
+            </when>
+        </choose>
+		order by type asc,dir asc,name desc
+	</select>
+
+	<select id="getResourceListByName" resultType="com.sohu.cache.entity.SystemResource">
+		select
+		<include refid="resource_columns" />
+		from system_resource where status = 1 and name like CONCAT("%",#{searchName},"%")  and type = #{resourceType}
+		order by type asc,dir asc,name desc
+	</select>
+
+	<select id="getResourceById" resultType="com.sohu.cache.entity.SystemResource">
+		select
+		<include refid="resource_columns" />
+		from system_resource where id = #{resourceId}
+	</select>
+
+	<select id="getResourceByName" resultType="com.sohu.cache.entity.SystemResource">
+		select
+		<include refid="resource_columns" />
+		from system_resource where name = #{resourceName} and status=1
+	</select>
+
+	<insert id="save" parameterType="SystemResource" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
+		insert into system_resource (<include refid="resource_columns"/>)
+		value(<include refid="resource_fields"/>);
+	</insert>
+
+	<update id="update" parameterType="SystemResource">
+		update system_resource
+		set name=#{name}, intro=#{intro}, type=#{type}, url=#{url},dir=#{dir}, ispush=#{ispush}, lastmodify=now(),
+		status=#{status}, username=#{username}, task_id=#{taskId}
+		where id=#{id}
+	</update>
+
+	<select id="getAppUseRedis" resultType="java.util.HashMap">
+		SELECT version_id,count(version_id) as num from app_desc where `status`=2 GROUP BY version_id
+	</select>
+
+</mapper>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sohu.cache.dao.AppAuditLogDao">
+    <sql id="app_audit_log_column">
+    	app_id,user_id,info,create_time,type,app_audit_id
+    </sql>
+    
+    <insert id="save" parameterType="AppAuditLog"  keyProperty="id" useGeneratedKeys="true" >
+    	insert into app_audit_log
+    		(<include refid="app_audit_log_column"/>)
+		values
+			(#{appId},#{userId},#{info},#{createTime},#{type},#{appAuditId})    	
+    </insert>
+    
+    <select id="getAuditByType" resultType="AppAuditLog">
+        select id,<include refid="app_audit_log_column"/>
+        from app_audit_log
+        where app_audit_id=#{appAuditId} and type=#{type}
+    </select>
+    
+</mapper>
+
+
