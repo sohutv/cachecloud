@@ -19,7 +19,7 @@
         <quartz.version>2.3.2</quartz.version>
         <logback.version>1.1.1</logback.version>
         <mysql.java.version>8.0.16</mysql.java.version>
-        <junit.version>4.11</junit.version>
+        <junit.version>4.13.1</junit.version>
         <servlet.api.version>3.1</servlet.api.version>
         <jetty.version>9.2.3.v20140905</jetty.version>
         <mybatis.spring.version>1.2.3</mybatis.spring.version>
