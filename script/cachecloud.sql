@@ -883,13 +883,19 @@ insert into system_config(config_key,config_value,info,status,order_id) values('
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.email.alert.interface','','邮件报警接口(说明:http://cachecloud.github.io 邮件和短信报警接口规范)',1,25);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.mobile.alert.interface','','短信报警接口(说明:http://cachecloud.github.io 邮件和短信报警接口规范)',1,26);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.ldap.url','','LDAP接口地址(例如:ldap://ldap.xx.com)',1,27);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.ldap.basedn','','LDAP Base DN(例如:dc=sohu,dc=com)',1,28);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.ldap.binddn','','LDAP Bind DN(ldap管理员，例如:cn=admin,ou=user,dc=sohu,dc=com)',1,29);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.ldap.bindpassword','','LDAP Bind password(ldap管理员密码)',1,30);
 
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.whether.schedule.clean.data','false','是否定期清理统计数据',1,28);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.whether.schedule.clean.data','false','是否定期清理统计数据',1,31);
 
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.app.secret.base.key','cachecloud-2014','appkey秘钥基准key',1,29);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.stats.cron.minute','1','机器性能统计周期(分钟)',1,30);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.app.secret.base.key','cachecloud-2014','appkey秘钥基准key',1,32);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.machine.stats.cron.minute','1','机器性能统计周期(分钟)',1,33);
 
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.nmon.dir','/opt/cachecloud','nmon安装目录',1,31);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.nmon.dir','/opt/cachecloud','nmon安装目录',1,34);
+
+
+
 
 DROP TABLE IF EXISTS `app_data_migrate_status`;
 CREATE TABLE `app_data_migrate_status` (
