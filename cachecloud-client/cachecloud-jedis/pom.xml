@@ -47,9 +47,9 @@
     </scm>
 
     <properties>
-        <redis-hosts>10.19.121.73:6380,10.19.121.73:6383</redis-hosts>
-        <sentinel-hosts>10.19.121.73:6386,10.19.121.73:6385,10.19.121.73:6387</sentinel-hosts>
-        <cluster-hosts>10.18.29.123:6800,10.18.29.123:6801,10.18.29.123:6802,10.18.29.123:6803,10.18.29.123:6804</cluster-hosts>
+        <redis-hosts>127.0.0.1:6380,127.0.0.1:6383</redis-hosts>
+        <sentinel-hosts>127.0.0.1:6386,127.0.0.1:6385,127.0.0.1:6387</sentinel-hosts>
+        <cluster-hosts>127.0.0.1:6800,127.0.0.1:6801,127.0.0.1:6802</cluster-hosts>
         <github.global.server>github</github.global.server>
     </properties>
 

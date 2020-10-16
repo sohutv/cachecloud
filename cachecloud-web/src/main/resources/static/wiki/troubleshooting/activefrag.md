@@ -11,7 +11,7 @@ redis客户端连接Redis节点会出现周期性超时情况，CC监控排查�
 客户端机器测试redis节点延迟情况:
 
 ````
-redis-cli -h 10.19.122.69 -p 6387 -a 5d948b734065a8f163cb931701b7ade2 --latency-history
+redis-cli -h 127.0.0.1 -p 6387 -a 5d948b734065a8f163cb931701b7ade2 --latency-history
 ** min: 0, max: 2894, avg: 3.87 (1077 samples) -- 15.01 seconds range ** 
 min: 0, max: 30, avg: 1.20 (1332 samples) -- 15.02 seconds range
 min: 0, max: 218, avg: 1.40 (1308 samples) -- 15.01 seconds range

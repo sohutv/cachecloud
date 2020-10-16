@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.5.16, for Linux (x86_64)
 --
--- Host: 10.10.19.167    Database: cache-cloud
+-- Host: 127.0.0.1    Database: cache-cloud
 -- ------------------------------------------------------
 -- Server version	5.5.34-32.0-log
 
