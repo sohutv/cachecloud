@@ -28,17 +28,17 @@ public class AppDataMigrateStatusDaoTest extends BaseTest {
     public void testSave() {
         AppDataMigrateStatus appDataMigrateStatus = new AppDataMigrateStatus();
         appDataMigrateStatus.setEndTime(new Date());
-        appDataMigrateStatus.setMigrateMachineIp("10.10.53.159");
+        appDataMigrateStatus.setMigrateMachineIp("127.0.0.1");
         appDataMigrateStatus.setMigrateMachinePort(8888);
         appDataMigrateStatus.setStartTime(new Date());
         appDataMigrateStatus.setStatus(1);
         appDataMigrateStatus.setUserId(10244);
         appDataMigrateStatus.setSourceAppId(10023);
         appDataMigrateStatus.setSourceMigrateType(1);
-        appDataMigrateStatus.setSourceServers("10.10.53.159:6379");
+        appDataMigrateStatus.setSourceServers("127.0.0.1:6379");
         appDataMigrateStatus.setTargetAppId(0);
         appDataMigrateStatus.setTargetMigrateType(2);
-        appDataMigrateStatus.setTargetServers("10.10.52.136:6385");
+        appDataMigrateStatus.setTargetServers("127.0.0.1:6385");
         appDataMigrateStatus.setLogPath("/opt/redis-migrate-tool/rmt-20160609144601.log");
         appDataMigrateStatus.setConfigPath("/opt/redis-migrate-tool/rmt-20160609144601.conf");
         appDataMigrateStatusDao.save(appDataMigrateStatus);

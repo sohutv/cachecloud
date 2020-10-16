@@ -24,7 +24,7 @@ public class AppClientReportDataSizeDaoTest extends BaseTest {
     @Test
     public void testSave() {
         AppClientDataSizeStat stat = new AppClientDataSizeStat();
-        stat.setClientIp("10.7.40.201");
+        stat.setClientIp("127.0.0.1");
         stat.setReportTime(new Date());
         stat.setCollectTime(20150120135000L);
         stat.setCreateTime(new Date());

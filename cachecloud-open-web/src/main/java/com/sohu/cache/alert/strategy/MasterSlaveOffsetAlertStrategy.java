@@ -22,8 +22,8 @@ public class MasterSlaveOffsetAlertStrategy extends AlertConfigStrategy {
     /**
      * 格式：
      *     connected_slaves:2
-     *     slave0:ip=10.10.76.151,port=6380,state=online,offset=33119690469561,lag=1
-     *     slave1:ip=10.10.76.160,port=6380,state=online,offset=33119690513578,lag=0
+     *     slave0:ip=127.0.0.1,port=6380,state=online,offset=33119690469561,lag=1
+     *     slave1:ip=127.0.0.1,port=6380,state=online,offset=33119690513578,lag=0
      *     master_repl_offset:33119653194425
      */
     @Override

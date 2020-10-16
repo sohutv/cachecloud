@@ -16,14 +16,4 @@ import javax.annotation.Resource;
 public class AppUserDaoTest extends BaseTest{
     @Resource
     private AppUserDao appUserDao;
-
-    @Test
-    public void testAppDao() {
-        AppUser appUser = AppUser.buildFrom(null, "11", "fff", "leifu@sohu-inc.com", "13820794024", -1);
-        appUserDao.save(appUser);
-        logger.info("{}", appUser);
-    }
-    
-    
-    
 }

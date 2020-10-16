@@ -148,7 +148,7 @@ public class ConstUtils {
     /**
      * 报警相关
      */
-    public static String DEFAULT_EMAILS = "xx@sohu.com,yy@qq.com";
+    public static String DEFAULT_EMAILS = "xx@xx.com,yy@qq.com";
     public static String EMAILS = DEFAULT_EMAILS;
 
     public static String DEFAULT_PHONES = "13812345678,13787654321";

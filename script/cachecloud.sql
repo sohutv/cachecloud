@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.5.16, for Linux (x86_64)
 --
--- Host: 10.10.19.167    Database: cache-cloud
+-- Host: 127.0.0.1    Database: cache-cloud
 -- ------------------------------------------------------
 -- Server version	5.5.34-32.0-log
 
@@ -866,7 +866,7 @@ insert into system_config(config_key,config_value,info,status,order_id) values('
 insert into system_config(config_key,config_value,info,status,order_id) values('machine.mem.alert.ratio','80.0','机器内存报警阀值',1,10);
 insert into system_config(config_key,config_value,info,status,order_id) values('machine.load.alert.ratio','8.0','机器负载报警阀值',1,11);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.documentUrl','http://cachecloud.github.io','文档地址',1,12);
-insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.owner.email','xx@sohu.com,yy@qq.com','邮件报警(逗号隔开)',1,13);
+insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.owner.email','xx@xx.com,yy@qq.com','邮件报警(逗号隔开)',1,13);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.owner.phone','13812345678,13787654321','手机号报警(逗号隔开)',1,14);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.mavenWareHouse','http://your_maven_house','maven仓库地址(客户端)',1,15);
 insert into system_config(config_key,config_value,info,status,order_id) values('cachecloud.contact','user1:(xx@zz.com, user1:135xxxxxxxx)<br/>user2: (user2@zz.com, user2:138xxxxxxxx)','值班联系人信息',1,16);
@@ -911,7 +911,7 @@ CREATE TABLE `app_data_migrate_status` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='迁移状态';
 
-insert into app_user(name,ch_name,email,mobile,type) values('admin','admin','admin@sohu-inc.com','13500000000',0);
+insert into app_user(name,ch_name,email,mobile,type) values('admin','admin','admin@xxx.com','13500000000',0);
 
 DROP TABLE IF EXISTS `instance_config`;
 CREATE TABLE `instance_config` (

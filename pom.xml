@@ -205,36 +205,6 @@
         </dependencies>
     </dependencyManagement>
 
-    <developers>
-
-        <developer>
-            <name>yijunzhang</name>
-            <email>yijunzhang@sohu-inc.com</email>
-            <organization>sohu-tv</organization>
-            <roles>
-                <role>developer</role>
-            </roles>
-        </developer>
-
-        <developer>
-            <name>leifu</name>
-            <email>leifu@sohu-inc.com</email>
-            <organization>sohu-tv</organization>
-            <roles>
-                <role>developer</role>
-            </roles>
-        </developer>
-
-        <developer>
-            <name>lingguo</name>
-            <email>lingguo@sohu-inc.com</email>
-            <organization>sohu-tv</organization>
-            <roles>
-                <role>developer</role>
-            </roles>
-        </developer>
-    </developers>
-
     <build>
         <pluginManagement>
             <plugins>

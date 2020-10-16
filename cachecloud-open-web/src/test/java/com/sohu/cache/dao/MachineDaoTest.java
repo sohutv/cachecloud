@@ -26,7 +26,7 @@ public class MachineDaoTest extends BaseTest {
 
         MachineInfo machineInfo = new MachineInfo();
         machineInfo.setCpu(16);
-        machineInfo.setIp("10.10.53.181");
+        machineInfo.setIp("127.0.0.1");
         machineInfo.setMem(96);
         machineInfo.setModifyTime(new Date());
         machineInfo.setRealIp("");

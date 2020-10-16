@@ -41,11 +41,11 @@ public class ImportAppCenterTest extends BaseTest {
 
         // 实例信息
         String appInstanceInfo =
-                        "10.10.53.159:7000:512\n" +
-                        "10.10.53.159:7001:512\n" +
-                        "10.10.53.159:26379:mymaster\n" +
-                        "10.10.53.159:26380:mymaster\n" +
-                        "10.10.53.159:26381:mymaster";
+                        "127.0.0.1:7000:512\n" +
+                        "127.0.0.1:7001:512\n" +
+                        "127.0.0.1:26379:mymaster\n" +
+                        "127.0.0.1:26380:mymaster\n" +
+                        "127.0.0.1:26381:mymaster";
         boolean result = importAppCenter.importAppAndInstance(appDesc, appInstanceInfo);
         logger.info("result: {}", result);
     }
@@ -87,7 +87,7 @@ public class ImportAppCenterTest extends BaseTest {
         AppDesc appDesc = new AppDesc();
         appDesc.setName("carlosfu2");
         // 实例信息
-        String appInstanceInfo = "\n10.10.53.159:6379:1024";
+        String appInstanceInfo = "\n127.0.0.1:6379:1024";
         ImportAppResult importAppResult = importAppCenter.check(appDesc, appInstanceInfo);
         logger.info("importAppResult: {}", importAppResult);
     }
@@ -101,7 +101,7 @@ public class ImportAppCenterTest extends BaseTest {
         AppDesc appDesc = new AppDesc();
         appDesc.setName("carlosfu3");
         // 实例信息
-        String appInstanceInfo = "10.10.53.159:6379";
+        String appInstanceInfo = "127.0.0.1:6379";
         ImportAppResult importAppResult = importAppCenter.check(appDesc, appInstanceInfo);
         logger.info("importAppResult: {}", importAppResult);
     }
@@ -115,7 +115,7 @@ public class ImportAppCenterTest extends BaseTest {
         AppDesc appDesc = new AppDesc();
         appDesc.setName("carlosfu4");
         // 实例信息
-        String appInstanceInfo = "10.10.10.10:6379:1024";
+        String appInstanceInfo = "127.0.0.1:6379:1024";
         ImportAppResult importAppResult = importAppCenter.check(appDesc, appInstanceInfo);
         logger.info("importAppResult: {}", importAppResult);
     }
@@ -129,7 +129,7 @@ public class ImportAppCenterTest extends BaseTest {
         AppDesc appDesc = new AppDesc();
         appDesc.setName("carlosfu5");
         // 实例信息
-        String appInstanceInfo = "10.10.53.162:ab:1024";
+        String appInstanceInfo = "127.0.0.1:ab:1024";
         ImportAppResult importAppResult = importAppCenter.check(appDesc, appInstanceInfo);
         logger.info("importAppResult: {}", importAppResult);
     }
@@ -143,7 +143,7 @@ public class ImportAppCenterTest extends BaseTest {
         AppDesc appDesc = new AppDesc();
         appDesc.setName("carlosfu6");
         // 实例信息
-        String appInstanceInfo = "10.10.53.162:6379:1024";
+        String appInstanceInfo = "127.0.0.1:6379:1024";
         ImportAppResult importAppResult = importAppCenter.check(appDesc, appInstanceInfo);
         logger.info("importAppResult: {}", importAppResult);
     }
@@ -157,7 +157,7 @@ public class ImportAppCenterTest extends BaseTest {
         AppDesc appDesc = new AppDesc();
         appDesc.setName("carlosfu7");
         // 实例信息
-        String appInstanceInfo = "10.10.53.162:6399:1024";
+        String appInstanceInfo = "127.0.0.1:6399:1024";
         ImportAppResult importAppResult = importAppCenter.check(appDesc, appInstanceInfo);
         logger.info("importAppResult: {}", importAppResult);
     }
@@ -171,7 +171,7 @@ public class ImportAppCenterTest extends BaseTest {
         AppDesc appDesc = new AppDesc();
         appDesc.setName("carlosfu8");
         // 实例信息
-        String appInstanceInfo = "10.10.53.159:6379:aa";
+        String appInstanceInfo = "127.0.0.1:6379:aa";
         ImportAppResult importAppResult = importAppCenter.check(appDesc, appInstanceInfo);
         logger.info("importAppResult: {}", importAppResult);
     }
@@ -184,7 +184,7 @@ public class ImportAppCenterTest extends BaseTest {
         AppDesc appDesc = new AppDesc();
         appDesc.setName("carlosfu9");
         // 实例信息
-        String appInstanceInfo = "10.10.53.159:6379:1024";
+        String appInstanceInfo = "127.0.0.1:6379:1024";
         ImportAppResult importAppResult = importAppCenter.check(appDesc, appInstanceInfo);
         logger.info("importAppResult: {}", importAppResult);
     }
@@ -198,7 +198,7 @@ public class ImportAppCenterTest extends BaseTest {
         AppDesc appDesc = new AppDesc();
         appDesc.setName("carlosfu10");
         // 实例信息
-        String appInstanceInfo = "10.10.53.159:26379:1024";
+        String appInstanceInfo = "127.0.0.1:26379:1024";
         ImportAppResult importAppResult = importAppCenter.check(appDesc, appInstanceInfo);
         logger.info("importAppResult: {}", importAppResult);
     }
@@ -212,7 +212,7 @@ public class ImportAppCenterTest extends BaseTest {
         AppDesc appDesc = new AppDesc();
         appDesc.setName("carlosfu11");
         // 实例信息
-        String appInstanceInfo = "10.10.53.159:26379:mymaster";
+        String appInstanceInfo = "127.0.0.1:26379:mymaster";
         ImportAppResult importAppResult = importAppCenter.check(appDesc, appInstanceInfo);
         logger.info("importAppResult: {}", importAppResult);
     }
@@ -227,11 +227,11 @@ public class ImportAppCenterTest extends BaseTest {
         appDesc.setName("carlosfu12");
         // 实例信息
         String appInstanceInfo =
-                "10.10.53.159:7000:512\n" +
-                        "10.10.53.159:7001:512\n" +
-                        "10.10.53.159:26379:mymaster\n" +
-                        "10.10.53.159:26380:mymaster\n" +
-                        "10.10.53.159:26381:mymaster";
+                "127.0.0.1:7000:512\n" +
+                        "127.0.0.1:7001:512\n" +
+                        "127.0.0.1:26379:mymaster\n" +
+                        "127.0.0.1:26380:mymaster\n" +
+                        "127.0.0.1:26381:mymaster";
         ImportAppResult importAppResult = importAppCenter.check(appDesc, appInstanceInfo);
         logger.info("importAppResult: {}", importAppResult);
     }
@@ -243,12 +243,12 @@ public class ImportAppCenterTest extends BaseTest {
         appDesc.setName("carlosfu13");
         // 实例信息
         String appInstanceInfo =
-                "10.10.53.159:8000:512\n" +
-                        "10.10.53.159:8001:512\n" +
-                        "10.10.53.159:8002:512\n" +
-                        "10.10.53.159:8003:512\n" +
-                        "10.10.53.159:8004:512\n" +
-                        "10.10.53.159:8005:512\n";
+                "127.0.0.1:8000:512\n" +
+                        "127.0.0.1:8001:512\n" +
+                        "127.0.0.1:8002:512\n" +
+                        "127.0.0.1:8003:512\n" +
+                        "127.0.0.1:8004:512\n" +
+                        "127.0.0.1:8005:512\n";
         ImportAppResult importAppResult = importAppCenter.check(appDesc, appInstanceInfo);
         logger.info("importAppResult: {}", importAppResult);
     }
