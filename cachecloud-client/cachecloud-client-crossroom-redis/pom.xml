@@ -66,26 +66,6 @@
 
     </dependencies>
 
-    <developers>
-
-        <developer>
-            <name>leifu</name>
-            <email>leifu@sohu-inc.com</email>
-            <organization>sohu-tv</organization>
-            <roles>
-                <role>developer</role>
-            </roles>
-        </developer>
-        <developer>
-            <name>yijunzhang</name>
-            <email>yijunzhang@sohu-inc.com</email>
-            <organization>sohu-tv</organization>
-            <roles>
-                <role>developer</role>
-            </roles>
-        </developer>
-    </developers>
-
     <build>
         <resources>
             <resource>

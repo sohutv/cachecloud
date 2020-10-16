@@ -918,7 +918,7 @@ CREATE TABLE `app_data_migrate_status` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='迁移状态';
 
-insert into app_user(name,ch_name,email,mobile,type) values('admin','admin','admin@sohu-inc.com','13500000000',0);
+insert into app_user(name,ch_name,email,mobile,type) values('admin','admin','admin@xxx.com','13500000000',0);
 
 DROP TABLE IF EXISTS `instance_config`;
 CREATE TABLE `instance_config` (

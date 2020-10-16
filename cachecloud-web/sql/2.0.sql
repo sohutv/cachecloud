@@ -421,7 +421,7 @@ CREATE TABLE `app_user` (
 --  Records of `app_user`
 -- ----------------------------
 BEGIN;
-INSERT INTO `app_user` VALUES ('1', 'admin', 'admin', 'admin@sohu-inc.com', '13500000000', '0', null, '1');
+INSERT INTO `app_user` VALUES ('1', 'admin', 'admin', 'admin@xxx.com', '13500000000', '0', null, '1');
 COMMIT;
 
 --
