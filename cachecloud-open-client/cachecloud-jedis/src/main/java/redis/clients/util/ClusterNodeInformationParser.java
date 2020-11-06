@@ -34,6 +34,11 @@ public class ClusterNodeInformationParser {
   public HostAndPort getHostAndPortFromNodeLine(String[] nodeInfoPartArray, HostAndPort current) {
     String stringHostAndPort = nodeInfoPartArray[HOST_AND_PORT_INDEX];
 
+    int index = stringHostAndPort.indexOf("@");
+    if (index != -1 ){
+        stringHostAndPort = stringHostAndPort.substring(0, index);
+    }
+
     String[] arrayHostAndPort = stringHostAndPort.split(":");
     return new HostAndPort(arrayHostAndPort[0].isEmpty() ? current.getHost() : arrayHostAndPort[0],
         arrayHostAndPort[1].isEmpty() ? current.getPort() : Integer.valueOf(arrayHostAndPort[1]));
