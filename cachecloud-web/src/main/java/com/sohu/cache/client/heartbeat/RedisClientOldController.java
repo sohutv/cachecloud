@@ -55,9 +55,6 @@ public class RedisClientOldController {
 
     private void getRedisClusterInfo(HttpServletRequest request, long appId, Model model) {
         String clientVersion = request.getParameter("clientVersion");
-        if (!checkClientVersion(appId, clientVersion, model)) {
-            return;
-        }
 
         List<InstanceInfo> instanceList = instanceDao.getInstListByAppId(appId);
         if (instanceList == null || instanceList.isEmpty()) {
@@ -113,9 +110,6 @@ public class RedisClientOldController {
 
     private void getRedisSentinelInfo(HttpServletRequest request, long appId, Model model) {
         String clientVersion = request.getParameter("clientVersion");
-        if (!checkClientVersion(appId, clientVersion, model)) {
-            return;
-        }
 
         List<InstanceInfo> instanceList = instanceDao.getInstListByAppId(appId);
         if (instanceList == null || instanceList.isEmpty()) {
@@ -170,9 +164,6 @@ public class RedisClientOldController {
 
     private void getRedisStandaloneInfo(HttpServletRequest request, long appId, Model model) {
         String clientVersion = request.getParameter("clientVersion");
-        if (!checkClientVersion(appId, clientVersion, model)) {
-            return;
-        }
 
         List<InstanceInfo> instanceList = instanceDao.getInstListByAppId(appId);
         String standalone = null;
@@ -232,27 +223,6 @@ public class RedisClientOldController {
             }
         }
         return true;
-    }
-
-    private boolean checkClientVersion(long appId, String clientVersion, Model model) {
-        /** 检查客户端的版本 **/
-        List<String> goodVersions = Lists.newArrayList(ConstUtils.GOOD_CLIENT_VERSIONS.split(ConstUtils.COMMA));
-        List<String> warnVersions = Lists.newArrayList(ConstUtils.WARN_CLIENT_VERSIONS.split(ConstUtils.COMMA));
-
-        boolean versionOk = true;
-
-        if (goodVersions.contains(clientVersion)) {
-            model.addAttribute("status", ClientStatusEnum.GOOD.getStatus());
-            model.addAttribute("message", "appId:" + appId + " client is up to date, Cheers!");
-        } else if (warnVersions.contains(clientVersion)) {
-            model.addAttribute("status", ClientStatusEnum.WARN.getStatus());
-            model.addAttribute("message", "WARN: client is NOT the newest, please update!");
-        } else {
-            model.addAttribute("status", ClientStatusEnum.ERROR.getStatus());
-            model.addAttribute("message", "ERROR: client is TOO old or NOT recognized, please update NOW!");
-            versionOk = false;
-        }
-        return versionOk;
     }
 
 }

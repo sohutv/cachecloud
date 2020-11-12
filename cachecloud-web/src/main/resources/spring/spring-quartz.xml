@@ -31,12 +31,7 @@
         <property name="jobClass" value="com.sohu.cache.schedule.brevity.DispatcherBrevityScheduleJob"></property>
         <property name="durability" value="true"/>
     </bean>
-    <bean id="monitorThreadPoolJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="name" value="monitorThreadPoolJobDetail"></property>
-        <property name="group" value="monitorThreadPoolGroup"></property>
-        <property name="jobClass" value="com.sohu.cache.schedule.jobs.MonitorThreadPoolJob"></property>
-        <property name="durability" value="true"/>
-    </bean>
+
     <bean id="errorLogMinuteStatJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="name" value="errorLogMinuteStatJob"/>
         <property name="group" value="errorLogMinuteStatGroup"/>
@@ -76,7 +71,6 @@
                 <ref bean="systemConfigRefreshTrigger"/>
                 <ref bean="dispatcherBrevityScheduleTrigger"/>
                 <ref bean="errorLogMinuteStatTrigger"/>
-                <ref bean="monitorThreadPoolTrigger"/>
             </array>
         </property>
 
@@ -85,7 +79,6 @@
                 <ref bean="systemConfigRefreshJobDetail"/>
                 <ref bean="dispatcherBrevityScheduleJobDetail"/>
                 <ref bean="errorLogMinuteStatJobDetail"/>
-                <ref bean="monitorThreadPoolJobDetail"/>
             </array>
         </property>
     </bean>
@@ -374,13 +367,6 @@
         <property name="jobDetail" ref="instanceAlertValueJobDetail"/>
         <property name="cronExpression" value="0 0/1 * ? * *"/>
         <property name="misfireInstruction" value="2"/>
-    </bean>
-
-    <bean id="monitorThreadPoolTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="name" value="monitorThreadPoolTrigger"/>
-        <property name="group" value="monitorThreadPoolGroup"/>
-        <property name="jobDetail" ref="monitorThreadPoolJobDetail"/>
-        <property name="cronExpression" value="0/10 * * ? * *"/>
     </bean>
 
     <bean id="instanceStateJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">

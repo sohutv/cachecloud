@@ -80,7 +80,7 @@
 
 
 		<li <c:if test="${machineActive == 1}">class="active"</c:if>>
-			<a href="/manage/machine/list">
+			<a href="/manage/machine/index">
 				<i class="glyphicon glyphicon-wrench"></i>
 				<span class="title">机器管理</span>
 				<c:if test="${machineActive == 1}">
@@ -89,17 +89,7 @@
 				</c:if>
 			</a>
 		</li>
-		
-		<%--<li <c:if test="${clientVersionActive == 1}">class="active"</c:if>>--%>
-			<%--<a href="/manage/client/version">--%>
-				<%--<i class="glyphicon glyphicon-star"></i>--%>
-				<%--<span class="title">客户端版本统计</span>--%>
-				<%--<c:if test="${clientVersionActive == 1}">--%>
-					<%--<span class="selected"></span>--%>
-					<%--<span class="arrow"></span>--%>
-				<%--</c:if>--%>
-			<%--</a>--%>
-		<%--</li>--%>
+
 
 		<li <c:if test="${instanceAlertValueActive == 1}">class="active"</c:if>>
 			<a href="/manage/instanceAlert/init">

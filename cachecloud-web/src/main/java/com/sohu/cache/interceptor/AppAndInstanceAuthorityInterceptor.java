@@ -47,7 +47,7 @@ public class AppAndInstanceAuthorityInterceptor extends HandlerInterceptorAdapte
         // 1. 获取用户
         String userName = userLoginStatusService.getUserNameFromLoginStatus(request);
         //未登录
-            if (StringUtils.isBlank(userName)) {
+        if (StringUtils.isBlank(userName)) {
             String redirectUrl = userLoginStatusService.getRedirectUrl(request);
             response.sendRedirect(redirectUrl);
             return false;

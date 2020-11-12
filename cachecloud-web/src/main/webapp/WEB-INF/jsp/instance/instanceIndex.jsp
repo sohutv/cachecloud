@@ -14,16 +14,16 @@
     </div>
     <div class="tabbable-custom">
         <ul class="nav nav-tabs" id="instance_tabs">
-            <li id="instance_stat" class="active" data-url="/admin/instance/stat.html?instanceId=${instanceId}&startDate=${startDate}&endDate=${endDate}"><a href="?instanceId=${instanceId}&tabTag=instance_stat">实例统计信息</a></li>
-            <li id="app_topology" data-url="/admin/app/topology.html?appId=${appId}"><a href="?instanceId=${instanceId}&tabTag=app_topology">拓扑结构</a></li>
+            <li id="instance_stat" class="active" data-url="/admin/instance/stat?instanceId=${instanceId}&startDate=${startDate}&endDate=${endDate}"><a href="?instanceId=${instanceId}&tabTag=instance_stat">实例统计信息</a></li>
+            <li id="app_topology" data-url="/admin/app/topology?appId=${appId}"><a href="?instanceId=${instanceId}&tabTag=app_topology">拓扑结构</a></li>
             <c:if test="${type == 2 or type == 6}">
-            <li id="instance_slowSelect" data-url="/admin/instance/slowSelect.html?instanceId=${instanceId}"><a href="?instanceId=${instanceId}&tabTag=instance_slowSelect">慢查询分析</a></li>
-            <li id="instance_configSelect" data-url="/admin/instance/configSelect.html?instanceId=${instanceId}&appId=${appId}"><a href="?instanceId=${instanceId}&tabTag=instance_configSelect">配置查询</a></li>
-            <li id="instance_clientList" data-url="/admin/instance/clientList.html?instanceId=${instanceId}&condition=${condition}"><a href="?instanceId=${instanceId}&tabTag=instance_clientList">连接信息</a></li>
+            <li id="instance_slowSelect" data-url="/admin/instance/slowSelect?instanceId=${instanceId}"><a href="?instanceId=${instanceId}&tabTag=instance_slowSelect">慢查询分析</a></li>
+            <li id="instance_configSelect" data-url="/admin/instance/configSelect?instanceId=${instanceId}&appId=${appId}"><a href="?instanceId=${instanceId}&tabTag=instance_configSelect">配置查询</a></li>
+            <li id="instance_clientList" data-url="/admin/instance/clientList?instanceId=${instanceId}&condition=${condition}"><a href="?instanceId=${instanceId}&tabTag=instance_clientList">连接信息</a></li>
             </c:if>
-            <li id="instance_fault" data-url="/admin/instance/fault.html?instanceId=${instanceId}&startDate=${startDate}&endDate=${endDate}"><a href="?instanceId=${instanceId}&tabTag=instance_fault">故障报警</a></li>
-            <li id="instance_advancedAnalysis" data-url="/admin/instance/advancedAnalysis.html?instanceId=${instanceId}&startDate=${startDate}&endDate=${endDate}"><a href="?instanceId=${instanceId}&tabTag=instance_advancedAnalysis">命令曲线</a></li>
-            <li id="instance_command" data-url="/admin/instance/command.html?instanceId=${instanceId}"><a href="?instanceId=${instanceId}&tabTag=instance_command">命令执行</a></li>
+            <li id="instance_fault" data-url="/admin/instance/fault?instanceId=${instanceId}&startDate=${startDate}&endDate=${endDate}"><a href="?instanceId=${instanceId}&tabTag=instance_fault">故障报警</a></li>
+            <li id="instance_advancedAnalysis" data-url="/admin/instance/advancedAnalysis?instanceId=${instanceId}&startDate=${startDate}&endDate=${endDate}"><a href="?instanceId=${instanceId}&tabTag=instance_advancedAnalysis">命令曲线</a></li>
+            <li id="instance_command" data-url="/admin/instance/command?instanceId=${instanceId}"><a href="?instanceId=${instanceId}&tabTag=instance_command">命令执行</a></li>
         </ul>
         <div class="tab-content">
             <div class="tab-pane active" id="instance_statTab"></div>

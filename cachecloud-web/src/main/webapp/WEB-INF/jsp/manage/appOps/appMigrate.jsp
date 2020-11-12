@@ -342,7 +342,7 @@ function autoSelectMachine(type,machineNum,mem,masterNum,slaveNum) {
                         '   <td>'+machine.instanceNum+"&nbsp;&nbsp;/&nbsp;&nbsp;"+machine.cpu+'</td>\n' +
                         '   <td>'+machineDeployStat.masterNum+"&nbsp;&nbsp;/&nbsp;&nbsp;"+machineDeployStat.slaveNum+"&nbsp;&nbsp;/&nbsp;&nbsp;"+machineDeployStat.sentinelNum+'</td>\n' +
                         '   <td>'+machine.realIp+"&nbsp;&nbsp;/&nbsp;&nbsp;"+machine.rack+'</td>\n' +
-                        "   <td> <a target='_blank' href='/manage/machine/list?ipLike="+machine.ip+" '>查看</a>\n" +
+                        "   <td> <a target='_blank' href='/manage/machine/index?tabTag=machine&ipLike="+machine.ip+" '>查看</a>\n" +
                         '</tr>'
                     )
                     $("#redisMachineInfoDiv").removeAttr("style");
@@ -385,7 +385,7 @@ function selectSentinelMachine(appId) {
                         '   <td>'+(machine.usedMem/1024/1024/1024).toFixed(2)+'G</td>\n' +
                         '   <td ><font color="#FF0000">'+(machine.mem-(machine.applyMem/1024/1024/1024)).toFixed(2)+'G </font> </td>\n' +
                         '   <td>'+machine.instanceNum+"&nbsp;&nbsp;/&nbsp;&nbsp;"+machine.cpu+'</td>\n' +
-                        "   <td> <a target='_blank' href='/manage/machine/list?ipLike="+machine.ip+" '>查看</a>\n" +
+                        "   <td> <a target='_blank' href='/manage/machine/index?tabTag=machine&ipLike="+machine.ip+" '>查看</a>\n" +
                         '</tr>'
                     )
                     $("#sentinelMachineInfoDiv").removeAttr("style");

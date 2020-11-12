@@ -176,7 +176,7 @@ public class ResourceController extends BaseController {
 
         JSONObject result = new JSONObject();
         if (StringUtils.isEmpty(containerIp)) {
-            containerIp = "127.0.0.1";
+            containerIp = "10.11.198.100";
         }
         SuccessEnum successEnum = SuccessEnum.FAIL;
 

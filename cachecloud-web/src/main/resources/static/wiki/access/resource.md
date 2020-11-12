@@ -21,7 +21,7 @@ CacheCloud系统需要依赖一些脚本，Redis资源包，迁移工具，公�
 
 根目录：仓库资源的根目录；例如:/opt/download/software/cachecloud/resource
 
-资源下载地址：可访问资源地址；例如:http://%.%.sohuno.com/software/cachecloud/resource
+资源下载地址：可访问资源地址；例如:http://%.%.%.com/software/cachecloud/resource
 
 ### 三、目录管理
 

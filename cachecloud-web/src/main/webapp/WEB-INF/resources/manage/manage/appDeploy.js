@@ -150,7 +150,7 @@ function generateDeployInfo() {
                     var machineDeployStat=machineDeployStatMap[machine.ip];
                     $("#tableList tbody").prepend(
                         '<tr class="odd gradeX">\n' +
-                        "   <td> <a target='_blank' href='/manage/machine/list?ipLike="+machine.ip+" '>"+machine.ip+"</a>\n" +
+                        "   <td> <a target='_blank' href='/manage/machine/index?tabTag=machine&ipLike="+machine.ip+" '>"+machine.ip+"</a>\n" +
                         '   <td>'+machine.instanceNum+"&nbsp;&nbsp;/&nbsp;&nbsp;"+machine.cpu+'</td>\n' +
                         '   <td> '+(machine.usedMem/1024/1024/1024).toFixed(1)+'G / <font color="#FF0000">'+(machine.mem-(machine.usedMem/1024/1024/1024)).toFixed(1)+'G </font> / '+machine.mem+'G</td>\n' +
                         '   <td> - G / - G / - G</td>\n' +

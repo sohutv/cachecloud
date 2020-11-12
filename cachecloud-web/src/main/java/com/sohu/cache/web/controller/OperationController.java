@@ -14,21 +14,19 @@ import com.sohu.cache.task.constant.MachineSyncEnum;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.enums.PodStatusEnum;
 import com.sohu.cache.web.enums.SuccessEnum;
-import com.sohu.cache.web.util.VelocityUtils;
+import com.sohu.cache.web.util.FreemakerUtils;
+import freemarker.template.Configuration;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang.StringUtils;
-import org.apache.velocity.app.VelocityEngine;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,13 +52,13 @@ public class OperationController extends BaseController {
     @Resource
     private MachineRoomDao machineRoomDao;
     @Resource
-    private VelocityEngine velocityEngine;
-    @Resource
     private EmailComponent emailComponent;
     @Resource
     private RedisConfigTemplateService redisConfigTemplateService;
     @Resource
     private MachineRelationDao machineRelationDao;
+    @Autowired
+    private Configuration configuration;
 
 
     @RequestMapping(value = "/machines", method = {RequestMethod.POST})
@@ -301,7 +299,7 @@ public class OperationController extends BaseController {
                     List<InstanceAlertValueResult> instanceAlertValueResults = new ArrayList<>();
                     if (syncStatus.getValue() == MachineSyncEnum.NO_CHANGE.getValue() ||
                             syncStatus.getValue() == MachineSyncEnum.SYNC_SUCCESS.getValue()) {
-                        instanceAlertValueResults = instanceDeployCenter.checkAndStartExceptionInstance(ip,true);
+                        instanceAlertValueResults = instanceDeployCenter.checkAndStartExceptionInstance(ip, true);
                     }
                     logger.info("pod ip:{} sync status:{}, scroll redis number:{} ", ip, syncStatus.getDesc(), instanceAlertValueResults.size());
                     return true;
@@ -579,12 +577,9 @@ public class OperationController extends BaseController {
         } else if (type.equalsIgnoreCase("POD-OFFLINE")) {
             title += "POD状态变更:下线";
         }
-        String mailContent = VelocityUtils.createText(velocityEngine,
-                null, null, null,
-                null,
-                operationAlertValueResultList,
-                null,
-                "OperationAlert.vm", "UTF-8");
+        Map<String, Object> context = new HashMap<>();
+        context.put("operationAlertValueResultList", operationAlertValueResultList);
+        String mailContent = FreemakerUtils.createText("OperationAlert.ftl", configuration, context);
         logger.info("send mail content: {}" + operationAlertValueResultList);
         emailComponent.sendMailToAdmin(title, mailContent);
     }

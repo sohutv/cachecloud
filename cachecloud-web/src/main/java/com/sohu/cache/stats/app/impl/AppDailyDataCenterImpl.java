@@ -11,12 +11,12 @@ import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.service.AppService;
 import com.sohu.cache.web.service.UserService;
 import com.sohu.cache.web.util.DateUtil;
-import com.sohu.cache.web.util.VelocityUtils;
+import com.sohu.cache.web.util.FreemakerUtils;
 import com.sohu.cache.web.vo.AppDetailVO;
+import freemarker.template.Configuration;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang.time.DateUtils;
-import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +48,7 @@ public class AppDailyDataCenterImpl implements AppDailyDataCenter {
     @Autowired
     private AppStatsCenter appStatsCenter;
     @Autowired
-    private VelocityEngine velocityEngine;
+    private Configuration configuration;
     @Autowired
     private InstanceSlowLogDao instanceSlowLogDao;
     @Autowired
@@ -133,7 +133,7 @@ public class AppDailyDataCenterImpl implements AppDailyDataCenter {
         if (appDesc.isOffline()) {
             return null;
         }
-        if (appDesc.isTest()) {
+        if (appDesc.isTestOk()) {
             return null;
         }
         AppDailyData appDailyData = new AppDailyData();
@@ -267,13 +267,10 @@ public class AppDailyDataCenterImpl implements AppDailyDataCenter {
         String startDateFormat = DateUtil.formatYYYYMMdd(startDate);
         String title = String.format("【CacheCloud】%s日报(appId=%s)", startDateFormat, appDetailVO.getAppDesc().getAppId());
         AppDesc appDesc = appDetailVO.getAppDesc();
-        String mailContent = VelocityUtils.createText(velocityEngine,
-                appDesc, null, appDailyData,
-                null,
-                null,
-                null,
-                "appDaily.vm",
-                "UTF-8");
+        Map<String, Object> context = new HashMap<>();
+        context.put("appDesc", appDesc);
+        context.put("appDailyData", appDailyData);
+        String mailContent = FreemakerUtils.createText("appDaily.ftl", configuration, context);
         emailComponent.sendMail(title, mailContent, appDetailVO.getEmailList(), ccEmailList);
     }
 
@@ -281,12 +278,9 @@ public class AppDailyDataCenterImpl implements AppDailyDataCenter {
     public void noteAppTopologyDaily(Date startDate, List<Map> topologyExamResult) {
         String startDateFormat = DateUtil.formatYYYYMMdd(startDate);
         String title = String.format("【CacheCloud】应用拓扑结构检查结果%s日报", startDateFormat);
-        String mailContent = VelocityUtils.createText(velocityEngine,
-                null, null, null,
-                null,
-                null,
-                topologyExamResult,
-                "topologyExam.vm", "UTF-8");
+        Map<String, Object> context = new HashMap<>();
+        context.put("examResult", topologyExamResult);
+        String mailContent = FreemakerUtils.createText("topologyExam.ftl", configuration, context);
         emailComponent.sendMailToAdmin(title, mailContent);
     }
 

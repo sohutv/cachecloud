@@ -1,14 +1,15 @@
 package com.sohu.cache.alert.strategy;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang.math.NumberUtils;
+
 import com.sohu.cache.alert.bean.AlertConfigBaseData;
 import com.sohu.cache.entity.InstanceAlertConfig;
 import com.sohu.cache.entity.InstanceAlertValueResult;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.redis.enums.RedisInfoEnum;
-import org.apache.commons.lang.math.NumberUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 主从偏移量监控
@@ -21,8 +22,8 @@ public class MasterSlaveOffsetAlertStrategy extends AlertConfigStrategy {
     /**
      * 格式：
      *     connected_slaves:2
-     *     slave0:ip=127.0.0.1,port=6380,state=online,offset=33119690469561,lag=1
-     *     slave1:ip=127.0.0.1,port=6380,state=online,offset=33119690513578,lag=0
+     *     slave0:ip=10.10.76.151,port=6380,state=online,offset=33119690469561,lag=1
+     *     slave1:ip=10.10.76.160,port=6380,state=online,offset=33119690513578,lag=0
      *     master_repl_offset:33119653194425
      */
     @Override

@@ -44,7 +44,6 @@ public class LoginController extends BaseController {
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public ModelAndView init(HttpServletRequest request, HttpServletResponse response, Model model) {
         model.addAttribute(ConstUtils.RREDIRECT_URL_PARAM, request.getParameter(ConstUtils.RREDIRECT_URL_PARAM));
-//        model.addAttribute(ConstUtils.SSO_CLIENT, ssoConfiguration.getClientId());
         return new ModelAndView("manage/login");
     }
 

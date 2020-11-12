@@ -2,6 +2,7 @@ package com.sohu.cache.machine;
 
 import com.sohu.cache.entity.MachineInfo;
 import com.sohu.cache.entity.MachineRelation;
+import com.sohu.cache.entity.MachineRoom;
 import com.sohu.cache.web.enums.SuccessEnum;
 
 import java.util.List;
@@ -20,6 +21,10 @@ public interface MachineDeployCenter {
      * @param machineInfo
      */
     public boolean addMachine(MachineInfo machineInfo);
+
+    boolean addMachineRoom(MachineRoom room);
+
+    boolean removeMachineRoom(int roomId);
 
     /**
      * 移除一台机器：删db数据和关闭统计

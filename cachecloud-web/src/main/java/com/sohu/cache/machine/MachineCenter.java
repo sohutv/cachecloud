@@ -201,6 +201,8 @@ public interface MachineCenter {
      */
     public List<MachineRoom> getEffectiveRoom();
 
+    List<MachineRoom> getAllRoom();
+
     /**
      * 机器使用内存分布
      * @return

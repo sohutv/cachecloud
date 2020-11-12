@@ -9,17 +9,14 @@ import com.sohu.cache.util.StringUtil;
 import com.sohu.cache.web.service.AppService;
 import com.sohu.cache.web.service.UserService;
 import com.sohu.cache.web.util.DateUtil;
-import com.sohu.cache.web.util.VelocityUtils;
+import com.sohu.cache.web.util.FreemakerUtils;
+import freemarker.template.Configuration;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.time.DateUtils;
-import org.apache.velocity.app.VelocityEngine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -41,7 +38,7 @@ public class CoreAppsStatCenterImpl implements CoreAppsStatCenter {
     @Autowired
     private EmailComponent emailComponent;
     @Autowired
-    private VelocityEngine velocityEngine;
+    private Configuration configuration;
 
     @Override
     public boolean sendExpAppsStatDataEmail(String searchDate) {
@@ -58,7 +55,7 @@ public class CoreAppsStatCenterImpl implements CoreAppsStatCenter {
                 appDesc.setVersionName(versionName);
                 appDesc.setOfficer(userService.getOfficerName(appDesc.getOfficer()));
             });
-            Map<Long, AppDesc> appDescMap = appDescList.stream().collect(Collectors.toMap(AppDesc::getAppId, Function.identity()));
+            Map<String, AppDesc> appDescMap = appDescList.stream().collect(Collectors.toMap(appDesc -> String.valueOf(appDesc.getAppId()), Function.identity()));
 
 
             Map<String, List<Map<String, Object>>> appClientGatherStatGroup = appService.getFilterAppClientStatGather(-1, searchDate);
@@ -71,9 +68,13 @@ public class CoreAppsStatCenterImpl implements CoreAppsStatCenter {
         }
     }
 
-    public void noticeExpAppsDaily(String searchDate, Map<Long, AppDesc> appDescMap, Map<String, List<Map<String, Object>>> appClientGatherStatGroup) {
+    public void noticeExpAppsDaily(String searchDate, Map<String, AppDesc> appDescMap, Map<String, List<Map<String, Object>>> appClientGatherStatGroup) {
         String title = String.format("【CacheCloud】%s应用日报", searchDate);
-        String mailContent = VelocityUtils.createExpAppsText(velocityEngine, searchDate, appDescMap, appClientGatherStatGroup, "expAppsDaily.vm", "UTF-8");
+        Map<String, Object> context = new HashMap<>();
+        context.put("appDescMap", appDescMap);
+        context.put("appClientGatherStatGroup", appClientGatherStatGroup);
+        context.put("searchDate", searchDate);
+        String mailContent = FreemakerUtils.createText("expAppsDaily.ftl", configuration, context);
         log.info("noticeExpAppsDaily sendMailToAdmin, title:{}, mailContent:{}", title, mailContent);
         emailComponent.sendMailToAdmin(title, mailContent);
         log.info("noticeExpAppsDaily success");

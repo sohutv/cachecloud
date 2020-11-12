@@ -12,10 +12,11 @@
         <div class="row">
             <div class="col-md-12">
                 <div style="float:right">
-                    <form class="form-inline" role="form" action="/manage/total/list" method="get">
+                    <form class="form-inline" role="form" action="/manage/total/list" method="get" id="appList">
                         <div class="form-group">
                             <input type="text" class="form-control" id="appParam" name="appParam" value="${appParam}"
                                    placeholder="应用ID/应用名">
+                            <input type="hidden" name="pageNo" id="pageNo">
                         </div>
                         <button type="submit" class="btn btn-info">查询</button>
                     </form>
@@ -224,7 +225,7 @@
 <script>
     // 配置预览
     function configPreview(appId) {
-        window.open("/manage/redisConfig/init?versionid=" + $('#versionSelect' + appId + " option:selected").attr('versionid'));
+        window.open("/manage/redisConfig/init?resourceId=" + $('#versionSelect' + appId + " option:selected").attr('versionid'));
     }
 
     // 升级配置对比

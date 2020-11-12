@@ -11,15 +11,14 @@ import com.sohu.cache.util.EnvUtil;
 import com.sohu.cache.web.enums.SuccessEnum;
 import com.sohu.cache.web.service.UserService;
 import com.sohu.cache.web.vo.AppDetailVO;
+import freemarker.template.Configuration;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -43,8 +42,7 @@ public class AppEmailUtil {
     private UserService userService;
 
     @Autowired
-    @Lazy
-    private VelocityEngine velocityEngine;
+    private Configuration configuration;
 
     @Autowired
     private AppStatsCenter appStatsCenter;
@@ -64,7 +62,12 @@ public class AppEmailUtil {
         }
         List<String> ccEmailList = getCCEmailList(appDesc, appAudit);
         appDesc.setOfficer(userService.getOfficerName(appDesc.getOfficer()));
-        String mailContent = VelocityUtils.createText(velocityEngine, appDesc, appAudit, new AppDailyData(), new ArrayList<InstanceAlertValueResult>(), null, null, "appAudit.vm", "UTF-8");
+        Map<String, Object> context = new HashMap<>();
+        context.put("appDesc", appDesc);
+        context.put("appAudit", appAudit);
+        context.put("appDailyData", new AppDailyData());
+        context.put("instanceAlertValueResultList", new ArrayList<InstanceAlertValueResult>());
+        String mailContent = FreemakerUtils.createText("appAudit.ftl", configuration, context);
         AppUser appUser = userService.get(appDesc.getUserId());
         emailComponent.sendMail("【CacheCloud】状态通知", mailContent, Arrays.asList(appUser.getEmail()), ccEmailList);
     }
@@ -81,7 +84,12 @@ public class AppEmailUtil {
         }
         List<String> ccEmailList = getCCEmailList(appDesc, appAudit);
         appDesc.setOfficer(userService.getOfficerName(appDesc.getOfficer()));
-        String mailContent = VelocityUtils.createText(velocityEngine, appDesc, appAudit, new AppDailyData(), new ArrayList<InstanceAlertValueResult>(), null, null, "appAudit.vm", "UTF-8");
+        Map<String, Object> context = new HashMap<>();
+        context.put("appDesc", appDesc);
+        context.put("appAudit", appAudit);
+        context.put("appDailyData", new AppDailyData());
+        context.put("instanceAlertValueResultList", new ArrayList<InstanceAlertValueResult>());
+        String mailContent = FreemakerUtils.createText("appAudit.ftl", configuration, context);
         AppUser appUser = userService.get(appDesc.getUserId());
         emailComponent.sendMail("【CacheCloud】API应用申请通知", mailContent, Arrays.asList(appUser.getEmail()), ccEmailList);
     }

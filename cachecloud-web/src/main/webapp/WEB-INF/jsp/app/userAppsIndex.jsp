@@ -32,7 +32,7 @@
             <li id="app_command_analysis" data-url="/admin/app/commandAnalysis?appId=${appId}&startDate=${startDate}&endDate=${endDate}&firstCommand=${firstCommand}">
                 <a href="?appId=${appId}&tabTag=app_command_analysis">命令曲线</a>
             </li>
-            <li id="app_command" data-url="/admin/app/command.html?appId=${appId}">
+            <li id="app_command" data-url="/admin/app/command?appId=${appId}">
                 <a href="?appId=${appId}&tabTag=app_command">命令执行</a>
             </li>
             <li id="app_demo" data-url="/wiki/access/client?entry=client">

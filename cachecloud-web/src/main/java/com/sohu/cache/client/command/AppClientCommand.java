@@ -50,7 +50,7 @@ public class AppClientCommand extends HystrixCommand<Map<String, Object>> {
     private final ConcurrentMap<Long, Map<String, Object>> appClientMap;
 
     public AppClientCommand(AppClientParams appClientParams, AppDao appDao, InstanceDao instanceDao,
-            ClientVersionService clientVersionService, ConcurrentMap<Long, Map<String, Object>> appClientMap) {
+                            ClientVersionService clientVersionService, ConcurrentMap<Long, Map<String, Object>> appClientMap) {
         super(Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey(groupKey))
                 .andCommandKey(HystrixCommandKey.Factory.asKey(commandKey))
                 .andThreadPoolKey(HystrixThreadPoolKey.Factory.asKey(poolKey))
@@ -110,7 +110,7 @@ public class AppClientCommand extends HystrixCommand<Map<String, Object>> {
 
         int status = MapUtils.getIntValue(model, "status", ClientStatusEnum.ERROR.getStatus());
         if (status == ClientStatusEnum.ERROR.getStatus()) {
-            logger.error("app-fallback-error: appId={} ,clientIp={},stat={}", appClientParams.getAppId(),appClientParams.getAppClientIp(), model);
+            logger.error("app-fallback-error: appId={} ,clientIp={},stat={}", appClientParams.getAppId(), appClientParams.getAppClientIp(), model);
         }
         return model;
     }
@@ -153,6 +153,7 @@ public class AppClientCommand extends HystrixCommand<Map<String, Object>> {
             standalone = instanceInfo.getIp() + ":" + instanceInfo.getPort();
         }
         model.put("standalone", standalone);
+        model.put("status", ClientStatusEnum.GOOD.getStatus());
 
         return model;
     }
@@ -193,6 +194,7 @@ public class AppClientCommand extends HystrixCommand<Map<String, Object>> {
         model.put("sentinels", sentinels);
         model.put("masterName", masterName);
         model.put("appId", appId);
+        model.put("status", ClientStatusEnum.GOOD.getStatus());
 
         return model;
     }
@@ -225,6 +227,7 @@ public class AppClientCommand extends HystrixCommand<Map<String, Object>> {
         model.put("appId", appId);
         model.put("shardNum", shardNum);
         model.put("shardInfo", shardsInfo);
+        model.put("status", ClientStatusEnum.GOOD.getStatus());
 
         return model;
     }
@@ -240,10 +243,6 @@ public class AppClientCommand extends HystrixCommand<Map<String, Object>> {
             if (StringUtils.isBlank(clientVersion)) {
                 clientVersion = "1.7-SNAPSHOT";
             }
-        }
-        boolean isVersionOk = checkClientVersion(clientVersion, model);
-        if (!isVersionOk) {
-            return false;
         }
         addPkey(clientVersion, model);
         if (clientRequest) {
@@ -273,28 +272,6 @@ public class AppClientCommand extends HystrixCommand<Map<String, Object>> {
                 model.put("pkey", "");
             }
         }
-    }
-
-    private boolean checkClientVersion(String clientVersion, Map<String, Object> model) {
-        long appId = appClientParams.getAppId();
-        /** 检查客户端的版本 **/
-        List<String> goodVersions = Lists.newArrayList(ConstUtils.GOOD_CLIENT_VERSIONS.split(ConstUtils.COMMA));
-        List<String> warnVersions = Lists.newArrayList(ConstUtils.WARN_CLIENT_VERSIONS.split(ConstUtils.COMMA));
-
-        boolean versionOk = true;
-
-        if (goodVersions.contains(clientVersion)) {
-            model.put("status", ClientStatusEnum.GOOD.getStatus());
-            model.put("message", "appId:" + appId + " client is up to date, Cheers!");
-        } else if (warnVersions.contains(clientVersion)) {
-            model.put("status", ClientStatusEnum.WARN.getStatus());
-            model.put("message", "WARN: client is NOT the newest, please update!");
-        } else {
-            model.put("status", ClientStatusEnum.ERROR.getStatus());
-            model.put("message", "ERROR: client is TOO old or NOT recognized, please update NOW!");
-            versionOk = false;
-        }
-        return versionOk;
     }
 
 }

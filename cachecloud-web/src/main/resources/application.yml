@@ -1,6 +1,8 @@
 spring:
   profiles:
     active: local
+  main:
+    allow-bean-definition-overriding: true
   mvc:
     servlet:
       load-on-startup: 1
@@ -14,6 +16,11 @@ spring:
       settings:
         number_format: computer
     log-resolved-exception: true
+    contentnegotiation:
+      favor-path-extension: true
+    pathmatch:
+      use-suffix-pattern: true
+      use-registered-suffix-pattern: true
   http:
     encoding:
       charset: UTF-8
@@ -21,29 +28,35 @@ spring:
       force: true
 cachecloud:
   jdbc:
-    driver: com.mysql.jdbc.Driver
+    driver: com.mysql.cj.jdbc.Driver
     validationQuery: select 1 from dual
 management:
-  security:
-    enabled: false
-  port: 8888
-  context-path: /actuator
-#关闭不安全控制endpoints
-endpoints:
-  shutdown:
-    enabled: false
-  restart:
-    enabled: false
-  pause:
-    enabled: false
-  heapdump:
-    enabled: false
-  refresh:
-    enabled: false
-  auditevents:
-    enabled: false
-  jolokia:
-    enabled: false
-  env:
-    post:
+  server:
+    port: 8888
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+    enabled-by-default: true
+  endpoint:
+    prometheus:
+      enabled: true
+    health:
+      show-details: always
+    shutdown: #关闭不安全控制endpoints
       enabled: false
+    restart:
+      enabled: false
+    pause:
+      enabled: false
+    heapdump:
+      enabled: false
+    refresh:
+      enabled: false
+    auditevents:
+      enabled: false
+    jolokia:
+      enabled: false
+    env:
+      post:
+        enabled: false

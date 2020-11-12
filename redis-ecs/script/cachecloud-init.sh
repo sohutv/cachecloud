@@ -16,7 +16,7 @@ set -o nounset
 set -o errexit
 
 # Redis6.0及以上版本需要依赖操作系统gcc 4.9.0以上版本编译
-redis_array=("redis-3.0.7" "redis-4.0.14" "redis-5.0.9")
+redis_array=("redis-3.0.7" "redis-3.2.12" "redis-4.0.14" "redis-5.0.9")
 
 # initial config
 initConfig() {
@@ -84,7 +84,6 @@ init() {
   mkdir -p /opt/cachecloud/conf
   mkdir -p /opt/cachecloud/data
   mkdir -p /opt/cachecloud/logs
-  mkdir -p /opt/cachecloud/redis
   mkdir -p /tmp/cachecloud
   mkdir -p /data/redis
 

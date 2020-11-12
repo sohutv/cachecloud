@@ -192,7 +192,7 @@
 										<select name="type" id="copyVersion" class="form-control select2_category">
                                             <option versionid="-1">不备份</option>
                                             <c:forEach items="${resourceList}" var="resource">
-                                               <c:if test="${resource.ispush==1}">
+                                               <c:if test="${resource.status==1}">
                                                     <option <c:if test="${resource.id == 1}">selected</c:if> versionid="${resource.id}">${resource.name}</option>
                                                </c:if>
                                             </c:forEach>

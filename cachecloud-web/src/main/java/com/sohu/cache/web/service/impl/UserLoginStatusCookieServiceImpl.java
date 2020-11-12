@@ -6,6 +6,7 @@ import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.EnvUtil;
 import com.sohu.cache.web.service.UserLoginStatusService;
 import com.sohu.cache.web.service.UserService;
+import com.sohu.cache.web.util.IpUtil;
 import com.sohu.cache.web.util.WebUtil;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,7 @@ public class UserLoginStatusCookieServiceImpl implements UserLoginStatusService 
             return "admin";
         }
         String userName = WebUtil.getLoginCookieValue(request);
-        if(StringUtils.isNotBlank(userName)){
+        if (StringUtils.isNotBlank(userName)) {
             return userName;
         }
         return null;
@@ -49,9 +50,9 @@ public class UserLoginStatusCookieServiceImpl implements UserLoginStatusService 
     @Override
     public String getUserNameFromTicket(HttpServletRequest request) {
         String ticket = request.getParameter("ticket");
-        if(StringUtils.isNotBlank(ticket)){
+        if (StringUtils.isNotBlank(ticket)) {
             String email = loginComponent.getEmail(ticket);
-            if(StringUtils.isNotBlank(email) && email.contains("@")){
+            if (StringUtils.isNotBlank(email) && email.contains("@")) {
                 String userName = email.substring(0, email.indexOf("@"));
                 return userName;
             }
@@ -71,7 +72,7 @@ public class UserLoginStatusCookieServiceImpl implements UserLoginStatusService 
 
     @Override
     public String getRegisterUrl(AppUser user) {
-        if (user != null && user.getType() == -1){
+        if (user != null && user.getType() == -1) {
             return "/user/register?success=1";
         }
         return "/user/register";
@@ -80,7 +81,7 @@ public class UserLoginStatusCookieServiceImpl implements UserLoginStatusService 
     @Override
     public void addLoginStatus(HttpServletRequest request, HttpServletResponse response, String userName) {
         Cookie cookie = new Cookie(LOGIN_USER_STATUS_NAME, userName);
-        cookie.setDomain(ConstUtils.COOKIE_DOMAIN);
+        cookie.setDomain(request.getServerName());
         cookie.setPath("/");
         cookie.setMaxAge(-1);
         response.addCookie(cookie);

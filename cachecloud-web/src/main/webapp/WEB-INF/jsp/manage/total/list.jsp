@@ -7,7 +7,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<title>CacheCloud管理后台</title>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	
+
 	<%@include file="/WEB-INF/jsp/manage/include/cache_cloud_main_css.jsp" %>
 	<!-- add -->
 	<link href="/resources/css/common.css" rel="stylesheet" type="text/css"/>

@@ -84,6 +84,7 @@ public class AppDeployCenterImpl implements AppDeployCenter {
             appAudit.setAppId(appId);
             appAudit.setUserId(appUser.getId());
             appAudit.setUserName(appUser.getName());
+            appAudit.setCreateTime(new Date());
             appAudit.setModifyTime(new Date());
             appAudit.setParam1(memSize);
             appAudit.setParam2(appDesc.getTypeDesc());

@@ -39,6 +39,22 @@ public class MachineManageController extends BaseController {
     @Resource
     private MachineDeployCenter machineDeployCenter;
 
+    @RequestMapping("/index")
+    public ModelAndView index(HttpServletRequest request, HttpServletResponse response, Model model,
+                              String tabTag,
+                              String ipLike, Integer versionId, Integer isInstall, Integer useType, Integer type, Integer k8sType, String realip) {
+        model.addAttribute("tabTag", tabTag);
+        model.addAttribute("isInstall", isInstall);
+        model.addAttribute("versionId",versionId);
+        model.addAttribute("useType", useType);
+        model.addAttribute("ipLike", ipLike);
+        model.addAttribute("k8sType", k8sType);
+        model.addAttribute("type", type);
+        model.addAttribute("realip", realip);
+        model.addAttribute("machineActive", SuccessEnum.SUCCESS.value());
+        return new ModelAndView("manage/machine/list");
+    }
+
     @RequestMapping(value = "/pod/changelist")
     public ModelAndView doPodList(Model model, String ip) {
 
@@ -90,22 +106,34 @@ public class MachineManageController extends BaseController {
 
     @RequestMapping(value = "/list")
     public ModelAndView doMachineList(HttpServletRequest request,
-                                      HttpServletResponse response, Model model, String ipLike, Integer versionId, Integer isInstall, Integer useType, Integer type, Integer k8sType, String realip) {
-        List<MachineStats> machineList = machineCenter.getMachineStats(ipLike, useType, type, versionId, isInstall, k8sType, realip);
-        Map<String, Integer> machineInstanceCountMap = machineCenter.getMachineInstanceCountMap();
-        List<MachineRoom> roomList = machineCenter.getEffectiveRoom();
-        model.addAttribute("list", machineList);
-        model.addAttribute("roomList", roomList);
-        model.addAttribute("isInstall", isInstall);
-        model.addAttribute("useType", useType);
-        model.addAttribute("ipLike", ipLike);
-        model.addAttribute("k8sType", k8sType);
-        model.addAttribute("type", type);
-        model.addAttribute("realip", realip);
-        model.addAttribute("machineActive", SuccessEnum.SUCCESS.value());
-        model.addAttribute("collectAlert", "(请等待" + ConstUtils.MACHINE_STATS_CRON_MINUTE + "分钟)");
-        model.addAttribute("machineInstanceCountMap", machineInstanceCountMap);
-        return new ModelAndView("manage/machine/list");
+                                      HttpServletResponse response, Model model,
+                                      String tabTag,
+                                      String ipLike, Integer versionId, Integer isInstall, Integer useType, Integer type, Integer k8sType, String realip) {
+
+        if (tabTag.equals("machine")) {
+            List<MachineStats> machineList = machineCenter.getMachineStats(ipLike, useType, type, versionId, isInstall, k8sType, realip);
+            Map<String, Integer> machineInstanceCountMap = machineCenter.getMachineInstanceCountMap();
+            List<MachineRoom> roomList = machineCenter.getEffectiveRoom();
+            model.addAttribute("roomList", roomList);
+            model.addAttribute("list", machineList);
+            model.addAttribute("isInstall", isInstall);
+            model.addAttribute("versionId",versionId);
+            model.addAttribute("useType", useType);
+            model.addAttribute("ipLike", ipLike);
+            model.addAttribute("k8sType", k8sType);
+            model.addAttribute("type", type);
+            model.addAttribute("realip", realip);
+            model.addAttribute("machineActive", SuccessEnum.SUCCESS.value());
+            model.addAttribute("collectAlert", "(请等待" + ConstUtils.MACHINE_STATS_CRON_MINUTE + "分钟)");
+            model.addAttribute("machineInstanceCountMap", machineInstanceCountMap);
+
+            return new ModelAndView("manage/machine/machineList");
+        } else if (tabTag.equals("room")) {
+            List<MachineRoom> roomList = machineCenter.getAllRoom();
+            model.addAttribute("roomList", roomList);
+            return new ModelAndView("manage/machine/roomList");
+        }
+        return new ModelAndView("");
     }
 
     /**
@@ -218,7 +246,7 @@ public class MachineManageController extends BaseController {
         } else {
             logger.warn("machineIp is empty!");
         }
-        return new ModelAndView("redirect:/manage/machine/list");
+        return new ModelAndView("redirect:/manage/machine/index?tabTag=machine");
     }
 
 
@@ -271,4 +299,31 @@ public class MachineManageController extends BaseController {
     }
 
 
+    @RequestMapping(value = "room/add", method = {RequestMethod.POST})
+    public ModelAndView doRoomAdd(HttpServletRequest request,
+                                  HttpServletResponse response, Model model) {
+        MachineRoom room = new MachineRoom();
+        room.setId(NumberUtils.toInt(request.getParameter("id")));
+        room.setName(request.getParameter("name"));
+        room.setStatus(NumberUtils.toInt(request.getParameter("status"), 1));
+        room.setDesc(request.getParameter("desc"));
+        room.setIpNetwork(request.getParameter("ipNetwork"));
+        room.setOperator(request.getParameter("operator"));
+
+        boolean isSuccess = machineDeployCenter.addMachineRoom(room);
+        model.addAttribute("result", isSuccess);
+        return new ModelAndView("");
+    }
+
+    @RequestMapping(value = "room/delete")
+    public ModelAndView doRoomDelete(HttpServletRequest request, HttpServletResponse response, Model model) {
+        int roomId = NumberUtils.toInt(request.getParameter("id"), -1);
+        if (roomId > -1) {
+            boolean success = machineDeployCenter.removeMachineRoom(roomId);
+            logger.warn("delete machine {}, result is {}", roomId, success);
+        } else {
+            logger.warn("machineIp is empty!");
+        }
+        return new ModelAndView("redirect:/manage/machine/index?tabTag=room");
+    }
 }

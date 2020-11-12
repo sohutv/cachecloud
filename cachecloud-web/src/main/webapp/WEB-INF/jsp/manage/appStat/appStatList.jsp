@@ -174,7 +174,7 @@
 
     function sendExpAppsStatDataEmail() {
         var searchDate = document.getElementById("searchDate").value;
-        $.get('/manage/app/tool/sendExpAppsStatDataEmail.json', {searchDate: searchDate});
+        $.get('/manage/app/tool/sendExpAppsStatDataEmail', {searchDate: searchDate});
         alert("异常应用日报已发送，请查收")
     }
 </script>

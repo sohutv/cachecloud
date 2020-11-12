@@ -6,16 +6,16 @@ import com.sohu.cache.dao.InstanceDao;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.InstanceAlertValueResult;
 import com.sohu.cache.entity.InstanceInfo;
-import com.sohu.cache.inspect.InspectParamEnum;
 import com.sohu.cache.web.service.AppService;
 import com.sohu.cache.web.service.UserService;
-import com.sohu.cache.web.util.VelocityUtils;
+import com.sohu.cache.web.util.FreemakerUtils;
+import freemarker.template.Configuration;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.velocity.app.VelocityEngine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,11 +28,11 @@ public class InstanceStateInspector extends BaseAlertService {
     @Autowired
     private InstanceDao instanceDao;
     @Autowired
-    private VelocityEngine velocityEngine;
-    @Autowired
     private AppService appService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private Configuration configuration;
 
     public boolean inspect() {
 
@@ -51,13 +51,10 @@ public class InstanceStateInspector extends BaseAlertService {
                 alertInstInfo.add(instanceAlert);
             }
             String emailTitle = String.format("Redis实例异常状态监控报警");
-            String emailContent = VelocityUtils.createText(velocityEngine,
-                    null, null, null,
-                    alertInstInfo,
-                    null,
-                    null,
-                    "instanceState.vm", "UTF-8");
-            emailComponent.sendMailToAdmin(emailTitle, emailContent.toString());
+            Map<String, Object> context = new HashMap<>();
+            context.put("instanceAlertValueResultList", alertInstInfo);
+            String emailContent = FreemakerUtils.createText("instanceState.ftl", configuration, context);
+            emailComponent.sendMailToAdmin(emailTitle, emailContent);
             logger.info(emailContent);
         }
         return true;

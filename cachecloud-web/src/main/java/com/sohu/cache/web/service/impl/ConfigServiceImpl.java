@@ -12,7 +12,6 @@ import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sohu.cache.constant.UserLoginTypeEnum;
 import com.sohu.cache.dao.ConfigDao;
 import com.sohu.cache.entity.SystemConfig;
 import com.sohu.cache.util.ConstUtils;
@@ -35,6 +34,7 @@ public class ConfigServiceImpl implements ConfigService {
     @Autowired
     private ConfigDao configDao;
 
+
     @PostConstruct
     public void init() {
         reloadSystemConfig();
@@ -51,12 +51,6 @@ public class ConfigServiceImpl implements ConfigService {
         // 文案相关
         ConstUtils.CONTACT = MapUtils.getString(configMap, "cachecloud.contact");
         logger.debug("{}: {}", "ConstUtils.CONTACT", ConstUtils.CONTACT);
-
-        ConstUtils.DOCUMENT_URL = MapUtils.getString(configMap, "cachecloud.documentUrl");
-        logger.debug("{}: {}", "ConstUtils.DOCUMENT_URL", ConstUtils.DOCUMENT_URL);
-
-        ConstUtils.MAVEN_WAREHOUSE = MapUtils.getString(configMap, "cachecloud.mavenWareHouse");
-        logger.debug("{}: {}", "ConstUtils.MAVEN_WAREHOUSE", ConstUtils.MAVEN_WAREHOUSE);
 
         // 报警相关配置
         ConstUtils.EMAILS = MapUtils.getString(configMap, "cachecloud.owner.email");
@@ -112,55 +106,14 @@ public class ConfigServiceImpl implements ConfigService {
         logger.debug("{}: {}", "ConstUtils.SUPER_MANAGER", ConstUtils.SUPER_MANAGER);
 
         String leaderEmailListStr = MapUtils.getString(configMap, "cachecloud.leader.email");
-        if(!StringUtil.isBlank(leaderEmailListStr)){
+        if (!StringUtil.isBlank(leaderEmailListStr)) {
             ConstUtils.LEADER_EMAIL_LIST = Arrays.asList(leaderEmailListStr.split(","));
         }
 
         // 机器报警阀值
-        ConstUtils.CPU_USAGE_RATIO_THRESHOLD = MapUtils.getDoubleValue(configMap, "machine.cpu.alert.ratio",
-                ConstUtils.DEFAULT_CPU_USAGE_RATIO_THRESHOLD);
-        logger.debug("{}: {}", "ConstUtils.CPU_USAGE_RATIO_THRESHOLD", ConstUtils.CPU_USAGE_RATIO_THRESHOLD);
-
         ConstUtils.MEMORY_USAGE_RATIO_THRESHOLD = MapUtils.getDoubleValue(configMap, "machine.mem.alert.ratio",
                 ConstUtils.DEFAULT_MEMORY_USAGE_RATIO_THRESHOLD);
         logger.debug("{}: {}", "ConstUtils.MEMORY_USAGE_RATIO_THRESHOLD", ConstUtils.MEMORY_USAGE_RATIO_THRESHOLD);
-
-        ConstUtils.LOAD_THRESHOLD = MapUtils.getDoubleValue(configMap, "machine.load.alert.ratio",
-                ConstUtils.DEFAULT_LOAD_THRESHOLD);
-        logger.debug("{}: {}", "ConstUtils.LOAD_THRESHOLD", ConstUtils.LOAD_THRESHOLD);
-
-        // 客户端版本
-        ConstUtils.GOOD_CLIENT_VERSIONS = MapUtils.getString(configMap, "cachecloud.good.client",
-                ConstUtils.DEFAULT_GOOD_CLIENT_VERSIONS);
-        logger.debug("{}: {}", "ConstUtils.GOOD_CLIENT_VERSIONS", ConstUtils.GOOD_CLIENT_VERSIONS);
-
-        ConstUtils.WARN_CLIENT_VERSIONS = MapUtils.getString(configMap, "cachecloud.warn.client",
-                ConstUtils.DEFAULT_WARN_CLIENT_VERSIONS);
-        logger.debug("{}: {}", "ConstUtils.WARN_CLIENT_VERSIONS", ConstUtils.WARN_CLIENT_VERSIONS);
-
-        ConstUtils.ERROR_CLIENT_VERSIONS = MapUtils.getString(configMap, "cachecloud.error.client",
-                ConstUtils.DEFAULT_ERROR_CLIENT_VERSIONS);
-        logger.debug("{}: {}", "ConstUtils.ERROR_CLIENT_VERSIONS", ConstUtils.ERROR_CLIENT_VERSIONS);
-
-        //redis-migrate-tool安装路径
-        ConstUtils.REDIS_MIGRATE_TOOL_HOME = MapUtils.getString(configMap, "redis.migrate.tool.home");
-        logger.debug("{}: {}", "ConstUtils.REDIS_MIGRATE_TOOL_HOME", ConstUtils.REDIS_MIGRATE_TOOL_HOME);
-
-        //redis-shake安装路径 todo
-        ConstUtils.REDIS_SHAKE_HOME = MapUtils.getString(configMap, "redis.shake.home");
-        logger.debug("{}: {}", "ConstUtils.REDIS_SHAKE_HOME", ConstUtils.REDIS_SHAKE_HOME);
-        //redis-full-check安装路径 todo
-        ConstUtils.REDIS_FULL_CHECK_HOME = MapUtils.getString(configMap, "redis.full-check.home");
-        logger.debug("{}: {}", "ConstUtils.REDIS_FULL_CHECK_HOME", ConstUtils.REDIS_FULL_CHECK_HOME);
-
-        //用户登录状态方式
-        ConstUtils.USER_LOGIN_TYPE = MapUtils.getIntValue(configMap, "cachecloud.user.login.type", ConstUtils.DEFAULT_USER_LOGIN_TYPE);
-        UserLoginTypeEnum userLoginTypeEnum = UserLoginTypeEnum.getLoginTypeEnum(ConstUtils.USER_LOGIN_TYPE);
-        logger.debug("{}: {}, {}", "ConstUtils.USER_LOGIN_TYPE", userLoginTypeEnum.getType(), userLoginTypeEnum.getDesc());
-
-        //cookie登录方式所需要的domain
-        ConstUtils.COOKIE_DOMAIN = MapUtils.getString(configMap, "cachecloud.cookie.domain");
-        logger.debug("{}: {}", "ConstUtils.COOKIE_DOMAIN", ConstUtils.COOKIE_DOMAIN);
 
         //cachecloud根目录
         ConstUtils.CACHECLOUD_BASE_DIR = MapUtils.getString(configMap, "cachecloud.base.dir", ConstUtils.DEFAULT_CACHECLOUD_BASE_DIR);
@@ -182,17 +135,9 @@ public class ConfigServiceImpl implements ConfigService {
         ConstUtils.WECHAT_ALERT_INTERFACE = MapUtils.getString(configMap, "cachecloud.weChat.alert.interface");
         logger.debug("{}: {}", "ConstUtils.MOBILE_ALERT_INTERFACE", ConstUtils.MOBILE_ALERT_INTERFACE);
 
-        //LDAP登录地址
-        ConstUtils.LDAP_URL = MapUtils.getString(configMap, "cachecloud.ldap.url");
-        logger.debug("{}: {}", "ConstUtils.LDAP_URL", ConstUtils.LDAP_URL);
-
         //是否定期清理各种统计数据(详见CleanUpStatisticsJob)
         ConstUtils.WHETHER_SCHEDULE_CLEAN_DATA = MapUtils.getBooleanValue(configMap, "cachecloud.whether.schedule.clean.data", ConstUtils.DEFAULT_WHETHER_SCHEDULE_CLEAN_DATA);
         logger.debug("{}: {}", "ConstUtils.WHETHER_SCHEDULE_CLEAN_DATA", ConstUtils.WHETHER_SCHEDULE_CLEAN_DATA);
-
-        // app secret key
-        ConstUtils.APP_SECRET_BASE_KEY = MapUtils.getString(configMap, "cachecloud.app.secret.base.key", ConstUtils.DEFAULT_APP_SECRET_BASE_KEY);
-        logger.debug("{}: {}", "ConstUtils.APP_SECRET_KEY", ConstUtils.APP_SECRET_BASE_KEY);
 
         // 机器性能统计周期(分钟)
         ConstUtils.MACHINE_STATS_CRON_MINUTE = MapUtils.getIntValue(configMap, "cachecloud.machine.stats.cron.minute", ConstUtils.DEFAULT_MACHINE_STATS_CRON_MINUTE);
@@ -228,6 +173,7 @@ public class ConfigServiceImpl implements ConfigService {
 
     /**
      * 获取所有配置的key-value
+     *
      * @return
      */
     private Map<String, String> getConfigMap() {

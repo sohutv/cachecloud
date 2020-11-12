@@ -14,16 +14,15 @@ import com.sohu.cache.stats.instance.InstanceAlertConfigService;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.EnvUtil;
 import com.sohu.cache.web.service.UserService;
-import com.sohu.cache.web.util.VelocityUtils;
+import com.sohu.cache.web.util.FreemakerUtils;
+import freemarker.template.Configuration;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
-import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +47,7 @@ public class InstanceAlertConfigServiceImpl implements InstanceAlertConfigServic
     @Autowired
     private EmailComponent emailComponent;
     @Autowired
-    private VelocityEngine velocityEngine;
+    private Configuration configuration;
     @Autowired
     private AppDao appDao;
     @Autowired
@@ -331,13 +330,10 @@ public class InstanceAlertConfigServiceImpl implements InstanceAlertConfigServic
         // 4.发送给管理员报警
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         String emailTitle = String.format("Redis实例分钟报警(%s~%s)", sdf.format(beginTime), sdf.format(endTime));
-        String emailContent = VelocityUtils.createText(velocityEngine,
-                null, null, null,
-                instanceAlertValueResultList,
-                null,
-                null,
-                "instanceAlert.vm", "UTF-8");
-        emailComponent.sendMailToAdmin(emailTitle, emailContent.toString());
+        Map<String, Object> context = new HashMap<>();
+        context.put("instanceAlertValueResultList", instanceAlertValueResultList);
+        String emailContent = FreemakerUtils.createText("instanceAlert.ftl", configuration, context);
+        emailComponent.sendMailToAdmin(emailTitle, emailContent);
 
         // 5.发送给客户端定制报警
         for (Map.Entry<Long, List<InstanceAlertValueResult>> appAlert : appAlertMap.entrySet()) {
@@ -345,12 +341,9 @@ public class InstanceAlertConfigServiceImpl implements InstanceAlertConfigServic
             List<InstanceAlertValueResult> instanceAlertList = appAlert.getValue();
 
             emailTitle = String.format("应用Redis分钟报警(%s~%s)", sdf.format(beginTime), sdf.format(endTime));
-            emailContent = VelocityUtils.createText(velocityEngine,
-                    null, null, null,
-                    instanceAlertList,
-                    null,
-                    null,
-                    "appAlert.vm", "UTF-8");
+            Map<String, Object> context1 = new HashMap<>();
+            context1.put("instanceAlertValueResultList", instanceAlertList);
+            emailContent = FreemakerUtils.createText("appAlert.ftl", configuration, context1);
             // 获取报警用户列表
             List<AppUser> appUsers = userService.getAlertByAppId(appId);
             List<String> emailList = getEmailList(appUsers);

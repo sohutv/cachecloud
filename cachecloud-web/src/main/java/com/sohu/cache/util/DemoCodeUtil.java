@@ -222,36 +222,19 @@ public class DemoCodeUtil {
     public static List<String> getDependencyRedis() {
         List<String> dependencyRedis = new ArrayList<String>();
 
-        // redis版本
-        String redisGoodVersion = getGoodVersion();
-
         // 依赖
         dependencyRedis.add("&lt;dependency&gt;                                                     ");
         dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&lt;groupId&gt;com.sohu.tv&lt;/groupId&gt;                                   ");
         dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&lt;artifactId&gt;cachecloud-client-redis&lt;/artifactId&gt;                       ");
-        dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&lt;version&gt;" + redisGoodVersion + "&lt;/version&gt;                                           ");
 
         dependencyRedis.add("&lt;/dependency&gt;                                                    ");
         dependencyRedis.add("&lt;repositories&gt;                                                   ");
         dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&lt;repository&gt;                                                     ");
         dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;id&gt;sohu.nexus&lt;/id&gt;                                              ");
-        dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;url&gt;" + ConstUtils.MAVEN_WAREHOUSE + "&lt;/url&gt;");
         dependencyRedis.add("&nbsp;&nbsp;&nbsp;&nbsp;&lt;/repository&gt;                                                    ");
         dependencyRedis.add("&lt;/repositories&gt;                                                  ");
 
         return dependencyRedis;
-    }
-
-    /**
-     * 获取最好的版本
-     *
-     * @return
-     */
-    private static String getGoodVersion() {
-        String[] redisGoodVersionArr = ConstUtils.GOOD_CLIENT_VERSIONS.split(ConstUtils.COMMA);
-        List<String> redisGoodVersions = Arrays.asList(redisGoodVersionArr);
-        String redisGoodVersion = redisGoodVersions.get(redisGoodVersions.size() - 1);
-        return redisGoodVersion;
     }
 
     public static List<String> getCode(int appType, long appId) {
@@ -312,7 +295,6 @@ public class DemoCodeUtil {
     }
 
     public static String getRestAPI(int appType, long appId) {
-        String redisGoodVersion = getGoodVersion();
         String appTypePath = "";
         switch (appType) {
             case ConstUtils.CACHE_REDIS_SENTINEL: {
@@ -330,8 +312,7 @@ public class DemoCodeUtil {
             default:
                 break;
         }
-        return "http://${domain}/cache/client/redis/" + appTypePath + "/" + appId + ".json?clientVersion="
-                + redisGoodVersion;
+        return "http://${domain}/cache/client/redis/" + appTypePath + "/" + appId + ".json";
     }
 
 }

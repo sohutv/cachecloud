@@ -333,7 +333,7 @@
                                             <span style="color:red">未检测</span>
                                         </c:otherwise>
                                     </c:choose>
-                                    [<a target="_blank" href="/manage/app/index.do?appId=${app_id}&tabTag=app_ops_tool">查看诊断</a>]
+                                    [<a target="_blank" href="/manage/app/index?appId=${app_id}&tabTag=app_ops_tool">查看诊断</a>]
                                 </td>
                             </tr>
                         </c:forEach>
@@ -385,7 +385,7 @@
 
     function sendExpAppsStatDataEmail() {
         var searchDate = document.getElementById("searchDate").value;
-        $.get('/manage/app/tool/sendExpAppsStatDataEmail.json', {searchDate: searchDate});
+        $.get('/manage/app/tool/sendExpAppsStatDataEmail', {searchDate: searchDate});
         alert("异常应用日报已发送，请查收")
     }
 

@@ -834,7 +834,7 @@ public class AppServiceImpl implements AppService {
         }
         try {
             long appId = MapUtils.getLongValue(appClientGatherStat, "app_id", 0l);
-            if (appService.getByAppId(appId).isTest()) {
+            if (appService.getByAppId(appId).isTestOk()) {
                 return false;
             }
             return true;
@@ -862,7 +862,7 @@ public class AppServiceImpl implements AppService {
             appClientGatherStatList.forEach(appClientGatherMap -> {
                 long appId = MapUtils.getLongValue(appClientGatherMap, "app_id", 0l);
                 AppDesc appDesc = appService.getByAppId(appId);
-                if (appDesc != null && !appDesc.isTest()) {
+                if (appDesc != null && !appDesc.isTestOk()) {
                     AppDetailVO appDetail = appStatsCenter.getAppDetail(appId);
                     long mem = appDetail.getMem();
 

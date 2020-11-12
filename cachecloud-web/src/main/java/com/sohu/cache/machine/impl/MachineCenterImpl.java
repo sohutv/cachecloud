@@ -227,13 +227,7 @@ public class MachineCenterImpl implements MachineCenter {
          * 当机器的状态超过预设的阀值时，向上汇报或者报警
          */
         StringBuilder alertContent = new StringBuilder();
-        // cpu使用率 todo
-        if (cpuUsage > ConstUtils.CPU_USAGE_RATIO_THRESHOLD) {
-            logger.warn("cpuUsageRatio is above security line. ip: {}, cpuUsage: {}%", ip, cpuUsage);
-            alertContent.append("ip:").append(ip).append(",cpuUse:").append(cpuUsage);
-        }
-
-        // 内存使用率 todo rss报警统一按机器85%报警
+        // 内存使用率
         if (memoryUsage > memoryThreshold) {
             logger.warn("memoryUsageRatio is above security line, ip: {}, memTotal: {}, memoryUsage: {}%", ip, memTotal, memoryUsage);
             alertContent.append("ip:").append(ip).append(",memTotal(G):").append(memTotal / 1024).append(",memUse(%):").append(memoryUsage);
@@ -803,6 +797,11 @@ public class MachineCenterImpl implements MachineCenter {
 
     public List<MachineRoom> getEffectiveRoom() {
         return machineRoomDao.getEffectiveRoom();
+    }
+
+    @Override
+    public List<MachineRoom> getAllRoom() {
+        return machineRoomDao.getAllRoom();
     }
 
     @Override

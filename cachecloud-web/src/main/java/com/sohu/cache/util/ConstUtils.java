@@ -118,11 +118,7 @@ public class ConstUtils {
     /**
      * 机器报警阀值
      */
-    public static final double DEFAULT_CPU_USAGE_RATIO_THRESHOLD = 80.0;
     public static final double DEFAULT_MEMORY_USAGE_RATIO_THRESHOLD = 85.0;
-    public static final double SAMLL_MEMORY_USAGE_RATIO_THRESHOLD = 75.0;
-    public static final double MIDDLE_MEMORY_USAGE_RATIO_THRESHOLD = 80.0;
-    public static final double DEFAULT_LOAD_THRESHOLD = 8.0;
     /**
      * 应用客户端连接数报警阀值
      */
@@ -136,7 +132,6 @@ public class ConstUtils {
     /**
      * ssh授权方式：参考SshAuthTypeEnum
      */
-//    public static int DEFAULT_SSH_AUTH_TYPE = SshAuthTypeEnum.PASSWORD.getValue();
     public static final int DEFAULT_SSH_AUTH_TYPE = SshAuthTypeEnum.PUBLIC_KEY.getValue();
     /**
      * public key pem
@@ -151,18 +146,7 @@ public class ConstUtils {
     public static final String DEFAULT_SUPER_ADMIN_NAME = "admin";
     public static final String DEFAULT_SUPER_ADMIN_PASS = "admin";
     public static final String DEFAULT_SUPER_ADMINS = "admin";
-    /**
-     * 客户端可用版本
-     */
-    public static final String DEFAULT_GOOD_CLIENT_VERSIONS = "1.2,1.3-SNAPSHOT,1.2-SNAPSHOT,1.4-SNAPSHOT,1.5-SNAPSHOT,1.7-SNAPSHOT";
-    /**
-     * 客户端警告版本
-     */
-    public static final String DEFAULT_WARN_CLIENT_VERSIONS = "1.0,1.1";
-    /**
-     * 客户端错误版本
-     */
-    public static final String DEFAULT_ERROR_CLIENT_VERSIONS = "0.0";
+
     /**
      * redis-migrate-tool端口
      */
@@ -203,9 +187,7 @@ public class ConstUtils {
     public static final int DEFAULT_LIST_MAX_LENGTH = 50000;
     public static final int DEFAULT_SET_MAX_LENGTH = 50000;
     public static final int DEFAULT_ZSET_MAX_LENGTH = 50000;
-    public static double CPU_USAGE_RATIO_THRESHOLD = DEFAULT_CPU_USAGE_RATIO_THRESHOLD;
     public static double MEMORY_USAGE_RATIO_THRESHOLD = DEFAULT_MEMORY_USAGE_RATIO_THRESHOLD;
-    public static double LOAD_THRESHOLD = DEFAULT_LOAD_THRESHOLD;
     public static int APP_CLIENT_CONN_THRESHOLD = DEFAULT_APP_CLIENT_CONN_THRESHOLD;
     public static String USERNAME = DEFAULT_USERNAME;
     public static String PASSWORD = DEFAULT_PASSWORD;
@@ -218,17 +200,9 @@ public class ConstUtils {
     public static String SUPER_ADMINS = DEFAULT_SUPER_ADMINS;
     public static List<String> SUPER_MANAGER;
     /**
-     * ldap登陆
-     */
-    public static String LDAP_URL;
-    /**
      * 联系人
      */
     public static String CONTACT;
-    /**
-     * 文档地址
-     */
-    public static String DOCUMENT_URL;
     /**
      * 报警相关
      */
@@ -248,13 +222,6 @@ public class ConstUtils {
      */
     public static String WECHAT_ALERT_INTERFACE;
     /**
-     * maven仓库地址
-     */
-    public static String MAVEN_WAREHOUSE;
-    public static String GOOD_CLIENT_VERSIONS = DEFAULT_GOOD_CLIENT_VERSIONS;
-    public static String WARN_CLIENT_VERSIONS = DEFAULT_WARN_CLIENT_VERSIONS;
-    public static String ERROR_CLIENT_VERSIONS = DEFAULT_ERROR_CLIENT_VERSIONS;
-    /**
      * redis-migrate-tool相关路径
      */
     public static String REDIS_MIGRATE_TOOL_HOME;
@@ -273,7 +240,6 @@ public class ConstUtils {
     /**
      * cookie登录方式所需要的域
      */
-    public static String COOKIE_DOMAIN;
     public static String CACHECLOUD_BASE_DIR = DEFAULT_CACHECLOUD_BASE_DIR;
     public static boolean WHETHER_SCHEDULE_CLEAN_DATA = DEFAULT_WHETHER_SCHEDULE_CLEAN_DATA;
     public static String APP_SECRET_BASE_KEY = DEFAULT_APP_SECRET_BASE_KEY;

@@ -30,7 +30,7 @@ b.也可以clone源码，自行打包：
 <a name="cc3"/>
 
 ### 三、启动工程
-准备配置文件：application-open.yml
+准备配置文件：application-open.yml，放到war包同目录下
 
 	#配置应用名称
 	spring:
@@ -53,7 +53,7 @@ b.也可以clone源码，自行打包：
 启动工程
 
  	//启动web工程
-	nohup java -jar -Dspring.profiles.active=open -Dspring.config.location=${配置文件路径} cachecloud-web.war &
+	nohup java -jar -Dspring.profiles.active=open cachecloud-web.war &
 	
 访问web：<http://localhost:8080/manage/login> 使用默认管理员账户登录：用户名 admin 密码 admin	
 <img src="../../img/quickstart/login.png" width="50%"/>
@@ -107,7 +107,7 @@ b.也可以clone源码，自行打包：
 
 * 3.添加机器
 
-	将刚准备好资源的机器添加到cachecloud中台：<http://localhost:8080/manage/machine/list>
+	将刚准备好资源的机器添加到cachecloud中台：<http://localhost:8080/manage/machine/index?tabTag=machine>
 	<img src="../../img/quickstart/addmachine.png" width="50%"/>
 
 <a name="cc7"/>

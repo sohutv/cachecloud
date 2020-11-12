@@ -33,16 +33,13 @@
                                         机房:
                                     </label>
                                     <div class="col-md-5">
-                                        <select name="room" id="room${machine.info.id}" class="form-control select2_category">
+                                        <select name="machineoom" id="machineRoom${machine.info.id}" class="form-control select2_category">
                                             <option value="默认">默认机房</option>
                                             <c:forEach items="${roomList}" var="room">
                                                 <option value="${room.name}" <c:if test="${room.name == machine.info.room}">selected</c:if>>${room.name} (${room.ipNetwork})</option>
                                             </c:forEach>
                                         </select>
                                     </div>
-                                    <%--<label class="control-label col-md-2">--%>
-                                        <%--<a>新增机房</a>--%>
-                                    <%--</label>--%>
                                 </div>
 
                                 <div class="form-group">
@@ -245,3 +242,4 @@
 		</div>
 	</div>
 </div>
+

@@ -21,9 +21,9 @@
 								<td><span style="font-weight:bold">在线实例数</span></td>
 								<td>${totalRunningInstance}</td>
 								<td><span style="font-weight:bold">在线机器数</span></td>
-								<td><a target="_blank" href="/manage/machine/list">${totalMachineCount}</a></td>
+								<td><a target="_blank" href="/manage/machine/index?tabTag=machine">${totalMachineCount}</a></td>
 								<td><span style="font-weight:bold">Redis版本数量</span></td>
-								<td><a target="_blank" href="/manage/redis/upgrade/init">${redisTypeCount}</a></td>
+								<td><a target="_blank" href="/manage/app/resource/index?tab=redis">${redisTypeCount}</a></td>
 							</tr>
 							<tr>
 								<td><span style="font-weight:bold">机器总内存</span></td>

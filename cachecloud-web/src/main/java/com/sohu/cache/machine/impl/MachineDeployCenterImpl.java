@@ -1,12 +1,10 @@
 package com.sohu.cache.machine.impl;
 
 import com.google.common.base.Strings;
-import com.sohu.cache.dao.MachineDao;
-import com.sohu.cache.dao.MachineRelationDao;
-import com.sohu.cache.dao.MachineStatsDao;
-import com.sohu.cache.dao.ServerStatusDao;
+import com.sohu.cache.dao.*;
 import com.sohu.cache.entity.MachineInfo;
 import com.sohu.cache.entity.MachineRelation;
+import com.sohu.cache.entity.MachineRoom;
 import com.sohu.cache.machine.MachineDeployCenter;
 import com.sohu.cache.web.enums.SuccessEnum;
 import org.slf4j.Logger;
@@ -21,7 +19,7 @@ import java.util.List;
  * 机器部署相关
  *
  * @author leifu
- *         changed @Date 2016-4-24
+ * changed @Date 2016-4-24
  * @Time 下午5:07:30
  */
 @Service("machineDeployCenter")
@@ -29,6 +27,8 @@ public class MachineDeployCenterImpl implements MachineDeployCenter {
     private Logger logger = LoggerFactory.getLogger(MachineDeployCenterImpl.class);
     @Autowired
     private MachineDao machineDao;
+    @Autowired
+    private MachineRoomDao machineRoomDao;
     @Autowired
     private MachineStatsDao machineStatsDao;
     @Autowired
@@ -62,6 +62,34 @@ public class MachineDeployCenterImpl implements MachineDeployCenter {
             logger.info("save and deploy machine ok, machineInfo: {}", machineInfo.toString());
         }
         return success;
+    }
+
+    @Override
+    public boolean addMachineRoom(MachineRoom room) {
+        boolean success = true;
+        try {
+            machineRoomDao.saveRoom(room);
+        } catch (Exception e) {
+            logger.error("save machineRoom: {} to db error.", room.toString(), e);
+            return false;
+        }
+
+        if (success) {
+            logger.info("save machineRoom ok, machineRoom: {}", room.toString());
+        }
+        return success;
+    }
+
+    @Override
+    public boolean removeMachineRoom(int roomId) {
+        try {
+            machineRoomDao.removeRoom(roomId);
+        } catch (Exception e) {
+            logger.error("remove machineRoom from db error, machineRoom: {}", roomId, e);
+            return false;
+        }
+        logger.info("remove machineRoom ok: {}", roomId);
+        return true;
     }
 
     /**

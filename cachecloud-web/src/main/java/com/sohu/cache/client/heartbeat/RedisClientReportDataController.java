@@ -73,14 +73,7 @@ public class RedisClientReportDataController {
      */
     private ResponseEntity<String> dealAppClientReportData(String clientVersion, String json) {
         HttpStatus status = HttpStatus.CREATED;
-        // 1. 验证版本的正确性
-        if (!checkClientVersion(clientVersion)) {
-            logger.error("status: {}, message: {}", ClientStatusEnum.ERROR.getStatus(),
-                    "ERROR: client is TOO old or NOT recognized, please update NOW!");
-            status = HttpStatus.BAD_REQUEST;
-            return ResponseEntity.status(status).body("ERROR: client is TOO old or NOT recognized, please update NOW!");
-        }
-        // 2. 验证json的正确性
+        // 验证json的正确性
         AppClientReportModel appClientReportModel = checkAppClientReportJson(json);
         if (appClientReportModel == null) {
             logger.error("reportWrong message: {}", json);
@@ -90,7 +83,7 @@ public class RedisClientReportDataController {
             logger.debug("discard report data, clientIp:{}", appClientReportModel.getClientIp());
             return ResponseEntity.status(status).body("success");
         }
-        // 3. 处理数据
+        // 处理数据
         boolean result = dealClientReportService.deal(appClientReportModel);
         if (!result) {
             logger.error("appClientReportCommandService deal fail, appClientReportModel is {}", appClientReportModel);
@@ -124,29 +117,6 @@ public class RedisClientReportDataController {
             }
         }
         return null;
-    }
-
-    /**
-     * 检查客户端的版本
-     *
-     * @param clientVersion
-     * @return
-     */
-    private boolean checkClientVersion(String clientVersion) {
-        if (StringUtils.isBlank(clientVersion)) {
-            return false;
-        }
-        // 获取合格的客户端版本
-        List<String> goodVersions = Lists.newArrayList(ConstUtils.GOOD_CLIENT_VERSIONS.split(ConstUtils.COMMA));
-        List<String> warnVersions = Lists.newArrayList(ConstUtils.WARN_CLIENT_VERSIONS.split(ConstUtils.COMMA));
-
-        // 错误版本
-        if (goodVersions.contains(clientVersion) && warnVersions.contains(clientVersion)) {
-            logger.error("status: {}, message: {}", ClientStatusEnum.ERROR.getStatus(),
-                    "ERROR: client is TOO old or NOT recognized, please update NOW!");
-            return false;
-        }
-        return true;
     }
 
 }

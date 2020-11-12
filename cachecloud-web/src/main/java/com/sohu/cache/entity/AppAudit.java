@@ -1,5 +1,6 @@
 package com.sohu.cache.entity;
 
+import com.sohu.cache.constant.AppAuditType;
 import lombok.Data;
 
 import java.text.SimpleDateFormat;
@@ -68,7 +69,10 @@ public class AppAudit {
     private AppAuditLog appAuditLog;
 
     public Date getCreateTime() {
-        return (Date) createTime.clone();
+        if (createTime != null) {
+            return (Date) createTime.clone();
+        }
+        return null;
     }
 
     public void setCreateTime(Date createTime) {
@@ -76,6 +80,9 @@ public class AppAudit {
     }
 
     public Date getModifyTime() {
+        if (modifyTime == null) {
+            return null;
+        }
         return (Date) modifyTime.clone();
     }
 
@@ -84,17 +91,10 @@ public class AppAudit {
     }
 
     public String getTypeDesc() {
-        if (type == 0) {
-            return "申请应用";
-        } else if (type == 1) {
-            return "应用扩容";
-        } else if (type == 2) {
-            return "修改配置";
-        } else if (type == 5) {
-            return "应用全局报警配置";
-        } else {
-            return type + "";
+        if (AppAuditType.getAppAuditType(type) != null) {
+            return AppAuditType.getAppAuditType(type).getInfo();
         }
+        return "";
     }
 
     public String getStatusDesc() {

@@ -26,10 +26,10 @@ import com.sohu.cache.web.enums.PodStatusEnum;
 import com.sohu.cache.web.service.AppService;
 import com.sohu.cache.web.service.ResourceService;
 import com.sohu.cache.web.util.DateUtil;
-import com.sohu.cache.web.util.VelocityUtils;
+import com.sohu.cache.web.util.FreemakerUtils;
+import freemarker.template.Configuration;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +40,7 @@ import org.springframework.web.client.RestTemplate;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisDataException;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -81,7 +79,7 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
     @Autowired
     AssistRedisService assistRedisService;
     @Autowired
-    private VelocityEngine velocityEngine;
+    private Configuration configuration;
     @Autowired
     private AppService appService;
     @Autowired
@@ -430,7 +428,7 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
     }
 
     @Override
-    public List<InstanceAlertValueResult> checkAndStartExceptionInstance(String ip,Boolean isAlert) {
+    public List<InstanceAlertValueResult> checkAndStartExceptionInstance(String ip, Boolean isAlert) {
 
         // 1.获取容器心跳停止/运行中的实例列表
         List<InstanceInfo> instanceInfos = instanceDao.checkHeartStopInstance(ip);
@@ -488,25 +486,22 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
                 } catch (Exception e) {
                     logger.error("checkAndStartExceptionInstance {}:{} {} ", host, port, e.getMessage(), e);
                 } finally {
-                    if(jedis != null){
-                        try{
+                    if (jedis != null) {
+                        try {
                             jedis.close();
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             logger.error("jedis close exception {}:{} {} ", host, port, e.getMessage(), e);
                         }
                     }
                 }
             }
 
-            if(isAlert){
+            if (isAlert) {
                 // 邮件通知：实例信息 恢复时间
                 String emailTitle = String.format("Pod重启探测Redis实例报警");
-                String emailContent = VelocityUtils.createText(velocityEngine,
-                        null, null, null,
-                        recoverInstInfo,
-                        null,
-                        null,
-                        "instanceRecover.vm", "UTF-8");
+                Map<String, Object> context = new HashMap<>();
+                context.put("instanceAlertValueResultList", recoverInstInfo);
+                String emailContent = FreemakerUtils.createText("instanceRecover.ftl", configuration, context);
                 emailComponent.sendMailToAdmin(emailTitle, emailContent.toString());
             }
         } else {

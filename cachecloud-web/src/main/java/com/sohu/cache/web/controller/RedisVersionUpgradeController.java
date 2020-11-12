@@ -37,34 +37,9 @@ public class RedisVersionUpgradeController extends BaseController {
     @Autowired
     private RedisConfigTemplateService redisConfigTemplateService;
     @Autowired
-    private MachineCenter machineCenter;
-    @Autowired
     private AppService appService;
     @Autowired
     private ResourceService resourceService;
-
-    /**
-     * <p>
-     * Description: Redis版本管理首页
-     * </p>
-     *
-     * @author chenshi
-     * @version 1.0
-     * @date 2018/9/5
-     */
-    @RequestMapping("init")
-    public ModelAndView init(Model model) {
-        //获取版本信息
-        List<SystemResource> versionList = resourceService.getResourceList(ResourceEnum.REDIS.getValue());
-        //获取机器安装redis信息
-        List<RedisVersionStat> versionStatList = machineCenter.getMachineInstallRedisStat(versionList);
-        // 资源包列表
-        List<SystemResource> resourceList = resourceService.getResourceList(ResourceEnum.REDIS.getValue());
-        model.addAttribute("versionStatList", versionStatList);
-        model.addAttribute("redisUpdateActive", SuccessEnum.SUCCESS.value());
-        model.addAttribute("resourceList", resourceList);
-        return new ModelAndView("manage/upgrade/init");
-    }
 
     /**
      * <p>
@@ -167,6 +142,7 @@ public class RedisVersionUpgradeController extends BaseController {
         return null;
     }
 */
+
     /**
      * <p>
      * Description: 实例和配置检查

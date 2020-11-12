@@ -302,7 +302,7 @@
                                             <div class="col-md-5">
                                                 <select name="type" id="version" class="form-control select2_category">
                                                     <c:forEach items="${resourcelist}" var="resource">
-                                                        <c:if test="${resource.ispush == 1}">
+                                                        <c:if test="${resource.status == 1}">
                                                             <option <c:if test="${resource.id == currentVersion.id}">selected</c:if> versionid="${resource.id}">${resource.name}</option>
                                                         </c:if>
                                                     </c:forEach>

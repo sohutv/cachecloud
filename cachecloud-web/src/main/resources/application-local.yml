@@ -1,24 +1,24 @@
 spring:
   application:
     name: cloud.cachecloud-web.local
-    import: classpath:spring/spring.xml
 
 server:
   port: 8080
-  # ip/域名地址
-  domain: 127.0.0.1:8080
-  jsp-servlet:
-    init-parameters:
-      development: true #jsp 热部署
+  #ip/域名地址
+  domain: http://127.0.0.1:8080
+  servlet:
+    jsp:
+      init-parameters:
+        development: true #jsp 热部署
 
 cachecloud:
   primary:
-    url: jdbc:mysql://127.0.0.1:3306/cachecloud_open
-    user: cachecloud
-    password: cachecloud
+    url: jdbc:mysql://127.0.0.1:3306/cachecloud-open?useUnicode=true&characterEncoding=UTF8&autoReconnect=true&connectTimeout=3000&socketTimeout=10000
+    user: cachecloud-open
+    password: cachecloud-open
     initialPoolSize: 1
     maxPoolSize: 3
-  redis:
+  redis: #配置cachecloud-web需要的redis，用户存储任务流log
     main:
       host: 127.0.0.1
       port: 6379

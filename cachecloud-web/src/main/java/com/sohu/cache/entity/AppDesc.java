@@ -232,7 +232,7 @@ public class AppDesc implements Serializable {
      *
      * @return
      */
-    public boolean isTest() {
+    public boolean isTestOk() {
         return isTest == AppDescEnum.AppTest.IS_TEST.getValue();
     }
 
@@ -264,7 +264,10 @@ public class AppDesc implements Serializable {
     }
 
     public Date getCreateTime() {
-        return (Date) createTime.clone();
+        if (createTime != null) {
+            return (Date) createTime.clone();
+        }
+        return null;
     }
 
     public void setCreateTime(Date createTime) {
@@ -272,7 +275,10 @@ public class AppDesc implements Serializable {
     }
 
     public Date getPassedTime() {
-        return (Date) passedTime.clone();
+        if (passedTime != null) {
+            return (Date) passedTime.clone();
+        }
+        return null;
     }
 
     public void setPassedTime(Date passedTime) {

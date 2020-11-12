@@ -200,7 +200,7 @@ function getDeployInfo() {
                         '   <td>'+machine.instanceNum+"&nbsp;&nbsp;/&nbsp;&nbsp;"+machine.cpu+'</td>\n' +
                         '   <td>'+machineDeployStat.masterNum+"&nbsp;&nbsp;/&nbsp;&nbsp;"+machineDeployStat.slaveNum+"&nbsp;&nbsp;/&nbsp;&nbsp;"+machineDeployStat.sentinelNum+'</td>\n' +
                         '   <td>'+machine.realIp+"&nbsp;&nbsp;/&nbsp;&nbsp;"+machine.rack+'</td>\n' +
-                        "   <td> <a target='_blank' href='/manage/machine/list?ipLike="+machine.ip+" '>查看</a>\n" +
+                        "   <td> <a target='_blank' href='/manage/machine/index?tabTag=machine&ipLike="+machine.ip+" '>查看</a>\n" +
                         '</tr>'
                     )
                 })

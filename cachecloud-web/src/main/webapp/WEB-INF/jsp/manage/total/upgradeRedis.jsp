@@ -75,17 +75,17 @@
 							<label id="instanceLog${appDetail.appDesc.appId}" class="control-label"></label>
 						</div>
 						<div class="form-group">
-                            <c:set var="bigVersionName" value="${appDetail.appDesc.versionName.substring(0,appDetail.appDesc.versionName.lastIndexOf('.'))}"></c:set>
-                            <c:set var="currentTag" value="${appDetail.appDesc.versionName.substring(appDetail.appDesc.versionName.lastIndexOf('.')+1)}"></c:set>
+                            <c:set var="currentVersion" value="${appDetail.appDesc.versionName.substring(0, appDetail.appDesc.versionName.lastIndexOf('.'))}"></c:set>
                             <label class="control-label col-md-3"> 可升级Redis版本:</label>
 					        <div class="col-md-4">
-                                <select id="versionSelect${appDetail.appDesc.appId}" class="form-control select2_category" title="请选择" data-live-search-placeholder="搜索" name="ip" data-live-search="true">
+								<select id="versionSelect${appDetail.appDesc.appId}" class="form-control select2_category" title="请选择" data-live-search-placeholder="搜索" name="ip" data-live-search="true">
+
 									<c:forEach items="${redisVersionList}" var="version">
-                                        <c:if test="${version.groups == bigVersionName && (currentTag - version.name.substring(version.name.lastIndexOf('.')+1) < 0 )}">
-                                            <option versionid="${version.id}">${version.name}</option>
-                                        </c:if>
-                                    </c:forEach>
-                                </select>
+										<c:if test="${version.name.indexOf(currentVersion)> -1 && !appDetail.appDesc.versionName.equals(version.name)}">
+											<option versionid="${version.id}">${version.name}</option>
+										</c:if>
+									</c:forEach>
+								</select>
                             </div>
 							<label class="control-label"><a target="_blank" onclick="configPreview(${appDetail.appDesc.appId})"> Redis配置预览</a></label>&nbsp;&nbsp;&nbsp;
 							<label class="control-label"><a target="_blank" onclick="configContrast('${appDetail.appDesc.versionId}','${appDetail.appDesc.appId}')"> 升级配置对比</a></label>
@@ -100,7 +100,7 @@
 				</form>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-primary" data-toggle="modal" onclick="install(${appDetail.appDesc.appId})"><span id="install${appDetail.appDesc.appId}">一键安装</span></button>
+				<button type="button" class="btn btn-primary" data-toggle="modal" onclick="install(${appDetail.appDesc.appId})"><span id="install${appDetail.appDesc.appId}">一键升级</span></button>
 			</div>
 		</div>
 	</div>
