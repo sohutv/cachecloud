@@ -38,7 +38,7 @@ CacheCloud是一个Redis云管理平台：支持Redis多种架构(Standalone、S
 
 + CacheCloud后台地址：[地址](http://47.97.112.178:8080/admin/app/list)
 + 用户名/登录密码：cachecloud_user:cachecloud_user
-+ 开源版本试用时间: 2020-10-18 ，如果大家有空闲公网资源可以贡献，请[联系我们](#cc8)
++ 开源版本试用时间: 2020-01-18 ，如果大家有空闲公网资源可以贡献，请[联系我们](#cc8)
 
 <a name="cc5"/>
 ## 五、FAQ快速接入
