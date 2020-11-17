@@ -1,5 +1,6 @@
 ## 快速接入 quick start 
 ”快速接入“ 帮助你快速启动cachecloud中台，并创建一个应用。
+
 <img src="../../img/quickstart/quickstart.png" width="60%"/>
 
 <a name="cc1"/>
@@ -55,7 +56,8 @@ b.也可以clone源码，自行打包：
  	//启动web工程
 	nohup java -jar -Dspring.profiles.active=open cachecloud-web.war &
 	
-访问web：<http://localhost:8080/manage/login> 使用默认管理员账户登录：用户名 admin 密码 admin	
+访问web：<http://localhost:8080/manage/login> 使用默认管理员账户登录：用户名 admin 密码 admin
+
 <img src="../../img/quickstart/login.png" width="50%"/>
 
 <a name="cc4"/>
@@ -67,6 +69,7 @@ b.也可以clone源码，自行打包：
 
 ### 五、创建一个用户
 新用户注册：<http://localhost:8080/user/register> 提交用户注册申请。
+
 <img src="../../img/quickstart/register.png" width="60%"/>
 
 管理员审核（<http://localhost:8080/manage/app/auditList>）通过后，用户可登录/使用系统。
@@ -85,11 +88,10 @@ b.也可以clone源码，自行打包：
 		cachecloud-init.sh脚本作用：
 		a.初始化环境变量
 		b.创建用户;
-		c.创建公钥私钥；
-		d.创建默认redis路径并授权;
-		e.默认安装"redis-3.0.7" "redis-4.0.14" "redis-5.0.9";
+		c.创建默认redis路径并授权;
+		d.默认安装"redis-3.0.7" "redis-3.2.12" "redis-4.0.14" "redis-5.0.9";
 		  注意：Redis6.0及以上版本需要依赖操作系统gcc4.9.0以上版本编译
-		f.@usage: sh cachecloud-init.sh [username]
+		e.@usage: sh cachecloud-init.sh [username]
 
 <a name="cc62"/>
 
@@ -108,6 +110,7 @@ b.也可以clone源码，自行打包：
 * 3.添加机器
 
 	将刚准备好资源的机器添加到cachecloud中台：<http://localhost:8080/manage/machine/index?tabTag=machine>
+	
 	<img src="../../img/quickstart/addmachine.png" width="50%"/>
 
 <a name="cc7"/>
@@ -128,7 +131,8 @@ b.也可以clone源码，自行打包：
 	
 	<img src="../../img/quickstart/appjob.png" width="100%"/>
 	
-	b.应用部署：点击”生成部署预览“，确认拓扑无误，点击”开始部署“，跳转到应用部署任务流。	
+	b.应用部署：点击”生成部署预览“，确认拓扑无误，点击”开始部署“，跳转到应用部署任务流。
+		
 	<img src="../../img/quickstart/appdeploy.png" width="80%"/>
 		
 	c.通过：等待应用部署成功后，在审批页点击”通过“，就此应用开通成功。用户接入使用可参考：[客户端接入文档](../access/client.md)。

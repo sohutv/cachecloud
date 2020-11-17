@@ -5,10 +5,9 @@
 # 1. initial config
 # 2. add system config
 #	3. create user;
-# 4. create public key & secret key
-#	5. create default directories and authorize;
-# 6.install sshpass tool
-# 7.install redis
+#	4. create default directories and authorize;
+# 5. install sshpass tool
+# 6. install redis
 #	@usage: sh cachecloud-init.sh [username]
 ###########################################################################
 
@@ -96,24 +95,6 @@ init() {
   echo -e "\033[41;36m OK: init done. \033[0m"
 }
 
-# create public key & secret key
-createSshkey() {
-  mkdir -p /opt/ssh
-  chown -R $1:$2 /opt/ssh
-
-  ssh-keygen -t rsa -f /opt/ssh/id_rsa -P '' -C $1
-  local privateKeyFile="/opt/ssh/id_rsa"
-  chmod 600 ${privateKeyFile}
-
-  mkdir -p /home/$1/.ssh
-  local publicKeyFile="/home/$1/.ssh/authorized_keys"
-  cat /opt/ssh/id_rsa.pub >>${publicKeyFile}
-  chown -R $1:$2 /home/$1/.ssh
-  chmod 755 ${publicKeyFile}
-
-  echo -e "\033[41;36m OK: create public key & secret key done. \033[0m"
-}
-
 # install sshpass tool
 installSshpass() {
   yum install -y sshpass
@@ -183,11 +164,9 @@ initConfig
 initSysConfig
 # 3. check & create user
 checkExist "${username}" "${password}"
-# 4. create public key & secret key
-createSshkey "${username}" "${password}"
-# 5.install sshpass tool
+# 4.install sshpass tool
 installSshpass
-# 6.output
+# 5.output
 output "${username}"
-# 7.install install
+# 6.install install
 installRedis "${username}" "${password}"

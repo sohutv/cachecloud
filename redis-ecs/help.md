@@ -12,12 +12,13 @@
 
 - 1) cachecloud-web.war: 可直接启动cachecloud中台，详情参考： [快速接入](./cachecloud-web/src/main/resources/static/wiki/quickstart/index.md)
 	
-		nohup java -jar -Dspring.profiles.active=open -Dspring.config.location=${配置文件路径} cachecloud-web.war &
+		nohup java -jar -Dspring.profiles.active=open cachecloud-web.war &
 
 - 2) script脚本：
 	- cachecloud-init.sh: 初始化宿主环境(物理机/虚拟机)系统变量，Redis机器相关资源等，执行：sh cachecloud-init.sh [username];
 	- redis-install.sh: 安装单个redis版本, 执行: sh redis-install.sh [username] [redisTarGz]；
 	- redisShake-install.sh: 安装redis-shake-v2.0.3，执行：sh redisShake-install.sh [username]；
+	- ssh-keygen.sh: 创建公钥私钥，执行：sh ssh-keygen.sh [username]；
 
 - 3) redis-*.*.*-make.tar.gz:
 	- Redis各大版本的make资源包（已经编译好的包），如果需要到其他版本可自行添加。(提示：资源编译需要注意当前机器操作系统和gcc版本)
@@ -31,7 +32,7 @@
    
   - 1) 使用root登录目标服务器;
   - 2) 将cachecloud-init.sh脚本拷贝到目标服务器当前用户目录下/opt ;
-  - 3) 执行 sh cachecloud-init.sh ${username}，默认username="cachecloud-open"；
+  - 3) 执行 sh cachecloud-init.sh [username]，默认username="cachecloud-open"；
   - 4) 设置密码;
   - 5) 一路安装直到成功；
   - 6) 通过cachecloud后台可以对当前机器进行Redis实例部署。
