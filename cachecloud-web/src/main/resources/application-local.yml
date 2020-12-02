@@ -13,7 +13,7 @@ server:
 
 cachecloud:
   primary:
-    url: jdbc:mysql://127.0.0.1:3306/cachecloud-open?useUnicode=true&characterEncoding=UTF8&autoReconnect=true&connectTimeout=3000&socketTimeout=10000
+    url: jdbc:mysql://127.0.0.1:3306/cachecloud_open?useUnicode=true&characterEncoding=UTF8&autoReconnect=true&connectTimeout=3000&socketTimeout=10000&serverTimezone=Asia/Shanghai
     user: cachecloud-open
     password: cachecloud-open
     initialPoolSize: 1

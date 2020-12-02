@@ -102,7 +102,7 @@ function saveRedisConfig() {
 				<ul class="nav nav-tabs" id="app_tabs" >
 					<c:forEach items="${resourceList}" var="resource">
 						<li <c:if test="${resource.id == currentVersion.id}">class="active"</c:if>>
-							<a href="/manage/redisConfig/init?resourceId=${resource.id}">${resource.name}</a>
+							<a href="/manage/redisConfig/init?versionid=${resource.id}">${resource.name}</a>
 						</li>
 					</c:forEach>
 				</ul>

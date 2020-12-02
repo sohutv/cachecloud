@@ -112,6 +112,10 @@
                         </c:choose>
                     </td>
                 </tr>
+                <tr>
+                    <td>应用描述</td>
+                    <td>${appDetail.appDesc.intro}</td>
+                </tr>
                 </tbody>
             </table>
         </div>

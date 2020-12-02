@@ -950,7 +950,7 @@ public class MachineCenterImpl implements MachineCenter {
 
     public String getMachineRelativeDir(String host, int dirType) {
         MachineInfo machineInfo = machineDao.getMachineInfoByIp(host);
-        if (machineInfo.isK8sMachine(machineInfo.getK8sType())) {
+        if (machineInfo != null &&  machineInfo.isK8sMachine(machineInfo.getK8sType())) {
             return MachineProtocol.getK8sDir(host, dirType);
         }
         return MachineProtocol.getDir(dirType);
@@ -958,7 +958,7 @@ public class MachineCenterImpl implements MachineCenter {
 
     public Boolean isK8sMachine(String host) {
         MachineInfo machineInfo = machineDao.getMachineInfoByIp(host);
-        if (machineInfo.isK8sMachine(machineInfo.getK8sType())) {
+        if (machineInfo != null && machineInfo.isK8sMachine(machineInfo.getK8sType())) {
             return true;
         }
         return false;

@@ -54,7 +54,7 @@ public class RedisConfigTemplateController extends BaseController {
     public ModelAndView init(HttpServletRequest request, HttpServletResponse response, Model model) {
         // 默认是Redis普通节点配置
         int type = NumberUtils.toInt(request.getParameter("type"), ConstUtils.CACHE_REDIS_STANDALONE);
-        int resourceId = NumberUtils.toInt(request.getParameter("resourceId"),0);
+        int resourceId = NumberUtils.toInt(request.getParameter("versionid"),0);
 
         // 获取redis资源包
         List<SystemResource> resourceList = resourceService.getResourceList(ResourceEnum.REDIS.getValue());
@@ -180,80 +180,6 @@ public class RedisConfigTemplateController extends BaseController {
         appEmailUtil.sendRedisConfigTemplateChangeEmail(appUser, versionName, instanceConfig, successEnum, RedisConfigTemplateChangeEnum.ADD);
         return new ModelAndView("");
 
-    }
-
-    /**
-     * 添加Redis版本管理
-     */
-    @RequestMapping(value = "/addRedisVersion")
-    public ModelAndView addVersion(HttpServletRequest request, HttpServletResponse response, Model model) {
-        /*AppUser appUser = getUserInfo(request);
-        // versionId =-1 为新增 ，否则为修改
-        Integer versionId = StringUtils.isEmpty(request.getParameter("versionId")) ? -1 : Integer.parseInt(request.getParameter("versionId"));
-        String versionName = StringUtils.isEmpty(request.getParameter("versionName")) ? "" : String.valueOf(request.getParameter("versionName"));
-        String versionGroup = StringUtils.isEmpty(request.getParameter("versionGroup")) ? "" : String.valueOf(request.getParameter("versionGroup"));
-        int versionStatus = StringUtils.isEmpty(request.getParameter("versionStatus")) ? 1 : Integer.parseInt(request.getParameter("versionStatus"));
-        String versionDir = StringUtils.isEmpty(request.getParameter("versionDir")) ? ConstUtils.REDIS_DEFAULT_DIR : String.valueOf(request.getParameter("versionDir"));
-        int bind = StringUtils.isEmpty(request.getParameter("versionBind")) ? 0 : Integer.parseInt(request.getParameter("versionBind") + "");
-        int versionCopyId = StringUtils.isEmpty(request.getParameter("versionCopyId")) ? 0 : Integer.parseInt(request.getParameter("versionCopyId"));
-        int resourceId = StringUtils.isEmpty(request.getParameter("resourceId")) ? -1 : Integer.parseInt(request.getParameter("resourceId"));
-        logger.info("saveOrupdate Redis version ! versionId:{},versionName:{},versionStatus:{},versionDir:{},versionCopyId:{},isBind:{}", versionId, versionName, versionStatus, versionDir, versionCopyId, bind);
-
-        Map<String, Object> resultMap = new HashMap<String, Object>();
-        SuccessEnum successEnum = null;
-        if (StringUtils.isEmpty(versionName)) {
-            successEnum = SuccessEnum.FAIL;
-            resultMap.put("status", successEnum.value());
-            resultMap.put("message", ErrorMessageEnum.PARAM_ERROR_MSG.getMessage());
-            sendMessage(response, JSONObject.toJSONString(resultMap));
-            return null;
-        }
-        *//**
-         * 新增Redis版本及配置复制
-         *//*
-        RedisVersion redisVersion = null;
-        try {
-            if (versionId == -1) {
-                redisVersion = new RedisVersion(versionName, versionStatus, versionDir, versionGroup, bind, resourceId);
-                //1.验证是否插入相同版本
-                RedisVersion existVersion = redisConfigTemplateService.getRedisVersionByName(redisVersion);
-                if (existVersion == null) {
-                    //2.插入Redis版本
-                    redisConfigTemplateService.saveRedisVersion(redisVersion);
-                    //3.复制redis版本配置
-                    if (versionCopyId > 0) {
-                        redisConfigTemplateService.copyRedisConfig(versionCopyId, redisVersion);
-                    }
-                    successEnum = SuccessEnum.SUCCESS;
-                    //增加Redis新版本,通知管理员
-//                    if (redisVersion != null) {
-//                        appEmailUtil.sendAddRedisVersionEmail(appUser, redisVersion.getName(), successEnum);
-//                    }
-                } else {
-                    logger.info("insert versionName:{} repeat!", versionName);
-                    successEnum = SuccessEnum.FAIL;
-                    resultMap.put("message", versionName + ErrorMessageEnum.REPEAT_INSERT_MSG.getMessage());
-                }
-            } else {
-                logger.info("update version id={},name={}", versionId, versionName);
-                redisVersion = new RedisVersion(versionId, versionName, versionStatus, versionDir, versionGroup, bind, resourceId);
-                // 更新版本信息
-                redisConfigTemplateService.updateRedisVersion(redisVersion);
-                successEnum = SuccessEnum.SUCCESS;
-            }
-            // redis默认版本只能有一个
-            if (bind == RedisVersionEnum.Is_bind.getValue()) {
-                redisConfigTemplateService.setUnbindVersions(redisVersion);
-            }
-        } catch (Exception e) {
-            successEnum = SuccessEnum.FAIL;
-            resultMap.put("message", ErrorMessageEnum.INNER_ERROR_MSG.getMessage());
-            logger.error(e.getMessage(), e);
-        }
-        resultMap.put("status", successEnum.value());
-        logger.info("result:{}", resultMap);
-        sendMessage(response, JSONObject.toJSONString(resultMap));*/
-        return null;
     }
 
     /**

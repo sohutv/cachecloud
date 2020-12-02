@@ -125,7 +125,7 @@
 		</li>
 
 		<li <c:if test="${redisConfigActive == 1}">class="active"</c:if>>
-			<a href="/manage/redisConfig/init?resourceId=29">
+			<a href="/manage/redisConfig/init?versionid=29">
 				<i class="glyphicon glyphicon-file"></i>
 				<span class="title">配置模版</span>
 				<c:if test="${redisConfigActive == 1}">
