@@ -172,10 +172,10 @@ public class AppDailyDataCenterImpl implements AppDailyDataCenter {
         appDailyData.setMaxUsedMemory(MapUtils.getLongValue(appMinuteStatMap, "maxUsedMemory") / 1024 / 1024);
         appDailyData.setExpiredKeysCount(MapUtils.getIntValue(appMinuteStatMap, "expiredKeys"));
         appDailyData.setEvictedKeysCount(MapUtils.getIntValue(appMinuteStatMap, "evictedKeys"));
-        appDailyData.setAvgMinuteNetOutputByte(remainNumberTwoPoint(MapUtils.getDoubleValue(appMinuteStatMap, "avgNetInputByte") / 1024.0 / 1024.0));
-        appDailyData.setMaxMinuteNetOutputByte(remainNumberTwoPoint(MapUtils.getDoubleValue(appMinuteStatMap, "maxNetInputByte") / 1024.0 / 1024.0));
-        appDailyData.setAvgMinuteNetInputByte(remainNumberTwoPoint(MapUtils.getDoubleValue(appMinuteStatMap, "avgNetOutputByte") / 1024.0 / 1024.0));
-        appDailyData.setMaxMinuteNetInputByte(remainNumberTwoPoint(MapUtils.getDoubleValue(appMinuteStatMap, "maxNetOutputByte") / 1024.0 / 1024.0));
+        appDailyData.setAvgMinuteNetOutputByte(remainNumberTwoPoint(MapUtils.getDoubleValue(appMinuteStatMap, "avgNetOutputByte") / 1024.0 / 1024.0));
+        appDailyData.setMaxMinuteNetOutputByte(remainNumberTwoPoint(MapUtils.getDoubleValue(appMinuteStatMap, "maxNetOutputByte") / 1024.0 / 1024.0));
+        appDailyData.setAvgMinuteNetInputByte(remainNumberTwoPoint(MapUtils.getDoubleValue(appMinuteStatMap, "avgNetInputByte") / 1024.0 / 1024.0));
+        appDailyData.setMaxMinuteNetInputByte(remainNumberTwoPoint(MapUtils.getDoubleValue(appMinuteStatMap, "maxNetInputByte") / 1024.0 / 1024.0));
         appDailyData.setAvgObjectSize(MapUtils.getIntValue(appMinuteStatMap, "avgObjectSize"));
         appDailyData.setMaxObjectSize(MapUtils.getIntValue(appMinuteStatMap, "maxObjectSize"));
 
