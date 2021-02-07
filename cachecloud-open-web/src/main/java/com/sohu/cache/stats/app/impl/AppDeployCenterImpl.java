@@ -320,7 +320,7 @@ public class AppDeployCenterImpl implements AppDeployCenter {
             if (StringUtils.isBlank(nodeInfo)) {
                 continue;
             }
-            String[] array = nodeInfo.split(":");
+            String[] array = nodeInfo.split(ConstUtils.COLON);
 //            if (array.length < 2) {
 //                logger.error("error nodeInfo:{}", Arrays.toString(array));
 //                continue;
