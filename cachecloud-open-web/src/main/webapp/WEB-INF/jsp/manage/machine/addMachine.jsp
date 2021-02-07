@@ -67,7 +67,7 @@
                                             <option value="0" <c:if test="${machine.info.virtual == 0}">selected="selected"</c:if>>
                                                 否
                                             </option>
-                                            <option value="1" <c:if test="${machine.info.virtual == 2}">selected="selected"</c:if>>
+                                            <option value="1" <c:if test="${machine.info.virtual == 1}">selected="selected"</c:if>>
                                                 是
                                             </option>
                                         </select>
