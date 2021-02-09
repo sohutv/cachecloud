@@ -8,6 +8,7 @@ import org.apache.commons.lang.math.NumberUtils;
 
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.service.UserLoginStatusService;
+import org.springframework.stereotype.Service;
 
 /**
  * cookie保护登录状态
@@ -15,6 +16,7 @@ import com.sohu.cache.web.service.UserLoginStatusService;
  * @Date 2016年6月15日
  * @Time 下午1:31:17
  */
+@Service
 public class UserLoginStatusCookieServiceImpl implements UserLoginStatusService {
 
     @Override
