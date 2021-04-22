@@ -12,8 +12,7 @@ b.也可以clone源码，自行打包：
 
 	//clone项目
 	git clone https://github.com/sohutv/cachecloud.git
-	//打包
-	mvn clean package
+	
 
 <a name="cc2"/>
 
@@ -26,12 +25,12 @@ b.也可以clone源码，自行打包：
 	user: xxx
 	password: xxx
 
-导入建表文件：/cachecloud-open/cachecloud-web/sql/cc2.0.sql
+导入建表文件：cachecloud-web/sql/cc2.0.sql
 
 <a name="cc3"/>
 
 ### 三、启动工程
-准备配置文件：application-open.yml，放到war包同目录下
+准备配置文件：cachecloud-web/src/main/resources/application-open.yml
 
 	#配置应用名称
 	spring:
@@ -51,9 +50,15 @@ b.也可以clone源码，自行打包：
 	#配置访问端口,默认8080
 	server:
 	  port: 8080
-启动工程
+	  
+打包
 
+      //打包
+	mvn clean package
+启动工程
+      
  	//启动web工程
+	cd cachecloud-web/target
 	nohup java -jar -Dspring.profiles.active=open cachecloud-web.war &
 	
 访问web：<http://localhost:8080/manage/login> 使用默认管理员账户登录：用户名 admin 密码 admin
