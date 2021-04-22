@@ -111,12 +111,14 @@
                     <div class="portlet-body">
                         <div class="table-toolbar">
                             <div class="col-md-12">
-                                <form action="/manage/app/auditList" method="post" class="form-inline" role="form">&nbsp;&nbsp;
+                                <form action="/manage/app/auditList" method="post" class="form-inline" role="form">
+                                    &nbsp;&nbsp;
                                     <div class="form-group">
                                         <label class="control-label">
                                             &nbsp;申请人:&nbsp;&nbsp;
                                         </label>
-                                        <select name="userId" data-width="50px" class="selectpicker form-control" data-live-search="true">
+                                        <select name="userId" data-width="50px" class="selectpicker form-control"
+                                                data-live-search="true">
                                             <option value="" <c:if test="${userId == null}">selected="selected"</c:if>>
                                                 所有
                                             </option>
@@ -270,6 +272,10 @@
                                                    value="/manage/app/addAuditStatus?status=1&appAuditId=${item.id}"/>
                                             <a onclick="if(window.confirm('确认要通过该申请请求吗?')){return true;}else{return false;}"
                                                href="${auditUrl}">[通过]</a>
+                                            <c:if test="${item.type == 12}">
+                                                <a target="_blank"
+                                                   href="/import/app/init?importId=${item.param1}">[迁移进度]</a>
+                                            </c:if>
                                         </c:if>
                                         &nbsp;
                                         <c:if test="${item.status == 0}">
@@ -326,6 +332,10 @@
                                                 <c:when test="${item.type == 11}">
                                                     <a target="_blank"
                                                        href="/manage/app/addAuditStatus?status=2&appAuditId=${item.id}&type=11&appId=${item.appId}">[审批处理]</a>
+                                                </c:when>
+                                                <c:when test="${item.type == 12}">
+                                                    <a target="_blank"
+                                                       href="/manage/app/addAuditStatus?status=2&appAuditId=${item.id}&type=12&appId=${item.appId}">[审批处理]</a>
                                                 </c:when>
                                             </c:choose>
                                         </c:if>

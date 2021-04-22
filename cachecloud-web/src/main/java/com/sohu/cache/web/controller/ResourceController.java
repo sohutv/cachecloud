@@ -77,6 +77,9 @@ public class ResourceController extends BaseController {
             case "dir":
                 resource_type = ResourceEnum.DIR.getValue();
                 break;
+            case "module":
+                resource_type = ResourceEnum.MODULE.getValue();
+                break;
             default:
                 break;
         }

@@ -37,7 +37,7 @@ function saveAppDesc(){
 	//应用描述
 	var memSize = document.getElementById("memSize");
 	if(memSize.value == ""){
-		alert("内容容量不能为空");
+		alert("内存容量不能为空");
 		memSize.focus();
 		return false;
 	}
@@ -53,6 +53,17 @@ function saveAppDesc(){
 		alert("项目负责人不能为空");
 		officer.focus();
 		return false;
+	}
+
+	//redis版本
+	var versionId = document.getElementById("versionId");
+	if(versionId.value == "-1"){
+		var versionName = document.getElementById("versionName");
+		if(versionName.value == ""){
+			alert("Redis部署版本不能为空");
+			officer.focus();
+			return false;
+		}
 	}
 	
 	//预估QPS

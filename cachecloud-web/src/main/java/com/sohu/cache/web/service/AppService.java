@@ -224,6 +224,13 @@ public interface AppService {
     List<MachineStats> getAppMachineDetail(Long appId);
 
     /**
+     * 获取应用拥有实例的机器
+     * @param appId
+     * @return
+     */
+    public List<MachineStats> getAppMachine(Long appId);
+
+    /**
      * 根据应用id获取审批记录
      *
      * @param appId

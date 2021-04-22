@@ -3,9 +3,6 @@
 <script src="/resources/manage/plugins/data-tables/jquery.dataTables.js" type="text/javascript"></script>
 <script src="/resources/manage/plugins/data-tables/DT_bootstrap.js" type="text/javascript"></script>
 <link href="/resources/manage/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
-<style>
-
-</style>
 <script type="text/javascript">
     var TableManaged = function () {
         return {

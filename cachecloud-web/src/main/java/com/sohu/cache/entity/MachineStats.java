@@ -51,6 +51,10 @@ public class MachineStats{
 
     private MachineMemInfo machineMemInfo;
 
+    private Map<String,Object> moduleInfo;
+
+    private String versionInfo;
+
     private Map<String/**挂载点*/, String/**使用百分比*/> diskUsageMap;
 
     /**

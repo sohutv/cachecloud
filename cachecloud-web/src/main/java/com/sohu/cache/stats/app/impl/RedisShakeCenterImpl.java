@@ -72,7 +72,7 @@ public class RedisShakeCenterImpl implements RedisShakeCenter {
     }
 
     @Override
-    public boolean migrate(String migrateMachineIp, int source_rdb_parallel, int parallel,
+    public AppDataMigrateStatus migrate(String migrateMachineIp, int source_rdb_parallel, int parallel,
                            AppDataMigrateEnum sourceRedisMigrateEnum, String sourceServers,
                            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers,
                            long sourceAppId, long targetAppId,
@@ -90,7 +90,7 @@ public class RedisShakeCenterImpl implements RedisShakeCenter {
         String logFileName = fileName + timestamp + ".log";
         boolean uploadConfig = createRemoteFile(migrateMachineIp, confileFileName, configContent, resource);
         if (!uploadConfig) {
-            return false;
+            return null;
         }
         // 3. 开始执行: 指定的配置名、目录、日志名
         String cmd = ConstUtils.getRedisShakeLinuxCmd(resource.getName()) + " -conf=" + ConstUtils.getRedisShakeConfDir(resource.getName()) + confileFileName + " -type=sync";
@@ -100,7 +100,7 @@ public class RedisShakeCenterImpl implements RedisShakeCenter {
             SSHUtil.execute(migrateMachineIp, cmd);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return false;
+            return null;
         }
 
         // 4. 记录执行记录
@@ -123,7 +123,7 @@ public class RedisShakeCenterImpl implements RedisShakeCenter {
         appDataMigrateStatus.setStatus(AppDataMigrateStatusEnum.PREPARE.getStatus());
         appDataMigrateStatusDao.save(appDataMigrateStatus);
 
-        return true;
+        return appDataMigrateStatus;
     }
 
     @Override

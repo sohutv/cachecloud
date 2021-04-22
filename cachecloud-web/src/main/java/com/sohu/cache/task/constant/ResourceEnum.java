@@ -8,11 +8,12 @@ public enum ResourceEnum {
     ALL(0, "所有资源"),
     Repository(1, "仓库管理"),
     SCRIPT(2, "脚本管路"),
-    REDIS(3, "redis资源管理"),
+    REDIS(3, "Redis资源管理"),
     SSHKEY(4, "sshkey管理"),
     DOCKERFILE(5, "镜像管理"),
     DIR(6, "目录管理"),
-    TOOL(7, "迁移工具管理");
+    TOOL(7, "迁移工具管理"),
+    MODULE(8, "Redis模块");
 
     private int value;
 

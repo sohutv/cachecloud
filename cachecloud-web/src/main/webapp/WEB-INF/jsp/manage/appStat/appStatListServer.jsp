@@ -12,6 +12,10 @@
                             href="/manage/app/stat/list/server?tabId=2">碎片率指标</a></li>
                     <li <c:if test="${tabId == 3}">class="active"</c:if>><a
                             href="/manage/app/stat/list/server?tabId=3">应用拓扑诊断</a></li>
+                    <li <c:if test="${tabId == 4}">class="active"</c:if>><a
+                    href="/manage/app/stat/list/server?tabId=4">容器环境诊断</a></li>
+                    <li <c:if test="${tabId == 5}">class="active"</c:if>><a
+                    href="/manage/app/stat/list/server?tabId=5">宿主环境诊断</a></li>
                 </ul>
             </div>
 
@@ -228,7 +232,7 @@
                                     <fmt:formatNumber var="used_memory"
                                                       value="${((appClientGatherStatMap[app_id]['used_memory'])/1024/1024)}"
                                                       pattern="0.00"/>
-                                        ${used_memory}
+                                    ${used_memory}
                                 </td>
                                 <td>
                                     <fmt:formatNumber var="used_memory_rss"
@@ -340,6 +344,142 @@
                         </tbody>
                     </table>
                 </div>
+
+                <div class="portlet box light-grey" id="containerIndex">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <i class="fa fa-globe"></i>容器环境诊断
+                        </div>
+
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-md-3"></label>
+                        <textarea rows="5"  class="form-control" style="color:darkgray;overflow-y:hidden" readonly="readonly">
+容器环境基准值:
+        1).内存分配策略: 是否为1,内核允许分配所有的物理内存;
+        2).thp大内存页配置: 设置为never,防止fork过程中消耗大内存拷贝导致阻塞;
+        3).内存swap配置: 是否为0关闭swap，避免内存io转换磁盘io导致阻塞;
+        4).容器nproc配置: 获取当前容器的nproc配置;
+                        </textarea>
+                    </div>
+                    <table class="table table-striped table-bordered table-hover" name="tableDataList">
+                        <thead>
+                        <tr>
+                            <th>容器ip</th>
+                            <th>overcommit_memory</th>
+                            <th>swappiness</th>
+                            <th>thp_enabled</th>
+                            <th>thp_defrag</th>
+                            <th>nproc</th>
+                            <th>类型</th>
+                            <th>诊断情况</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach items="${machineEnvMap.container}" var="container">
+                                <tr class="odd gradeX">
+                                    <td>
+                                        ${container.ip}
+                                    </td>
+                                    <td>${container.envs.overcommit_memory}</td>
+                                    <td>${container.envs.swappines}</td>
+                                    <td>${container.envs.transparent_hugepage_enable}</td>
+                                    <td>${container.envs.transparent_hugepage_defrag}</td>
+                                    <td>${container.envs.nproc}</td>
+                                    <td>
+                                        容器
+                                    </td>
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${container.status == 1}">
+                                                <span style="color:green">检测一致</span>
+                                            </c:when>
+                                            <c:when test="${container.status == 2}">
+                                                <span style="color:red">检测不一致</span>
+                                            </c:when>
+                                            <c:when test="${container.status == 3}">
+                                                <span style="color:red">检测异常</span>
+                                            </c:when>
+                                        </c:choose>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="portlet box light-grey" id="machineIndex">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <i class="fa fa-globe"></i>宿主环境诊断
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label col-md-3"></label>
+                        <textarea rows="8"  class="form-control"  style="color:darkgray;overflow-y:hidden" readonly="readonly">
+宿主环境基准值:
+    1).检测cachecloud用户连接的进程数,报警阈值 cachecloud_nprocs>=1024;
+    2).检测宿主机某天的所有实例aof写盘阻塞 ,报警阈值 fsync_slow_times >=10次;
+    3).检测tcp连接队列数: 配置 somaxconn = 511;
+    4).检测sshpass安装: 检测宿主文件拷贝命令支持;
+    5).检测运行redis实例总数;
+    6).检测打开文件数/最大文件数;
+    7).检测磁盘容量使用率 disk used >= 80%;
+                        </textarea>
+                    </div>
+                    <table class="table table-striped table-bordered table-hover" name="tableDataList">
+                        <thead>
+                        <tr>
+                            <th>宿主ip</th>
+                            <th>cachecloud_nprocs</th>
+                            <th>fsync_slow_times</th>
+                            <th>somaxconn</th>
+                            <th>sshpass</th>
+                            <th>redis实例数</th>
+                            <th>ulimit文件数</th>
+                            <th>disk used</th>
+                            <th>类型</th>
+                            <th>诊断情况</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach items="${machineEnvMap.host}" var="machine">
+                                <tr class="odd gradeX">
+                                    <td>
+                                        ${machine.ip}
+                                    </td>
+                                    <td> ${machine.envs.nproc_threads}</td>
+                                    <td> ${machine.envs.fsync_delay_times}</td>
+                                    <td>${machine.envs.somaxconn}</td>
+                                    <td> ${machine.envs.sshPass}</td>
+                                    <td> ${machine.envs.instanceNum}</td>
+                                    <td>${machine.envs.unlimit}
+                                        <%--/${machine.envs.unlimit_used}--%>
+                                    </td>
+                                    <td>${machine.envs.diskUsed}</td>
+                                    <td>
+                                        宿主机
+                                    </td>
+                                     <td>
+                                        <c:choose>
+                                            <c:when test="${machine.status == 1}">
+                                                <span style="color:green">检测一致</span>
+                                            </c:when>
+                                            <c:when test="${machine.status == 2}">
+                                                <span style="color:red">检测不一致</span>
+                                            </c:when>
+                                            <c:when test="${machine.status == 3}">
+                                                <span style="color:red">检测异常</span>
+                                            </c:when>
+                                        </c:choose>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
         </div>
     </div>
@@ -361,14 +501,32 @@
             $('#memIndex').removeAttr("hidden");
             $('#fragRatioIndex').attr("hidden", "hidden");
             $('#appTopologyIndex').attr("hidden", "hidden");
+            $('#containerIndex').attr("hidden", "hidden");
+            $('#machineIndex').attr("hidden", "hidden");
         } else if (tabVal == 2) {
             $('#memIndex').attr("hidden", "hidden");
             $('#fragRatioIndex').removeAttr("hidden");
             $('#appTopologyIndex').attr("hidden", "hidden");
+            $('#containerIndex').attr("hidden", "hidden");
+            $('#machineIndex').attr("hidden", "hidden");
         } else if (tabVal == 3) {
             $('#memIndex').attr("hidden", "hidden");
             $('#fragRatioIndex').attr("hidden", "hidden");
             $('#appTopologyIndex').removeAttr("hidden");
+            $('#containerIndex').attr("hidden", "hidden");
+            $('#machineIndex').attr("hidden", "hidden");
+        } else if (tabVal == 4) {
+            $('#memIndex').attr("hidden", "hidden");
+            $('#fragRatioIndex').attr("hidden", "hidden");
+            $('#appTopologyIndex').attr("hidden", "hidden");
+            $('#containerIndex').removeAttr("hidden");
+            $('#machineIndex').attr("hidden", "hidden");
+        } else if (tabVal == 5) {
+            $('#memIndex').attr("hidden", "hidden");
+            $('#fragRatioIndex').attr("hidden", "hidden");
+            $('#appTopologyIndex').attr("hidden", "hidden");
+            $('#containerIndex').attr("hidden", "hidden");
+            $('#machineIndex').removeAttr("hidden");
         }
 
     })

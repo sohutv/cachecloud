@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sohu.cache.dao.AppImportDao">
+    <sql id="columns">
+    	id,app_id,mem_size,source_type,redis_version_name,instance_info,redis_password,status,step,app_build_task_id,migrate_id
+    </sql>
+
+    <select id="get" resultType="com.sohu.cache.entity.AppImport">
+        select id,
+        <include refid="columns"/>,create_time,update_time
+        from app_import
+        where id=#{id}
+    </select>
+
+    <insert id="save" parameterType="AppImport" keyProperty="id" useGeneratedKeys="true">
+        insert into app_import
+        (<include refid="columns"/>)
+        values
+        (#{id},#{appId},#{memSize},#{sourceType},#{redisVersionName},#{instanceInfo},#{redisPassword},#{status},#{step},#{appBuildTaskId},#{migrateId})
+    </insert>
+
+    <update id="update" parameterType="AppImport">
+    	update app_import
+    		set app_id=#{appId},mem_size=#{memSize},source_type=#{sourceType}, redis_version_name=#{redisVersionName},instance_info=#{instanceInfo}, redis_password=#{redisPassword}, status=#{status}, step=#{step},app_build_task_id=#{appBuildTaskId}, migrate_id=#{migrateId}
+    	where id=#{id}
+    </update>
+
+    <select id="getAppImports" resultType="AppImport" parameterType="int">
+        select id,
+        <include refid="columns"/>,create_time,update_time
+        from app_import where 1=1
+        <choose>
+            <when test="status != null and status > -1">
+                and status = #{status}
+            </when>
+        </choose>
+    </select>
+</mapper>

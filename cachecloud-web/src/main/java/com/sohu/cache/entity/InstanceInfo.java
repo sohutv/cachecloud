@@ -4,8 +4,12 @@ import com.sohu.cache.task.constant.InstanceInfoEnum;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.enums.BooleanEnum;
 import lombok.Data;
+import redis.clients.jedis.Module;
+
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+
 /**
  * 实例信息
  * User: lingguo
@@ -57,6 +61,9 @@ public class InstanceInfo implements Serializable {
     private String roleDesc;
     private int groupId;
     private Date updateTime;
+
+    private List<Module> modules;
+
     public String getTypeDesc() {
         if (type <= 0) {
             typeDesc = "";

@@ -17,6 +17,9 @@
             <li id="app_ops_instance" class="active" data-url="/manage/app/instance?appId=${appId}">
                 <a href="?appId=${appId}&tabTag=app_ops_instance">应用实例</a>
             </li>
+            <li id="app_ops_module" data-url="/manage/app/module?appId=${appId}">
+                <a href="?appId=${appId}&tabTag=app_ops_module">应用模块</a>
+            </li>
             <li id="app_ops_machine" data-url="/manage/app/machine?appId=${appId}">
                 <a href="?appId=${appId}&tabTag=app_ops_machine">应用机器列表</a>
             </li>
@@ -32,6 +35,8 @@
         </ul>
         <div class="tab-content">
             <div class="tab-pane active" id="app_ops_instanceTab">
+            </div>
+            <div class="tab-pane" id="app_ops_moduleTab">
             </div>
             <div class="tab-pane" id="app_ops_machineTab">
             </div>

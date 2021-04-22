@@ -13,13 +13,10 @@
                         <span class="glyphicon glyphicon-cog"></span>
                         <font color='white'> ${userInfo.chName}</font>
                         <b class="caret"></b>
-<%--					<i class="fa fa-angle-down"></i>--%>
 					</a>
 					<ul class="dropdown-menu">
 						<c:if test="${userInfo.type == 0}">
 							<li><a target="_blank" href="/manage/total/statlist"><span class="glyphicon glyphicon-th-large"></span> 管理后台</a></li>
-							<li><a target="_blank" href="/import/app/init"><span class="glyphicon glyphicon-import"></span> 导入应用</a></li>
-                            <li><a target="_blank" href="/data/migrate/list"><span class="glyphicon glyphicon-retweet"></span> 数据迁移工具</a></li>
                             <li class="divider"></li>
 						</c:if>
 						<li><a href="/admin/app/list"><span class="glyphicon glyphicon-th-list"></span> 应用列表</a></li>
@@ -32,7 +29,7 @@
             
             <ul class="nav navbar-nav navbar-left">
                 <li>
-                    <a href="/wiki/intro/index"><font color='white'>CacheCloud文档</font>
+                    <a href="/wiki/quickstart/index"><font color='white'>CacheCloud文档</font>
 					</a>
                 </li>
             </ul>

@@ -293,14 +293,19 @@ public class AppStatsCenterImpl implements AppStatsCenter {
             //2.判断版本是否可以升级
             List<SystemResource> versionList = resourceDao.getResourceList(ResourceEnum.REDIS.getValue());
             for (SystemResource version : versionList) {
-                // 大版本同一版本且大于当前版本号
-                int versionTag = Integer.parseInt(version.getName().replaceAll("redis-","").replaceAll("\\.",""));
-                int currentTag = Integer.parseInt(redisResource.getName().replaceAll("redis-","").replaceAll("\\.",""));
-                // 支持小版本号升级
-                String versionStr = redisResource.getName().substring(0, redisResource.getName().lastIndexOf("."));
-                if (version.getName().indexOf(versionStr) > -1 && versionTag > currentTag) {
-                    appDesc.setIsVersionUpgrade(1);
-                    break;
+                try {
+                    // 大版本同一版本且大于当前版本号
+                    int versionTag = Integer.parseInt(version.getName().replaceAll("redis-","").replaceAll("\\.",""));
+                    int currentTag = Integer.parseInt(redisResource.getName().replaceAll("redis-","").replaceAll("\\.",""));
+                    // 支持小版本号升级
+                    String versionStr = redisResource.getName().substring(0, redisResource.getName().lastIndexOf("."));
+                    if (version.getName().indexOf(versionStr) > -1 && versionTag > currentTag) {
+                        appDesc.setIsVersionUpgrade(1);
+                        break;
+                    }
+                } catch (Exception e) {
+                    logger.error("parse version:{} {} exception : {}", redisResource.getName(), version.getName(), e.getMessage(), e);
+                    appDesc.setIsVersionUpgrade(0);
                 }
             }
         } else {

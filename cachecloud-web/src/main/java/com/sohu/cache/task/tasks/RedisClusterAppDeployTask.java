@@ -121,10 +121,10 @@ public class RedisClusterAppDeployTask extends BaseTask {
 
         //审核id
         auditId = MapUtils.getLongValue(paramMap, TaskConstants.AUDIT_ID_KEY);
-        if (auditId <= 0) {
-            logger.error(marker, "task {} auditId {} is wrong", taskId, auditId);
-            return TaskFlowStatusEnum.ABORT;
-        }
+//        if (auditId <= 0) {
+//            logger.error(marker, "task {} auditId {} is wrong", taskId, auditId);
+//            return TaskFlowStatusEnum.ABORT;
+//        }
 
         //maxMemory
         maxMemory = MapUtils.getIntValue(paramMap, TaskConstants.REDIS_SERVER_MAX_MEMORY_KEY);
@@ -433,7 +433,9 @@ public class RedisClusterAppDeployTask extends BaseTask {
      */
     public TaskFlowStatusEnum updateAudit() {
         try {
-            appAuditDao.updateAppAudit(auditId, AppCheckEnum.APP_ALLOCATE_RESOURCE.value());
+            if (auditId > 0){
+                appAuditDao.updateAppAudit(auditId, AppCheckEnum.APP_ALLOCATE_RESOURCE.value());
+            }
             return TaskFlowStatusEnum.SUCCESS;
         } catch (Exception e) {
             logger.error(marker, e.getMessage(), e);

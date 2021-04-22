@@ -242,8 +242,7 @@ public class AppToolController extends BaseController {
                 json.put("result", result);
             } else if (type == DiagnosticTypeEnum.HOT_KEY.getType()) {
                 String result = diagnosticToolService.getHotkeyDiagnosticData(redisKey);
-                String formatResult = result.replaceAll("(\\r\\n|\\n|\\n\\r)", "<br/>");
-                json.put("result", formatResult);
+                json.put("result", result == null ? "" : result.replaceAll("(\\r\\n|\\n|\\n\\r)", "<br/>"));
             }
         }
         json.put("status", String.valueOf(SuccessEnum.SUCCESS.value()));

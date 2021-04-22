@@ -190,7 +190,7 @@ public class RedisMigrateToolCenterImpl implements RedisMigrateToolCenter {
     }
 
     @Override
-    public boolean migrate(String migrateMachineIp, AppDataMigrateEnum sourceRedisMigrateEnum, String sourceServers,
+    public AppDataMigrateStatus migrate(String migrateMachineIp, AppDataMigrateEnum sourceRedisMigrateEnum, String sourceServers,
                            AppDataMigrateEnum targetRedisMigrateEnum, String targetServers, long sourceAppId, long targetAppId,
                            String redisSourcePass, String redisTargetPass, long userId, SystemResource resource) {
         // 1. 生成配置
@@ -203,7 +203,7 @@ public class RedisMigrateToolCenterImpl implements RedisMigrateToolCenter {
         String logFileName = "rmt-" + timestamp + ".log";
         boolean uploadConfig = createRemoteFile(migrateMachineIp, confileFileName, configContent);
         if (!uploadConfig) {
-            return false;
+            return null;
         }
         // 3. 开始执行: 指定的配置名、目录、日志名
         String cmd = ConstUtils.getRedisMigrateToolCmd(resource.getName()) + " -c " + ConstUtils.getRedisMigrateToolDir() + confileFileName
@@ -213,7 +213,7 @@ public class RedisMigrateToolCenterImpl implements RedisMigrateToolCenter {
             SSHUtil.execute(migrateMachineIp, cmd);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            return false;
+            return null;
         }
         // 4. 记录执行记录
         AppDataMigrateStatus appDataMigrateStatus = new AppDataMigrateStatus();
@@ -234,7 +234,7 @@ public class RedisMigrateToolCenterImpl implements RedisMigrateToolCenter {
         appDataMigrateStatus.setStatus(AppDataMigrateStatusEnum.PREPARE.getStatus());
 
         appDataMigrateStatusDao.save(appDataMigrateStatus);
-        return true;
+        return appDataMigrateStatus;
     }
 
     /**

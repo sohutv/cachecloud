@@ -4,6 +4,7 @@ import com.sohu.cache.async.AsyncService;
 import com.sohu.cache.constant.AppUserTypeEnum;
 import com.sohu.cache.dao.AppAuditDao;
 import com.sohu.cache.dao.AppAuditLogDao;
+import com.sohu.cache.dao.AppImportDao;
 import com.sohu.cache.dao.InstanceDao;
 import com.sohu.cache.entity.*;
 import com.sohu.cache.machine.MachineCenter;
@@ -79,6 +80,9 @@ public class BaseController {
 
     @Resource
     protected AppAuditDao appAuditDao;
+
+    @Resource
+    protected AppImportDao appImportDao;
 
     @Resource
     protected AppAuditLogDao appAuditLogDao;

@@ -913,6 +913,18 @@ public class AppController extends BaseController {
         return new ModelAndView("app/jobIndex/appInitIndex");
     }
 
+    @RequestMapping(value = "/import")
+    public ModelAndView doAppImport(HttpServletRequest request,
+                                    HttpServletResponse response, Model model) {
+        List<AppUser> userList = userService.getAllUser();
+        List<MachineRoom> roomList = machineCenter.getEffectiveRoom();
+        List<SystemResource> versionList = resourceService.getResourceList(ResourceEnum.REDIS.getValue());
+        model.addAttribute("userList", userList);
+        model.addAttribute("roomList", roomList);
+        model.addAttribute("versionList", versionList);
+
+        return new ModelAndView("app/jobIndex/appImportIndex");
+    }
 
     @RequestMapping(value = "/jobs")
     public ModelAndView doAppJobs(HttpServletRequest request,
@@ -1169,6 +1181,62 @@ public class AppController extends BaseController {
         return null;
     }
 
+
+    @RequestMapping(value = "import/submit", method = RequestMethod.POST)
+    public ModelAndView doAppImportSubmit(HttpServletRequest request,
+                                          HttpServletResponse response, Model model, AppDesc appDesc, String memSize) {
+        AppUser appUser = getUserInfo(request);
+
+        //创建appImport
+        AppImport appImport = new AppImport();
+        //appDesc入库
+        if (appDesc != null) {
+            Timestamp now = new Timestamp(new Date().getTime());
+            appDesc.setCreateTime(now);
+            appDesc.setPassedTime(now);
+            appDesc.setVerId(1);
+            appDesc.setStatus((short) AppStatusEnum.STATUS_INITIALIZE.getStatus());
+            appDesc.setHitPrecentAlertValue(0);
+            appDesc.setIsAccessMonitor(AppUserAlertEnum.NO.value());
+            appService.save(appDesc);
+            // 保存应用和用户的关系
+            String officers = appDesc.getOfficer();
+            if (!StringUtils.isEmpty(officers)) {
+                for (String officerId : officers.split(",")) {
+                    if (!StringUtils.isEmpty(officerId)) {
+                        appService.saveAppToUser(appDesc.getAppId(), Long.parseLong(officerId));
+                    }
+                }
+            }
+            // 更新appKey
+            long appId = appDesc.getAppId();
+            appService.updateAppKey(appId);
+        }
+        appImport.setAppId(appDesc.getAppId());
+        appImport.setMemSize(NumberUtils.toInt(memSize));
+        appImport.setSourceType(NumberUtils.toInt(request.getParameter("sourceType")));
+        appImport.setInstanceInfo(request.getParameter("appInstanceInfo"));
+        appImport.setRedisPassword(request.getParameter("password"));
+        appImport.setStatus(0);
+        appImportDao.save(appImport);
+
+        //appAudit入库
+        AppAudit appAudit = new AppAudit();
+        appAudit.setAppId(appDesc.getAppId());
+        appAudit.setUserId(appUser.getId());
+        appAudit.setUserName(appUser.getName());
+        appAudit.setInfo("迁移到应用：" + appDesc.getAppId() + " " + appDesc.getName());
+        appAudit.setModifyTime(new Date());
+        appAudit.setStatus(AppCheckEnum.APP_WATING_CHECK.value());
+        appAudit.setType(AppAuditType.APP_IMPORT.getValue());
+        appAudit.setParam1(String.valueOf(appImport.getId()));
+        Date now = new Date();
+        appAudit.setCreateTime(now);
+        appAudit.setModifyTime(now);
+        appAuditDao.insertAppAudit(appAudit);
+
+        return new ModelAndView("redirect:/admin/app/jobs");
+    }
 
     /**
      * 添加应用

@@ -85,9 +85,6 @@
             </div>
         </div>
     </div>
-    
-    
-    
     <div class="row">
         <div class="col-md-12">
             <div class="page-header">
@@ -321,14 +318,18 @@
 	                </tbody>
 	            </table>
             </div>
-            <div style="margin-bottom: 10px;float: right;margin-right: 15px">
-				<span>
-					<ul id='ccPagenitor' style="margin-bottom: 0px;margin-top: 0px"></ul>
-					<div id="pageDetail" style="float:right;padding-top:7px;padding-left:8px;color:#4A64A4;display: none">共${page.totalPages}页,${page.totalCount}条</div>		
-				</span>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<div  style="margin-bottom: 10px;float: right;margin-right: 15px">
+					<span>
+						<ul id='ccPagenitor' style="margin-bottom: 0px;margin-top: 0px"></ul>
+						<div id="pageDetail" style="float:right;padding-top:7px;padding-left:8px;color:#4A64A4;display: none">共${page.totalPages}页,${page.totalCount}条</div>
+					</span>
 			</div>
-        </div>
-    </div>
+		</div>
+	</div>
+</div>
 
 <jsp:include page="/WEB-INF/include/foot.jsp"/>
 

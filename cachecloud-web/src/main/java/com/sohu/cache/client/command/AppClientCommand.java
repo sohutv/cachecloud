@@ -145,6 +145,12 @@ public class AppClientCommand extends HystrixCommand<Map<String, Object>> {
         if (CollectionUtils.isEmpty(instanceList)) {
             instanceList = instanceDao.getInstListByAppId(appId);
         }
+        String shardsInfo = ObjectConvert.assembleInstance(instanceList);
+        if (StringUtils.isBlank(shardsInfo)) {
+            model.put("status", ClientStatusEnum.ERROR.getStatus());
+            model.put("message", "ERROR: appId:" + appId + "shardsInfo为空 ");
+            return model;
+        }
         String standalone = null;
         for (InstanceInfo instanceInfo : instanceList) {
             if (instanceInfo.isOffline()) {
@@ -173,6 +179,12 @@ public class AppClientCommand extends HystrixCommand<Map<String, Object>> {
         if (instanceList == null || instanceList.isEmpty()) {
             model.put("status", ClientStatusEnum.ERROR.getStatus());
             model.put("message", "appId: " + appId + " 实例集合为空 ");
+            return model;
+        }
+        String shardsInfo = ObjectConvert.assembleInstance(instanceList);
+        if (StringUtils.isBlank(shardsInfo)) {
+            model.put("status", ClientStatusEnum.ERROR.getStatus());
+            model.put("message", "ERROR: appId:" + appId + "shardsInfo为空 ");
             return model;
         }
         String masterName = null;

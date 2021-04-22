@@ -53,54 +53,38 @@ public class ImportAppCenterImpl implements ImportAppCenter {
     private InstanceStatsDao instanceStatsDao;
 
     @Override
-    public ImportAppResult check(AppDesc appDesc, String appInstanceInfo, String password) {
-        // 1.检查是否应用信息为空
-        if (appDesc == null) {
-            return ImportAppResult.fail("应用信息为空");
-        }
-        // 2.检查应用名是否重复
-        String appName = appDesc.getName();
-        AppDesc existAppDesc = appService.getAppByName(appName);
-        if (existAppDesc != null) {
-            return ImportAppResult.fail(appName + ", 应用名重复");
-        }
-        // 3.实例信息是否为空
+    public ImportAppResult check(int type, String appInstanceInfo, String password) {
+        // 1.实例信息是否为空
         if (StringUtils.isBlank(appInstanceInfo)) {
             return ImportAppResult.fail("实例详情为空");
         }
 
         String[] appInstanceDetails = appInstanceInfo.split("\n");
 
-        // 4.检查实例信息格式是否正确
+        String masterNameInput = "";
+        // 2.检查实例信息格式是否正确
         for (String appInstance : appInstanceDetails) {
             if (StringUtils.isBlank(appInstance)) {
                 return ImportAppResult.fail("应用实例信息有空行");
             }
             String[] instanceItems = appInstance.split(":");
-            if (instanceItems.length != 3) {
-                return ImportAppResult.fail("应用实例信息" + appInstance + "格式错误，必须有2个冒号");
+            if (instanceItems.length != 2) {
+                return ImportAppResult.fail("应用实例信息" + appInstance + "格式错误，必须以冒号分隔");
             }
+
+            // 2.1检查端口是否为整数
             String ip = instanceItems[0];
-            // 4.1.检查ip对应的机器是否存在
-            try {
-                MachineInfo machineInfo = machineCenter.getMachineInfoByIp(ip);
-                if (machineInfo == null) {
-                    return ImportAppResult.fail(appInstance + "中的ip不存在");
-                } else if (machineInfo.isOffline()) {
-                    return ImportAppResult.fail(appInstance + "中的ip已经被删除");
-                }
-            } catch (Exception e) {
-                return ImportAppResult.fail(appInstance + "中的ip不存在");
-            }
-            // 4.2.检查端口是否为整数
             String portStr = instanceItems[1];
             boolean portIsDigit = NumberUtils.isDigits(portStr);
-            if (!portIsDigit) {
+            if ((!portIsDigit) && (type != ConstUtils.CACHE_REDIS_SENTINEL)) {
                 return ImportAppResult.fail(appInstance + "中的port不是整数");
+            } else if ((!portIsDigit) && (type == ConstUtils.CACHE_REDIS_SENTINEL)) {
+                masterNameInput = instanceItems[0];
+                continue;
             }
 
             int port = NumberUtils.toInt(portStr);
-            // 4.3.检查ip:port是否已经在instance_info表和instance_statistics中
+            // 2.2检查ip:port是否已经在instance_info表和instance_statistics中
             int count = instanceDao.getCountByIpAndPort(ip, port);
             if (count > 0) {
                 return ImportAppResult.fail(appInstance + "中ip:port已经在instance_info存在");
@@ -109,11 +93,9 @@ public class ImportAppCenterImpl implements ImportAppCenter {
             if (instanceStats != null) {
                 return ImportAppResult.fail(appInstance + "中ip:port已经在instance_statistics存在");
             }
-            // 4.4.检查Redis实例是否存活
-            String memoryOrMasterName = instanceItems[2];
-            int memoryOrMasterNameInt = NumberUtils.toInt(memoryOrMasterName);
+            // 3.2检查Redis实例是否存活
             boolean isRun;
-            if (memoryOrMasterNameInt > 0) {
+            if (StringUtils.isNotEmpty(password)) {
                 // 外部导入密码以外部密码为主(cc内部采用一定规则加密)
                 isRun = redisCenter.isRun(ip, port, password);
             } else {
@@ -123,30 +105,16 @@ public class ImportAppCenterImpl implements ImportAppCenter {
                 return ImportAppResult.fail(appInstance + "中的节点不是存活的");
             }
 
-            // 4.5.检查内存是否为整数
-            boolean isSentinelNode = memoryOrMasterNameInt <= 0;
-            if (isSentinelNode) {
-                // 4.5.1 sentinel节点masterName判断
-                if (StringUtils.isEmpty(memoryOrMasterName)) {
-                    return ImportAppResult.fail(appInstance + "中的sentinel节点master为空");
-                }
-                // 判断masterName
+            //3.3判断sentinel模式下，masterName是否正确
+            if (StringUtils.isNotEmpty(masterNameInput) && (type == ConstUtils.CACHE_REDIS_SENTINEL)) {
                 String masterName = getSentinelMasterName(ip, port);
-                if (StringUtils.isEmpty(masterName) || !memoryOrMasterName.equals(masterName)) {
+                if (StringUtils.isEmpty(masterName) || !masterNameInput.equals(masterName)) {
                     return ImportAppResult.fail(ip + ":" + port + ", masterName:" + masterName + "与所填"
-                            + memoryOrMasterName + "不一致");
-                }
-            } else {
-                // 4.5.2 内存必须是整数
-                boolean maxMemoryIsDigit = NumberUtils.isDigits(memoryOrMasterName);
-                if (!maxMemoryIsDigit) {
-                    return ImportAppResult.fail(appInstance + "中的maxmemory不是整数");
+                            + masterNameInput + "不一致");
                 }
             }
+
         }
-
-        // 5. 节点之间关系是否正确，这个比较麻烦，还是依赖于用户填写的正确性。
-
         return ImportAppResult.success();
     }
 

@@ -12,6 +12,8 @@ import com.sohu.cache.stats.app.RedisMigrateToolCenter;
 import com.sohu.cache.stats.app.RedisShakeCenter;
 import com.sohu.cache.task.constant.ResourceEnum;
 import com.sohu.cache.util.ConstUtils;
+import com.sohu.cache.web.enums.SuccessEnum;
+import com.sohu.cache.web.service.AppImportService;
 import com.sohu.cache.web.service.AppService;
 import com.sohu.cache.web.service.ResourceService;
 import com.sohu.cache.web.util.Page;
@@ -25,6 +27,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -65,6 +68,32 @@ public class AppDataMigrateController extends BaseController {
     private AppUserDao appUserDao;
     @Autowired
     private ResourceService resourceService;
+    @Autowired
+    private AppImportService appImportService;
+
+
+    @RequestMapping("/index")
+    public ModelAndView index(HttpServletRequest request, HttpServletResponse response, Model model,
+                              String tabTag,
+                              AppDataMigrateSearch appDataMigrateSearch) {
+        List<AppUser> adminList = appUserDao.getAdminList();
+        model.addAttribute("adminList", adminList);
+
+        // 分页相关
+        int totalCount = appDataMigrateCenter.getMigrateTaskCount(appDataMigrateSearch);
+        int pageNo = NumberUtils.toInt(request.getParameter("pageNo"), 1);
+        Page page = new Page(pageNo, 15, totalCount);
+        appDataMigrateSearch.setPage(page);
+
+        List<AppDataMigrateStatus> appDataMigrateStatusList = appDataMigrateCenter.search(appDataMigrateSearch);
+        model.addAttribute("page", page);
+        model.addAttribute("appDataMigrateStatusList", appDataMigrateStatusList);
+        model.addAttribute("appDataMigrateSearch", appDataMigrateSearch);
+        model.addAttribute("tabTag", tabTag);
+        model.addAttribute("appMigrateActive", SuccessEnum.SUCCESS.value());
+
+        return new ModelAndView("manage/migrate/list");
+    }
 
     /**
      * 初始化界面
@@ -72,7 +101,7 @@ public class AppDataMigrateController extends BaseController {
      * @return
      */
     @RequestMapping(value = "/init")
-    public ModelAndView init(Model model) {
+    public ModelAndView init(HttpServletRequest request, Model model) {
         List<MachineInfo> machineInfoList = machineCenter.getMachineInfoByType(MachineInfoEnum.TypeEnum.REDIS_MIGRATE_TOOL);
         Map<String, Integer> machineInfoMap = machineInfoList.stream().collect(Collectors.toMap(
                 machineInfo -> machineInfo.getIp(),
@@ -80,6 +109,19 @@ public class AppDataMigrateController extends BaseController {
         List<SystemResource> resourcelist = resourceService.getResourceList(ResourceEnum.TOOL.getValue());
         model.addAttribute("resourcelist", resourcelist);
         model.addAttribute("machineInfoMap", machineInfoMap);
+
+        long importId = NumberUtils.toLong(request.getParameter("importId"));
+        if (importId > 0) {
+            AppImport appImport = appImportService.get(importId);
+            model.addAttribute("importId", importId);
+            model.addAttribute("targetAppId", appImport.getAppId());
+            model.addAttribute("sourceServers", appImport.getInstanceInfo());
+            model.addAttribute("redisSourcePass", appImport.getRedisPassword());
+            model.addAttribute("sourceType", appImport.getSourceType());
+            model.addAttribute("sourceDataType", 0);
+            model.addAttribute("redisSourceVersion", appImport.getRedisVersionName());
+        }
+
         return new ModelAndView("migrate/init");
     }
 
@@ -124,12 +166,12 @@ public class AppDataMigrateController extends BaseController {
             return null;
         }
         // 检验机器安装环境
-        redisConfigTemplateService.checkAndInstallRedisTool(migrateMachineIp,resource);
+        redisConfigTemplateService.checkAndInstallRedisTool(migrateMachineIp, resource);
 
         AppDataMigrateResult redisMigrateResult = null;
         if (resource.getName().indexOf("redis-shake") > -1) {
             redisMigrateResult = redisShakeCenter.check(migrateMachineIp, sourceRedisMigrateEnum, sourceServers, targetRedisMigrateEnum, targetServers, redisSourcePass, redisTargetPass, resource);
-        }else if(resource.getName().indexOf("redis-migrate-tool") > -1){
+        } else if (resource.getName().indexOf("redis-migrate-tool") > -1) {
             redisMigrateResult = redisMigrateToolCenter.check(migrateMachineIp, sourceRedisMigrateEnum, sourceServers, targetRedisMigrateEnum, targetServers, redisSourcePass, redisTargetPass, resource);
         }
         model.addAttribute("status", redisMigrateResult.getStatus());
@@ -178,20 +220,21 @@ public class AppDataMigrateController extends BaseController {
         if (resource == null) {
             return null;
         }
-
+        AppDataMigrateStatus appDataMigrateStatus = new AppDataMigrateStatus();
         if (resource.getName().indexOf("redis-shake") > -1) {
-            redisShakeCenter.migrate(migrateMachineIp, source_rdb_parallel, parallel,
+            appDataMigrateStatus = redisShakeCenter.migrate(migrateMachineIp, source_rdb_parallel, parallel,
                     sourceRedisMigrateEnum, sourceServers,
                     targetRedisMigrateEnum, targetServers,
                     sourceAppId, targetAppId,
                     redisSourcePass, redisTargetPass,
                     redisSourceVersion, redisTargetVersion,
-                    userId,resource);
-        }else if(resource.getName().indexOf("redis-migrate-tool") > -1){
-            redisMigrateToolCenter.migrate(migrateMachineIp, sourceRedisMigrateEnum, sourceServers,
-                    targetRedisMigrateEnum, targetServers, sourceAppId, targetAppId, redisSourcePass, redisTargetPass, userId,resource);
+                    userId, resource);
+        } else if (resource.getName().indexOf("redis-migrate-tool") > -1) {
+            appDataMigrateStatus = redisMigrateToolCenter.migrate(migrateMachineIp, sourceRedisMigrateEnum, sourceServers,
+                    targetRedisMigrateEnum, targetServers, sourceAppId, targetAppId, redisSourcePass, redisTargetPass, userId, resource);
         }
         model.addAttribute("status", 1);
+        model.addAttribute("migrateId", appDataMigrateStatus.getMigrateId());
 
         return new ModelAndView("");
     }
@@ -275,7 +318,7 @@ public class AppDataMigrateController extends BaseController {
      * @return
      */
     @RequestMapping(value = "/checkData")
-    public ModelAndView checkData(HttpServletRequest request,Model model) {
+    public ModelAndView checkData(HttpServletRequest request, Model model) {
         long id = NumberUtils.toLong(request.getParameter("id"));
         int migrateTool = NumberUtils.toInt(request.getParameter("migrateTool"), 0);
         int comparemode = NumberUtils.toInt(request.getParameter("comparemode"), 3);
@@ -318,7 +361,7 @@ public class AppDataMigrateController extends BaseController {
      * @return
      */
     @RequestMapping(value = "/checkData/log")
-    public ModelAndView checkDatalog(HttpServletRequest request,Model model) {
+    public ModelAndView checkDatalog(HttpServletRequest request, Model model) {
         //任务id：查到任务相关信息
         long id = NumberUtils.toLong(request.getParameter("id"));
         int pageSize = NumberUtils.toInt(request.getParameter("pageSize"), 0);
@@ -338,29 +381,6 @@ public class AppDataMigrateController extends BaseController {
             }
         }
         return false;
-    }
-
-    /**
-     * 查看迁移列表(包含历史)
-     *
-     * @return
-     */
-    @RequestMapping(value = "/list")
-    public ModelAndView list(HttpServletRequest request,Model model, AppDataMigrateSearch appDataMigrateSearch) {
-        List<AppUser> adminList = appUserDao.getAdminList();
-        model.addAttribute("adminList", adminList);
-
-        // 分页相关
-        int totalCount = appDataMigrateCenter.getMigrateTaskCount(appDataMigrateSearch);
-        int pageNo = NumberUtils.toInt(request.getParameter("pageNo"), 1);
-        Page page = new Page(pageNo, 15, totalCount);
-        appDataMigrateSearch.setPage(page);
-
-        List<AppDataMigrateStatus> appDataMigrateStatusList = appDataMigrateCenter.search(appDataMigrateSearch);
-        model.addAttribute("page", page);
-        model.addAttribute("appDataMigrateStatusList", appDataMigrateStatusList);
-        model.addAttribute("appDataMigrateSearch", appDataMigrateSearch);
-        return new ModelAndView("migrate/list");
     }
 
     /**

@@ -7,6 +7,7 @@ import com.sohu.cache.async.AsyncThreadPoolFactory;
 import com.sohu.cache.async.KeyCallable;
 import com.sohu.cache.constant.InstanceStatusEnum;
 import com.sohu.cache.constant.MachineConstant;
+import com.sohu.cache.constant.MachineInfoEnum;
 import com.sohu.cache.constant.MachineInfoEnum.TypeEnum;
 import com.sohu.cache.dao.*;
 import com.sohu.cache.entity.*;
@@ -16,6 +17,7 @@ import com.sohu.cache.machine.PortGenerator;
 import com.sohu.cache.protocol.MachineProtocol;
 import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.redis.enums.DirEnum;
+import com.sohu.cache.ssh.SSHService;
 import com.sohu.cache.ssh.SSHUtil;
 import com.sohu.cache.stats.instance.InstanceStatsCenter;
 import com.sohu.cache.task.BaseTask;
@@ -23,8 +25,10 @@ import com.sohu.cache.task.constant.InstanceInfoEnum.InstanceTypeEnum;
 import com.sohu.cache.task.constant.ResourceEnum;
 import com.sohu.cache.util.*;
 import com.sohu.cache.web.enums.BooleanEnum;
+import com.sohu.cache.web.enums.CheckEnum;
 import com.sohu.cache.web.enums.MachineMemoryDistriEnum;
-import com.sohu.cache.web.enums.RedisVersionEnum;
+import com.sohu.cache.web.enums.ModuleEnum;
+import com.sohu.cache.web.vo.MachineEnv;
 import com.sohu.cache.web.vo.MachineStatsVo;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -45,8 +49,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -76,14 +81,18 @@ public class MachineCenterImpl implements MachineCenter {
     private ResourceDao resourceDao;
     @Autowired
     private MachineRoomDao machineRoomDao;
+    @Autowired
+    private SSHService sshService;
+    @Autowired
+    protected AsyncService asyncService;
+    @Autowired
+    private ForkJoinPool forkJoinPool;
 
     /**
      * 邮箱报警
      */
     @Autowired
     private EmailComponent emailComponent;
-    @Autowired
-    private AsyncService asyncService;
 
     @PostConstruct
     public void init() {
@@ -743,58 +752,6 @@ public class MachineCenterImpl implements MachineCenter {
         return k8sMachineMaps;
     }
 
-    public List<RedisVersionStat> getMachineInstallRedisStat(List<SystemResource> resourceList){
-
-        List<MachineInfo> allMachines = machineDao.getAllMachines();
-        //1.遍历机器安装情况
-        Map<String, Integer> installStats = new HashMap<String, Integer>();
-        if (allMachines != null && allMachines.size() > 0) {
-            for (MachineInfo machine : allMachines) {
-                String version_install = machine.getVersionInstall();
-                if (!StringUtils.isEmpty(version_install)) {
-                    for (String installinfo : version_install.split(";")) {
-                        Integer count = MapUtils.getInteger(installStats, installinfo, 0) + 1;
-                        installStats.put(installinfo, count);
-                    }
-                }
-            }
-        }
-
-        //2. app stat
-        List<Map<String, Integer>> appVersionStats = appDao.getVersionStat();
-
-        Map<String, Integer> appStats = new HashMap<String, Integer>();
-        if (appVersionStats != null && appVersionStats.size() > 0) {
-            for (Map<String, Integer> appVersion : appVersionStats) {
-                appStats.put(MapUtils.getString(appVersion, "version_id"), MapUtils.getInteger(appVersion, "num", 0));
-            }
-        }
-        //3.安装信息写入redisVersionStat
-        List<RedisVersionStat> redisVersionStatList = new ArrayList<RedisVersionStat>();
-        for (SystemResource redisResource : resourceList) {
-            RedisVersionStat redisVersionStat = new RedisVersionStat(redisResource);
-            redisVersionStat.setInstallNum(MapUtils.getInteger(installStats,
-                    redisResource.getName() + ConstUtils.POUND + RedisVersionEnum.Redis_installed.getValue(), 0));
-            redisVersionStat.setUninstallNum(MapUtils.getInteger(installStats,
-                    redisResource.getName() + ConstUtils.POUND + RedisVersionEnum.Redis_uninstalled.getValue(), 0));
-            redisVersionStat.setInstallExceptionNum(MapUtils.getInteger(installStats,
-                    redisResource.getName() + ConstUtils.POUND + RedisVersionEnum.Redis_installException.getValue(), 0));
-            redisVersionStat.setTotalMachineNum(allMachines.size());
-            if (!CollectionUtils.isEmpty(allMachines)) {
-                redisVersionStat.setInstallRatio(redisVersionStat.getInstallNum() * 100 / allMachines.size());
-            } else {
-                redisVersionStat.setInstallRatio(0);
-            }
-            redisVersionStat.setAppUsedNum(MapUtils.getIntValue(appStats, redisResource.getId() + ""));
-            redisVersionStatList.add(redisVersionStat);
-        }
-        return redisVersionStatList;
-    }
-
-    public List<MachineInfo> getAllEffectiveMachines() {
-        return machineDao.getAllMachines();
-    }
-
     public List<MachineRoom> getEffectiveRoom() {
         return machineRoomDao.getEffectiveRoom();
     }
@@ -950,7 +907,7 @@ public class MachineCenterImpl implements MachineCenter {
 
     public String getMachineRelativeDir(String host, int dirType) {
         MachineInfo machineInfo = machineDao.getMachineInfoByIp(host);
-        if (machineInfo != null &&  machineInfo.isK8sMachine(machineInfo.getK8sType())) {
+        if (machineInfo != null && machineInfo.isK8sMachine(machineInfo.getK8sType())) {
             return MachineProtocol.getK8sDir(host, dirType);
         }
         return MachineProtocol.getDir(dirType);
@@ -964,11 +921,262 @@ public class MachineCenterImpl implements MachineCenter {
         return false;
     }
 
-    public String getFirstMachineIp(){
+    public Map<String, Object> getExceptionMachineEnv(Date searchDate) {
+
+        Map<String, Object> exceptionMap = new HashMap<String, Object>();
+        Map<String, Object> allMachineEnvMap = getAllMachineEnv(searchDate, MachineInfoEnum.MachineTypeEnum.ALL.getValue());
+        // 过滤需要监控的数据
+        List<Map<String, Object>> containerlist = (List<Map<String, Object>>) allMachineEnvMap.get(MachineInfoEnum.MachineEnum.CONTAINER.getValue());
+        List<Map<String, Object>> hostlist = (List<Map<String, Object>>) allMachineEnvMap.get(MachineInfoEnum.MachineEnum.HOST.getValue());
+
+        exceptionMap.put(MachineInfoEnum.MachineEnum.CONTAINER.getValue(), containerlist.stream().filter(map -> MapUtils.getInteger(map, "status") != CheckEnum.CONSISTENCE.getValue()).collect(Collectors.toList()));
+        exceptionMap.put(MachineInfoEnum.MachineEnum.HOST.getValue(), hostlist.stream().filter(map -> MapUtils.getInteger(map, "status") != CheckEnum.CONSISTENCE.getValue()).collect(Collectors.toList()));
+        return exceptionMap;
+    }
+
+    public Map<String, Object> getAllMachineEnv(Date searchDate, int type) {
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+
+        List<MachineInfo> allMachines = machineDao.getAllMachines();
+        Set<String> iplist = new HashSet<String>();
+        Set<String> hostlist = new HashSet<String>();
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH);
+        if (!CollectionUtils.isEmpty(allMachines)) {
+            for (MachineInfo machineInfo : allMachines) {
+                iplist.add(machineInfo.getIp());
+                hostlist.add(machineInfo.getRealIp());
+            }
+        }
+        /**
+         *  检测容器:
+         *  1.内存分配策略
+         *  2.thp大内存页配置
+         *  3.内存swap配置
+         *  4.容器nproc配置
+         */
+        String container_cmd =
+                "cat /proc/sys/vm/overcommit_memory;" +
+                        "cat /proc/sys/vm/swappiness;" +
+                        "cat /sys/kernel/mm/transparent_hugepage/enabled;" +
+                        "cat /sys/kernel/mm/transparent_hugepage/defrag;" +
+                        "cat /etc/security/limits.d/*-nproc.conf | grep '*          soft    nproc'" +
+                        "";
+        /**
+         * 检测宿主机:
+         * 1.检测用户连接的进程数 大于>=1024
+         * 2.检测宿主机所有实例aof写盘阻塞 >=3次
+         * 3.检测 somaxconn 512
+         * 4.检测 sshpass安装
+         * 5.运行redis实例总数
+         * 6.ulimit 打开文件句柄检测
+         * 7.磁盘/内存使用情况
+         */
+        String machine_cmd =
+                "cat /proc/sys/net/core/somaxconn;" +
+                        "cat /data/redis/logs/*/* | grep '" + dateFormat.format(searchDate) + "' | grep 'slow down Redis'  | wc -l;" +
+                        "ps -u cachecloud -L | wc -l;" +
+                        "sshpass -V | head -1;" +
+                        "ulimit -n;" +
+                        "echo 0;" +
+//                        "lsof | grep cachecloud | wc -l;" +
+                        "df -h | grep '/dev' | grep '/data' | awk '{print $5\"(\"$3\"/\"$2\")\"}';" +
+                        "ps -ef | grep redis | wc -l;" +
+                        "";
+
+
+        List<Map<String, Object>> containerInfo = new ArrayList<>();
+        List<Map<String, Object>> machineInfo = new ArrayList<>();
+        long phase1 = System.currentTimeMillis();
+        if (type == MachineInfoEnum.MachineTypeEnum.CONTAINER.getValue() || type == MachineInfoEnum.MachineTypeEnum.ALL.getValue()) {
+            if (!CollectionUtils.isEmpty(iplist)) {
+                ForkJoinTask<Map<String, Map<String, Object>>> container_task = forkJoinPool.submit(() -> iplist.parallelStream().collect(Collectors.toMap(containerIp -> containerIp, containerIp -> new MachinetaskCallable(containerIp, container_cmd, sshService, MachineInfoEnum.MachineEnum.CONTAINER.getValue()).call())));
+                try {
+                    Map<String, Map<String, Object>> container_result = container_task.get(30, TimeUnit.SECONDS);
+                    if (!MapUtils.isEmpty(container_result)) {
+                        for (Map.Entry<String, Map<String, Object>> container : container_result.entrySet()) {
+                            Map<String, Object> res = container.getValue();
+                            if (!MapUtils.isEmpty(res)) {
+                                containerInfo.add(res);
+                            }
+                        }
+                    }
+                    logger.info("container result size:{}", container_result.size());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (TimeoutException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        long phase2 = System.currentTimeMillis();
+        logger.info("container check env cost time:{} ms", phase2 - phase1);
+
+        if (type == MachineInfoEnum.MachineTypeEnum.HOST.getValue() || type == MachineInfoEnum.MachineTypeEnum.ALL.getValue()) {
+            if (!CollectionUtils.isEmpty(hostlist)) {
+                ForkJoinTask<Map<String, Map<String, Object>>> machine_task = forkJoinPool.submit(() -> hostlist.parallelStream().collect(Collectors.toMap(machineIp -> machineIp, machineIp -> new MachinetaskCallable(machineIp, machine_cmd, sshService, MachineInfoEnum.MachineEnum.HOST.getValue()).call())));
+                try {
+                    Map<String, Map<String, Object>> host_result = machine_task.get(30, TimeUnit.SECONDS);
+                    if (!MapUtils.isEmpty(host_result)) {
+                        for (Map.Entry<String, Map<String, Object>> host : host_result.entrySet()) {
+                            Map<String, Object> res = host.getValue();
+                            if (!MapUtils.isEmpty(res)) {
+                                machineInfo.add(res);
+                            }
+                        }
+                    }
+                    logger.info("machine result size:{}", host_result.size());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (TimeoutException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        logger.info("host check env cost time:{} ms", System.currentTimeMillis() - phase2);
+
+        resultMap.put(MachineInfoEnum.MachineEnum.CONTAINER.getValue(), containerInfo);
+        resultMap.put(MachineInfoEnum.MachineEnum.HOST.getValue(), machineInfo);
+        return resultMap;
+    }
+
+    private class MachinetaskCallable implements Callable<Map<String, Object>> {
+
+        private String ip;
+        private String cmd;
+        private SSHService sshService;
+        private String type;
+
+        public MachinetaskCallable(String ip, String cmd, SSHService sshService, String type) {
+            this.ip = ip;
+            this.cmd = cmd;
+            this.sshService = sshService;
+            this.type = type;
+        }
+
+
+        @Override
+        public Map<String, Object> call() {
+
+            Map<String, Object> machineResult = new HashMap<String, Object>();
+            String info = null;
+            try {
+                info = sshService.execute(ip, cmd);
+                machineResult.put("ip", ip);
+                if (!StringUtil.isBlank(info)) {
+                    if (type.equals(MachineInfoEnum.MachineEnum.CONTAINER.getValue())) {
+                        MachineEnv containerEnv = convertContainer(info);
+                        if (containerEnv != null) {
+                            machineResult.put("envs", containerEnv);
+                            machineResult.put("status", MachineEnv.checkContainer(containerEnv));
+                        } else {
+                            machineResult.put("status", CheckEnum.EXCEPTION.getValue());
+                            machineResult.put("envs", MachineEnv.getDefaultEnv());
+                        }
+                    } else if (type.equals(MachineInfoEnum.MachineEnum.HOST.getValue())) {
+                        MachineEnv hostEnv = convertHost(info);
+                        if (hostEnv != null) {
+                            machineResult.put("envs", hostEnv);
+                            machineResult.put("status", MachineEnv.checkHost(hostEnv));
+                        } else {
+                            machineResult.put("status", CheckEnum.EXCEPTION.getValue());
+                            machineResult.put("envs", MachineEnv.getDefaultEnv());
+                        }
+                    }
+                } else {
+                    machineResult.put("status", CheckEnum.EXCEPTION.getValue());
+                    machineResult.put("envs", MachineEnv.getDefaultEnv());
+                }
+            } catch (SSHException e) {
+                logger.error("MachinetaskCallable ip:{} error msg :{}",ip,e.getMessage());
+                machineResult.put("status", CheckEnum.EXCEPTION.getValue());
+                machineResult.put("envs", MachineEnv.getDefaultEnv());
+            }
+
+            return machineResult;
+        }
+    }
+
+
+    public MachineEnv convertContainer(String cmdResult) {
+
+        String[] envs = cmdResult.split("\n");
+        String nproc = "";
+        try {
+            nproc = StringUtils.isBlank(envs[4]) ? "" : envs[4];
+        } catch (Exception e) {
+            logger.error("MachineEnv convertContainer cmdResult:{} error {}:", cmdResult, e.getMessage());
+        }
+        return new MachineEnv(envs[0], envs[1], envs[2], envs[3], nproc);
+
+    }
+
+    public MachineEnv convertHost(String cmdResult) {
+
+        int fsync_delay_times = -1;
+        int nproc_threads = -1;
+        int unlimit = -1;
+        int unlimit_used = -1;
+        int instanceNum = -1;
+        try {
+            String[] envs = cmdResult.split("\n");
+            fsync_delay_times = StringUtils.isBlank(envs[1]) ? -1 : Integer.parseInt(envs[1]);
+            nproc_threads = StringUtils.isBlank(envs[2]) ? -1 : Integer.parseInt(envs[2]);
+            unlimit = StringUtils.isBlank(envs[4]) ? -1 : Integer.parseInt(envs[4]);
+            unlimit_used = StringUtils.isBlank(envs[5]) ? -1 : Integer.parseInt(envs[5]);
+            instanceNum = StringUtils.isBlank(envs[7]) ? -1 : Integer.parseInt(envs[7]);
+            return new MachineEnv(envs[0], fsync_delay_times, nproc_threads, envs[3], unlimit_used, unlimit, envs[6], instanceNum);
+        } catch (Exception e) {
+            logger.error("convertMachine error :{} {}", cmdResult, e.getMessage(), e);
+            return new MachineEnv("-1", fsync_delay_times, nproc_threads, "", unlimit_used, unlimit, "", instanceNum);
+
+        }
+    }
+
+    public String getFirstMachineIp() {
         List<MachineInfo> machines = machineDao.getAllMachines();
-        if(!CollectionUtils.isEmpty(machines)){
+        if (!CollectionUtils.isEmpty(machines)) {
             return machines.get(0).getIp();
         }
         return null;
+    }
+
+    public List<MachineStats> checkMachineModule(List<MachineStats> machineStatsList) {
+
+        if (!CollectionUtils.isEmpty(machineStatsList)) {
+            for (MachineStats machineStats : machineStatsList) {
+
+                String moduleBasePath = ConstUtils.MODULE_BASE_PATH;
+                String cmd = String.format("cd %s && ls -l | grep .so", moduleBasePath);
+                String cmd2 = String.format("cat /etc/redhat-release");
+
+                try {
+                    String ip = machineStats.getInfo().getIp();
+                    String executeResult = sshService.execute(ip, cmd);
+                    logger.info("ip :{} ,exe cmd :{},module info:{}", ip, cmd,   executeResult);
+
+                    Map<String,Object> moduleInfo = new HashMap<String,Object>();
+                    for(String moduleName : ConstUtils.MODULE_LIST){
+                        if(!StringUtil.isBlank(executeResult)) {
+                            moduleInfo.put(moduleName, executeResult.contains(moduleName));
+                        }else{
+                            moduleInfo.put(moduleName, false);
+                        }
+                    }
+
+                    String version = sshService.execute(ip, cmd2);
+                    machineStats.setVersionInfo(version);
+                    machineStats.setModuleInfo(moduleInfo);
+                } catch (SSHException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return machineStatsList;
     }
 }

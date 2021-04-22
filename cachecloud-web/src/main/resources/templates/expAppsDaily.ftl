@@ -229,6 +229,134 @@
             <ul>
                 <li>
                     <span style="font-weight: bold; padding-top:20px; color:#3f3f3f;">
+                    宿主环境检测
+                        <a target="_blank"
+                           href="${ccDomain}/manage/app/stat/list/server?tabId=5&searchDate=${searchDate}">【查看更多--后台】</a>
+                    </span>
+                </li>
+            </ul>
+            <table style="table-layout:fixed;width: 872px;border-collapse: collapse;word-break: break-all;word-wrap:break-word;border-top: 1px dotted #676767;text-align: center;color: #000; font-family:'宋体'; font-size:12px; margin-top:10px; margin-left: 24px">
+                <tr>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 70px;">
+                        宿主机ip
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 70px;">
+                        cachecloud_nprocs
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 150px;/">
+                        fsync_slow_times
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 150px;/">
+                        somaxconn
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 50px;">
+                        redis实例数
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 50px;">
+                        文件句柄used/total
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 100px;">
+                        disk used
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 50px;">
+                        诊断结果
+                    </td>
+                </tr>
+            <#assign machineEnvs=exceptionMachineEnv["host"]>
+            <#list machineEnvs as machine>
+                <tr>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 70px;">
+                        ${machine.ip}
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 70px;">
+                       ${machine.envs.nproc_threads}
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 50px;">
+                        ${machine.envs.fsync_delay_times}
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 100px;">
+                        ${machine.envs.somaxconn}
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 50px;">
+                        ${machine.envs.instanceNum}
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 50px;">
+                        ${machine.envs.unlimit_used}/${machine.envs.unlimit}
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 100px;">
+                        ${machine.envs.diskUsed}
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 50px;">
+                        <span style="color:red">异常</span>
+                    </td>
+                </tr>
+            </#list>
+            </table>
+
+            <ul>
+                <li>
+                    <span style="font-weight: bold; padding-top:20px; color:#3f3f3f;">
+                    容器环境检测
+                        <a target="_blank"
+                           href="${ccDomain}/manage/app/stat/list/server?tabId=4&searchDate=${searchDate}">【查看更多--后台】</a>
+                    </span>
+                </li>
+            </ul>
+            <table style="table-layout:fixed;width: 872px;border-collapse: collapse;word-break: break-all;word-wrap:break-word;border-top: 1px dotted #676767;text-align: center;color: #000; font-family:'宋体'; font-size:12px; margin-top:10px; margin-left: 24px">
+                <tr>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 70px;">
+                        容器ip
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 70px;">
+                        overcommit_memory
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 120px;/">
+                        thp_enabled
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 120px;/">
+                        thp_defrag
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 50px;">
+                        swappiness
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 100px;">
+                        nproc
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 50px;">
+                        诊断结果
+                    </td>
+                </tr>
+            <#assign machineEnvs=exceptionMachineEnv["container"]>
+            <#list machineEnvs as container>
+                <tr>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 70px;">
+                        ${container.ip}
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 50px;">
+                        ${container.envs.overcommit_memory}
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 100px;">
+                        ${container.envs.transparent_hugepage_enable}
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 50px;">
+                        ${container.envs.transparent_hugepage_defrag}
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 50px;">
+                        ${container.envs.swappines}
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 100px;">
+                        ${container.envs.nproc}
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 50px;">
+                        <span style="color:red">异常</span>
+                    </td>
+                </tr>
+            </#list>
+            </table>
+
+            <ul>
+                <li>
+                    <span style="font-weight: bold; padding-top:20px; color:#3f3f3f;">
                         应用内存使用情况（bottom 10）
                         <a target="_blank"
                            href="${ccDomain}/manage/app/stat/list/server?tabId=1&searchDate=${searchDate}">【查看更多--后台】</a>

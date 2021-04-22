@@ -6,6 +6,7 @@ import com.sohu.cache.task.constant.InstanceInfoEnum.InstanceTypeEnum;
 import com.sohu.cache.web.enums.MachineMemoryDistriEnum;
 import com.sohu.cache.web.vo.MachineStatsVo;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -175,22 +176,6 @@ public interface MachineCenter {
     public Map<String,MachineInfo> getK8sMachineMap();
 
     /**
-     * 获取机器安装redis不同版本情况
-     */
-    public List<RedisVersionStat> getMachineInstallRedisStat(List<SystemResource> versionList);
-
-    /**
-     * <p>
-     * Description: 获取有效机器列表
-     * </p>
-     *
-     * @author chenshi
-     * @version 1.0
-     * @date 2018/9/25
-     */
-    public List<MachineInfo> getAllEffectiveMachines();
-
-    /**
      * <p>
      * Description: 获取有效机房
      * </p>
@@ -245,10 +230,16 @@ public interface MachineCenter {
      */
     public Boolean isK8sMachine(String host);
 
+    public Map<String,Object> getAllMachineEnv(Date searchDate,int type);
+
+    public Map<String,Object> getExceptionMachineEnv(Date searchDate);
+
     /**
      * 获取机器列表的第一台机器资源
      * @return
      */
     public String getFirstMachineIp();
+
+    public  List<MachineStats>  checkMachineModule(List<MachineStats> machineStatsList);
 
 }

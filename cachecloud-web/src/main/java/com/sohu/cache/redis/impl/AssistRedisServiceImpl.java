@@ -10,6 +10,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Protocol;
 import redis.clients.jedis.Tuple;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.params.SetParams;
 import redis.clients.jedis.serializable.ProtostuffSerializer;
 
@@ -24,13 +25,13 @@ import java.util.Set;
 public class AssistRedisServiceImpl implements AssistRedisService {
     private Logger logger = LoggerFactory.getLogger(AssistRedisServiceImpl.class);
 
-    @Value("${cachecloud.redis.main.host}")
+    @Value("${cachecloud.redis.main.host:127.0.0.1}")
     private String mainHost;
 
-    @Value("${cachecloud.redis.main.port}")
+    @Value("${cachecloud.redis.main.port:6379}")
     private int mainPort;
 
-    @Value("${cachecloud.redis.main.password}")
+    @Value("${cachecloud.redis.main.password:}")
     private String mainPassword;
 
     private JedisPool jedisPoolMain;
@@ -51,8 +52,11 @@ public class AssistRedisServiceImpl implements AssistRedisService {
     private Jedis getFromJedisPool() {
         try {
             return jedisPoolMain.getResource();
+        } catch (JedisConnectionException ce){
+            logger.warn("Please Make sure the file:application-${profile}.yml connection pool is configured correctly !  cachecloud.redis.main.host:{} cachecloud.redis.main.port:{} cachecloud.redis.main.password:{}",mainHost,mainPort,mainPassword);
+            return null;
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            logger.warn(e.getMessage(),e);
             return null;
         }
     }
@@ -65,7 +69,7 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             jedis.rpush(key, item);
             return true;
         } catch (Exception e) {
-            logger.error("rpush {} {} error " + e.getMessage(), key, item, e);
+            logger.warn("rpush {} {} error " + e.getMessage(), key, item, e);
             return false;
         } finally {
             if (jedis != null) {
@@ -81,7 +85,7 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             jedis = getFromJedisPool();
             return jedis.lrange(key, start, end);
         } catch (Exception e) {
-            logger.error("lrange {} {} {} error " + e.getMessage(), key, start, end, e);
+            logger.warn("lrange {} {} {} error " + e.getMessage(), key, start, end);
             return Collections.emptyList();
         } finally {
             if (jedis != null) {
@@ -98,7 +102,7 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             jedis.rpush(key, items.toArray(new String[items.size()]));
             return true;
         } catch (Exception e) {
-            logger.error("rpushList {} {} error " + e.getMessage(), key, items, e);
+            logger.warn("rpushList {} {} error " + e.getMessage(), key, items);
             return false;
         } finally {
             if (jedis != null) {
@@ -115,7 +119,7 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             jedis.sadd(key, items.toArray(new String[items.size()]));
             return true;
         } catch (Exception e) {
-            logger.error("saddList {} {} error " + e.getMessage(), key, items, e);
+            logger.warn("saddList {} {} error " + e.getMessage(), key, items);
             return false;
         } finally {
             if (jedis != null) {
@@ -131,7 +135,7 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             jedis = getFromJedisPool();
             return jedis.smembers(key);
         } catch (Exception e) {
-            logger.error("smembers {} error " + e.getMessage(), key, e);
+            logger.warn("smembers {} error " + e.getMessage(), key);
             return Collections.emptySet();
         } finally {
             if (jedis != null) {
@@ -148,7 +152,7 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             jedis.srem(key, item);
             return true;
         } catch (Exception e) {
-            logger.error("srem {} {} error " + e.getMessage(), key, item, e);
+            logger.warn("srem {} {} error " + e.getMessage(), key, item);
             return false;
         } finally {
             if (jedis != null) {
@@ -175,7 +179,7 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             jedis.set(key.getBytes(Charset.forName("UTF-8")), bytes);
             return true;
         } catch (Exception e) {
-            logger.error("set {} error " + e.getMessage(), key, e);
+            logger.warn("set {} error " + e.getMessage(), key, e);
             return false;
         } finally {
             if (jedis != null) {
@@ -197,7 +201,7 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             jedis.setex(key.getBytes(Charset.forName("UTF-8")), seconds, bytes);
             return true;
         } catch (Exception e) {
-            logger.error("setex {} {} error " + e.getMessage(), key, seconds, e);
+            logger.warn("setex {} {} error " + e.getMessage(), key, seconds);
             return false;
         } finally {
             if (jedis != null) {
@@ -213,7 +217,7 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             jedis = getFromJedisPool();
             result = jedis.setnx(key, value);
         } catch (Exception e) {
-            logger.error("setnx {} {} error:{} ", key, value, e.getMessage(), e);
+            logger.warn("setnx {} {} error:{} ", key, value, e.getMessage());
         } finally {
             if (jedis != null) {
                 jedis.close();
@@ -229,7 +233,7 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             jedis = getFromJedisPool();
             return jedis.set(key, value, params);
         } catch (Exception e) {
-            logger.error("set {} {} {} error " + e.getMessage(), key, value, params, e);
+            logger.warn("set {} {} {} error " + e.getMessage(), key, value, params);
             return null;
         } finally {
             if (jedis != null) {
@@ -249,7 +253,7 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             jedis.set(key, value.toString());
             return true;
         } catch (Exception e) {
-            logger.error("setWithNoSerialize {} error " + e.getMessage(), key, e);
+            logger.warn("setWithNoSerialize {} error " + e.getMessage(), key);
             return false;
         } finally {
             if (jedis != null) {
@@ -269,7 +273,7 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             jedis.setex(key, seconds, value.toString());
             return true;
         } catch (Exception e) {
-            logger.error("setWithNoSerialize {} error " + e.getMessage(), key, e);
+            logger.warn("setWithNoSerialize {} error " + e.getMessage(), key);
             return false;
         } finally {
             if (jedis != null) {
@@ -285,7 +289,7 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             jedis = getFromJedisPool();
             return jedis.get(key);
         } catch (Exception e) {
-            logger.error("getWithNoSerialize {} error " + e.getMessage(), key, e);
+            logger.warn("getWithNoSerialize {} error " + e.getMessage(), key);
             return null;
         } finally {
             if (jedis != null) {
@@ -302,7 +306,7 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             jedis.del(key);
             return true;
         } catch (Exception e) {
-            logger.error("remove {} error " + e.getMessage(), key, e);
+            logger.warn("remove {} error " + e.getMessage(), key);
             return false;
         } finally {
             if (jedis != null) {
@@ -319,7 +323,7 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             jedis.zadd(key, score, member);
             return true;
         } catch (Exception e) {
-            logger.error("zadd {} {} {} error " + e.getMessage(), key, score, member, e);
+            logger.warn("zadd {} {} {} error " + e.getMessage(), key, score, member);
             return false;
         } finally {
             if (jedis != null) {
@@ -336,7 +340,7 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             jedis.hset(key, field, value);
             return true;
         } catch (Exception e) {
-            logger.error("hset {} {} {} error " + e.getMessage(), key, field, value, e);
+            logger.warn("hset {} {} {} error " + e.getMessage(), key, field, value);
             return false;
         } finally {
             if (jedis != null) {
@@ -354,7 +358,7 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             jedis.hmset(key, map);
             return true;
         } catch (Exception e) {
-            logger.error("hset {} {} error " + e.getMessage(), key, map, e);
+            logger.warn("hset {} {} error " + e.getMessage(), key, map);
             return false;
         } finally {
             if (jedis != null) {
@@ -370,7 +374,7 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             jedis = getFromJedisPool();
             return jedis.hgetAll(key);
         } catch (Exception e) {
-            logger.error("hgetAll {} error " + e.getMessage(), key, e);
+            logger.warn("hgetAll {} error " + e.getMessage(), key);
             return Collections.emptyMap();
         } finally {
             if (jedis != null) {
@@ -391,7 +395,7 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             T t = protostuffSerializer.deserialize(bytes);
             return t;
         } catch (Exception e) {
-            logger.error("get {} error " + e.getMessage(), key, e);
+            logger.warn("get {} error " + e.getMessage(), key);
             return null;
         } finally {
             if (jedis != null) {
@@ -408,7 +412,7 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             jedis.del(key);
             return true;
         } catch (Exception e) {
-            logger.error("del {} error " + e.getMessage(), key, e);
+            logger.warn("del {} error " + e.getMessage(), key);
             return false;
         } finally {
             if (jedis != null) {
@@ -424,7 +428,7 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             jedis = getFromJedisPool();
             jedis.zincrby(key, score, member);
         } catch (Exception e) {
-            logger.error("zincrby {} {} {} error " + e.getMessage(), key, score, member, e);
+            logger.warn("zincrby {} {} {} error " + e.getMessage(), key, score, member);
         } finally {
             if (jedis != null) {
                 jedis.close();
@@ -439,7 +443,7 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             jedis = getFromJedisPool();
             return jedis.zrangeWithScores(key, start, end);
         } catch (Exception e) {
-            logger.error("zrangeWithScores {} {} {}error " + e.getMessage(), key, start, end, e);
+            logger.warn("zrangeWithScores {} {} {}error " + e.getMessage(), key, start, end);
             return null;
         } finally {
             if (jedis != null) {

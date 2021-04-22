@@ -29,13 +29,14 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
  * <p>
  * Description:RedisStandalone部署任务流
  * </p>
+ *
  * @author chenshi
  * @version 1.0
  * @date 2019/1/9
  */
 @Component("RedisStandaloneAppDeployTask")
 @Scope(SCOPE_PROTOTYPE)
-public class RedisStandaloneAppDeployTask extends BaseTask{
+public class RedisStandaloneAppDeployTask extends BaseTask {
     /**
      * 应用id
      */
@@ -114,10 +115,10 @@ public class RedisStandaloneAppDeployTask extends BaseTask{
 
         //审核id
         auditId = MapUtils.getLongValue(paramMap, TaskConstants.AUDIT_ID_KEY);
-        if (auditId <= 0) {
-            logger.error(marker, "task {} auditId {} is wrong", taskId, auditId);
-            return TaskFlowStatusEnum.ABORT;
-        }
+//        if (auditId <= 0) {
+//            logger.error(marker, "task {} auditId {} is wrong", taskId, auditId);
+//            return TaskFlowStatusEnum.ABORT;
+//        }
 
         //maxMemory
         maxMemory = MapUtils.getIntValue(paramMap, TaskConstants.REDIS_SERVER_MAX_MEMORY_KEY);
@@ -219,7 +220,7 @@ public class RedisStandaloneAppDeployTask extends BaseTask{
         }
         // 设置master节点
         for (RedisServerNode redisServerNode : redisServerNodes) {
-            if(redisServerNode.isMaster()){
+            if (redisServerNode.isMaster()) {
                 redisServerNodes.remove(redisServerNode);
             }
         }
@@ -365,7 +366,9 @@ public class RedisStandaloneAppDeployTask extends BaseTask{
      */
     public TaskFlowStatusEnum updateAudit() {
         try {
-            appAuditDao.updateAppAudit(auditId, AppCheckEnum.APP_ALLOCATE_RESOURCE.value());
+            if (auditId > 0) {
+                appAuditDao.updateAppAudit(auditId, AppCheckEnum.APP_ALLOCATE_RESOURCE.value());
+            }
             return TaskFlowStatusEnum.SUCCESS;
         } catch (Exception e) {
             logger.error(marker, e.getMessage(), e);

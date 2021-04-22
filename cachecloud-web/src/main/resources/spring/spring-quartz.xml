@@ -272,8 +272,8 @@
         <property name="name" value="cleanupDayDimensionalityTrigger"/>
         <property name="group" value="cleanUpDayStatisticsGroup"/>
         <property name="jobDetail" ref="cleanupDayDimensionalityJobDetail"/>
-        <!-- 每天执行一次 -->
-        <property name="cronExpression" value="0 0 12 * * ?"/>
+        <!-- 每小时执行一次 -->
+        <property name="cronExpression" value="0 0 0/1 ? * *"/>
     </bean>
 
     <bean id="inspectorJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">

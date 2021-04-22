@@ -16,8 +16,8 @@ public interface EmailComponent {
      * @return
      */
     boolean sendMail(String title, String content, List<String> emailList, List<String> ccList);
-	
-	
+
+
     /**
      * 发送邮件
      * @param title
@@ -35,7 +35,7 @@ public interface EmailComponent {
      */
     boolean sendMailToAdmin(String title, String content);
 
-    
+
     /**
      * 获取管理员邮件组
      * @return

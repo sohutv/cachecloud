@@ -4,6 +4,7 @@ import com.sohu.cache.alert.EmailComponent;
 import com.sohu.cache.dao.AppDao;
 import com.sohu.cache.dao.ResourceDao;
 import com.sohu.cache.entity.AppDesc;
+import com.sohu.cache.machine.MachineCenter;
 import com.sohu.cache.stats.admin.CoreAppsStatCenter;
 import com.sohu.cache.util.StringUtil;
 import com.sohu.cache.web.service.AppService;
@@ -39,6 +40,8 @@ public class CoreAppsStatCenterImpl implements CoreAppsStatCenter {
     private EmailComponent emailComponent;
     @Autowired
     private Configuration configuration;
+    @Autowired
+    private MachineCenter machineCenter;
 
     @Override
     public boolean sendExpAppsStatDataEmail(String searchDate) {
@@ -60,7 +63,10 @@ public class CoreAppsStatCenterImpl implements CoreAppsStatCenter {
 
             Map<String, List<Map<String, Object>>> appClientGatherStatGroup = appService.getFilterAppClientStatGather(-1, searchDate);
 
-            noticeExpAppsDaily(searchDate, appDescMap, appClientGatherStatGroup);
+            // 获取异常的宿主或容器信息
+            Map<String, Object> exceptionMachineEnv = machineCenter.getExceptionMachineEnv(DateUtils.addDays(new Date(), -1));
+
+            noticeExpAppsDaily(searchDate, appDescMap, appClientGatherStatGroup,exceptionMachineEnv);
             return true;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -68,15 +74,19 @@ public class CoreAppsStatCenterImpl implements CoreAppsStatCenter {
         }
     }
 
-    public void noticeExpAppsDaily(String searchDate, Map<String, AppDesc> appDescMap, Map<String, List<Map<String, Object>>> appClientGatherStatGroup) {
+    public void noticeExpAppsDaily(String searchDate, Map<String, AppDesc> appDescMap, Map<String, List<Map<String, Object>>> appClientGatherStatGroup,Map<String,Object> exceptionMachineEnv) {
         String title = String.format("【CacheCloud】%s应用日报", searchDate);
         Map<String, Object> context = new HashMap<>();
         context.put("appDescMap", appDescMap);
         context.put("appClientGatherStatGroup", appClientGatherStatGroup);
+        context.put("exceptionMachineEnv", exceptionMachineEnv);
         context.put("searchDate", searchDate);
         String mailContent = FreemakerUtils.createText("expAppsDaily.ftl", configuration, context);
         log.info("noticeExpAppsDaily sendMailToAdmin, title:{}, mailContent:{}", title, mailContent);
+        // 发送管理员
         emailComponent.sendMailToAdmin(title, mailContent);
         log.info("noticeExpAppsDaily success");
     }
+
+
 }

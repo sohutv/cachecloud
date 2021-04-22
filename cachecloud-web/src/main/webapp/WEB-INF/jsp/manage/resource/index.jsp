@@ -23,7 +23,8 @@
             <li id="script" data-url="/manage/app/resource/redis/script?searchName=${searchName}"><a href="?tab=script">脚本管理</a></li>
             <li id="redis" data-url="/manage/app/resource/redis/redis?searchName=${searchName}"><a href="?tab=redis">Redis资源管理</a></li>
             <li id="tool" data-url="/manage/app/resource/redis/tool?searchName=${searchName}"><a href="?tab=tool">迁移工具管理</a></li>
-<%--            <li id="sshkey" data-url="/manage/app/resource/redis/sshkey"><a href="?tab=sshkey">SSH Keys</a></li>--%>
+            <%--<li id="module" data-url="/manage/app/resource/redis/module?searchName=${searchName}"><a href="?tab=module">Redis模块管理</a></li>--%>
+            <%--<li id="sshkey" data-url="/manage/app/resource/redis/sshkey"><a href="?tab=sshkey">SSH Keys</a></li>--%>
         </ul>
         <div class="tab-content" id="tabContent">
             <div class="tab-pane active" id="respoTab">
@@ -36,7 +37,9 @@
             </div>
             <div class="tab-pane" id="toolTab">
             </div>
-            <div class="tab-pane" id="sshkeyTab">
+            <%--<div class="tab-pane" id="sshkeyTab">--%>
+            <%--</div>--%>
+            <%--<div class="tab-pane" id="moduleTab">--%>
             </div>
         </div>
     </div>

@@ -333,7 +333,7 @@ public class InstanceAlertConfigServiceImpl implements InstanceAlertConfigServic
         Map<String, Object> context = new HashMap<>();
         context.put("instanceAlertValueResultList", instanceAlertValueResultList);
         String emailContent = FreemakerUtils.createText("instanceAlert.ftl", configuration, context);
-        emailComponent.sendMailToAdmin(emailTitle, emailContent);
+        emailComponent.sendMailToAdmin(emailTitle, emailContent.replaceAll("\t",""));
 
         // 5.发送给客户端定制报警
         for (Map.Entry<Long, List<InstanceAlertValueResult>> appAlert : appAlertMap.entrySet()) {

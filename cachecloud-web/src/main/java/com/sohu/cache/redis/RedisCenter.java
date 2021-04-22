@@ -459,4 +459,18 @@ public interface RedisCenter {
      */
     public List<InstanceInfo> checkNutCrackerHashIsSame(long appId, boolean isDelete);
 
+    /**
+     * 检查实例安装插件情况
+     * @param appId
+     */
+    public List<InstanceInfo> checkInstanceModule(long appId);
+
+    public Map loadModule(long appId, String moduleName);
+
+    public Map unloadModule(long appId, String moduleName);
+
+    /**
+     * 检查主从节点是否有redis插件
+     */
+    public boolean checkAndLoadModule(long appId, String host, int port, String currentHost, int currentPort);
 }

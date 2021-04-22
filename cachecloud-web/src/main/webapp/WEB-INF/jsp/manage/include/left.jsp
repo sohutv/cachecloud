@@ -66,6 +66,28 @@
 			</a>
 		</li>
 
+		<li <c:if test="${appImportActive == 1}">class="active"</c:if>>
+			<a href="/import/app/index">
+				<i class="glyphicon glyphicon-import"></i>
+				<span class="title">应用导入</span>
+				<c:if test="${appImportActive == 1}">
+					<span class="selected"></span>
+					<span class="arrow"></span>
+				</c:if>
+			</a>
+		</li>
+
+		<li <c:if test="${appMigrateActive == 1}">class="active"</c:if>>
+			<a href="/data/migrate/index">
+				<i class="glyphicon glyphicon-retweet"></i>
+				<span class="title">数据迁移</span>
+				<c:if test="${appMigrateActive == 1}">
+					<span class="selected"></span>
+					<span class="arrow"></span>
+				</c:if>
+			</a>
+		</li>
+
 		<li <c:if test="${diagnosticActive == 1}">class="active"</c:if>>
 			<a href="/manage/app/tool/index">
 				<i class="glyphicon glyphicon-magnet"></i>
@@ -76,8 +98,6 @@
 				</c:if>
 			</a>
 		</li>
-
-
 
 		<li <c:if test="${machineActive == 1}">class="active"</c:if>>
 			<a href="/manage/machine/index">
@@ -127,7 +147,7 @@
 		<li <c:if test="${redisConfigActive == 1}">class="active"</c:if>>
 			<a href="/manage/redisConfig/init?versionid=29">
 				<i class="glyphicon glyphicon-file"></i>
-				<span class="title">配置模版</span>
+				<span class="title">模版配置</span>
 				<c:if test="${redisConfigActive == 1}">
 					<span class="selected"></span>
 					<span class="arrow"></span>

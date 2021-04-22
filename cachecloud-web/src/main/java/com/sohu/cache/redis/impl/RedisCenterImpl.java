@@ -14,12 +14,14 @@ import com.sohu.cache.protocol.RedisProtocol;
 import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.redis.enums.RedisInfoEnum;
 import com.sohu.cache.redis.enums.RedisReadOnlyCommandEnum;
+import com.sohu.cache.ssh.SSHService;
 import com.sohu.cache.stats.instance.InstanceStatsCenter;
 import com.sohu.cache.task.BaseTask;
 import com.sohu.cache.task.constant.InstanceInfoEnum.InstanceTypeEnum;
 import com.sohu.cache.util.*;
 import com.sohu.cache.web.enums.BooleanEnum;
 import com.sohu.cache.web.enums.ClientTypeEnum;
+import com.sohu.cache.web.enums.SuccessEnum;
 import com.sohu.cache.web.service.AppService;
 import com.sohu.cache.web.service.WebClientComponent;
 import com.sohu.cache.web.util.DateUtil;
@@ -90,6 +92,8 @@ public class RedisCenterImpl implements RedisCenter {
     private InstanceLatencyHistoryDao instanceLatencyHistoryDao;
     @Autowired
     private WebClientComponent webClientComponent;
+    @Autowired
+    SSHService sshService;
 
     @PostConstruct
     public void init() {
@@ -2628,101 +2632,302 @@ public class RedisCenterImpl implements RedisCenter {
         return null;
     }
 
-    private class RedisKeyCallable extends KeyCallable<Boolean> {
-        private final long appId;
-        private final long collectTime;
-        private final String host;
-        private final int port;
-        private final Map<RedisConstant, Map<String, Object>> infoMap;
-        private final Map<String, Object> clusterInfoMap;
+    public List<InstanceInfo> checkInstanceModule(long appId) {
 
-        private RedisKeyCallable(long appId, long collectTime, String host, int port,
-                                 Map<RedisConstant, Map<String, Object>> infoMap, Map<String, Object> clusterInfoMap) {
-            super(buildFutureKey(appId, collectTime, host, port));
-            this.appId = appId;
-            this.collectTime = collectTime;
-            this.host = host;
-            this.port = port;
-            this.infoMap = infoMap;
-            this.clusterInfoMap = clusterInfoMap;
-        }
-
-        @Override
-        public Boolean execute() {
-            //比对currentInfoMap和lastInfoMap,计算差值
-            long lastCollectTime = ScheduleUtil.getLastCollectTime(collectTime);
-            Map<String, Object> lastInfoMap = instanceStatsCenter
-                    .queryStandardInfoMap(lastCollectTime, host, port, ConstUtils.REDIS);
-
-            if (lastInfoMap == null || lastInfoMap.isEmpty()) {
-                logger.error("[redis-lastInfoMap] : lastCollectTime = {} appId={} host:port = {}:{} is null",
-                        lastCollectTime, appId, host, port);
-            }
-            //基本统计累加差值
-            Table<RedisConstant, String, Long> baseDiffTable = getAccumulationDiff(infoMap, lastInfoMap);
-            fillAccumulationMap(infoMap, baseDiffTable);
-
-            //命令累加差值
-            Table<RedisConstant, String, Long> commandDiffTable = getCommandsDiff(infoMap, lastInfoMap);
-            fillAccumulationMap(infoMap, commandDiffTable);
-
-            //内存碎片率差值计算
-            //Table<RedisConstant, String, Double> otherDiffTable = getDoubleAccumulationDiff(infoMap, lastInfoMap);
-            //fillDoubleAccumulationMap(infoMap, otherDiffTable);
-            fillMemFragRatioMap(infoMap);
-
-            Map<String, Object> currentInfoMap = new LinkedHashMap<String, Object>();
-            for (Map.Entry<RedisConstant, Map<String, Object>> entry : infoMap.entrySet()) {
-                currentInfoMap.put(entry.getKey().getValue(), entry.getValue());
-            }
-            currentInfoMap.put(ConstUtils.COLLECT_TIME, collectTime);
-            instanceStatsCenter.saveStandardStats(currentInfoMap, clusterInfoMap, host, port, ConstUtils.REDIS);
-
-            // 更新实例在db中的状态
-            InstanceStats instanceStats = getInstanceStats(appId, host, port, infoMap);
-            if (instanceStats != null) {
-                instanceStatsDao.updateInstanceStats(instanceStats);
-            }
-
-            BooleanEnum isMaster = isMaster(infoMap);
-            if (isMaster == BooleanEnum.TRUE) {
-                Table<RedisConstant, String, Long> diffTable = HashBasedTable.create();
-                diffTable.putAll(baseDiffTable);
-                diffTable.putAll(commandDiffTable);
-
-                long allCommandCount = 0L;
-                //更新命令统计
-                List<AppCommandStats> commandStatsList = getCommandStatsList(appId, collectTime, diffTable);
-                for (AppCommandStats commandStats : commandStatsList) {
-                    //排除无效命令且存储有累加的数据
-                    if (RedisExcludeCommand.isExcludeCommand(commandStats.getCommandName())
-                            || commandStats.getCommandCount() <= 0L) {
-                        continue;
-                    }
-                    allCommandCount += commandStats.getCommandCount();
+        // 实例列表
+        List<InstanceInfo> instanceList = appService.getAppInstanceInfo(appId);
+        if (!CollectionUtils.isEmpty(instanceList)) {
+            for (InstanceInfo instanceInfo : instanceList) {
+                if (!CollectionUtils.isEmpty(instanceList)) {
+                    String host = instanceInfo.getIp();
+                    int port = instanceInfo.getPort();
+                    int type = instanceInfo.getType();
+                    Jedis jedis = null;
                     try {
-                        // todo 数据库(on duplicate key update)竞争优化
-                        appStatsDao.mergeMinuteCommandStatus(commandStats);
-                        appStatsDao.mergeHourCommandStatus(commandStats);
+                        if (type == ConstUtils.CACHE_REDIS_STANDALONE || type == ConstUtils.CACHE_TYPE_REDIS_CLUSTER) {
+                            jedis = getJedis(appId, host, port);
+                            List<Module> modules = jedis.moduleList();
+                            instanceInfo.setModules(modules);
+                            logger.info("checkInstanceModule {}:{} module info :{}", host, port, modules);
+                        }
                     } catch (Exception e) {
-                        logger.error(e.getMessage() + appId, e);
+                        logger.error("checkInstanceModule {}:{} error , message:{}", host, port, e.getMessage(), e);
+                    } finally {
+                        if (jedis != null) {
+                            jedis.close();
+                        }
                     }
                 }
-                //写入app分钟统计
-                AppStats appStats = getAppStats(appId, collectTime, diffTable, infoMap);
+            }
+        }
+        return instanceList;
+    }
+
+    public Map loadModule(long appId, String moduleName) {
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        int status = SuccessEnum.SUCCESS.value();
+        String message = "";
+        try {
+            List<InstanceInfo> instanceList = appService.getAppInstanceInfo(appId);
+            if (!CollectionUtils.isEmpty(instanceList)) {
+                for (InstanceInfo instanceInfo : instanceList) {
+                    if (!instanceInfo.isOffline()) {
+                        String host = instanceInfo.getIp();
+                        int port = instanceInfo.getPort();
+                        int type = instanceInfo.getType();
+                        String module_path = ConstUtils.MODULE_BASE_PATH + moduleName;
+                        Jedis jedis = null;
+                        try {
+                            if (type == ConstUtils.CACHE_REDIS_STANDALONE || type == ConstUtils.CACHE_TYPE_REDIS_CLUSTER) {
+                                jedis = getJedis(appId, host, port);
+                                List<Module> modules = jedis.moduleList();
+                                // 未load module
+                                if (!existModule(modules, moduleName)) {
+                                    String result = jedis.moduleLoad(module_path);
+                                    logger.info(" {}:{} load module path:{} result:{}", host, port, module_path, result);
+                                    //写配置文件
+                                    refreshConfig(appId, host, port, module_path);
+                                }
+                            }
+                        } catch (Exception e) {
+                            logger.error(" {}:{} load module path:{} error , message:{}", host, port, module_path, e.getMessage(), e);
+                            status = SuccessEnum.ERROR.value();
+                            message += String.format("%s:%s load module:%s error \n", host, port, module_path);
+                        } finally {
+                            if (jedis != null) {
+                                jedis.close();
+                            }
+                        }
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            logger.error("appid:{} load moduleName :{} error :{}", appId, moduleName, e.getMessage());
+            status = SuccessEnum.FAIL.value();
+        }
+        resultMap.put("status", status);
+        resultMap.put("message", message);
+        return resultMap;
+    }
+
+    public boolean refreshConfig(long appid, String host, int port, String modulePath) {
+
+        try {
+            AppDesc appDesc = appService.getByAppId(appid);
+            boolean iscluster = false;
+            if (appDesc.getType() == ConstUtils.CACHE_TYPE_REDIS_CLUSTER) {
+                iscluster = true;
+            }
+            String configName = RedisProtocol.getConfig(port, iscluster);
+            String filePath = MachineProtocol.CONF_DIR + configName;
+            if (machineCenter.isK8sMachine(host)) {
+                filePath = MachineProtocol.getK8sConfDir(host) + configName;
+            }
+
+            String cmd = String.format("echo \"loadmodule %s\" >> %s", modulePath, filePath);
+
+            String result = sshService.execute(host, cmd);
+            logger.info("appid:{} {}:{} load module:{} refresh config result:{}", appid, host, port, modulePath, result);
+
+        } catch (Exception e) {
+            logger.error("appid:{} {}:{} load module:{} refresh config error :{}", appid, host, port, modulePath, e.getMessage(), e);
+            return false;
+        }
+        return true;
+    }
+
+    public boolean existModule(List<Module> modules, String moduleName) {
+        if (!CollectionUtils.isEmpty(modules)) {
+            for (Module module : modules) {
+                if (module.getName().equals(ConstUtils.MODULE_MAP.get(moduleName))) {
+                    logger.info("module:{} alread load in redis!", moduleName);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean checkAndLoadModule(long appId, String masterHost, int masterPort, String slaveHost, int slavePort) {
+
+    Jedis jedis = null;
+    Jedis currentJedis = null;
+    try {
+        //原redis实例
+        jedis = getJedis(appId, masterHost, masterPort);
+        //变更redis实例
+        currentJedis = getJedis(appId, slaveHost, slavePort);
+        List<Module> modules = jedis.moduleList();
+        // 未load module
+        if(!CollectionUtils.isEmpty(modules)){
+            for(Module module : modules){
+                String moduleFileName = MapUtils.getString(ConstUtils.MODULE_MAP, module.getName());
+                if(!StringUtils.isEmpty(moduleFileName)){
+                    // 装载redis插件
+                    String modulePath = String.format("%s%s", ConstUtils.MODULE_BASE_PATH, moduleFileName);
+                    String result = currentJedis.moduleLoad(modulePath);
+                    logger.info(" {}:{} load module path:{} result:{}", slaveHost, slavePort, modulePath, result);
+                    // 写配置文件
+                    refreshConfig(appId, slaveHost, slavePort, modulePath);
+                }
+            }
+        }
+    } catch(Exception e) {
+        logger.error(" {}:{} load module error , message:{}", slaveHost, slaveHost, e.getMessage(), e);
+    } finally {
+        if (jedis != null) {
+            jedis.close();
+        }
+        if (currentJedis != null){
+            currentJedis.close();
+        }
+    }
+    return true;
+}
+
+    public Map unloadModule(long appId, String moduleName) {
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        int status = SuccessEnum.SUCCESS.value();
+        String message = "";
+        try {
+            List<InstanceInfo> instanceList = appService.getAppInstanceInfo(appId);
+            if (!CollectionUtils.isEmpty(instanceList)) {
+                for (InstanceInfo instanceInfo : instanceList) {
+                    if (!instanceInfo.isOffline()) {
+                        String host = instanceInfo.getIp();
+                        int port = instanceInfo.getPort();
+                        int type = instanceInfo.getType();
+                        Jedis jedis = null;
+                        try {
+                            if (type == ConstUtils.CACHE_REDIS_STANDALONE || type == ConstUtils.CACHE_TYPE_REDIS_CLUSTER) {
+                                jedis = getJedis(appId, host, port);
+                                List<Module> modules = jedis.moduleList();
+                                if (!CollectionUtils.isEmpty(modules)) {
+                                    for (Module module : modules) {
+                                        if (module.getName().equals(moduleName)) {
+                                            String result = jedis.moduleUnload(module.getName());
+                                            logger.info("checkInstanceModule {}:{} unload module:{} result:{}", host, port, moduleName, result);
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {
+                            logger.error("checkInstanceModule {}:{} unload module:{} error , message:{}", host, port, moduleName, e.getMessage(), e);
+                            status = SuccessEnum.ERROR.value();
+                            message += String.format("%s:%s unload module:%s error \n", host, port, moduleName);
+                        } finally {
+                            if (jedis != null) {
+                                jedis.close();
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error("appid:{} unload moduleName :{} error :{}", appId, moduleName, e.getMessage());
+            status = SuccessEnum.FAIL.value();
+        }
+        resultMap.put("status", status);
+        resultMap.put("message", message);
+        return resultMap;
+    }
+
+private class RedisKeyCallable extends KeyCallable<Boolean> {
+    private final long appId;
+    private final long collectTime;
+    private final String host;
+    private final int port;
+    private final Map<RedisConstant, Map<String, Object>> infoMap;
+    private final Map<String, Object> clusterInfoMap;
+
+    private RedisKeyCallable(long appId, long collectTime, String host, int port,
+                             Map<RedisConstant, Map<String, Object>> infoMap, Map<String, Object> clusterInfoMap) {
+        super(buildFutureKey(appId, collectTime, host, port));
+        this.appId = appId;
+        this.collectTime = collectTime;
+        this.host = host;
+        this.port = port;
+        this.infoMap = infoMap;
+        this.clusterInfoMap = clusterInfoMap;
+    }
+
+    @Override
+    public Boolean execute() {
+        //比对currentInfoMap和lastInfoMap,计算差值
+        long lastCollectTime = ScheduleUtil.getLastCollectTime(collectTime);
+        Map<String, Object> lastInfoMap = instanceStatsCenter
+                .queryStandardInfoMap(lastCollectTime, host, port, ConstUtils.REDIS);
+
+        if (lastInfoMap == null || lastInfoMap.isEmpty()) {
+            logger.error("[redis-lastInfoMap] : lastCollectTime = {} appId={} host:port = {}:{} is null",
+                    lastCollectTime, appId, host, port);
+        }
+        //基本统计累加差值
+        Table<RedisConstant, String, Long> baseDiffTable = getAccumulationDiff(infoMap, lastInfoMap);
+        fillAccumulationMap(infoMap, baseDiffTable);
+
+        //命令累加差值
+        Table<RedisConstant, String, Long> commandDiffTable = getCommandsDiff(infoMap, lastInfoMap);
+        fillAccumulationMap(infoMap, commandDiffTable);
+
+        //内存碎片率差值计算
+        //Table<RedisConstant, String, Double> otherDiffTable = getDoubleAccumulationDiff(infoMap, lastInfoMap);
+        //fillDoubleAccumulationMap(infoMap, otherDiffTable);
+        fillMemFragRatioMap(infoMap);
+
+        Map<String, Object> currentInfoMap = new LinkedHashMap<String, Object>();
+        for (Map.Entry<RedisConstant, Map<String, Object>> entry : infoMap.entrySet()) {
+            currentInfoMap.put(entry.getKey().getValue(), entry.getValue());
+        }
+        currentInfoMap.put(ConstUtils.COLLECT_TIME, collectTime);
+        instanceStatsCenter.saveStandardStats(currentInfoMap, clusterInfoMap, host, port, ConstUtils.REDIS);
+
+        // 更新实例在db中的状态
+        InstanceStats instanceStats = getInstanceStats(appId, host, port, infoMap);
+        if (instanceStats != null) {
+            instanceStatsDao.updateInstanceStats(instanceStats);
+        }
+
+        BooleanEnum isMaster = isMaster(infoMap);
+        if (isMaster == BooleanEnum.TRUE) {
+            Table<RedisConstant, String, Long> diffTable = HashBasedTable.create();
+            diffTable.putAll(baseDiffTable);
+            diffTable.putAll(commandDiffTable);
+
+            long allCommandCount = 0L;
+            //更新命令统计
+            List<AppCommandStats> commandStatsList = getCommandStatsList(appId, collectTime, diffTable);
+            for (AppCommandStats commandStats : commandStatsList) {
+                //排除无效命令且存储有累加的数据
+                if (RedisExcludeCommand.isExcludeCommand(commandStats.getCommandName())
+                        || commandStats.getCommandCount() <= 0L) {
+                    continue;
+                }
+                allCommandCount += commandStats.getCommandCount();
                 try {
-                    appStats.setCommandCount(allCommandCount);
                     // todo 数据库(on duplicate key update)竞争优化
-                    appStatsDao.mergeMinuteAppStats(appStats);
-                    appStatsDao.mergeHourAppStats(appStats);
+                    appStatsDao.mergeMinuteCommandStatus(commandStats);
+                    appStatsDao.mergeHourCommandStatus(commandStats);
                 } catch (Exception e) {
                     logger.error(e.getMessage() + appId, e);
                 }
-                logger.debug("collect redis info done, appId: {}, instance: {}:{}, time: {}", appId, host, port,
-                        collectTime);
             }
-
-            return true;
+            //写入app分钟统计
+            AppStats appStats = getAppStats(appId, collectTime, diffTable, infoMap);
+            try {
+                appStats.setCommandCount(allCommandCount);
+                // todo 数据库(on duplicate key update)竞争优化
+                appStatsDao.mergeMinuteAppStats(appStats);
+                appStatsDao.mergeHourAppStats(appStats);
+            } catch (Exception e) {
+                logger.error(e.getMessage() + appId, e);
+            }
+            logger.debug("collect redis info done, appId: {}, instance: {}:{}, time: {}", appId, host, port,
+                    collectTime);
         }
+
+        return true;
     }
+}
 }

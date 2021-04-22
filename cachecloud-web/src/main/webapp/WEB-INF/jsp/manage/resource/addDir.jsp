@@ -12,7 +12,7 @@
                 resourceId: $('#resourceId').html(),
                 resourceName: $('#resourceName').val(),
                 resourceDesc: $('#resourceDesc').val(),
-                resourceType: $('#resourceType').val(),
+                resourceType: 6,
                 resourceStatus: $('#resourceStatus').val()
             },
             function (data) {
@@ -119,28 +119,6 @@
                                             </option>
                                             <option value="0">
                                                 无效
-                                            </option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="control-label col-md-3">
-                                        类型:
-                                    </label>
-                                    <div class="col-md-6">
-                                        <select name="resourceType" id="resourceType" class="form-control select2_category">
-                                            <option value="2">
-                                                脚本
-                                            </option>
-                                            <option value="3">
-                                                 Redis资源包
-                                            </option>
-                                            <option value="6">
-                                                目录
-                                            </option>
-                                            <option value="7">
-                                                迁移工具
                                             </option>
                                         </select>
                                     </div>

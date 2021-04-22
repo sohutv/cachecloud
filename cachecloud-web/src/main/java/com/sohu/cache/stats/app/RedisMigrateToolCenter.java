@@ -3,6 +3,7 @@ package com.sohu.cache.stats.app;
 import com.sohu.cache.constant.AppDataMigrateEnum;
 import com.sohu.cache.constant.AppDataMigrateResult;
 import com.sohu.cache.constant.CommandResult;
+import com.sohu.cache.entity.AppDataMigrateStatus;
 import com.sohu.cache.entity.SystemResource;
 
 /**
@@ -41,8 +42,8 @@ public interface RedisMigrateToolCenter {
      * @param targetSourcePass
      * @return
      */
-    boolean migrate(String migrateMachineIp, AppDataMigrateEnum sourceRedisMigrateEnum, String sourceServers,
-                    AppDataMigrateEnum targetRedisMigrateEnum, String targetServers, long sourceAppId, long targetAppId, String redisSourcePass, String targetSourcePass, long userId, SystemResource resource);
+    AppDataMigrateStatus migrate(String migrateMachineIp, AppDataMigrateEnum sourceRedisMigrateEnum, String sourceServers,
+                                 AppDataMigrateEnum targetRedisMigrateEnum, String targetServers, long sourceAppId, long targetAppId, String redisSourcePass, String targetSourcePass, long userId, SystemResource resource);
 
     /**
      * 比较源和目标的样本数据

@@ -1,7 +1,6 @@
 package com.sohu.cache.web.controller;
 
 import com.sohu.cache.constant.*;
-import com.sohu.cache.dao.AppUserDao;
 import com.sohu.cache.dao.InstanceReshardProcessDao;
 import com.sohu.cache.entity.*;
 import com.sohu.cache.machine.MachineCenter;
@@ -9,7 +8,6 @@ import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.redis.RedisDeployCenter;
 import com.sohu.cache.stats.app.AppDailyDataCenter;
 import com.sohu.cache.stats.app.AppDeployCenter;
-import com.sohu.cache.stats.instance.InstanceDeployCenter;
 import com.sohu.cache.task.TaskService;
 import com.sohu.cache.task.constant.ResourceEnum;
 import com.sohu.cache.util.ConstUtils;
@@ -29,7 +27,6 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -72,9 +69,6 @@ public class AppManageController extends BaseController {
     @Resource(name = "redisDeployCenter")
     private RedisDeployCenter redisDeployCenter;
 
-    @Resource(name = "instanceDeployCenter")
-    private InstanceDeployCenter instanceDeployCenter;
-
     @Resource(name = "appDailyDataCenter")
     private AppDailyDataCenter appDailyDataCenter;
 
@@ -83,9 +77,6 @@ public class AppManageController extends BaseController {
 
     @Resource(name = "appService")
     private AppService appService;
-
-    @Autowired
-    private AppUserDao appUserDao;
 
     @Resource
     private TaskService taskService;
@@ -462,9 +453,19 @@ public class AppManageController extends BaseController {
      */
     @RequestMapping(value = "/initAppDeploy")
     public ModelAndView doInitAppDeploy(HttpServletRequest request, HttpServletResponse response, Model model, Long appAuditId) {
-        // 申请原因
-        AppAudit appAudit = appService.getAppAuditById(appAuditId);
-        model.addAttribute("appAudit", appAudit);
+        long appId;
+        AppDesc appDesc;
+        if (appAuditId == null) {
+            appId = NumberUtils.toLong(request.getParameter("appId"));
+            appDesc = appService.getByAppId(appId);
+        } else {
+            // 申请原因
+            AppAudit appAudit = appService.getAppAuditById(appAuditId);
+            appId = appAudit.getAppId();
+            model.addAttribute("appAudit", appAudit);
+            appDesc = appAudit.getAppDesc();
+        }
+
         // 获取所有Redis版本
         List<SystemResource> allRedisVersion = resourceService.getResourceList(ResourceEnum.REDIS.getValue());
         // 机器列表
@@ -472,9 +473,8 @@ public class AppManageController extends BaseController {
         // 获取机器信息
         Map<String, Integer> machineInstanceCountMap = machineCenter.getMachineInstanceCountMap();
 
-        AppDesc appDesc = appAudit.getAppDesc();
         if (appDesc != null) {
-            model.addAttribute("version",appDesc.getVersionName());
+            model.addAttribute("version", appDesc.getVersionName());
         }
         List<MachineRoom> roomList = machineCenter.getEffectiveRoom();
         model.addAttribute("roomList", roomList);
@@ -482,10 +482,11 @@ public class AppManageController extends BaseController {
         model.addAttribute("machineList", machineList);
         model.addAttribute("machineInstanceCountMap", machineInstanceCountMap);
         model.addAttribute("appAuditId", appAuditId);
-        model.addAttribute("appId", appAudit.getAppId());
-        model.addAttribute("md5password", AuthUtil.getAppIdMD5(String.valueOf(appAudit.getAppId())));
-        model.addAttribute("appDesc", appService.getByAppId(appAudit.getAppId()));
+        model.addAttribute("appId", appId);
+        model.addAttribute("md5password", AuthUtil.getAppIdMD5(String.valueOf(appId)));
+        model.addAttribute("appDesc", appService.getByAppId(appId));
         model.addAttribute("versionList", allRedisVersion);
+        model.addAttribute("importId", request.getParameter("importId"));
 
         return new ModelAndView("manage/appAudit/deploy/initAppDeploy");
     }
@@ -662,7 +663,11 @@ public class AppManageController extends BaseController {
                 sendMessage(response, json.toString());
                 return null;
             }
-            appAuditDao.updateAppAuditOperateUser(appAuditId, appUser.getId());
+            if (appAuditId != null) {
+                appAuditDao.updateAppAuditOperateUser(appAuditId, appUser.getId());
+            } else {
+                appAuditId = -1l;
+            }
             //2.根据应用类型获取部署拓扑信息
             switch (type) {
                 case 2: //  部署task :redis cluster
@@ -852,6 +857,10 @@ public class AppManageController extends BaseController {
             return new ModelAndView("redirect:/data/migrate/init");
         }
 
+        if (AppCheckEnum.APP_ALLOCATE_RESOURCE.value().equals(status) && AppAuditType.APP_IMPORT.getValue() == type) {
+            return new ModelAndView("redirect:/import/app/init?importId=" + appAudit.getParam1());
+        }
+
         write(response, String.valueOf(SuccessEnum.SUCCESS.value()));
         return null;
     }
@@ -936,6 +945,48 @@ public class AppManageController extends BaseController {
             model.addAttribute("appDesc", appDesc);
         }
         return new ModelAndView("manage/appOps/appMachine");
+    }
+
+    @RequestMapping("/module")
+    public ModelAndView appModule(Model model, Long appId) {
+        if (appId != null && appId > 0) {
+            List<MachineStats> appMachineList = appService.getAppMachine(appId);
+            //1.检测机器模块装载情况
+            machineCenter.checkMachineModule(appMachineList);
+            model.addAttribute("appMachineList", appMachineList);
+            //2.检测应用实例的插件集成情况
+            List<InstanceInfo> instanceList = redisCenter.checkInstanceModule(appId);
+            model.addAttribute("instanceList", instanceList);
+            AppDesc appDesc = appService.getByAppId(appId);
+            model.addAttribute("appDesc", appDesc);
+            model.addAttribute("basePath", ConstUtils.MODULE_BASE_PATH);
+            model.addAttribute("moduleMap", ConstUtils.MODULE_MAP);
+        }
+        return new ModelAndView("manage/appOps/appModule");
+    }
+
+    @RequestMapping("/loadModule")
+    public ModelAndView loadModule(HttpServletRequest request, HttpServletResponse response, Long appId, String moduleName) {
+        Map<String, Object> map = new HashMap();
+        AppUser appUser = getUserInfo(request);
+        if (appId != null && appId > 0) {
+            map = redisCenter.loadModule(appId, moduleName);
+        }
+        logger.warn("user {} loadModule, appId:{}, result is {}", appUser.getName(), appId, map);
+        sendMessage(response, JSONObject.fromObject(map).toString());
+        return null;
+    }
+
+    @RequestMapping("/unloadModule")
+    public ModelAndView unloadModule(HttpServletRequest request, HttpServletResponse response, Long appId, String moduleName) {
+        Map<String, Object> map = new HashMap();
+        AppUser appUser = getUserInfo(request);
+        if (appId != null && appId > 0) {
+            map = redisCenter.unloadModule(appId, moduleName);
+        }
+        logger.warn("user {} unloadModule, appId:{}, result is {}", appUser.getName(), appId, map);
+        sendMessage(response, JSONObject.fromObject(map).toString());
+        return null;
     }
 
     /**

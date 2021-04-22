@@ -431,6 +431,7 @@
 														<span id="deploy">开始部署</span>
 													</button>
 												</div>
+												<input id="importId" type="hidden" value="${importId}">
 											</div>
 										</form>
 										<!-- END FORM-->

@@ -24,6 +24,12 @@
                     $('#redis_shake_config').hide();
                 }
             });
+
+            var targetAppId = document.getElementById('targetAppId').value;
+            if (targetAppId != '') {
+                fillAppInstanceList('targetRedisShakeIndex', 'redisTargetPass', 'redisTargetVersion', 'targetServers', 'targetRedisMigrateIndex', 'targetAppName', 'targetAppId');
+            }
+
         });
 
         function changeDataType(appIdId, serversId, choose) {
@@ -226,18 +232,38 @@
                 function (data) {
                     var status = data.status;
                     if (status == 1) {
+                        updateForImport(data.migrateId);
                         alert("迁移程序已经启动，请返回迁移列表关注迁移进度!");
-                        location.href = "/data/migrate/list";
+                        location.href = "/data/migrate/index?status=-2";
                     } else {
                         alert("迁移失败,请查看日志分析原因!");
                     }
-
                     var checkButton = document.getElementById("checkButton");
                     checkButton.disabled = true;
                 }
             );
         }
 
+        function updateForImport(migrateId) {
+            console.log("updateForImport migrateId:" + migrateId);
+            var importId = document.getElementById("importId");
+            if (importId != null && importId.value != '') {
+                console.log("updateForImport importId:" + importId.value);
+                $.get(
+                    '/import/app/goOn.json',
+                    {
+                        importId: importId.value,
+                        migrateId: migrateId
+                    },
+                    function (data) {
+                        var success = data.success;
+                        if (success == 1) {
+                            console.log("updateForImport success");
+                        }
+                    }
+                );
+            }
+        }
     </script>
 </head>
 <body role="document">
@@ -289,7 +315,7 @@
                                                         class="form-control select2_category">
                                                     <c:forEach items="${machineInfoMap}" var="machineInfo">
                                                         <option value="${machineInfo.key}">
-                                                                ip：${machineInfo.key}&nbsp;&nbsp;任务数：${machineInfo.value}
+                                                            ip：${machineInfo.key}&nbsp;&nbsp;任务数：${machineInfo.value}
                                                         </option>
                                                     </c:forEach>
                                                 </select>
@@ -303,7 +329,9 @@
                                                 <select name="type" id="version" class="form-control select2_category">
                                                     <c:forEach items="${resourcelist}" var="resource">
                                                         <c:if test="${resource.status == 1}">
-                                                            <option <c:if test="${resource.id == currentVersion.id}">selected</c:if> versionid="${resource.id}">${resource.name}</option>
+                                                            <option
+                                                                    <c:if test="${resource.id == currentVersion.id}">selected</c:if>
+                                                                    versionid="${resource.id}">${resource.name}</option>
                                                         </c:if>
                                                     </c:forEach>
                                                 </select>
@@ -365,13 +393,13 @@
                                                     <option value="0">
                                                         Redis普通节点
                                                     </option>
-                                                    <option value="5">
+                                                    <option value="5" <c:if test="${sourceType==5}">selected="selected"</c:if>>
                                                         Redis-standalone
                                                     </option>
-                                                    <option value="6">
+                                                    <option value="6" <c:if test="${sourceType==6}">selected="selected"</c:if>>
                                                         Redis-sentinel
                                                     </option>
-                                                    <option value="7">
+                                                    <option value="7" <c:if test="${sourceType==7}">selected="selected"</c:if>>
                                                         Redis-cluster
                                                     </option>
                                                 </select>
@@ -427,6 +455,7 @@
                                             </label>
                                             <div class="col-md-5">
                                                 <input type="text" id="redisSourceVersion" name="redisSourceVersion"
+                                                       value="${redisSourceVersion}"
                                                        placeholder="redis-x.x.x" class="form-control"/>
                                             </div>
                                         </div>
@@ -457,11 +486,12 @@
                                                 <select id="sourceDataType" name="sourceDataType"
                                                         class="form-control select2_category"
                                                         onchange="changeDataType('sourceAppId','sourceServers',this)">
-                                                    <option value="0">
-                                                        非cachecloud
-                                                    </option>
                                                     <option value="1" selected="selected">
                                                         cachecloud
+                                                    </option>
+                                                    <option value="0"
+                                                            <c:if test="${sourceDataType==0}">selected="selected"</c:if> >
+                                                        非cachecloud
                                                     </option>
                                                 </select>
                                             </div>
@@ -514,6 +544,7 @@
                                             </label>
                                             <div class="col-md-5">
                                                 <input type="text" id="targetAppId" class="form-control"
+                                                       value="${targetAppId}"
                                                        onchange="fillAppInstanceList('targetRedisShakeIndex', 'redisTargetPass','redisTargetVersion', 'targetServers', 'targetRedisMigrateIndex', 'targetAppName',this.id)"/>
                                                 <label id="targetAppName" class="control-label"
                                                        style="display:none"></label>
@@ -532,6 +563,7 @@
                                             </label>
                                             <div class="col-md-5">
                                                 <input type="text" id="redisSourcePass" name="redisSourcePass"
+                                                       value="${redisSourcePass}"
                                                        placeholder="没有无需填写" class="form-control"/>
                                             </div>
                                         </div>
@@ -559,9 +591,12 @@
                                                 源实例详情:
                                             </label>
                                             <div class="col-md-8">
-                                                <textarea disabled="disabled" rows="10" name="sourceServers"
-                                                          id="sourceServers"
-                                                          placeholder="节点详情" class="form-control"></textarea>
+                                                <textarea
+                                                        <c:if test="${sourceServers==''}">disabled="disabled"</c:if>
+                                                        rows="10" name="sourceServers"
+                                                        id="sourceServers"
+                                                        placeholder="节点详情"
+                                                        class="form-control">${sourceServers}</textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -638,6 +673,8 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <input id="importId" type="hidden" value="${importId}">
                         </div>
                     </form>
                 </div>

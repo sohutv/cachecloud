@@ -1,8 +1,8 @@
 package com.sohu.cache.web.controller;
 
+import com.sohu.cache.constant.MachineInfoEnum;
 import com.sohu.cache.dao.AppClientStatisticGatherDao;
 import com.sohu.cache.dao.AppDao;
-import com.sohu.cache.dao.ResourceDao;
 import com.sohu.cache.entity.AppClientStatisticGather;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.InstanceInfo;
@@ -26,6 +26,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -47,7 +48,6 @@ public class AppStatController extends BaseController {
     private AppClientStatisticGatherDao appClientStatisticGatherDao;
     @Autowired
     TopologyExamTask topologyExamTask;
-
 
     @RequestMapping(value = "/list")
     public ModelAndView doAppStatsList(HttpServletRequest request,
@@ -123,22 +123,45 @@ public class AppStatController extends BaseController {
         searchDate = timeBetween.getFormatStartDate();
         model.addAttribute("searchDate", searchDate);
 
-        //appDescList
-        List<AppDesc> appDescList = appDao.getOnlineApps();
-        appDescList.forEach(appDesc -> {
-            String versionName = Optional.ofNullable(resourceService.getResourceById(appDesc.getVersionId())).map(ver -> ver.getName()).orElse("");
-            appDesc.setVersionName(versionName);
-        });
-        model.addAttribute("appDescList", appDescList);
+        if(tabId == 1 || tabId == 2 || tabId == 3){
+            //appDescList
+            List<AppDesc> appDescList = appDao.getOnlineApps();
+            appDescList.forEach(appDesc -> {
+                String versionName = Optional.ofNullable(resourceService.getResourceById(appDesc.getVersionId())).map(ver -> ver.getName()).orElse("");
+                appDesc.setVersionName(versionName);
+            });
+            model.addAttribute("appDescList", appDescList);
 
-        //appDetailVOMap
-        Map<Long, AppDetailVO> appDetailVOMap = appStatsCenter.getOnlineAppDetails();
-        model.addAttribute("appDetailVOMap", appDetailVOMap);
+            //appDetailVOMap
+            Map<Long, AppDetailVO> appDetailVOMap = appStatsCenter.getOnlineAppDetails();
+            model.addAttribute("appDetailVOMap", appDetailVOMap);
 
-        //appClientGatherStatMap
-        Map<Long, Map<String, Object>> appClientGatherStatMap = appService.getAppClientStatGather(appId, searchDate);
-        model.addAttribute("appClientGatherStatMap", appClientGatherStatMap);
-
+            //appClientGatherStatMap
+            Map<Long, Map<String, Object>> appClientGatherStatMap = appService.getAppClientStatGather(appId, searchDate);
+            model.addAttribute("appClientGatherStatMap", appClientGatherStatMap);
+        }
+        //机器环境检查
+        if(tabId == 4 ) {
+            SimpleDateFormat searchFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Map<String, Object> machineEnvMap = null;
+            try {
+                machineEnvMap = machineCenter.getAllMachineEnv(searchFormat.parse(searchDate), MachineInfoEnum.MachineTypeEnum.CONTAINER.getValue());
+            } catch (ParseException e) {
+                logger.error("machineCenter get container date:{} error :{}",searchDate,e.getMessage());
+            }
+            model.addAttribute("machineEnvMap", machineEnvMap);
+        }
+        // 宿主环境检查
+        if(tabId == 5) {
+            SimpleDateFormat searchFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Map<String, Object> machineEnvMap = null;
+            try {
+                machineEnvMap = machineCenter.getAllMachineEnv(searchFormat.parse(searchDate), MachineInfoEnum.MachineTypeEnum.HOST.getValue());
+            } catch (ParseException e) {
+                logger.error("machineCenter get host date:{} error :{}",searchDate,e.getMessage());
+            }
+            model.addAttribute("machineEnvMap", machineEnvMap);
+        }
 
         model.addAttribute("appStatServerActive", SuccessEnum.SUCCESS.value());
         return new ModelAndView("manage/appStat/listServer");

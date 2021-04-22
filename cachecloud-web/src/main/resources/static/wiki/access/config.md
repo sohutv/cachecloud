@@ -1,4 +1,4 @@
-## 系统全局配置说明
+## 系统配置说明
 
 ### 一、系统配置说明
 
@@ -82,17 +82,16 @@ cachecloud会定期对机器重要指标进行检测进行报警(报警实现请
 
 #### 7. 相关工具
 
-- nmon安装目录:
-- redis-migrate-tool安装路径:
-- redis-shake安装路径:
-- redis-full-check安装路径:
+- redis-migrate-tool安装路径；
+- redis-shake安装路径；
+- redis-full-check安装路径。
 
     
 ####
 
 ### 三、注意
 
-系统配置的初始化值,需要导入2.0.sql(目录:cachecloud-web/sql)中的相关表和数据：
+系统配置的初始化值，需要导入2.0.sql(目录:cachecloud-web/sql)中的相关表和数据：
 
 ```
 CREATE TABLE `system_config` (

@@ -81,4 +81,35 @@ public class MachineInfoEnum {
 
     }
 
+    public static enum MachineEnum {
+        HOST("host"),
+        CONTAINER("container");
+
+        private String value;
+
+        MachineEnum(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
+
+    public static enum MachineTypeEnum {
+        HOST(1),
+        CONTAINER(2),
+        ALL(3);
+
+        private int value;
+
+        MachineTypeEnum(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+    }
+
 }

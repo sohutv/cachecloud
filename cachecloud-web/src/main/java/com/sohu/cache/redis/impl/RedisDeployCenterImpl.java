@@ -443,6 +443,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
             configs.add(RedisConfigEnum.REQUIREPASS.getKey() + ConstUtils.SPACE + password);
             configs.add(RedisConfigEnum.MASTERAUTH.getKey() + ConstUtils.SPACE + password);
         }
+
         printConfig(configs);
         String fileName;
         String runShell;
@@ -488,7 +489,6 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         long appId = appDesc.getAppId();
         String password = appDesc.getPasswordMd5();
         // 获取redis路径
-//        RedisVersion redisVersion = redisConfigTemplateService.getRedisVersionById(appDesc.getVersionId());
         SystemResource redisResource = resourceService.getResourceById(appDesc.getVersionId());
         String redisDir = redisResource == null ? ConstUtils.REDIS_DEFAULT_DIR : ConstUtils.getRedisDir(redisResource.getName());
         // 生成配置
@@ -1006,6 +1006,10 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
                     logger.error("{}:{} getNodeId failed", masterHost, masterPort);
                     return false;
                 }
+
+                // 检查主节点是否有加载redis插件
+                redisCenter.checkAndLoadModule(appId, masterHost, masterPort, slaveHost, slavePort);
+
                 boolean isClusterReplicate = new IdempotentConfirmer() {
                     @Override
                     public boolean execute() {
@@ -1702,6 +1706,9 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
                            final int slavePort) {
         final Jedis slave = redisCenter.getJedis(appId, slaveHost, slavePort, Protocol.DEFAULT_TIMEOUT * 3, Protocol.DEFAULT_TIMEOUT * 3);
         try {
+            // 检查主节点是否有加载redis插件
+            redisCenter.checkAndLoadModule(appId, masterHost, masterPort, slaveHost, slavePort);
+
             boolean isSlave = new IdempotentConfirmer() {
                 @Override
                 public boolean execute() {

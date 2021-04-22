@@ -74,6 +74,11 @@
         select app_data_migrate_status.id,<include refid="migrate_data_status_fields"/>,app_user.ch_name as user_name
         from app_data_migrate_status, app_user where 1=1 and app_data_migrate_status.user_id=app_user.id
         <choose>
+            <when test="appDataMigrateSearch.migrateId != null and appDataMigrateSearch.migrateId > 0">
+                and migrate_id = #{appDataMigrateSearch.migrateId}
+            </when>
+        </choose>
+        <choose>
             <when test="appDataMigrateSearch.sourceAppId != null and appDataMigrateSearch.sourceAppId > 0">
                 and source_app_id = #{appDataMigrateSearch.sourceAppId}
             </when>
@@ -139,6 +144,13 @@
         select id,
         <include refid="migrate_data_status_fields"/>
         from app_data_migrate_status where id = #{id}
+    </select>
+
+
+    <select id="getByMigrateId" resultType="AppDataMigrateStatus">
+        select id,
+        <include refid="migrate_data_status_fields"/>
+        from app_data_migrate_status where migrate_id = #{migrateId}
     </select>
 
     <update id="updateStatus">

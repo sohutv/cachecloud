@@ -1,9 +1,9 @@
 ### 目录
 * [一、CacheCloud是什么](#cc1)
-* [二、CacheCloud功能架构](#cc2)
-* [三、CacheCloud使用规模](#cc3)
-* [四、阿里云ecs试用版本](#cc4) 
-* [五、FAQ快速接入](#cc5)
+* [二、CacheCloud快速接入](#cc2)
+* [三、CacheCloud功能架构](#cc3)
+* [四、CacheCloud使用规模](#cc4)
+* [五、阿里云ecs试用版本](#cc5) 
 * [六、服务用户](#cc6)
 * [七、图书分享](#cc7)  
 * [八、支持与帮助](#cc8)
@@ -11,11 +11,18 @@
 <a name="cc1"/>
 ## 一、CacheCloud是什么
 
-CacheCloud是一个Redis云管理平台：支持Redis多种架构(Standalone、Sentinel、Cluster)高效管理、有效降低大规模redis运维成本，提升资源管控能力和利用率。平台提供快速搭建/迁移，运维管理，弹性伸缩，统计监控，客户端整合接入等功能。
+CacheCloud是一个Redis云管理平台：支持Redis多种架构(Standalone、Sentinel、Cluster)高效管理，有效降低大规模redis运维成本，提升资源管控能力和利用率。平台提供redis快速搭建、迁移，运维管理，弹性伸缩，统计监控，客户端整合接入等功能。
+
 ![cachecloud云平台](../../img/readme/cachecloud.png)
 
 <a name="cc2"/>
-## 二、CacheCloud功能架构
+## 二、CacheCloud快速接入
+
++ [快速开始](../../wiki/quickstart/index.md)
++ [客户端接入](../../wiki/access/client.md)
+
+<a name="cc3"/>
+## 三、CacheCloud功能架构
 
 + Wiki管理：FAQ、系统介绍、系统接入、系统功能、功能手册、常见问题；
 + Redis搭建：环境初始化、实例部署安装、类型架构支持；
@@ -25,26 +32,20 @@ CacheCloud是一个Redis云管理平台：支持Redis多种架构(Standalone、S
 + 统计监控：指标采集、应用统计、节点统计、机器统计、监控报警、问题诊断；
 <img src="../../img/readme/CacheCloud功能架构.png" width="100%"/>
 
-<a name="cc3"/>
-## 三、CacheCloud使用规模
+<a name="cc4"/>
+## 四、CacheCloud使用规模
 
 + 400亿+ commands/day
 + 15T+ Memory Total
 + 300+ app Total / 3000+ Instances Total
 + 200+ Machines Total
 
-<a name="cc4"/>
-## 四、阿里云ecs试用版本
+<a name="cc5"/>
+## 五、阿里云ecs试用版本
 
 + CacheCloud后台地址：[地址](http://47.97.112.178:8080/admin/app/list)
 + 用户名/登录密码：cachecloud_user:cachecloud_user
 + 开源版本试用时间: 2021-01-18 ，如果大家有空闲公网资源可以贡献，请[联系我们](#cc8)
-
-<a name="cc5"/>
-## 五、FAQ快速接入
-
-+ [快速开始](../../wiki/quickstart/index.md)
-+ [客户端接入](../../wiki/access/client.md)
 
 <a name="cc6"/>
 ## 六、服务用户

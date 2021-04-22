@@ -13,6 +13,8 @@ CacheCloud系统需要依赖一些脚本，Redis资源包，迁移工具，公�
 - Redis资源管理： 管理redis资源包不同版本及推送下载；
 - 迁移工具资源管理：管理迁移工具不同资源包版本及推送下载；
 
+<a name="cc2"/>
+
 ### 二、仓库配置
 
 <img src="../../img/operate/version/respo.png" width="100%"/>
@@ -23,17 +25,23 @@ CacheCloud系统需要依赖一些脚本，Redis资源包，迁移工具，公�
 
 资源下载地址：可访问资源地址；例如:http://%.%.%.com/software/cachecloud/resource
 
+<a name="cc3"/>
+
 ### 三、目录管理
 
 <img src="../../img/operate/version/dir.png" width="100%"/>
 
 对不同类型资源创建不同目录，需要做推送后及在远程仓库创建对应资源目录(格式:/${dir})；
 
+<a name="cc4"/>
+
 ### 四、脚本管理
 
 <img src="../../img/operate/version/script.png" width="100%"/>
 
 对系统依赖脚本进行版本管理，可在编译内容和推送脚本到仓库上；
+
+<a name="cc5"/>
 
 ### 五、Redis资源管理
 
@@ -65,6 +73,8 @@ Redis资源管理支持对Redis大小版本做统一管理和版本控制(3.0.x 
 <img src="../../img/operate/version/upgrade-process.png" width="60%"/>
 
 升级完后，若为升级版本5.0.7为当前管理的最终小版本号，则应用按钮会显示为`最新版本`。
+
+<a name="cc6"/>
 
 ### 六、迁移工具资源管理
 

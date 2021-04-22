@@ -132,10 +132,10 @@ public class RedisSentinelAppDeployTask extends BaseTask {
 
         //审核id
         auditId = MapUtils.getLongValue(paramMap, TaskConstants.AUDIT_ID_KEY);
-        if (auditId <= 0) {
-            logger.error(marker, "task {} auditId {} is wrong", taskId, auditId);
-            return TaskFlowStatusEnum.ABORT;
-        }
+//        if (auditId <= 0) {
+//            logger.error(marker, "task {} auditId {} is wrong", taskId, auditId);
+//            return TaskFlowStatusEnum.ABORT;
+//        }
 
         //maxMemory
         maxMemory = MapUtils.getIntValue(paramMap, TaskConstants.REDIS_SERVER_MAX_MEMORY_KEY);
@@ -215,7 +215,7 @@ public class RedisSentinelAppDeployTask extends BaseTask {
                 return TaskFlowStatusEnum.ABORT;
             }
             MachineInfo machineInfo = machineDao.getMachineInfoByIp(redisServerIp);
-            if(machineInfo == null){
+            if (machineInfo == null) {
                 logger.error(marker, "redis server machine info is null");
                 return TaskFlowStatusEnum.ABORT;
             }
@@ -346,7 +346,7 @@ public class RedisSentinelAppDeployTask extends BaseTask {
             return TaskFlowStatusEnum.ABORT;
         }
         // 保存sentinel实例信息
-        if(!StringUtils.isEmpty(masterName)){
+        if (!StringUtils.isEmpty(masterName)) {
             for (RedisSentinelNode redisSentinelNode : redisSentinelNodes) {
                 Integer instanceId = saveInstance(appId, redisSentinelNode.getIp(), redisSentinelNode.getPort(), 0,
                         InstanceTypeEnum.REDIS_SENTINEL, InstanceStatusEnum.NEW_STATUS, masterName);
@@ -354,7 +354,7 @@ public class RedisSentinelAppDeployTask extends BaseTask {
                     return TaskFlowStatusEnum.ABORT;
                 }
             }
-        }else {
+        } else {
             logger.error(marker, "appId {} masterName {} is empty", appId, masterName);
             return TaskFlowStatusEnum.ABORT;
         }
@@ -555,7 +555,7 @@ public class RedisSentinelAppDeployTask extends BaseTask {
         return TaskFlowStatusEnum.SUCCESS;
     }
 
-    public TaskFlowStatusEnum setPasswd(){
+    public TaskFlowStatusEnum setPasswd() {
 
         try {
             if (appId > 0) {
@@ -579,9 +579,10 @@ public class RedisSentinelAppDeployTask extends BaseTask {
 
     /**
      * 清理sentinel实例状态
+     *
      * @return
      */
-    public TaskFlowStatusEnum sentinelReset(){
+    public TaskFlowStatusEnum sentinelReset() {
 
         try {
             redisDeployCenter.sentinelReset(appId);
@@ -600,7 +601,9 @@ public class RedisSentinelAppDeployTask extends BaseTask {
      */
     public TaskFlowStatusEnum updateAudit() {
         try {
-            appAuditDao.updateAppAudit(auditId, AppCheckEnum.APP_ALLOCATE_RESOURCE.value());
+            if (auditId > 0) {
+                appAuditDao.updateAppAudit(auditId, AppCheckEnum.APP_ALLOCATE_RESOURCE.value());
+            }
             return TaskFlowStatusEnum.SUCCESS;
         } catch (Exception e) {
             logger.error(marker, e.getMessage(), e);

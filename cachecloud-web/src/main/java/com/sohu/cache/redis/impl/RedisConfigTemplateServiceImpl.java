@@ -82,6 +82,8 @@ public class RedisConfigTemplateServiceImpl implements RedisConfigTemplateServic
 
     private static int WAITING_RESOURCE_SECOND = 5;
 
+    private static int WAITING_RETRY_TIMES = 10;
+
     private static int DOWNLOAD_SECONDS = 60 * 5 * 1000;
 
     private static String DOWNLOAD_CMD = "cd %s && wget %s && tar -xvf %s && rm -rf %s ";
@@ -441,8 +443,8 @@ public class RedisConfigTemplateServiceImpl implements RedisConfigTemplateServic
         String redisDir = ConstUtils.getRedisDir(redisResource.getName());
         if (!checkMachineRedisVersion(host, redisDir)) {
             installRedisOnMachine(host, redisResource);
-            // 验证安装是否成功,最多重试3次
-            for (int retry = 1; retry <= 3; retry++) {
+            // 验证安装是否成功,最多重试10次
+            for (int retry = 1; retry <= WAITING_RETRY_TIMES; retry++) {
                 if (checkMachineRedisVersion(host, redisDir)) {
                     logger.info("checkAndInstallRedisResource machine:{} install {} ok!", host, redisResource.getName());
                     redisInstallFlag = true;
@@ -467,8 +469,8 @@ public class RedisConfigTemplateServiceImpl implements RedisConfigTemplateServic
         String redisDir = ConstUtils.getRedisDir(redisResource.getName());
         if (!checkMachineRedisTool(host, redisDir)) {
             installRedisOnMachine(host, redisResource);
-            // 验证安装是否成功,最多重试3次
-            for (int retry = 1; retry <= 3; retry++) {
+            // 验证安装是否成功,最多重试10次
+            for (int retry = 1; retry <= WAITING_RETRY_TIMES; retry++) {
                 if (checkMachineRedisTool(host, redisDir)) {
                     logger.info("checkAndInstallRedisResource machine:{} install {} ok!", host, redisResource.getName());
                     redisInstallFlag = true;

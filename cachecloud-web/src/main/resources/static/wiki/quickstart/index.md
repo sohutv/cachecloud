@@ -1,3 +1,15 @@
+##### 目录
+* [一、准备war包](#cc1)
+* [二、初始化数据](#cc2)
+* [三、启动工程](#cc3)
+* [四、系统初始配置](#cc4)
+* [五、创建一个用户](#cc5)
+* [六、准备资源](#cc6)
+* [七、创建一个应用](#cc7)
+
+
+<a name="cc1"/>
+
 ## 快速接入 quick start 
 ”快速接入“ 帮助你快速启动cachecloud中台，并创建一个应用。
 
@@ -37,20 +49,16 @@ b.也可以clone源码，自行打包：
 	spring:
 	  application:
 	    name: cloud.cachecloud-web.open
+	#配置访问端口,默认8080
+	server:
+	  port: 8080
 	#配置数据库
 	cachecloud:
 	  primary: #mysql数据库
 	    url: ${jdbcUrl}
 	    user: ${username}
 	    password: ${password}
-	  redis: #配置cachecloud-web需要的redis，用户存储任务流日志，可稍后配置
-	    main:
-	      host: 127.0.0.1
-	      port: 6379
-	      password:
-	#配置访问端口,默认8080
-	server:
-	  port: 8080
+
 启动工程
 
  	//启动web工程
@@ -140,3 +148,9 @@ b.也可以clone源码，自行打包：
 	(提示：任务流日志是存储在redis中的，即项目启动时配置文件application-open.yml中的cachecloud.redis信息)
 	
 	<img src="../../img/quickstart/apptask.png" width="80%"/>
+	
+<a name="cc73"/>
+	
+* 3.导入应用
+
+	该功能支持将外部redis实例导入Cachecloud平台进行运维管理。具体操作参考：[应用导入](../../wiki/function/operations#cc1-3.md)

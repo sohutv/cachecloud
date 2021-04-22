@@ -7,6 +7,7 @@ import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.stats.app.AppStatsCenter;
 import com.sohu.cache.util.ConstUtils;
+import com.sohu.cache.util.EnvUtil;
 import com.sohu.cache.web.service.AppService;
 import com.sohu.cache.web.service.UserService;
 import org.apache.commons.lang.StringUtils;
@@ -14,6 +15,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
@@ -44,6 +46,8 @@ public class AppWechatUtil {
 
     @Autowired
     private AppStatsCenter appStatsCenter;
+    @Autowired
+    private Environment environment;
 
     /**
      * 应用状态通知
@@ -52,6 +56,9 @@ public class AppWechatUtil {
      * @param appAudit
      */
     public void noticeAppResult(AppDesc appDesc, AppAudit appAudit) {
+        if (EnvUtil.isDev(environment)) {
+            return;
+        }
         try {
             long userId = appDesc.getUserId();
             AppUser appUser = userService.get(userId);
@@ -61,18 +68,18 @@ public class AppWechatUtil {
 
             StringBuffer appCreateWeChatContent = new StringBuffer();
             appCreateWeChatContent
-                    .append(String.format("<div class=\"highlight\">申请类型: %s </div>", appAudit.getTypeDesc()));
-            appCreateWeChatContent.append(String.format("申请描述: %s <br/>", appAudit.getInfo()));
-            appCreateWeChatContent.append(String.format("申请时间: %s <br/>", appAudit.getCreateTimeFormat()));
-            appCreateWeChatContent.append(String.format("申请人员: %s <br/>", applyAppUser.getChName()));
+                    .append(String.format("申请类型: %s \n", appAudit.getTypeDesc()));
+            appCreateWeChatContent.append(String.format("申请描述: %s \n", appAudit.getInfo()));
+            appCreateWeChatContent.append(String.format("申请时间: %s \n", appAudit.getCreateTimeFormat()));
+            appCreateWeChatContent.append(String.format("申请人员: %s \n", applyAppUser.getChName()));
             appCreateWeChatContent
-                    .append(String.format("<div class=\"highlight\">申请状态: %s </div>", appAudit.getStatusDesc()));
-            appCreateWeChatContent.append(String.format("集群名称: %s<br/>", appDesc.getName()));
+                    .append(String.format("申请状态: %s \n", appAudit.getStatusDesc()));
+            appCreateWeChatContent.append(String.format("集群名称: %s\n", appDesc.getName()));
             //appCreateWeChatContent.append(String.format("集群容量: %s GB<br/>", appDesc.getForecastMem()));
             //appCreateWeChatContent.append(String.format("集群机房: %s(%s) <br/>", machineRoomName, machineLogicName));
             if (StringUtils.isNotBlank(appAudit.getRefuseReason())) {
                 appCreateWeChatContent
-                        .append(String.format("<div class=\"highlight\">处理描述: %s </div>", appAudit.getRefuseReason()));
+                        .append(String.format("处理描述: %s \n", appAudit.getRefuseReason()));
             }
             Set<String> weChatSet = new HashSet<String>();
             //weChatSet.addAll(ConstUtils.getAdminWeChatList());
@@ -93,6 +100,10 @@ public class AppWechatUtil {
      * @param operateUser
      */
     public void noticeAppClaim(AppDesc appDesc, AppUser operateUser) {
+        if (EnvUtil.isDev(environment)) {
+            return;
+        }
+
         try {
             //            String machineRoomName = appDesc.getMachineRoom();
             //            String machineLogicName;
@@ -104,11 +115,11 @@ public class AppWechatUtil {
             //            }
 
             StringBuffer appCreateWeChatContent = new StringBuffer();
-            appCreateWeChatContent.append(String.format("<div class=\"highlight\">事件类型: %s </div>", "集群认领"));
+            appCreateWeChatContent.append(String.format("事件类型: %s \n", "集群认领"));
             appCreateWeChatContent.append(String.format("认领人员: %s <br/>", operateUser.getChName()));
             appCreateWeChatContent.append(String
-                    .format("认领时间: %s <br/>", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())));
-            appCreateWeChatContent.append(String.format("集群名称: %s <br/>", appDesc.getName()));
+                    .format("认领时间: %s \n", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())));
+            appCreateWeChatContent.append(String.format("集群名称: %s \n", appDesc.getName()));
             //appCreateWeChatContent.append(String.format("集群类型: %s <br/>", appDesc.getDbTypeDesc()));
             //appCreateWeChatContent.append(String.format("集群机房: %s(%s) <br/>", machineRoomName, machineLogicName));
 
@@ -124,14 +135,17 @@ public class AppWechatUtil {
     }
 
     public void noticeRmtSyncFinish(long sourceAppId, long targetAppId) {
+        if (EnvUtil.isDev(environment)) {
+            return;
+        }
         try {
             AppDesc sourceAppDesc = appService.getByAppId(sourceAppId);
             AppDesc targetAppDesc = appService.getByAppId(targetAppId);
 
             StringBuffer content = new StringBuffer();
-            content.append("<div class=\"highlight\">扩容同步完成</div>");
-            content.append(String.format("源集群 : %s <br/>", sourceAppDesc.getName()));
-            content.append(String.format("目集群 : %s <br/>", targetAppDesc.getName()));
+            content.append("扩容同步完成\n");
+            content.append(String.format("源集群 : %s \n", sourceAppDesc.getName()));
+            content.append(String.format("目集群 : %s \n", targetAppDesc.getName()));
             content.append("可以执行redis.sh --update");
             weChatComponent.sendWeChatToAdmin(ConstUtils.NOTICE_TITLE, content.toString());
         } catch (Exception e) {
@@ -140,9 +154,12 @@ public class AppWechatUtil {
     }
 
     public void noticeTaskAbort(long taskId, String stepName) {
+        if (EnvUtil.isDev(environment)) {
+            return;
+        }
         try {
             StringBuffer content = new StringBuffer();
-            content.append(String.format("<div class=\"highlight\">任务id=%s,stepName=%s中断</div>，请查看", taskId, stepName));
+            content.append(String.format("任务id=%s,stepName=%s中断，请查看", taskId, stepName));
             weChatComponent.sendWeChatToAdmin(ConstUtils.NOTICE_TITLE, content.toString());
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -150,11 +167,14 @@ public class AppWechatUtil {
     }
 
     public void noticeAppScaleStop(long sourceAppId, long targetAppId) {
+        if (EnvUtil.isDev(environment)) {
+            return;
+        }
         try {
             AppDesc sourceAppDesc = appService.getByAppId(sourceAppId);
             AppDesc targetAppDesc = appService.getByAppId(targetAppId);
             StringBuffer content = new StringBuffer();
-            content.append(String.format("<div class=\"highlight\">集群%s->%s的rmt被强制中断,请查看cc任务日志</div>",
+            content.append(String.format("集群%s->%s的rmt被强制中断,请查看cc任务日志",
                     sourceAppDesc.getName(), targetAppDesc.getName()));
             weChatComponent.sendWeChatToAdmin(ConstUtils.NOTICE_TITLE, content.toString());
         } catch (Exception e) {
@@ -163,9 +183,12 @@ public class AppWechatUtil {
     }
 
     public void noticeRmtUseMaster(long sourceAppId, long targetAppId) {
+        if (EnvUtil.isDev(environment)) {
+            return;
+        }
         try {
             StringBuffer content = new StringBuffer();
-            content.append(String.format("<div class=\"highlight\">集群迁移%s->%s，使用了master做source</div>", sourceAppId,
+            content.append(String.format("集群迁移%s->%s，使用了master做source", sourceAppId,
                     targetAppId));
             weChatComponent.sendWeChatToAdmin(ConstUtils.NOTICE_TITLE, content.toString());
         } catch (Exception e) {
@@ -180,6 +203,9 @@ public class AppWechatUtil {
      * @param port
      */
     public void noticeWildInstance(String ip, int port) {
+        if (EnvUtil.isDev(environment)) {
+            return;
+        }
         try {
             StringBuffer content = new StringBuffer();
             content.append(String.format("%s:%s is not in instance_info", ip, port));

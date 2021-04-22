@@ -20,6 +20,11 @@
             </a>
         </li>
         <li>
+            <a href="/admin/app/import">
+                &nbsp;&nbsp;&nbsp;<i class="glyphicon glyphicon-import"></i> 导入应用
+            </a>
+        </li>
+        <li>
             <a href="/admin/app/appDel">
                 &nbsp;&nbsp;&nbsp;<i class="glyphicon glyphicon-trash"></i>  数据清理
             </a>

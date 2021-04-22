@@ -482,6 +482,59 @@ public class AppServiceImpl implements AppService {
     }
 
     @Override
+    public List<MachineStats> getAppMachine(Long appId) {
+        //应用信息
+        Assert.isTrue(appId != null && appId > 0L);
+        AppDesc appDesc = appDao.getAppDescById(appId);
+        if (appDesc == null) {
+            logger.error("appDesc:id={} is not exist");
+            return Collections.emptyList();
+        }
+
+        //应用实例列表
+        List<InstanceInfo> appInstanceList = getAppInstanceInfo(appId);
+        if (CollectionUtils.isEmpty(appInstanceList)) {
+            return Collections.emptyList();
+        }
+
+        //防止重复
+        Set<String> instanceMachineHosts = new HashSet<String>();
+        //结果列表
+        List<MachineStats> machineDetailVOList = new ArrayList<MachineStats>();
+        //应用的机器信息
+        for (InstanceInfo instanceInfo : appInstanceList) {
+            if(!instanceInfo.isOffline()){
+                String ip = instanceInfo.getIp();
+                if (instanceMachineHosts.contains(ip)) {
+                    continue;
+                } else {
+                    instanceMachineHosts.add(ip);
+                }
+                MachineStats machineStats = machineStatsDao.getMachineStatsByIp(ip);
+                if (machineStats == null) {
+                    continue;
+                }
+                //已经分配的内存
+                int memoryHost = instanceDao.getMemoryByHost(ip);
+                machineStats.setMemoryAllocated(memoryHost);
+                //机器信息
+                MachineInfo machineInfo = machineCenter.getMachineInfoByIp(ip);
+                if (machineInfo == null) {
+                    continue;
+                }
+                //下线机器不展示
+                if (machineInfo.isOffline()) {
+                    continue;
+                }
+                machineStats.setInfo(machineInfo);
+                machineDetailVOList.add(machineStats);
+            }
+        }
+        return machineDetailVOList;
+    }
+
+
+    @Override
     public AppAudit getAppAuditById(Long appAuditId) {
         return appAuditDao.getAppAudit(appAuditId);
     }

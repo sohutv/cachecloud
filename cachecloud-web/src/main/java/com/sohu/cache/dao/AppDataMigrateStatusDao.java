@@ -20,6 +20,8 @@ public interface AppDataMigrateStatusDao {
 
     AppDataMigrateStatus get(@Param("id") long id);
 
+    AppDataMigrateStatus getByMigrateId(@Param("migrateId") long migrateId);
+
     int updateStatus(@Param("id") long id, @Param("status") int status);
 
     int getMigrateTaskCount(@Param("appDataMigrateSearch") AppDataMigrateSearch appDataMigrateSearch);

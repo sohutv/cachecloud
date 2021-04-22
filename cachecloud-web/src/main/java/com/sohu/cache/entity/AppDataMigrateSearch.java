@@ -11,6 +11,10 @@ import lombok.Data;
 @Data
 public class AppDataMigrateSearch {
     /**
+     * 迁移id
+     */
+    private Long migrateId;
+    /**
      * 源应用id
      */
     private Long sourceAppId;

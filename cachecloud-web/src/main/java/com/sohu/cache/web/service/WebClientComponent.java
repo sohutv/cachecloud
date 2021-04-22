@@ -14,7 +14,7 @@ import java.util.List;
  */
 @Component
 public class WebClientComponent {
-    @Value("${cachecloud.web.clients}")
+    @Value("${cachecloud.web.clients:127.0.0.1}")
     private String[] clients;
 
     public List<String> getWebClientIps() {
