@@ -18,7 +18,7 @@
 <a name="cc1"/>
 
 ### 一、准备war包	
-a.下载war包：[cachecloud-web.war](http://47.97.112.178/redis-ecs/cachecloud-web.war)
+a.下载war包：[cachecloud-web.war](http://122.9.1.235/redis-ecs/cachecloud-web.war)
 
 b.也可以clone源码，自行打包：
 
@@ -71,7 +71,7 @@ b.也可以clone源码，自行打包：
 <a name="cc4"/>
 
 ### 四、系统初始配置
-系统已有默认配置，如需更改，请参考 [系统配置说明](../access/config.md)。
+系统已有默认配置，如需更改，请参考 [系统配置说明](../access/config)。
 
 <a name="cc5"/>
 
@@ -143,7 +143,7 @@ b.也可以clone源码，自行打包：
 		
 	<img src="../../img/quickstart/appdeploy.png" width="80%"/>
 		
-	c.通过：等待应用部署成功后，在审批页点击”通过“，就此应用开通成功。用户接入使用可参考：[客户端接入文档](../access/client.md)。
+	c.通过：等待应用部署成功后，在审批页点击”通过“，就此应用开通成功。用户接入使用可参考：[客户端接入文档](../access/client)。
 	
 	(提示：任务流日志是存储在redis中的，即项目启动时配置文件application-open.yml中的cachecloud.redis信息)
 	
@@ -153,4 +153,4 @@ b.也可以clone源码，自行打包：
 	
 * 3.导入应用
 
-	该功能支持将外部redis实例导入Cachecloud平台进行运维管理。具体操作参考：[应用导入](../../wiki/function/operations#cc1-3.md)
+	该功能支持将外部redis实例导入Cachecloud平台进行运维管理。具体操作参考：[应用导入](../../wiki/function/operation-import)
