@@ -47,14 +47,6 @@ public interface ClientVersionService {
     public List<Map<String, Object>> getAllMaxClientVersion();
 
     /**
-     * 获取应用的所有客户端版本信息(过滤掉版本网段 10.7 10.2 10.1)
-     *
-     * @param appId
-     * @return
-     */
-    List<AppClientVersion> getAppAllServerClientVersion(long appId);
-
-    /**
      * 获取所有客户端版本
      *
      * @return
