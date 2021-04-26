@@ -50,12 +50,12 @@ checkExist() {
       echo -e "\033[41;36m delete existed user: $1. \033[0m"
       userdel -r "$1"
       createUser "$1" "$2"
-      init "$1" "$2"
+      init "$1"
       return 0
     fi
   else
     createUser "$1" "$2"
-    init "$1" "$2"
+    init "$1"
   fi
   return 0
 }
@@ -87,11 +87,11 @@ init() {
   mkdir -p /data/redis
 
   # change owner
-  chown -R $1:$2 /opt/cachecloud
-  chown -R $1:$2 /tmp/cachecloud
-  chown -R $1:$2 /home/$1
+  chown -R $1:$1 /opt/cachecloud
+  chown -R $1:$1 /tmp/cachecloud
+  chown -R $1:$1 /home/$1
   chown -R $1 /var/run
-  chown -R $1:$2 /data/redis
+  chown -R $1:$1 /data/redis
   echo -e "\033[41;36m OK: init done. \033[0m"
 }
 
