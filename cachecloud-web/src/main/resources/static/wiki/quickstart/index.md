@@ -18,7 +18,7 @@
 <a name="cc1"/>
 
 ### 一、准备war包	
-a.下载war包：[cachecloud-web.war](http://47.97.112.178/redis-ecs/cachecloud-web.war)
+a.下载war包：[cachecloud-web.war](http://122.9.1.235/redis-ecs/cachecloud-web.war)
 
 b.也可以clone源码，自行打包：
 
@@ -153,4 +153,4 @@ b.也可以clone源码，自行打包：
 	
 * 3.导入应用
 
-	该功能支持将外部redis实例导入Cachecloud平台进行运维管理。具体操作参考：[应用导入](../../wiki/function/operations#cc1-3.md)
+	该功能支持将外部redis实例导入Cachecloud平台进行运维管理。具体操作参考：[应用导入](../../wiki/function/operation-import.md)
