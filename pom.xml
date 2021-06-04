@@ -23,7 +23,7 @@
         <junit.version>4.13.1</junit.version>
         <jedis.version>3.1.0-CC-4-RELEASE</jedis.version>
         <jackson.version>2.3.2</jackson.version>
-        <httpcoponents.version>4.3.2</httpcoponents.version>
+        <httpcoponents.version>4.5.13</httpcoponents.version>
         <apache.commons.collections>4.0</apache.commons.collections>
         <maven.compiler.plugin>3.1</maven.compiler.plugin>
         <maven.compiler.target>1.8</maven.compiler.target>
