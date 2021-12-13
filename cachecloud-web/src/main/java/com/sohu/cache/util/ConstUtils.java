@@ -132,6 +132,7 @@ public class ConstUtils {
      */
     public static final String DEFAULT_USERNAME = "cachecloud";
     public static final String DEFAULT_PASSWORD = "cachecloud";
+    public static final String DEFAULT_USER_LOGIN_ENCRY_KEY = "97c9d9de0a2dbd64";
     public static final int DEFAULT_SSH_PORT_DEFAULT = 22;
     /**
      * ssh授权方式：参考SshAuthTypeEnum
@@ -219,6 +220,7 @@ public class ConstUtils {
     public static String SUPER_ADMIN_NAME = DEFAULT_SUPER_ADMIN_NAME;
     public static String SUPER_ADMIN_PASS = DEFAULT_SUPER_ADMIN_PASS;
     public static String SUPER_ADMINS = DEFAULT_SUPER_ADMINS;
+    public static String USER_LOGIN_ENCRY_KEY = DEFAULT_USER_LOGIN_ENCRY_KEY;
     public static List<String> SUPER_MANAGER;
     /**
      * 联系人

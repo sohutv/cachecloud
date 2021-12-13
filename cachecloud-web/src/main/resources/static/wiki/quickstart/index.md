@@ -91,7 +91,7 @@ b.也可以clone源码，自行打包：
 
 * 1.准备脚本
 	
-	下载 [cachecloud-init.sh](http://47.97.112.178/redis-ecs/script)
+	下载 [cachecloud-init.sh](http://122.9.1.235/redis-ecs/script)
 	
 		cachecloud-init.sh脚本作用：
 		a.初始化环境变量

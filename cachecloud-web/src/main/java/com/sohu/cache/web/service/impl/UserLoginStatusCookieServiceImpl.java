@@ -4,11 +4,14 @@ import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.login.LoginComponent;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.EnvUtil;
+import com.sohu.cache.util.StringUtil;
 import com.sohu.cache.web.service.UserLoginStatusService;
 import com.sohu.cache.web.service.UserService;
-import com.sohu.cache.web.util.IpUtil;
+import com.sohu.cache.web.util.AESCoder;
 import com.sohu.cache.web.util.WebUtil;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -16,6 +19,7 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Random;
 
 /**
  * cookie保护登录状态
@@ -24,6 +28,8 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Service("userLoginStatusService")
 public class UserLoginStatusCookieServiceImpl implements UserLoginStatusService {
+
+    private Logger logger = LoggerFactory.getLogger(UserLoginStatusCookieServiceImpl.class);
 
     @Autowired
     private LoginComponent loginComponent;
@@ -34,13 +40,29 @@ public class UserLoginStatusCookieServiceImpl implements UserLoginStatusService 
     @Autowired
     private Environment environment;
 
+    private static final String CONCATE_STR = "&&";
+
     @Override
     public String getUserNameFromLoginStatus(HttpServletRequest request) {
         if (EnvUtil.isLocal(environment)) {
             //todo for local
             return "admin";
         }
-        String userName = WebUtil.getLoginCookieValue(request);
+        String userName = null;
+        String userCookie = null;
+        String cookie = WebUtil.getLoginCookieValue(request);
+        try {
+            userCookie = AESCoder.decrypt(cookie, ConstUtils.USER_LOGIN_ENCRY_KEY);
+        } catch (Exception e) {
+            logger.error("getUserNameFromLoginStatus decrypt error: ", e);
+        }
+        if(StringUtil.isBlank(userCookie)){
+            return null;
+        }
+        String[] userInfos = userCookie.split(CONCATE_STR);
+        if(userInfos != null && userInfos.length > 0){
+            userName = userInfos[0];
+        }
         if (StringUtils.isNotBlank(userName)) {
             return userName;
         }
@@ -80,6 +102,16 @@ public class UserLoginStatusCookieServiceImpl implements UserLoginStatusService 
 
     @Override
     public void addLoginStatus(HttpServletRequest request, HttpServletResponse response, String userName) {
+        if(userName == null){
+            userName = "";
+        }else{
+            userName = userName + CONCATE_STR + getRandomStr4Encrypt();
+            try {
+                userName = AESCoder.encrypt(userName,  ConstUtils.USER_LOGIN_ENCRY_KEY);
+            } catch (Exception e) {
+                logger.error("addLoginStatus encrypt error: ",e);
+            }
+        }
         Cookie cookie = new Cookie(LOGIN_USER_STATUS_NAME, userName);
         cookie.setDomain(request.getServerName());
         cookie.setPath("/");
@@ -90,5 +122,9 @@ public class UserLoginStatusCookieServiceImpl implements UserLoginStatusService 
     @Override
     public void removeLoginStatus(HttpServletRequest request, HttpServletResponse response) {
         addLoginStatus(request, response, "");
+    }
+
+    private String getRandomStr4Encrypt(){
+        return String.valueOf(new Random().nextInt(Integer.MAX_VALUE));
     }
 }
