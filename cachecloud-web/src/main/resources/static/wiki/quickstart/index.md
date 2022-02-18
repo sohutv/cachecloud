@@ -18,7 +18,7 @@
 <a name="cc1"/>
 
 ### 一、准备war包	
-a.下载war包：[cachecloud-web.war](http://122.9.1.235/redis-ecs/cachecloud-web.war)
+a.下载war包：[cachecloud-web.war](http://124.222.77.220/redis-ecs/cachecloud-web.war)
 
 b.也可以clone源码，自行打包：
 
@@ -91,7 +91,7 @@ b.也可以clone源码，自行打包：
 
 * 1.准备脚本
 	
-	下载 [cachecloud-init.sh](http://122.9.1.235/redis-ecs/script)
+	下载 [cachecloud-init.sh](http://124.222.77.220/redis-ecs/script)
 	
 		cachecloud-init.sh脚本作用：
 		a.初始化环境变量
