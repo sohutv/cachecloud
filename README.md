@@ -15,9 +15,12 @@
 
 [![Stargazers over time](https://starchart.cc/sohutv/cachecloud.svg)](https://starchart.cc/sohutv/cachecloud)
 
-CacheCloud项目是从2016年以来一直在持续迭代开发,**如果你喜欢这个项目,欢迎Star多多支持.** 
+CacheCloud项目是从2016年以来一直在持续迭代开发,**如果你喜欢这个项目[CacheCloud试用版本](http://124.222.77.220:8080/admin/app/list),欢迎Star多多支持.**  
+
 为了给大家带来更好的CacheCloud使用体验,希望您能在issue里提供宝贵建议：https://github.com/sohutv/cachecloud/issues/281
+
 也感谢大家一直对项目支持：
+
 [![Stargazers repo roster for @sohutv/cachecloud](https://reporoster.com/stars/sohutv/cachecloud)](https://github.com/sohutv/cachecloud/stargazers)
 [![Forkers repo roster for @sohutv/cachecloud](https://reporoster.com/forks/sohutv/cachecloud)](https://github.com/sohutv/cachecloud/network/members)
 
@@ -87,10 +90,12 @@ CacheCloud是一个Redis云管理平台：支持Redis多种架构(Standalone、S
    
 + 微信群:发布Cachecloud最新动态，帮大家减轻工作负担。
 
-<img src="http://photocdn.tv.sohu.com/img/20220225/pic_org_9c178fbf-769a-4256-aa33-20c1ea7e4d2c.png" width="40%"/>
+<img src="https://bjcnc.scs.sohucs.com/vrs/cachecloud/weixin.jpg?" width="40%"/>
 
 <img src="cachecloud-web/src/main/resources/static/img/readme/subcribe.png" width="40%"/>
 
 + 微信：如果大家有公网资源可以联系我，会加入到开源版本服务资源部署试用，提高大家的用户体验。
+
 <img src="cachecloud-web/src/main/resources/static/img/readme/wechat.png" width="40%"/>
+
 如果你觉得CacheCloud对你有帮助，欢迎Star。
