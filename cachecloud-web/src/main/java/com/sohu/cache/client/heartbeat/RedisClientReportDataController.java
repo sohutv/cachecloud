@@ -53,7 +53,6 @@ public class RedisClientReportDataController {
     @RequestMapping(value = "/v1/reportData/exception", method = RequestMethod.POST)
     public ResponseEntity<String> reportExceptionData(@RequestParam("clientVersion") String clientVersion,
                                                       @RequestParam("stats") String json) {
-        logger.info("get reportExceptionData: {}", json);
         return dealAppClientReportData(clientVersion, json);
     }
 

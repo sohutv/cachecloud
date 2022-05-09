@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.sohu.cache.alert.utils.AlertUtils;
 import com.sohu.cache.util.StringUtil;
 import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
@@ -53,15 +54,14 @@ public class ConfigServiceImpl implements ConfigService {
         logger.debug("{}: {}", "ConstUtils.CONTACT", ConstUtils.CONTACT);
 
         // 报警相关配置
-        ConstUtils.EMAILS = MapUtils.getString(configMap, "cachecloud.owner.email");
-        logger.debug("{}: {}", "ConstUtils.EMAILS", ConstUtils.EMAILS);
+        AlertUtils.EMAILS = MapUtils.getString(configMap, "cachecloud.owner.email");
+        logger.debug("{}: {}", "ConstUtils.EMAILS", AlertUtils.EMAILS);
 
-        ConstUtils.PHONES = MapUtils.getString(configMap, "cachecloud.owner.phone");
-        logger.debug("{}: {}", "ConstUtils.PHONES", ConstUtils.PHONES);
+        AlertUtils.PHONES = MapUtils.getString(configMap, "cachecloud.owner.phone");
+        logger.debug("{}: {}", "ConstUtils.PHONES", AlertUtils.PHONES);
 
-        ConstUtils.WECHAT = MapUtils.getString(configMap, "cachecloud.owner.weChat");
-
-        logger.debug("{}: {}", "ConstUtils.WECHAT", ConstUtils.WECHAT);
+        AlertUtils.WECHAT = MapUtils.getString(configMap, "cachecloud.owner.weChat");
+        logger.debug("{}: {}", "ConstUtils.WECHAT", AlertUtils.WECHAT);
 
         // ssh相关配置
         ConstUtils.USERNAME = MapUtils.getString(configMap, "cachecloud.machine.ssh.name", ConstUtils.DEFAULT_USERNAME);
@@ -124,16 +124,16 @@ public class ConfigServiceImpl implements ConfigService {
         logger.debug("{}: {}", "ConstUtils.APP_CLIENT_CONN_THRESHOLD", ConstUtils.APP_CLIENT_CONN_THRESHOLD);
 
         //邮件报警接口
-        ConstUtils.EMAIL_ALERT_INTERFACE = MapUtils.getString(configMap, "cachecloud.email.alert.interface");
-        logger.debug("{}: {}", "ConstUtils.EMAIL_ALERT_INTERFACE", ConstUtils.EMAIL_ALERT_INTERFACE);
+        AlertUtils.EMAIL_ALERT_INTERFACE = MapUtils.getString(configMap, "cachecloud.email.alert.interface");
+        logger.debug("{}: {}", "ConstUtils.EMAIL_ALERT_INTERFACE", AlertUtils.EMAIL_ALERT_INTERFACE);
 
         //短信报警接口
-        ConstUtils.MOBILE_ALERT_INTERFACE = MapUtils.getString(configMap, "cachecloud.mobile.alert.interface");
-        logger.debug("{}: {}", "ConstUtils.MOBILE_ALERT_INTERFACE", ConstUtils.MOBILE_ALERT_INTERFACE);
+        AlertUtils.MOBILE_ALERT_INTERFACE = MapUtils.getString(configMap, "cachecloud.mobile.alert.interface");
+        logger.debug("{}: {}", "ConstUtils.MOBILE_ALERT_INTERFACE", AlertUtils.MOBILE_ALERT_INTERFACE);
 
         //微信报警接口
-        ConstUtils.WECHAT_ALERT_INTERFACE = MapUtils.getString(configMap, "cachecloud.weChat.alert.interface");
-        logger.debug("{}: {}", "ConstUtils.MOBILE_ALERT_INTERFACE", ConstUtils.MOBILE_ALERT_INTERFACE);
+        AlertUtils.WECHAT_ALERT_INTERFACE = MapUtils.getString(configMap, "cachecloud.weChat.alert.interface");
+        logger.debug("{}: {}", "ConstUtils.MOBILE_ALERT_INTERFACE", AlertUtils.MOBILE_ALERT_INTERFACE);
 
         //是否定期清理各种统计数据(详见CleanUpStatisticsJob)
         ConstUtils.WHETHER_SCHEDULE_CLEAN_DATA = MapUtils.getBooleanValue(configMap, "cachecloud.whether.schedule.clean.data", ConstUtils.DEFAULT_WHETHER_SCHEDULE_CLEAN_DATA);

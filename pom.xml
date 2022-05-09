@@ -7,7 +7,6 @@
     <version>1.0-SNAPSHOT</version>
     <modules>
         <module>cachecloud-web</module>
-        <module>cachecloud-client</module>
         <module>cachecloud-custom</module>
     </modules>
 
@@ -21,7 +20,8 @@
         <druid-version>1.1.3</druid-version>
         <mybatis-spring-boot.version>1.3.1</mybatis-spring-boot.version>
         <junit.version>4.13.1</junit.version>
-        <jedis.version>3.1.0-CC-4-RELEASE</jedis.version>
+        <jedis.version>3.7.0</jedis.version>
+        <protostuff.version>1.0.8</protostuff.version>
         <jackson.version>2.3.2</jackson.version>
         <httpcoponents.version>4.3.2</httpcoponents.version>
         <apache.commons.collections>4.0</apache.commons.collections>
@@ -99,6 +99,17 @@
                 <groupId>redis.clients</groupId>
                 <artifactId>jedis</artifactId>
                 <version>${jedis.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.dyuproject.protostuff</groupId>
+                <artifactId>protostuff-runtime</artifactId>
+                <version>${protostuff.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.dyuproject.protostuff</groupId>
+                <artifactId>protostuff-core</artifactId>
+                <version>${protostuff.version}</version>
             </dependency>
 
             <dependency>

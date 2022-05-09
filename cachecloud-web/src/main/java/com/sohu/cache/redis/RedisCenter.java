@@ -68,13 +68,23 @@ public interface RedisCenter {
     public BooleanEnum isMaster(long appId, String ip, int port);
 
     /**
-     * 获取行数
-     *
-     * @param appId
-     * @param ip
-     * @param port
+     * 判断实例是否为从节点，并且与主节点连接有效
+     * @param appDesc
+     * @param slaveInstance
+     * @param masterInstance
      * @return
      */
+    public BooleanEnum isSlaveAndPointedMasterUp(AppDesc appDesc, InstanceInfo slaveInstance, InstanceInfo masterInstance);
+
+
+        /**
+         * 获取行数
+         *
+         * @param appId
+         * @param ip
+         * @param port
+         * @return
+         */
     long getDbSize(long appId, String ip, int port);
 
 
@@ -110,6 +120,8 @@ public interface RedisCenter {
      * @return
      */
     public HostAndPort getMaster(String ip, int port, String password);
+
+    public HostAndPort getSlave0(String ip, int port, String password);
 
     /**
      * 判断实例是否运行
@@ -153,7 +165,6 @@ public interface RedisCenter {
     /**
      * 下线指定实例
      *
-     * @param appId
      * @param ip
      * @param port
      * @return
@@ -204,9 +215,10 @@ public interface RedisCenter {
      *
      * @param appDesc
      * @param command
+     * @param userName
      * @return
      */
-    public String executeCommand(AppDesc appDesc, String command);
+    public String executeCommand(AppDesc appDesc, String command, String userName);
 
     /**
      * 实例执行redis命令
@@ -440,6 +452,8 @@ public interface RedisCenter {
 
     Jedis getJedis(long appId, String host, int port, int connectionTimeout, int soTimeout);
 
+    Jedis getJedis(String host, int port, String password, int connectionTimeout, int soTimeout);
+
     public boolean sendDeployRedisRelateCollectionMsg(long appId, String host, int port);
 
     /**
@@ -466,6 +480,8 @@ public interface RedisCenter {
     public List<InstanceInfo> checkInstanceModule(long appId);
 
     public Map loadModule(long appId, String moduleName);
+
+    public Map loadModule(long appId, int versionId);
 
     public Map unloadModule(long appId, String moduleName);
 

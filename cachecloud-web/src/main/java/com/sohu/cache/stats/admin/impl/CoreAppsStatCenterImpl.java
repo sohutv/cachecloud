@@ -1,6 +1,7 @@
 package com.sohu.cache.stats.admin.impl;
 
 import com.sohu.cache.alert.EmailComponent;
+import com.sohu.cache.alert.utils.AlertUtils;
 import com.sohu.cache.dao.AppDao;
 import com.sohu.cache.dao.ResourceDao;
 import com.sohu.cache.entity.AppDesc;
@@ -84,7 +85,7 @@ public class CoreAppsStatCenterImpl implements CoreAppsStatCenter {
         String mailContent = FreemakerUtils.createText("expAppsDaily.ftl", configuration, context);
         log.info("noticeExpAppsDaily sendMailToAdmin, title:{}, mailContent:{}", title, mailContent);
         // 发送管理员
-        emailComponent.sendMailToAdmin(title, mailContent);
+        emailComponent.sendDailyMail(title, mailContent, Arrays.asList(AlertUtils.EMAILS.split(",")), null);
         log.info("noticeExpAppsDaily success");
     }
 

@@ -55,12 +55,30 @@ public interface InstanceAlertConfigService {
     int remove(int id);
 
     /**
+     * 根据alertConfig 获取全局配置，并根据比较类型进行筛选出紧急程度
+     * @param alertConfig
+     * @param compareType
+     * @return
+     */
+    int getImportantLevelByAlertConfigAndCompareType(String alertConfig, int compareType);
+
+    /**
      * 更新alertValue和checkCycle
      * @param id
      * @param alertValue
      * @param checkCycle
+     * @param compareType
+     * @param importantLevel
      */
-    void update(long id, String alertValue, int checkCycle);
+    void update(long id, String alertValue, int checkCycle, int compareType, int importantLevel);
+
+    /**
+     * 根据alertConfig和compareType更新所有报警配置的紧急程度
+     * @param alertConfig
+     * @param compareType
+     * @param importantLevel
+     */
+    void updateImportantLevel(String alertConfig, int compareType, int importantLevel);
 
     /**
      * 更新配置的最后检测时间

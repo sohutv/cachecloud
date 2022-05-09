@@ -8,14 +8,19 @@ import com.sohu.cache.dao.InstanceAlertConfigDao;
 import com.sohu.cache.dao.InstanceDao;
 import com.sohu.cache.dao.StandardStatsDao;
 import com.sohu.cache.entity.*;
+import com.sohu.cache.redis.enums.InstanceAlertStatusEnum;
 import com.sohu.cache.redis.enums.InstanceAlertTypeEnum;
 import com.sohu.cache.redis.enums.RedisAlertConfigEnum;
 import com.sohu.cache.stats.instance.InstanceAlertConfigService;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.EnvUtil;
+import com.sohu.cache.web.enums.AlertTypeEnum;
+import com.sohu.cache.web.enums.ImportantLevelTypeEnum;
+import com.sohu.cache.web.service.AppAlertRecordService;
 import com.sohu.cache.web.service.UserService;
 import com.sohu.cache.web.util.FreemakerUtils;
 import freemarker.template.Configuration;
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -28,6 +33,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author leifu
@@ -54,6 +60,8 @@ public class InstanceAlertConfigServiceImpl implements InstanceAlertConfigServic
     private UserService userService;
     @Autowired
     private Environment environment;
+    @Autowired
+    private AppAlertRecordService appAlertRecordService;
 
     private static Map<RedisAlertConfigEnum, AlertConfigStrategy> alertConfigStrategyMap = new HashMap<RedisAlertConfigEnum, AlertConfigStrategy>();
 
@@ -75,8 +83,11 @@ public class InstanceAlertConfigServiceImpl implements InstanceAlertConfigServic
         alertConfigStrategyMap.put(RedisAlertConfigEnum.master_slave_offset_diff, new MasterSlaveOffsetAlertStrategy());
         alertConfigStrategyMap.put(RedisAlertConfigEnum.cluster_state, new ClusterStateAlertStrategy());
         alertConfigStrategyMap.put(RedisAlertConfigEnum.cluster_slots_ok, new ClusterSlotsOkAlertStrategy());
-        alertConfigStrategyMap.put(RedisAlertConfigEnum.used_cpu_sys, new MinuteUsedCpuAlertStrategy());
-        alertConfigStrategyMap.put(RedisAlertConfigEnum.used_cpu_user, new MinuteUsedCpuAlertStrategy());
+        alertConfigStrategyMap.put(RedisAlertConfigEnum.used_cpu_sys, new MinuteUsedCpuSysStrategy());
+        alertConfigStrategyMap.put(RedisAlertConfigEnum.used_cpu_user, new MinuteUsedCpuUserStrategy());
+        alertConfigStrategyMap.put(RedisAlertConfigEnum.used_cpu_sys_children, new MinuteUsedCpuSysChStrategy());
+        alertConfigStrategyMap.put(RedisAlertConfigEnum.used_cpu_user_children, new MinuteUsedCpuUserChStrategy());
+        alertConfigStrategyMap.put(RedisAlertConfigEnum.other_default_common_config, new DefaultCommonAlertStrategy());
     }
 
     @Override
@@ -140,12 +151,31 @@ public class InstanceAlertConfigServiceImpl implements InstanceAlertConfigServic
     }
 
     @Override
-    public void update(long id, String alertValue, int checkCycle) {
+    public int getImportantLevelByAlertConfigAndCompareType(String alertConfig, int compareType) {
         try {
-            instanceAlertConfigDao.update(id, alertValue, checkCycle);
+            List<InstanceAlertConfig> configList = instanceAlertConfigDao.getByAlertConfigAndType(alertConfig, InstanceAlertTypeEnum.ALL_ALERT.getValue());
+            for (InstanceAlertConfig instanceAlertConfig : configList) {
+                if(instanceAlertConfig.getStatus() == InstanceAlertStatusEnum.YES.getValue() && compareType == instanceAlertConfig.getCompareType()){
+                    return instanceAlertConfig.getImportantLevel();
+                }
+            }
+            if(CollectionUtils.isNotEmpty(configList)){
+                return configList.get(0).getImportantLevel();
+            }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
+        return 0;
+    }
+
+    @Override
+    public void update(long id, String alertValue, int checkCycle, int compareType, int importantLevel) {
+        instanceAlertConfigDao.update(id, alertValue, checkCycle, compareType, importantLevel);
+    }
+
+    @Override
+    public void updateImportantLevel(String alertConfig, int compareType, int importantLevel) {
+        instanceAlertConfigDao.updateImportantLevel(alertConfig, compareType, importantLevel);
     }
 
     @Override
@@ -163,15 +193,29 @@ public class InstanceAlertConfigServiceImpl implements InstanceAlertConfigServic
         // 1.全部和特殊实例报警配置
         List<InstanceAlertConfig> commonInstanceAlertConfigList = getByType(InstanceAlertTypeEnum.ALL_ALERT.getValue());
         List<InstanceAlertConfig> specialInstanceAlertConfigList = getByType(InstanceAlertTypeEnum.INSTANCE_ALERT.getValue());
+        //1.2查询应用报警配置
+        List<InstanceAlertConfig> appInstanceAlertConfigList = getByType(InstanceAlertTypeEnum.APP_ALERT.getValue());
+
+        // 2.所有实例信息
+        List<InstanceInfo> allInstanceInfoList = instanceDao.getAllInsts();
+        if (CollectionUtils.isEmpty(allInstanceInfoList)) {
+            return;
+        }
+
+        List<InstanceAlertConfig> transferAppInstanceAlertConfigList = new ArrayList<>();
+        List<InstanceInfo> appInstanceInfo = null;
+        for (InstanceAlertConfig instanceAlertConfig: appInstanceAlertConfigList) {
+            appInstanceInfo = allInstanceInfoList.stream().filter(instanceInfo -> instanceInfo.getAppId() == instanceAlertConfig.getInstanceId()).collect(Collectors.toList());
+            addAppInstanceToTransferList(transferAppInstanceAlertConfigList, instanceAlertConfig, appInstanceInfo);
+        }
+        if(CollectionUtils.isNotEmpty(transferAppInstanceAlertConfigList)){
+            specialInstanceAlertConfigList.addAll(transferAppInstanceAlertConfigList);
+        }
+
         List<InstanceAlertConfig> allInstanceAlertConfigList = new ArrayList<InstanceAlertConfig>();
         allInstanceAlertConfigList.addAll(commonInstanceAlertConfigList);
         allInstanceAlertConfigList.addAll(specialInstanceAlertConfigList);
         if (CollectionUtils.isEmpty(allInstanceAlertConfigList)) {
-            return;
-        }
-        // 2.所有实例信息
-        List<InstanceInfo> allInstanceInfoList = instanceDao.getAllInsts();
-        if (CollectionUtils.isEmpty(allInstanceInfoList)) {
             return;
         }
         // 3. 取上1分钟Redis实例统计信息
@@ -194,7 +238,12 @@ public class InstanceAlertConfigServiceImpl implements InstanceAlertConfigServic
             List<InstanceInfo> tempInstanceInfoList = allInstanceInfoList;
             if (instanceAlertConfig.isSpecail()) {
                 tempInstanceInfoList.clear();
-                InstanceInfo instanceInfo = instanceDao.getInstanceInfoById(instanceAlertConfig.getInstanceId());
+                InstanceInfo instanceInfo = null;
+                if(instanceAlertConfig.getInstanceInfo() == null){
+                    instanceInfo = instanceDao.getInstanceInfoById(instanceAlertConfig.getInstanceId());
+                }else{
+                    instanceInfo = instanceAlertConfig.getInstanceInfo();
+                }
                 if (instanceInfo == null) {
                     continue;
                 }
@@ -216,6 +265,27 @@ public class InstanceAlertConfigServiceImpl implements InstanceAlertConfigServic
         long costTime = System.currentTimeMillis() - startTime;
         if (costTime > 20000) {
             logger.warn("monitorLastMinuteAllInstanceInfo cost {} ms", costTime);
+        }
+    }
+
+    /**
+     * 将应用报警转化为应用下实例报警
+     * @param transferAppInstanceAlertConfigList 转换后结果存储
+     * @param instanceAlertConfig 应用报警配置
+     * @param appInstanceInfo 应用下实例信息列表
+     */
+    private void addAppInstanceToTransferList(List<InstanceAlertConfig> transferAppInstanceAlertConfigList, InstanceAlertConfig instanceAlertConfig, List<InstanceInfo> appInstanceInfo) {
+        InstanceAlertConfig appInstanceAlertConfig = null;
+        for (InstanceInfo instanceInfo : appInstanceInfo) {
+            appInstanceAlertConfig = new InstanceAlertConfig();
+            try {
+                BeanUtils.copyProperties(appInstanceAlertConfig, instanceAlertConfig);
+            } catch (Exception e) {
+                logger.error("addAppInstanceToTransferList error:", e);
+            }
+            appInstanceAlertConfig.setInstanceId(instanceInfo.getId());
+            appInstanceAlertConfig.setInstanceInfo(instanceInfo);
+            transferAppInstanceAlertConfigList.add(appInstanceAlertConfig);
         }
     }
 
@@ -251,10 +321,10 @@ public class InstanceAlertConfigServiceImpl implements InstanceAlertConfigServic
         // 枚举检测
         String alertConfig = finalInstanceConfig.getAlertConfig();
         RedisAlertConfigEnum redisAlertConfigEnum = RedisAlertConfigEnum.getRedisAlertConfig(alertConfig);
-        if (redisAlertConfigEnum == null) {
-            logger.warn("alertConfig {} is not in RedisAlertConfigEnum", alertConfig);
-            return null;
+        if(redisAlertConfigEnum == null){
+            redisAlertConfigEnum = RedisAlertConfigEnum.other_default_common_config;
         }
+
         // 策略检测
         AlertConfigStrategy alertConfigStrategy = alertConfigStrategyMap.get(redisAlertConfigEnum);
         if (alertConfigStrategy == null) {
@@ -329,10 +399,17 @@ public class InstanceAlertConfigServiceImpl implements InstanceAlertConfigServic
         }
         // 4.发送给管理员报警
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        int importantLevel = this.getAlertImportantLevel(instanceAlertValueResultList);
         String emailTitle = String.format("Redis实例分钟报警(%s~%s)", sdf.format(beginTime), sdf.format(endTime));
+        if(importantLevel == ImportantLevelTypeEnum.URGENT.getType()
+                || importantLevel == ImportantLevelTypeEnum.IMPORTANT.getType()
+                || importantLevel == ImportantLevelTypeEnum.NORMAL.getType()){
+            emailTitle = String.format("[%s]Redis实例分钟报警(%s~%s)", ImportantLevelTypeEnum.getInfoByType(importantLevel), sdf.format(beginTime), sdf.format(endTime));
+        }
         Map<String, Object> context = new HashMap<>();
         context.put("instanceAlertValueResultList", instanceAlertValueResultList);
         String emailContent = FreemakerUtils.createText("instanceAlert.ftl", configuration, context);
+        appAlertRecordService.saveAlertInfoByType(AlertTypeEnum.INSTANCE_MINUTE_MONITOR, emailTitle, null, instanceAlertValueResultList);
         emailComponent.sendMailToAdmin(emailTitle, emailContent.replaceAll("\t",""));
 
         // 5.发送给客户端定制报警
@@ -352,6 +429,23 @@ public class InstanceAlertConfigServiceImpl implements InstanceAlertConfigServic
             }
         }
 
+    }
+
+    /**
+     * 根据报警结果，获取报警重要程度
+     * @param instanceAlertValueResultList
+     * @return
+     */
+    private int getAlertImportantLevel(List<InstanceAlertValueResult> instanceAlertValueResultList){
+        int importantLevel = ImportantLevelTypeEnum.NORMAL.getType();
+        for(InstanceAlertValueResult alertValueResult : instanceAlertValueResultList){
+            if(alertValueResult.getInstanceAlertConfig() != null && alertValueResult.getInstanceAlertConfig().getImportantLevel() != null){
+                if(importantLevel < alertValueResult.getInstanceAlertConfig().getImportantLevel()){
+                    importantLevel = alertValueResult.getInstanceAlertConfig().getImportantLevel();
+                }
+            }
+        }
+        return importantLevel;
     }
 
     /**

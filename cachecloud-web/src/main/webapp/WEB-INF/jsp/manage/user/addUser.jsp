@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="com.sohu.cache.utils.EnvCustomUtil"%>
 <div id="addUserModal${user.id}" class="modal fade" tabindex="-1" data-width="400">
 	<div class="modal-dialog">
 		<div class="modal-content">
@@ -102,6 +103,30 @@
 									</div>
 								</div>
 
+								<c:if test="<%=EnvCustomUtil.openswitch%>">
+									<div class="form-group">
+										<label class="control-label col-md-3">
+											公司名称:
+										</label>
+										<div class="col-md-5">
+											<input type="text" id="company${user.id}" name="company"
+												   value="${user.company}" placeholder="公司名称"
+												   class="form-control"/>
+										</div>
+									</div>
+
+									<div class="form-group">
+										<label class="control-label col-md-3">
+											使用目的:
+										</label>
+										<div class="col-md-5">
+											<input type="text" id="purpose${user.id}" name="purpose"
+												   value="${user.purpose}" placeholder="使用目的"
+												   class="form-control"/>
+										</div>
+									</div>
+								</c:if>
+
 								<input type="hidden" id="userId${user.id}" name="userId" value="${user.id}"/>
 							</div>
 							<!-- form-body 结束 -->
@@ -113,7 +138,7 @@
 				
 				<div class="modal-footer">
 					<button type="button" data-dismiss="modal" class="btn" >Close</button>
-					<button type="button" id="userBtn${user.id}" class="btn red" onclick="saveOrUpdateUser('${user.id}')">Ok</button>
+					<button type="button" id="userBtn${user.id}" class="btn red" onclick="saveOrUpdateUser('${user.id}', <%=EnvCustomUtil.openswitch%>)">Ok</button>
 				</div>
 			
 			</form>

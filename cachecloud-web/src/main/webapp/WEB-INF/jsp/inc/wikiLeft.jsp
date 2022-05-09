@@ -123,6 +123,7 @@
 			<ul class="dropdown-menu">
 				<li id="function_operation-job"><a href="${request.contextPath}/wiki/function/operation-job">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;工单审批</a></li>
 				<li id="function_operation-app"><a href="${request.contextPath}/wiki/function/operation-app">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;应用运维</a></li>
+				<li id="function_operation-instance"><a href="${request.contextPath}/wiki/function/operation-instance">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;实例运维</a></li>
 				<li id="function_operation-import"><a href="${request.contextPath}/wiki/function/operation-import">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;应用导入</a></li>
 				<li id="function_operation-migrate"><a href="${request.contextPath}/wiki/function/operation-migrate">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;数据迁移</a></li>
 				<li id="function_operation-diagnostic"><a href="${request.contextPath}/wiki/function/operation-diagnostic">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;诊断工具</a></li>
@@ -134,6 +135,7 @@
 				<li id="function_operation-alert"><a href="${request.contextPath}/wiki/function/operation-alert">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;报警配置</a></li>
 				<li id="function_operation-systemalert"><a href="${request.contextPath}/wiki/function/operation-systemalert">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;系统配置</a></li>
 				<li id="function_operation-resource"><a href="${request.contextPath}/wiki/function/operation-resource">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;资源管理</a></li>
+				<li id="function_operation-module"><a href="${request.contextPath}/wiki/function/operation-module">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;模块管理</a></li>
 				<li id="function_operation-template"><a href="${request.contextPath}/wiki/function/operation-template">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;模板配置</a></li>
 			</ul>
 		</li>

@@ -13,14 +13,19 @@
 ### 一、初始化数据库
   导入项目sql目录下初始化库表结构，默认插入admin超级管理员。以下表为相关sql文件说明:
   
-  | 序号 | sql文件名 | 说明  |  
-  | 1 | 2.0.sql | CacheCloud2.0版本的sql文件 |  
+  | 序号 | sql文件名 | 说明  | 
+  | :-------------------------- | :-------------------------- |:----------------------------- | 
+  | 1 | 1.2.sql     | CacheCloud1.2版本的sql文件 | 
+  | 2 | 1.2-2.0.sql     | CacheCloud从1.2版本升级到2.0版本增量sql文件 |  
+  | 3 | 2.0.sql | CacheCloud2.0版本的sql文件 |  
+  | 4 | 2.0-3.0 sql | CacheCloud从2.0版本升级到3.0版本增量sql文件 |
+  | 5 | 3.0 sql | CacheCloud3.0版本的sql文件 |
 
 <a name="cc2"/>
 
 ### 二、CacheCloud系统配置
 
-项目采用springboot部署方式，通过application-${rofile}.yml来区分不同环境资源隔离,其中profile:本地(默认为local)、测试(test)、线上(online)。
+项目采用springboot部署方式，通过application-${profile}.yml来区分不同环境资源隔离,其中profile:本地(默认为local)、测试(test)、线上(online)。
 当第一次启动系统后，需要对管理后台进行初始化配置，详细配置请参考: [系统配置说明](config.md) 		
     
 <img src="../../img/access/globalconfig.png" width="60%"/>

@@ -133,6 +133,7 @@ public class ConstUtils {
     public static final String DEFAULT_USERNAME = "cachecloud";
     public static final String DEFAULT_PASSWORD = "cachecloud";
     public static final String DEFAULT_USER_LOGIN_ENCRY_KEY = "97c9d9de0a2dbd64";
+    public static final String DEFAULT_USER_PASSWORD = "89750bfb62c09ba4f7dfe8b7e45ca31f";
     public static final int DEFAULT_SSH_PORT_DEFAULT = 22;
     /**
      * ssh授权方式：参考SshAuthTypeEnum
@@ -226,24 +227,7 @@ public class ConstUtils {
      * 联系人
      */
     public static String CONTACT;
-    /**
-     * 报警相关
-     */
-    public static String EMAILS;
-    public static String PHONES;
-    public static String WECHAT;
-    /**
-     * 邮箱报警接口
-     */
-    public static String EMAIL_ALERT_INTERFACE;
-    /**
-     * 短信报警接口
-     */
-    public static String MOBILE_ALERT_INTERFACE;
-    /**
-     * 微信报警接口
-     */
-    public static String WECHAT_ALERT_INTERFACE;
+
     /**
      * redis-migrate-tool相关路径
      */

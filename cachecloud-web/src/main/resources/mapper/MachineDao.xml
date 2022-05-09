@@ -80,6 +80,23 @@
         </choose>
     </select>
 
+    <!--通过ip模糊查找机器-->
+    <select id="getMachineListByCondition" resultType="MachineInfo">
+        select
+        id, modify_time, <include refid="machine_info_columns"/>
+        from machine_info where available = 1
+        <choose>
+            <when test="ipLike != '' and ipLike != null">
+                and ip like '%${ipLike}%'
+            </when>
+        </choose>
+        <choose>
+            <when test="realIpLike != '' and realIpLike != null">
+                and real_ip like '%${realIpLike}%'
+            </when>
+        </choose>
+    </select>
+
     <!--通过ip real_ip查找机器-->
     <select id="existk8sMachine" resultType="MachineInfo">
         select

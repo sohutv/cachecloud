@@ -7,6 +7,7 @@ import com.sohu.cache.dao.AppDao;
 import com.sohu.cache.dao.InstanceDao;
 import com.sohu.cache.dao.MachineDao;
 import com.sohu.cache.entity.*;
+import com.sohu.cache.exception.SSHException;
 import com.sohu.cache.machine.MachineCenter;
 import com.sohu.cache.protocol.MachineProtocol;
 import com.sohu.cache.protocol.RedisProtocol;
@@ -16,6 +17,10 @@ import com.sohu.cache.redis.RedisConfigTemplateService;
 import com.sohu.cache.redis.RedisDeployCenter;
 import com.sohu.cache.redis.enums.DirEnum;
 import com.sohu.cache.redis.enums.RedisConfigEnum;
+import com.sohu.cache.redis.util.AuthUtil;
+import com.sohu.cache.redis.util.JedisUtil;
+import com.sohu.cache.ssh.SSHService;
+import com.sohu.cache.ssh.SSHTemplate;
 import com.sohu.cache.stats.instance.InstanceDeployCenter;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.IdempotentConfirmer;
@@ -33,11 +38,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisSentinelPool;
-import redis.clients.jedis.Protocol;
+import redis.clients.jedis.*;
+import redis.clients.jedis.args.ClusterFailoverOption;
 import redis.clients.jedis.exceptions.JedisDataException;
-import redis.clients.jedis.util.AuthUtil;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -72,6 +75,8 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
     private AppService appService;
     @Autowired
     private ResourceService resourceService;
+    @Autowired
+    private SSHService sshService;
 
     @Override
     public boolean deployClusterInstance(long appId, List<RedisClusterNode> clusterNodes, int maxMemory) {
@@ -484,7 +489,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         return true;
     }
 
-    public boolean bornConfigAndRunNode(AppDesc appDesc, InstanceInfo instanceInfo, String host, Integer port, int maxMemory, boolean isCluster) {
+    public boolean bornConfigAndRunNode(AppDesc appDesc, InstanceInfo instanceInfo, String host, Integer port, int maxMemory, boolean isCluster, boolean isInstallModule, String moduleCommand) {
 
         long appId = appDesc.getAppId();
         String password = appDesc.getPasswordMd5();
@@ -523,6 +528,18 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         if (StringUtils.isBlank(pathFile)) {
             logger.error("createFile={} error", pathFile);
             return false;
+        }
+        // 是否装载模块
+        if (isInstallModule) {
+            // 刷新配置
+            String cmd = String.format("echo \"%s\" >> %s", moduleCommand, pathFile);
+            try {
+                SSHTemplate.Result result = sshService.executeWithResult(host, cmd);
+                logger.info("refresh config {}:{} load module:{} refresh config result:{}", host, port, cmd, result);
+            } catch (SSHException e) {
+                logger.error("refresh config error host:{},command :{} ,error:{}", host, cmd, e.getMessage(), e);
+            }
+
         }
         //启动实例
         logger.info("masterShell:host={};shell={}", host, runShell);
@@ -932,10 +949,6 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
                 newMasterJedis.close();
             }
         }
-        /*if (!"OK".equalsIgnoreCase(addSlotsResult)) {
-            logger.warn("{}:{} set slots faily", newMasterHost, newMasterPort);
-            return RedisOperateEnum.FAIL;
-        }*/
 
         // 7.保存实例信息、并开启收集信息
         saveInstance(appId, newMasterHost, newMasterPort, healthyMasterMem, ConstUtils.CACHE_TYPE_REDIS_CLUSTER, "");
@@ -1221,6 +1234,16 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         return true;
     }
 
+    public boolean clusterFailover(long appId, HostAndPort hostAndPort, String failoverParam) throws Exception {
+        InstanceInfo inst = instanceDao.getInstByIpAndPort(hostAndPort.getHost(), hostAndPort.getPort());
+        if (inst != null && inst.getId() > 0) {
+            return clusterFailover(appId, inst.getId(), failoverParam);
+        } else {
+            logger.warn("appid:{} clusterFailover error : {} get instanceinfo is empty,inst:{} ", appId, hostAndPort, inst);
+            return false;
+        }
+    }
+
     @Override
     public boolean clusterFailover(final long appId, int slaveInstanceId, final String failoverParam) throws Exception {
         Assert.isTrue(appId > 0);
@@ -1244,9 +1267,9 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
                 if (StringUtils.isBlank(failoverParam)) {
                     response = slaveJedis.clusterFailover();
                 } else if ("force".equals(failoverParam)) {
-                    response = slaveJedis.clusterFailoverForce();
+                    response = slaveJedis.clusterFailover(ClusterFailoverOption.FORCE);
                 } else if ("takeover".equals(failoverParam)) {
-                    response = slaveJedis.clusterFailoverTakeOver();
+                    response = slaveJedis.clusterFailover(ClusterFailoverOption.TAKEOVER);
                 } else {
                     logger.error("appId {} failoverParam {} is wrong", appId, failoverParam);
                 }
@@ -1546,11 +1569,11 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         //打印需要配置密码的节点信息
         logger.warn("collect nodes done,list:");
         for (Jedis jedis : nodeList) {
-            logger.warn("fix-password-node:" + jedis.getClient().getHostPort() + " isRun:" + redisCenter.isRun(jedis.getClient().getHost(), jedis.getClient().getPort()));
+            logger.warn("fix-password-node:" + JedisUtil.getHostPort(jedis) + " isRun:" + redisCenter.isRun(jedis.getClient().getHost(), jedis.getClient().getPort()));
 
         }
         for (Jedis jedis : sentinelList) {
-            logger.warn("fix-sentinel-password-node:" + jedis.getClient().getHostPort() + " isRun:" + redisCenter.isRun(jedis.getClient().getHost(), jedis.getClient().getPort()));
+            logger.warn("fix-sentinel-password-node:" + JedisUtil.getHostPort(jedis) + " isRun:" + redisCenter.isRun(jedis.getClient().getHost(), jedis.getClient().getPort()));
         }
         try {
             for (Jedis jedis : nodeList) {
@@ -1595,7 +1618,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
     }
 
     private boolean fixSentinelPassword(Jedis jedis, String masterName, String passwordMD5) {
-        String hostPort = jedis.getClient().getHostPort();
+        String hostPort = JedisUtil.getHostPort(jedis);
         /**
          * sentinel set {masterName} auth-pass {passwordMD5}
          * sentinel flushconfig
@@ -1607,7 +1630,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
             if (setResult.equals("OK")) {
                 logger.warn("config-pass sentinel success: sentinel={} master={} , auth-pass={}",
                         hostPort, masterName, passwordMD5);
-                String flushResult = jedis.sentinelFlushConfig();
+                String flushResult = JedisUtil.sentinelFlushConfig(jedis);
                 if (flushResult.equals("OK")) {
                     logger.warn("config rewrite success,sentinel={}", hostPort);
                 } else {
@@ -1616,7 +1639,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
                 }
             } else {
                 logger.error("sentinel-config-error:sentinel={} result={}",
-                        jedis.getClient().getHostPort(), setResult);
+                        JedisUtil.getHostPort(jedis), setResult);
                 return false;
             }
             return true;
@@ -1632,7 +1655,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         for (Jedis rollbackJedis : rollbackNodeList) {
             boolean rollback = fixNodePassword(rollbackJedis, oldPasswordMD5);
             logger.warn("node-rollback: node={} rollback={}",
-                    rollbackJedis.getClient().getHostPort(), rollback);
+                    JedisUtil.getHostPort(rollbackJedis), rollback);
         }
     }
 
@@ -1641,12 +1664,12 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         for (Jedis rollbackJedis : rollbackSentinelList) {
             boolean rollback = fixSentinelPassword(rollbackJedis, masterName, oldPasswordMD5);
             logger.warn("sentinel-rollback: node={} rollback={}",
-                    rollbackJedis.getClient().getHostPort(), rollback);
+                    JedisUtil.getHostPort(rollbackJedis), rollback);
         }
     }
 
     private boolean fixNodePassword(Jedis jedis, String passwordMD5) {
-        String hostPort = jedis.getClient().getHostPort();
+        String hostPort = JedisUtil.getHostPort(jedis);
         try {
             List<String> results = Lists.newArrayList();
 
@@ -1692,7 +1715,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
                     return false;
                 }
             } catch (Exception e) {
-                logger.error("node-auth-failed: node={} password={} error={}", jedis.getClient().getHostPort(),
+                logger.error("node-auth-failed: node={} password={} error={}", JedisUtil.getHostPort(jedis),
                         passwordMD5, e.getMessage());
                 logger.error(e.getMessage(), e);
                 return false;

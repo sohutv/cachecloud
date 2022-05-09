@@ -53,4 +53,10 @@ public class AsyncThreadPoolFactory {
             new LinkedBlockingQueue<Runnable>(256),
             new NamedThreadFactory(RESHARD_PROCESS_POOL, false),new CounterRejectedExecutionHandler());
 
+    public static final String ALERT_RECORD_POOL = "alert-record-pool";
+    public static final ThreadPoolExecutor ALERT_RECORD_THREAD_POOL = new ThreadPoolExecutor(3, 10,
+            0L, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<Runnable>(1024),
+            new NamedThreadFactory(ALERT_RECORD_POOL, false));
+
 }

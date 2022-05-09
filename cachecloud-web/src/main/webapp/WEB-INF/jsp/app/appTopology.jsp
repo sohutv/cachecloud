@@ -17,6 +17,7 @@
                 <td>连接数</td>
                 <td>命中率</td>
                 <td>碎片率</td>
+                <td>模块</td>
                 <td>角色</td>
                 <td>主实例ID</td>
             </tr>
@@ -81,6 +82,11 @@
 	                 		</c:otherwise>
 	                  </c:choose>
 	                  <label class="label ${memFragmentationRatioLabel}">${memFragmentationRatio}</label>
+                  </td>
+                  <td>
+                    <c:forEach items="${instance.modules}" var="module">
+                        <label class="label label-success">${module.name}</label>
+                    </c:forEach>
                   </td>
                   <td>${instance.roleDesc}</td>
                   <c:choose>

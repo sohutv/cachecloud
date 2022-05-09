@@ -1,11 +1,11 @@
 package com.sohu.cache.task.tasks.analysis;
 
+import com.google.common.util.concurrent.AtomicLongMap;
 import com.sohu.cache.task.BaseTask;
 import com.sohu.cache.task.constant.TaskConstants;
 import com.sohu.cache.task.constant.TaskStepFlowEnum.TaskFlowStatusEnum;
 import com.sohu.cache.task.constant.TtlTimeDistriEnum;
 import com.sohu.cache.util.ConstUtils;
-import com.sohu.tv.cc.client.spectator.util.AtomicLongMap;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.context.annotation.Scope;

@@ -261,7 +261,6 @@ function addAppDeployTask() {
         return;
     }
     // 检查部署预览是否为空
-    // $("#appDeployBtn").attr("disabled",true);
     if ($("#appDeployInfo").val() == '') {
         toastr.error('请先生成部署预览!');
         return;
@@ -300,6 +299,17 @@ function addAppDeployTask() {
             }
         });
     }
+    // 插件信息
+    var moduleinfos = "";
+    // 插件信息
+    $("#checkboxs input:checkbox").each(function(){
+
+        var moduleId = $(this).attr("moduleId");
+        if($(this).is(':checked')){
+            // moduleinfos += moduleId+":"+$("#moduleVersionId-"+moduleId+" option:selected").attr("versionid")+";";
+            moduleinfos +=  $("#moduleVersionId-"+moduleId+" option:selected").attr("versionid")+";";
+        }
+    })
 
     $.post(
         '/manage/app/addAppDeployTask.json',
@@ -319,6 +329,7 @@ function addAppDeployTask() {
             sentinelMachines: sentinelMachines,
             pikaMachines: pikaMachines,
             twemproxyMachines: twemproxyMachines,
+            moduleinfos:moduleinfos
         },
         function (data) {
             var status = data.status;

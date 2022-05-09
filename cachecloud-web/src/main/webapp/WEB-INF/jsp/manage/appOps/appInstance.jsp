@@ -5,6 +5,7 @@
 <script type="text/javascript">var jQuery_1_10_2 = $;</script>
 <script src="/resources/manage/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
 <script type="text/javascript" src="/resources/select/bootstrap-select.js"></script>
+<script type="text/javascript" src="/resources/js/selectpicker.js?<%=System.currentTimeMillis()%>"></script>
 
 <script type="text/javascript">
     $(window).on('load', function () {
@@ -13,13 +14,15 @@
         jQuery_1_10_2('.selectpicker').selectpicker('render');
     });
     $(function () {
+
+        var appId = document.getElementById('appId').value;
+
         jQuery_1_10_2('.selectpicker').selectpicker();
 
         var slaveIp_select = document.getElementById('slaveIp');
         $("div[name='addSlave-modal']").on('shown.bs.modal', function () {
             var addSlaveModal_id = $(this).attr('id');
             var instanceId = addSlaveModal_id.split('_')[1];
-            console.log(instanceId);
 
             if (document.getElementById('slaveIp' + instanceId).options.length == 0) {
                 for (var i = 0; i < slaveIp_select.options.length; i++) {
@@ -27,7 +30,6 @@
                     var value = slaveIp_select.options[i].value;
                     $('#slaveIp' + instanceId).append("<option value='" + value + "'>" + text + "</option>");
                 }
-                console.log(document.getElementById('slaveIp' + instanceId).options.length);
 
                 $('#slaveIp' + instanceId).selectpicker('refresh');
                 $('#slaveIp' + instanceId).selectpicker('render');
@@ -35,13 +37,136 @@
                 $('.dropdown-toggle').on('click',function(){
                     $('.dropdown-toggle').dropdown();
                 });
-            } else {
-                console.log(document.getElementById('slaveIp' + instanceId).options.length);
             }
         });
+
+        $("div[name='addConfig-modal']").on('shown.bs.modal', function () {
+            var addConfigModal_id = $(this).attr('id');
+            var instanceId = addConfigModal_id.split('_')[1];
+            $.post('/admin/app/redisConfig',
+                {
+                    appId: appId,
+                    instanceId: instanceId
+                },
+                function (data) {
+                    var status = data.status;
+                    if (status == 1) {
+                        var redisConfigMap = data.redisConfigMap;
+                        $('#appConfigKey' + instanceId).append("<option value=''>" + '请选择' + "</option>");
+                        for (var key in redisConfigMap) {
+                            var item = '配置项：' + key + " | 配置值：" + redisConfigMap[key];
+                            $('#appConfigKey' + instanceId).append("<option value='" + key + "'>" + item + "</option>");
+                        }
+                        $('#appConfigKey' + instanceId).selectpicker('refresh');
+                        $('#appConfigKey' + instanceId).selectpicker('render');
+
+                        $('.dropdown-toggle').on('click', function () {
+                            $('.dropdown-toggle').dropdown();
+                        });
+                    }
+                }
+            );
+        });
+
+        $("div[name='configAndRestart-modal']").on('shown.bs.modal', function () {
+            var instanceId;
+            var masterIds = document.getElementsByName(`selectOneMaster`);
+            if(masterIds != undefined && masterIds.length != undefined && masterIds.length != null){
+                for (var key of masterIds) {
+                    instanceId = masterIds[0].value;
+                    break;
+                }
+            }
+            if(!(instanceId > 0)){
+                alert("未能获取配置列表，请手动填写！");
+                return false;
+            }
+            $.post('/admin/app/redisConfig',
+                {
+                    appId: appId,
+                    instanceId: instanceId
+                },
+                function (data) {
+                    var status = data.status;
+                    if (status == 1) {
+                        var redisConfigMap = data.redisConfigMap;
+                        $('#configListId').append("<option value=''>" + '请选择' + "</option>");
+                        for (var key in redisConfigMap) {
+                            var item = '配置项：' + key + " | 配置值：" + redisConfigMap[key];
+                            $('#configListId').append("<option value='" + key + "'>" + item + "</option>");
+                        }
+                        $('#configListId').selectpicker('refresh');
+                        $('#configListId').selectpicker('render');
+
+                        $('.dropdown-toggle').on('click', function () {
+                            $('.dropdown-toggle').dropdown();
+                        });
+                    }
+                }
+            );
+        });
+
+        $(function () { $("[data-toggle='tooltip']").tooltip(); });
+
+        {
+            var search = window.location.search;
+            var appId = getSearchString("appId", search);
+            var configName = getSearchString("configName", search);
+            var expectValue = getSearchString("expectValue", search);
+            var instanceIds = getSearchString("instanceIds", search);
+            if(appId != null && configName != null && instanceIds != null) {
+                document.getElementById("configRestartId").click();
+                $('#configAndRestartModal input[name="isUpdateConfig"][value="1"]').prop("checked", "checked");
+                moduleSelect('1');
+                document.getElementById("configName").value = configName;
+                var configValues = document.getElementsByName("configValue");
+                configValues[0].value = expectValue;
+                var instanceSelect = document.getElementById("configInstanceList");
+                var instanceIdStrs = instanceIds.split(",");
+                $('#configInstanceList').selectpicker('val', instanceIdStrs);
+                $('#configInstancneList').selectpicker('refresh');
+
+                var transferSelect = document.getElementById("msTransferFlag");
+                for(var i = 0; i < transferSelect.options.length; i++){
+                    if(transferSelect.options[i].value == 0){
+                        transferSelect.options[i].selected = true;
+                    }else{
+                        transferSelect.options[i].selected = false;
+                    }
+                }
+            }
+        }
     })
 </script>
 <script type="text/javascript">
+
+    //key(需要检索的键） url（传入的需要分割的url地址，例：?id=2&age=18）
+    function getSearchString(key, Url) {
+        var str = Url;
+        str = str.substring(1, str.length); // 获取URL中?之后的字符（去掉第一位的问号）
+        // 以&分隔字符串，获得类似name=xiaoli这样的元素数组
+        var arr = str.split("&");
+        var obj = new Object();
+        // 将每一个数组元素以=分隔并赋给obj对象
+        for (var i = 0; i < arr.length; i++) {
+            var tmp_arr = arr[i].split("=");
+            obj[decodeURIComponent(tmp_arr[0])] = decodeURIComponent(tmp_arr[1]);
+        }
+        return obj[key];
+    }
+
+    function setSelectedConfig(){
+        var configName = $('#configListId option:selected').val();
+        var configItem = $('#configListId option:selected').text();
+        var splitStr = configItem.split("配置值：");
+        var expectValue = splitStr[1];
+        if(configName != null){
+            document.getElementById("configName").value = configName;
+            var configValues = document.getElementsByName("configValue");
+            configValues[0].value = expectValue;
+        }
+    }
+
     function startInstance(appId, instanceId) {
         if (confirm("确认要开启" + instanceId + "实例吗?")) {
             $.ajax({
@@ -86,26 +211,62 @@
         }
     }
 
-    function forgetInstance(appId, instanceId) {
-            if (confirm("确认要永久下线" + instanceId + "实例吗?")) {
-                $.ajax({
-                    type: "get",
-                    url: "/manage/instance/forgetInstance.json",
-                    data:
-                        {
-                            appId: appId,
-                            instanceId: instanceId
-                        },
-                    success: function (result) {
-                        if (result.success == 1) {
-                            alert("关闭成功!");
-                        } else {
-                            alert("关闭失败, msg: " + result.message);
-                        }
+    function addConfigInstance(appId, instanceId, host, port) {
+        var configKey = $('#appConfigKey' + instanceId).selectpicker('val');
+        var newConfigKey = document.getElementById("newConfigKey" + instanceId).value;
+        var configVal = document.getElementById("appConfigValue" + instanceId).value;
+
+        if (newConfigKey == "") {
+            if (configKey == "") {
+                alert("配置项不能为空");
+                return false;
+            }
+        } else {
+            configKey = newConfigKey;
+        }
+
+        if (confirm("确认更新实例" + instanceId + "的配置: " + configKey + ":" + configVal)) {
+
+
+            $.post("/manage/instance/addInstanceConfigChange",
+                {
+                    appId: appId,
+                    host: host,
+                    port: port,
+                    instanceConfigKey: configKey,
+                    instanceConfigValue: configVal
+                },
+                function (data) {
+                    if (data.result == 1) {
+                        alert("配置更新成功!");
                         window.location.reload();
+                    } else {
+                        alert("配置更新失败...");
                     }
                 });
-            }
+        }
+    }
+
+    function forgetInstance(appId, instanceId) {
+        if (confirm("确认要永久下线" + instanceId + "实例吗?")) {
+            $.ajax({
+                type: "get",
+                url: "/manage/instance/forgetInstance.json",
+                data:
+                    {
+                        appId: appId,
+                        instanceId: instanceId
+                    },
+                success: function (result) {
+                    if (result.success == 1) {
+                        alert("关闭成功!");
+                    } else {
+                        alert("关闭失败, msg: " + result.message);
+                    }
+                    window.location.reload();
+                }
+            });
+        }
     }
 
 
@@ -401,6 +562,199 @@
         );
     }
 
+    function moduleSelect(radioVal){
+        if(radioVal == '0'){
+            $("#moduleInfo").attr("style","display:none");
+        }
+        if(radioVal == '1'){
+            $("#moduleInfo").attr("style","display:display");
+        }
+    }
+
+    function addConfigRow(){
+        var ul = document.getElementById("configRowGroup");
+        var lis = document.getElementsByName(`configRow`);
+        var li = lis[0].cloneNode(true);
+        li.getElementsByTagName('input')[0].value="";
+        ul.appendChild(li);
+    }
+
+    function config(appId) {
+        var configList = null;
+        var configInstanceList = null;
+        var isUpdateConfig = $('input:radio[name="isUpdateConfig"]:checked').val();
+        var tipInfo = "滚动重启";
+        if(isUpdateConfig == 1){
+            var configName = document.getElementById("configName").value;
+            if(configName == null || configName == ""){
+                alert("请填写配置项");
+                return false;
+            }
+            var configValues = document.getElementsByName("configValue");
+            configList = [];
+            var newConfigValue = [];
+            for(i = 0; i < configValues.length; i++){
+                configList.push({
+                    configName: configName,
+                    configValue: configValues[i].value
+                });
+                newConfigValue.push(configValues[i].value);
+            }
+            if(configList.length < 1){
+                alert("请至少填写一个配置值");
+                return false;
+            }
+            configInstanceList = [];
+            $('#configInstanceList option:selected').each(function(){
+                if($(this).val() != null){
+                    configInstanceList.push($(this).val());
+                }
+            });
+            if(configInstanceList.length == 0){
+                alert("请选择实例");
+                return false;
+            }
+
+            tipInfo = "修改配置" + configName + "的值为：" + newConfigValue;
+        }
+        var msTransferFlag = document.getElementById("msTransferFlag").value;
+        var data = {
+            appId: appId,
+            configFlag: isUpdateConfig == 1,
+            transferFlag: msTransferFlag == 1,
+            instanceList: configInstanceList,
+            configList: configList
+        };
+        if (confirm("确认" + tipInfo)) {
+            document.getElementById("configAndRestartCloseBtn").disabled = 'true';
+            document.getElementById("configAndRestartBtn").disabled = 'true';
+            document.getElementById("msTransferFlag").disabled = false;
+            document.getElementById("configInstanceList").disabled = false;
+            document.getElementById("addConfigRowBtn").disabled = false;
+            $("#configAndRestartModal").find("input[type='radio']").attr("disabled", "disabled");
+            $("#configAndRestartModal").find("input[type='text']").attr("disabled", "disabled");
+            $.ajax({
+                type: 'post',
+                url:'/manage/app/restart/updateConfig',
+                contentType:'application/json',
+                data: JSON.stringify(data),
+                dataType:'json',
+                success:function (data) {
+                    if (data.status == 200) {
+                        if(data.data.commandSet == true){
+                            alert("配置更新成功!");
+                            window.location.href = "/manage/app/index?appId=" + appId;
+                        }else{
+                            alert("请点击重启，激活配置!");
+                            document.getElementById("recordId").value = data.data.recordId;
+                            document.getElementById("restartAfterConfigBtn").style.display = 'inline';
+                            document.getElementById("configAndRestartCloseBtn").disabled = 'true';
+                            document.getElementById("configAndRestartBtn").disabled = 'true';
+                        }
+                    } else {
+                        alert("配置更新失败，请人工确认 : " + data.error);
+                        document.getElementById("msTransferFlag").disabled = 'true';
+                        document.getElementById("configInstanceList").disabled = 'true';
+                        document.getElementById("addConfigRowBtn").disabled = 'true';
+                        $("#configAndRestartModal").find("input[type='radio']").removeAttr("disabled");
+                        $("#configAndRestartModal").find("input[type='text']").removeAttr("disabled");
+                        document.getElementById("configAndRestartCloseBtn").disabled = false;
+                        document.getElementById("configAndRestartBtn").disabled = false;
+                    }
+                }
+            });
+        }
+    }
+
+    function restart(appId) {
+        var configList = null;
+        var configInstanceList = null;
+        var isUpdateConfig = $('input:radio[name="isUpdateConfig"]:checked').val();
+        var tipInfo = "滚动重启";
+        if(isUpdateConfig == 1){
+            var configName = document.getElementById("configName").value;
+            if(configName == null || configName == ""){
+                alert("请填写配置项");
+                return false;
+            }
+            var configValues = document.getElementsByName("configValue");
+            configList = [];
+            for(i = 0; i < configValues.length; i++){
+                console.log(configValues[i].value);
+                configList.push({
+                    configName: configName,
+                    configValue: configValues[i].value
+                });
+            }
+
+            if(configList.length < 1){
+                alert("请至少填写一个配置值");
+                return false;
+            }
+            configInstanceList = [];
+            $('#configInstanceList option:selected').each(function(){
+                if($(this).val() != null){
+                    configInstanceList.push($(this).val());
+                }
+            });
+            if(configInstanceList.length == 0){
+                alert("请选择实例");
+                return false;
+            }
+            tipInfo = "修改配置" + configName + "并更新";
+        }
+        var msTransferFlag = document.getElementById("msTransferFlag").value;
+        var recordId = document.getElementById("recordId").value;
+        var data = {
+            appId: appId,
+            recordId: recordId,
+            configFlag: isUpdateConfig == 1,
+            transferFlag: msTransferFlag == 1,
+            instanceList: configInstanceList,
+            configList: configList
+        };
+        if (confirm("确认" + tipInfo)) {
+            document.getElementById("configAndRestartCloseBtn").disabled = 'true';
+            document.getElementById("configAndRestartBtn").disabled = 'true';
+            $.ajax({
+                type: 'post',
+                url:'/manage/app/restart/scrollRestart',
+                contentType:'application/json',
+                data: JSON.stringify(data),
+                dataType:'json',
+                success:function (data) {
+                    if (data.status == 200) {
+                        alert(data.data);
+                        window.location.reload();
+                    } else {
+                        alert("重启失败，请确认 : " + data.error);
+                    }
+                    document.getElementById("configAndRestartCloseBtn").disabled = false;
+                    document.getElementById("configAndRestartBtn").disabled = false;
+                }
+            });
+        }else{
+            document.getElementById("configAndRestartBtn").disabled = false;
+        }
+    }
+
+    function configAndRestart(appId) {
+        var isUpdateConfig = $('input:radio[name="isUpdateConfig"]:checked').val();
+        if(isUpdateConfig == 1){
+            return config(appId);
+        }
+        return restart(appId);
+    }
+
+    function configAndRestartClose(appId) {
+        window.location.href = "/manage/app/index?appId=" + appId;
+    }
+
+    function openRestartRecord(appId){
+        window.open("/manage/instance/opsList?tabId=3&appId=" + appId + "&pageNo=1");
+        return;
+    }
+
 </script>
 <div class="row">
     <div class="page-header">
@@ -421,8 +775,17 @@
                             data-toggle="modal">&nbsp;FailOver&nbsp;
                     </button>
                     <button type="button" class="btn btn-small btn-primary" data-target="#redisSentinelResetModal"
-                    data-toggle="modal">&nbsp;Reset&nbsp;
+                            data-toggle="modal">&nbsp;Reset&nbsp;
                     </button>
+                </c:when>
+            </c:choose>
+            <c:choose>
+                <c:when test="${appDesc.type == 2}">
+                    <div style="float:right;">
+                        <button type="button" id="configRestartId" class="btn btn-small btn-primary" data-target="#configAndRestartModal"
+                                data-toggle="modal">&nbsp;config / restart&nbsp;
+                        </button>
+                    </div>
                 </c:when>
             </c:choose>
         </h4>
@@ -448,12 +811,17 @@
             </tr>
             </thead>
             <tbody>
-            <select style="display:none" id="instanceList">
-                <c:forEach items="${instanceList}" var="instance">
-                    <option value="${instance.id}"/>
-                </c:forEach>
-                </optgroup>
-            </select>
+            <div hidden="hidden">
+                <select style="display:none" id="instanceList">
+                    <c:forEach items="${instanceList}" var="instance">
+                        <option value="${instance.id}"/>
+                        <c:if test="${instance.status == 1 && instance.masterInstanceId == 0 && instance.type != 5}">
+                            <input name="selectOneMaster" hidden value="${instance.id}"/>
+                        </c:if>
+                    </c:forEach>
+                    </optgroup>
+                </select>
+            </div>
 
             <c:forEach items="${instanceListMap}" var="instanceList">
                 <c:forEach var="instance" items="${instanceList.value}" varStatus="status">
@@ -480,7 +848,13 @@
                                 否
                             </c:if>
                         </td>
-                        <td>${instance.statusDesc}</td>
+                        <td>
+                                ${instance.statusDesc}
+                            <c:if test="${instance.status==2 || instance.status==3}">
+                                <br/>
+                                ${instance.updateTimeDesc}
+                            </c:if>
+                        </td>
                         <td>${instance.roleDesc}</td>
                         <c:choose>
                             <c:when test="${instance.masterInstanceId >0}">
@@ -524,8 +898,9 @@
                                 ${(instanceStatsMap[instanceStatsMapKey]).currItems}
                         </td>
                         <td>
-                            <a href="/admin/instance/index?instanceId=${instance.id}&tabTag=instance_clientList" target="_blank">
-                                ${(instanceStatsMap[instanceStatsMapKey]).currConnections}
+                            <a href="/admin/instance/index?instanceId=${instance.id}&tabTag=instance_clientList"
+                               target="_blank">
+                                    ${(instanceStatsMap[instanceStatsMapKey]).currConnections}
                             </a>
                         </td>
                         <td>${(instanceStatsMap[instanceStatsMapKey]).hitPercent}</td>
@@ -559,8 +934,8 @@
                                         <c:if test="${instance.type ==2}">
                                             <br/><br/>
                                             <button type="button" class="btn btn-small btn-danger"
-                                                 onclick="forgetInstance('${appDesc.appId}','${instance.id}')">
-                                              &nbsp;永久下线&nbsp;
+                                                    onclick="forgetInstance('${appDesc.appId}','${instance.id}')">
+                                                &nbsp;永久下线&nbsp;
                                             </button>
                                         </c:if>
                                     </c:when>
@@ -599,6 +974,11 @@
                                                 onclick="shutdownInstance('${appDesc.appId}', '${instance.id}')">
                                             &nbsp;下线实例&nbsp;
                                         </button>
+                                        <br/><br/>
+                                        <button type="button" class="btn btn-sm btn-info"
+                                                data-target="#instanceAddConfigModal_${instance.id}"
+                                                data-toggle="modal">修改配置
+                                        </button>
                                         <c:if test="${instance.masterInstanceId == 0 and instance.type != 5}">
                                             <br/><br/>
                                             <button type="button" class="btn btn-small btn-primary"
@@ -608,7 +988,6 @@
                                         </c:if>
                                     </c:when>
                                 </c:choose>
-
                             </div>
                         </td>
                         <td>
@@ -748,6 +1127,7 @@
     </div>
 </div>
 
+<input type="hidden" id="appId" value="${appDesc.appId}">
 
 <c:forEach var="instance" items="${instanceList}" varStatus="status">
     <div id="redisClusterFailOverManualModal${instance.id}" class="modal fade" tabindex="-1" data-width="400">
@@ -867,6 +1247,69 @@
                             onclick="redisClusterDelNode('${appDesc.appId}', '${instance.id}')">Ok
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="instanceAddConfigModal_${instance.id}" name="addConfig-modal" class="modal fade" tabindex="-1"
+         data-width="400"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                    <h4 class="modal-title">更新配置</h4>
+                    <h5>【实例】${instance.ip}:${instance.port}</h5>
+                </div>
+
+                <form class="form-horizontal form-bordered form-row-stripped">
+                    <div class="modal-body">
+                        <div class="row">
+                            <!-- 控件开始 -->
+                            <div class="col-md-12">
+                                <!-- form-body开始 -->
+                                <div class="form-body">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3">配置项:</label>
+                                        <div class="col-md-8">
+                                            <select id="appConfigKey${instance.id}" name="appConfigKey"
+                                                    class="selectpicker show-tick form-control"
+                                                    data-live-search="true" title="选择配置项" data-width="30%"
+                                                    data-size="8">
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-md-4 col-md-offset-3">
+                                            <input type="text" id="newConfigKey${instance.id}" class="form-control"
+                                                   placeholder="新增配置项"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3">配置值:</label>
+                                        <div class="col-md-4">
+                                            <input type="text" name="appConfigValue" id="appConfigValue${instance.id}"
+                                                   value="${appConfigValue}" class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- form-body 结束 -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" data-dismiss="modal" class="btn">Close</button>
+                        <button type="button" id="instanceAddConfigBtn${instance.id}" class="btn red"
+                                onclick="addConfigInstance('${appDesc.appId}', '${instance.id}','${instance.ip}','${instance.port}')">
+                            Ok
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -1016,8 +1459,6 @@
             </div>
         </div>
     </div>
-
-
 </c:forEach>
 
 
@@ -1055,6 +1496,153 @@
         <option value="${machine.ip}">${machine.ip}：【${usedCpu}/${cpu}核(${cpuUsage}%)】【${usedMemRss}/${mem}G(${memUsage}%)】【${realIp}-${rack}】【${extraDesc}】</option>
     </c:forEach>
 </select>
+
+<div id="configAndRestartModal" name="configAndRestart-modal" class="modal fade" tabindex="-1"
+     data-width="400"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                <h4 class="modal-title">修改配置/滚动重启</h4>
+                <h5>【应用】${appDesc.appId}:${appDesc.name}
+                    <button class="btn btn-warning btn-sm" style="float: right;" onclick="openRestartRecord('${appDesc.appId}')">
+                        查看重启进程记录
+                    </button>
+                </h5>
+            </div>
+
+            <form class="form-horizontal form-bordered form-row-stripped">
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- 控件开始 -->
+                        <div class="col-md-12">
+                            <!-- form-body开始 -->
+                            <div class="form-body">
+                                <div class="form-group">
+                                    <label class="control-label col-md-3">
+                                        操作类型:
+                                    </label>
+                                    <div class="col-md-8">
+                                        <label class="radio-inline">
+                                            <input type="hidden" id="recordId" name="recordId" class="form-control"/>
+                                            <input type="radio" name="isUpdateConfig" value="0" onchange="moduleSelect('0')" checked="checked"> 滚动重启
+                                            <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip"
+                                                    data-placement="right" title="按照主从分组后重启">
+                                            </span>
+                                        </label>
+                                        <label>
+                                        </label>
+                                        <label>&nbsp;&nbsp;</label>
+                                        <label class="radio-inline">
+                                            <input type="radio" name="isUpdateConfig" value="1" onchange="moduleSelect('1')"> 修改配置
+                                            <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip"
+                                                  data-placement="right" title="某些配置修改后，需要重启实例">
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div id="moduleInfo" style="display: none">
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3">配置项列表:</label>
+                                        <div class="col-md-8">
+                                            <select id="configListId" name="appConfigKey"
+                                                    class="selectpicker show-tick form-control"
+                                                    data-live-search="true" title="选择配置项" data-width="31%"
+                                                    data-size="8" onchange="setSelectedConfig()">
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3">修改配置项:</label>
+                                        <div class="col-md-8">
+                                            <input type="text" id="configName" name="configName" class="form-control"
+                                                   placeholder="参考配置项列表"/>
+                                        </div>
+                                    </div>
+
+                                    <ul id="configRowGroup">
+                                        <span id="configValueTip" style="color: orange">* 请确认配置值是否需分开</span>
+                                        <li name="configRow">
+                                            <div class="form-group">
+                                                <label class="control-label col-md-3">配置值:</label>
+                                                <div class="col-md-8">
+                                                    <input type="text" name="configValue" class="form-control"
+                                                            placeholder="如同一配置项有多个配置值，请分开填写"/>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+
+                                    <div class="form-group">
+                                        <div class="col-md-1 col-lg-offset-9">
+                                            <button id="addConfigRowBtn" type="button" onclick="addConfigRow()">+</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3">
+                                            选择实例<font color='red'>(*)</font>:
+                                        </label>
+                                        <div class="col-md-8">
+                                            <select id="configInstanceList" name="configInstance" class="form-control selectpicker bla bla bli" multiple data-live-search="true" data-width="31%">
+                                                <option value="0">所有实例</option>
+                                                <c:forEach items="${instanceList}" var="instanceInfo">
+                                                    <c:if test="${instanceInfo.status == 1 && (instanceInfo.type == 2 || instanceInfo.type == 6)}">
+                                                        <option value="${instanceInfo.id}">${instanceInfo.ip}:${instanceInfo.port}</option>
+                                                    </c:if>
+                                                </c:forEach>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="control-label col-md-3">
+                                        是否允许主从切换:
+                                    </label>
+                                    <div class="col-md-8">
+                                        <select id="msTransferFlag" name="msTransferFlag" class="form-control">
+                                            <option value="0" selected>
+                                                否
+                                            </option>
+                                            <option value="1">
+                                                是
+                                            </option>
+                                        </select>
+                                        <span class="help-block">
+                                            当滚动重启和修改配置需重启时，是否允许原有的主节点切换为从节点
+                                        </span>
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+                            <!-- form-body 结束 -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="configAndRestartCloseBtn" class="btn" onclick="configAndRestartClose('${appDesc.appId}')">Close</button>
+                    <button type="button" id="configAndRestartBtn" class="btn red"
+                            onclick="configAndRestart('${appDesc.appId}')">
+                        Ok
+                    </button>
+                    <button type="button" id="restartAfterConfigBtn" class="btn red"
+                            onclick="restart('${appDesc.appId}')" style="display: none">
+                        Restart to active config
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 
 

@@ -1,6 +1,7 @@
 package com.sohu.cache.redis.impl;
 
 import com.sohu.cache.redis.AssistRedisService;
+import com.sohu.cache.redis.util.ProtostuffSerializer;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +13,6 @@ import redis.clients.jedis.Protocol;
 import redis.clients.jedis.Tuple;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.params.SetParams;
-import redis.clients.jedis.serializable.ProtostuffSerializer;
 
 import javax.annotation.PostConstruct;
 import java.nio.charset.Charset;
@@ -104,6 +104,40 @@ public class AssistRedisServiceImpl implements AssistRedisService {
         } catch (Exception e) {
             logger.warn("rpushList {} {} error " + e.getMessage(), key, items);
             return false;
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+    }
+
+    @Override
+    public Long llen(final String key){
+        Jedis jedis = null;
+        try {
+            jedis = getFromJedisPool();
+            Long llen = jedis.llen(key);
+            return llen;
+        } catch (Exception e) {
+            logger.warn("llen {} {} error " + e.getMessage(), key);
+            return 0L;
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+    }
+
+    @Override
+    public String lpop(final String key){
+        Jedis jedis = null;
+        try {
+            jedis = getFromJedisPool();
+            String lpop = jedis.lpop(key);
+            return lpop;
+        } catch (Exception e) {
+            logger.warn("rpushList {} {} error " + e.getMessage(), key);
+            return null;
         } finally {
             if (jedis != null) {
                 jedis.close();
@@ -445,6 +479,22 @@ public class AssistRedisServiceImpl implements AssistRedisService {
         } catch (Exception e) {
             logger.warn("zrangeWithScores {} {} {}error " + e.getMessage(), key, start, end);
             return null;
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+    }
+
+    @Override
+    public boolean exists(String key) {
+        Jedis jedis = null;
+        try {
+            jedis = getFromJedisPool();
+            return jedis.exists(key);
+        } catch (Exception e) {
+            logger.warn("del {} error " + e.getMessage(), key);
+            return false;
         } finally {
             if (jedis != null) {
                 jedis.close();

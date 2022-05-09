@@ -4,11 +4,22 @@
 <script>
 
     function loadModule(appId) {
+
+        // 插件信息
+        var moduleinfos = "";
+        // 插件信息
+        $("#checkboxs input:checkbox").each(function(){
+            var moduleId = $(this).attr("moduleId");
+            if($(this).is(':checked')){
+                moduleinfos +=  $("#moduleVersionId-"+moduleId+" option:selected").attr("versionid")+";";
+            }
+        })
+
         $.post(
             '/manage/app/loadModule',
             {
                 appId: appId,
-                moduleName: $('#module option:selected').attr("key")
+                moduleinfos: moduleinfos
             },
             function (data) {
                 if (data.status == 1) {
@@ -46,7 +57,14 @@
         );
     }
 
-
+    //选择安装相关模块信息
+		function selectModule(moduleId){
+			if($("#checkbox-"+moduleId).is(':checked') == true){
+				$("#check-"+moduleId).attr("style","font-weight:bold;color:green");
+			}else{
+				$("#check-"+moduleId).removeAttr("style");
+			}
+		}
 
 </script>
 
@@ -108,8 +126,8 @@
                 <h4 style="color:lightslategray">2.实例装载模块情况:
                     <button type="button" class="btn btn-small btn-info" data-target="#loadModuleModal"
                     data-toggle="modal">安装模块</button>
-                    <button type="button" class="btn btn-small btn-warning" data-target="#unloadModuleModal"
-                    data-toggle="modal">卸载模块</button>
+                    <%--<button type="button" class="btn btn-small btn-warning" data-target="#unloadModuleModal"--%>
+                    <%--data-toggle="modal">卸载模块</button>--%>
                 </h4>
                 <label class="label label-success">bf</label>：布隆过滤器模块
                 <label class="label label-success">search</label>：redis-search模块
@@ -159,14 +177,23 @@
                             <div class="form-body">
                                 <div class="form-group">
                                 <label class="control-label col-md-3">选择安装模块:</label>
-                                <div class="col-md-6">
-                                    <select id="module" name="type" class="form-control select2_category">
-                                        <c:forEach items="${moduleMap}" var="module">
-                                            <c:if test="${module.key.contains(\".so\")}">
-                                                <option value="${module.value}" key="${module.key}">${module.key}</option>
-                                            </c:if>
+                                <div class="col-md-8" id="checkboxs">
+                                        <c:forEach items="${allModuleVersions}" var="module">
+                                            <div>
+                                                <input id="checkbox-${module.id}" moduleId="${module.id}" type="checkbox" onclick="selectModule(${module.id})">
+                                                <label id="check-${module.id}" value="${module.id}">${module.name} (${module.info})</label>
+                                            </div>
+                                            <div>
+                                                <select name="type" id="moduleVersionId-${module.id}" class="form-control select2_category">
+                                                    <option versionid="-1">不安装</option>
+                                                    <c:forEach items="${module.versions}" var="version">
+                                                        <c:if test="${version.status ==1}">
+                                                            <option versionid="${version.id}">${version.tag} </option>
+                                                        </c:if>
+                                                    </c:forEach>
+                                                </select>
+                                            </div>
                                         </c:forEach>
-                                    </select>
                                 </div>
                             </div>
                             <!-- form-body 结束 -->
@@ -187,7 +214,8 @@
     </div>
 </div>
 
-    <div id="unloadModuleModal" class="modal fade" tabindex="-1" data-width="400">
+
+<div id="unloadModuleModal" class="modal fade" tabindex="-1" data-width="400">
     <div class="modal-dialog">
         <div class="modal-content">
 
@@ -207,8 +235,12 @@
                                 <label class="control-label col-md-3">选择卸载模块:</label>
                                 <div class="col-md-6">
                                     <select id="module2" name="type" class="form-control select2_category">
-                                        <c:forEach items="${moduleMap}" var="module">
-                                            <option value="${module.value}" key="${module.key}">${module.key}</option>
+                                        <c:forEach items="${allModuleVersions}" var="module">
+                                            <c:forEach items="${module.versions}" var="version">
+                                                <c:if test="${version.status ==1}">
+                                                    <option value="${version.soPath}" key="${version.moduleId}">${version.soPath}</option>
+                                                </c:if>
+                                            </c:forEach>
                                         </c:forEach>
                                     </select>
                                 </div>
@@ -223,7 +255,7 @@
                 <div class="modal-footer">
                     <button type="button" data-dismiss="modal" class="btn">Close</button>
                     <button type="button" id="unloadModuleBtn" class="btn red"
-                            onclick="loadModule('${appDesc.appId}')">Ok
+                            onclick="unloadModule('${appDesc.appId}')">Ok
                     </button>
                 </div>
             </form>

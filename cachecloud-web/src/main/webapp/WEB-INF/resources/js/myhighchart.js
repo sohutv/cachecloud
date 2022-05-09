@@ -115,7 +115,11 @@ function pushOptionSeries(options, data, dates, nameLegendPrefix, unit, defaultC
     for (var t = 0; t < dates.length; t++) {
         date = dates[t];
         var dataArr = dataObject[date];
-        var length = dataArr.length;
+        var length = 0;
+        if(dataArr == undefined){
+        }else{
+            length = dataArr.length;
+        }
         var dataSeries = [];
         var count;
         for (var i = 0; i < length - 1; i++) {
@@ -349,6 +353,34 @@ function getInstanceCpuPoints(instance, nameLegend, command) {
     return seriesPoints;
 }
 
+function getInstanceKeyPoints(instance, nameLegend, command) {
+    var dataArr = instance.instanceExpiredEvictedKeysStatMapList;
+    var length = dataArr.length;
+    //i,o,t
+    var dataSeries = [];
+    var unit = 1;
+    var unitTxt = "个"
+
+    for (var i = 0; i < length - 1; i++) {
+        var data = dataArr[i];
+        var count = Math.round(data[command] / unit);
+        var pointName = formatDate(data.t) + ":  " + count + unitTxt;
+        var dataPoint = {
+            name: pointName,
+            x: data.t,
+            y: count,
+        };
+        dataSeries.push(dataPoint);
+    }
+
+    var seriesPoints = {
+        name: nameLegend,
+        data: dataSeries,
+        unit: unit,
+        unitTxt: unitTxt
+    };
+    return seriesPoints;
+}
 
 function getInstanceBaseCpuPoints(instance, nameLegend, ratio) {
     var dataArr = instance.instanceCpuStatMapList;
@@ -507,6 +539,40 @@ function getMemoryPoints(dataArr, nameLegend, unit, defaultValue) {
     return seriesPoints;
 }
 
+function getKeyPoints(dataArr, nameLegend, unit, defaultValue) {
+    var length = dataArr.length;
+    var dataSeries = [];
+
+    var unitTxt = "";
+
+    if (unit == 1) {
+        unit = 1;
+        unitTxt = "个"
+    }
+    var count;
+    for (var i = 0; i < length - 1; i++) {
+        var data = dataArr[i];
+        count = data.y;
+        if (defaultValue > 0) {
+            count = defaultValue;
+        }
+        var pointName = data.date + ":  " + count + unitTxt;
+        var dataPoint = {
+            name: pointName,
+            x: data.x,
+            y: count,
+        };
+        dataSeries.push(dataPoint);
+    }
+
+    var seriesPoints = {
+        name: nameLegend,
+        data: dataSeries,
+        unit: unit,
+        unitTxt: unitTxt
+    };
+    return seriesPoints;
+}
 
 function getNetPoints(dataArr, nameLegend, unit, timeUnit) {
     var length = dataArr.length;

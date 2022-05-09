@@ -74,6 +74,21 @@ public interface UserService {
      */
     SuccessEnum delete(Long userId);
 
+    /**
+     * 重置密码
+     * @param userId
+     * @return
+     */
+    SuccessEnum resetPwd(Long userId);
+
+    /**
+     * 修改密码
+     * @param userId
+     * @param password
+     * @return
+     */
+    SuccessEnum updatePwd(Long userId, String password);
+
     String getOfficerName(Long appId);
 
     String getOfficerName(String officer);

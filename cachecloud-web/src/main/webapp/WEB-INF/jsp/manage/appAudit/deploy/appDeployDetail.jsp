@@ -103,7 +103,11 @@
 									<td>客户端机房信息</td>
 									<td>${appDesc.clientMachineRoom}</td>
 									<td>Redis版本</td>
-									<td>${version}</td>
+									<td>${version.name}</td>
+								</tr>
+								<tr>
+									<td>申请安装Redis模块</td>
+									<td class="col-md-4">${appAudit.param3}</td>
 								</tr>
 							</table>
 						</div>
@@ -151,9 +155,7 @@
 													<select name="type" id="versionId" class="form-control select2_category">
 														<option versionid="-1"> --- 请选择Redis版本 ---</option>
 														<c:forEach items="${versionList}" var="version">
-															<%--<c:if test="${version.ispush==1}">--%>
-																<option <c:if test="${version.id == appDesc.versionId}">selected</c:if> versionid="${version.id}">${version.name} </option>
-															<%--</c:if>--%>
+															<option <c:if test="${version.id == appDesc.versionId}">selected</c:if> versionid="${version.id}">${version.name} </option>
 														</c:forEach>
 													</select>
 												</div>
@@ -167,6 +169,55 @@
 												</div>
 												<div class="col-md-2">
 													<input type="checkbox" id="isSetPasswd" name="isSetPasswd" value="1" checked="checked" />设置默认密码
+												</div>
+											</div>
+										</form>
+										<!-- END FORM-->
+									</div>
+								</div>
+
+							</div>
+							<!-- END TABLE PORTLET-->
+						</div>
+					</div>
+
+					<div class="row" id="moduleVersionDiv">
+						<div class="col-md-12">
+							<div class="portlet box light-grey">
+								<div class="portlet-title">
+									<div class="caption"><i class="fa fa-globe"></i>Redis模块信息</div>
+									<div class="tools">
+										<a href="javascript:;" class="collapse"></a>
+									</div>
+									<c:if test="${appAudit.param3 != ''}">
+										<label style="color:red">申请安装模块:${appAudit.param3}</label>
+									</c:if>
+								</div>
+								<div class="portlet-body">
+									<div class="form">
+										<!-- BEGIN FORM-->
+										<form class="form-horizontal form-bordered form-row-stripped">
+											<div class="form-group" id="moduleInfo">
+												<label class="control-label col-md-3">
+													选择安装Redis模块:
+												</label>
+												<div class="col-md-5" id="checkboxs">
+														<c:forEach items="${allModuleVersions}" var="module">
+															<div>
+																<input id="checkbox-${module.id}" moduleId="${module.id}" type="checkbox" onclick="selectModule(${module.id})">
+																<label id="check-${module.id}" value="${module.id}">${module.name} (${module.info})</label>
+															</div>
+															<div>
+																<select name="type" id="moduleVersionId-${module.id}" class="form-control select2_category">
+																	<option versionid="-1">不安装</option>
+																	<c:forEach items="${module.versions}" var="version">
+																		<c:if test="${version.status ==1}">
+																			<option versionid="${version.id}">${version.tag} </option>
+																		</c:if>
+																	</c:forEach>
+																</select>
+															</div>
+														</c:forEach>
 												</div>
 											</div>
 										</form>
@@ -491,4 +542,23 @@
                 $("#pikaMachines").hide();
             }
         }
+
+		//选择安装相关模块信息
+		function selectModule(moduleId){
+			if($("#checkbox-"+moduleId).is(':checked') == true){
+				$("#check-"+moduleId).attr("style","font-weight:bold;color:green");
+			}else{
+				$("#check-"+moduleId).removeAttr("style");
+			}
+
+			<%--var moduleinfos = "";--%>
+			<%--// 插件信息--%>
+			<%--$("#checkboxs input:checkbox").each(function(){--%>
+				<%--var moduleId = $(this).attr("moduleId");--%>
+				<%--if($(this).is(':checked')){--%>
+				<%--moduleinfos += moduleId+":"+$("#moduleVersionId-"+moduleId+" option:selected").attr("versionid")+";";--%>
+				<%--}--%>
+			<%--})--%>
+			<%--alert(moduleinfos);--%>
+		}
 </script>

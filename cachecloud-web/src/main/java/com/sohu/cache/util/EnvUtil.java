@@ -33,4 +33,9 @@ public class EnvUtil {
         return profiles.contains("test") || profiles.contains("test-sohu");
     }
 
+    public static boolean isOpen(Environment environment) {
+        Set<String> profiles = getProfiles(environment);
+        return profiles.contains("open") || profiles.contains("open-sohu");
+    }
+
 }

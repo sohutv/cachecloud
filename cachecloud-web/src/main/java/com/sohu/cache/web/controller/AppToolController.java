@@ -254,7 +254,7 @@ public class AppToolController extends BaseController {
     public ModelAndView getCommandExecute(HttpServletRequest request,
                                           HttpServletResponse response,
                                           Model model, Long appId, String node, String command, Integer timeout) {
-        String result;
+        String result = "";
         if (appId != null && appId > 0 && !StringUtil.isBlank(node)) {
             model.addAttribute("appId", appId);
             model.addAttribute("node", node);

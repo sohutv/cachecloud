@@ -553,7 +553,6 @@ public class RedisConfigTemplateServiceImpl implements RedisConfigTemplateServic
                     int targetVersionTag = Integer.parseInt(upgradeVersionName.substring(upgradeVersionName.lastIndexOf(".") + 1));
                     logger.info("current redis version:{} , target redis version:{}", versionTag, targetVersionTag);
                     if (versionTag == targetVersionTag) {
-                        //instanceInfo += instance.getIp() + ":" + instance.getPort() + " " + instance.getRoleDesc() + " version:" + redisVersion + " 等于当前版本,不需升级\n";
                         instanceInfoBuilder.append(instance.getIp())
                                 .append(":")
                                 .append(instance.getPort())
@@ -566,7 +565,6 @@ public class RedisConfigTemplateServiceImpl implements RedisConfigTemplateServic
                         instanceLogBuilder.append("<br/>");
                         continue;
                     } else if (versionTag > targetVersionTag) {
-                        //instanceInfo += instance.getIp() + ":" + instance.getPort() + " " + instance.getRoleDesc() + " version:" + redisVersion + " 高于当前版本,不需升级\n";
                         instanceInfoBuilder.append(instance.getIp())
                                 .append(":")
                                 .append(instance.getPort())
@@ -583,15 +581,30 @@ public class RedisConfigTemplateServiceImpl implements RedisConfigTemplateServic
                     // 1).备份配置
                     String bakCommonConfig = "";
                     Boolean isCluster = true;
+                    Boolean isInstallModule = false;
+                    String moduleCommand = "";
                     try {
+                        //1.1) 备份配置
                         String confDir = machineCenter.getMachineRelativeDir(instance.getIp(), DirEnum.CONF_DIR.getValue());
+                        String confPath = "";
                         if (TypeUtil.isRedisCluster(instance.getType())) {
                             bakCommonConfig = "cp -rf " + confDir + RedisProtocol.getConfig(port, true) + " " + confDir + RedisProtocol.getConfig(port, true) + ".bak" + bakTime;
+                            confPath = confDir + RedisProtocol.getConfig(port, true);
                         } else {
                             bakCommonConfig = "cp -rf " + confDir + RedisProtocol.getConfig(port, false) + " " + ".conf " + confDir + RedisProtocol.getConfig(port, false) + ".bak" + bakTime;
+                            confPath = confDir + RedisProtocol.getConfig(port, false);
                             isCluster = false;
                         }
                         SSHUtil.execute(ip, bakCommonConfig);
+                        //1.2) 扫描是否有插件
+                        String checkModuleCommand = String.format("cat %s | grep loadmodule",confPath);
+                        SSHTemplate.Result result = sshService.executeWithResult(ip, checkModuleCommand);
+                        if (result.isSuccess() && !StringUtils.isEmpty(result.getResult()) && result.getResult().indexOf("loadmodule") > -1) {
+                            isInstallModule = true;
+                            moduleCommand = result.getResult();
+                        }
+
+                        logger.info("checkModuleCommand :{} isInstallModule:{} moduleCommand:{}", checkModuleCommand, isInstallModule, moduleCommand);
                     } catch (SSHException e) {
                         logger.error(String.format("ip：%s bak config error:%s", ip, e.getMessage()));
                         resultMap.put("message", "备份配置异常,请查看日志!");
@@ -600,9 +613,10 @@ public class RedisConfigTemplateServiceImpl implements RedisConfigTemplateServic
                     // 2).关闭redis
                     boolean closeOp = instanceDeployCenter.shutdownExistInstance(appId, instanceId);
                     // 3).生成新配置 & 4).启动redis
+                    // 3.1) 是否有module插件, 需要加载配置 loadmodule ${modulepath}
                     try {
                         appDesc.setVersionId(upgradeVersionId);
-                        boolean bornConf = redisDeployCenter.bornConfigAndRunNode(appDesc, instance, ip, port, mem, isCluster);
+                        boolean bornConf = redisDeployCenter.bornConfigAndRunNode(appDesc, instance, ip, port, mem, isCluster, isInstallModule, moduleCommand);
                         if (bornConf == false) {
                             resultMap.put("message", "启动失败,查看日志!");
                             break;
@@ -613,7 +627,6 @@ public class RedisConfigTemplateServiceImpl implements RedisConfigTemplateServic
                     }
                     // 5).记录日志
                     redisVersion = redisCenter.getRedisVersion(appId, instance.getIp(), instance.getPort());
-                    //instanceInfo += instance.getIp() + ":" + instance.getPort() + " " + instance.getRoleDesc() + " version:" + redisVersion + " 更新成功\n";
                     instanceInfoBuilder.append(instance.getIp())
                             .append(":")
                             .append(instance.getPort())
@@ -623,7 +636,6 @@ public class RedisConfigTemplateServiceImpl implements RedisConfigTemplateServic
                             .append(redisVersion)
                             .append(" 更新成功\n");
                     instanceInfo = instanceInfoBuilder.toString();
-                    //instanceLog += "<a target='_blank' href=/manage/instance/log?instanceId=" + instance.getId() + ">日志</a><br/>";
                     instanceLogBuilder.append("<a target='_blank' href=/manage/instance/log?instanceId=")
                             .append(instance.getId())
                             .append(">日志</a><br/>");

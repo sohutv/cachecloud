@@ -14,9 +14,13 @@
             table_schema = 'cache-cloud' and table_name = @tn;
 	-->
 	<sql id="user_column">
-		id,name,ch_name,email,mobile,weChat,type,isAlert
+		id,name,ch_name,email,mobile,weChat,type,isAlert,password,company,purpose,register_time
     </sql>
-    
+
+    <sql id="user_insert_column">
+		id,name,ch_name,email,mobile,weChat,type,isAlert,password,company,purpose
+    </sql>
+
     <select id="get" resultType="AppUser" parameterType="long">
         select           
         	<include refid="user_column"/>
@@ -40,18 +44,24 @@
     
     <insert id="save" parameterType="AppUser" keyProperty="id" useGeneratedKeys="true">
     	insert into app_user
-    		(<include refid="user_column"/>)
+    		(<include refid="user_insert_column"/>)
 		values
-			(#{id},#{name},#{chName},#{email},#{mobile},#{weChat},#{type},#{isAlert})
+			(#{id},#{name},#{chName},#{email},#{mobile},#{weChat},#{type},#{isAlert},#{password},#{company},#{purpose})
     </insert>
     
     <delete id="delete" parameterType="long">
     	delete from app_user where id=#{id}
     </delete>
-    
+
+    <update id="updatePwd">
+    	update app_user
+    		set password=#{password}
+    	where id=#{id}
+    </update>
+
     <update id="update" parameterType="AppUser">
     	update app_user 
-    		set name=#{name}, ch_name=#{chName}, email=#{email}, mobile=#{mobile}, weChat=#{weChat}, type=#{type}, isAlert=#{isAlert}
+    		set name=#{name}, ch_name=#{chName}, email=#{email}, mobile=#{mobile}, weChat=#{weChat}, type=#{type}, isAlert=#{isAlert}, company=#{company}, purpose=#{purpose}
     	where id=#{id}
     </update>
     

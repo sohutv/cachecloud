@@ -4,7 +4,7 @@
 
 <mapper namespace="com.sohu.cache.dao.InstanceDao">
     <sql id="instance_info_columns">
-        id, app_id, host_id, ip, port, status, mem, conn, cmd, type
+        id, app_id, host_id, ip, port, status, mem, conn, cmd, type, update_time
     </sql>
 
     <!--通过type查询实例列表-->
@@ -114,7 +114,8 @@
         <if test="mem != null">mem=#{mem},</if>
         <if test="conn != null">conn=#{conn},</if>
         <if test="cmd != null">cmd=#{cmd},</if>
-        status=#{status}
+        status=#{status},
+        update_time = now()
         where
         id=#{id}
     </update>

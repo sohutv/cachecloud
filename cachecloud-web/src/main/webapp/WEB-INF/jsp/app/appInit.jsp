@@ -136,9 +136,7 @@
 												<div class="col-md-5">
 													<select id="versionId" name="versionId" class="form-control">
 														<c:forEach items="${versionList}" var="version">
-															<%--<c:if test="${version.ispush == 1}">--%>
 																<option value="${version.id}">${version.name}</option>
-															<%--</c:if>--%>
 														</c:forEach>
 													</select>
 												</div>

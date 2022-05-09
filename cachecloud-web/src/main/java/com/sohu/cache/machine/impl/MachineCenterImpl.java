@@ -27,7 +27,8 @@ import com.sohu.cache.util.*;
 import com.sohu.cache.web.enums.BooleanEnum;
 import com.sohu.cache.web.enums.CheckEnum;
 import com.sohu.cache.web.enums.MachineMemoryDistriEnum;
-import com.sohu.cache.web.enums.ModuleEnum;
+import com.sohu.cache.web.enums.AlertTypeEnum;
+import com.sohu.cache.web.service.AppAlertRecordService;
 import com.sohu.cache.web.vo.MachineEnv;
 import com.sohu.cache.web.vo.MachineStatsVo;
 import org.apache.commons.collections.CollectionUtils;
@@ -87,6 +88,8 @@ public class MachineCenterImpl implements MachineCenter {
     protected AsyncService asyncService;
     @Autowired
     private ForkJoinPool forkJoinPool;
+    @Autowired
+    private AppAlertRecordService appAlertRecordService;
 
     /**
      * 邮箱报警
@@ -244,6 +247,7 @@ public class MachineCenterImpl implements MachineCenter {
         // 报警
         if (StringUtils.isNotBlank(alertContent.toString())) {
             String title = "cachecloud机器内存报警:";
+            appAlertRecordService.saveAlertInfoByType(AlertTypeEnum.MACHINE_MEMORY_OVER_PRESET, title, alertContent.toString(), ip);
             emailComponent.sendMailToAdmin(title, alertContent.toString());
         }
     }
@@ -980,7 +984,6 @@ public class MachineCenterImpl implements MachineCenter {
                         "sshpass -V | head -1;" +
                         "ulimit -n;" +
                         "echo 0;" +
-//                        "lsof | grep cachecloud | wc -l;" +
                         "df -h | grep '/dev' | grep '/data' | awk '{print $5\"(\"$3\"/\"$2\")\"}';" +
                         "ps -ef | grep redis | wc -l;" +
                         "";
@@ -1178,5 +1181,15 @@ public class MachineCenterImpl implements MachineCenter {
             }
         }
         return machineStatsList;
+    }
+
+    public boolean checkMachineMemory(String ip){
+
+        MachineStats machineStats = machineStatsDao.getMachineStatsByIp(ip);
+        float memThreshold= Float.parseFloat(machineStats.getMemoryFree())/Float.parseFloat(machineStats.getMemoryTotal());
+        if (machineStats == null || memThreshold < 0.15) {
+            return false;
+        }
+        return true;
     }
 }

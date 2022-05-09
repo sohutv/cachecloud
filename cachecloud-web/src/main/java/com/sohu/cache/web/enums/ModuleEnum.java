@@ -5,8 +5,8 @@ package com.sohu.cache.web.enums;
  */
 public enum ModuleEnum {
 
-    BLOOMFILTER_NAME("bf"), REDISSEARCH_NAME("search"),
-    BLOOMFILTER_SO("redisbloom.so"),REDISSEARCH_SO("redisearch.so");
+    BLOOMFILTER_NAME("bf"), REDISSEARCH_NAME("search"),REDISMODULEOSS_NAME("search"),
+    BLOOMFILTER_SO("redisbloom.so"),REDISSEARCH_SO("redisearch.so"),MODULE_OSS_SO("module-oss.so");
 
     private String value;
 

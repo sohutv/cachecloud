@@ -7,6 +7,7 @@ import com.sohu.cache.dao.AppUserDao;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.AppToUser;
 import com.sohu.cache.entity.AppUser;
+import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.enums.SuccessEnum;
 import com.sohu.cache.web.service.UserService;
 import org.apache.commons.collections.CollectionUtils;
@@ -146,6 +147,28 @@ public class UserServiceImpl implements UserService {
     public SuccessEnum delete(Long userId) {
         try {
             appUserDao.delete(userId);
+            return SuccessEnum.SUCCESS;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return SuccessEnum.FAIL;
+        }
+    }
+
+    @Override
+    public SuccessEnum resetPwd(Long userId) {
+        try {
+            appUserDao.updatePwd(userId, ConstUtils.DEFAULT_USER_PASSWORD);
+            return SuccessEnum.SUCCESS;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return SuccessEnum.FAIL;
+        }
+    }
+
+    @Override
+    public SuccessEnum updatePwd(Long userId, String password) {
+        try {
+            appUserDao.updatePwd(userId, password);
             return SuccessEnum.SUCCESS;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

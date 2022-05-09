@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ include file="/WEB-INF/jsp/manage/commons/taglibs.jsp" %>
+<%@ page import="com.sohu.cache.utils.EnvCustomUtil"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <script src="/resources/manage/plugins/jquery-1.10.2.min.js"></script>
@@ -670,6 +671,30 @@
                                         </div>
                                     </div>
 
+                                    <c:if test="<%=EnvCustomUtil.openswitch%>">
+                                        <div class="form-group">
+                                            <label class="control-label col-md-3">
+                                                公司名称:
+                                            </label>
+                                            <div class="col-md-5">
+                                                <input type="text" name="company" id="company${user.id}"
+                                                       value="${user.company}" placeholder="公司名称"
+                                                       class="form-control"/>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="control-label col-md-3">
+                                                使用目的:
+                                            </label>
+                                            <div class="col-md-5">
+                                                <input type="text" name="purpose" id="purpose${user.id}"
+                                                       value="${user.purpose}" placeholder="使用目的"
+                                                       class="form-control"/>
+                                            </div>
+                                        </div>
+                                    </c:if>
+
                                     <input type="hidden" id="type${user.id}" value="${user.type}">
                                     <input type="hidden" id="userId${user.id}" name="userId" value="${user.id}"/>
                                 </div>
@@ -683,7 +708,7 @@
                     <div class="modal-footer">
                         <button type="button" data-dismiss="modal" class="btn">Close</button>
                         <button type="button" class="btn red"
-                                onclick="saveOrUpdateUser('${user.id}','${appDetail.appDesc.appId}')">Ok
+                                onclick="saveOrUpdateUser('${user.id}','${appDetail.appDesc.appId}', <%=EnvCustomUtil.openswitch%>)">Ok
                         </button>
                     </div>
                 </form>

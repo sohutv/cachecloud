@@ -131,6 +131,10 @@ public class HighchartPoint {
             count = appStat.getCpuSysChildren();
         } else if ("cpuUserChildren".equals(statName)) {
             count = appStat.getCpuUserChildren();
+        } else if ("expiredKeys".equals(statName)) {
+            count = appStat.getExpiredKeys();
+        } else if ("evictedKeys".equals(statName)) {
+            count = appStat.getEvictedKeys();
         }
         //为了显示在一个时间范围内
         if (diffDays > 0) {

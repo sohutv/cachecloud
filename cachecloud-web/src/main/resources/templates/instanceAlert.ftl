@@ -40,6 +40,9 @@
                     		说明
                     </td>
                     <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 140px;">
+                            重要程度
+                    </td>
+                    <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 140px;">
                     		其他信息
                     </td>
                 </tr>
@@ -67,6 +70,29 @@
 						<td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 140px;">
 							${item.alertMessage!}
 						</td>
+
+                        <#if item.instanceAlertConfig.importantLevel??>
+                            <#if item.instanceAlertConfig.importantLevel == 0>
+                                <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 140px;">
+                                    一般
+                                </td>
+                            </#if>
+                            <#if item.instanceAlertConfig.importantLevel == 1>
+                                <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 140px;color: darkorange">
+                                    重要
+                                </td>
+                            </#if>
+                            <#if item.instanceAlertConfig.importantLevel == 2>
+                                <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 140px; color: red">
+                                    紧急
+                                </td>
+                            </#if>
+                        <#else>
+                            <td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 140px;">
+                                一般
+                            </td>
+                        </#if>
+
 						<td style="border-right: 1px dotted #676767; border-bottom: 1px dotted #676767; height:33px; width: 140px;">
 							${item.otherInfo!}
 						</td>

@@ -2,6 +2,8 @@
 
 ### <span style="color:green">CacheCloud定制客户端分类说明：</span>
 
+CacheCloud 3.0以上版本中已移除cachecloud-client模块，请移至[cachecloud-client](https://github.com/sohutv/cachecloud-client)开源地址查看。
+
 - 1.[cachecloud-client-redis](#j1) (基于Jedis定制客户端)
 - 2.[cachecloud-jedis](#j2) (定制完善Jedis客户端)
 - 3.[cachecloud-client-crossroom-redis](#j3) (跨机房容灾高可用客户端)

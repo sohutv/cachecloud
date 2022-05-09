@@ -67,11 +67,18 @@ public interface AppService {
     int update(AppDesc appDesc);
 
     /**
-     * 获取应用的实例
-     *
+     * 获取应用下实例的基本信息
      * @param appId
      * @return
      */
+    List<InstanceInfo> getAppBasicInstanceInfo(Long appId);
+
+        /**
+         * 获取应用的实例
+         *
+         * @param appId
+         * @return
+         */
     List<InstanceInfo> getAppInstanceInfo(Long appId);
 
     List<InstanceInfo> getAppOnlineInstanceInfo(Long appId);

@@ -4,6 +4,7 @@ package com.sohu.cache.task.tasks.diagnosticTask;
 import com.sohu.cache.constant.DiagnosticTypeEnum;
 import com.sohu.cache.entity.DiagnosticTaskRecord;
 import com.sohu.cache.entity.InstanceSlotModel;
+import com.sohu.cache.redis.util.PipelineUtil;
 import com.sohu.cache.task.BaseTask;
 import com.sohu.cache.task.constant.TaskConstants;
 import com.sohu.cache.task.constant.TaskStepFlowEnum.TaskFlowStatusEnum;
@@ -154,8 +155,7 @@ public class InstanceSlotAnalysisTask extends BaseTask {
                         break;
                     }
                 }
-
-                slotList.stream().forEach(slot -> pipeline.clusterCountKeysInSlot(slot));
+                slotList.stream().forEach(slot -> PipelineUtil.clusterCountKeysInSlot(pipeline, slot));
                 List<Object> objectList = new ArrayList<>();
                 try {
                     objectList = pipeline.syncAndReturnAll();

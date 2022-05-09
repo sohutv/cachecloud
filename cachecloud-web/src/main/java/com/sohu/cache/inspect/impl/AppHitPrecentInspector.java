@@ -7,6 +7,7 @@ import com.sohu.cache.inspect.InspectParamEnum;
 import com.sohu.cache.inspect.Inspector;
 import com.sohu.cache.stats.app.AppStatsCenter;
 import com.sohu.cache.util.ConstUtils;
+import com.sohu.cache.web.enums.AlertTypeEnum;
 import com.sohu.cache.web.vo.AppDetailVO;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -88,6 +89,7 @@ public class AppHitPrecentInspector extends BaseAlertService implements Inspecto
         String content = String.format("应用(%s)-应用平均命中率报警-当前命中率百分之%s-现已低于预设百分之%s-请及时关注",
                 appDesc.getAppId(), appDetailVO.getHitPercent(), appDesc.getHitPrecentAlertValue());
         String title = "CacheCloud系统-应用平均命中率报警";
+        appAlertRecordService.saveAlertInfoByType(AlertTypeEnum.APP_HIT_RATIO, title, content, appDetailVO);
         emailComponent.sendMail(title, content, appDetailVO.getEmailList(),
                 Arrays.asList(emailComponent.getAdminEmail().split(ConstUtils.COMMA)));
         weChatComponent.sendWeChatToAll(title,content,appDetailVO.getWeChatList());

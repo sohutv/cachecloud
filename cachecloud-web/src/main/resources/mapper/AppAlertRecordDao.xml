@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sohu.cache.dao.AppAlertRecordDao">
+    <sql id="alert_record_fields">
+        create_time, visible_type, important_level, app_id, instance_id, ip, port, title, content
+    </sql>
+
+    <sql id="alert_record_query_fields">
+        id, create_time, visible_type, important_level, app_id, instance_id, ip, port, title, content
+    </sql>
+
+    <insert id="save" parameterType="com.sohu.cache.entity.AppAlertRecord" keyProperty="id" useGeneratedKeys="true" >
+    	insert into app_alert_record
+    		(<include refid="alert_record_fields"/>)
+		values
+			(
+            #{createTime},#{visibleType},#{importantLevel},#{appId},#{instanceId},#{ip},#{port},#{title},#{content}
+            )
+    </insert>
+
+    <insert id="batchSave">
+        insert ignore into app_alert_record (<include refid="alert_record_fields"/>)
+        values
+        <foreach collection="list" item="appAlertRecord" separator=",">
+            (
+            #{appAlertRecord.createTime},#{appAlertRecord.visibleType},#{appAlertRecord.importantLevel},#{appAlertRecord.appId},
+            #{appAlertRecord.instanceId},#{appAlertRecord.ip},#{appAlertRecord.port},#{appAlertRecord.title},#{appAlertRecord.content}
+            )
+        </foreach>
+    </insert>
+
+</mapper>
+
+

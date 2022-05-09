@@ -6,6 +6,7 @@ import com.sohu.cache.entity.*;
 import com.sohu.cache.machine.MachineCenter;
 import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.redis.RedisDeployCenter;
+import com.sohu.cache.redis.util.AuthUtil;
 import com.sohu.cache.stats.app.AppDailyDataCenter;
 import com.sohu.cache.stats.app.AppDeployCenter;
 import com.sohu.cache.task.TaskService;
@@ -17,22 +18,24 @@ import com.sohu.cache.web.enums.NodeEnum;
 import com.sohu.cache.web.enums.RedisOperateEnum;
 import com.sohu.cache.web.enums.SuccessEnum;
 import com.sohu.cache.web.service.AppService;
+import com.sohu.cache.web.service.ModuleService;
 import com.sohu.cache.web.util.AppEmailUtil;
 import com.sohu.cache.web.util.DateUtil;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
-import redis.clients.jedis.util.AuthUtil;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -80,6 +83,8 @@ public class AppManageController extends BaseController {
 
     @Resource
     private TaskService taskService;
+    @Autowired
+    private ModuleService moduleService;
 
     @RequestMapping("/appDaily")
     public ModelAndView appDaily(HttpServletRequest request, HttpServletResponse response, Model model) throws ParseException {
@@ -210,9 +215,11 @@ public class AppManageController extends BaseController {
         AppUser appUser = getUserInfo(request);
         logger.warn("user {} change appConfig:appId={};key={};value={},appAuditId:{}", appUser.getName(), appId, appConfigKey, appConfigValue, appAuditId);
         boolean isModify = false;
-        if (appId != null && appAuditId != null && StringUtils.isNotBlank(appConfigKey) && StringUtils.isNotBlank(appConfigValue)) {
+        if (appId != null && StringUtils.isNotBlank(appConfigKey)) {
             try {
-                appAuditDao.updateAppAuditOperateUser(appAuditId, appUser.getId());
+                if(appAuditId != null ){
+                    appAuditDao.updateAppAuditOperateUser(appAuditId, appUser.getId());
+                }
                 isModify = appDeployCenter.modifyAppConfig(appId, appAuditId, appConfigKey, appConfigValue);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
@@ -463,7 +470,7 @@ public class AppManageController extends BaseController {
             AppAudit appAudit = appService.getAppAuditById(appAuditId);
             appId = appAudit.getAppId();
             model.addAttribute("appAudit", appAudit);
-            appDesc = appAudit.getAppDesc();
+            appDesc = appService.getByAppId(appId);
         }
 
         // 获取所有Redis版本
@@ -473,11 +480,14 @@ public class AppManageController extends BaseController {
         // 获取机器信息
         Map<String, Integer> machineInstanceCountMap = machineCenter.getMachineInstanceCountMap();
 
-        if (appDesc != null) {
-            model.addAttribute("version", appDesc.getVersionName());
+        if (appDesc.getVersionId() > 0) {
+            model.addAttribute("version", resourceService.getResourceById(appDesc.getVersionId()));
         }
         List<MachineRoom> roomList = machineCenter.getEffectiveRoom();
         model.addAttribute("roomList", roomList);
+        //获取插件信息
+        List<ModuleInfo> allModules = moduleService.getAllModules();
+        List<ModuleInfo> allModuleVersions = moduleService.getAllModuleVersions();
 
         model.addAttribute("machineList", machineList);
         model.addAttribute("machineInstanceCountMap", machineInstanceCountMap);
@@ -486,6 +496,8 @@ public class AppManageController extends BaseController {
         model.addAttribute("md5password", AuthUtil.getAppIdMD5(String.valueOf(appId)));
         model.addAttribute("appDesc", appService.getByAppId(appId));
         model.addAttribute("versionList", allRedisVersion);
+        model.addAttribute("allModules", allModules);
+        model.addAttribute("allModuleVersions", allModuleVersions);
         model.addAttribute("importId", request.getParameter("importId"));
 
         return new ModelAndView("manage/appAudit/deploy/initAppDeploy");
@@ -625,7 +637,9 @@ public class AppManageController extends BaseController {
                                            String redisMachines,
                                            String sentinelMachines,
                                            String twemproxyMachines,
-                                           String pikaMachines) {
+                                           String pikaMachines,
+                                           String moduleinfos
+                                        ) {
         JSONObject json = new JSONObject();
         long taskid = -1;//任务流跳转
         AppUser appUser = getUserInfo(request);
@@ -635,6 +649,7 @@ public class AppManageController extends BaseController {
         logger.info("sentinelMachines:{} ,num:{} ", sentinelMachines, sentinelNum);
         logger.info("twemproxyMachines:{} ,num:{} ", twemproxyMachines, twemproxyNum);
         logger.info("pikaMachines:{} ,num:{} ", pikaMachines, pikaNum);
+        logger.info("moduleinfos:{} ", moduleinfos);
         try {
             List<String> redisMachinelist = Arrays.asList(redisMachines.split(";"));
             List<String> sentinelMachinelist = Arrays.asList(sentinelMachines.split(";"));
@@ -671,13 +686,13 @@ public class AppManageController extends BaseController {
             //2.根据应用类型获取部署拓扑信息
             switch (type) {
                 case 2: //  部署task :redis cluster
-                    taskid = taskService.addRedisClusterAppTask(appid, appAuditId, maxMemory, redisMachinelist, redisNum, redisResource.getName(), -1);
+                    taskid = taskService.addRedisClusterAppTask(appid, appAuditId, maxMemory, redisMachinelist, redisNum, redisResource.getName(),moduleinfos, -1);
                     break;
                 case 5: //  部署task :sentinel + redis
-                    taskid = taskService.addRedisSentinelAppTask(appid, appAuditId, maxMemory, redisMachinelist, sentinelMachinelist, redisNum, sentinelNum, redisResource.getName(), -1);
+                    taskid = taskService.addRedisSentinelAppTask(appid, appAuditId, maxMemory, redisMachinelist, sentinelMachinelist, redisNum, sentinelNum, redisResource.getName(),moduleinfos, -1);
                     break;
                 case 6://   部署task :standalone
-                    taskid = taskService.addRedisStandaloneAppTask(appid, appAuditId, maxMemory, redisMachinelist, 1, redisResource.getName(), -1);
+                    taskid = taskService.addRedisStandaloneAppTask(appid, appAuditId, maxMemory, redisMachinelist, 1, redisResource.getName(),moduleinfos, -1);
                     break;
                 case 7: //  部署task :twemproxy + redis
                     taskid = taskService.addTwemproxyAppTask(appid, appAuditId, maxMemory, redisMachinelist, sentinelMachinelist,
@@ -958,20 +973,33 @@ public class AppManageController extends BaseController {
             List<InstanceInfo> instanceList = redisCenter.checkInstanceModule(appId);
             model.addAttribute("instanceList", instanceList);
             AppDesc appDesc = appService.getByAppId(appId);
+
+            List<ModuleInfo> allModuleVersions = moduleService.getAllModuleVersions();
+
             model.addAttribute("appDesc", appDesc);
             model.addAttribute("basePath", ConstUtils.MODULE_BASE_PATH);
-            model.addAttribute("moduleMap", ConstUtils.MODULE_MAP);
+
+            model.addAttribute("allModuleVersions", allModuleVersions);
         }
         return new ModelAndView("manage/appOps/appModule");
     }
 
     @RequestMapping("/loadModule")
-    public ModelAndView loadModule(HttpServletRequest request, HttpServletResponse response, Long appId, String moduleName) {
+    public ModelAndView loadModule(HttpServletRequest request, HttpServletResponse response, Long appId,String moduleinfos) {
         Map<String, Object> map = new HashMap();
         AppUser appUser = getUserInfo(request);
-        if (appId != null && appId > 0) {
-            map = redisCenter.loadModule(appId, moduleName);
+        if (appId != null && appId > 0 && !StringUtils.isEmpty(moduleinfos)) {
+            for (String versionId : moduleinfos.split(";")) {
+                if (!StringUtils.isEmpty(versionId)) {
+                    map = redisCenter.loadModule(appId, Integer.parseInt(versionId));
+                    Integer status = MapUtils.getInteger(map, "status");
+                    String message = MapUtils.getString(map, "message");
+                    String so_name = MapUtils.getString(map, "so_name");
+                    logger.info("{} module load info status:{} message:{}",so_name,status, message);
+                }
+            }
         }
+
         logger.warn("user {} loadModule, appId:{}, result is {}", appUser.getName(), appId, map);
         sendMessage(response, JSONObject.fromObject(map).toString());
         return null;

@@ -6,6 +6,7 @@ import com.sohu.cache.dao.InstanceDao;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.InstanceAlertValueResult;
 import com.sohu.cache.entity.InstanceInfo;
+import com.sohu.cache.web.enums.AlertTypeEnum;
 import com.sohu.cache.web.service.AppService;
 import com.sohu.cache.web.service.UserService;
 import com.sohu.cache.web.util.FreemakerUtils;
@@ -54,6 +55,7 @@ public class InstanceStateInspector extends BaseAlertService {
             Map<String, Object> context = new HashMap<>();
             context.put("instanceAlertValueResultList", alertInstInfo);
             String emailContent = FreemakerUtils.createText("instanceState.ftl", configuration, context);
+            appAlertRecordService.saveAlertInfoByType(AlertTypeEnum.INATANCE_EXCEPTION_STATE_MONITOR, emailTitle, null, alertInstInfo);
             emailComponent.sendMailToAdmin(emailTitle, emailContent);
             logger.info(emailContent);
         }

@@ -4,6 +4,7 @@ import com.sohu.cache.constant.ClusterOperateResult;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.web.enums.RedisOperateEnum;
+import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 
 import java.util.List;
@@ -148,7 +149,7 @@ public interface RedisDeployCenter {
      * @version 1.0
      * @date 2018/9/12
      */
-    public boolean bornConfigAndRunNode(AppDesc appDesc, InstanceInfo instanceInfo, String host, Integer port, int maxMemory, boolean isCluster);
+    public boolean bornConfigAndRunNode(AppDesc appDesc, InstanceInfo instanceInfo, String host, Integer port, int maxMemory, boolean isCluster,boolean isInstallModule,String moduleCommand);
 
     /**
      * sentinel类型应用执行Failover,主从切换
@@ -175,6 +176,15 @@ public interface RedisDeployCenter {
      * @return
      */
     public boolean clusterFailover(long appId, int slaveInstanceId, String failoverParam) throws Exception;
+
+    /**
+     * 根据 host port进行
+     * @param appId
+     * @param failoverParam
+     * @return
+     * @throws Exception
+     */
+    public boolean clusterFailover(long appId, HostAndPort hostAndPort, String failoverParam) throws Exception;
 
     /**
      * 检查是否具备forget的条件

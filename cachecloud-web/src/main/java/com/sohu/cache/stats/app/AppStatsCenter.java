@@ -155,9 +155,10 @@ public interface AppStatsCenter {
      *
      * @param appId
      * @param command
+     * @param userName
      * @return
      */
-    public String executeCommand(long appId, String command);
+    public String executeCommand(long appId, String command, String userName);
 
 
     /**

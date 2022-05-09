@@ -60,7 +60,7 @@ public class AppDeployCenterImpl implements AppDeployCenter {
     private RedisConfigTemplateService redisConfigTemplateService;
 
     @Override
-    public boolean createApp(AppDesc appDesc, AppUser appUser, String memSize) {
+    public boolean createApp(AppDesc appDesc, AppUser appUser, String memSize, String isInstall, String moduleInfo) {
         try {
             appService.save(appDesc);
             // 保存应用和用户的关系
@@ -88,6 +88,10 @@ public class AppDeployCenterImpl implements AppDeployCenter {
             appAudit.setModifyTime(new Date());
             appAudit.setParam1(memSize);
             appAudit.setParam2(appDesc.getTypeDesc());
+            //模块信息
+            if ("1".equals(isInstall)) {
+                appAudit.setParam3(moduleInfo);
+            }
             appAudit.setInfo("类型:" + appDesc.getTypeDesc() + ";初始申请空间:" + memSize);
             appAudit.setStatus(AppCheckEnum.APP_WATING_CHECK.value());
             appAudit.setType(AppAuditType.APP_AUDIT.getValue());
@@ -187,130 +191,6 @@ public class AppDeployCenterImpl implements AppDeployCenter {
         }
         return DataFormatCheckResult.success("应用部署格式正确，可以开始部署了!");
     }
-
-
-    /*@Override
-    public DataFormatCheckResult checkAppDeployDetail(Long appAuditId, String appDeployText, Integer versionId) {
-        if (appAuditId == null) {
-            logger.error("appAuditId is null");
-            return DataFormatCheckResult.fail("审核id不能为空!");
-        }
-        if (StringUtils.isBlank(appDeployText)) {
-            logger.error("appDeployText is null");
-            return DataFormatCheckResult.fail("部署节点列表不能为空!");
-        }
-        String[] nodeInfoList = appDeployText.split(ConstUtils.NEXT_LINE);
-        if (nodeInfoList == null || nodeInfoList.length == 0) {
-            logger.error("nodeInfoList is null");
-            return DataFormatCheckResult.fail("部署节点列表不能为空!");
-        }
-        AppAudit appAudit = appAuditDao.getAppAudit(appAuditId);
-        if (appAudit == null) {
-            logger.error("appAudit:id={} is not exist", appAuditId);
-            return DataFormatCheckResult.fail(String.format("审核id=%s不存在", appAuditId));
-        }
-        long appId = appAudit.getAppId();
-        AppDesc appDesc = appService.getByAppId(appId);
-        if (appDesc == null) {
-            logger.error("appDesc:id={} is not exist");
-            return DataFormatCheckResult.fail(String.format("appId=%s不存在", appId));
-        }
-        int type = appDesc.getType();
-
-        SystemResource redisResource = resourceDao.getResourceById(versionId);
-        //检查每一行
-        for (String nodeInfo : nodeInfoList) {
-            nodeInfo = StringUtils.trim(nodeInfo);
-            if (StringUtils.isBlank(nodeInfo)) {
-                return DataFormatCheckResult.fail(String.format("部署列表%s中存在空行", appDeployText));
-            }
-            String[] array = nodeInfo.split(ConstUtils.COLON);
-            if (array == null || array.length == 0) {
-                return DataFormatCheckResult.fail(String.format("部署列表%s中存在空行", appDeployText));
-            }
-            String masterHost = null;
-            String memSize = null;
-            String slaveHost = null;
-            if (TypeUtil.isRedisCluster(type)) {
-                if (array.length == 2) {
-                    masterHost = array[0];
-                    memSize = array[1];
-                } else if (array.length == 3) {
-                    masterHost = array[0];
-                    memSize = array[1];
-                    slaveHost = array[2];
-                } else {
-                    return DataFormatCheckResult.fail(String.format("部署列表中%s, 格式错误!", nodeInfo));
-                }
-            } else if (TypeUtil.isRedisSentinel(type) || TypeUtil.isPikaSentinel(type)) {
-                if (array.length == 3) {
-                    masterHost = array[0];
-                    memSize = array[1];
-                    slaveHost = array[2];
-                } else if (array.length == 1) {
-                    masterHost = array[0];
-                } else {
-                    return DataFormatCheckResult.fail(String.format("部署列表中%s, 格式错误!", nodeInfo));
-                }
-            } else if (TypeUtil.isRedisStandalone(type)) {
-                if (array.length == 2) {
-                    masterHost = array[0];
-                    memSize = array[1];
-                } else {
-                    return DataFormatCheckResult.fail(String.format("部署列表中%s, 格式错误!", nodeInfo));
-                }
-            } else if (TypeUtil.isRedisTwemproxy(type) || TypeUtil.isPikaTwemproxy(type)) {
-                if (array.length == 2) {
-                    masterHost = array[0];
-                    memSize = array[1];
-                } else if (array.length == 3) {
-                    masterHost = array[0];
-                    memSize = array[1];
-                    slaveHost = array[2];
-                } else if (array.length == 1) {
-                    masterHost = array[0];
-                } else {
-                    return DataFormatCheckResult.fail(String.format("部署列表中%s, 格式错误!", nodeInfo));
-                }
-            }
-            if (!checkHostExist(masterHost)) {
-                return DataFormatCheckResult.fail(String.format("%s中的ip=%s不存在，请在机器管理中添加!", nodeInfo, masterHost));
-            }
-            if (StringUtils.isNotBlank(memSize) && !NumberUtils.isDigits(memSize)) {
-                return DataFormatCheckResult.fail(String.format("%s中的中的memSize=%s不是整数!", nodeInfo, memSize));
-            }
-            if (StringUtils.isNotBlank(slaveHost) && !checkHostExist(slaveHost)) {
-                return DataFormatCheckResult.fail(String.format("%s中的ip=%s不存在，请在机器管理中添加!", nodeInfo, slaveHost));
-            }
-            // 20180828 检查机器的redis版本是否安装  todo modify
-            if (redisResource == null) {
-                return DataFormatCheckResult.fail(String.format("%s redis版本不存在，请添加正确Redis版本!", nodeInfo));
-            }
-            // master节点检查
-            Boolean installMasterStatus = redisConfigTemplateService.checkAndInstallRedisResource(masterHost, redisResource);
-            if (!installMasterStatus) {
-                return DataFormatCheckResult.fail(String.format("%s机器安装%s版本失败!", masterHost, redisResource.getName()));
-            }
-            // slave节点检查
-            if (StringUtils.isNotBlank(slaveHost)) {
-                Boolean installSlaveStatus = redisConfigTemplateService.checkAndInstallRedisResource(slaveHost, redisResource);
-                if (!installSlaveStatus) {
-                    return DataFormatCheckResult.fail(String.format("%s机器安装%s版本失败!", slaveHost, redisResource.getName()));
-                }
-            }
-        }
-        //检查sentinel类型:数据节点一行，sentinel节点多行
-        if (TypeUtil.isRedisSentinel(type) || TypeUtil.isPikaSentinel(type)) {
-            return checkSentinelAppDeploy(nodeInfoList);
-            //检查单点类型:只能有一行数据节点
-        } else if (TypeUtil.isRedisTwemproxy(type) || TypeUtil.isPikaTwemproxy(type)) {
-            // todo twemproxy 验证逻辑
-            //return checkSentinelAppDeploy(nodeInfoList);
-        } else if (TypeUtil.isRedisStandalone(type)) {
-            return checkStandaloneAppDeploy(nodeInfoList);
-        }
-        return DataFormatCheckResult.success("应用部署格式正确，可以开始部署了!");
-    }*/
 
     /**
      * 检查单点格式

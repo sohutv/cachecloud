@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
 import com.sohu.cache.constant.*;
-import com.sohu.cache.dao.AppDao;
 import com.sohu.cache.dao.AppUserDao;
 import com.sohu.cache.entity.*;
 import com.sohu.cache.machine.MachineCenter;
@@ -22,6 +21,7 @@ import com.sohu.cache.web.chart.model.HighchartDoublePoint;
 import com.sohu.cache.web.chart.model.HighchartPoint;
 import com.sohu.cache.web.chart.model.SimpleChartData;
 import com.sohu.cache.web.enums.SuccessEnum;
+import com.sohu.cache.web.service.ModuleService;
 import com.sohu.cache.web.service.ResourceService;
 import com.sohu.cache.web.service.UserService;
 import com.sohu.cache.web.util.AppEmailUtil;
@@ -37,7 +37,6 @@ import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -93,10 +92,10 @@ public class AppController extends BaseController {
 
     @Resource
     private UserService userService;
-    @Resource
-    private AppDao appDao;
     @Autowired
     private AppUserDao appUserDao;
+    @Autowired
+    private ModuleService moduleService;
 
     /**
      * 初始化贡献者页面
@@ -225,7 +224,7 @@ public class AppController extends BaseController {
             }
         }
         model.addAttribute("top5ClimaxList", top5ClimaxList);
-        if (StringUtils.isNotBlank(appDetail.getAppDesc().getPkey())) {
+        if (appDetail != null && StringUtils.isNotBlank(appDetail.getAppDesc().getPkey())) {
             model.addAttribute("md5password", appDetail.getAppDesc().getPasswordMd5());
         }
 
@@ -250,7 +249,8 @@ public class AppController extends BaseController {
         TimeBetween timeBetween = getTimeBetween(request, model, "startDate", "endDate");
 
         // 3.是否超过1天
-        if (timeBetween.getEndTime() - timeBetween.getStartTime() > TimeUnit.DAYS.toMillis(1)) {
+        if(timeBetween.getStartDate() != null && timeBetween.getEndDate() != null
+                && (timeBetween.getEndDate().getTime() - timeBetween.getStartDate().getTime() > TimeUnit.DAYS.toMillis(1))){
             model.addAttribute("betweenOneDay", 0);
         } else {
             model.addAttribute("betweenOneDay", 1);
@@ -725,6 +725,96 @@ public class AppController extends BaseController {
     }
 
     /**
+     * 获取指定时间内某个应用全部实例的过期/淘汰键统计信息
+     *
+     * @param appId
+     */
+    @RequestMapping("/appInstanceExpiredEvictedKeysStat")
+    public ModelAndView appInstanceExpiredEvictedKeysStat(HttpServletRequest request, Model model,
+                                                    Long appId) throws ParseException {
+        // 应用基本信息
+        AppDesc appDesc = appService.getByAppId(appId);
+        model.addAttribute("appDesc", appDesc);
+        model.addAttribute("appId", appId);
+        // 日期格式转换
+        getTimeBetween(request, model, "startDate", "endDate");
+        return new ModelAndView("app/appInstanceExpiredEvictedKeysStat");
+    }
+
+    /**
+     * 获取指定时间内某个应用全部实例的过期/淘汰键统计信息
+     * @param appId 应用流量
+     */
+    @RequestMapping("/getAppInstancesExpiredEvictedKeysStat")
+    public void getAppInstancesExpiredEvictedKeysStat(HttpServletRequest request, HttpServletResponse response, Model model,
+                                                Long appId) throws ParseException {
+        //时间转换
+        TimeBetween timeBetween = getJsonTimeBetween(request);
+
+        //缩减字段
+        String expiredKeysCommand = "expired_keys";
+        String evictedKeysCommand = "evicted_keys";
+        Map<String, String> commandMap = Maps.newHashMap();
+        commandMap.put(expiredKeysCommand, "exkey");
+        commandMap.put(evictedKeysCommand, "evkey");
+
+        long start = System.currentTimeMillis();
+        //获取应用下所有实例过期/淘汰键
+        Table<Integer, String, Map<String, List<InstanceMinuteStats>>> table = instanceStatsCenter
+                .getInstanceMinuteStatsList(appId, timeBetween.getStartTime(), timeBetween.getEndTime(),
+                        Arrays.asList(expiredKeysCommand, evictedKeysCommand));
+        logger.warn("getInstanceMinuteStatsList cost:{} ms", (System.currentTimeMillis() - start));
+
+        start = System.currentTimeMillis();
+
+        //解析成json数组
+        List<Map<String, Object>> appInstancesExpiredEvictedKeysStatList = new ArrayList<Map<String, Object>>();
+        for (Table.Cell<Integer, String, Map<String, List<InstanceMinuteStats>>> cell : table.cellSet()) {
+            Integer instanceId = cell.getRowKey();
+
+            //实例基本信息
+            Map<String, Object> instanceStatMap = new HashMap<String, Object>();
+            instanceStatMap.put("instanceId", instanceId);
+            instanceStatMap.put("instanceInfo", cell.getColumnKey());
+
+            //每个实例的统计信息
+            List<Map<String, Object>> instanceExpiredEvictedKeysStatList = new ArrayList<Map<String, Object>>();
+            instanceStatMap.put("instanceExpiredEvictedKeysStatMapList", instanceExpiredEvictedKeysStatList);
+            appInstancesExpiredEvictedKeysStatList.add(instanceStatMap);
+
+            //记录过期、淘汰键
+            Map<String, List<InstanceMinuteStats>> map = cell.getValue();
+            List<InstanceMinuteStats> instanceCommandStatsList = new ArrayList<>();
+            instanceCommandStatsList.addAll(map.get(expiredKeysCommand));
+            instanceCommandStatsList.addAll(map.get(evictedKeysCommand));
+
+            Map<Long, Map<String, Object>> total = new HashMap<Long, Map<String, Object>>();
+            for (InstanceMinuteStats instanceMinuteStats : instanceCommandStatsList) {
+                //用timestamp作为key,保证在一个Map统计里
+                long timestamp = instanceMinuteStats.getTimeStamp();
+                double memFragRatio = instanceMinuteStats.getMemFragmentationRatio();
+                String command = instanceMinuteStats.getCommandName();
+                //精简字段
+                command = commandMap.get(command);
+                if (total.containsKey(timestamp)) {
+                    Map<String, Object> tmpMap = total.get(timestamp);
+                    tmpMap.put(command, memFragRatio);
+                } else {
+                    Map<String, Object> tmpMap = new HashMap<String, Object>();
+                    tmpMap.put("t", timestamp);
+                    tmpMap.put(command, memFragRatio);
+                    total.put(timestamp, tmpMap);
+                    instanceExpiredEvictedKeysStatList.add(tmpMap);
+                }
+            }
+        }
+
+        String result = JSONObject.toJSONString(appInstancesExpiredEvictedKeysStatList);
+        logger.warn("parse Json cost:{} ms", (System.currentTimeMillis() - start));
+        write(response, result);
+    }
+
+    /**
      * 获取指定时间内某个应用全部实例的统计信息
      *
      * @param appId 应用流量
@@ -906,9 +996,12 @@ public class AppController extends BaseController {
         List<AppUser> userList = userService.getAllUser();
         List<MachineRoom> roomList = machineCenter.getEffectiveRoom();
         List<SystemResource> versionList = resourceService.getResourceList(ResourceEnum.REDIS.getValue());
+        //获取插件信息
+        List<ModuleInfo> allModules = moduleService.getAllModules();
         model.addAttribute("userList", userList);
         model.addAttribute("roomList", roomList);
         model.addAttribute("versionList", versionList);
+        model.addAttribute("allModules", allModules);
 
         return new ModelAndView("app/jobIndex/appInitIndex");
     }
@@ -1247,8 +1340,9 @@ public class AppController extends BaseController {
      */
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     public ModelAndView doAppAdd(HttpServletRequest request,
-                                 HttpServletResponse response, Model model, AppDesc appDesc, String memSize) {
+                                 HttpServletResponse response, Model model, AppDesc appDesc, String memSize, String isInstall, String moduleInfo) {
         AppUser appUser = getUserInfo(request);
+        logger.info("isInstall:{} moduleInfo:{}", isInstall, moduleInfo);
         if (appDesc != null) {
             Timestamp now = new Timestamp(new Date().getTime());
             appDesc.setCreateTime(now);
@@ -1259,7 +1353,7 @@ public class AppController extends BaseController {
             appDesc.setHitPrecentAlertValue(0);
             // 客户端默认关闭监控
             appDesc.setIsAccessMonitor(AppUserAlertEnum.NO.value());
-            appDeployCenter.createApp(appDesc, appUser, memSize);
+            appDeployCenter.createApp(appDesc, appUser, memSize, isInstall, moduleInfo);
         }
         return new ModelAndView("redirect:/admin/app/jobs");
     }
@@ -1305,10 +1399,11 @@ public class AppController extends BaseController {
     @RequestMapping("/commandExecute")
     public ModelAndView commandExecute(HttpServletRequest request, HttpServletResponse response, Model model,
                                        Long appId) {
+        AppUser currentUser = getUserInfo(request);
         if (appId != null && appId > 0) {
             model.addAttribute("appId", appId);
             String command = request.getParameter("command");
-            String result = appStatsCenter.executeCommand(appId, command);
+            String result = appStatsCenter.executeCommand(appId, command, currentUser != null ? currentUser.getName() : null);
             model.addAttribute("result", result);
         } else {
             model.addAttribute("result", "error");
@@ -1361,11 +1456,12 @@ public class AppController extends BaseController {
     public ModelAndView doAddUser(HttpServletRequest request,
                                   HttpServletResponse response, Model model, String name, String chName, String email, String mobile,
                                   String weChat,
-                                  Integer type, Integer isAlert, Long userId) {
+                                  Integer type, Integer isAlert, Long userId, String company, String purpose) {
         // 后台暂时不对参数进行验证
-        AppUser appUser = AppUser.buildFrom(userId, name, chName, email, mobile, weChat, type, isAlert);
+        AppUser appUser = AppUser.buildFrom(userId, name, chName, email, mobile, weChat, type, isAlert, company, purpose);
         try {
             if (userId == null) {
+                appUser.setPassword(ConstUtils.DEFAULT_USER_PASSWORD);
                 userService.save(appUser);
             } else {
                 userService.update(appUser);

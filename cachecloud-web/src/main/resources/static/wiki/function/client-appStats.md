@@ -14,13 +14,16 @@
   + CPU消耗：展示应用的CPU消耗情况趋势图，亦可查看应用下各实例的CPU消耗情况趋势；
   + 内存使用量：展示应用的内存使用情况趋势图，亦可查看应用下各实例的内存碎片率情况；
   + 客户端连接统计：展示该应用下客户端连接数趋势图；
-  + 键个数统计：展示该应用下键个数趋势图。
+  + 键个数统计：展示该应用下键个数趋势图；
+  + 过期/淘汰键统计：展示该应用下过期/淘汰键个数趋势图，亦可查看应用下各实例的过期/淘汰键统计。
   
 ![](../../img/function/client/client-statsInfo.jpg)
 
 ![](../../img/function/client/client-statsInfo1.jpg)
 
 ![](../../img/function/client/client-statsInfo2.jpg)
+
+![](../../img/function/client/client-statsInfo3.jpg)
 
     - 扩容/缩容，在应用统计信息页面，点击申请扩容，弹出如图弹框，按照要求填写对应信息，提交。提交成功后，将收到进度邮件。
     

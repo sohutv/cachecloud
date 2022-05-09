@@ -63,7 +63,8 @@ public enum RedisInfoEnum {
     master_port(RedisConstant.Replication, "master_port", "主节点端口", false),
     connected_slaves(RedisConstant.Replication, "connected_slaves", "从节点数量", false),
     master_repl_offset(RedisConstant.Replication, "master_repl_offset", "主节点偏移量", false),
-    
+    master_link_status(RedisConstant.Replication, "master_link_status", "主节点连接状态", false)
+
     ;
     
     private final static List<RedisInfoEnum> RedisInfoEnumList = new ArrayList<RedisInfoEnum>();

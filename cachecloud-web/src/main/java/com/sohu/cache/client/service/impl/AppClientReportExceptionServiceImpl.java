@@ -209,7 +209,7 @@ public class AppClientReportExceptionServiceImpl implements AppClientReportExcep
             }
             return appClientExceptionStatistics;
         } catch (Exception e) {
-            log.error("generate appClientCommandStatistics error {}, {}", e.getMessage(), e);
+            log.error("generate appClientCommandStatistics exceptionModel: {}, error {}, {}", exceptionModel, e.getMessage(), e);
             return null;
         }
 

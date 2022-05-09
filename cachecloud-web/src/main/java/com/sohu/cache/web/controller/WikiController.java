@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -45,7 +46,7 @@ public class WikiController extends BaseController {
         if (inputStream == null) {
             return null;
         }
-        String markdown = new String(read(inputStream));
+        String markdown = new String(read(inputStream), Charset.forName("utf-8"));
         MutableDataSet options = new MutableDataSet();
         options.setFrom(ParserEmulationProfile.MARKDOWN);
         options.set(Parser.EXTENSIONS, Arrays.asList(new Extension[]{TablesExtension.create()}));

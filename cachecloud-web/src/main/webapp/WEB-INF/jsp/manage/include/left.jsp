@@ -66,6 +66,17 @@
 			</a>
 		</li>
 
+		<li <c:if test="${insOperateActive == 1}">class="active"</c:if>>
+			<a href="/manage/instance/opsList">
+				<i class="glyphicon glyphicon-list"></i>
+				<span class="title">实例运维</span>
+				<c:if test="${insOperateActive == 1}">
+					<span class="selected"></span>
+					<span class="arrow"></span>
+				</c:if>
+			</a>
+		</li>
+
 		<li <c:if test="${appImportActive == 1}">class="active"</c:if>>
 			<a href="/import/app/index">
 				<i class="glyphicon glyphicon-import"></i>
@@ -138,6 +149,17 @@
 				<i class="fa fa-map-marker"></i>
 				<span class="title">资源管理</span>
 				<c:if test="${reourcesActive == 1}">
+					<span class="selected"></span>
+					<span class="arrow"></span>
+				</c:if>
+			</a>
+		</li>
+
+		<li <c:if test="${moduleActive == 1}">class="active"</c:if>>
+			<a href="/manage/app/resource/modulelist">
+				<i class="fa fa-map-marker"></i>
+				<span class="title">模块管理</span>
+				<c:if test="${moduleActive == 1}">
 					<span class="selected"></span>
 					<span class="arrow"></span>
 				</c:if>

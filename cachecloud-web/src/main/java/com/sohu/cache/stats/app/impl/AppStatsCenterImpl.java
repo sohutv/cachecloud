@@ -443,7 +443,7 @@ public class AppStatsCenterImpl implements AppStatsCenter {
     }
 
     @Override
-    public String executeCommand(long appId, String command) {
+    public String executeCommand(long appId, String command, String userName) {
         if (StringUtils.isBlank(command)) {
             return "命令不能为空";
         }
@@ -452,7 +452,7 @@ public class AppStatsCenterImpl implements AppStatsCenter {
             return "app not found";
         }
         if (TypeUtil.isRedisType(appDesc.getType())) {
-            return redisCenter.executeCommand(appDesc, command);
+            return redisCenter.executeCommand(appDesc, command, userName);
         }
         return "not support app";
     }

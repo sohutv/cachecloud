@@ -20,6 +20,12 @@ public class DefaultEmailComponent implements EmailComponent {
         return true;
     }
 
+	@Override
+    public boolean sendDailyMail(String title, String content, List<String> emailList, List<String> ccList) {
+        logger.warn("Please implement the sendDailyMail logic.");
+        return true;
+    }
+
     @Override
     public boolean sendMail(String title, String content, List<String> emailList) {
         logger.warn("Please implement the sendMail logic.");

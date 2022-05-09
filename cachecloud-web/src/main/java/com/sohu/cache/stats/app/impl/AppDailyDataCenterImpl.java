@@ -1,6 +1,7 @@
 package com.sohu.cache.stats.app.impl;
 
 import com.sohu.cache.alert.EmailComponent;
+import com.sohu.cache.alert.utils.AlertUtils;
 import com.sohu.cache.dao.*;
 import com.sohu.cache.entity.AppClientValueDistriSimple;
 import com.sohu.cache.entity.AppDailyData;
@@ -271,7 +272,8 @@ public class AppDailyDataCenterImpl implements AppDailyDataCenter {
         context.put("appDesc", appDesc);
         context.put("appDailyData", appDailyData);
         String mailContent = FreemakerUtils.createText("appDaily.ftl", configuration, context);
-        emailComponent.sendMail(title, mailContent, appDetailVO.getEmailList(), ccEmailList);
+        // 发送日报
+        emailComponent.sendDailyMail(title, mailContent, appDetailVO.getEmailList(), ccEmailList);
     }
 
 
@@ -281,7 +283,7 @@ public class AppDailyDataCenterImpl implements AppDailyDataCenter {
         Map<String, Object> context = new HashMap<>();
         context.put("examResult", topologyExamResult);
         String mailContent = FreemakerUtils.createText("topologyExam.ftl", configuration, context);
-        emailComponent.sendMailToAdmin(title, mailContent);
+        emailComponent.sendDailyMail(title, mailContent, Arrays.asList(AlertUtils.EMAILS.split(",")), null);
     }
 
     /**

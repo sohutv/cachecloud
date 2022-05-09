@@ -8,6 +8,10 @@ import com.sohu.cache.dao.AppDao;
 import com.sohu.cache.dao.InstanceDao;
 import com.sohu.cache.dao.MachineRelationDao;
 import com.sohu.cache.entity.*;
+import com.sohu.cache.entity.InstanceAlertValueResult;
+import com.sohu.cache.entity.AppDesc;
+import com.sohu.cache.entity.InstanceInfo;
+import com.sohu.cache.entity.MachineRelation;
 import com.sohu.cache.machine.MachineCenter;
 import com.sohu.cache.machine.MachineDeployCenter;
 import com.sohu.cache.redis.AssistRedisService;
@@ -21,8 +25,10 @@ import com.sohu.cache.task.constant.TaskQueueEnum;
 import com.sohu.cache.task.entity.TaskQueue;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.TypeUtil;
+import com.sohu.cache.web.enums.AlertTypeEnum;
 import com.sohu.cache.web.enums.MachineTaskEnum;
 import com.sohu.cache.web.enums.PodStatusEnum;
+import com.sohu.cache.web.service.AppAlertRecordService;
 import com.sohu.cache.web.service.AppService;
 import com.sohu.cache.web.service.ResourceService;
 import com.sohu.cache.web.util.DateUtil;
@@ -84,6 +90,8 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
     private AppService appService;
     @Autowired
     private ResourceService resourceService;
+    @Autowired
+    private AppAlertRecordService appAlertRecordService;
 
     private final static String LINE_SEP = "\\n";
     private final static String FAIL = "fail";
@@ -153,6 +161,67 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
             }
         }
 
+        return isRun;
+    }
+
+    @Override
+    public boolean startExistInstanceWithoutResourceCheck(long appId, int instanceId) {
+        Assert.isTrue(instanceId > 0L);
+        InstanceInfo instanceInfo = instanceDao.getInstanceInfoById(instanceId);
+        Assert.isTrue(instanceInfo != null);
+        int type = instanceInfo.getType();
+        String host = instanceInfo.getIp();
+        int port = instanceInfo.getPort();
+        // 获取redis路径
+        SystemResource redisResource = resourceService.getResourceById(appDao.getAppDescById(appId).getVersionId());
+        String redisDir = redisResource == null ? ConstUtils.REDIS_DEFAULT_DIR : ConstUtils.getRedisDir(redisResource.getName());
+        boolean isRun;
+        if (TypeUtil.isRedisType(type)) {
+            if (TypeUtil.isRedisSentinel(type)) {
+                isRun = redisCenter.isRun(host, port);
+            } else {
+                isRun = redisCenter.isRun(appId, host, port);
+            }
+            if (isRun) {
+                logger.warn("{}:{} instance is Running", host, port);
+            } else {
+                String runShell = "";
+                if (TypeUtil.isRedisCluster(type)) {
+                    runShell = redisDeployCenter.getRedisRunShell(true, host, port, redisDir);
+                } else if (TypeUtil.isRedisSentinel(type)) {
+                    runShell = redisDeployCenter.getSentinelRunShell(host, port, redisDir);
+                } else {
+                    runShell = redisDeployCenter.getRedisRunShell(false, host, port, redisDir);
+                }
+                boolean isRunShell = machineCenter.startProcessAtPort(host, port, runShell);
+                if (!isRunShell) {
+                    logger.error("startProcessAtPort-> {}:{} shell= {} failed", host, port, runShell);
+                    return false;
+                } else {
+                    logger.warn("{}:{} instance has Run", host, port);
+                }
+                if (TypeUtil.isRedisSentinel(type)) {
+                    isRun = redisCenter.isRun(host, port);
+                } else {
+                    isRun = redisCenter.isRun(appId, host, port);
+                }
+            }
+        } else {
+            logger.error("type={} not match!", type);
+            isRun = false;
+        }
+        if (isRun) {
+            instanceInfo.setStatus(InstanceStatusEnum.GOOD_STATUS.getStatus());
+            instanceDao.update(instanceInfo);
+        }
+        // 重置所有sentinel实例状态
+        if (TypeUtil.isRedisSentinel(type)) {
+            try {
+                redisDeployCenter.sentinelReset(appId);
+            } catch (Exception e) {
+                logger.error("redis sentinel reset error :{}", e.getMessage(), e);
+            }
+        }
         return isRun;
     }
 
@@ -347,13 +416,13 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
     @Override
     public boolean modifyInstanceConfig(long appId, Long appAuditId, String host, int port, String instanceConfigKey,
                                         String instanceConfigValue) {
-        Assert.isTrue(appAuditId != null && appAuditId > 0L);
+//        Assert.isTrue(appAuditId != null && appAuditId > 0L);
         Assert.isTrue(StringUtils.isNotBlank(host));
         Assert.isTrue(port > 0);
         Assert.isTrue(StringUtils.isNotBlank(instanceConfigKey));
-        Assert.isTrue(StringUtils.isNotBlank(instanceConfigValue));
+//        Assert.isTrue(StringUtils.isNotBlank(instanceConfigValue));
         boolean isModify = redisDeployCenter.modifyInstanceConfig(appId, host, port, instanceConfigKey, instanceConfigValue);
-        if (isModify) {
+        if (isModify && appAuditId != null) {
             // 改变审核状态
             appAuditDao.updateAppAudit(appAuditId, AppCheckEnum.APP_ALLOCATE_RESOURCE.value());
         }
@@ -389,6 +458,7 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
                             machineDeployCenter.updateMachineRelation(relationId, taskId, MachineTaskEnum.SYNCING.getValue());
                             // 3.2 探测 taskId 执行情况  10s轮训一次
                             long start = System.currentTimeMillis();
+
                             while (true) {
                                 TaskQueue taskQueue = taskService.getTaskQueueById(taskId);
                                 if (taskQueue.getStatus() == TaskQueueEnum.TaskStatusEnum.SUCCESS.getStatus()) {
@@ -397,7 +467,7 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
                                     break;
                                 }
                                 if (taskQueue.getStatus() == TaskQueueEnum.TaskStatusEnum.ABORT.getStatus()) {
-                                    // b).机器同步异常
+                                    // b).机器同步数据异常 发送邮件通知管理员
                                     syncEnum = MachineSyncEnum.SYNC_ABORT;
                                     break;
                                 }
@@ -406,6 +476,7 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
                             }
                             String emailTitle = String.format("Pod重启机器同步任务报警");
                             String emailContent = String.format("Pod ip:%s 发生重启, 宿主机发生变更[%s]->[%s],机器同步任务id:(%s) 状态:(%s), 数据同步时间开销:(%s s)", ip, sourceIp, targetIp, taskId, syncEnum.getDesc(), (System.currentTimeMillis() - start) / 1000);
+                            appAlertRecordService.saveAlertInfoByType(AlertTypeEnum.POD_RESTART_SYNC_TASK, emailTitle, emailContent, ip);
                             emailComponent.sendMailToAdmin(emailTitle, emailContent);
                         }
                     } else {
@@ -421,6 +492,7 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
                 syncEnum = MachineSyncEnum.NO_CHANGE;
                 String emailTitle = String.format("Pod重启机器同步任务报警");
                 String emailContent = String.format("Pod ip:%s 发生重启, 宿主机未变更[%s]->[%s] 状态:(%s)", ip, sourceIp, targetIp, syncEnum.getDesc());
+                appAlertRecordService.saveAlertInfoByType(AlertTypeEnum.POD_RESTART_SYNC_TASK, emailTitle, emailContent, ip);
                 emailComponent.sendMailToAdmin(emailTitle, emailContent);
             }
             return syncEnum;
@@ -502,6 +574,7 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
                 Map<String, Object> context = new HashMap<>();
                 context.put("instanceAlertValueResultList", recoverInstInfo);
                 String emailContent = FreemakerUtils.createText("instanceRecover.ftl", configuration, context);
+                appAlertRecordService.saveAlertInfoByType(AlertTypeEnum.POD_RESTART_INSTANCE_RECOVER, emailTitle, null, recoverInstInfo);
                 emailComponent.sendMailToAdmin(emailTitle, emailContent.toString());
             }
         } else {

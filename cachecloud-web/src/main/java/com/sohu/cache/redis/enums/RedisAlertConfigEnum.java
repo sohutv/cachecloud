@@ -29,8 +29,11 @@ public enum RedisAlertConfigEnum {
     master_slave_offset_diff("master_slave_offset_diff", "主从节点偏移量差(单位：字节)"),
     cluster_state("cluster_state", "集群状态"),
     cluster_slots_ok("cluster_slots_ok", "集群成功分配槽个数"),
-    used_cpu_sys("used_cpu_sys","系统cpu消耗"),
-    used_cpu_user("used_cpu_user","用户cpu消耗")
+    used_cpu_sys("used_cpu_sys","系统cpu消耗(单位：秒)"),
+    used_cpu_user("used_cpu_user","用户cpu消耗(单位：秒)"),
+    used_cpu_sys_children("used_cpu_sys_children","系统子进程cpu消耗(单位：秒)"),
+    used_cpu_user_children("used_cpu_user_children","用户子进程cpu消耗(单位：秒)"),
+    other_default_common_config("other_default_common_config","除上述之外的其他默认通用配置")
     ;
     private final static List<RedisAlertConfigEnum> redisAlertConfigEnumList = new ArrayList<RedisAlertConfigEnum>();
     static {

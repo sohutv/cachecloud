@@ -40,6 +40,13 @@
         group by host_port
     </select>
 
+    <select id="getAppLatencyStatsCount" resultType="int">
+        select count(0) as count
+        from instance_latency_history
+        where app_id=#{appId}
+        and execute_date between #{startTime} and #{endTime}
+    </select>
+
     <select id="getAppLatencyInfo" resultType="hashmap">
         select concat(ip,":",port) as host_port,UNIX_TIMESTAMP(execute_date) timestamp,
         <include refid="instance_latency_history_columns"/>

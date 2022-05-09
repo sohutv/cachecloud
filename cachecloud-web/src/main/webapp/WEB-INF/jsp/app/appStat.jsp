@@ -559,6 +559,53 @@
     <div id="containerDbsize"
          style="min-width: 310px; height: 350px; margin: 0 auto"></div>
 
+
+    <!-- 过期/淘汰键变化相关 -->
+    <script type="text/javascript">
+
+
+        /*if(betweenOneDay == 1){*/
+        var containerExpiredKeysUrl = "/admin/app/appInstanceExpiredEvictedKeysStat?appId=" + appId + chartParams;
+        $(document).ready(
+            function () {
+                var options = getOption("containerExpiredEvictedKeys", "<b>过期/淘汰键统计<a href='" + containerExpiredKeysUrl + "' target='_blank'>(查看实例过期/淘汰键统计)</a></b>", "个");
+                var commandsUrl = "/admin/app/getMutiStatAppStats.json?appId=" + appId + "&statName=expiredKeys,evictedKeys" + chartParams;
+                $.ajax({
+                    type: "get",
+                    url: commandsUrl,
+                    async: true,
+                    success: function (data) {
+                        console.log(data);
+                        var dataObject = eval("(" + data.data + ")");
+                        var expiredKeysDataArr = dataObject["expiredKeys"];
+                        //1.expiredKeys
+                        var expiredKeysPoints = getKeyPoints(expiredKeysDataArr, "expired_keys", 0);
+                        //确认单位
+                        console.log(expiredKeysPoints);
+
+                        options.yAxis.title.text = expiredKeysPoints.unitTxt;
+                        var unit = expiredKeysPoints.unit;
+                        console.log(expiredKeysPoints);
+
+                        options.series.push(expiredKeysPoints);
+
+                        //2.evictedKeys
+                        var evictedKeysDataArr = dataObject["evictedKeys"];
+                        var evictedKeysPoints = getKeyPoints(evictedKeysDataArr, "evicted_keys", 0);
+                        //确认单位
+                        options.yAxis.title.text = evictedKeysPoints.unitTxt;
+                        var unit = evictedKeysPoints.unit;
+                        options.series.push(evictedKeysPoints);
+
+                        new Highcharts.Chart(options);
+
+                    }
+                });
+            });
+    </script>
+    <div id="containerExpiredEvictedKeys"
+         style="min-width: 310px; height: 350px; margin: 0 auto"></div>
+
     <br/>
     <br/>
     <br/>

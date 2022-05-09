@@ -44,6 +44,10 @@ public interface AssistRedisService {
 
     List<String> lrange(String key, int start, int end);
 
+    Long llen(final String key);
+
+    String lpop(final String key);
+
     boolean zadd(String key, long score, String member);
 
     boolean hset(String key, String field, String value);
@@ -57,5 +61,7 @@ public interface AssistRedisService {
     void zincrby(String key, double score, String member);
 
     Set<Tuple> zrangeWithScores(String key, long start, long end);
+
+    boolean exists(String key);
 
 }

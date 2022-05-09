@@ -1,6 +1,7 @@
 package com.sohu.cache.schedule.brevity.impl;
 
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.AtomicLongMap;
 import com.sohu.cache.async.AsyncService;
 import com.sohu.cache.async.AsyncThreadPoolFactory;
 import com.sohu.cache.async.KeyCallable;
@@ -11,8 +12,7 @@ import com.sohu.cache.schedule.brevity.BrevityScheduleType;
 import com.sohu.cache.schedule.brevity.BrevityScheduler;
 import com.sohu.cache.server.ServerStatusCollector;
 import com.sohu.cache.util.ScheduleUtil;
-import com.sohu.tv.cc.client.spectator.util.AtomicLongMap;
-import com.sohu.tv.cc.client.spectator.util.DateUtils;
+import com.sohu.cache.web.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -147,7 +147,7 @@ public class BrevitySchedulerImpl implements BrevityScheduler {
     }
 
     private long getVersion() {
-        long version = Long.parseLong(DateUtils.formatDate(new Date(), _yyyyMMddHHmm));
+        long version = Long.parseLong(DateUtil.formatDate(new Date(), _yyyyMMddHHmm));
         return ScheduleUtil.getLastCollectTime(version);
     }
 

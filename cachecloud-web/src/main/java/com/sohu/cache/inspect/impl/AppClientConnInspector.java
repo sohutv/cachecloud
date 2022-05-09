@@ -10,6 +10,7 @@ import com.sohu.cache.stats.app.AppStatsCenter;
 import com.sohu.cache.stats.instance.InstanceStatsCenter;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.TypeUtil;
+import com.sohu.cache.web.enums.AlertTypeEnum;
 import com.sohu.cache.web.vo.AppDetailVO;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -112,6 +113,7 @@ public class AppClientConnInspector extends BaseAlertService implements Inspecto
         String title = "CacheCloud系统-客户端连接数报警";
         logger.warn("app title {}", title);
         logger.warn("app content {}", content);
+        appAlertRecordService.saveAlertInfoByType(AlertTypeEnum.APP_CLIENT_CONNECTION, title, content, appDetailVO);
         emailComponent.sendMail(title, content, appDetailVO.getEmailList(),
                 Arrays.asList(emailComponent.getAdminEmail().split(ConstUtils.COMMA)));
         weChatComponent.sendWeChatToAll(title,content,appDetailVO.getWeChatList());
@@ -131,6 +133,7 @@ public class AppClientConnInspector extends BaseAlertService implements Inspecto
         String title = "CacheCloud系统-分片客户端连接数报警";
         logger.warn("instance title {}", title);
         logger.warn("instace content {}", content);
+        appAlertRecordService.saveAlertInfoByType(AlertTypeEnum.APP_SHARD_CLENT_CONNECTION, title, content, appDetailVO, instanceStats);
         emailComponent.sendMail(title, content, appDetailVO.getEmailList(),
                 Arrays.asList(emailComponent.getAdminEmail().split(ConstUtils.COMMA)));
         weChatComponent.sendWeChatToAll(title,content,appDetailVO.getWeChatList());

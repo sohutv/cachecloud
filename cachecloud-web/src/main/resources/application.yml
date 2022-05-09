@@ -32,7 +32,7 @@ cachecloud:
     validationQuery: select 1 from dual
 management:
   server:
-    port: 8888
+    port: 8889
   endpoints:
     web:
       exposure:

@@ -242,4 +242,10 @@ public interface MachineCenter {
 
     public  List<MachineStats>  checkMachineModule(List<MachineStats> machineStatsList);
 
+    /**
+     * 检查机器内存是否充足 容器内存*0.85
+     * @param ip 检测机器
+     * true: 内存充足  false:内存使用率>85%
+     */
+    public boolean checkMachineMemory(String ip);
 }

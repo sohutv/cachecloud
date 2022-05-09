@@ -3,11 +3,11 @@ package com.sohu.cache.entity;
 import com.sohu.cache.constant.AppDescEnum;
 import com.sohu.cache.constant.AppDescEnum.AppImportantLevel;
 import com.sohu.cache.constant.AppStatusEnum;
+import com.sohu.cache.redis.util.AuthUtil;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.enums.AppTypeEnum;
 import lombok.Data;
 import org.apache.commons.lang.StringUtils;
-import redis.clients.jedis.util.AuthUtil;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -82,7 +82,7 @@ public class AppDesc implements Serializable {
     private int verId;
 
     /**
-     * 是否测试：1是0否
+     * 类型：0：正式 1：测试 2：试用
      */
     private int isTest;
 

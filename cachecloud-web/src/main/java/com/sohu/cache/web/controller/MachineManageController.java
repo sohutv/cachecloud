@@ -152,6 +152,13 @@ public class MachineManageController extends BaseController {
         //统计信息
         fillInstanceModel(instanceList, instanceStatList, model);
 
+        // 机器列表
+        List<MachineStats> machineList = machineCenter.getMachineStats(null, null, null, null, null, null, null);
+        // 获取机器信息
+        Map<String, Integer> machineInstanceCountMap = machineCenter.getMachineInstanceCountMap();
+        
+        model.addAttribute("machineInstanceCountMap", machineInstanceCountMap);
+        model.addAttribute("machineList", machineList);
         model.addAttribute("machineInfo", machineInfo);
         model.addAttribute("machineActive", SuccessEnum.SUCCESS.value());
         return new ModelAndView("manage/machine/machineInstances");

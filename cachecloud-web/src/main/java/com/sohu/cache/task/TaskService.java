@@ -274,7 +274,7 @@ public interface TaskService {
      * @return
      */
     long addRedisStandaloneAppTask(long appId, long appAuditId, int maxMemory, List<String> redisServerMachineList,
-                                   int masterPerMachine, String dbVersion, long parentTaskId);
+                                   int masterPerMachine, String dbVersion,String moduleinfos, long parentTaskId);
 
     /**
      * redis cluster集群
@@ -289,7 +289,7 @@ public interface TaskService {
      * @return
      */
     long addRedisClusterAppTask(long appId, long appAuditId, int maxMemory, List<String> redisServerMachineList,
-                                int masterPerMachine, String dbVersion, long parentTaskId);
+                                int masterPerMachine, String dbVersion,String moduleinfos, long parentTaskId);
 
     /**
      * redis sentinel集群
@@ -306,7 +306,7 @@ public interface TaskService {
      * @return
      */
     long addRedisSentinelAppTask(long appId, long appAuditId, int maxMemory, List<String> redisServerMachineList,
-                                 List<String> redisSentinelMachineList, int masterPerMachine, int sentinelPerMachine, String dbVersion,
+                                 List<String> redisSentinelMachineList, int masterPerMachine, int sentinelPerMachine, String dbVersion,String moduleinfos,
                                  long parentTaskId);
 
     /**

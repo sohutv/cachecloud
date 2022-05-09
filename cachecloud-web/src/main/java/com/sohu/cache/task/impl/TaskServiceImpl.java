@@ -501,7 +501,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public long addRedisStandaloneAppTask(long appId, long appAuditId, int maxMemory, List<String> redisServerMachineList, int masterPerMachine, String dbVersion, long parentTaskId) {
+    public long addRedisStandaloneAppTask(long appId, long appAuditId, int maxMemory, List<String> redisServerMachineList, int masterPerMachine, String dbVersion,String moduleinfos,long parentTaskId) {
         Map<String, Object> paramMap = new HashMap<String, Object>();
         paramMap.put(TaskConstants.APPID_KEY, appId);
         paramMap.put(TaskConstants.AUDIT_ID_KEY, appAuditId);
@@ -509,6 +509,7 @@ public class TaskServiceImpl implements TaskService {
         paramMap.put(TaskConstants.REDIS_SERVER_MACHINE_LIST_KEY, redisServerMachineList);
         paramMap.put(TaskConstants.MASTER_PER_MACHINE_KEY, masterPerMachine);
         paramMap.put(TaskConstants.VERSION_KEY, dbVersion);
+        paramMap.put(TaskConstants.MODULE_KEY, moduleinfos);
         AppDesc appDesc = appService.getByAppId(appId);
         String importantInfo = appDesc.getName() + "-redis-standalone";
         String param = JSONObject.toJSONString(paramMap);
@@ -521,7 +522,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public long addRedisClusterAppTask(long appId, long appAuditId, int maxMemory, List<String> redisServerMachineList, int masterPerMachine, String dbVersion, long parentTaskId) {
+    public long addRedisClusterAppTask(long appId, long appAuditId, int maxMemory, List<String> redisServerMachineList, int masterPerMachine, String dbVersion,String moduleinfos, long parentTaskId) {
         Map<String, Object> paramMap = new HashMap<String, Object>();
         paramMap.put(TaskConstants.APPID_KEY, appId);
         paramMap.put(TaskConstants.AUDIT_ID_KEY, appAuditId);
@@ -529,6 +530,7 @@ public class TaskServiceImpl implements TaskService {
         paramMap.put(TaskConstants.REDIS_SERVER_MACHINE_LIST_KEY, redisServerMachineList);
         paramMap.put(TaskConstants.MASTER_PER_MACHINE_KEY, masterPerMachine);
         paramMap.put(TaskConstants.VERSION_KEY, dbVersion.replaceAll(RedisConstUtils.REDIS_VERSION_PREFIX,""));
+        paramMap.put(TaskConstants.MODULE_KEY, moduleinfos);
         AppDesc appDesc = appService.getByAppId(appId);
         String importantInfo = appDesc.getName() + "-redis-cluster";
         String param = JSONObject.toJSONString(paramMap);
@@ -542,7 +544,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public long addRedisSentinelAppTask(long appId, long appAuditId, int maxMemory, List<String> redisServerMachineList,
-                                        List<String> redisSentinelMachineList, int masterPerMachine, int sentinelPerMachine, String dbVersion,
+                                        List<String> redisSentinelMachineList, int masterPerMachine, int sentinelPerMachine, String dbVersion,String moduleinfos,
                                         long parentTaskId) {
         Map<String, Object> paramMap = new HashMap<String, Object>();
         paramMap.put(TaskConstants.APPID_KEY, appId);
@@ -553,6 +555,7 @@ public class TaskServiceImpl implements TaskService {
         paramMap.put(TaskConstants.MASTER_PER_MACHINE_KEY, masterPerMachine);
         paramMap.put(TaskConstants.SENTINEL_PER_MACHINE_KEY, sentinelPerMachine);
         paramMap.put(TaskConstants.VERSION_KEY, dbVersion);
+        paramMap.put(TaskConstants.MODULE_KEY, moduleinfos);
         AppDesc appDesc = appService.getByAppId(appId);
         String importantInfo = appDesc.getName();
         String param = JSONObject.toJSONString(paramMap);

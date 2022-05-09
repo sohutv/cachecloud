@@ -5,14 +5,19 @@ import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.entity.LoginResult;
 import com.sohu.cache.login.LoginComponent;
 import com.sohu.cache.util.ConstUtils;
+import com.sohu.cache.util.MD5Util;
+import com.sohu.cache.utils.EnvCustomUtil;
 import com.sohu.cache.web.enums.AdminEnum;
 import com.sohu.cache.web.enums.LoginEnum;
 import com.sohu.cache.web.service.UserLoginStatusService;
+import com.sohu.cache.web.vo.GeneralResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
@@ -66,7 +71,11 @@ public class LoginController extends BaseController {
         AppUser userModel = null;
         if (ConstUtils.SUPER_ADMIN_NAME.equals(userName)) {
             userModel = userService.getByName(userName);
-            if (userModel != null && ConstUtils.SUPER_ADMIN_PASS.equals(password)) {
+            String checkPwd = ConstUtils.SUPER_ADMIN_PASS;
+            if(EnvCustomUtil.pwdswitch){
+                checkPwd = MD5Util.string2MD5(ConstUtils.SUPER_ADMIN_PASS);
+            }
+            if (userModel != null && checkPwd.equals(password)) {
                 loginResult.setLoginEnum(LoginEnum.LOGIN_SUCCESS);
             } else {
                 loginResult.setLoginEnum(LoginEnum.LOGIN_WRONG_USER_OR_PASSWORD);
@@ -105,11 +114,28 @@ public class LoginController extends BaseController {
      *
      * @return
      */
-    @RequestMapping(value = "/logout", method = RequestMethod.GET)
+    @RequestMapping("/logout")
     public ModelAndView logout(HttpServletRequest request, HttpServletResponse response) {
         userLoginStatusService.removeLoginStatus(request, response);
         //String redirectUrl = userLoginStatusService.getLogoutUrl();
         return new ModelAndView("redirect:" + "/manage/login");
+    }
+
+    /**
+     * 用户登录
+     *
+     * @param appUser 用户
+     * @return
+     */
+    @RequestMapping(value = "/loginCheck", method = RequestMethod.POST)
+    @ResponseBody
+    public GeneralResponse<String> loginCheck(HttpServletRequest request,
+                                              @RequestBody AppUser appUser) {
+        AppUser user = userService.getByName(appUser.getName());
+        if(user != null && user.getPassword() != null && user.getPassword().equals(appUser.getPassword())){
+            return GeneralResponse.ok();
+        }
+        return GeneralResponse.error(1001, "用户名或密码错误");
     }
 
 }

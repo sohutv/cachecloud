@@ -67,6 +67,7 @@ public class TaskConstants {
     public final static String HOST_KEY = "host";
     public final static String PORT_KEY = "port";
     public final static String VERSION_KEY = "db_version";
+    public final static String MODULE_KEY = "moduleVersions";
     public final static String IS_CLUSTER_KEY = "is_cluster";
 
     public final static String MASTER_HOST_KEY = "master_host";

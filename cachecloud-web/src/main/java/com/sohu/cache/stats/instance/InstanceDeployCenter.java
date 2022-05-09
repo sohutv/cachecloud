@@ -19,6 +19,14 @@ public interface InstanceDeployCenter {
     boolean startExistInstance(long appId, int instanceId);
 
     /**
+     * 启动已存在的实例，无需进行redis资源包校验
+     * @param appId
+     * @param instanceId
+     * @return
+     */
+    boolean startExistInstanceWithoutResourceCheck(long appId, int instanceId);
+
+    /**
      * 下线已经存在的实例
      * @param appId
      * @param instanceId

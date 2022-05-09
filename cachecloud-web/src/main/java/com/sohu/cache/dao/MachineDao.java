@@ -41,6 +41,14 @@ public interface MachineDao {
     public List<MachineInfo> getMachineInfoByCondition(@Param("ipLike") String ipLike, @Param("useType") int useType, @Param("type") int type, @Param("versionStr") String versionStr, @Param("k8sType") int k8sType, @Param("realip") String realip);
 
     /**
+     * 通过ip模糊查找机器
+     * @param ipLike
+     * @param realIpLike
+     * @return
+     */
+    public List<MachineInfo> getMachineListByCondition(@Param("ipLike") String ipLike, @Param("realIpLike") String realIpLike);
+
+    /**
      * @Description: 通过room&useType查询机器信息
      * @Author: caoru
      * @CreateDate: 2018/10/12 11:39

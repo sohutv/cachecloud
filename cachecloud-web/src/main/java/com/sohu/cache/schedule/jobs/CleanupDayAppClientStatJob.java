@@ -19,11 +19,14 @@ public class CleanupDayAppClientStatJob extends CacheBaseJob {
     /**
      * 清除命令统计&异常统计
      */
-    private static final String CLEAN_APP_CLIENT_COMMAND_MINUTE_STATISTICS = "delete from app_client_command_minute_statistics where current_min < ?";
-    private static final String CLEAN_APP_CLIENT_EXCEPTION_MINUTE_STATISTICS = "delete from app_client_exception_minute_statistics where current_min < ?";
-    private static final String CLEAN_APP_CLIENT_LATENCY_COMMAND = "delete from app_client_latency_command where create_time < ?";
-    private static final String CLEAN_APP_CLIENT_STATISTIC_GATHER = "delete from app_client_statistic_gather where gather_time < ?";
-    private static final String CLEAN_INSTANCE_LATENCY_HISTORY = "delete from instance_latency_history where execute_date < ?";
+    private static int BATCH_SIZE = 1000;
+    private static final String CLEAN_APP_CLIENT_COMMAND_MINUTE_STATISTICS = "delete from app_client_command_minute_statistics where current_min < ? limit " + BATCH_SIZE;
+    private static final String CLEAN_APP_CLIENT_EXCEPTION_MINUTE_STATISTICS = "delete from app_client_exception_minute_statistics where current_min < ? limit " + BATCH_SIZE;
+    private static final String CLEAN_APP_CLIENT_LATENCY_COMMAND = "delete from app_client_latency_command where create_time < ? limit " + BATCH_SIZE;
+    private static final String CLEAN_APP_CLIENT_STATISTIC_GATHER = "delete from app_client_statistic_gather where gather_time < ? limit " + BATCH_SIZE;
+    private static final String CLEAN_INSTANCE_LATENCY_HISTORY = "delete from instance_latency_history where execute_date < ? limit " + BATCH_SIZE;
+
+    JdbcTemplate jdbcTemplate = null;
 
     @Override
     public void action(JobExecutionContext context) {
@@ -35,7 +38,7 @@ public class CleanupDayAppClientStatJob extends CacheBaseJob {
             logger.warn("begin-CleanupDayAppClientStatJob");
             SchedulerContext schedulerContext = context.getScheduler().getContext();
             ApplicationContext applicationContext = (ApplicationContext) schedulerContext.get(APPLICATION_CONTEXT_KEY);
-            JdbcTemplate jdbcTemplate = applicationContext.getBean("jdbcTemplate", JdbcTemplate.class);
+            jdbcTemplate = applicationContext.getBean("jdbcTemplate", JdbcTemplate.class);
 
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(new Date());
@@ -46,20 +49,56 @@ public class CleanupDayAppClientStatJob extends CacheBaseJob {
             /**
              * 清除命令统计&异常统计（保存14天）
              */
-            int cleanCount = jdbcTemplate.update(CLEAN_APP_CLIENT_COMMAND_MINUTE_STATISTICS, timeFormat);
-            logger.warn("clean_app_client_command_minute_statistics count={}", cleanCount);
-            cleanCount = jdbcTemplate.update(CLEAN_APP_CLIENT_EXCEPTION_MINUTE_STATISTICS, timeFormat);
-            logger.warn("clean_app_client_exception_minute_statistics count={}", cleanCount);
-            cleanCount = jdbcTemplate.update(CLEAN_APP_CLIENT_LATENCY_COMMAND, calendar.getTime());
-            logger.warn("clean_app_client_latency_command count={}", cleanCount);
-            cleanCount = jdbcTemplate.update(CLEAN_APP_CLIENT_STATISTIC_GATHER, date);
-            logger.warn("clean_app_client_statistic_gather count={}", cleanCount);
-            cleanCount = jdbcTemplate.update(CLEAN_INSTANCE_LATENCY_HISTORY, timeFormat);
-            logger.warn("clean_instance_latency_history count={}", cleanCount);
-
+            long cleanCount = 0;
+            try{
+                cleanCount = scrollDelete(CLEAN_APP_CLIENT_COMMAND_MINUTE_STATISTICS, timeFormat);
+                logger.warn("clean_app_client_command_minute_statistics count={}", cleanCount);
+            }catch (Exception e){
+                logger.error("clean_app_client_command_minute_statistics error, ", e);
+            }
+            try{
+                cleanCount = scrollDelete(CLEAN_APP_CLIENT_EXCEPTION_MINUTE_STATISTICS, timeFormat);
+                logger.warn("clean_app_client_exception_minute_statistics count={}", cleanCount);
+            }catch (Exception e){
+                logger.error("clean_app_client_exception_minute_statistics error, ", e);
+            }
+            try{
+                cleanCount = scrollDelete(CLEAN_APP_CLIENT_LATENCY_COMMAND, calendar.getTime());
+                logger.warn("clean_app_client_latency_command count={}", cleanCount);
+            }catch (Exception e){
+                logger.error("clean_app_client_latency_command error, ", e);
+            }
+            try{
+                cleanCount = scrollDelete(CLEAN_APP_CLIENT_STATISTIC_GATHER, date);
+                logger.warn("clean_app_client_statistic_gather count={}", cleanCount);
+            }catch (Exception e){
+                logger.error("clean_app_client_statistic_gather error, ", e);
+            }
+            try{
+                cleanCount = scrollDelete(CLEAN_INSTANCE_LATENCY_HISTORY, timeFormat);
+                logger.warn("clean_instance_latency_history count={}", cleanCount);
+            }catch (Exception e){
+                logger.error("clean_instance_latency_history error, ", e);
+            }
             logger.warn("end-CleanupDayAppClientStatJob");
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            logger.error("CleanupDayAppClientStatJob error, ", e);
         }
     }
+
+    /**
+     * 滚动删除表数据
+     */
+    private long scrollDelete(String sql, Object time) {
+        long totalCount = 0;
+        while (true) {
+            int cleanCount = jdbcTemplate.update(sql, time);
+            totalCount += cleanCount;
+            if (cleanCount == 0) {
+                break;
+            }
+        }
+        return totalCount;
+    }
+
 }

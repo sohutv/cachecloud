@@ -194,18 +194,28 @@ public class MachineInfo {
     }
 
     public Date getModifyTime() {
+        if(modifyTime == null){
+            return null;
+        }
         return (Date) modifyTime.clone();
     }
 
     public void setModifyTime(Date modifyTime) {
-        this.modifyTime = (Date) modifyTime.clone();
+        if(modifyTime != null){
+            this.modifyTime = (Date) modifyTime.clone();
+        }
     }
 
     public Date getServiceTime() {
+        if(serviceTime == null){
+            return null;
+        }
         return (Date) serviceTime.clone();
     }
 
     public void setServiceTime(Date serviceTime) {
-        this.serviceTime = (Date) serviceTime.clone();
+        if(serviceTime != null){
+            this.serviceTime = (Date) serviceTime.clone();
+        }
     }
 }

@@ -114,9 +114,9 @@ function changeCommandChart(value){
 							var nameLegend = firstCommand + "命令趋势图";
 							var finalPoints = getSeriesPoints(data, nameLegend);
 							options.series.push(finalPoints);
+							new Highcharts.Chart(options);
 						}
 					});
-					new Highcharts.Chart(options);
 			 });
 		}
 	</script>

@@ -18,6 +18,8 @@ public interface InstanceLatencyHistoryDao {
 
     List<Map<String, Object>> getAppLatencyStats(@Param("appId") long appId, @Param("startTime") long startTime, @Param("endTime") long endTime);
 
+    int getAppLatencyStatsCount(@Param("appId") long appId, @Param("startTime") long startTime, @Param("endTime") long endTime);
+
     List<Map<String, Object>> getAppLatencyStatsGroupByInstance(@Param("appId") long appId, @Param("startTime") long startTime, @Param("endTime") long endTime);
 
     List<Map<String, Object>> getAppLatencyInfo(@Param("appId") long appId, @Param("startTime") long startTime, @Param("endTime") long endTime, @Param("event") String event);

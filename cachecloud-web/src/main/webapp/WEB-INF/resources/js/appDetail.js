@@ -198,7 +198,7 @@ var valPhones = /^((13[0-9])|(14[5,7])|(15[0-3,5-9])|(17[0,3,5-8])|(18[0-9])|166
 //验证邮箱格式
 var valEmails = /^(([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.|\-]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3};){0,6}([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.|\-]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/;
 
-function saveOrUpdateUser(userId, appId) {
+function saveOrUpdateUser(userId, appId, openFlag) {
     var name = document.getElementById("name" + userId);
     var chName = document.getElementById("chName" + userId);
     var email = document.getElementById("email" + userId);
@@ -206,6 +206,8 @@ function saveOrUpdateUser(userId, appId) {
     var weChat = document.getElementById("weChat" + userId);
     var type = document.getElementById("type" + userId);
     var isAlert = document.getElementById("isAlert" + userId);
+    var company = "";
+    var purpose = "";
     if (name.value == "") {
         alert("域账户名不能为空!");
         name.focus();
@@ -241,6 +243,22 @@ function saveOrUpdateUser(userId, appId) {
         weChat.focus();
         return false;
     }
+    if(openFlag){
+        var companyDoc = document.getElementById("company" + userId);
+        var purposeDoc = document.getElementById("purpose" + userId);
+        if (companyDoc.value == "") {
+            alert("公司名称不能为空!");
+            companyDoc.focus();
+            return false;
+        }
+        if (purposeDoc.value == "") {
+            alert("使用目的不能为空!");
+            purposeDoc.focus();
+            return false;
+        }
+        company = companyDoc.value;
+        purpose = purposeDoc.value;
+    }
     $.post(
         '/admin/app/changeAppUserInfo',
         {
@@ -251,6 +269,8 @@ function saveOrUpdateUser(userId, appId) {
             weChat: weChat.value,
             type: type.value,
             isAlert: isAlert.value,
+            company: company,
+            purpose: purpose,
             userId: userId
         },
         function (data) {

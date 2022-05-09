@@ -87,14 +87,15 @@ public class CleanupDayDimensionalityJob extends CacheBaseJob {
             cleanCount = scrollDelete(CLEAN_INSTANCE_MINUTE_STATS, timeFormat);
             logger.warn("clean_instance_minute_stats timeFormat={} count={} cost={}s", timeFormat, cleanCount, (System.currentTimeMillis() - start) / 1000);
 
+            //注销此逻辑，其操作的表已废弃，待统一删除
             //清除客户端耗时数据(保存2天)
-            ClientReportCostDistriService clientReportCostDistriService = applicationContext.getBean(
-                    "clientReportCostDistriService", ClientReportCostDistriService.class);
-            calendar.setTime(new Date());
-            calendar.add(Calendar.DAY_OF_MONTH, -2);
-            timeFormat = NumberUtils.toLong(new SimpleDateFormat("yyyyMMddHHmm00").format(calendar.getTime()));
-            cleanCount = clientReportCostDistriService.deleteBeforeCollectTime(timeFormat);
-            logger.warn("clean_app_client_costtime_minute_stat count={}", cleanCount);
+//            ClientReportCostDistriService clientReportCostDistriService = applicationContext.getBean(
+//                    "clientReportCostDistriService", ClientReportCostDistriService.class);
+//            calendar.setTime(new Date());
+//            calendar.add(Calendar.DAY_OF_MONTH, -2);
+//            timeFormat = NumberUtils.toLong(new SimpleDateFormat("yyyyMMddHHmm00").format(calendar.getTime()));
+//            cleanCount = clientReportCostDistriService.deleteBeforeCollectTime(timeFormat);
+//            logger.warn("clean_app_client_costtime_minute_stat count={}", cleanCount);
 
             //清除客户端耗时汇总数据(保存14天)
             calendar.setTime(new Date());

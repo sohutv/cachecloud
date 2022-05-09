@@ -164,6 +164,7 @@ public class ClientReportCostDistriServiceImpl implements ClientReportCostDistri
     }
 
     /**
+     * todo 此实现类对应的appClientCostTimeStatDao所在的表已废弃，请不要使用
      * 1.获取最小的id
      * 2.获取date的id
      * 3.按照id批量删除

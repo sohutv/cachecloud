@@ -43,108 +43,6 @@ public class RedisVersionUpgradeController extends BaseController {
 
     /**
      * <p>
-     * Description: Redis版本对所有机器一键安装
-     * </p>
-     *
-     * @author chenshi
-     * @version 1.0
-     * @date 2018/9/5
-     */
-    /*@RequestMapping("install/allmachine")
-    public ModelAndView installAllMachines(HttpServletResponse response, Model model, Integer versionId) {
-        Map<String, Object> resultMap = new HashMap<String, Object>();
-        SuccessEnum successEnum = SuccessEnum.SUCCESS;
-        // 1.获取需要安装Redis版本信息
-//        RedisVersion redisVersion = redisConfigTemplateService.getRedisVersionById(versionId);
-        SystemResource redisResource = resourceService.getResourceById(versionId);
-        if (redisResource == null) {
-            successEnum = SuccessEnum.FAIL;
-            resultMap.put("status", successEnum.value());
-            resultMap.put("message", ErrorMessageEnum.PARAM_ERROR_MSG.getMessage());
-            sendMessage(response, JSONObject.toJSONString(resultMap));
-            return null;
-        }
-        // 2.获取机器列表，执行ssh cmd命令
-        List<MachineStats> allMachineStats = machineCenter.getAllMachineStats();
-        if (allMachineStats != null && allMachineStats.size() > 0) {
-            for (MachineStats machineStats : allMachineStats) {
-                try {
-                    long start = System.currentTimeMillis();
-                    // todo
-//                    Boolean install = redisConfigTemplateService.checkAndInstallRedisResource(machineStats.getIp(), redisVersion);
-//                    logger.info("install redis result: {} , costtime= {}ms", install, (System.currentTimeMillis() - start));
-                } catch (Exception e) {
-                    logger.error(e.getMessage(), e);
-                    logger.error(" machine ip:{} install redis:{} error !", machineStats.getIp(), redisResource.getName());
-                }
-            }
-            successEnum = SuccessEnum.SUCCESS;
-        }
-        resultMap.put("status", successEnum.value());
-        sendMessage(response, JSONObject.toJSONString(resultMap));
-        return null;
-    }*/
-
-    /**
-     * <p>
-     * Description: Redis版本对所有机器一键安装
-     * </p>
-     *
-     * @author chenshi
-     * @version 1.0
-     * @date 2018/9/5
-     */
-   /* @RequestMapping("install/machine")
-    public ModelAndView installMachine(HttpServletResponse response, Model model, String ip) {
-        Map<String, Object> resultMap = new HashMap<String, Object>();
-        SuccessEnum successEnum = SuccessEnum.FAIL;
-        // 获取机器信息
-        try {
-            MachineInfo machineInfo = machineCenter.getMachineInfoByIp(ip);
-            if (machineInfo != null) {
-                String result = redisConfigTemplateService.installAllRedisOnMachine(ip);
-                redisConfigTemplateService.updateMachineInstallRedis(ip);
-                logger.info("machine ip:{} install redis :{}", ip, result);
-                successEnum = SuccessEnum.SUCCESS;
-            }
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            successEnum = SuccessEnum.FAIL;
-        }
-        resultMap.put("status", successEnum.value());
-        sendMessage(response, JSONObject.toJSONString(resultMap));
-        return null;
-    }*/
-
-    /*@RequestMapping("refresh/machines")
-    public ModelAndView refreshMachineStats(HttpServletResponse response, Model model) {
-
-        Map<String, Object> resultMap = new HashMap<String, Object>();
-        SuccessEnum successEnum = SuccessEnum.FAIL;
-        // 1.获取机器列表
-        List<MachineStats> allMachineStats = machineCenter.getAllMachineStats();
-        if (allMachineStats != null && allMachineStats.size() > 0) {
-            for (MachineStats machineStats : allMachineStats) {
-                try {
-                    if (machineStats.getInfo().getAvailable() == MachineInfoEnum.AvailableEnum.YES.getValue()) {
-                        // 3.更新线上机器version_install版本状态
-                        redisConfigTemplateService.updateMachineInstallRedis(machineStats.getIp());
-                    }
-                } catch (Exception e) {
-                    logger.error(e.getMessage(), e);
-                    logger.error(" refresh all machine stats ip:{} install redis:{} error !", machineStats.getIp());
-                }
-            }
-            successEnum = SuccessEnum.SUCCESS;
-        }
-        resultMap.put("status", successEnum.value());
-        sendMessage(response, JSONObject.toJSONString(resultMap));
-        return null;
-    }
-*/
-
-    /**
-     * <p>
      * Description: 实例和配置检查
      * </p>
      *
@@ -167,7 +65,6 @@ public class RedisVersionUpgradeController extends BaseController {
             return null;
         }
         // 2.版本有效检查
-//        RedisVersion upgradeRedisVerison = redisConfigTemplateService.getRedisVersionById(upgradeVersionId);
         SystemResource redisResource = resourceService.getResourceById(upgradeVersionId);
         if (redisResource == null || redisResource.getStatus() == 0) {
             // 无该版本配置 || 版本配置无效
@@ -187,7 +84,6 @@ public class RedisVersionUpgradeController extends BaseController {
             for (InstanceInfo instance : instanceList) {
                 if (instance.getStatus() == InstanceStatusEnum.GOOD_STATUS.getStatus()) {
                     String redisVersion = redisCenter.getRedisVersion(appId, instance.getIp(), instance.getPort());
-                    //instanceInfo += instance.getIp() + ":" + instance.getPort() + " " + instance.getRoleDesc() + " version:" + redisVersion + "\n";
                     instanceInfoBuilder.append(instance.getIp())
                             .append(":")
                             .append(instance.getPort())

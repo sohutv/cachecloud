@@ -118,7 +118,7 @@ b.也可以clone源码，自行打包：
 * 3.添加机器
 
 	将刚准备好资源的机器添加到cachecloud中台：<http://localhost:8080/manage/machine/index?tabTag=machine>
-	
+
 	<img src="../../img/quickstart/addmachine.png" width="50%"/>
 
 <a name="cc7"/>
@@ -140,7 +140,7 @@ b.也可以clone源码，自行打包：
 	<img src="../../img/quickstart/appjob.png" width="100%"/>
 	
 	b.应用部署：点击”生成部署预览“，确认拓扑无误，点击”开始部署“，跳转到应用部署任务流。
-		
+
 	<img src="../../img/quickstart/appdeploy.png" width="80%"/>
 		
 	c.通过：等待应用部署成功后，在审批页点击”通过“，就此应用开通成功。用户接入使用可参考：[客户端接入文档](../access/client.md)。

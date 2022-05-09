@@ -9,6 +9,11 @@
 //查看实例是否存在
 function checkInstanceExist(){
 	var instanceHostPort = document.getElementById("instanceHostPort").value;
+	if (instanceHostPort == null || instanceHostPort == ""){
+		alert("请填写实例ip:port");
+		instanceHostPort.focus();
+		return false;
+	}
 	if(instanceHostPort != ''){
 		$.post(
 			'/manage/instanceAlert/checkInstanceHostPort.json',
@@ -47,12 +52,16 @@ function removeAlertConfig(id) {
 function changeAlertConfig(id) {
 	var alertValue = document.getElementById("alertValue" + id);
 	var checkCycle = document.getElementById("checkCycle" + id);
+	var compareType = document.getElementById("compareType" + id);
+	var importantLevel = document.getElementById("importantLevel" + id);
 	$.get(
 		'/manage/instanceAlert/update.json',
 		{
 			id: id,
 			alertValue: alertValue.value,
-			checkCycle: checkCycle.value
+			checkCycle: checkCycle.value,
+			compareType: compareType.value,
+			importantLevel: importantLevel.value
 		},
         function(data){
 			var status = data.status;
@@ -78,6 +87,11 @@ function saveInstanceAlertConfig() {
 	var compareType = document.getElementById("compareType");
 	var checkCycle = document.getElementById("checkCycle");
 	var instanceHostPort = document.getElementById("instanceHostPort");
+	if (instanceHostPort.value == null || instanceHostPort.value == ""){
+		alert("请填写实例ip:port");
+		instanceHostPort.focus();
+		return false;
+	}
 	var type = 1;
 	if (instanceHostPort.value != null && instanceHostPort.value != '') {
 		type = 2;
@@ -87,6 +101,7 @@ function saveInstanceAlertConfig() {
 		{
 			alertConfig: alertConfig.value,
 			alertValue: alertValue.value,
+			configInfo: alertConfig.options[alertConfig.selectedIndex].text,
 			compareType: compareType.value,
 			checkCycle: checkCycle.value,
 			instanceHostPort: instanceHostPort.value,
@@ -104,6 +119,53 @@ function saveInstanceAlertConfig() {
      );
 }
 
+//保存全局实例
+function saveGlobalInstanceAlertConfig() {
+	var alertConfig = document.getElementById("alertConfigGlobal");
+	if (alertConfig.value == ""){
+		alert("请填写配置名");
+		alertConfig.focus();
+		return false;
+	}
+	var alertValue = document.getElementById("alertValueGlobal");
+	if (alertValue.value == ""){
+		alert("请填写阈值");
+		alertValue.focus();
+		return false;
+	}
+	var configInfo = document.getElementById("configInfoGlobal");
+	if (configInfo.value == ""){
+		alert("请填写配置说明");
+		configInfo.focus();
+		return false;
+	}
+	var compareType = document.getElementById("compareTypeGlobal");
+	var checkCycle = document.getElementById("checkCycleGlobal");
+	var importantLevel = document.getElementById("importantLevel");
+	var type = 1;
+	$.get(
+			'/manage/instanceAlert/add.json',
+			{
+				alertConfig: alertConfig.value,
+				configInfo: configInfo.value,
+				alertValue: alertValue.value,
+				compareType: compareType.value,
+				checkCycle: checkCycle.value,
+				importantLevel: importantLevel.value,
+				type: type
+			},
+			function(data){
+				var status = data.status;
+				if (status == 1) {
+					alert("添加成功！");
+				} else {
+					alert("添加失败！" + data.message);
+				}
+				window.location.reload();
+			}
+	);
+}
+
 // 应用添加报警
 function saveAppAlertConfig() {
     var alertConfig = document.getElementById("alertAppConfig");
@@ -116,13 +178,19 @@ function saveAppAlertConfig() {
     var compareType = document.getElementById("compareAppType");
     var checkCycle = document.getElementById("checkAppCycle");
     var appid = document.getElementById("appid");
+	if (appid.value == ""){
+		alert("请填写appid");
+		appid.focus();
+		return false;
+	}
 
     $.get(
         '/manage/instanceAlert/addApp.json',
         {
             alertConfig: alertConfig.value,
             alertValue: alertValue.value,
-            compareType: compareType.value,
+			configInfo: alertConfig.options[alertConfig.selectedIndex].text,
+			compareType: compareType.value,
             checkCycle: checkCycle.value,
             appid: appid.value
         },
@@ -142,17 +210,6 @@ function saveAppAlertConfig() {
 <div class="page-container">
 	<div class="page-content">
 		<div class="table-toolbar">
-			<div class="btn-group">
-				<button id="sample_editable_2_new" class="btn green" data-target="#addAppAlertModal" data-toggle="modal">
-					添加应用报警项 <i class="fa fa-plus"></i>
-				</button>
-			</div>
-			&nbsp;
-			<div class="btn-group">
-				<button id="sample_editable_1_new" class="btn green" data-target="#addInstanceAlertModal" data-toggle="modal">
-					添加新实例报警项 <i class="fa fa-plus"></i>
-				</button>
-			</div>
 		</div>
 
 		<div class="row">
@@ -165,6 +222,7 @@ function saveAppAlertConfig() {
 								&nbsp;
 							</div>
 							<div class="tools">
+								<button type="button" class="btn btn-success" style="margin-top: 0px" data-target="#addGlobalInstanceAlertModal" data-toggle="modal" href="#">添加全局报警项</button>
 								<a href="javascript:;" class="collapse"></a>
 							</div>
 						</div>
@@ -180,6 +238,7 @@ function saveAppAlertConfig() {
 											<th>关系</th>
 											<th>阀值</th>
 											<th>周期</th>
+											<th>重要程度</th>
 											<th>最近检测时间</th>
 											<th>操作</th>
 										</tr>
@@ -209,6 +268,13 @@ function saveAppAlertConfig() {
 														<c:if test="${config.checkCycle == instanceAlertCheckCycleEnum.value}">${instanceAlertCheckCycleEnum.info}</c:if>
 													</c:forEach>
 												</td>
+
+												<td>
+													<c:if test="${config.importantLevel == 0}">一般</c:if>
+													<c:if test="${config.importantLevel == 1}">重要</c:if>
+													<c:if test="${config.importantLevel == 2}">紧急</c:if>
+												</td>
+
 												<td>
 		                    							<fmt:formatDate value="${config.lastCheckTime}" pattern="yyyy-MM-dd HH:mm:ss"/>
 												</td>
@@ -237,6 +303,12 @@ function saveAppAlertConfig() {
 								&nbsp;
 							</div>
 							<div class="tools">
+								<div class="btn-group">
+									<button type="button" class="btn btn-success" style="margin-top: 0px" data-target="#addAppAlertModal" data-toggle="modal" href="#">添加应用报警项</button>
+								</div>
+								<div class="btn-group">
+									<button type="button" class="btn btn-success" style="margin-top: 0px" data-target="#addInstanceAlertModal" data-toggle="modal" href="#">添加新实例报警项</button>
+								</div>
 								<a href="javascript:;" class="collapse"></a>
 							</div>
 						</div>
@@ -265,8 +337,13 @@ function saveAppAlertConfig() {
 												</td>
 		                							<c:set var="instanceId" value="${config.instanceId}"/>
 												<td>
-													${config.instanceInfo.hostPort}
-													<a target="_blank" href="/admin/app/index?appId=${config.instanceInfo.appId}">(${config.instanceInfo.appId})</a>
+													<c:if test="${config.type == 2}">
+														${config.instanceInfo.hostPort}
+														<a target="_blank" href="/admin/app/index?appId=${config.instanceInfo.appId}">(${config.instanceInfo.appId})</a>
+													</c:if>
+													<c:if test="${config.type == 3}">
+														<a target="_blank" href="/admin/app/index?appId=${config.instanceId}">${config.instanceId}</a>
+													</c:if>
 												</td>
 												<td>
 													${config.alertConfig}
@@ -331,7 +408,7 @@ function saveAppAlertConfig() {
 									</label>
 									<div class="col-md-5">
 										<select name="alertConfig" id="alertConfig" class="form-control select2_category">
-											<c:forEach items="${redisAlertConfigEnumList}" var="redisAlertConfig">
+											<c:forEach items="${redisUsedGlobalAlertConfigList}" var="redisAlertConfig">
 												<option value="${redisAlertConfig.value}">
 													${redisAlertConfig.info}
 												</option>
@@ -372,7 +449,7 @@ function saveAppAlertConfig() {
 									</label>
 									<div class="col-md-5">
 										<input type="text" name="instanceHostPort" id="instanceHostPort"
-											class="form-control" placeholder="全部则为空,单个实例ip:port" onchange="checkInstanceExist()"/>
+											class="form-control" placeholder="单个实例ip:port" onchange="checkInstanceExist()"/>
 									</div>
 								</div>
 								
@@ -405,6 +482,109 @@ function saveAppAlertConfig() {
 	</div>
 </div>
 
+<!-- 全局实例报警项 -->
+<div id="addGlobalInstanceAlertModal" class="modal fade" tabindex="-1" data-width="400">
+	<div class="modal-dialog">
+		<div class="modal-content">
+
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+				<h4 class="modal-title">添加全局实例报警项</h4>
+			</div>
+
+			<form class="form-horizontal form-bordered form-row-stripped">
+				<div class="modal-body">
+					<div class="row">
+						<!-- 控件开始 -->
+						<div class="col-md-12">
+							<!-- form-body开始 -->
+							<div class="form-body">
+								<div class="form-group">
+									<label class="control-label col-md-3">
+										配置名:
+									</label>
+									<div class="col-md-5">
+										<input type="text" name="alertConfig" id="alertConfigGlobal"
+											   class="form-control" placeholder="参照redis info中的字段名"/>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="control-label col-md-3">
+										配置说明:
+									</label>
+									<div class="col-md-5">
+										<input type="text" name="configInfo" id="configInfoGlobal"
+											   class="form-control" />
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label class="control-label col-md-3">
+										比较:
+									</label>
+									<div class="col-md-5">
+										<select name="compareType" id="compareTypeGlobal" class="form-control select2_category">
+											<c:forEach items="${instanceAlertCompareTypeEnumList}" var="instanceAlertCompareTypeEnum">
+												<option value="${instanceAlertCompareTypeEnum.value}">
+														${instanceAlertCompareTypeEnum.info}
+												</option>
+											</c:forEach>
+										</select>
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label class="control-label col-md-3">
+										阀值:
+									</label>
+									<div class="col-md-5">
+										<input type="text" name="alertValue" id="alertValueGlobal"
+											   class="form-control" />
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label class="control-label col-md-3">
+										周期:
+									</label>
+									<div class="col-md-5">
+										<select name="checkCycle" id="checkCycleGlobal" class="form-control select2_category">
+											<c:forEach items="${instanceAlertCheckCycleEnumList}" var="instanceAlertCheckCycleEnum">
+												<option value="${instanceAlertCheckCycleEnum.value}">
+														${instanceAlertCheckCycleEnum.info}
+												</option>
+											</c:forEach>
+										</select>
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label class="control-label col-md-3">
+										重要程度:
+									</label>
+									<div class="col-md-5">
+										<select name="importantLevel" id="importantLevel" class="form-control select2_category">
+											<option value="0" selected>一般</option>
+											<option value="1">重要</option>
+											<option value="2">紧急</option>
+										</select>
+									</div>
+								</div>
+							</div>
+							<!-- form-body 结束 -->
+						</div>
+					</div>
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" data-dismiss="modal" class="btn" >Close</button>
+					<button type="button" id="configBtnGlobal" class="btn red" onclick="saveGlobalInstanceAlertConfig()">Ok</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
 <!-- 应用报警项 -->
 <div id="addAppAlertModal" class="modal fade" tabindex="-1" data-width="400">
 	<div class="modal-dialog">
@@ -428,7 +608,7 @@ function saveAppAlertConfig() {
 									</label>
 									<div class="col-md-5">
 										<select name="alertConfig" id="alertAppConfig" class="form-control select2_category">
-											<c:forEach items="${redisAlertConfigEnumList}" var="redisAlertConfig">
+											<c:forEach items="${redisUsedGlobalAlertConfigList}" var="redisAlertConfig">
 												<option value="${redisAlertConfig.value}">
 														${redisAlertConfig.info}
 												</option>
@@ -521,6 +701,21 @@ function saveAppAlertConfig() {
 								<div class="form-body">
 									<div class="form-group">
 										<label class="control-label col-md-3">
+											比较:
+										</label>
+										<div class="col-md-5">
+											<select name="compareType${config.id}" id="compareType${config.id}" class="form-control select2_category">
+												<c:forEach items="${instanceAlertCompareTypeEnumList}" var="instanceAlertCompareTypeEnum">
+													<option value="${instanceAlertCompareTypeEnum.value}" <c:if test="${config.compareType == instanceAlertCompareTypeEnum.value}">selected</c:if>>
+															${instanceAlertCompareTypeEnum.info}
+													</option>
+												</c:forEach>
+											</select>
+										</div>
+									</div>
+
+									<div class="form-group">
+										<label class="control-label col-md-3">
 											阀值:
 										</label>
 										<div class="col-md-5">
@@ -540,6 +735,19 @@ function saveAppAlertConfig() {
 														${instanceAlertCheckCycleEnum.info}
 													</option>
 												</c:forEach>
+											</select>
+										</div>
+									</div>
+
+									<div class="form-group" <c:if test="${config.type != 1}">hidden</c:if>>
+										<label class="control-label col-md-3">
+											重要程度:
+										</label>
+										<div class="col-md-5">
+											<select name="importantLevel${config.id}" id="importantLevel${config.id}" class="form-control select2_category">
+												<option value="0" <c:if test="${config.importantLevel == 0}">selected</c:if>>一般</option>
+												<option value="1" <c:if test="${config.importantLevel == 1}">selected</c:if>>重要</option>
+												<option value="2" <c:if test="${config.importantLevel == 2}">selected</c:if>>紧急</option>
 											</select>
 										</div>
 									</div>

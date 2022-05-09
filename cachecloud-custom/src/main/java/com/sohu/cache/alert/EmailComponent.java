@@ -17,6 +17,7 @@ public interface EmailComponent {
      */
     boolean sendMail(String title, String content, List<String> emailList, List<String> ccList);
 
+    boolean sendDailyMail(String title, String content, List<String> emailList, List<String> ccList);
 
     /**
      * 发送邮件

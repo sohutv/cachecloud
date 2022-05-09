@@ -53,8 +53,8 @@ public class MachineSyncTask extends BaseTask {
      * 同步/校验数据 超时时间
      */
     private static int SYNC_DATA_TIMEOUT = 30 * 60 * 1000;
-    private static int MD5_CHECK_TIMEOUT = 20 * 1000;
-    private static int BACKUP_DATA_TIMEOUT = 30 * 1000;
+    private static int MD5_CHECK_TIMEOUT = 2 * 60 * 1000;
+    private static int BACKUP_DATA_TIMEOUT = 5 * 60 * 1000;
 
 
     @Override
@@ -232,8 +232,10 @@ public class MachineSyncTask extends BaseTask {
      */
     public TaskFlowStatusEnum checkDirMd5() {
 
-        String sourceShell = "find " + baseConfDir.concat(containerIp) + " " + baseDataDir.concat(containerIp) + " " + baseLogDir.concat(containerIp) + " -type f -exec md5sum {} \\; | sort -k 2";
-        String targetShell = "find " + baseConfDir.concat(containerIp) + " " + baseDataDir.concat(containerIp) + " " + baseLogDir.concat(containerIp) + " -type f -exec md5sum {} \\; | sort -k 2";
+//        String sourceShell = "find " + baseConfDir.concat(containerIp) + " " + baseDataDir.concat(containerIp) + " " + baseLogDir.concat(containerIp) + " -type f -exec md5sum {} \\; | sort -k 2";
+//        String targetShell = "find " + baseConfDir.concat(containerIp) + " " + baseDataDir.concat(containerIp) + " " + baseLogDir.concat(containerIp) + " -type f -exec md5sum {} \\; | sort -k 2";
+        String sourceShell = "find " + baseConfDir.concat(containerIp) + "/*.conf " + baseDataDir.concat(containerIp) + "/*.conf -type f -exec md5sum {} \\; | sort -k 2";
+        String targetShell = "find " + baseConfDir.concat(containerIp) + "/*.conf " + baseDataDir.concat(containerIp) + "/*.conf -type f -exec md5sum {} \\; | sort -k 2";
 
         //1.源宿主机和目标宿主机 目录文件列表的md5值
         Result sourceMd5Result;

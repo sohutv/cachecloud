@@ -11,6 +11,7 @@ import com.sohu.cache.stats.app.AppStatsCenter;
 import com.sohu.cache.stats.instance.InstanceStatsCenter;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.TypeUtil;
+import com.sohu.cache.web.enums.AlertTypeEnum;
 import com.sohu.cache.web.vo.AppDetailVO;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -108,6 +109,7 @@ public class AppMemInspector extends BaseAlertService implements Inspector {
         String content = String.format("应用(%s)-内存使用率报警-预设百分之%s-现已达到百分之%s-请及时关注",
                 appDesc.getAppId(), appDesc.getMemAlertValue(), appDetailVO.getMemUsePercent());
         String title = "CacheCloud系统-应用内存使用率报警";
+        appAlertRecordService.saveAlertInfoByType(AlertTypeEnum.APP_MEM_USED_RATIO, title, content, appDetailVO);
         emailComponent.sendMail(title, content, appDetailVO.getEmailList(),
                 Arrays.asList(emailComponent.getAdminEmail().split(ConstUtils.COMMA)));
         weChatComponent.sendWeChatToAll(title,content,appDetailVO.getWeChatList());
@@ -121,6 +123,7 @@ public class AppMemInspector extends BaseAlertService implements Inspector {
                 instanceStats.getAppId(), appDetailVO.getAppDesc().getMemAlertValue(),
                 instanceStats.getMemUsePercent(), appDetailVO.getMemUsePercent());
         String title = "CacheCloud系统-分片内存使用率报警";
+        appAlertRecordService.saveAlertInfoByType(AlertTypeEnum.APP_SHARD_MEM_USED_RATIO, title, content, appDetailVO, instanceStats);
         emailComponent.sendMail(title, content, appDetailVO.getEmailList(),
                 Arrays.asList(emailComponent.getAdminEmail().split(ConstUtils.COMMA)));
         weChatComponent.sendWeChatToAll(title,content,appDetailVO.getWeChatList());

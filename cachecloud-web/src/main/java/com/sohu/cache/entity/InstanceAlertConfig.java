@@ -76,6 +76,11 @@ public class InstanceAlertConfig {
      */
     private Date lastCheckTime;
 
+    /**
+     * 重要度（参照ImportantLevelTypeEnum）（0:一般；1：重要；2：紧急）
+     */
+    private Integer importantLevel;
+
     public Date getUpdateTime() {
         return (Date) updateTime.clone();
     }
@@ -112,7 +117,9 @@ public class InstanceAlertConfig {
     }
 
     public boolean isSpecail() {
-        return instanceId > 0 && type == InstanceAlertTypeEnum.INSTANCE_ALERT.getValue();
+        return instanceId > 0 &&
+                (type == InstanceAlertTypeEnum.INSTANCE_ALERT.getValue() ||
+                        type == InstanceAlertTypeEnum.APP_ALERT.getValue());
     }
 
     @Override

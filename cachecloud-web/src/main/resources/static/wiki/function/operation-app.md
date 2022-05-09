@@ -1,6 +1,7 @@
 ###### 目录
 * [1. 应用运维](#cc1)
 	- [管理应用实例](#cc1-1)
+	- [管理应用模块](#cc1-6)
 	- [应用机器列表](#cc1-2)
 	- [应用详情和审批列表](#cc1-3)
 	- [应用密码修改](#cc1-4)
@@ -28,7 +29,8 @@ a. 一键添加sentinel节点
 b. 一键Failover  
 c. 上下线实例  
 d. 添加slave节点  
-e. 查看操作日志 
+e. 查看操作日志  
+f. 修改配置 
 
 <img src="../../img/function/server/app-operation-sentinel1.png" width="100%">
 
@@ -37,11 +39,20 @@ e. 查看操作日志
 **2. Redis Cluster应用类型**
 
 a. 添加Slave  
-b.一键Failover  
-c.上下线实例  
-d. 查看操作日志 
+b. 一键Failover  
+c. 上下线实例  
+d. 查看操作日志  
+e. 修改配置  
+f. config/restart（修改配置/滚动重启）
 
 <img src="../../img/function/server/app-operation-cluster.png" width="100%">
+
+<a name="cc1-6"/>
+#### 管理应用模块
+
+查看机器集成模块情况，实例装载模块情况，安装模块，查看实例日志等。
+
+<img src="../../img/function/server/app-module.png" width="100%">
 
 <a name="cc1-2"/>
 #### 应用机器列表

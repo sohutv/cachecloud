@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ include file="/WEB-INF/jsp/manage/commons/taglibs.jsp"%>
+<%@ page import="com.sohu.cache.utils.EnvCustomUtil"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -8,8 +9,9 @@
 	<title>CacheCloud系统</title>
 	<link rel="stylesheet" type="text/css" href="/resources/css/login.css">
 	<script type="text/javascript" src="/resources/bootstrap/jquery/jquery-1.11.0.min.js"></script>
+	<script src="/resources/manage/plugins/jquery.md5.js" type="text/javascript"></script>
 	<script type="text/javascript">
-		function loginIn() {
+		function loginIn(pwdFlag) {
 			var userName = document.getElementById("userName");
 			var password = document.getElementById("password");
 			var redirectUrl = document.getElementById("redirectUrl").value;
@@ -23,11 +25,15 @@
 				password.focus();
 				return false;
 	        }
+			var realPwd = password.value;
+			if(pwdFlag){
+				realPwd = $.md5(password.value);
+			}
 			$.post(
 				'/manage/loginIn.json',
 				{
 					userName: userName.value,
-					password: password.value,
+					password: realPwd,
 					isAdmin: false
 				},
 	            function(data){
@@ -74,7 +80,7 @@
 		            <input type="hidden" value="${redirectUrl}" id="redirectUrl" name="redirectUrl">
 		            
 		            <div class="input login">
-		                <input type="button" value="登 录" onclick="loginIn()">
+		                <input type="button" value="登 录" onclick="loginIn(<%=EnvCustomUtil.pwdswitch%>)">
 		            </div>
 		
 		        </form>

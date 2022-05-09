@@ -106,10 +106,22 @@
         group by app_id
     </select>
 
+    <select id="getAppClientConnExpCount" resultType="int">
+        select case when sum(count) is null then 0 else sum(count) end as count
+        from app_client_exception_minute_statistics
+        where app_id = #{appId} and type=0 and current_min between #{startTime} and #{endTime}
+    </select>
+
     <select id="getAppClientCmdExpStat" resultType="AppClientStatisticGather">
         select app_id, sum(count) as cmd_exp_count, sum(cost)/sum(count) as avg_cmd_exp_cost, DATE_FORMAT(current_min,'%Y-%m-%d') gather_time
         from app_client_exception_minute_statistics
         where type=1 and current_min between #{startTime} and #{endTime}
         group by app_id
+    </select>
+
+    <select id="getAppClientCmdExpCount" resultType="int">
+        select case when sum(count) is null then 0 else sum(count) end as count
+        from app_client_exception_minute_statistics
+        where app_id = #{appId} and type=1 and current_min between #{startTime} and #{endTime}
     </select>
 </mapper>

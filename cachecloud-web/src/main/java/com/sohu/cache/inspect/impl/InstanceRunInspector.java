@@ -12,6 +12,7 @@ import com.sohu.cache.inspect.InspectParamEnum;
 import com.sohu.cache.inspect.Inspector;
 import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.util.TypeUtil;
+import com.sohu.cache.web.enums.AlertTypeEnum;
 import com.sohu.cache.web.enums.BooleanEnum;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
@@ -95,6 +96,7 @@ public class InstanceRunInspector extends BaseAlertService implements Inspector 
         }
         String title = "实例(" + info.getIp() + ":" + info.getPort() + ")状态发生变化";
         String message = generateMessage(info, true);
+        appAlertRecordService.saveAlertInfoByType(AlertTypeEnum.INSTANCE_RUNNING_STATE_CHANGE, title, message, info);
         emailComponent.sendMailToAdmin(title, message);
     }
 

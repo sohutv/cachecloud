@@ -10,6 +10,8 @@ import com.sohu.cache.entity.SystemResource;
 import com.sohu.cache.exception.SSHException;
 import com.sohu.cache.protocol.MachineProtocol;
 import com.sohu.cache.redis.RedisCenter;
+import com.sohu.cache.ssh.SSHService;
+import com.sohu.cache.ssh.SSHTemplate;
 import com.sohu.cache.ssh.SSHUtil;
 import com.sohu.cache.stats.app.RedisShakeCenter;
 import com.sohu.cache.util.ConstUtils;
@@ -17,7 +19,6 @@ import com.sohu.cache.util.TypeUtil;
 import com.sohu.cache.web.service.AppService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,8 @@ public class RedisShakeCenterImpl implements RedisShakeCenter {
     @Autowired
     private RedisCenter redisCenter;
     @Autowired
+    private SSHService sshService;
+    @Autowired
     private AppDataMigrateStatusDao appDataMigrateStatusDao;
 
     @Override
@@ -73,12 +76,12 @@ public class RedisShakeCenterImpl implements RedisShakeCenter {
 
     @Override
     public AppDataMigrateStatus migrate(String migrateMachineIp, int source_rdb_parallel, int parallel,
-                           AppDataMigrateEnum sourceRedisMigrateEnum, String sourceServers,
-                           AppDataMigrateEnum targetRedisMigrateEnum, String targetServers,
-                           long sourceAppId, long targetAppId,
-                           String redisSourcePass, String redisTargetPass,
-                           String redisSourceVersion, String redisTargetVersion,
-                           long userId, SystemResource resource) {
+                                        AppDataMigrateEnum sourceRedisMigrateEnum, String sourceServers,
+                                        AppDataMigrateEnum targetRedisMigrateEnum, String targetServers,
+                                        long sourceAppId, long targetAppId,
+                                        String redisSourcePass, String redisTargetPass,
+                                        String redisSourceVersion, String redisTargetVersion,
+                                        long userId, SystemResource resource) {
         String timestamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
         // 1. 生成配置
         String configContent = generateRedisShakeConfig(timestamp, source_rdb_parallel, parallel,
@@ -93,37 +96,40 @@ public class RedisShakeCenterImpl implements RedisShakeCenter {
             return null;
         }
         // 3. 开始执行: 指定的配置名、目录、日志名
-        String cmd = ConstUtils.getRedisShakeLinuxCmd(resource.getName()) + " -conf=" + ConstUtils.getRedisShakeConfDir(resource.getName()) + confileFileName + " -type=sync";
+        String cmd = "nohup " + ConstUtils.getRedisShakeLinuxCmd(resource.getName()) + " -conf=" + ConstUtils.getRedisShakeConfDir(resource.getName()) + confileFileName + " -type=sync > "+ConstUtils.REDIS_INSTALL_BASE_DIR+"/shake.out 2>&1 &";
 
         log.warn(cmd);
         try {
-            SSHUtil.execute(migrateMachineIp, cmd);
+            SSHTemplate.Result cmdResult = sshService.executeWithResult(migrateMachineIp, cmd);
+
+            // 4. 记录执行记录
+            if (cmdResult.isSuccess()) {
+                AppDataMigrateStatus appDataMigrateStatus = new AppDataMigrateStatus();
+                appDataMigrateStatus.setMigrateId(timestamp);
+                appDataMigrateStatus.setMigrateTool(0);
+                appDataMigrateStatus.setMigrateMachineIp(migrateMachineIp);
+                appDataMigrateStatus.setStartTime(new Date());
+                appDataMigrateStatus.setSourceMigrateType(sourceRedisMigrateEnum.getIndex());
+                appDataMigrateStatus.setSourceServers(sourceServers);
+                appDataMigrateStatus.setTargetMigrateType(targetRedisMigrateEnum.getIndex());
+                appDataMigrateStatus.setTargetServers(targetServers);
+                appDataMigrateStatus.setLogPath(ConstUtils.getRedisShakeLogsDir(resource.getName()) + logFileName);
+                appDataMigrateStatus.setConfigPath(ConstUtils.getRedisShakeConfDir(resource.getName()) + confileFileName);
+                appDataMigrateStatus.setUserId(userId);
+                appDataMigrateStatus.setSourceAppId(sourceAppId);
+                appDataMigrateStatus.setTargetAppId(targetAppId);
+                appDataMigrateStatus.setRedisSourceVersion(redisSourceVersion);
+                appDataMigrateStatus.setRedisTargetVersion(redisTargetVersion);
+                appDataMigrateStatus.setStatus(AppDataMigrateStatusEnum.PREPARE.getStatus());
+                appDataMigrateStatusDao.save(appDataMigrateStatus);
+                return appDataMigrateStatus;
+            } else {
+                return null;
+            }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return null;
         }
-
-        // 4. 记录执行记录
-        AppDataMigrateStatus appDataMigrateStatus = new AppDataMigrateStatus();
-        appDataMigrateStatus.setMigrateId(timestamp);
-        appDataMigrateStatus.setMigrateTool(0);
-        appDataMigrateStatus.setMigrateMachineIp(migrateMachineIp);
-        appDataMigrateStatus.setStartTime(new Date());
-        appDataMigrateStatus.setSourceMigrateType(sourceRedisMigrateEnum.getIndex());
-        appDataMigrateStatus.setSourceServers(sourceServers);
-        appDataMigrateStatus.setTargetMigrateType(targetRedisMigrateEnum.getIndex());
-        appDataMigrateStatus.setTargetServers(targetServers);
-        appDataMigrateStatus.setLogPath(ConstUtils.getRedisShakeLogsDir(resource.getName()) + logFileName);
-        appDataMigrateStatus.setConfigPath(ConstUtils.getRedisShakeConfDir(resource.getName()) + confileFileName);
-        appDataMigrateStatus.setUserId(userId);
-        appDataMigrateStatus.setSourceAppId(sourceAppId);
-        appDataMigrateStatus.setTargetAppId(targetAppId);
-        appDataMigrateStatus.setRedisSourceVersion(redisSourceVersion);
-        appDataMigrateStatus.setRedisTargetVersion(redisTargetVersion);
-        appDataMigrateStatus.setStatus(AppDataMigrateStatusEnum.PREPARE.getStatus());
-        appDataMigrateStatusDao.save(appDataMigrateStatus);
-
-        return appDataMigrateStatus;
     }
 
     @Override
@@ -137,10 +143,10 @@ public class RedisShakeCenterImpl implements RedisShakeCenter {
         // redis-shake stop.sh
         try {
             String configPath = appDataMigrateStatus.getConfigPath();
-            ConstUtils.REDIS_SHAKE_HOME = configPath.substring(0,configPath.indexOf("conf"));
+            ConstUtils.REDIS_SHAKE_HOME = configPath.substring(0, configPath.indexOf("conf"));
 
             String migrateId = appDataMigrateStatus.getMigrateId();
-            String stopCmd = ConstUtils.getRedisShakeStopCmd() + " " + String.format("%s/pid/redis-shake-%s.pid",ConstUtils.REDIS_SHAKE_HOME,migrateId);
+            String stopCmd = ConstUtils.getRedisShakeStopCmd() + " " + String.format("%s/pid/redis-shake-%s.pid", ConstUtils.REDIS_SHAKE_HOME, migrateId);
             String stopResult = SSHUtil.execute(migrateMachineIp, stopCmd);
             if (StringUtils.isNotEmpty(stopResult) && stopResult.contains("Fail")) {
                 if (stopResult.contains("No process number")) {

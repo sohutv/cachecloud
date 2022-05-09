@@ -3,12 +3,10 @@ package com.sohu.cache.web.controller;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
-
 import com.sohu.cache.constant.AppAuditType;
 import com.sohu.cache.entity.AppAudit;
 import com.sohu.cache.entity.AppUser;
@@ -28,7 +26,7 @@ public class UserController extends BaseController{
     
     @Resource(name = "appEmailUtil")
     private AppEmailUtil appEmailUtil;
-    
+
     /**
      * 注册用户页面
      */
@@ -45,11 +43,11 @@ public class UserController extends BaseController{
     @RequestMapping(value = "/apply")
     public ModelAndView doAddUser(HttpServletRequest request,
             HttpServletResponse response, Model model, String name, String chName, String email, String mobile, String weChat,
-            Integer type, Long userId, Integer isAlert) {
+            Integer type, Long userId, Integer isAlert, String password, String company, String purpose) {
         SuccessEnum success = SuccessEnum.SUCCESS;
         try {
             //保存用户(type=-1为无效用户,需要审批)
-            AppUser appUser = AppUser.buildFrom(userId, name, chName, email, mobile, weChat, type, isAlert);
+            AppUser appUser = AppUser.buildFrom(userId, name, chName, email, mobile, weChat, type, isAlert, password, company, purpose);
             userService.save(appUser);
             //提交审批
             AppAudit appAudit = appService.saveRegisterUserApply(appUser,AppAuditType.REGISTER_USER_APPLY);

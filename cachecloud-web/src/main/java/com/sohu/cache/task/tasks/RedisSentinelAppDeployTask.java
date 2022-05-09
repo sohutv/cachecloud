@@ -13,6 +13,7 @@ import com.sohu.cache.task.constant.TaskStepFlowEnum.TaskFlowStatusEnum;
 import com.sohu.cache.task.entity.RedisSentinelNode;
 import com.sohu.cache.task.entity.RedisServerNode;
 import com.sohu.cache.util.EnvUtil;
+import com.sohu.cache.web.enums.SuccessEnum;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -78,6 +79,11 @@ public class RedisSentinelAppDeployTask extends BaseTask {
 
     private String version;
 
+    /**
+     * Redis模块信息
+     */
+    private String moduleInfo;
+
 
     @Override
     public List<String> getTaskSteps() {
@@ -111,6 +117,8 @@ public class RedisSentinelAppDeployTask extends BaseTask {
         taskStepList.add("deployCollection");
         //14. 设置密码
         taskStepList.add("setPasswd");
+        //14. 装载组件
+        taskStepList.add("loadModule");
         //15. 重置sentinel实例状态
         taskStepList.add("sentinelReset");
         //16. 审核
@@ -194,6 +202,9 @@ public class RedisSentinelAppDeployTask extends BaseTask {
             }
         }
         version = MapUtils.getString(paramMap, TaskConstants.VERSION_KEY);
+
+        // 模块安装
+        moduleInfo = MapUtils.getString(paramMap, TaskConstants.MODULE_KEY);
 
         return TaskFlowStatusEnum.SUCCESS;
     }
@@ -573,6 +584,23 @@ public class RedisSentinelAppDeployTask extends BaseTask {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return TaskFlowStatusEnum.ABORT;
+        }
+        return TaskFlowStatusEnum.SUCCESS;
+    }
+
+    public TaskFlowStatusEnum loadModule(){
+        if (!StringUtils.isEmpty(moduleInfo)) {
+            for (String versionId : moduleInfo.split(";")) {
+                if (!StringUtils.isEmpty(versionId)) {
+                    Map map = redisCenter.loadModule(appId, Integer.parseInt(versionId));
+                    Integer status = MapUtils.getInteger(map, "status");
+                    String message = MapUtils.getString(map, "message");
+                    logger.info(marker, "module load info status:{} message:{}",status, message);
+                    if (status != SuccessEnum.SUCCESS.value()) {
+                        return TaskFlowStatusEnum.ABORT;
+                    }
+                }
+            }
         }
         return TaskFlowStatusEnum.SUCCESS;
     }

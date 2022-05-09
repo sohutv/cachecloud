@@ -2,6 +2,7 @@ package com.sohu.cache.task.tasks.diagnosticTask;
 
 import com.sohu.cache.constant.DiagnosticTypeEnum;
 import com.sohu.cache.entity.DiagnosticTaskRecord;
+import com.sohu.cache.redis.util.PipelineUtil;
 import com.sohu.cache.task.BaseTask;
 import com.sohu.cache.task.constant.TaskConstants;
 import com.sohu.cache.task.constant.TaskStepFlowEnum.TaskFlowStatusEnum;
@@ -171,7 +172,7 @@ public class InstanceBigKeyTask extends BaseTask {
                     Pipeline pipeline = jedis.pipelined();
                     if (CollectionUtils.isNotEmpty(keyList)) {
                         List<String> keyStrList = keyList.stream().map(byteKey -> new String(byteKey)).collect(Collectors.toList());
-                        keyStrList.stream().forEach(keyStr -> pipeline.memoryUsage(keyStr));
+                        keyStrList.stream().forEach(keyStr -> PipelineUtil.memoryUsage(pipeline, keyStr));
                         List<Object> memObjectList;
                         try {
                             memObjectList = pipeline.syncAndReturnAll();

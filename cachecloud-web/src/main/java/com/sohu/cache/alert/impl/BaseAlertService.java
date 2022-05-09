@@ -2,6 +2,7 @@ package com.sohu.cache.alert.impl;
 
 import com.sohu.cache.alert.EmailComponent;
 import com.sohu.cache.alert.WeChatComponent;
+import com.sohu.cache.web.service.AppAlertRecordService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,12 @@ public class BaseAlertService {
      */
     @Autowired(required = false)
     protected EmailComponent emailComponent;
+
+    /**
+     * 报警记录
+     */
+    @Autowired(required = false)
+    protected AppAlertRecordService appAlertRecordService;
 
     /**
      * 微信报警

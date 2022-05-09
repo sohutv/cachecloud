@@ -20,7 +20,9 @@ public interface AppUserDao {
 	public int update(AppUser user);
 	
 	public int delete(@Param("id") Long id);
-	
+
+	public int updatePwd(@Param("id") Long id, @Param("password") String password);
+
 	public AppUser getByName(@Param("name") String name);
 
 	AppUser getByEmail(@Param("email") String email);

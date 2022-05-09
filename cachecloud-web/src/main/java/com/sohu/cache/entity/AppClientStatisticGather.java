@@ -25,7 +25,7 @@ public class AppClientStatisticGather {
     /**
      * 累计命令调用次数
      */
-    private int cmdCount;
+    private long cmdCount;
     /**
      * 平均命令调用耗时
      */

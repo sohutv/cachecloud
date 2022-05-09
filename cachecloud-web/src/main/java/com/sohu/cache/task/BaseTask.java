@@ -25,6 +25,7 @@ import com.sohu.cache.task.entity.TaskQueue;
 import com.sohu.cache.task.util.AppWechatUtil;
 import com.sohu.cache.web.service.AppService;
 import com.sohu.cache.web.service.InstancePortService;
+import com.sohu.cache.web.service.ModuleService;
 import com.sohu.cache.web.service.ResourceService;
 import com.sohu.cache.web.util.AppEmailUtil;
 import com.sohu.cache.web.util.SimpleFileUtil;
@@ -139,6 +140,9 @@ public abstract class BaseTask {
 
     @Autowired
     protected ResourceDao resourceDao;
+
+    @Autowired
+    protected ModuleService moduleService;
 
     /**
      * 任务id

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.sohu.cache.constant.AppCheckEnum;
 import com.sohu.cache.entity.MachineInfo;
 import com.sohu.cache.entity.MachineStats;
+import com.sohu.cache.redis.util.JedisUtil;
 import com.sohu.cache.task.BaseTask;
 import com.sohu.cache.task.constant.InstanceInfoEnum.InstanceStatusEnum;
 import com.sohu.cache.task.constant.InstanceInfoEnum.InstanceTypeEnum;
@@ -11,6 +12,7 @@ import com.sohu.cache.task.constant.TaskConstants;
 import com.sohu.cache.task.constant.TaskStepFlowEnum.TaskFlowStatusEnum;
 import com.sohu.cache.task.entity.RedisServerNode;
 import com.sohu.cache.util.EnvUtil;
+import com.sohu.cache.web.enums.SuccessEnum;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -73,6 +75,11 @@ public class RedisClusterAppDeployTask extends BaseTask {
      */
     private Map<Jedis, Jedis> clusterMap = new LinkedHashMap<Jedis, Jedis>();
 
+    /**
+     * Redis模块信息
+     */
+    private String moduleInfo;
+
     @Override
     public List<String> getTaskSteps() {
         List<String> taskStepList = new ArrayList<String>();
@@ -102,6 +109,8 @@ public class RedisClusterAppDeployTask extends BaseTask {
         taskStepList.add("deployCollection");
         //14. 设置密码
         taskStepList.add("setPasswd");
+        //14. 装载组件
+        taskStepList.add("loadModule");
         //14. 审核
         taskStepList.add("updateAudit");
         //15. 更新机器分配状态
@@ -166,6 +175,8 @@ public class RedisClusterAppDeployTask extends BaseTask {
         }
         // redis版本
         version = MapUtils.getString(paramMap, TaskConstants.VERSION_KEY);
+        // 模块安装
+        moduleInfo = MapUtils.getString(paramMap, TaskConstants.MODULE_KEY);
         return TaskFlowStatusEnum.SUCCESS;
     }
 
@@ -426,6 +437,24 @@ public class RedisClusterAppDeployTask extends BaseTask {
         return TaskFlowStatusEnum.SUCCESS;
     }
 
+    public TaskFlowStatusEnum loadModule(){
+        if (!StringUtils.isEmpty(moduleInfo)) {
+            for (String versionId : moduleInfo.split(";")) {
+                if (!StringUtils.isEmpty(versionId)) {
+                    Map map = redisCenter.loadModule(appId, Integer.parseInt(versionId));
+                    Integer status = MapUtils.getInteger(map, "status");
+                    String message = MapUtils.getString(map, "message");
+                    String so_name = MapUtils.getString(map, "so_name");
+                    logger.info(marker, "{} module load info status:{} message:{}",so_name,status, message);
+                    if (status != SuccessEnum.SUCCESS.value()) {
+                        return TaskFlowStatusEnum.ABORT;
+                    }
+                }
+            }
+        }
+        return TaskFlowStatusEnum.SUCCESS;
+    }
+
     /**
      * 通过初审：资源分配
      *
@@ -500,8 +529,8 @@ public class RedisClusterAppDeployTask extends BaseTask {
             for (Map.Entry<Jedis, Jedis> msNode : clusterMap.entrySet()) {
                 Jedis masterNode = msNode.getKey();
                 Jedis slaveNode = msNode.getValue();
-                String masterInfo = masterNode != null ? masterNode.getClient().getHostPort() : null;
-                String slaveInfo = slaveNode != null ? slaveNode.getClient().getHostPort() : null;
+                String masterInfo = masterNode != null ? JedisUtil.getHostPort(masterNode) : null;
+                String slaveInfo = slaveNode != null ? JedisUtil.getHostPort(slaveNode) : null;
 
                 logger.info(marker, "master :{} -> slave :{}", masterInfo, slaveInfo);
             }

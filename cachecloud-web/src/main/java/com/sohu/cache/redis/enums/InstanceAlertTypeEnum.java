@@ -11,7 +11,8 @@ import java.util.List;
  */
 public enum InstanceAlertTypeEnum {
     ALL_ALERT(1, "全局报警"),
-    INSTANCE_ALERT(2, "实例报警");
+    INSTANCE_ALERT(2, "实例报警"),
+    APP_ALERT(3, "应用报警");
 
     
     private final static List<InstanceAlertTypeEnum> instanceAlertTypeEnumList = new ArrayList<InstanceAlertTypeEnum>();

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.ModuleDao">
+
+   <sql id="module_info_columns">
+   		id,name,git_url,info
+   	</sql>
+
+    <sql id="module_version_columns">
+        id,module_id,version_id,tag,create_time,status,so_path
+    </sql>
+
+   	<sql id="module_info_fields">
+   		#{id}, #{name}, #{git_url},#{info}
+   	</sql>
+
+     <select id="getAllModules" resultType="ModuleInfo">
+        select <include refid="module_info_columns"/>
+        from module_info  where  status=1
+    </select>
+
+     <select id="getModule" resultType="ModuleInfo">
+        select <include refid="module_info_columns"/>
+        from module_info where name=#{moduleName}
+    </select>
+
+    <select id="getVersion" resultType="ModuleVersion">
+        select <include refid="module_version_columns"/>
+        from module_version where id=#{versionId}
+    </select>
+
+    <select id="getAllVersions" resultType="ModuleVersion">
+        select <include refid="module_version_columns"/>
+        from module_version where module_id = #{moduleId}
+    </select>
+
+    <select id="delModule">
+        update module_info set status=0 where id = #{moduleId}
+    </select>
+
+    <insert id="saveOrUpdate" parameterType="ModuleInfo">
+        insert into module_info(name,git_url,info)
+        values(#{name},#{gitUrl},#{info})
+        on duplicate key update
+        name = #{name}, git_url = #{gitUrl},info = #{info}
+    </insert>
+
+    <insert id="saveOrUpdateVersion" parameterType="ModuleVersion">
+        insert into module_version(id,module_id,version_id,tag,create_time,status,so_path)
+        values(#{id},#{moduleId},#{versionId},#{tag},now(),#{status},#{soPath})
+        on duplicate key update
+        module_id = #{moduleId}, version_id = #{versionId},tag = #{tag},status= #{status},so_path= #{soPath},create_time=now()
+    </insert>
+
+</mapper>

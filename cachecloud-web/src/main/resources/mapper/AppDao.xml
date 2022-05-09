@@ -174,6 +174,11 @@
                 and app_id in (select app_id from app_to_user where user_id = ${userId})
             </when>
         </choose>
+        <choose>
+            <when test="isTest != null and isTest > 0">
+                and is_test = ${isTest}
+            </when>
+        </choose>
         ORDER BY app_id desc
         <choose>
         	<when test="page != null">

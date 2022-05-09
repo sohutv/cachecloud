@@ -7,6 +7,7 @@ import lombok.Data;
 import redis.clients.jedis.Module;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -142,6 +143,14 @@ public class InstanceInfo implements Serializable {
             return (Date) updateTime.clone();
         }
         return null;
+    }
+    public String getUpdateTimeDesc() {
+        if(updateTime != null){
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            return sdf.format((Date) updateTime.clone());
+        } else {
+            return "";
+        }
     }
     public void setUpdateTime(Date updateTime) {
         this.updateTime = (Date) updateTime.clone();

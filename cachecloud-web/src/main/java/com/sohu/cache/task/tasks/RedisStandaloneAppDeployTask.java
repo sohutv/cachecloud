@@ -11,6 +11,7 @@ import com.sohu.cache.task.constant.TaskConstants;
 import com.sohu.cache.task.constant.TaskStepFlowEnum.TaskFlowStatusEnum;
 import com.sohu.cache.task.entity.RedisServerNode;
 import com.sohu.cache.util.EnvUtil;
+import com.sohu.cache.web.enums.SuccessEnum;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -18,10 +19,7 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
@@ -69,6 +67,10 @@ public class RedisStandaloneAppDeployTask extends BaseTask {
      */
     private String version;
 
+    /**
+     * Redis模块信息
+     */
+    private String moduleInfo;
 
     @Override
     public List<String> getTaskSteps() {
@@ -95,6 +97,8 @@ public class RedisStandaloneAppDeployTask extends BaseTask {
         taskStepList.add("deployCollection");
         //11. 设置密码
         taskStepList.add("setPasswd");
+        //12. 装载组件
+        taskStepList.add("loadModule");
         //12. 审核
         taskStepList.add("updateAudit");
         //13. 更新机器分配状态
@@ -153,6 +157,10 @@ public class RedisStandaloneAppDeployTask extends BaseTask {
         }
         // redis版本
         version = MapUtils.getString(paramMap, TaskConstants.VERSION_KEY);
+
+        // 模块安装
+        moduleInfo = MapUtils.getString(paramMap, TaskConstants.MODULE_KEY);
+
         return TaskFlowStatusEnum.SUCCESS;
     }
 
@@ -355,6 +363,23 @@ public class RedisStandaloneAppDeployTask extends BaseTask {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return TaskFlowStatusEnum.ABORT;
+        }
+        return TaskFlowStatusEnum.SUCCESS;
+    }
+
+    public TaskFlowStatusEnum loadModule(){
+        if (!StringUtils.isEmpty(moduleInfo)) {
+            for (String versionId : moduleInfo.split(";")) {
+                if (!StringUtils.isEmpty(versionId)) {
+                    Map map = redisCenter.loadModule(appId, Integer.parseInt(versionId));
+                    Integer status = MapUtils.getInteger(map, "status");
+                    String message = MapUtils.getString(map, "message");
+                    logger.info(marker, "module load info status:{} message:{}",status, message);
+                    if (status != SuccessEnum.SUCCESS.value()) {
+                        return TaskFlowStatusEnum.ABORT;
+                    }
+                }
+            }
         }
         return TaskFlowStatusEnum.SUCCESS;
     }

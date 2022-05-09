@@ -128,10 +128,10 @@ public class InstanceStatsCenterImpl implements InstanceStatsCenter {
             String ip = instance.getIp();
             int port = instance.getPort();
             int type = instance.getType();
-            BooleanEnum isMaster = redisCenter.isMaster(appId, ip, port);
-            if (isMaster != BooleanEnum.TRUE) {
-                continue;
-            }
+//            BooleanEnum isMaster = redisCenter.isMaster(appId, ip, port);
+//            if (isMaster != BooleanEnum.TRUE) {
+//                continue;
+//            }
             List<Map<String, Object>> objectList = this
                     .queryDiffMapList(beginTime, endTime, ip, port, ConstUtils.REDIS);
 

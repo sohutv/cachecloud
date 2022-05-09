@@ -1,6 +1,7 @@
 spring:
   application:
     name: cloud.cachecloud-web.local
+    import: classpath:spring/spring.xml
 
 server:
   port: 8080

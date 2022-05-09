@@ -60,7 +60,7 @@ public class AppInfoApi {
     /**
      * 是否测试: 0:测试 1:正式
      */
-    @ApiModelProperty(value = "是否测试: 0:正式 1:测试", required = true)
+    @ApiModelProperty(value = "是否测试: 0:正式 1:测试 2:试用集群", required = true)
     private int isTest;
 
     /**
@@ -80,4 +80,5 @@ public class AppInfoApi {
 
     @ApiModelProperty(value = "sentinel实例数量,sentinel应用可传，默认值:3")
     private int sentinelNum;
+
 }

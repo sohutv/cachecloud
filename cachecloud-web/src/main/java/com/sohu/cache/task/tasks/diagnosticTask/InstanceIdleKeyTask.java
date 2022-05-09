@@ -2,6 +2,7 @@ package com.sohu.cache.task.tasks.diagnosticTask;
 
 import com.sohu.cache.constant.DiagnosticTypeEnum;
 import com.sohu.cache.entity.DiagnosticTaskRecord;
+import com.sohu.cache.redis.util.PipelineUtil;
 import com.sohu.cache.task.BaseTask;
 import com.sohu.cache.task.constant.TaskConstants;
 import com.sohu.cache.task.constant.TaskStepFlowEnum.TaskFlowStatusEnum;
@@ -165,7 +166,7 @@ public class InstanceIdleKeyTask extends BaseTask {
                     Pipeline pipeline = jedis.pipelined();
                     if (CollectionUtils.isNotEmpty(keyList)) {
                         List<String> keyStrList = keyList.stream().map(byteKey -> new String(byteKey)).collect(Collectors.toList());
-                        keyStrList.stream().forEach(keyStr -> pipeline.debug(DebugParams.OBJECT(keyStr)));
+                        keyStrList.stream().forEach(keyStr -> PipelineUtil.debug(pipeline, DebugParams.OBJECT(keyStr)));
                         List<Object> debugObjectList;
                         try {
                             debugObjectList = pipeline.syncAndReturnAll();
@@ -173,12 +174,15 @@ public class InstanceIdleKeyTask extends BaseTask {
                             continue; // ignore
                         }
 
-                        List<Object> debugResList = debugObjectList;
+                        List<String> debugResList = new ArrayList<>();
+                        if(CollectionUtils.isNotEmpty(debugObjectList)){
+                            debugObjectList.stream().filter(debugObject -> (debugObject instanceof byte[])).forEach(debugObject -> debugResList.add(new String((byte[])debugObject)));
+                        }
                         Map<String, String> keyIdleMap = new HashMap<>();
                         IntStream.range(0, keyStrList.size())
-                                .filter(i -> (debugResList.get(i) != null) && (debugResList.get(i) instanceof String))
+                                .filter(i -> debugResList.get(i) != null)
                                 .forEach(i -> {
-                                    for (String param : ((String) debugResList.get(i)).split(" ")) {
+                                    for (String param : (debugResList.get(i)).split(" ")) {
                                         if (param.startsWith("lru_seconds_idle")) {
                                             String[] paramArr = param.split(":");
                                             if (paramArr.length > 1) {

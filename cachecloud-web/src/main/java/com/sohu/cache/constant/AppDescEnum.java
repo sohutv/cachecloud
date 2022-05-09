@@ -10,11 +10,12 @@ package com.sohu.cache.constant;
 public class AppDescEnum {
     
     /**
-     * 是否为测试应用
+     * 应用类型：0 正式，1：测试 2：试用
      */
     public static enum AppTest {
         IS_TEST(1),
-        NOT_TEST(0);
+        NOT_TEST(0),
+        IS_TRAIL(2);
 
         private int value;
 

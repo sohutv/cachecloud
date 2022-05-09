@@ -1,14 +1,13 @@
 package com.sohu.cache.web.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.sohu.cache.entity.AppUser;
-import com.sohu.cache.entity.ServerInfo;
-import com.sohu.cache.entity.SystemResource;
+import com.sohu.cache.entity.*;
 import com.sohu.cache.ssh.SSHService;
 import com.sohu.cache.task.TaskService;
 import com.sohu.cache.task.constant.PushEnum;
 import com.sohu.cache.task.constant.ResourceEnum;
 import com.sohu.cache.web.enums.SuccessEnum;
+import com.sohu.cache.web.service.ModuleService;
 import com.sohu.cache.web.service.ResourceService;
 import com.sohu.cache.web.service.ServerDataService;
 import org.apache.commons.collections.CollectionUtils;
@@ -42,6 +41,8 @@ public class ResourceController extends BaseController {
     TaskService taskService;
     @Autowired
     ServerDataService serverDataService;
+    @Autowired
+    ModuleService moduleService;
 
     @RequestMapping("/index")
     public ModelAndView index(Model model, String tabTag, String searchName) {
@@ -50,6 +51,100 @@ public class ResourceController extends BaseController {
 
         model.addAttribute("reourcesActive", SuccessEnum.SUCCESS.value());
         return new ModelAndView("manage/resource/list");
+    }
+
+    @RequestMapping("/modulelist")
+    public ModelAndView module(Model model, String tabTag, String searchName) {
+
+
+        List<ModuleInfo> allModules = moduleService.getAllModules();
+
+        model.addAttribute("allModules", allModules);
+        model.addAttribute("tabTag", tabTag);
+        model.addAttribute("searchName", searchName);
+        model.addAttribute("moduleActive", SuccessEnum.SUCCESS.value());
+
+        return new ModelAndView("manage/module/list");
+    }
+
+    @RequestMapping("/deleteModule")
+    public ModelAndView addModule(HttpServletResponse response,Integer moduleId) {
+        JSONObject result = new JSONObject();
+        SuccessEnum successEnum = null;
+        successEnum = moduleService.deleteModule(moduleId);
+        result.put("status", successEnum.value());
+        sendMessage(response, result.toString());
+
+        return null;
+    }
+
+    @RequestMapping("/addModule")
+    public ModelAndView addModule(HttpServletRequest request, HttpServletResponse response,Integer moduleId) {
+
+        JSONObject result = new JSONObject();
+        ModuleInfo moduleInfo = new ModuleInfo();
+        //修改
+        if (moduleId != null && moduleId > 0) {
+            //修改
+        }
+        moduleInfo.setName(request.getParameter("moduleName"));
+        moduleInfo.setInfo(request.getParameter("moduleInfo"));
+        moduleInfo.setGitUrl(request.getParameter("giturl"));
+
+
+        SuccessEnum successEnum = null;
+        if (moduleId != null && moduleId > 0) {
+            moduleInfo.setId(moduleId);
+        }
+        successEnum = moduleService.saveOrUpdateModule(moduleInfo);
+
+        result.put("status", successEnum.value());
+        sendMessage(response, result.toString());
+
+        return null;
+    }
+
+    @RequestMapping("/addVersion")
+    public ModelAndView addVersion(HttpServletRequest request, HttpServletResponse response,Integer versionId,Integer moduleId
+            ,Integer status,Integer version_id,String tag,String so_path) {
+
+        JSONObject result = new JSONObject();
+        ModuleVersion moduleVersion = new ModuleVersion();
+
+        moduleVersion.setModuleId(moduleId);
+        moduleVersion.setTag(tag);
+        moduleVersion.setStatus(status);
+        moduleVersion.setVersionId(version_id);// redis版本
+        moduleVersion.setSoPath(so_path);
+
+        SuccessEnum successEnum = null;
+        if (versionId != null && versionId > 0) {
+            //修改
+            moduleVersion.setId(versionId);
+        }
+        successEnum = moduleService.saveOrUpdateVersion(moduleVersion);
+
+        result.put("status", successEnum.value());
+        sendMessage(response, result.toString());
+
+        return null;
+    }
+
+    @RequestMapping("/module/{tab}")
+    public ModelAndView moduleTab(@PathVariable("tab") String tab, String searchName, Model model) {
+
+        List<ModuleInfo> allModules = moduleService.getAllModuleVersions();
+        ModuleInfo moduleInfo = moduleService.getModuleVersions(tab);
+
+        // 获取所有Redis版本
+        List<SystemResource> allRedisVersion = resourceService.getResourceList(ResourceEnum.REDIS.getValue());
+
+        model.addAttribute("allModules", allModules);
+        model.addAttribute("moduleInfo", moduleInfo);
+        model.addAttribute("tabTag", tab);
+        model.addAttribute("versionList", allRedisVersion);
+
+        return new ModelAndView("manage/module/version");
     }
 
     @RequestMapping("/redis/{tab}")

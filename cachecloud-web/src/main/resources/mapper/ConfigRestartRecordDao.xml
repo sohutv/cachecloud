@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.ConfigRestartRecordDao">
+
+    <sql id="config_restart_record_columns">
+        app_id, app_name, instances, operate_type, param, status, log, user_id, user_name, start_time, end_time, create_time, update_time
+    </sql>
+    
+    <sql id="config_restart_record_fields">
+    	#{appId}, #{appName}, #{instances}, #{operateType}, #{param}, #{status}, #{log}, #{userId}, #{userName}, #{startTime}, #{endTime}, #{createTime}, #{updateTime}
+    </sql>
+
+    <insert id="save" parameterType="com.sohu.cache.entity.ConfigRestartRecord" keyProperty="id" useGeneratedKeys="true">
+        insert into config_restart_record
+        	(<include refid="config_restart_record_columns"/>)
+        values
+        	(<include refid="config_restart_record_fields"/>)
+    </insert>
+    
+    <select id="getById" resultType="com.sohu.cache.entity.ConfigRestartRecord">
+        select id,<include refid="config_restart_record_columns"/>, execute_ip_port
+        from config_restart_record
+        where id = #{id}
+    </select>
+    
+    <update id="updateStatus">
+    	update config_restart_record set status = #{status}, update_time = now() where id = #{id}
+    </update>
+
+    <update id="updateByCondition">
+    	update config_restart_record
+    	<set>
+            <if test="status != null and status > 0">
+                status = #{status},
+            </if>
+            <if test="startTime != null">
+                start_time = #{startTime},
+            </if>
+            <if test="endTime != null">
+                end_time = #{endTime},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+            <if test="log != null">
+                log = #{log},
+            </if>
+            update_time = now()
+        </set>
+    	where id = #{id}
+    </update>
+    
+    <select id="getCountByCondition" resultType="int" parameterType="com.sohu.cache.entity.ConfigRestartRecord">
+        select
+            count(0)
+        from config_restart_record
+        <where>
+            <if test="appId != null and appId > 0">
+                and app_id = #{appId}
+            </if>
+            <if test="status != null and status >= 0">
+                and status = #{status}
+            </if>
+        </where>
+    </select>
+    
+    <select id="getListByCondition" resultType="com.sohu.cache.entity.ConfigRestartRecord" parameterType="com.sohu.cache.entity.ConfigRestartRecord">
+        select
+            id,<include refid="config_restart_record_columns"/>
+        from config_restart_record
+        <where>
+            <if test="appId != null and appId > 0">
+                 and app_id = #{appId}
+            </if>
+            <if test="status != null and status >= 0">
+                 and status = #{status}
+            </if>
+        </where>
+        order by create_time desc
+        <if test="page != null">
+            <choose>
+                <when test="page.totalCount > page.pageSize">
+                    limit #{page.start},#{page.pageSize};
+                </when>
+                <otherwise>
+                    limit #{page.totalCount}
+                </otherwise>
+            </choose>
+        </if>
+    </select>
+    
+</mapper>

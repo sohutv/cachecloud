@@ -14,7 +14,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
  */
 @SpringBootApplication
 @EnableAutoConfiguration(exclude = {MybatisAutoConfiguration.class})
-@ImportResource("classpath:spring/spring.xml")
+@ImportResource("${spring.application.import}")
 @ServletComponentScan(basePackages = "com.sohu.cache.web.druid")
 @EnableAsync
 public class ApplicationStarter {

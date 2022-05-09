@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * 系统用户信息
@@ -28,7 +29,13 @@ public class AppUser implements Serializable {
      */
     @ApiModelProperty(value = "用户名(英文，域账户)",required = true)
     private String name;
-    
+
+    /**
+     * 密码
+     */
+    @ApiModelProperty(value = "密码")
+    private String password;
+
     /**
      * 中文名
      */
@@ -65,6 +72,24 @@ public class AppUser implements Serializable {
     @ApiModelProperty(value = "是否接收报警 0:不接收报警 1:接收报警",hidden = true)
     private int isAlert;
 
+    /**
+     * 公司名
+     */
+    @ApiModelProperty(value = "公司名")
+    private String company;
+
+    /**
+     * 目的
+     */
+    @ApiModelProperty(value = "目的")
+    private String purpose;
+
+    /**
+     * 注册时间
+     */
+    @ApiModelProperty(value = "注册时间")
+    private Date registerTime;
+
     public static AppUser buildFrom(Long userId, String name, String chName, String email, String mobile, String weChat,
             Integer type) {
         AppUser appUser = new AppUser();
@@ -89,6 +114,39 @@ public class AppUser implements Serializable {
         appUser.setWeChat(weChat);
         appUser.setType(type);
         appUser.setIsAlert(isAlert);
+        return appUser;
+    }
+
+    public static AppUser buildFrom(Long userId, String name, String chName, String email, String mobile, String weChat,
+                                    Integer type,Integer isAlert, String company, String purpose) {
+        AppUser appUser = new AppUser();
+        appUser.setId(userId);
+        appUser.setName(name);
+        appUser.setChName(chName);
+        appUser.setEmail(email);
+        appUser.setMobile(mobile);
+        appUser.setWeChat(weChat);
+        appUser.setType(type);
+        appUser.setIsAlert(isAlert);
+        appUser.setCompany(company);
+        appUser.setPurpose(purpose);
+        return appUser;
+    }
+
+    public static AppUser buildFrom(Long userId, String name, String chName, String email, String mobile, String weChat,
+                                    Integer type,Integer isAlert, String password, String company, String purpose) {
+        AppUser appUser = new AppUser();
+        appUser.setId(userId);
+        appUser.setName(name);
+        appUser.setChName(chName);
+        appUser.setEmail(email);
+        appUser.setMobile(mobile);
+        appUser.setWeChat(weChat);
+        appUser.setType(type);
+        appUser.setIsAlert(isAlert);
+        appUser.setPassword(password);
+        appUser.setCompany(company);
+        appUser.setPurpose(purpose);
         return appUser;
     }
 

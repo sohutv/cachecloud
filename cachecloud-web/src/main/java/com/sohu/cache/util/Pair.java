@@ -25,8 +25,6 @@
 
 package com.sohu.cache.util;
 
-import javafx.beans.NamedArg;
-
 import java.io.Serializable;
 
 /**

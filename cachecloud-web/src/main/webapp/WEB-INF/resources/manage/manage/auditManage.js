@@ -48,14 +48,6 @@ function checkAppConfig(){
 		appConfigKey.focus();
 		return false;
 	}
-	
-	//配置值
-	var appConfigValue = document.getElementById("appConfigValue");
-	if(appConfigValue.value == ""){
-		alert("配置值不能为空");
-		appConfigValue.focus();
-		return false;
-	}
 	return true;
 }
 

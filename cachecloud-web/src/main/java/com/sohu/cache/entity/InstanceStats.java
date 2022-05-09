@@ -104,7 +104,10 @@ public class InstanceStats {
     }
 
     public Timestamp getCreateTime() {
-        return (Timestamp) createTime.clone();
+        if(createTime != null){
+            return (Timestamp) createTime.clone();
+        }
+        return null;
     }
 
     public void setCreateTime(Timestamp createTime) {

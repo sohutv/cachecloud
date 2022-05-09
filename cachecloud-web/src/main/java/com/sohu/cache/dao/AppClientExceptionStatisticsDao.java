@@ -78,9 +78,28 @@ public interface AppClientExceptionStatisticsDao {
     List<AppClientStatisticGather> getAppClientConnExpStat(@Param("startTime") long startTime, @Param("endTime") long endTime);
 
     /**
+     * 获取指定日期连接异常个数
+     * @param appId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    int getAppClientConnExpCount(@Param("appId") long appId, @Param("startTime") long startTime, @Param("endTime") long endTime);
+
+    /**
      * @param startTime
      * @param endTime
      * @return
      */
     List<AppClientStatisticGather> getAppClientCmdExpStat(@Param("startTime") long startTime, @Param("endTime") long endTime);
+
+    /**
+     * 获取指定日期超时异常个数
+     * @param appId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    int getAppClientCmdExpCount(@Param("appId") long appId, @Param("startTime") long startTime, @Param("endTime") long endTime);
+
 }

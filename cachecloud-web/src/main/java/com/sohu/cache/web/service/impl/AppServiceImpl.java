@@ -10,6 +10,7 @@ import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.stats.app.AppStatsCenter;
 import com.sohu.cache.task.constant.InstanceInfoEnum.InstanceTypeEnum;
 import com.sohu.cache.util.AppKeyUtil;
+import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.TypeUtil;
 import com.sohu.cache.web.enums.BooleanEnum;
 import com.sohu.cache.web.enums.DeployInfoEnum;
@@ -27,6 +28,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import redis.clients.jedis.HostAndPort;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Module;
+import redis.clients.jedis.exceptions.JedisDataException;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
@@ -224,6 +228,20 @@ public class AppServiceImpl implements AppService {
         return appDao.getByAppName(appName);
     }
 
+    /**
+     * 获取app 基本实例信息
+     * @param appId
+     * @return
+     */
+    @Override
+    public List<InstanceInfo> getAppBasicInstanceInfo(Long appId) {
+        AppDesc appDesc = appDao.getAppDescById(appId);
+        if(appDesc == null){
+            return new ArrayList<>();
+        }
+        return instanceDao.getInstListByAppId(appId);
+    }
+
     @Override
     public List<InstanceInfo> getAppInstanceInfo(Long appId) {
         AppDesc appDesc = appDao.getAppDescById(appId);
@@ -235,6 +253,9 @@ public class AppServiceImpl implements AppService {
     @Override
     public List<InstanceInfo> getAppOnlineInstanceInfo(Long appId) {
         AppDesc appDesc = appDao.getAppDescById(appId);
+        if(appDesc == null){
+            return Collections.EMPTY_LIST;
+        }
         String password = appDesc.getPasswordMd5();
         List<InstanceInfo> resultList = instanceDao.getEffectiveInstListByAppId(appId);
         return getInstancelistInfo(appId, password, resultList);
@@ -268,6 +289,27 @@ public class AppServiceImpl implements AppService {
                                     break;
                                 }
                             }
+                        }
+                    }
+                    // 设置模块信息
+                    Jedis jedis = null;
+                    try {
+                        if (type == ConstUtils.CACHE_REDIS_STANDALONE || type == ConstUtils.CACHE_TYPE_REDIS_CLUSTER) {
+                            jedis = redisCenter.getJedis(appId, host, port);
+                            List<Module> modules = jedis.moduleList();
+                            instanceInfo.setModules(modules);
+                        }
+                    }catch (JedisDataException e){
+                        if("ERR unknown command 'MODULE'".equals(e.getMessage())){
+                            logger.info("checkInstanceModule {}:{} error , message:{}", host, port, e.getMessage());
+                        }else {
+                            logger.error("checkInstanceModule {}:{} error , message:{}", host, port, e.getMessage(), e);
+                        }
+                    } catch (Exception e) {
+                        logger.error("checkInstanceModule {}:{} error , message:{}", host, port, e.getMessage(), e);
+                    } finally {
+                        if (jedis != null) {
+                            jedis.close();
                         }
                     }
 
@@ -563,9 +605,16 @@ public class AppServiceImpl implements AppService {
         appAudit.setUserId(appUser.getId());
         appAudit.setUserName(appUser.getName());
         appAudit.setModifyTime(new Date());
-        appAudit.setInfo(
-                appUser.getChName() + "申请成为Cachecloud用户, 手机:" + appUser.getMobile() + ",邮箱:" + appUser.getEmail()
-                        + ",微信:" + appUser.getWeChat());
+        StringBuilder info = new StringBuilder();
+        info.append(appUser.getChName() + "申请成为Cachecloud用户, 手机:" + appUser.getMobile() + ",邮箱:" + appUser.getEmail()
+                + ",微信:" + appUser.getWeChat());
+        if(!StringUtils.isEmpty(appUser.getCompany())){
+            info.append(",公司:" + appUser.getCompany());
+        }
+        if(!StringUtils.isEmpty(appUser.getPurpose())){
+            info.append(",使用目的:" + appUser.getPurpose());
+        }
+        appAudit.setInfo(info.toString());
         appAudit.setStatus(AppCheckEnum.APP_WATING_CHECK.value());
         appAudit.setType(registerUserApply.getValue());
         appAuditDao.insertAppAudit(appAudit);
@@ -916,6 +965,10 @@ public class AppServiceImpl implements AppService {
                 long appId = MapUtils.getLongValue(appClientGatherMap, "app_id", 0l);
                 AppDesc appDesc = appService.getByAppId(appId);
                 if (appDesc != null && !appDesc.isTestOk()) {
+                    //增加应用是否下线判断，如应用下线，此条客户端统计信息不做处理
+                    if(AppStatusEnum.STATUS_PUBLISHED.getStatus() != appDesc.getStatus()){
+                        return;
+                    }
                     AppDetailVO appDetail = appStatsCenter.getAppDetail(appId);
                     long mem = appDetail.getMem();
 

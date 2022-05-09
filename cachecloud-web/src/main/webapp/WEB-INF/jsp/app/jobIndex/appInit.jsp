@@ -4,6 +4,18 @@
 <script type="text/javascript" src="/resources/select/bootstrap-select.js"></script>
 <link rel="stylesheet" type="text/css" href="/resources/select/bootstrap-select.css"/>
 <script type="text/javascript" src="/resources/js/selectpicker.js?<%=System.currentTimeMillis()%>"></script>
+
+<script>
+		function moduleSelect(radioVal){
+			if(radioVal == '0'){
+				$("#moduleInfo").attr("style","display:none");
+			}
+			if(radioVal == '1'){
+				$("#moduleInfo").attr("style","display:display");
+			}
+		}
+</script>
+
 <div class="col-md-9">
 	<div class="row">
 		<div class="col-md-12">
@@ -113,9 +125,34 @@
 										<div class="col-md-5">
 											<select id="versionId" name="versionId" class="form-control">
 												<c:forEach items="${versionList}" var="version">
-													<%--<c:if test="${version.ispush == 1}">--%>
-														<option value="${version.id}">${version.name}</option>
-													<%--</c:if>--%>
+													<option value="${version.id}">${version.name}</option>
+												</c:forEach>
+											</select>
+										</div>
+									</div>
+
+									<div class="form-group">
+										<label class="control-label col-md-3">
+											是否安装Redis模块:
+										</label>
+										<div class="col-md-6">
+											<label class="radio-inline">
+												<input type="radio" name="isInstall" value="0" onchange="moduleSelect('0')" checked="checked"> 否
+											</label>
+											<label class="radio-inline">
+												<input type="radio" name="isInstall" value="1" onchange="moduleSelect('1')"> 是
+											</label>
+										</div>
+									</div>
+
+									<div class="form-group" id="moduleInfo" style="display:none">
+										<label class="control-label col-md-3">
+											Redis模块:
+										</label>
+										<div class="col-md-3">
+											<select id="moduleInfo" name="moduleInfo" class="selectpicker bla bla bli" multiple data-live-search="true">
+												<c:forEach items="${allModules}" var="module">
+														<option value="${module.name}">${module.name} (${module.info})</option>
 												</c:forEach>
 											</select>
 										</div>

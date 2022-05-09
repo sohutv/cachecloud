@@ -29,6 +29,10 @@ public class AppSearch {
      * 申请状态
      */
     private Integer appStatus;
+    /**
+     * 应用类型 0：正式 1：测试 2：试用
+     */
+    private Integer isTest;
 
     /**
      * 命中率排序

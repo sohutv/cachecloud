@@ -4,6 +4,7 @@ import com.sohu.cache.constant.AppCheckEnum;
 import com.sohu.cache.constant.AppUserTypeEnum;
 import com.sohu.cache.entity.AppAudit;
 import com.sohu.cache.entity.AppUser;
+import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.enums.SuccessEnum;
 import com.sohu.cache.web.util.AppEmailUtil;
 import org.springframework.stereotype.Controller;
@@ -61,11 +62,12 @@ public class UserManageController extends BaseController {
     @RequestMapping(value = "/add")
     public ModelAndView doAddUser(HttpServletRequest request,
                                   HttpServletResponse response, Model model, String name, String chName, String email, String mobile, String weChat,
-                                  Integer type, Long userId, Integer isAlert) {
+                                  Integer type, Long userId, Integer isAlert, String company, String purpose) {
         // 后台暂时不对参数进行验证
-        AppUser appUser = AppUser.buildFrom(userId, name, chName, email, mobile, weChat, type, isAlert);
+        AppUser appUser = AppUser.buildFrom(userId, name, chName, email, mobile, weChat, type, isAlert, company, purpose);
         try {
             if (userId == null) {
+                appUser.setPassword(ConstUtils.DEFAULT_USER_PASSWORD);
                 userService.save(appUser);
             } else {
                 userService.update(appUser);
@@ -92,9 +94,40 @@ public class UserManageController extends BaseController {
     }
 
     /**
+     * 重置密码
+     *
+     * @param userId
+     * @return
+     */
+    @RequestMapping(value = "/resetPwd")
+    public ModelAndView doResetUserPwd(HttpServletRequest request,
+                                     HttpServletResponse response, Model model, Long userId) {
+        userService.resetPwd(userId);
+        return new ModelAndView("redirect:/manage/user/list");
+    }
+
+    /**
+     * 修改密码
+     *
+     * @param userId
+     * @return
+     */
+    @RequestMapping(value = "/updatePwd")
+    public ModelAndView doResetUserPwd(HttpServletRequest request,
+                                       HttpServletResponse response, Model model, Long userId, String password) {
+        SuccessEnum successEnum = userService.updatePwd(userId, password);
+        if(successEnum.equals(SuccessEnum.SUCCESS)){
+            write(response, String.valueOf(SuccessEnum.SUCCESS.value()));
+        }else{
+            write(response, String.valueOf(SuccessEnum.FAIL.value()));
+        }
+        return null;
+    }
+
+    /**
      * 用户列表
      *
-     * @param  中文名
+     * @param  searchChName 中文名
      * @return
      */
     @RequestMapping(value = "/list")
