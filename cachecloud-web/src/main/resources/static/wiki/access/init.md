@@ -18,7 +18,7 @@
   | 1 | 1.2.sql     | CacheCloud1.2版本的sql文件 | 
   | 2 | 1.2-2.0.sql     | CacheCloud从1.2版本升级到2.0版本增量sql文件 |  
   | 3 | 2.0.sql | CacheCloud2.0版本的sql文件 |  
-  | 4 | 2.0-3.0 sql | CacheCloud从2.0版本升级到3.0版本增量sql文件 |
+  | 4 | update 2.0 to 3.0 sql | CacheCloud从2.0版本升级到3.0版本增量sql文件 |
   | 5 | 3.0 sql | CacheCloud3.0版本的sql文件 |
 
 <a name="cc2"/>

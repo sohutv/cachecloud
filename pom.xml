@@ -13,7 +13,7 @@
     <properties>
         <spring.boot.version>2.2.9.RELEASE</spring.boot.version>
         <spring.cloud.version>Hoxton.SR4</spring.cloud.version>
-        <logback.version>1.1.11</logback.version>
+        <logback.version>1.2.11</logback.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <quartz.version>2.2.1</quartz.version>
         <mysql.java.version>8.0.16</mysql.java.version>
@@ -23,7 +23,7 @@
         <jedis.version>3.7.0</jedis.version>
         <protostuff.version>1.0.8</protostuff.version>
         <jackson.version>2.3.2</jackson.version>
-        <httpcoponents.version>4.3.2</httpcoponents.version>
+        <httpcomponents.version>4.5.13</httpcomponents.version>
         <apache.commons.collections>4.0</apache.commons.collections>
         <maven.compiler.plugin>3.1</maven.compiler.plugin>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -115,7 +115,7 @@
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
-                <version>${httpcoponents.version}</version>
+                <version>${httpcomponents.version}</version>
             </dependency>
 
             <!-- SSH远程 -->
