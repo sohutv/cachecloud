@@ -13,8 +13,6 @@
 
 ## 一、CacheCloud发展
 
-[![Stargazers over time](https://starchart.cc/sohutv/cachecloud.svg)](https://starchart.cc/sohutv/cachecloud)
-
 CacheCloud项目是从2016年以来一直在持续迭代开发,**如果你喜欢这个项目[CacheCloud试用版本](http://124.222.77.220:8080/admin/app/list),欢迎Star多多支持.**  
 
 为了给大家带来更好的CacheCloud使用体验,希望您能在issue里提供宝贵建议：https://github.com/sohutv/cachecloud/issues/281
