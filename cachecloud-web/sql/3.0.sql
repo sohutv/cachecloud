@@ -1278,7 +1278,8 @@ CREATE TABLE `module_info` (
   `git_url` varchar(255) NOT NULL DEFAULT '' COMMENT 'git resource',
   `info` varchar(128) DEFAULT NULL COMMENT '模块信息说明',
   `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0:无效 1:有效',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `NAMEKEY` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Redis模块信息表';
 
 --

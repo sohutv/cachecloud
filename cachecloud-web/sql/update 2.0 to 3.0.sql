@@ -79,3 +79,7 @@ ALTER TABLE app_user ADD register_time DATETIME DEFAULT CURRENT_TIMESTAMP NULL C
 ALTER TABLE app_user ADD purpose varchar(255) NULL COMMENT '使用目的';
 ALTER TABLE app_user ADD company varchar(255) NULL COMMENT '公司名称';
 
+-- module_info change
+ALTER TABLE module_info ADD CONSTRAINT `NAMEKEY` UNIQUE KEY (name);
+
+
