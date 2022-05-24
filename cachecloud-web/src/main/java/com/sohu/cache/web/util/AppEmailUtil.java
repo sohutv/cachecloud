@@ -61,7 +61,8 @@ public class AppEmailUtil {
             return;
         }
         List<String> ccEmailList = getCCEmailList(appDesc, appAudit);
-        appDesc.setOfficer(userService.getOfficerName(appDesc.getOfficer()));
+        String officerIds = appDesc.getOfficer();
+        appDesc.setOfficer(userService.getOfficerName(officerIds));
         Map<String, Object> context = new HashMap<>();
         context.put("appDesc", appDesc);
         context.put("appAudit", appAudit);
@@ -69,7 +70,13 @@ public class AppEmailUtil {
         context.put("instanceAlertValueResultList", new ArrayList<InstanceAlertValueResult>());
         String mailContent = FreemakerUtils.createText("appAudit.ftl", configuration, context);
         AppUser appUser = userService.get(appDesc.getUserId());
-        emailComponent.sendMail("【CacheCloud】状态通知", mailContent, Arrays.asList(appUser.getEmail()), ccEmailList);
+        List<String> receiveEmailList = new ArrayList<>();
+        if(appUser != null){
+            receiveEmailList.add(appUser.getEmail());
+        }else{
+            userService.getOfficerUserByUserIds(officerIds).forEach(user -> receiveEmailList.add(user.getEmail()));
+        }
+        emailComponent.sendMail("【CacheCloud】状态通知", mailContent, receiveEmailList, ccEmailList);
     }
 
     /**

@@ -15,11 +15,13 @@ public class TopoloyExamContants {
 
     public final static String INSTANCE_FORMAT="{0}:{1}:{2} 宿主机:{3}<br/>";
     public final static String CLUSTER_INSTANCE_FORMAT="{0}:{1}:{2} 宿主机:{3}<br/>";
+    public final static String NETSEGMENT_FORMAT="存在至少两个网段，网段1：{0}，网段2：{1}";
 
     public final static String MASTER_SLAVE_DESC="主从节点分布同一台物理机";
     public final static String SLAVE_NOT_EXIST="主节点没有从节点";
     public final static String NODESNUM_DESC="集群节点分布在少于3台物理机";
     public final static String CLUSTER_FAILOVER_DESC="集群中一台物理机宕机不满足故障转移条件";
+    public final static String NETSEGMENT_DESC="集群节点不在同网段";
 
 
 }

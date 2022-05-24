@@ -93,4 +93,11 @@ public interface UserService {
 
     String getOfficerName(String officer);
 
+    /**
+     * 获取某个应用下的所有负责人
+     * @param officer
+     * @return
+     */
+    List<AppUser> getOfficerUserByUserIds(String officer);
+
 }

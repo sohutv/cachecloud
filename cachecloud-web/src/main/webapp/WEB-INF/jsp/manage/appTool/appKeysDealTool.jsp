@@ -67,7 +67,23 @@
         <div class="row">
             <div class="col-md-12">
                 <h3 class="page-header">
-                    诊断1:主从节点分析
+                    诊断1:同网段分析
+                    <c:choose>
+                        <c:when test="${checkInfo.sameNetSegment == 'false'}">
+                            <a class="btn btn-danger">异常</a>
+                        </c:when>
+                        <c:otherwise>
+                            <a class="btn btn-success">正常</a>
+                        </c:otherwise>
+                    </c:choose>
+                </h3>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <h3 class="page-header">
+                    诊断2:主从节点分析
                     <c:choose>
                         <c:when test="${checkInfo.master_slaves.size() == checkInfo.slaveNum && checkInfo.msFlag == 'false'}">
                             <a class="btn btn-success">正常</a>
@@ -152,7 +168,7 @@
         <div class="row">
             <div class="col-md-12">
                 <h3 class="page-header">
-                    诊断2:物理机/机架分布
+                    诊断3:物理机/机架分布
                     <c:choose>
                         <c:when test="${checkInfo.machineInfoMap.size() >= 3 && checkInfo.failoverStatus != false}">
                             <a class="btn btn-success">正常</a>

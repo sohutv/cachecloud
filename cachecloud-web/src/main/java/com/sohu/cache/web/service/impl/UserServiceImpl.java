@@ -203,4 +203,19 @@ public class UserServiceImpl implements UserService {
         }
         return officerName;
     }
+
+    /**
+     * 获取某个应用下的所有负责人
+     * @param officer
+     * @return
+     */
+    public List<AppUser> getOfficerUserByUserIds(String officer){
+        List<AppUser> officerList = new ArrayList<>();
+        if (StringUtils.isNotEmpty(officer)) {
+            officerList = Arrays.stream(officer.split(","))
+                    .map(userId -> get(NumberUtils.toLong(userId))).filter(appUser -> appUser != null).collect(Collectors.toList());
+        }
+        return officerList;
+    }
+
 }

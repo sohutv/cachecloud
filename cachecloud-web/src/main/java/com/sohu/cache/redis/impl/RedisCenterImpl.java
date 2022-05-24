@@ -17,6 +17,7 @@ import com.sohu.cache.redis.enums.RedisInfoEnum;
 import com.sohu.cache.redis.enums.RedisReadOnlyCommandEnum;
 import com.sohu.cache.redis.util.*;
 import com.sohu.cache.ssh.SSHService;
+import com.sohu.cache.ssh.SSHUtil;
 import com.sohu.cache.stats.instance.InstanceStatsCenter;
 import com.sohu.cache.task.BaseTask;
 import com.sohu.cache.task.constant.InstanceInfoEnum.InstanceTypeEnum;
@@ -55,6 +56,7 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -1281,6 +1283,35 @@ public class RedisCenterImpl implements RedisCenter {
         } finally {
             jedis.close();
         }
+    }
+
+    @Override
+    public boolean checkShutdownSuccess(InstanceInfo instanceInfo){
+        if(instanceInfo == null){
+            return false;
+        }
+        //关闭节点后，判断配置文件句柄是否释放
+        boolean executeFlag = false;
+        int tryTimes = 3;
+        long sleepTime = 2L;
+        String host = instanceInfo.getIp();
+        int port = instanceInfo.getPort();
+        StringBuilder command = new StringBuilder();
+        command.append("ps -ef | grep redis | grep redis-server | grep :").append(port).append("  | grep -v \"grep\"");
+        while(tryTimes-- > 0){
+            try{
+                String execute = SSHUtil.execute(host, command.toString());
+                if(StringUtils.isEmpty(execute)){
+                    executeFlag = true;
+                    break;
+                }
+                logger.info(String.format("check Instance shutdown not success, will one more time, appId:%s, instance:%s, command:%s", instanceInfo.getAppId(), instanceInfo.getHostPort(), command));
+                TimeUnit.SECONDS.sleep(sleepTime);
+            }catch (Exception e){
+                logger.error(String.format("check Instance shutdown error, appId:%s, instance:%s, command:%s, error: ", instanceInfo.getAppId(), instanceInfo.getHostPort(), command), e);
+            }
+        }
+        return executeFlag;
     }
 
     @Override

@@ -256,6 +256,11 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
             isShutdown = false;
         }
 
+        //check shutdown success
+        if(isShutdown){
+            isShutdown = redisCenter.checkShutdownSuccess(instanceInfo);
+        }
+
         if (isShutdown) {
             instanceInfo.setStatus(InstanceStatusEnum.OFFLINE_STATUS.getStatus());
             instanceDao.update(instanceInfo);

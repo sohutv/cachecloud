@@ -182,6 +182,14 @@ public interface RedisCenter {
     public boolean shutdown(long appId, String ip, int port);
 
     /**
+     * 校验下线指定实例是否成功
+     *
+     * @param instanceInfo
+     * @return
+     */
+    public boolean checkShutdownSuccess(InstanceInfo instanceInfo);
+
+    /**
      * forget指定实例
      *
      * @param appId

@@ -72,6 +72,7 @@ public class TopologyExamTask extends BaseTask {
      */
     private List<InstanceInfo> sentinels;
 
+    private static final String DOT = ".";
 
     @Override
     public List<String> getTaskSteps() {
@@ -303,6 +304,7 @@ public class TopologyExamTask extends BaseTask {
         examInfo.put("instances", instances);
         examInfo.put("master_slaves", master_slaves);
         examInfo.put("sentinels", sentinels);
+        examInfo.put("sameNetSegment", checkSameNetSegment());
         examInfo.put("slaveNum", slaveNum);
         examInfo.put("machineInfoMap", machineInfoMap);
         examInfo.put("instanceInfoMap", instanceInfoMap);
@@ -310,6 +312,40 @@ public class TopologyExamTask extends BaseTask {
         examInfo.put("msFlag", msFlag);
 
         return true;
+    }
+
+    private boolean checkSameNetSegment(){
+        boolean sameFlag = true;
+        if (appType == ConstUtils.CACHE_TYPE_REDIS_CLUSTER  && CollectionUtils.isNotEmpty(instances)) {
+            Optional<InstanceInfo> masterOptional = instances.stream().filter(instanceInfo -> instanceInfo.getRoleDesc().equals(InstanceRoleEnum.MASTER.getInfo())).findFirst();
+            if(masterOptional.isPresent()){
+                String ip = masterOptional.get().getIp();
+                String[] split = ip.split("\\.");
+                if(split != null && split.length > 2){
+                    String netSegment = split[0] + DOT  + split[1];
+                    Optional<InstanceInfo> notMatchInstance = instances.stream().filter(instanceInfo -> InstanceRoleEnum.MASTER.getInfo().equals(instanceInfo.getRoleDesc()) || InstanceRoleEnum.SLAVE.getInfo().equals(instanceInfo.getRoleDesc())).filter(instanceInfo -> !instanceInfo.getIp().startsWith(netSegment)).findFirst();
+                    if(notMatchInstance.isPresent()){
+                        String notMatchIp = notMatchInstance.get().getIp();
+                        String notMatchNetSegment = notMatchIp;
+                        if(notMatchIp != null){
+                            String[] split1 = notMatchIp.split("\\.");
+                            notMatchNetSegment = split1[0] + DOT + split1[1];
+                        }
+                        String diffNetSegment = notMatchNetSegment;
+                        sameFlag = false;
+                        examResult.add(
+                                new HashMap<String, String>() {{
+                                    put(TopoloyExamContants.APPID, String.valueOf(appId));
+                                    put(TopoloyExamContants.TYPE, appType == ConstUtils.CACHE_TYPE_REDIS_CLUSTER ? TopoloyExamContants.REDIS_CLUSTER : TopoloyExamContants.REDIS_SENTINEL);
+                                    put(TopoloyExamContants.STATUS, TopoloyExamContants.NETSEGMENT_DESC);
+                                    put(TopoloyExamContants.DESC, MessageFormat.format(TopoloyExamContants.NETSEGMENT_FORMAT, netSegment, diffNetSegment));
+                                }}
+                        );
+                    }
+                }
+            }
+        }
+        return sameFlag;
     }
 
     /**

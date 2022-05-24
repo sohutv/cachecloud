@@ -228,6 +228,9 @@ public class ImportAppController extends BaseController {
         final String ip = instanceInfo.getIp();
         final int port = instanceInfo.getPort();
         boolean isShutdown = TypeUtil.isRedisType(type) ? redisCenter.shutdown(appId, ip, port) : true;
+        if(isShutdown){
+            isShutdown = redisCenter.checkShutdownSuccess(instanceInfo);
+        }
         if (isShutdown) {
             instanceInfo.setStatus(InstanceStatusEnum.OFFLINE_STATUS.getStatus());
             instanceDao.update(instanceInfo);
