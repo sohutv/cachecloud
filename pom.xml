@@ -44,7 +44,7 @@
         <poi-ooxml.version>3.15-beta2</poi-ooxml.version>
         <swagger-starter.version>1.0.3-SNAPSHOT</swagger-starter.version>
         <flexmark.version>0.42.12</flexmark.version>
-        <fastjson.version>1.2.70</fastjson.version>
+        <fastjson.version>1.2.83</fastjson.version>
         <hystrix.version>1.5.6</hystrix.version>
         <maven.deloy.plugin>2.8.1</maven.deloy.plugin>
         <maven-source-plugin>2.2.1</maven-source-plugin>
