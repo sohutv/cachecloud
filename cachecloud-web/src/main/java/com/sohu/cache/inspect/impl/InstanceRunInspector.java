@@ -27,7 +27,6 @@ import java.util.Map;
  * Created by yijunzhang on 15-1-20.
  */
 public class InstanceRunInspector extends BaseAlertService implements Inspector {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     /**
      * 实例相关

@@ -91,7 +91,7 @@ public class OSFactory {
 		DistributionVersion versionResult = findVersion(findType.getVersions(), ver);
 		//没有具体的版本能匹配上
 		if(versionResult == null) {
-			logger.info("version {} not found, {}", ver);
+			logger.info("version {} not found, {}", ver, issue);
 			OS os = new OS(osType, defaultDist, version, defaultArch);
 			return os;
 		}

@@ -133,7 +133,7 @@ public class InstanceAlertValueController extends BaseController {
                 int globalImportantLevel = instanceAlertConfigService.getImportantLevelByAlertConfigAndCompareType(instanceAlertConfig.getAlertConfig(), instanceAlertConfig.getCompareType());
                 instanceAlertConfig.setImportantLevel(globalImportantLevel);
             }
-            logger.warn("user {} want to add instanceAlertConfig {}, result is {}", appUser.getName(), instanceAlertConfig);
+            logger.warn("user {} want to add instanceAlertConfig {}", appUser.getName(), instanceAlertConfig);
             instanceAlertConfigService.save(instanceAlertConfig);
             successEnum = SuccessEnum.SUCCESS;
         } catch (Exception e) {
@@ -227,7 +227,7 @@ public class InstanceAlertValueController extends BaseController {
         int checkCycle = NumberUtils.toInt(request.getParameter("checkCycle"));
         int compareType = NumberUtils.toInt(request.getParameter("compareType"));
         int importantLevel = NumberUtils.toInt(request.getParameter("importantLevel"));
-        logger.warn("user {} want to change instance alert id={}, alertValue={}, checkCycle={}, compareType={}", appUser.getName(), alertValue, checkCycle, compareType);
+        logger.warn("user {} want to change instance alert id={}, alertValue={}, checkCycle={}, compareType={}", appUser.getName(), id, alertValue, checkCycle, compareType);
         SuccessEnum successEnum;
         try {
             InstanceAlertConfig orgInstAlertConfig = instanceAlertConfigService.get(id);
@@ -248,7 +248,7 @@ public class InstanceAlertValueController extends BaseController {
             model.addAttribute("message", ErrorMessageEnum.INNER_ERROR_MSG.getMessage());
             logger.error(e.getMessage(), e);
         }
-        logger.warn("user {} change instance alert id={}, alertValue={}, checkCycle={}, compareType={}, result is {}", appUser.getName(), alertValue, checkCycle, compareType, successEnum.info());
+        logger.warn("user {} change instance alert id={}, alertValue={}, checkCycle={}, compareType={}, result is {}", appUser.getName(), id, alertValue, checkCycle, compareType, successEnum.info());
         model.addAttribute("status", successEnum.value());
         return new ModelAndView("");
     }

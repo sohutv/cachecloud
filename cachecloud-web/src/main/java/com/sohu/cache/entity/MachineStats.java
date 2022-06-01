@@ -99,7 +99,7 @@ public class MachineStats{
 
     public Date getCreateTime() {
         if(null == createTime){
-            this.createTime = null;
+            return null;
         }
         return (Date) createTime.clone();
     }

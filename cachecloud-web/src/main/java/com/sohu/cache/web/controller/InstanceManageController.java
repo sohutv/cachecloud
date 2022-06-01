@@ -236,7 +236,7 @@ public class InstanceManageController extends BaseController {
             for (InstanceInfo instanceInfo : instanceList) {
                 if (instanceInfo.isOnline() && instanceInfo.getType() == ConstUtils.CACHE_TYPE_REDIS_CLUSTER) {
                     // a)当前为master节点
-                    if (instanceInfo.getRoleDesc() == InstanceRoleEnum.MASTER.getInfo()) {
+                    if (InstanceRoleEnum.MASTER.getInfo().equals(instanceInfo.getRoleDesc())) {
                         try {
                             //a.1)获取master节点slave0
                             AppDesc appdesc = appService.getByAppId(instanceInfo.getAppId());
@@ -293,7 +293,7 @@ public class InstanceManageController extends BaseController {
                         }
                     }
                     // b).当前为slave节点
-                    if (instanceInfo.getRoleDesc() == InstanceRoleEnum.SLAVE.getInfo()) {
+                    if (InstanceRoleEnum.SLAVE.getInfo().equals(instanceInfo.getRoleDesc())) {
                         AppDesc appdesc = appService.getByAppId(instanceInfo.getAppId());
                         HostAndPort masterInfo = redisCenter.getMaster(instanceInfo.getIp(), instanceInfo.getPort(), appdesc.getPasswordMd5());
                         if (!StringUtils.isEmpty(masterInfo.getHost()) && masterInfo.getPort() > 0) {

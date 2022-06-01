@@ -61,9 +61,12 @@ public class DefaultLoginComponent implements LoginComponent {
         try {
             address = InetAddress.getLocalHost();
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
-        return "http://"+address.getHostAddress() +":"+this.serverPort;
+        if(address != null){
+            return "http://" + address.getHostAddress() + ":" + this.serverPort;
+        }
+        return "http://127.0.0.1:" + this.serverPort;
     }
 
     @Override

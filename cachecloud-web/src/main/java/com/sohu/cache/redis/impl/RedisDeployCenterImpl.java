@@ -282,7 +282,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
 
             if (!isReplicate) {
                 logger.error("{}:{} set replicate:{}", slaveJedis.getClient().getHost(),
-                        slaveJedis.getClient().getPort());
+                        slaveJedis.getClient().getPort(), isReplicate);
                 return false;
             }
         }
@@ -1137,7 +1137,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         }
         final List<InstanceInfo> instanceList = instanceDao.getEffectiveInstListByAppId(appId);
         if (instanceList == null || instanceList.isEmpty()) {
-            logger.warn("app={} instances is empty");
+            logger.warn("app={} instances is empty", appId);
             return false;
         }
         for (InstanceInfo instanceInfo : instanceList) {
@@ -1152,7 +1152,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
                 }
                 boolean isRun = redisCenter.isRun(host, port);
                 if (!isRun) {
-                    logger.warn("{} is not run");
+                    logger.warn("{}:{} is not run", host, port);
                     continue;
                 }
                 boolean isSentinelFailOver = new IdempotentConfirmer() {
@@ -1189,7 +1189,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         }
         final List<InstanceInfo> instanceList = instanceDao.getInstancesByType(app_id, ConstUtils.CACHE_REDIS_SENTINEL);
         if (instanceList == null || instanceList.isEmpty()) {
-            logger.warn("app={} instances is empty");
+            logger.warn("app={} instances is empty", app_id);
             return false;
         }
         for (InstanceInfo instanceInfo : instanceList) {
@@ -1204,7 +1204,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
                 }
                 boolean isRun = redisCenter.isRun(host, port);
                 if (!isRun) {
-                    logger.warn("{} is not run");
+                    logger.warn("{}:{} is not run", host, port);
                     continue;
                 }
                 boolean isSentinelReset = new IdempotentConfirmer() {
@@ -1634,7 +1634,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
                 if (flushResult.equals("OK")) {
                     logger.warn("config rewrite success,sentinel={}", hostPort);
                 } else {
-                    logger.error("config rewrite success sentinel={}");
+                    logger.error("config rewrite success sentinel={}", hostPort);
                     return false;
                 }
             } else {

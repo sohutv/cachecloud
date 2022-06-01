@@ -200,7 +200,7 @@ public class InstanceBigKeyTask extends BaseTask {
                 } finally {
                     //防止无限循环
 
-                    if ((size > 0 ? result.size() >= size : 1 != 1) || Arrays.equals("0".getBytes(Charset.forName("UTF-8")), cursor)) {
+                    if ((size > 0 ? result.size() >= size : false) || Arrays.equals("0".getBytes(Charset.forName("UTF-8")), cursor)) {
                         break;
                     }
                 }

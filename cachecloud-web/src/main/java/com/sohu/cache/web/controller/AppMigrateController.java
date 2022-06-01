@@ -422,7 +422,7 @@ public class AppMigrateController extends BaseController {
     public ModelAndView downSlave(HttpServletResponse response, long appId, String downInstanceIds, int type) {
 
         Map<String, Object> resultMap = new HashMap<String, Object>();
-        logger.info("appid:{}, downInstanceIds:{},downSentinelIds:{} ", appId, downInstanceIds);
+        logger.info("appid:{}, downInstanceIds:{},type:{} ", appId, downInstanceIds, type);
         // 1.关闭指定下线slave节点
         Boolean shutdownFlag = shutdownInstance(downInstanceIds, appId);
 

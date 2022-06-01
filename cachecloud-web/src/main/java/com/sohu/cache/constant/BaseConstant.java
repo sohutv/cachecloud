@@ -11,13 +11,13 @@ public class BaseConstant {
     public static long MILLISECONDS_OF_ONE_SECOND = 1000;
 
     /** mill seconds of one day */
-    public static long MILLISECONDS_OF_ONE_MINUTE = 1000 * 60;
+    public static long MILLISECONDS_OF_ONE_MINUTE = 1000L * 60;
 
     /** mill seconds of one day */
-    public static long MILLISECONDS_OF_ONE_DAY = 1000 * 60 * 60 * 24;
+    public static long MILLISECONDS_OF_ONE_DAY = 1000L * 60 * 60 * 24;
 
     /** mill seconds of one hour */
-    public static long MILLISECONDS_OF_ONE_HOUR = 1000 * 60 * 60;
+    public static long MILLISECONDS_OF_ONE_HOUR = 1000L * 60 * 60;
 
     public static String EMPTY_STRING = "";
 

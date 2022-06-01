@@ -844,7 +844,7 @@ public class MachineCenterImpl implements MachineCenter {
                 machineStats = new MachineStats();
             }
             // 单位MB
-            long machineMemoryTotal = machineInfo.getMem() * 1024;
+            long machineMemoryTotal = machineInfo.getMem() * 1024L;
             long machineFreeTotal = machineMemoryTotal - machineStats.getMaxMemory();
 
             //实例统计

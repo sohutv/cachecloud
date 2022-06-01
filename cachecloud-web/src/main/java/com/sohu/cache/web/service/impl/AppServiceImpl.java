@@ -479,7 +479,7 @@ public class AppServiceImpl implements AppService {
         Assert.isTrue(appId != null && appId > 0L);
         AppDesc appDesc = appDao.getAppDescById(appId);
         if (appDesc == null) {
-            logger.error("appDesc:id={} is not exist");
+            logger.error("appDesc:id={} is not exist", appId);
             return Collections.emptyList();
         }
 
@@ -529,7 +529,7 @@ public class AppServiceImpl implements AppService {
         Assert.isTrue(appId != null && appId > 0L);
         AppDesc appDesc = appDao.getAppDescById(appId);
         if (appDesc == null) {
-            logger.error("appDesc:id={} is not exist");
+            logger.error("appDesc:id={} is not exist", appId);
             return Collections.emptyList();
         }
 

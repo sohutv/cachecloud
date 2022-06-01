@@ -57,7 +57,7 @@ public class PortGenerator {
         if (availablePort < redisPortHolder.get(ip)) {
             availablePort = (int)redisPortHolder.getAndIncrement(ip);
         } else {    // 正常情况，以及兼容系统重启和当前端口不可用的情形
-            redisPortHolder.put(ip, availablePort + 1);
+            redisPortHolder.put(ip, availablePort + 1L);
         }
 
         logger.warn("first {} maxPort is {}", ip, availablePort);
@@ -69,7 +69,7 @@ public class PortGenerator {
             logger.error("check port error, ip: {}, port: {}", ip, availablePort, e);
         }
         logger.warn("final {} maxPort is {}", ip, availablePort);
-        redisPortHolder.put(ip, availablePort+1);
+        redisPortHolder.put(ip, availablePort + 1L);
         return availablePort;
     }
 

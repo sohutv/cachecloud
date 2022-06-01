@@ -162,7 +162,7 @@ public class RedisConfigTemplateController extends BaseController {
             return new ModelAndView("");
         }
         logger.warn("user {} want to add config, configKey is {}, configValue is {}, type is {}", appUser.getName(),
-                instanceConfig.getConfigKey(), instanceConfig.getType());
+                instanceConfig.getConfigKey(), instanceConfig.getConfigValue(), instanceConfig.getType());
         SuccessEnum successEnum;
         try {
             redisConfigTemplateService.saveOrUpdate(instanceConfig);

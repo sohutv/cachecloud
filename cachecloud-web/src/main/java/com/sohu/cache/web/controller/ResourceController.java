@@ -304,7 +304,7 @@ public class ResourceController extends BaseController {
                 // 2.1.推送目录资源
                 successEnum = resourceService.pushDir(repositoryId, resourceId, userInfo);
             }
-            result.put("status", successEnum.value());
+            result.put("status", successEnum == null ? successEnum : successEnum.value());
         } else {
             result.put("status", SuccessEnum.ERROR.value());
             result.put("message", "资源id异常");

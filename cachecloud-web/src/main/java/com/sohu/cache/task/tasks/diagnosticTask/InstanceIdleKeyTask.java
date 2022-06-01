@@ -208,7 +208,7 @@ public class InstanceIdleKeyTask extends BaseTask {
                     logger.error(marker, e.getMessage(), e);
                 } finally {
                     //防止无限循环
-                    if ((size > 0 ? result.size() >= size : 1 != 1) || Arrays.equals("0".getBytes(Charset.forName("UTF-8")), cursor)) {
+                    if ((size > 0 ? result.size() >= size : false) || Arrays.equals("0".getBytes(Charset.forName("UTF-8")), cursor)) {
                         break;
                     }
                 }

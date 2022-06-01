@@ -191,7 +191,7 @@ public class RedisStandaloneAppDeployTask extends BaseTask {
                 return TaskFlowStatusEnum.ABORT;
             }
             long memoryFree = NumberUtils.toLong(machineStats.getMemoryFree()) / 1024 / 1024;
-            long memoryNeed = masterPerMachine * maxMemory;
+            long memoryNeed = Long.valueOf(masterPerMachine) * maxMemory;
             if (memoryNeed > memoryFree * 0.85) {
                 logger.error(marker, "standalone : {} need {} MB, but memoryFree is {} MB", redisServerIp, memoryNeed, memoryFree);
                 return TaskFlowStatusEnum.ABORT;

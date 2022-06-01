@@ -119,7 +119,7 @@ public class RedisIsolationPersistenceInspector extends BaseAlertService impleme
         if (aofBaseSize == 0) {
             return 0.0D;
         }
-        String format = String.format("%.2f", (Double.valueOf(aofCurrentSize - aofBaseSize) * 100 / aofBaseSize));
+        String format = String.format("%.2f", (Double.valueOf(String.valueOf(aofCurrentSize - aofBaseSize)) * 100 / aofBaseSize));
         return Double.parseDouble(format);
     }
 

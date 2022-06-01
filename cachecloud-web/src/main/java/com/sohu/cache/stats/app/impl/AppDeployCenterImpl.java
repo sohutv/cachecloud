@@ -289,7 +289,7 @@ public class AppDeployCenterImpl implements AppDeployCenter {
         long appId = appAudit.getAppId();
         AppDesc appDesc = appService.getByAppId(appId);
         if (appDesc == null) {
-            logger.error("appDesc:id={} is not exist");
+            logger.error("appDesc:id={} is not exist", appId);
             return false;
         }
         int type = appDesc.getType();

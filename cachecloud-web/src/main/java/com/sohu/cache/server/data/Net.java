@@ -65,8 +65,8 @@ public class Net implements LineParser{
 				totalOut += nic.getValue();
 			}
 		}
-		nin = new BigDecimal(totalIn).setScale(2, BigDecimal.ROUND_HALF_UP).floatValue(); 
-		nout = new BigDecimal(totalOut).setScale(2, BigDecimal.ROUND_HALF_UP).floatValue(); 
+		nin = BigDecimal.valueOf(totalIn).setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
+		nout = BigDecimal.valueOf(totalOut).setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
 	}
 	
 	public float getNin() {

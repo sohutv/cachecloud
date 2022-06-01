@@ -23,7 +23,7 @@ public class MemFragmentationRatioAlertStrategy extends AlertConfigStrategy {
     /**
      * 实例最小500MB才进行内存碎片率检查，否则价值不是很大
      */
-    private final static long MIN_CHECK_MEMORY = 500 * 1024 * 1024;
+    private final static long MIN_CHECK_MEMORY = 500L * 1024 * 1024;
     
     @Override
     public List<InstanceAlertValueResult> checkConfig(InstanceAlertConfig instanceAlertConfig, AlertConfigBaseData alertConfigBaseData) {

@@ -27,7 +27,6 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
 @Component("MachineExamTask")
 @Scope(SCOPE_PROTOTYPE)
 public class MachineExamTask extends BaseTask {
-    private Logger logger = LoggerFactory.getLogger(MachineExamTask.class);
 
     private List<String> machineIpList;
     private Integer useType;
