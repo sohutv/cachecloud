@@ -1619,6 +1619,18 @@ public class AppScrollRestartServiceImpl implements AppScrollRestartService {
                 }
             }
             return false;
+        }else{
+            boolean executeFlag = this.rollbackUpdateConfigFile(instanceInfo);
+            log.info(String.format("test update config file and restart success, this time just rollback config file, appId:%s, instance:%s, rollback result:%s", instanceInfo.getAppId(), instanceInfo.getHostPort(), executeFlag));
+            if(executeFlag == true) {
+                //重启节点
+                Optional<String> s2 = this.restartNode(null, appDesc, instanceInfo);
+                log.info(String.format("test update config file and restart success, this time just restart node, appId:%s, instance:%s, restartResult:%s", instanceInfo.getAppId(), instanceInfo.getHostPort(), s2));
+                if(s2.isPresent()){
+                    log.error(String.format("test update config file and restart success, just rollback this config test, appId:%s, instance:%s, restartResult:%s", instanceInfo.getAppId(), instanceInfo.getHostPort(), s2));
+                    return false;
+                }
+            }
         }
         return true;
     }
