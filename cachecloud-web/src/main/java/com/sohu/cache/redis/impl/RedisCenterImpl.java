@@ -16,6 +16,7 @@ import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.redis.enums.RedisInfoEnum;
 import com.sohu.cache.redis.enums.RedisReadOnlyCommandEnum;
 import com.sohu.cache.redis.util.*;
+import com.sohu.cache.report.ReportDataComponent;
 import com.sohu.cache.ssh.SSHService;
 import com.sohu.cache.ssh.SSHUtil;
 import com.sohu.cache.stats.instance.InstanceStatsCenter;
@@ -102,6 +103,9 @@ public class RedisCenterImpl implements RedisCenter {
     SSHService sshService;
     @Autowired
     private ModuleService moduleService;
+
+    @Autowired
+    private ReportDataComponent reportDataComponent;
 
     @PostConstruct
     public void init() {
@@ -254,6 +258,14 @@ public class RedisCenterImpl implements RedisCenter {
                     new Object[]{appId, collectTime, host, port, (System.currentTimeMillis() - start)});
             return infoMap;
         }
+
+        //上报数据
+        Map<String, Object> redisInfoMap = new HashMap<>();
+        redisInfoMap.put("instanceInfo", instanceInfo);
+        redisInfoMap.put("collectTime", collectTime);
+        redisInfoMap.put("info", infoMap);
+        reportDataComponent.reportRedisInfoData(redisInfoMap);
+
         // cluster info统计
         Map<String, Object> clusterInfoMap = getClusterInfoStats(appId, instanceInfo);
 
