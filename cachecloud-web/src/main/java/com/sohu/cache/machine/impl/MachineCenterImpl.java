@@ -17,6 +17,7 @@ import com.sohu.cache.machine.PortGenerator;
 import com.sohu.cache.protocol.MachineProtocol;
 import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.redis.enums.DirEnum;
+import com.sohu.cache.report.ReportDataComponent;
 import com.sohu.cache.ssh.SSHService;
 import com.sohu.cache.ssh.SSHUtil;
 import com.sohu.cache.stats.instance.InstanceStatsCenter;
@@ -90,6 +91,8 @@ public class MachineCenterImpl implements MachineCenter {
     private ForkJoinPool forkJoinPool;
     @Autowired
     private AppAlertRecordService appAlertRecordService;
+    @Autowired
+    private ReportDataComponent reportDataComponent;
 
     /**
      * 邮箱报警
@@ -175,6 +178,10 @@ public class MachineCenterImpl implements MachineCenter {
                 // 获取物理机入库内存
                 machineStats.setMachineMemory(machineInfo.getMem() * 1024);
                 machineStatsDao.mergeMachineStats(machineStats);
+
+                //上报数据
+                reportDataComponent.reportMachineData(machineStats);
+
                 logger.debug("collect machine info done, host: {}, time: {}", ip, collectTime);
             }
         } catch (RuntimeException e) {
