@@ -6,6 +6,7 @@ import com.sohu.cache.dao.AppClientExceptionStatisticsDao;
 import com.sohu.cache.dao.AppClientLatencyCommandDao;
 import com.sohu.cache.entity.AppClientExceptionStatistics;
 import com.sohu.cache.entity.AppClientLatencyCommand;
+import com.sohu.cache.report.ReportDataComponent;
 import com.sohu.cache.util.MapUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -31,6 +32,9 @@ public class AppClientReportExceptionServiceImpl implements AppClientReportExcep
     @Autowired
     private AppClientLatencyCommandDao appClientLatencyCommandDao;
 
+    @Autowired
+    private ReportDataComponent reportDataComponent;
+
     @Override
     public void batchSave(long appId, String clientIp, String redisPoolConfig, long currentMin, List<Map<String, Object>> exceptionModels) {
         try {
@@ -46,6 +50,8 @@ public class AppClientReportExceptionServiceImpl implements AppClientReportExcep
             // 4.批量保存
             if (CollectionUtils.isNotEmpty(appClientExceptionStatisticsList)) {
                 appClientExceptionStatisticsDao.batchSave(appClientExceptionStatisticsList);
+                //上报数据
+                reportDataComponent.reportExceptionData(appClientExceptionStatisticsList);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);

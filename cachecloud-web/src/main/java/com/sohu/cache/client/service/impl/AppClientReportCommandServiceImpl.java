@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.sohu.cache.client.service.AppClientReportCommandService;
 import com.sohu.cache.dao.AppClientCommandStatisticsDao;
 import com.sohu.cache.entity.AppClientCommandStatistics;
+import com.sohu.cache.report.ReportDataComponent;
 import com.sohu.cache.util.MapUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -27,6 +28,9 @@ public class AppClientReportCommandServiceImpl implements AppClientReportCommand
     @Autowired
     private AppClientCommandStatisticsDao appClientCommandStatisticsDao;
 
+    @Autowired
+    private ReportDataComponent reportDataComponent;
+
     @Override
     public void batchSave(long appId, String clientIp, long currentMin, List<Map<String, Object>> commandStatsModels) {
         try {
@@ -43,6 +47,8 @@ public class AppClientReportCommandServiceImpl implements AppClientReportCommand
             // 4.批量保存
             if (CollectionUtils.isNotEmpty(appClientCommandStatisticsList)) {
                 appClientCommandStatisticsDao.batchSave(appClientCommandStatisticsList);
+                //上报数据
+                reportDataComponent.reportCommandData(appClientCommandStatisticsList);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
