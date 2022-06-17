@@ -27,3 +27,6 @@ cachecloud:
   #区分资源
   web:
     clients: 127.0.0.1
+aof:
+  rewrite:
+    ignore-appIds:

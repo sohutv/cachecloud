@@ -13,12 +13,10 @@ import com.sohu.cache.util.TypeUtil;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 
+import org.springframework.beans.factory.annotation.Value;
 import redis.clients.jedis.Jedis;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -30,8 +28,18 @@ public class RedisIsolationPersistenceInspector extends BaseAlertService impleme
     
     private RedisCenter redisCenter;
 
+    @Value("${aof.rewrite.ignore-appIds:null}")
+    private String aofRewriteIgnoreAppIds;
+
     @Override
     public boolean inspect(Map<InspectParamEnum, Object> paramMap) {
+        Set<String> aofRewriteIgnoreSet = new HashSet<>();
+        if(StringUtils.isNotEmpty(aofRewriteIgnoreAppIds)){
+            String[] appIds = aofRewriteIgnoreAppIds.split(";");
+            if(appIds != null && appIds.length > 0){
+                aofRewriteIgnoreSet.addAll(Arrays.asList(appIds));
+            }
+        }
         final String host = MapUtils.getString(paramMap, InspectParamEnum.SPLIT_KEY);
         List<InstanceInfo> list = (List<InstanceInfo>) paramMap.get(InspectParamEnum.INSTANCE_LIST);
         outer:
@@ -44,6 +52,12 @@ public class RedisIsolationPersistenceInspector extends BaseAlertService impleme
             if (status != InstanceStatusEnum.GOOD_STATUS.getStatus()) {
                 continue;
             }
+
+            //过滤不重写appId
+            if(aofRewriteIgnoreSet.contains(String.valueOf(appId))){
+                continue;
+            }
+
             if (TypeUtil.isRedisDataType(type)) {
                 Jedis jedis = redisCenter.getJedis(appId, host, port, REDIS_DEFAULT_TIME, REDIS_DEFAULT_TIME);
                 try {

@@ -21,3 +21,6 @@ cachecloud:
       password:
   web:
     clients: 127.0.0.1
+aof:
+  rewrite:
+    ignore-appIds:
