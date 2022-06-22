@@ -39,6 +39,11 @@
 										</button>
 									</div>
 								</div>
+								<div class="row">
+									<label class="control-label col-md-offset-2 col-md-8" style="color: orange; margin-left: auto">
+										请注意，redis6.0.0——6.0.8版本由于源码bug(#7899)，不支持清除密码 &nbsp;&nbsp;<a href="https://raw.githubusercontent.com/redis/redis/6.0/00-RELEASENOTES">点击查看</a>
+									</label>
+								</div>
 							</div>
 						</form>
 						<!-- END FORM-->

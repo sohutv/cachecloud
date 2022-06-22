@@ -1708,7 +1708,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
                 }
             } catch (JedisDataException e) {
                 //忽略无密码设置异常
-                if (e.getMessage().contains("no password is set")) {
+                if (e.getMessage().contains("no password is set") || e.getMessage().contains("without any password configured for the default user")) {
                     logger.info("ignore ERR Client sent AUTH, but no password is set");
                 } else {
                     logger.error(e.getMessage(), e);

@@ -1297,8 +1297,28 @@ public class AppManageController extends BaseController {
         SuccessEnum successEnum = SuccessEnum.FAIL;
         if (appId > 0) {
             try {
-                // 修改密码逻辑
-                redisDeployCenter.fixPassword(appId, password);
+                //增加版本校验，6.0.0-6.0.8不支持清除密码，即password为空的情况
+                AppDesc appDesc = appService.getByAppId(appId);
+                if(appDesc != null){
+                    if(StringUtils.isBlank(password)){
+                        // Redis版本信息
+                        SystemResource resource = resourceService.getResourceById(appDesc.getVersionId());
+                        String name = resource.getName();
+                        if(name != null){
+                            String[] split = name.split("-");
+                            if(split != null && split.length == 2){
+                                String version = split[1].replace(".", "");
+                                int versionNum = Integer.parseInt(version);
+                                if(versionNum <= 608 && versionNum >= 600){
+                                    model.addAttribute("status", successEnum.value());
+                                    return new ModelAndView("");
+                                }
+                            }
+                        }
+                    }
+                    // 修改密码逻辑
+                    redisDeployCenter.fixPassword(appId, password);
+                }
                 successEnum = SuccessEnum.SUCCESS;
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
