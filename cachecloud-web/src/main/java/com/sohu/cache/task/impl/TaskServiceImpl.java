@@ -1208,6 +1208,22 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public long addInstanceScanCleanKeyTask(long appId, long auditId, String host, int port, Map<String, Object> params, long parentTaskId) {
+        Map<String, Object> paramMap = new HashMap<String, Object>();
+        paramMap.putAll(params);
+        paramMap.put(TaskConstants.APPID_KEY, appId);
+        paramMap.put(TaskConstants.AUDIT_ID_KEY, auditId);
+        paramMap.put("parentTaskId", parentTaskId);
+        paramMap.put(TaskConstants.HOST_KEY, host);
+        paramMap.put(TaskConstants.PORT_KEY, port);
+        String importantInfo = host + ":" + port;
+        String param = JSONObject.toJSONString(paramMap);
+
+        String className = InstanceScanCleanKeyTask.class.getSimpleName();
+        return generateAndSaveTaskQueue(appId, className, param, importantInfo, parentTaskId);
+    }
+
+    @Override
     public long addAppDelKeyTask(long appId, String nodes, String pattern, long auditId, long parentTaskId) {
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put(TaskConstants.APPID_KEY, appId);
@@ -1392,6 +1408,22 @@ public class TaskServiceImpl implements TaskService {
         String param = JSONObject.toJSONString(paramMap);
 
         String className = InstanceSlotAnalysisTask.class.getSimpleName();
+        return generateAndSaveTaskQueue(appId, className, param, importantInfo, parentTaskId);
+    }
+
+    @Override
+    public long addAppScanCleanTask(long appId, Map<String, Object> params, long auditId, long parentTaskId) {
+        Map<String, Object> paramMap = new HashMap<String, Object>();
+        paramMap.putAll(params);
+        paramMap.put(TaskConstants.APPID_KEY, appId);
+        paramMap.put(TaskConstants.AUDIT_ID_KEY, auditId);
+        paramMap.put("parentTaskId", parentTaskId);
+        String param = JSONObject.toJSONString(paramMap);
+
+        AppDesc appDesc = appService.getByAppId(appId);
+        String importantInfo = appDesc.getName();
+
+        String className = AppScanCleanKeyTask.class.getSimpleName();
         return generateAndSaveTaskQueue(appId, className, param, importantInfo, parentTaskId);
     }
 

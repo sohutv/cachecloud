@@ -114,6 +114,8 @@ public class AppToolController extends BaseController {
             return new ModelAndView("manage/diagnosticTool/diagnosticDelKey");
         } else if (DiagnosticTypeEnum.SLOT_ANALYSIS.getDesc().equals(tabTag)) {
             return new ModelAndView("manage/diagnosticTool/diagnosticSlot");
+        } else if (DiagnosticTypeEnum.SCAN_CLEAN.getDesc().equals(tabTag)) {
+            return new ModelAndView("manage/diagnosticTool/diagnosticScanClean");
         }
 
         return new ModelAndView("");
@@ -183,6 +185,9 @@ public class AppToolController extends BaseController {
             taskId = taskService.addAppDelKeyTask(appId, nodes, pattern, auditId, 0);
         } else if (type == DiagnosticTypeEnum.SLOT_ANALYSIS.getType()) {
             taskId = taskService.addAppSlotAnalysisTask(appId, nodes, auditId, 0);
+        } else if (type == DiagnosticTypeEnum.SCAN_CLEAN.getType()) {
+            Map map = JSONObject.parseObject(params, Map.class);
+            taskId = taskService.addAppScanCleanTask(appId, map, auditId, 0);
         }
         JSONObject json = new JSONObject();
         json.put("status", "success");
@@ -243,6 +248,9 @@ public class AppToolController extends BaseController {
             } else if (type == DiagnosticTypeEnum.HOT_KEY.getType()) {
                 String result = diagnosticToolService.getHotkeyDiagnosticData(redisKey);
                 json.put("result", result == null ? "" : result.replaceAll("(\\r\\n|\\n|\\n\\r)", "<br/>"));
+            } else if (type == DiagnosticTypeEnum.SCAN_CLEAN.getType()){
+                List<String> result = diagnosticToolService.getScanCleanDiagnosticData(redisKey);
+                json.put("result", result);
             }
         }
         json.put("status", String.valueOf(SuccessEnum.SUCCESS.value()));

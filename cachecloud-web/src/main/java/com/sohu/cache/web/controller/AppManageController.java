@@ -876,6 +876,10 @@ public class AppManageController extends BaseController {
             return new ModelAndView("redirect:/import/app/init?importId=" + appAudit.getParam1());
         }
 
+        if (AppCheckEnum.APP_ALLOCATE_RESOURCE.value().equals(status) && AppAuditType.SCAN_CLEAN.getValue() == type) {
+            return new ModelAndView("redirect:/manage/app/tool/index?tabTag=scanClean");
+        }
+
         write(response, String.valueOf(SuccessEnum.SUCCESS.value()));
         return null;
     }

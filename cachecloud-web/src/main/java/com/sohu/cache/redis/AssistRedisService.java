@@ -38,6 +38,8 @@ public interface AssistRedisService {
 
     boolean saddSet(String key, Set<String> items);
 
+    boolean sadd(String key, String item);
+
     Set<String> smembers(String key);
 
     boolean srem(String key, String item);

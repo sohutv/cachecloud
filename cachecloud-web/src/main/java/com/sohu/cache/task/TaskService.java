@@ -7,6 +7,7 @@ import com.sohu.cache.task.constant.TaskQueueEnum.TaskStatusEnum;
 import com.sohu.cache.task.entity.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 任务相关
@@ -654,6 +655,7 @@ public interface TaskService {
 
     long addInstanceScanKeyTask(long appId, long auditId, String host, int port, String pattern, int size, long parentTaskId);
 
+    long addInstanceScanCleanKeyTask(long appId, long auditId, String host, int port, Map<String, Object> params, long parentTaskId);
 
     /**
      * delete key
@@ -704,7 +706,7 @@ public interface TaskService {
      *
      * @param appId
      * @param nodes
-     * @param monitorCount
+     * @param command
      * @param auditId
      * @param parentTaskId
      * @return
@@ -727,6 +729,14 @@ public interface TaskService {
 
     long addInstanceSlotAnalysisTask(long appId, String host, int port, long auditId, long parentTaskId);
 
+    /**
+     * scan key
+     * @param appId
+     * @param auditId
+     * @param parentTaskId
+     * @return
+     */
+    long addAppScanCleanTask(long appId, Map<String, Object> params, long auditId, long parentTaskId);
 
     /**
      * 更新childTaskId

@@ -12,7 +12,8 @@ public enum DiagnosticTypeEnum {
     IDLE_KEY(2, "idlekey", "空闲键扫描"),
     HOT_KEY(3, "hotkey", "热点键诊断"),
     DEL_KEY(4, "deleteKey", "删除键"),
-    SLOT_ANALYSIS(5, "slotAnalysis", "集群槽分析");
+    SLOT_ANALYSIS(5, "slotAnalysis", "集群槽分析"),
+    SCAN_CLEAN(6, "scanClean", "数据分析清理");
 
     int type;
     String desc;

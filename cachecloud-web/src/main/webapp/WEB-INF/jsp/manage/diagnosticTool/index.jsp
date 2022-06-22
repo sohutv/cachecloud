@@ -38,6 +38,9 @@
                 <li id="slotAnalysis" data-url="/manage/app/tool/diagnostic/tool?appId=${appId}&parentTaskId=${parentTaskId}&auditId=${auditId}&diagnosticStatus=${diagnosticStatus}&tabTag=slotAnalysis">
                     <a href="?tabTag=slotAnalysis">集群slot分析</a>
                 </li>
+                <li id="scanClean" data-url="/manage/app/tool/diagnostic/tool?appId=${appId}&parentTaskId=${parentTaskId}&auditId=${auditId}&diagnosticStatus=${diagnosticStatus}&tabTag=scanClean">
+                    <a href="?tabTag=scanClean">数据清理任务</a>
+                </li>
             </ul>
             <div class="tab-content">
                 <div class="tab-pane active" id="redis-cliTab">
@@ -53,6 +56,8 @@
                 <div class="tab-pane" id="deleteKeyTab">
                 </div>
                 <div class="tab-pane" id="slotAnalysisTab">
+                </div>
+                <div class="tab-pane" id="scanCleanTab">
                 </div>
             </div>
         </div>

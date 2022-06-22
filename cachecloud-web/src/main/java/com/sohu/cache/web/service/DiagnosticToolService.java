@@ -18,6 +18,8 @@ public interface DiagnosticToolService {
 
     List<String> getScanDiagnosticData(String redisKey);
 
+    List<String> getScanCleanDiagnosticData(String redisKey);
+
     Map<String, String> getDiagnosticDataMap(String redisKey,int type,boolean err);
 
     String getHotkeyDiagnosticData(String redisKey);

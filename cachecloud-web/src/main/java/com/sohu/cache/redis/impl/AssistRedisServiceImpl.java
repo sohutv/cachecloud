@@ -163,6 +163,23 @@ public class AssistRedisServiceImpl implements AssistRedisService {
     }
 
     @Override
+    public boolean sadd(String key, String item) {
+        Jedis jedis = null;
+        try {
+            jedis = getFromJedisPool();
+            jedis.sadd(key, item);
+            return true;
+        } catch (Exception e) {
+            logger.warn("sadd {} {} error " + e.getMessage(), key, item);
+            return false;
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+    }
+
+    @Override
     public Set<String> smembers(String key) {
         Jedis jedis = null;
         try {

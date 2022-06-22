@@ -1229,6 +1229,26 @@ public class AppController extends BaseController {
     }
 
 
+    @RequestMapping(value = "/appScanClean")
+    public ModelAndView doAppScanClean(HttpServletRequest request,
+                                         HttpServletResponse response, Model model, Long appId) {
+        model.addAttribute("appId", appId);
+
+        AppUser currentUser = getUserInfo(request);
+        List<AppDesc> appDescList = appService.getAppDescList(currentUser, new AppSearch());
+        appDescList.forEach(appDesc -> {
+            String versionName = Optional.ofNullable(resourceService.getResourceById(appDesc.getVersionId())).map(ver -> ver.getName()).orElse("");
+            appDesc.setVersionName(versionName);
+        });
+
+        Map<Long, AppDesc> appDescMap = appDescList.stream().collect(Collectors.toMap(AppDesc::getAppId, Function.identity()));
+        model.addAttribute("appDescMap", appDescMap);
+
+        return new ModelAndView("app/jobIndex/appScanCleanIndex");
+    }
+
+
+
     @RequestMapping(value = "/job/submit")
     public ModelAndView submitJobApplication(HttpServletRequest request,
                                              HttpServletResponse response, Model model,

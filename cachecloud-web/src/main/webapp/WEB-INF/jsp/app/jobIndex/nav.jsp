@@ -60,6 +60,11 @@
                 &nbsp;&nbsp;&nbsp;<i class="glyphicon glyphicon-bell"></i> 修改报警
             </a>
         </li>
+        <li>
+            <a href="/admin/app/appScanClean">
+                &nbsp;&nbsp;&nbsp;<i class="glyphicon glyphicon-check"></i> 数据分析清理
+            </a>
+        </li>
     </ul>
 </div>
 

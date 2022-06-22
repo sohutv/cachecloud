@@ -410,6 +410,14 @@ public class ConstUtils {
         return String.format("cc:key:slotAnalysis:%s:%s", taskId, hostPort);
     }
 
+    public static String getInstanceScanClean(long taskId, String hostPort) {
+        return String.format("cc:key:scanClean:%s:%s", taskId, hostPort);
+    }
+
+    public static String getScanClean(long taskId) {
+        return String.format("cc:key:scanClean:%s", taskId);
+    }
+
     public static String getRedisDir(String versionName){
         return String.format("%s/%s", REDIS_INSTALL_BASE_DIR, versionName);
     }

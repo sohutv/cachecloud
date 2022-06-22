@@ -18,7 +18,8 @@ public enum AppAuditType {
     APP_DIAGNOSTIC(8, "应用诊断"),
     APP_OFFLINE(10, "应用下线"),
     APP_MIGRATE(11, "应用数据迁移"),
-    APP_IMPORT(12, "应用导入");
+    APP_IMPORT(12, "应用导入"),
+    SCAN_CLEAN(13, "数据分析清理");
 
     private final static Map<Integer, AppAuditType> MAP = new HashMap<Integer, AppAuditType>();
 

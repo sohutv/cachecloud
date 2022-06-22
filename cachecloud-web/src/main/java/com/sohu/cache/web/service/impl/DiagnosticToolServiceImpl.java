@@ -19,10 +19,7 @@ import redis.clients.jedis.ScanParams;
 import redis.clients.jedis.ScanResult;
 
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -79,6 +76,11 @@ public class DiagnosticToolServiceImpl implements DiagnosticToolService {
 
     @Override
     public List<String> getScanDiagnosticData(String redisKey) {
+        return assistRedisService.lrange(redisKey, 0, -1);
+    }
+
+    @Override
+    public List<String> getScanCleanDiagnosticData(String redisKey) {
         return assistRedisService.lrange(redisKey, 0, -1);
     }
 

@@ -337,6 +337,10 @@
                                                     <a target="_blank"
                                                        href="/manage/app/addAuditStatus?status=2&appAuditId=${item.id}&type=12&appId=${item.appId}">[审批处理]</a>
                                                 </c:when>
+                                                <c:when test="${item.type == 13}">
+                                                    <a target="_blank"
+                                                       href="/manage/app/addAuditStatus?status=2&appAuditId=${item.id}&type=13&appId=${item.appId}">[审批处理]</a>
+                                                </c:when>
                                             </c:choose>
                                         </c:if>
 
