@@ -170,13 +170,13 @@
                                                 <fmt:formatNumber var="mem" value="${ machine.info.mem}" pattern="0.0"/>
                                                 <fmt:formatNumber var="memUsage" value="${usedMemRss/mem*100}" pattern="0"/>
                                                 <c:if test="${machine.info.useType==0}">
-                                                    <option value="${machine.ip}">${machine.ip}：${usedCpu}/${cpu}核(${cpuUsage}%) ${usedMemRss}/${mem}G(${memUsage}%) 【${machine.info.realIp}-${machine.info.rack}】【专用-${machine.info.extraDesc}】</option>
+                                                    <option value="${machine.ip}">${machine.ip}：${usedCpu}/${cpu}核(${cpuUsage}%) ${usedMemRss}/${mem}G(${memUsage}%) 【${machine.info.realIp}<c:if test="${machine.info.rack !=null && machine.info.rack != ''}">-${machine.info.rack}</c:if>】【专用-${machine.info.extraDesc}】</option>
                                                 </c:if>
                                                 <c:if test="${machine.info.useType==1}">
-                                                    <option value="${machine.ip}">${machine.ip}：${usedCpu}/${cpu}核(${cpuUsage}%) ${usedMemRss}/${mem}G(${memUsage}%) 【${machine.info.realIp}-${machine.info.rack}】【测试-${machine.info.extraDesc}】</option>
+                                                    <option value="${machine.ip}">${machine.ip}：${usedCpu}/${cpu}核(${cpuUsage}%) ${usedMemRss}/${mem}G(${memUsage}%) 【${machine.info.realIp}<c:if test="${machine.info.rack !=null && machine.info.rack != ''}">-${machine.info.rack}</c:if>】【测试-${machine.info.extraDesc}】</option>
                                                 </c:if>
                                                 <c:if test="${machine.info.useType==2}">
-                                                    <option value="${machine.ip}">${machine.ip}：${usedCpu}/${cpu}核(${cpuUsage}%) ${usedMemRss}/${mem}G(${memUsage}%) 【${machine.info.realIp}-${machine.info.rack}】【混合-${machine.info.extraDesc}】</option>
+                                                    <option value="${machine.ip}">${machine.ip}：${usedCpu}/${cpu}核(${cpuUsage}%) ${usedMemRss}/${mem}G(${memUsage}%) 【${machine.info.realIp}<c:if test="${machine.info.rack !=null && machine.info.rack != ''}">-${machine.info.rack}</c:if>】【混合-${machine.info.extraDesc}】</option>
                                                 </c:if>
                                         </c:forEach>
                                     </select>
@@ -222,7 +222,7 @@
                                         <select id="id_select2" class="selectpicker bla bla bli" multiple data-live-search="true">
                                             <c:forEach items="${machinelist}" var="machine">
                                                 <%--<c:if test="${machine.useType=='3'}">--%>
-                                                    <option value="${machine.ip}">[${machine.room}]${machine.ip}<c:if test="${machine.extraDesc.length()>0}">(${machine.extraDesc})</c:if></option>
+                                                <option value="${machine.ip}">${machine.ip}：${usedCpu}/${cpu}核(${cpuUsage}%) 【${machine.info.realIp}<c:if test="${machine.info.rack !=null && machine.info.rack != ''}">-${machine.info.rack}</c:if>】<c:if test="${machine.info.extraDesc != null && machine.info.extraDesc.length()>0}">(${machine.info.extraDesc})</c:if></option>
                                                 <%--</c:if>--%>
                                             </c:forEach>
                                         </select>
