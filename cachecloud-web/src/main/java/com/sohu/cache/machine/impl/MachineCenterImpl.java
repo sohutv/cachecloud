@@ -391,15 +391,17 @@ public class MachineCenterImpl implements MachineCenter {
         checkArgument(!Strings.isNullOrEmpty(fileName), "invalid fileName.");
         checkArgument(content != null && content.size() > 0, "content is empty.");
 
-        String localAbsolutePath = MachineProtocol.TMP_DIR + fileName;
-        File tmpDir = new File(MachineProtocol.TMP_DIR);
+        String tmpDirectory = MachineProtocol.TMP_DIR + host + "/";
+
+        String localAbsolutePath = tmpDirectory + fileName;
+        File tmpDir = new File(tmpDirectory);
         if (!tmpDir.exists()) {
             if (!tmpDir.mkdirs()) {
                 logger.error("cannot create dir:{} directory. ", tmpDir.getAbsolutePath());
             }
         }
 
-        Path path = Paths.get(MachineProtocol.TMP_DIR + fileName);
+        Path path = Paths.get(tmpDirectory + fileName);
         String confDir = getMachineRelativeDir(host, DirEnum.CONF_DIR.getValue());
         String remotePath = confDir + fileName;
         /**
