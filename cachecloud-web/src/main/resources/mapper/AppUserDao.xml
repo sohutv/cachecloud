@@ -32,7 +32,7 @@
         select           
         	<include refid="user_column"/>
         from app_user
-        where name = #{name};
+        where binary name = #{name};
     </select>
 
     <select id="getByEmail" resultType="AppUser" parameterType="string">
