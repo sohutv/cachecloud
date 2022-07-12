@@ -24,7 +24,7 @@
         <protostuff.version>1.0.8</protostuff.version>
         <jackson.version>2.3.2</jackson.version>
         <httpcomponents.version>4.5.13</httpcomponents.version>
-        <apache.commons.collections>4.0</apache.commons.collections>
+        <apache.commons.collections>4.4</apache.commons.collections>
         <maven.compiler.plugin>3.1</maven.compiler.plugin>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.surefire.plugin>2.16</maven.surefire.plugin>
@@ -32,16 +32,11 @@
         <ganymed.ssh.version>build210</ganymed.ssh.version>
         <sshj.version>0.26.0</sshj.version>
         <commons.collections.version>3.2.1</commons.collections.version>
-        <guava.version>20.0</guava.version>
+        <guava.version>30.1.1-jre</guava.version>
         <janino.version>3.0.6</janino.version>
         <commons-lang.version>3.8.1</commons-lang.version>
         <json-lib.version>2.4</json-lib.version>
-        <slf4j.version>1.7.6</slf4j.version>
         <commons.configuration.version>1.6</commons.configuration.version>
-        <velocity.version>1.7</velocity.version>
-        <velocity-tool.version>2.0</velocity-tool.version>
-        <velocity-tools-generic.version>3.0</velocity-tools-generic.version>
-        <poi-ooxml.version>3.15-beta2</poi-ooxml.version>
         <swagger-starter.version>1.0.3-SNAPSHOT</swagger-starter.version>
         <flexmark.version>0.42.12</flexmark.version>
         <fastjson.version>1.2.83</fastjson.version>
@@ -158,31 +153,9 @@
             </dependency>
 
             <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
-                <scope>compile</scope>
-            </dependency>
-            <dependency>
                 <groupId>commons-configuration</groupId>
                 <artifactId>commons-configuration</artifactId>
                 <version>${commons.configuration.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.velocity</groupId>
-                <artifactId>velocity</artifactId>
-                <version>${velocity.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.velocity</groupId>
-                <artifactId>velocity-tools</artifactId>
-                <version>${velocity-tool.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.velocity.tools</groupId>
-                <artifactId>velocity-tools-generic</artifactId>
-                <version>${velocity-tools-generic.version}</version>
             </dependency>
 
             <dependency>
@@ -202,14 +175,6 @@
                 <artifactId>janino</artifactId>
                 <version>${janino.version}</version>
             </dependency>
-
-            <dependency>
-                <groupId>org.apache.poi</groupId>
-                <artifactId>poi-ooxml</artifactId>
-                <version>${poi-ooxml.version}</version>
-            </dependency>
-
-
 
             <!--markdown to html-->
             <dependency>
