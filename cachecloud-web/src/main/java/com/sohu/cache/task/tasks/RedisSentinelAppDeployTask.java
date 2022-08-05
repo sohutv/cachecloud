@@ -571,13 +571,12 @@ public class RedisSentinelAppDeployTask extends BaseTask {
         try {
             if (appId > 0) {
                 // 设置密码
-                String passwd = String.valueOf(appId);
-                redisDeployCenter.fixPassword(appId, passwd);
+                redisDeployCenter.fixPassword(appId, null, null, true);
                 // 密码校验逻辑
                 boolean checkFlag = redisDeployCenter.checkAuths(appId);
                 logger.info(marker, "check app sentinel passwd:{}", checkFlag);
                 if (!checkFlag) {
-                    logger.error(marker, "check app sentinel passwd:{} error!", passwd);
+                    logger.error(marker, "check app sentinel passwd error, appId:{}!", appId);
                     return TaskFlowStatusEnum.ABORT;
                 }
             }

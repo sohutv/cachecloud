@@ -168,6 +168,11 @@ public class AppServiceImpl implements AppService {
     }
 
     @Override
+    public int updateWithCustomPwd(AppDesc appDesc) {
+        return appDao.updateWithCustomPwd(appDesc);
+    }
+
+    @Override
     public boolean saveAppToUser(Long appId, Long userId) {
         try {
             // 用户id下应用
@@ -245,7 +250,7 @@ public class AppServiceImpl implements AppService {
     @Override
     public List<InstanceInfo> getAppInstanceInfo(Long appId) {
         AppDesc appDesc = appDao.getAppDescById(appId);
-        String password = appDesc.getPasswordMd5();
+        String password = appDesc.getAppPassword();
         List<InstanceInfo> resultList = instanceDao.getInstListByAppId(appId);
         return getInstancelistInfo(appId, password, resultList);
     }
@@ -256,7 +261,7 @@ public class AppServiceImpl implements AppService {
         if(appDesc == null){
             return Collections.EMPTY_LIST;
         }
-        String password = appDesc.getPasswordMd5();
+        String password = appDesc.getAppPassword();
         List<InstanceInfo> resultList = instanceDao.getEffectiveInstListByAppId(appId);
         return getInstancelistInfo(appId, password, resultList);
     }

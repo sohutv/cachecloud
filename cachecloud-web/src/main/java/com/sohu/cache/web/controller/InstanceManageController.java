@@ -240,7 +240,7 @@ public class InstanceManageController extends BaseController {
                         try {
                             //a.1)获取master节点slave0
                             AppDesc appdesc = appService.getByAppId(instanceInfo.getAppId());
-                            HostAndPort slave0 = redisCenter.getSlave0(instanceInfo.getIp(), instanceInfo.getPort(), appdesc.getPasswordMd5());
+                            HostAndPort slave0 = redisCenter.getSlave0(instanceInfo.getIp(), instanceInfo.getPort(), appdesc.getAppPassword());
                             // a.2)执行failover
                             if (slave0 == null) {
                                 continue;
@@ -269,7 +269,7 @@ public class InstanceManageController extends BaseController {
 
                             //a.3) 添加新的从节点
                             Boolean isSuccess = null;
-                            HostAndPort masterInfo = redisCenter.getMaster(instanceInfo.getIp(), instanceInfo.getPort(), appdesc.getPasswordMd5());
+                            HostAndPort masterInfo = redisCenter.getMaster(instanceInfo.getIp(), instanceInfo.getPort(), appdesc.getAppPassword());
                             if (!StringUtils.isEmpty(masterInfo.getHost()) && masterInfo.getPort() > 0) {
                                 InstanceInfo masterInst = instanceDao.getInstByIpAndPort(masterInfo.getHost(), masterInfo.getPort());
                                 if (masterInst == null) {
@@ -295,7 +295,7 @@ public class InstanceManageController extends BaseController {
                     // b).当前为slave节点
                     if (InstanceRoleEnum.SLAVE.getInfo().equals(instanceInfo.getRoleDesc())) {
                         AppDesc appdesc = appService.getByAppId(instanceInfo.getAppId());
-                        HostAndPort masterInfo = redisCenter.getMaster(instanceInfo.getIp(), instanceInfo.getPort(), appdesc.getPasswordMd5());
+                        HostAndPort masterInfo = redisCenter.getMaster(instanceInfo.getIp(), instanceInfo.getPort(), appdesc.getAppPassword());
                         if (!StringUtils.isEmpty(masterInfo.getHost()) && masterInfo.getPort() > 0) {
                             try {
                                 InstanceInfo masterInst = instanceDao.getInstByIpAndPort(masterInfo.getHost(), masterInfo.getPort());

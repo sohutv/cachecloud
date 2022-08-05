@@ -851,7 +851,7 @@ public class RedisCenterImpl implements RedisCenter {
     public BooleanEnum isSlaveAndPointedMasterUp(AppDesc appDesc, InstanceInfo slaveInstance, InstanceInfo masterInstance){
         Jedis jedis = null;
         try {
-            jedis = getJedis(slaveInstance.getIp(), slaveInstance.getPort(), appDesc.getPasswordMd5());
+            jedis = getJedis(slaveInstance.getIp(), slaveInstance.getPort(), appDesc.getAppPassword());
             String info = jedis.info("all");
             Map<RedisConstant, Map<String, Object>> infoMap = processRedisStats(info);
             return isSlaveAndPointedMasterUp(infoMap, masterInstance);
@@ -1187,7 +1187,7 @@ public class RedisCenterImpl implements RedisCenter {
     @Override
     public boolean isRun(final long appId, final String ip, final int port) {
         AppDesc appDesc = appDao.getAppDescById(appId);
-        return isRun(ip, port, appDesc.getPasswordMd5());
+        return isRun(ip, port, appDesc.getAppPassword());
     }
 
     @Override
@@ -1466,7 +1466,7 @@ public class RedisCenterImpl implements RedisCenter {
         }
         int type = appDesc.getType();
         long appId = appDesc.getAppId();
-        String password = appDesc.getPasswordMd5();
+        String password = appDesc.getAppPassword();
         if (type == ConstUtils.CACHE_REDIS_SENTINEL) {
             JedisSentinelPool jedisSentinelPool = getJedisSentinelPool(appDesc);
             if (jedisSentinelPool == null) {
@@ -1595,7 +1595,7 @@ public class RedisCenterImpl implements RedisCenter {
                 return "online app only support read-only and safe command ";
             }
         }
-        String password = appDesc.getPasswordMd5();
+        String password = appDesc.getAppPassword();
         String shell = RedisProtocol.getExecuteCommandShell(host, port, password, command);
         //记录客户端发送日志
         logger.warn("executeRedisShell={}", shell);
@@ -1608,7 +1608,7 @@ public class RedisCenterImpl implements RedisCenter {
         if (appDesc == null) {
             return "not exist appId";
         }
-        String password = appDesc.getPasswordMd5();
+        String password = appDesc.getAppPassword();
         String shell = RedisProtocol.getExecuteAdminCommandShell(host, port, password, command);
         //记录客户端发送日志
         logger.warn("executeRedisShell={}", shell);
@@ -2212,7 +2212,7 @@ public class RedisCenterImpl implements RedisCenter {
             }
             return resultList;
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            logger.error(String.format("appId:%s, host:%s,port:%s,error:%s", appId, host, port, e.getMessage()), e);
             return Collections.emptyList();
         } finally {
             if (jedis != null) {
@@ -2644,8 +2644,8 @@ public class RedisCenterImpl implements RedisCenter {
     @Override
     public Jedis getJedis(long appId, String host, int port, int connectionTimeout, int soTimeout) {
         AppDesc appDesc = appDao.getAppDescById(appId);
-        String authPassword = appDesc.getAuthPassword();
-        Jedis jedis = getJedis(host, port, connectionTimeout, soTimeout, authPassword);
+        String password = appDesc.getAppPassword();
+        Jedis jedis = getJedis(host, port, connectionTimeout, soTimeout, password);
         return jedis;
     }
 

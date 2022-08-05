@@ -224,8 +224,8 @@ public class AppController extends BaseController {
             }
         }
         model.addAttribute("top5ClimaxList", top5ClimaxList);
-        if (appDetail != null && StringUtils.isNotBlank(appDetail.getAppDesc().getPkey())) {
-            model.addAttribute("md5password", appDetail.getAppDesc().getPasswordMd5());
+        if (appDetail != null && StringUtils.isNotBlank(appDetail.getAppDesc().getAppPassword())) {
+            model.addAttribute("md5password", appDetail.getAppDesc().getAppPassword());
         }
 
         model.addAttribute("appId", appId);
@@ -347,8 +347,8 @@ public class AppController extends BaseController {
                 InstanceAlertCheckCycleEnum.getInstanceAlertCheckCycleEnumList());
         model.addAttribute("instanceAlertCompareTypeEnumList",
                 InstanceAlertCompareTypeEnum.getInstanceAlertCompareTypeEnumList());
-        if (!StringUtils.isEmpty(appDetail.getAppDesc().getPkey())) {
-            model.addAttribute("password", appDetail.getAppDesc().getPasswordMd5());
+        if (!StringUtils.isEmpty(appDetail.getAppDesc().getAppPassword())) {
+            model.addAttribute("password", appDetail.getAppDesc().getAppPassword());
         } else {
             model.addAttribute("password", "");
         }

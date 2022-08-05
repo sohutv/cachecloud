@@ -508,10 +508,10 @@ public class RedisShakeCenterImpl implements RedisShakeCenter {
         String migrateId = appDataMigrateStatus.getMigrateId();
         cmd.append(ConstUtils.getRedisFullCheckCmd() + ConstUtils.SPACE);// 异步命令
         cmd.append("-s " + "\"" + formatAddressForRedisFullCheck(appDataMigrateStatus.getSourceAppId(), appDataMigrateStatus.getSourceServers(), appDataMigrateStatus.getSourceMigrateType()) + "\"" + ConstUtils.SPACE);
-        cmd.append("-p " + appService.getByAppId(appDataMigrateStatus.getSourceAppId()).getPasswordMd5() + ConstUtils.SPACE);
+        cmd.append("-p " + appService.getByAppId(appDataMigrateStatus.getSourceAppId()).getAppPassword() + ConstUtils.SPACE);
         cmd.append("--sourcedbtype=" + getCompareType(appDataMigrateStatus.getSourceMigrateType()) + ConstUtils.SPACE);//源库的类别，0：db(standalone单节点、主从)，1: cluster（集群版），2: 阿里云
         cmd.append("-t " + "\"" + formatAddressForRedisFullCheck(appDataMigrateStatus.getTargetAppId(), appDataMigrateStatus.getTargetServers(), appDataMigrateStatus.getTargetMigrateType()) + "\"" + ConstUtils.SPACE);
-        cmd.append("-a " + appService.getByAppId(appDataMigrateStatus.getTargetAppId()).getPasswordMd5() + ConstUtils.SPACE);
+        cmd.append("-a " + appService.getByAppId(appDataMigrateStatus.getTargetAppId()).getAppPassword() + ConstUtils.SPACE);
         cmd.append("--targetdbtype=" + getCompareType(appDataMigrateStatus.getTargetMigrateType()) + ConstUtils.SPACE);
         cmd.append("--comparetimes=1" + ConstUtils.SPACE);//比较轮数
         cmd.append("-m " + comparemode + ConstUtils.SPACE);//比较模式，1表示全量比较，2表示只对比value的长度，3只对比key是否存在，4全量比较的情况下，忽略大key的比较

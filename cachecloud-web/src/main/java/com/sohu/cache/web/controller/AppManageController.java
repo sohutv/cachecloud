@@ -638,12 +638,13 @@ public class AppManageController extends BaseController {
                                            String sentinelMachines,
                                            String twemproxyMachines,
                                            String pikaMachines,
-                                           String moduleinfos
+                                           String moduleinfos,
+                                           String customPassword
                                         ) {
         JSONObject json = new JSONObject();
         long taskid = -1;//任务流跳转
         AppUser appUser = getUserInfo(request);
-        logger.warn("user {} appid:{} ,appAuditId:{}, importantLevel:{} ,isSetPasswd:{},versionId:{}", appUser.getName(), appid, appAuditId, importantLevel, isSetPasswd, versionId);
+        logger.warn("user {} appid:{} ,appAuditId:{}, importantLevel:{} ,isSetPasswd:{},versionId:{},customPassword:{}", appUser.getName(), appid, appAuditId, importantLevel, isSetPasswd, versionId, customPassword);
         logger.info("type:{} ,maxMemory:{} MB ", type, maxMemory);
         logger.info("redisMachines:{} ,num:{} ", redisMachines, redisNum);
         logger.info("sentinelMachines:{} ,num:{} ", sentinelMachines, sentinelNum);
@@ -662,7 +663,8 @@ public class AppManageController extends BaseController {
                 appDesc.setImportantLevel(importantLevel);
                 appDesc.setVersionId(versionId);
                 appDesc.setType(type);
-                appService.update(appDesc);
+                appDesc.setCustomPassword(customPassword);
+                appService.updateWithCustomPwd(appDesc);
             } else {
                 json.put("status", "fail");
                 json.put("message", "部署失败:获取应用信息为空,请检查服务日志!");
@@ -1297,6 +1299,7 @@ public class AppManageController extends BaseController {
     public ModelAndView doUpdateAppPassword(HttpServletRequest request, HttpServletResponse response, Model model) {
         long appId = NumberUtils.toLong(request.getParameter("appId"));
         String password = request.getParameter("password");
+        Boolean isSetPasswd = Boolean.valueOf(request.getParameter("isSetPasswd"));
         logger.info("modify appId:{},password:{}", appId, password);
         SuccessEnum successEnum = SuccessEnum.FAIL;
         if (appId > 0) {
@@ -1321,7 +1324,7 @@ public class AppManageController extends BaseController {
                         }
                     }
                     // 修改密码逻辑
-                    redisDeployCenter.fixPassword(appId, password);
+                    redisDeployCenter.fixPassword(appId, password, isSetPasswd, false);
                 }
                 successEnum = SuccessEnum.SUCCESS;
             } catch (Exception e) {
@@ -1372,6 +1375,7 @@ public class AppManageController extends BaseController {
             AppDesc appDesc = appService.getByAppId(appId);
             model.addAttribute("appId", appDesc.getAppId());
             model.addAttribute("pkey", appDesc.getPkey());
+            model.addAttribute("customPassword", appDesc.getCustomPassword());
         }
         return new ModelAndView("manage/appCode/appCodeInit");
     }

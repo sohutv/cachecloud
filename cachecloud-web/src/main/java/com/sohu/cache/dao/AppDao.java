@@ -66,6 +66,16 @@ public interface AppDao {
      */
     public int update(AppDesc appDesc);
 
+
+    /**
+     * 更新app,包含自定义密码
+     *
+     * @param appDesc
+     * @return
+     */
+    public int updateWithCustomPwd(AppDesc appDesc);
+
+
     /**
      * 删除app
      *

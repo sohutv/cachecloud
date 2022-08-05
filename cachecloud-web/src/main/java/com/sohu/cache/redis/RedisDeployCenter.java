@@ -219,11 +219,28 @@ public interface RedisDeployCenter {
     public boolean fixPassword(Long appId, String pkey);
 
     /**
-     * 检查应用密码是否有效并且一致
+     * 应用级别配置密码并将密码更新到应用信息中。
+     * 步骤:
+     * 1:根据应用类型设置密码
+     * 2:确保配置持久化
+     * 3:更新密码pkey到应用信息中
+     * 4:检查所有节点密码是否一致。
      *
      * @param appId
+     * @param password  如果为空，表示默认逻辑，默认传递appId，也可传自定义密码
+     * @param customPwdFlag  是否为自定义密码
+     * @param initRedisFlag  是否为初始redis服务
      * @return
      */
+    public boolean fixPassword(Long appId, String password, Boolean customPwdFlag, boolean initRedisFlag);
+
+
+        /**
+         * 检查应用密码是否有效并且一致
+         *
+         * @param appId
+         * @return
+         */
     public boolean checkAuths(Long appId);
 
     /**

@@ -140,8 +140,8 @@ public class AppDataMigrateCenterImpl implements AppDataMigrateCenter {
     @Override
     public List<AppDataMigrateStatus> search(AppDataMigrateSearch appDataMigrateSearch) {
         try {
-            List<Long> onMigrateIds = appDataMigrateStatusDao.getAllOnMigrateId();
-            onMigrateIds.parallelStream().map(migrateId -> showDataMigrateLog(migrateId, 100)).collect(Collectors.toList());
+//            List<Long> onMigrateIds = appDataMigrateStatusDao.getAllOnMigrateId();
+//            onMigrateIds.parallelStream().map(migrateId -> showDataMigrateLog(migrateId, 100)).collect(Collectors.toList());
             return appDataMigrateStatusDao.search(appDataMigrateSearch);
         } catch (Exception e) {
             log.error(e.getMessage(), e);

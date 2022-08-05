@@ -139,7 +139,7 @@ public class InstanceScanCleanKeyTask extends BaseTask {
         }
         this.compilePatternAndSet();
         AppDesc appDesc = appService.getByAppId(appId);
-        authPwd = appDesc.getAuthPassword();
+        authPwd = appDesc.getAppPassword();
 
         ttlLess = MapUtils.getLong(paramMap, ScanCleanConstants.TTL_LESS);
         ttlMore = MapUtils.getLong(paramMap, ScanCleanConstants.TTL_MORE);

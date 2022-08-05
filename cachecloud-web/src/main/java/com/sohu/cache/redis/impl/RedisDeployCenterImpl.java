@@ -339,7 +339,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
 
         //运行sentinel实例组
         boolean isRunSentinel = runSentinelGroup(appDesc, sentinelList, masterHost, masterPort, appId,
-                appDesc.getPasswordMd5());
+                appDesc.getAppPassword());
         if (!isRunSentinel) {
             return false;
         }
@@ -429,7 +429,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
 
     private boolean runInstance(AppDesc appDesc, String host, Integer port, int maxMemory, boolean isCluster) {
         long appId = appDesc.getAppId();
-        String password = appDesc.getPasswordMd5();
+        String password = appDesc.getAppPassword();
         // 获取redis路径
         SystemResource redisResource = resourceService.getResourceById(appDesc.getVersionId());
         String redisDir = redisResource == null ? ConstUtils.REDIS_DEFAULT_DIR : ConstUtils.getRedisDir(redisResource.getName());
@@ -492,7 +492,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
     public boolean bornConfigAndRunNode(AppDesc appDesc, InstanceInfo instanceInfo, String host, Integer port, int maxMemory, boolean isCluster, boolean isInstallModule, String moduleCommand) {
 
         long appId = appDesc.getAppId();
-        String password = appDesc.getPasswordMd5();
+        String password = appDesc.getAppPassword();
         // 获取redis路径
         SystemResource redisResource = resourceService.getResourceById(appDesc.getVersionId());
         String redisDir = redisResource == null ? ConstUtils.REDIS_DEFAULT_DIR : ConstUtils.getRedisDir(redisResource.getName());
@@ -564,7 +564,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
                                 Integer masterPort) {
         //应用信息
         long appId = appDesc.getAppId();
-        String password = appDesc.getPasswordMd5();
+        String password = appDesc.getAppPassword();
         // 获取redis路径
 //        RedisVersion redisVersion = redisConfigTemplateService.getRedisVersionById(appDesc.getVersionId());
 //        String redisDir = redisVersion == null ? ConstUtils.REDIS_DEFAULT_DIR : redisVersion.getDir();
@@ -1474,11 +1474,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
             newPasswordMD5 = AuthUtil.getAppIdMD5(newPkey);
         }
 
-        String oldPasswordMD5 = "";
-        String oldPkey = appDesc.getPkey();
-        if (StringUtils.isNotBlank(oldPkey)) {
-            oldPasswordMD5 = AuthUtil.getAppIdMD5(oldPkey);
-        }
+        String oldPasswordMD5 = appDesc.getAppPassword();
 
         List<InstanceInfo> instanceInfos = instanceDao.getInstListByAppId(appId);
 
@@ -1488,6 +1484,73 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
             appDao.update(appDesc);
         }
 
+        return isSuccess;
+    }
+
+    @Override
+    public boolean fixPassword(Long appId, String password, Boolean customPwdFlag, boolean initRedisFlag) {
+        if (appId == null) {
+            logger.warn("appId is null");
+            return false;
+        }
+        AppDesc appDesc = appDao.getAppDescById(appId);
+        if (appDesc == null) {
+            logger.error("appId = {} not exist", appId);
+            return false;
+        }
+        if(customPwdFlag == null){
+            if(initRedisFlag){
+                customPwdFlag = appDesc.isSetCustomPassword();
+            }else{
+                customPwdFlag = false;
+            }
+        }
+
+        String newPassword = null;
+        String newPkey = null;
+        if(customPwdFlag){
+            if(StringUtils.isBlank(password)){
+                if(initRedisFlag){
+                    newPassword = appDesc.getCustomPassword();
+                }else{
+                    newPassword = password;
+                }
+            }else{
+                newPassword = password;
+            }
+        }else{
+            if(StringUtils.isBlank(password)){
+                if(initRedisFlag){
+                    newPkey = String.valueOf(appId);
+                    newPassword = AuthUtil.getAppIdMD5(newPkey);
+                }else{
+                    newPkey = null;
+                    newPassword = null;
+                }
+            }else{
+                newPkey = password;
+                newPassword = AuthUtil.getAppIdMD5(password);
+            }
+        }
+        if(newPassword == null){
+            newPassword = "";
+        }
+
+        String oldPassword = appDesc.getAppPassword();
+        List<InstanceInfo> instanceInfos = instanceDao.getInstListByAppId(appId);
+        boolean isSuccess = batchFixPassword(instanceInfos, oldPassword, newPassword);
+        if(!customPwdFlag){
+            if (isSuccess) {
+                appDesc.setPkey(newPkey);
+                appDesc.setCustomPassword(null);
+                appDao.updateWithCustomPwd(appDesc);
+            }
+        }else{
+            if (isSuccess) {
+                appDesc.setCustomPassword(newPassword);
+                appDao.updateWithCustomPwd(appDesc);
+            }
+        }
         return isSuccess;
     }
 
@@ -1503,11 +1566,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
             return false;
         }
 
-        String passwordMD5 = "";
-        String pkey = appDesc.getPkey();
-        if (StringUtils.isNotBlank(pkey)) {
-            passwordMD5 = AuthUtil.getAppIdMD5(pkey);
-        }
+        String password = appDesc.getAppPassword();
         List<InstanceInfo> instanceInfos = instanceDao.getInstListByAppId(appId);
         List<Jedis> nodeList = Lists.newArrayList();
         for (InstanceInfo instanceInfo : instanceInfos) {
@@ -1520,7 +1579,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
                     continue;
                 }
                 if (TypeUtil.isRedisCluster(type) || TypeUtil.isRedisStandalone(type)) {
-                    Jedis jedis = redisCenter.getJedis(host, port, passwordMD5);
+                    Jedis jedis = redisCenter.getJedis(host, port, password);
                     nodeList.add(jedis);
                 }
             } catch (Exception e) {
@@ -1528,7 +1587,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
                 return false;
             }
         }
-        return checkAuthNodes(nodeList, passwordMD5);
+        return checkAuthNodes(nodeList, password);
     }
 
     private boolean batchFixPassword(List<InstanceInfo> instanceInfos, String oldPasswordMD5, String passwordMD5) {

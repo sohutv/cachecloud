@@ -168,7 +168,7 @@
 													<input type="text" name="md5Password" id="md5Password" class="form-control" value="${md5password}" readonly/>
 												</div>
 												<div class="col-md-2">
-													<input type="checkbox" id="isSetPasswd" name="isSetPasswd" value="1" checked="checked" />设置默认密码
+													<input type="checkbox" id="isSetCustomPwd" name="isSetCustomPwd" onchange="changePwd('${md5password}')"/>设置自定义密码
 												</div>
 											</div>
 										</form>

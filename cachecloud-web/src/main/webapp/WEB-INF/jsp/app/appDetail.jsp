@@ -108,7 +108,8 @@
                     <td>redis密码</td>
                     <td>
                         <c:choose>
-                            <c:when test="${appDetail.appDesc.pkey != ''}">${password}</c:when>
+                            <c:when test="${appDetail.appDesc.customPassword != '' && appDetail.appDesc.customPassword != null}">${appDetail.appDesc.customPassword}</c:when>
+                            <c:when test="${appDetail.appDesc.pkey != '' && appDetail.appDesc.pkey != null}">${password}</c:when>
                             <c:otherwise>无</c:otherwise>
                         </c:choose>
                     </td>

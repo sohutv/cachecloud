@@ -21,23 +21,48 @@
 						<!-- BEGIN FORM-->
 						<form class="form-horizontal form-bordered form-row-stripped">
 							<div class="form-body">
-								<input type="hidden" id="oldPassword" name="oldPassword" value="${pkey}">
+								<c:if test="${customPassword != null && customPassword != ''}">
+									<input type="hidden" id="oldPassword" name="oldPassword" value="${customPassword}">
+								</c:if>
+								<c:if test="${customPassword == null || customPassword == ''}">
+									<input type="hidden" id="oldPassword" name="oldPassword" value="${pkey}">
+								</c:if>
 								<input type="hidden" id="appId" name="appId" value="${appId}">
 								<div class="form-group">
 									<label class="control-label col-md-3">
 										redis密码
 									</label>
-									<div class="col-md-5">
-										<input type="text" name="password" id="password" value="${pkey}" class="form-control"/>
+									<div class="col-md-4">
+										<c:if test="${customPassword != null && customPassword != ''}">
+											<input type="text" name="password" id="password" value="${customPassword}" class="form-control"/>
+										</c:if>
+										<c:if test="${customPassword == null || customPassword == ''}">
+											<input type="text" name="password" id="password" value="${pkey}" class="form-control"/>
+										</c:if>
 									</div>
 									<div class="col-md-2">
-										<button type="button" class="btn btn-small btn-primary" onclick="updateAppPassword()">
+										<c:if test="${customPassword != null && customPassword != ''}">
+											<input type="checkbox" id="isSetPasswd" name="isSetPasswd" checked="checked"/>设置自定义密码
+										</c:if>
+										<c:if test="${customPassword == null || customPassword == ''}">
+											<input type="checkbox" id="isSetPasswd" name="isSetPasswd" />设置自定义密码
+										</c:if>
+									</div>
+									<div class="col-md-2">
+										<button type="button" class="btn btn-small btn-primary" onclick="updateAppPassword('${customPassword}')">
 											更新
 										</button>
 										<button type="button" class="btn btn-small btn-primary" onclick="checkAppPassword()">
 											校验
 										</button>
 									</div>
+								</div>
+								<div class="row">
+									<label class="control-label col-md-offset-3 col-md-6" style="color: orangered; text-align: left; ">
+										自定义密码：用户定义的密码，设置的值即为密码；<br>
+										默认密码：设置的值仅为基础值，对该值经过系统默认加密处理从而生成密码。<br>
+										自定义密码优先级高于默认密码，如需清除密码，请先置空自定义密码，然后置空默认密码。
+									</label>
 								</div>
 								<div class="row">
 									<label class="control-label col-md-offset-2 col-md-8" style="color: orange; margin-left: auto">
@@ -56,26 +81,44 @@
 
 	<script>
 
-        function updateAppPassword() {
+        function updateAppPassword(customPwd) {
             var oldPassword = document.getElementById("oldPassword");
             var password = document.getElementById("password");
             var appId = document.getElementById("appId");
-            if(oldPassword.value.trim() == password.value.trim()){
-                alert("密码未变更,不更新!");
-                return false;
+			var isSetPasswd = document.getElementById("isSetPasswd").checked;
+			if(customPwd != null && customPwd != ''){
+            	if(isSetPasswd == true){
+					if(oldPassword.value.trim() == password.value.trim()){
+						alert("密码未变更,不更新!");
+						return false;
+					}
+				}
 			}
+			if(customPwd == null || customPwd == ''){
+            	if(isSetPasswd == false){
+					if(oldPassword.value.trim() == password.value.trim()){
+						alert("密码未变更,不更新!");
+						return false;
+					}
+				}
+			}
+
+			var originType = (customPwd != null && customPwd != '') ? "自定义密码" : "默认密码";
+			var newType = isSetPasswd == true ? "自定义密码" : "默认密码";
 
             $.get(
                 '/manage/app/updateAppPassword.json',
                 {
                     password: password.value.trim(),
-                    appId: appId.value
+                    appId: appId.value,
+					isSetPasswd: isSetPasswd
                 },
                 function(data){
                     var status = data.status;
                     if (status == 1) {
-                        alert("设置成功! 原有:【"+oldPassword.value+"】已更新成新密码：【"+password.value+"】");
-                        $("#oldPassword").attr("value",password.value);
+                        alert("设置成功! 原有:" + originType + "【"+oldPassword.value+"】已更新成新密码：" + newType + "【"+password.value+"】");
+                        window.location.reload();
+                        // $("#oldPassword").attr("value",password.value);
                     } else {
                         alert("设置失败!");
                     }

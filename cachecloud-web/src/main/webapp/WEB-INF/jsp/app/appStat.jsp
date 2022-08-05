@@ -54,7 +54,7 @@
                     <a target="_blank" href="/client/show/index?appId=${appId}" class="btn btn-info"
                        role="button">客户端统计</a>
                     <c:choose>
-                        <c:when test="${not empty appDetail.appDesc.pkey}">
+                        <c:when test="${not empty appDetail.appDesc.appPassword}">
                             <button type="button" class="btn btn-info" data-target="#appCodeChangeModal"
                                     data-toggle="modal" href="#">查看应用密码
                             </button>

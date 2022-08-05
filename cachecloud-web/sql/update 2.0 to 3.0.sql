@@ -82,4 +82,5 @@ ALTER TABLE app_user ADD company varchar(255) NULL COMMENT '公司名称';
 -- module_info change
 ALTER TABLE module_info ADD CONSTRAINT `NAMEKEY` UNIQUE KEY (name);
 
-
+-- app_desc change
+ALTER TABLE app_desc ADD custom_password varchar(255) DEFAULT NULL COMMENT '自定义密码';

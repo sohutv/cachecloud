@@ -157,15 +157,40 @@ public class AppDesc implements Serializable {
      */
     private int isVersionUpgrade = 0;
 
+    /**
+     * 自定义密码，优先级最高
+     */
+    private String customPassword;
+
     public String getAuthPassword() {
+        if(StringUtils.isNotBlank(customPassword)){
+            return customPassword;
+        }
         String authPassword = appId + AuthUtil.SPLIT_KEY;
         if (StringUtils.isNotBlank(pkey)) {
-            authPassword += getPasswordMd5();
+            authPassword += getAppPassword();
         }
         return authPassword;
     }
 
+    public boolean isSetCustomPassword(){
+        if(StringUtils.isNotBlank(customPassword)){
+            return true;
+        }
+        return false;
+    }
+
     public String getPasswordMd5() {
+        if (StringUtils.isNotBlank(pkey)) {
+            return AuthUtil.getAppIdMD5(pkey);
+        }
+        return null;
+    }
+
+    public String getAppPassword() {
+        if(StringUtils.isNotBlank(customPassword)){
+            return customPassword;
+        }
         if (StringUtils.isNotBlank(pkey)) {
             return AuthUtil.getAppIdMD5(pkey);
         }

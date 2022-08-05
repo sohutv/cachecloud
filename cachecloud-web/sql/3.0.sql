@@ -274,6 +274,7 @@ CREATE TABLE `app_desc` (
   `app_key` varchar(255) DEFAULT NULL COMMENT '应用秘钥',
   `important_level` tinyint(4) NOT NULL DEFAULT '2' COMMENT '应用级别，1:最重要，2:一般重要，3:一般',
   `password` varchar(255) DEFAULT '' COMMENT 'redis密码',
+  `custom_password` varchar(255) DEFAULT NULL COMMENT '自定义密码',
   `hit_precent_alert_value` int(11) DEFAULT '0' COMMENT '命中率报警阀值 0:不报警 ',
   `is_access_monitor` int(11) DEFAULT '0' COMMENT '是否接入全局监控报警 默认0,0:不接入监控 1:接入监控',
   `app_fsync_value` int(11) DEFAULT '1' COMMENT '应用刷盘策略 1:主从节点appdendfsync=everysec 2:主从节点 appdendfsync=no',

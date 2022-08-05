@@ -420,13 +420,12 @@ public class RedisClusterAppDeployTask extends BaseTask {
         try {
             if (appId > 0) {
                 // 设置密码
-                String passwd = String.valueOf(appId);
-                redisDeployCenter.fixPassword(appId, passwd);
+                redisDeployCenter.fixPassword(appId, null, null, true);
                 // 密码校验逻辑
                 boolean checkFlag = redisDeployCenter.checkAuths(appId);
                 logger.info(marker, "check app clutser passwd:{}", checkFlag);
                 if (!checkFlag) {
-                    logger.error(marker, "check app clutser passwd:{} error!", passwd);
+                    logger.error(marker, "check app clutser passwd error, appId:{}!", appId);
                     return TaskFlowStatusEnum.ABORT;
                 }
             }

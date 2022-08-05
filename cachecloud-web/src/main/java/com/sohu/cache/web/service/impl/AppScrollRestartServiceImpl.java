@@ -128,7 +128,7 @@ public class AppScrollRestartServiceImpl implements AppScrollRestartService {
                         retryTime = 3;
                         HostAndPort hap = null;
                         while (hap == null && retryTime-- > 0){
-                            hap = redisCenter.getMaster(host, port, appDesc.getPasswordMd5());
+                            hap = redisCenter.getMaster(host, port, appDesc.getAppPassword());
                         }
                         if(hap == null){
                             return false;

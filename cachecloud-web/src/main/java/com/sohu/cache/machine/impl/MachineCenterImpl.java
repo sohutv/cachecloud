@@ -676,7 +676,7 @@ public class MachineCenterImpl implements MachineCenter {
                     int port = instanceInfo.getPort();
                     long appId = instanceInfo.getAppId();
                     AppDesc appDesc = appDao.getAppDescById(appId);
-                    String password = appDesc.getPasswordMd5();
+                    String password = appDesc.getAppPassword();
                     BooleanEnum isMaster = redisCenter.isMaster(appId, host, port);
                     instanceInfo.setRoleDesc(isMaster);
                     if (isMaster == BooleanEnum.FALSE) {

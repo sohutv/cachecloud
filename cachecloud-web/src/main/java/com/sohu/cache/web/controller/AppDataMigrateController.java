@@ -399,7 +399,7 @@ public class AppDataMigrateController extends BaseController {
                 redisMigrateToolCenter.getAppInstanceListForRedisMigrateTool(appId)
                 : redisShakeCenter.getAppInstanceListForRedisShake(appId);
         model.addAttribute("instances", instances);
-        model.addAttribute("password", appDesc == null ? "" : appDesc.getPasswordMd5());
+        model.addAttribute("password", appDesc == null ? "" : appDesc.getAppPassword());
         model.addAttribute("appType", appDesc == null ? -1 : appDesc.getType());
         model.addAttribute("appName", appDesc == null ? "" : appDesc.getName());
         model.addAttribute("redisVersion", appDesc == null ? "" : resourceDao.getResourceById(appDesc.getVersionId()).getName());

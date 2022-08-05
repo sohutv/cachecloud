@@ -247,13 +247,39 @@ function clearinfo() {
     $("#appDeployInfo").val("");
 }
 
+function changePwd(defaultPwd){
+    // 是否设置密码
+    var isSetCustomPwd = $("#isSetCustomPwd").prop("checked");
+    if(isSetCustomPwd){
+        $("#md5Password").removeAttr("readonly");
+    }else{
+        $("#md5Password").val(defaultPwd);
+        $("#md5Password").attr("readonly", true);
+    }
+}
+
 /**
  * 添加应用部署任务
  */
 function addAppDeployTask() {
 
     // 是否设置密码
-    var isSetPasswd = $("#isSetPasswd").attr("checked") == 'checked' ? 1 : 0;
+    var customPassword = null;
+    var isSetCustomPwd = $("#isSetCustomPwd").prop("checked");
+    if(isSetCustomPwd){
+        customPassword = $("#md5Password").val();
+        if(customPassword == ''){
+            toastr.error("请填写自定义密码!");
+            $("#md5Password").focus();
+            return;
+        }
+    }
+    var isSetPasswd = 0;
+    if(isSetCustomPwd){
+        isSetPasswd = 1;
+    }else{
+        isSetPasswd = 0;
+    }
     var maxMemory = $.trim($("#maxMemory").val());
     if (maxMemory == '' || maxMemory == null) {
         toastr.error("请填写maxMemory内存大小!");
@@ -329,7 +355,8 @@ function addAppDeployTask() {
             sentinelMachines: sentinelMachines,
             pikaMachines: pikaMachines,
             twemproxyMachines: twemproxyMachines,
-            moduleinfos:moduleinfos
+            moduleinfos:moduleinfos,
+            customPassword:customPassword
         },
         function (data) {
             var status = data.status;

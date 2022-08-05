@@ -85,6 +85,8 @@ public interface AppService {
 
     List<InstanceStats> getAppInstanceStats(Long appId);
 
+    int updateWithCustomPwd(AppDesc appDesc);
+
     /**
      * 保存用户与应用的关系
      *
