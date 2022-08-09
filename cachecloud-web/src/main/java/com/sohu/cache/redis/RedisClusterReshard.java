@@ -3,10 +3,14 @@ package com.sohu.cache.redis;
 import com.sohu.cache.constant.ReshardStatusEnum;
 import com.sohu.cache.dao.AppDao;
 import com.sohu.cache.dao.InstanceReshardProcessDao;
+import com.sohu.cache.dao.ResourceDao;
+import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.entity.InstanceReshardProcess;
+import com.sohu.cache.entity.SystemResource;
 import com.sohu.cache.util.IdempotentConfirmer;
 import com.sohu.cache.web.enums.BooleanEnum;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +18,11 @@ import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Protocol;
 import redis.clients.jedis.exceptions.JedisException;
+import redis.clients.jedis.params.MigrateParams;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 水平扩容重构
@@ -50,6 +56,7 @@ public class RedisClusterReshard {
     private RedisCenter redisCenter;
     private InstanceReshardProcessDao instanceReshardProcessDao;
     private AppDao appDao;
+    private ResourceDao resourceDao;
 
     public RedisClusterReshard(Set<HostAndPort> hosts, RedisCenter redisCenter, InstanceReshardProcessDao instanceReshardProcessDao) {
         this.hosts = hosts;
@@ -68,11 +75,12 @@ public class RedisClusterReshard {
      * @version 1.0
      * @date 2017/12/25
      */
-    public RedisClusterReshard(Set<HostAndPort> hosts, RedisCenter redisCenter, InstanceReshardProcessDao instanceReshardProcessDao, AppDao appDao) {
+    public RedisClusterReshard(Set<HostAndPort> hosts, RedisCenter redisCenter, InstanceReshardProcessDao instanceReshardProcessDao, AppDao appDao, ResourceDao resourceDao) {
         this.hosts = hosts;
         this.redisCenter = redisCenter;
         this.instanceReshardProcessDao = instanceReshardProcessDao;
         this.appDao = appDao;
+        this.resourceDao = resourceDao;
     }
 
     /**
@@ -227,6 +235,22 @@ public class RedisClusterReshard {
      */
     public boolean migrateSlot(InstanceReshardProcess instanceReshardProcess) {
         long appId = instanceReshardProcess.getAppId();
+        AppDesc appDesc = appDao.getAppDescById(appId);
+        String password = null;
+        List<Integer> versionList = new ArrayList<>();
+        if(appDesc != null){
+            password = appDesc.getPasswordMd5();
+            // Redis版本信息
+            SystemResource resource = resourceDao.getResourceById(appDesc.getVersionId());
+            String name = resource.getName();
+            if(name != null){
+                String[] split = name.split("-");
+                if(split != null && split.length == 2){
+                    String[] versionArray = split[1].split("\\.");
+                    versionList = Arrays.asList(versionArray).stream().map(ver -> Integer.valueOf(ver)).collect(Collectors.toList());
+                }
+            }
+        }
         int migratingSlot = instanceReshardProcess.getMigratingSlot();
         int endSlot = instanceReshardProcess.getEndSlot();
         int isPipeline = instanceReshardProcess.getIsPipeline();
@@ -244,7 +268,7 @@ public class RedisClusterReshard {
             try {
                 instanceReshardProcessDao.updateMigratingSlot(instanceReshardProcess.getId(), slot);
                 //num是迁移key的总数
-                int num = migrateSlotData(appId, sourceJedis, targetJedis, slot, isPipeline);
+                int num = migrateSlotData(appId, sourceJedis, targetJedis, slot, isPipeline, password, versionList);
                 instanceReshardProcessDao.increaseFinishSlotNum(instanceReshardProcess.getId());
                 logger.warn("clusterReshard:{}->{}, slot={}, keys={}, costTime={} ms", sourceInstanceInfo.getHostPort(),
                         targetInstanceInfo.getHostPort(), slot, num, (System.currentTimeMillis() - slotStartTime));
@@ -272,7 +296,7 @@ public class RedisClusterReshard {
      *
      * @throws Exception
      */
-    private int moveSlotData(final long appId, final Jedis source, final Jedis target, final int slot, int isPipeline) throws Exception {
+    private int moveSlotData(final long appId, final Jedis source, final Jedis target, final int slot, int isPipeline, String password, List<Integer> versionList) throws Exception {
         int num = 0;
         while (true) {
             final Set<String> keys = new HashSet<String>();
@@ -299,8 +323,22 @@ public class RedisClusterReshard {
 
                     @Override
                     public boolean execute() {
-                        String response = source.migrate(target.getClient().getHost(), target.getClient().getPort(),
-                                key, 0, migrateTimeout * (migrateTimeOutFactor++));
+                        String response = null;
+                        Integer bigVer = 0;
+                        Integer smallVer = 0;
+                        Integer fixVer = 0;
+                        if(CollectionUtils.isNotEmpty(versionList)){
+                            bigVer = versionList.get(0);
+                            smallVer = versionList.get(1);
+                            fixVer = versionList.get(2);
+                        }
+                        if(bigVer < 4 || (bigVer == 4 && smallVer == 0 && fixVer < 7)){
+                            response = source.migrate(target.getClient().getHost(), target.getClient().getPort(),
+                                    key, 0, migrateTimeout * (migrateTimeOutFactor++));
+                        }else{
+                            response = source.migrate(target.getClient().getHost(), target.getClient().getPort(),
+                                    0, migrateTimeout * (migrateTimeOutFactor++), MigrateParams.migrateParams().auth(password), key);
+                        }
                         return response != null && (response.equalsIgnoreCase("OK") || response.equalsIgnoreCase("NOKEY"));
                     }
                 }.run();
@@ -354,7 +392,7 @@ public class RedisClusterReshard {
      * MIGRATE host port key destination-db timeout [COPY] [REPLACE]
      * CLUSTER SETSLOT <slot> NODE <node_id> 将槽 slot 指派给 node_id 指定的节点，如果槽已经指派给另一个节点，那么先让另一个节点删除该槽>，然后再进行指派。
      */
-    private int migrateSlotData(long appId, final Jedis source, final Jedis target, final int slot, int isPipeline) {
+    private int migrateSlotData(long appId, final Jedis source, final Jedis target, final int slot, int isPipeline, String password, List<Integer> versionList) {
         int num = 0;
         final String sourceNodeId = getNodeId(appId, source);
         final String targetNodeId = getNodeId(appId, target);
@@ -389,7 +427,7 @@ public class RedisClusterReshard {
         }
 
         try {
-            num = moveSlotData(appId, source, target, slot, isPipeline);
+            num = moveSlotData(appId, source, target, slot, isPipeline, password, versionList);
         } catch (Exception e) {
             isError = true;
             logger.error(e.getMessage(), e);

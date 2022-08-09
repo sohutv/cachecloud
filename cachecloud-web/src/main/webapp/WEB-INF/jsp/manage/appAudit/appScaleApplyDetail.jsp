@@ -53,7 +53,7 @@
                                                 </div>
                                                 <c:if test="${appDesc.type == 2}">
                                                 	<div class="col-md-6 ">
-	                                                    <a class="btn btn-info" href="/manage/app/initHorizontalScaleApply?appAuditId=${appAuditId}">水平扩容</a>
+	                                                    <a class="btn btn-info" href="/manage/app/initHorizontalScaleApply?appAuditId=${appAuditId}" title="不推荐（需要迁移slot，操作较慢，对redis服务有一定影响，且一旦失败，回滚较困难。）"><del>水平扩容</del><font color="red">?</font></a>
 	                                                </div>
                                                 </c:if>
                                             </div>

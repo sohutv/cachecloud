@@ -483,7 +483,7 @@ public class AppDeployCenterImpl implements AppDeployCenter {
 
         //4. 添加新节点: meet,复制，不做slot分配
 //        RedisClusterReshard clusterReshard = new RedisClusterReshard(clusterHosts, redisCenter, instanceReshardProcessDao);
-        RedisClusterReshard clusterReshard = new RedisClusterReshard(clusterHosts, redisCenter, instanceReshardProcessDao, appDao);
+        RedisClusterReshard clusterReshard = new RedisClusterReshard(clusterHosts, redisCenter, instanceReshardProcessDao, appDao, resourceDao);
         boolean joinCluster = clusterReshard.joinCluster(appId, masterHost, masterPort, slaveHost, slavePort);
         if (joinCluster) {
             //5. 保存实例,开启统计功能
@@ -727,7 +727,7 @@ public class AppDeployCenterImpl implements AppDeployCenter {
                 //所有节点用户clustersetslot
                 Set<HostAndPort> clusterHosts = getEffectiveInstanceList(appId);
 //                RedisClusterReshard clusterReshard = new RedisClusterReshard(clusterHosts, redisCenter, instanceReshardProcessDao);
-                RedisClusterReshard clusterReshard = new RedisClusterReshard(clusterHosts, redisCenter, instanceReshardProcessDao, appDao);
+                RedisClusterReshard clusterReshard = new RedisClusterReshard(clusterHosts, redisCenter, instanceReshardProcessDao, appDao, resourceDao);
                 //添加进度
                 boolean joinCluster = clusterReshard.migrateSlot(instanceReshardProcess);
                 if (joinCluster) {

@@ -86,6 +86,12 @@
 											</select>
 										</div>
                                     </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-offset-2 col-md-8" style="text-align: left">
+                                            redis版本低于<font color='red'>4.0.7</font>时，如待迁移集群设置有密码，由于redis migrate命令问题，不能正常执行，该情况下不支持水平扩容。
+                                        </label>
+                                    </div>
                                     
                                     <input type="hidden" name="appId" id="appId" value="${appAudit.appId}">
                                     <input type="hidden" name="appAuditId" id="appAuditId" value="${appAudit.id}">
