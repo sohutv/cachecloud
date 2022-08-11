@@ -60,7 +60,7 @@
         from machine_statistics
         <choose>
             <when test="ipLike != '' and ipLike != null">
-                where ip like '%${ipLike}%'
+                where instr(ip, #{ipLike}) > 0
             </when>
         </choose>
     </select>

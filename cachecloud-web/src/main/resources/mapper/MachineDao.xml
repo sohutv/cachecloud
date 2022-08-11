@@ -38,7 +38,7 @@
         from machine_info where available = 1
         <choose>
             <when test="ipLike != '' and ipLike != null">
-                and ip like '%${ipLike}%'
+                and instr(ip, #{ipLike}) > 0
             </when>
         </choose>
     </select>
@@ -50,7 +50,7 @@
         from machine_info where available = 1
         <choose>
             <when test="ipLike != '' and ipLike != null">
-                and ip like '%${ipLike}%'
+                and instr(ip, #{ipLike}) > 0
             </when>
         </choose>
         <choose>
@@ -65,7 +65,7 @@
         </choose>
         <choose>
             <when test="versionStr != '' and versionStr != null">
-                and version_install like '%${versionStr}%'
+                and instr(version_install, #{versionStr}) > 0
             </when>
         </choose>
         <choose>
@@ -87,12 +87,12 @@
         from machine_info where available = 1
         <choose>
             <when test="ipLike != '' and ipLike != null">
-                and ip like '%${ipLike}%'
+                and instr(ip, #{ipLike}) > 0
             </when>
         </choose>
         <choose>
             <when test="realIpLike != '' and realIpLike != null">
-                and real_ip like '%${realIpLike}%'
+                and instr(real_ip, #{realIpLike}) > 0
             </when>
         </choose>
     </select>
@@ -117,7 +117,7 @@
         from machine_info where available = 1
         <choose>
             <when test="room != null">
-                and room like '%${room}%'
+                and instr(room, #{room}) > 0
             </when>
         </choose>
         <choose>

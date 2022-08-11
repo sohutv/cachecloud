@@ -34,12 +34,13 @@
 
         <choose>
             <when test="appDataMigrateSearch.sourceInstanceIp != null and appDataMigrateSearch.sourceInstanceIp != ''">
-                and source_servers like '%${appDataMigrateSearch.sourceInstanceIp}%'
+                and instr(source_servers, #{appDataMigrateSearch.sourceInstanceIp}) > 0
             </when>
         </choose>
         <choose>
             <when test="appDataMigrateSearch.targetInstanceIp != null and appDataMigrateSearch.targetInstanceIp != ''">
-                and target_servers like '%${appDataMigrateSearch.targetInstanceIp}%'
+                and instr(target_servers, #{appDataMigrateSearch.targetInstanceIp}) > 0
+
             </when>
         </choose>
 
@@ -91,12 +92,12 @@
 
         <choose>
             <when test="appDataMigrateSearch.sourceInstanceIp != null and appDataMigrateSearch.sourceInstanceIp != ''">
-                and source_servers like '%${appDataMigrateSearch.sourceInstanceIp}%'
+                and instr(source_servers, #{appDataMigrateSearch.sourceInstanceIp}) > 0
             </when>
         </choose>
         <choose>
             <when test="appDataMigrateSearch.targetInstanceIp != null and appDataMigrateSearch.targetInstanceIp != ''">
-                and target_servers like '%${appDataMigrateSearch.targetInstanceIp}%'
+                and instr(target_servers, #{appDataMigrateSearch.targetInstanceIp}) > 0
             </when>
         </choose>
 

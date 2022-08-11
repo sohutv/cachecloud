@@ -110,7 +110,7 @@
     	select count(app_id) from app_desc where 1=1 and status &lt; 3
         <choose>
             <when test="appName != null and appName != ''">
-            	and name like '%${appName}%'
+                and instr(name, #{appName}) > 0
        	 	</when>
         </choose>
         <choose>
@@ -135,12 +135,12 @@
         </choose>
         <choose>
             <when test="versionId != null and versionId > 0">
-                and version_id = ${versionId}
+                and version_id = #{versionId}
             </when>
         </choose>
         <choose>
             <when test="userId != null and userId > 0">
-                and app_id in (select app_id from app_to_user where user_id = ${userId})
+                and app_id in (select app_id from app_to_user where user_id = #{userId})
             </when>
         </choose>
     </select>
@@ -151,8 +151,8 @@
         from app_desc where 1=1 and status &lt; 3
         <choose>
             <when test="appName != null and appName != ''">
-            	and name like '%${appName}%'
-       	 	</when>
+                and instr(name, #{appName}) > 0
+            </when>
         </choose>
         <choose>
             <when test="appType != null and appType > 0">
@@ -171,22 +171,22 @@
         </choose>
         <choose>
             <when test="importantLevel != null and importantLevel > 0">
-            	and important_level = ${importantLevel}
+            	and important_level = #{importantLevel}
        	 	</when>
         </choose>
         <choose>
             <when test="versionId != null and versionId > 0">
-                and version_id = ${versionId}
+                and version_id = #{versionId}
             </when>
         </choose>
         <choose>
             <when test="userId != null and userId > 0">
-                and app_id in (select app_id from app_to_user where user_id = ${userId})
+                and app_id in (select app_id from app_to_user where user_id = #{userId})
             </when>
         </choose>
         <choose>
             <when test="isTest != null and isTest > 0">
-                and is_test = ${isTest}
+                and is_test = #{isTest}
             </when>
         </choose>
         ORDER BY app_id desc
