@@ -3,7 +3,7 @@ var valPhones=/^((13[0-9])|(14[5,7])|(15[0-3,5-9])|(17[0,3,5-8])|(18[0-9])|166|1
 //验证邮箱格式
 var valEmails=/^(([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.|\-]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3};){0,6}([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.|\-]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/;
 function saveOrUpdateUser(userId, openFlag){
-	var name = document.getElementById("name" + userId);
+	var name = document.getElementById("user_name" + userId);
 	var chName = document.getElementById("chName" + userId);
 	var email = document.getElementById("email" + userId);
 	var mobile = document.getElementById("mobile" + userId);

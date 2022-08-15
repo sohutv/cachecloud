@@ -21,7 +21,7 @@
 										域账户名:
 									</label>
 									<div class="col-md-5">
-										<input type="text" name="name" id="name${user.id}"
+										<input type="text" name="name" id="user_name${user.id}"
 											value="${user.name}" placeholder="域账户名(邮箱前缀)"
 											class="form-control" />
 									</div>
