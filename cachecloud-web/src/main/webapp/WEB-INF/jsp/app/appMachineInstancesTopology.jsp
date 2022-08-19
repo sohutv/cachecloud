@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ include file="/WEB-INF/jsp/manage/commons/taglibs.jsp"%>
-<link href="http://www.bootcss.com/p/buttons/css/buttons.css" rel="stylesheet">
+<link href="/resources/css/buttons.css" rel="stylesheet">
 <div class="row">
     <div class="page-header">
         <a target="_blank" data-container="body" class='button button-caution button-square button-small'> </a>
