@@ -84,3 +84,36 @@ ALTER TABLE module_info ADD CONSTRAINT `NAMEKEY` UNIQUE KEY (name);
 
 -- app_desc change
 ALTER TABLE app_desc ADD custom_password varchar(255) DEFAULT NULL COMMENT '自定义密码';
+
+-- redis_module_config definition
+
+CREATE TABLE `redis_module_config` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `config_key` varchar(128) NOT NULL COMMENT '配置名',
+  `config_value` varchar(512) NOT NULL COMMENT '配置值',
+  `info` varchar(512) NOT NULL COMMENT '配置说明',
+  `update_time` datetime NOT NULL COMMENT '更新时间',
+  `type` mediumint(9) NOT NULL COMMENT '类型：2.cluster节点特殊配置, 5:sentinel节点配置, 6:redis普通节点',
+  `status` tinyint(4) NOT NULL COMMENT '1有效,0无效',
+  `version_id` int(11) NOT NULL COMMENT 'Module version版本表主键id',
+  `refresh` tinyint(4) DEFAULT '0' COMMENT '是否可重置：0不可，1可重置',
+  `module_id` int(11) NOT NULL DEFAULT '7' COMMENT 'Module 信息表id',
+  `config_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '配置类型，0：加载和运行配置；1：加载时配置；2：运行时配置',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_configkey_type_version_id` (`config_key`,`type`,`version_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='redis模块配置表';
+
+
+-- app_to_module definition
+
+CREATE TABLE `app_to_module` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `app_id` bigint(20) NOT NULL COMMENT '应用id',
+  `module_id` int(11) NOT NULL COMMENT '模块info id',
+  `module_version_id` int(11) NOT NULL COMMENT '模块版本id',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `app_to_module_un` (`app_id`,`module_id`,`module_version_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='应用与模块关系表';
+
+ALTER TABLE machine_info ADD dis_type tinyint(4) DEFAULT 0 NOT NULL COMMENT '操作系统发行版本，0:centos;1:ubuntu';
+

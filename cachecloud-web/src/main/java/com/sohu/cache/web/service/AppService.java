@@ -4,6 +4,7 @@ import com.sohu.cache.constant.AppAuditType;
 import com.sohu.cache.entity.*;
 import com.sohu.cache.task.constant.InstanceInfoEnum.InstanceTypeEnum;
 import com.sohu.cache.web.enums.SuccessEnum;
+import com.sohu.cache.web.vo.ModuleVersionDetailVo;
 
 import java.util.Date;
 import java.util.List;
@@ -95,6 +96,38 @@ public interface AppService {
      * @return
      */
     boolean saveAppToUser(Long appId, Long userId);
+
+    /**
+     * 保存应用与模块关系
+     *
+     * @param appToModuleList
+     * @return
+     */
+    int saveAppToModule(List<AppToModule> appToModuleList);
+
+    /**
+     * 获取应用安装模块信息
+     *
+     * @param appId
+     * @return
+     */
+    List<ModuleVersion> getAppToModuleList(Long appId);
+
+    /**
+     * 获取应用是否安装模块
+     *
+     * @param appId
+     * @return
+     */
+    boolean isInstallModule(Long appId);
+
+    /**
+     * 获取应用安装模块详细信息
+     *
+     * @param appId
+     * @return
+     */
+    List<ModuleVersionDetailVo> getAppModuleList(Long appId);
 
     /**
      * 更新审核状态

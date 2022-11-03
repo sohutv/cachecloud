@@ -219,6 +219,7 @@ public class MachineManageController extends BaseController {
             machineInfo.setCpu(NumberUtils.toInt(request.getParameter("cpu"), 0));
             machineInfo.setDisk(NumberUtils.toInt(request.getParameter("disk"), 0));
             machineInfo.setVirtual(NumberUtils.toInt(request.getParameter("virtual"), 0));
+            machineInfo.setDisType(NumberUtils.toInt(request.getParameter("disType"), 0));
             machineInfo.setRealIp(i < realIpList.size() ? realIpList.get(i) : "");
             machineInfo.setType(NumberUtils.toInt(request.getParameter("machineType"), 0));
             machineInfo.setUseType(NumberUtils.toInt(request.getParameter("useType"), 0));

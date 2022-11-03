@@ -53,6 +53,7 @@ import redis.clients.jedis.ScanParams;
 import redis.clients.jedis.ScanResult;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Module;
+import redis.clients.jedis.commands.ProtocolCommand;
 import redis.clients.jedis.exceptions.JedisAskDataException;
 import redis.clients.jedis.exceptions.JedisDataException;
 import redis.clients.jedis.exceptions.JedisMovedDataException;
@@ -98,6 +99,8 @@ public class RedisCenterImpl implements RedisCenter {
     private volatile Map<String, JedisPool> jedisPoolMap = new HashMap<String, JedisPool>();
     @Autowired
     private AppDao appDao;
+    @Autowired
+    private RedisModuleConfigDao redisModuleConfigDao;
     @Autowired
     private AppAuditLogDao appAuditLogDao;
     @Autowired
@@ -1544,6 +1547,127 @@ public class RedisCenterImpl implements RedisCenter {
         return "不支持应用类型";
     }
 
+    @Override
+    public Object executeAdminCommand(AppDesc appDesc, ProtocolCommand command, String... args) {
+        int type = appDesc.getType();
+        long appId = appDesc.getAppId();
+        String password = appDesc.getAppPassword();
+        if (type == ConstUtils.CACHE_REDIS_SENTINEL) {
+            List<InstanceInfo> instanceList = instanceDao.getInstListByAppId(appId);
+            if (instanceList == null || instanceList.isEmpty()) {
+                return "应用没有运行的实例";
+            }
+            String host = null;
+            int port = 0;
+            for (InstanceInfo instanceInfo : instanceList) {
+                if(instanceInfo.getType() == ConstUtils.CACHE_REDIS_SENTINEL){
+                    continue;
+                }
+                host = instanceInfo.getIp();
+                port = instanceInfo.getPort();
+                BooleanEnum isMaster = this.isMaster(appId, host, port);
+                if(isMaster.equals(BooleanEnum.TRUE)){
+                    break;
+                }else{
+                    host = null;
+                    port = 0;
+                }
+            }
+            Jedis jedis = null;
+            try {
+                jedis = this.getJedis(appId, host, port);
+                return executeAdminRedisCommandByJedis(jedis, command, args);
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+                return "运行出错:" + e.getMessage();
+            } finally {
+                if (jedis != null){
+                    jedis.close();
+                }
+            }
+        } else if (type == ConstUtils.CACHE_REDIS_STANDALONE) {
+            List<InstanceInfo> instanceList = instanceDao.getInstListByAppId(appId);
+            if (instanceList == null || instanceList.isEmpty()) {
+                return "应用没有运行的实例";
+            }
+            String host = null;
+            int port = 0;
+            for (InstanceInfo instanceInfo : instanceList) {
+                host = instanceInfo.getIp();
+                port = instanceInfo.getPort();
+                BooleanEnum isMaster = this.isMaster(appId, host, port);
+                if(isMaster.equals(BooleanEnum.TRUE)){
+                    break;
+                }else{
+                    host = null;
+                    port = 0;
+                }
+            }
+            Jedis jedis = null;
+            try {
+                jedis = this.getJedis(appId, host, port);
+                return executeAdminRedisCommandByJedis(jedis, command, args);
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+                return "运行出错:" + e.getMessage();
+            } finally {
+                if (jedis != null){
+                    jedis.close();
+                }
+            }
+        } else if (type == ConstUtils.CACHE_TYPE_REDIS_CLUSTER) {
+            List<InstanceInfo> instanceList = instanceDao.getInstListByAppId(appId);
+            if (instanceList == null || instanceList.isEmpty()) {
+                return "应用没有运行的实例";
+            }
+            Set<HostAndPort> clusterHosts = new LinkedHashSet<HostAndPort>();
+            for (InstanceInfo instance : instanceList) {
+                if (instance != null && instance.isOnline()) {
+                    clusterHosts.add(new HostAndPort(instance.getIp(), instance.getPort()));
+                }
+            }
+            if (clusterHosts.isEmpty()) {
+                return "no run instance";
+            }
+            String commandKey = null;
+            if(args != null && args.length > 0){
+                commandKey = args[0];
+            }
+            HostAndPort rightHostAndPort = null;
+            for (HostAndPort hostAndPort : clusterHosts) {
+                if(commandKey != null){
+                    rightHostAndPort = getClusterRightHostAndPort(hostAndPort.getHost(), hostAndPort.getPort(),
+                            password, command.toString(), commandKey);
+                    if(rightHostAndPort != null){
+                        break;
+                    }
+                }else{
+                    BooleanEnum isMaster = this.isMaster(appId, hostAndPort.getHost(), hostAndPort.getPort());
+                    if(isMaster.equals(BooleanEnum.TRUE)){
+                        rightHostAndPort = hostAndPort;
+                        break;
+                    }
+                }
+
+            }
+            if (rightHostAndPort != null) {
+                Jedis jedis = null;
+                try {
+                    jedis = this.getJedis(appId, rightHostAndPort.getHost(), rightHostAndPort.getPort());
+                    return executeAdminRedisCommandByJedis(jedis, command, args);
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
+                    return "运行出错:" + e.getMessage();
+                } finally {
+                    if (jedis != null){
+                        jedis.close();
+                    }
+                }
+            }
+        }
+        return "不支持应用类型";
+    }
+
     /**
      * 获取key对应的节点
      *
@@ -1614,6 +1738,13 @@ public class RedisCenterImpl implements RedisCenter {
         logger.warn("executeRedisShell={}", shell);
         return machineCenter.executeShell(host, shell, timeout);
     }
+
+    @Override
+    public Object executeAdminRedisCommandByJedis(Jedis jedis, ProtocolCommand command, String... args) {
+        Object o = jedis.sendCommand(command, args);
+        return o;
+    }
+
 
     @Override
     public JedisSentinelPool getJedisSentinelPool(AppDesc appDesc) {
@@ -2810,6 +2941,7 @@ public class RedisCenterImpl implements RedisCenter {
                         if (type == ConstUtils.CACHE_REDIS_STANDALONE || type == ConstUtils.CACHE_TYPE_REDIS_CLUSTER) {
                             jedis = getJedis(appId, host, port);
                             List<Module> modules = jedis.moduleList();
+                            modules = modules.stream().sorted(Comparator.comparing(Module::getName)).collect(Collectors.toList());
                             instanceInfo.setModules(modules);
                             logger.info("checkInstanceModule {}:{} module info :{}", host, port, modules);
                         }
@@ -2841,16 +2973,23 @@ public class RedisCenterImpl implements RedisCenter {
             so_name = soPath.substring(soPath.lastIndexOf("/") + 1);
             String check_command = String.format("ls -l %s | grep %s | wc -l", ConstUtils.MODULE_BASE_PATH, so_name);
             String download_command = String.format("mkdir -p %s && cd %s && wget %s && chmod +x *.so", ConstUtils.MODULE_BASE_PATH, ConstUtils.MODULE_BASE_PATH, soPath);
+            // module load path
+            String module_path = ConstUtils.MODULE_BASE_PATH + so_name;
 
+            List<String> moduleLoadConfigList = this.getModuleLoadConfig(appId, moduleVersion.getId());
+            List<String> moduleConfigList = new ArrayList<>();
+            moduleConfigList.addAll(moduleLoadConfigList);
+            moduleConfigList.add(0, Protocol.Keyword.LOAD.name());
+            moduleConfigList.add(1, module_path);
+            String[] commandArgs = moduleConfigList.toArray(new String[moduleConfigList.size()]);
             List<InstanceInfo> instanceList = appService.getAppInstanceInfo(appId);
+            boolean existFlag = false;
             if (!CollectionUtils.isEmpty(instanceList)) {
                 for (InstanceInfo instanceInfo : instanceList) {
                     if (!instanceInfo.isOffline()) {
                         String host = instanceInfo.getIp();
                         int port = instanceInfo.getPort();
                         int type = instanceInfo.getType();
-                        // module load path
-                        String module_path = ConstUtils.MODULE_BASE_PATH + so_name;
                         //检测并下载组件
                         checkAndDownloadModule(host, check_command, download_command);
                         Jedis jedis = null;
@@ -2859,12 +2998,24 @@ public class RedisCenterImpl implements RedisCenter {
                                 jedis = getJedis(appId, host, port);
                                 // 装载模块
                                 List<Module> modules = jedis.moduleList();
-                                // 未load module
-//                                if (!existModule(modules, moduleName)) {
-                                String result = jedis.moduleLoad(module_path);
+                                for(Module module : modules){
+                                    if(so_name.contains(module.getName())){
+                                        existFlag = true;
+                                    }
+                                }
+                                if(existFlag){
+                                    existFlag = false;
+                                    continue;
+                                }
+                                Object result = jedis.sendCommand(Protocol.Command.MODULE, commandArgs);
                                 logger.info(" {}:{} load module path:{} result:{}", host, port, module_path, result);
                                 //写配置文件
-                                refreshConfig(appId, host, port, module_path);
+                                String newModulePath = module_path;
+                                if(CollectionUtils.isNotEmpty(moduleLoadConfigList)){
+                                    String loadConfigStr = moduleLoadConfigList.stream().collect(Collectors.joining(" "));
+                                    newModulePath = newModulePath + " " + loadConfigStr;
+                                }
+                                refreshConfig(appId, host, port, newModulePath);
 //                                }
                             }
                         } catch (Exception e) {
@@ -2891,52 +3042,27 @@ public class RedisCenterImpl implements RedisCenter {
         return resultMap;
     }
 
-    public Map loadModule(long appId, String moduleName) {
-        Map<String, Object> resultMap = new HashMap<String, Object>();
-        int status = SuccessEnum.SUCCESS.value();
-        String message = "";
+    // 校验是否存在并自动下载so
+    @Override
+    public void checkAndDownloadModule(String ip, List<ModuleVersion> moduleList) {
         try {
-            List<InstanceInfo> instanceList = appService.getAppInstanceInfo(appId);
-            if (!CollectionUtils.isEmpty(instanceList)) {
-                for (InstanceInfo instanceInfo : instanceList) {
-                    if (!instanceInfo.isOffline()) {
-                        String host = instanceInfo.getIp();
-                        int port = instanceInfo.getPort();
-                        int type = instanceInfo.getType();
-                        String module_path = ConstUtils.MODULE_BASE_PATH + moduleName;
-                        Jedis jedis = null;
-                        try {
-                            if (type == ConstUtils.CACHE_REDIS_STANDALONE || type == ConstUtils.CACHE_TYPE_REDIS_CLUSTER) {
-                                jedis = getJedis(appId, host, port);
-                                List<Module> modules = jedis.moduleList();
-                                // 未load module
-                                if (!existModule(modules, moduleName)) {
-                                    String result = jedis.moduleLoad(module_path);
-                                    logger.info(" {}:{} load module path:{} result:{}", host, port, module_path, result);
-                                    //写配置文件
-                                    refreshConfig(appId, host, port, module_path);
-                                }
-                            }
-                        } catch (Exception e) {
-                            logger.error(" {}:{} load module path:{} error , message:{}", host, port, module_path, e.getMessage(), e);
-                            status = SuccessEnum.ERROR.value();
-                            message += String.format("%s:%s load module:%s error \n", host, port, module_path);
-                        } finally {
-                            if (jedis != null) {
-                                jedis.close();
-                            }
-                        }
-                    }
+            for(ModuleVersion moduleVersion : moduleList){
+                String soPath = moduleVersion.getSoPath();
+                String so_name = soPath.substring(soPath.lastIndexOf("/") + 1);
+                String check_command = String.format("ls -l %s | grep %s | wc -l", ConstUtils.MODULE_BASE_PATH, so_name);
+                String download_command = String.format("mkdir -p %s && cd %s && wget %s && chmod +x *.so", ConstUtils.MODULE_BASE_PATH, ConstUtils.MODULE_BASE_PATH, soPath);
+                String result = sshService.execute(ip, check_command);
+                logger.info("checkAndDownloadModule check_command:{} result:{}", check_command, result);
+                if ("0".equals(result)) {
+                    // download to module path
+                    String download_res = sshService.execute(ip, download_command);
+                    logger.info("download_command:{} result:{}", download_command, download_res);
                 }
             }
-
-        } catch (Exception e) {
-            logger.error("appid:{} load moduleName :{} error :{}", appId, moduleName, e.getMessage());
-            status = SuccessEnum.FAIL.value();
+        } catch (SSHException e) {
+            logger.error("checkAndDownloadModule ip:{} error :{}", ip, e.getMessage(), e);
+            throw new RuntimeException(String.format("machine: %s redis module checkAndDownloadModule error", ip));
         }
-        resultMap.put("status", status);
-        resultMap.put("message", message);
-        return resultMap;
     }
 
     public boolean refreshConfig(long appid, String host, int port, String modulePath) {
@@ -2965,18 +3091,6 @@ public class RedisCenterImpl implements RedisCenter {
         return true;
     }
 
-    public boolean existModule(List<Module> modules, String moduleName) {
-        if (!CollectionUtils.isEmpty(modules)) {
-            for (Module module : modules) {
-                if (module.getName().equals(ConstUtils.MODULE_MAP.get(moduleName))) {
-                    logger.info("module:{} alread load in redis!", moduleName);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     // 自动下载so
     public void checkAndDownloadModule(String ip, String check_command, String download_command) {
         try {
@@ -2992,41 +3106,110 @@ public class RedisCenterImpl implements RedisCenter {
         }
     }
 
-    public boolean checkAndLoadModule(long appId, String masterHost, int masterPort, String slaveHost, int slavePort) {
-
-        Jedis jedis = null;
-        Jedis currentJedis = null;
-        try {
-            //原redis实例
-            jedis = getJedis(appId, masterHost, masterPort);
-            //变更redis实例
-            currentJedis = getJedis(appId, slaveHost, slavePort);
-            List<Module> modules = jedis.moduleList();
-            // 未load module
-            if (!CollectionUtils.isEmpty(modules)) {
-                for (Module module : modules) {
-                    String moduleFileName = MapUtils.getString(ConstUtils.MODULE_MAP, module.getName());
-                    if (!StringUtils.isEmpty(moduleFileName)) {
+    public boolean checkAndLoadModule(long appId, String ip, int port) {
+        List<ModuleVersion> moduleList = appService.getAppToModuleList(appId);
+        if(CollectionUtils.isNotEmpty(moduleList)){
+            this.checkAndDownloadModule(ip, moduleList);
+            Jedis currentJedis = null;
+            try {
+                //变更redis实例
+                currentJedis = getJedis(appId, ip, port);
+                // 未load module
+                if (!CollectionUtils.isEmpty(moduleList)) {
+                    for (ModuleVersion moduleVersion : moduleList) {
+                        List<String> moduleLoadConfigList = this.getModuleLoadConfig(appId, moduleVersion.getId());
+                        List<String> moduleConfigList = new ArrayList<>();
+                        String soPath = moduleVersion.getSoPath();
+                        String moduleName = soPath.substring(soPath.lastIndexOf("/") + 1);
                         // 装载redis插件
-                        String modulePath = String.format("%s%s", ConstUtils.MODULE_BASE_PATH, moduleFileName);
-                        String result = currentJedis.moduleLoad(modulePath);
-                        logger.info(" {}:{} load module path:{} result:{}", slaveHost, slavePort, modulePath, result);
+                        String modulePath = String.format("%s%s", ConstUtils.MODULE_BASE_PATH, moduleName);
+                        moduleConfigList.addAll(moduleLoadConfigList);
+                        moduleConfigList.add(0, Protocol.Keyword.LOAD.name());
+                        moduleConfigList.add(1, modulePath);
+                        Object result = currentJedis.sendCommand(Protocol.Command.MODULE, moduleConfigList.toArray(new String[moduleConfigList.size()]));
+                        logger.info(" {}:{} load module path:{} result:{}", ip, port, modulePath, result);
                         // 写配置文件
-                        refreshConfig(appId, slaveHost, slavePort, modulePath);
+                        if(CollectionUtils.isNotEmpty(moduleLoadConfigList)){
+                            String loadConfigStr = moduleLoadConfigList.stream().collect(Collectors.joining(" "));
+                            modulePath = modulePath + " " + loadConfigStr;
+                        }
+                        refreshConfig(appId, ip, port, modulePath);
                     }
                 }
+            } catch (Exception e) {
+                logger.error(" {}:{} load module error , message:{}", ip, port, e.getMessage(), e);
+                return false;
+            } finally {
+                if (currentJedis != null) {
+                    currentJedis.close();
+                }
             }
-        } catch (Exception e) {
-            logger.error(" {}:{} load module error , message:{}", slaveHost, slaveHost, e.getMessage(), e);
-        } finally {
-            if (jedis != null) {
-                jedis.close();
-            }
-            if (currentJedis != null) {
-                currentJedis.close();
-            }
+
         }
         return true;
+    }
+
+    /**
+     * 获取模块默认配置并返回 配置文件中的模块格式
+     * @param appId
+     * @param moduleList
+     * @return
+     */
+    @Override
+    public List<String> getLoadModuleDefaultConfig(long appId, List<ModuleVersion> moduleList) {
+        List<String> defaultConfigList = new ArrayList<>();
+        if(CollectionUtils.isNotEmpty(moduleList)){
+            moduleList = appService.getAppToModuleList(appId);
+        }
+        if(CollectionUtils.isNotEmpty(moduleList)){
+            try {
+                //变更redis实例
+                // 未load module
+                if (!CollectionUtils.isEmpty(moduleList)) {
+                    for (ModuleVersion moduleVersion : moduleList) {
+                        List<String> moduleConfigList = this.getModuleLoadConfig(appId, moduleVersion.getId());
+                        String soPath = moduleVersion.getSoPath();
+                        String moduleName = soPath.substring(soPath.lastIndexOf("/") + 1);
+                        // 装载redis插件
+                        String modulePath = String.format("%s%s", ConstUtils.MODULE_BASE_PATH, moduleName);
+                        logger.info(" {} get load module path:{} default config", appId, modulePath);
+                        // 写配置文件
+                        if(CollectionUtils.isNotEmpty(moduleConfigList)){
+                            String loadConfigStr = moduleConfigList.stream().collect(Collectors.joining(" "));
+                            modulePath = modulePath + " " + loadConfigStr;
+                        }
+                        String moduleConfig = String.format("loadmodule %s", modulePath);
+                        defaultConfigList.add(moduleConfig);
+                    }
+                }
+            } catch (Exception e) {
+                logger.error(" {} get load module default config error , message:{}", appId, e.getMessage(), e);
+            }
+        }
+        return defaultConfigList;
+    }
+
+    private List<String> getModuleLoadConfig(Long appId, Integer versionId){
+        List<String> configList = new ArrayList<>();
+        List<RedisModuleConfig> moduleConfigs = redisModuleConfigDao.getModuleConfigByVersionId(versionId);
+        if(CollectionUtils.isNotEmpty(moduleConfigs)){
+            Map<String, String> loadConfigMap = moduleConfigs.stream().filter(moduleConfig -> moduleConfig.getConfigType() == 1)
+                    .collect(Collectors.toMap(moduleConfig -> moduleConfig.getConfigKey(), moduleConfig -> moduleConfig.getConfigValue()));
+            if(loadConfigMap != null && loadConfigMap.size() > 0){
+                AppDesc appDesc = appDao.getAppDescById(appId);
+                Set<Entry<String, String>> entries = loadConfigMap.entrySet();
+                entries.stream().filter(entry -> (entry.getValue() != null && entry.getValue().contains("${password}")))
+                        .forEach(entry -> entry.setValue(appDesc.getAppPassword()));
+                entries.forEach(entry -> {
+                    configList.add(entry.getKey());
+                    if(entry.getValue() == null){
+                        entry.setValue("");
+                    }
+                    configList.add(entry.getValue());
+                });
+            }
+        }
+        return configList;
     }
 
     public Map unloadModule(long appId, String moduleName) {

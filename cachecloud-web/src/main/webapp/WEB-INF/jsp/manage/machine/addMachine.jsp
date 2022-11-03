@@ -102,6 +102,22 @@
 
                                 <div class="form-group">
                                     <label class="control-label col-md-3">
+                                        操作系统:
+                                    </label>
+                                    <div class="col-md-5">
+                                        <select name="disType" id="disType${machine.info.id}" class="form-control select2_category">
+                                            <option value="0" <c:if test="${machine.info.disType == 0}">selected="selected"</c:if>>
+                                                centos
+                                            </option>
+                                            <option value="1" <c:if test="${machine.info.disType == 1}">selected="selected"</c:if>>
+                                                ubuntu
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="control-label col-md-3">
                                         宿主机ip:
                                     </label>
                                     <div class="col-md-5">

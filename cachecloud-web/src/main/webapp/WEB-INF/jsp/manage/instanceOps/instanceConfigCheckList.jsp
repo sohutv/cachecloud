@@ -9,7 +9,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>CacheCloud应用运维</title>
+    <title>CacheCloud实例运维</title>
     <jsp:include page="/WEB-INF/include/head.jsp"/>
     <script type="text/javascript" src="/resources/js/jquery-console.js"></script>
 

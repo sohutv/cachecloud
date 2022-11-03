@@ -30,6 +30,7 @@ function saveOrUpdateMachine(machineId) {
     var cpu = document.getElementById("cpu" + machineId);
     var disk = document.getElementById("disk" + machineId);
     var virtual = document.getElementById("virtual" + machineId);
+    var disType = document.getElementById("disType" + machineId);
     var realIp = document.getElementById("realIp" + machineId);
     var machineType = document.getElementById("machineType" + machineId);
     var useType = document.getElementById("useType1" + machineId);
@@ -81,6 +82,7 @@ function saveOrUpdateMachine(machineId) {
             cpu: cpu.value,
             disk: disk.value,
             virtual: virtual.value,
+            disType: disType.value,
             realIp: realIp.value,
             id: machineId,
             machineType: machineType.value,

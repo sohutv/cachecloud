@@ -7,6 +7,7 @@ import com.sohu.cache.web.vo.RedisSlowLog;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisSentinelPool;
+import redis.clients.jedis.commands.ProtocolCommand;
 
 import java.util.Date;
 import java.util.List;
@@ -239,14 +240,42 @@ public interface RedisCenter {
      */
     public String executeCommand(long appId, String host, int port, String command);
 
+    /**
+     * 执行redis命令，无白名单限制，仅供管理员使用
+     * @param appDesc
+     * @param command
+     * @param args
+     * @return
+     */
+    Object executeAdminCommand(AppDesc appDesc, ProtocolCommand command, String... args);
+
+
+        /**
+         * 实例执行redis命令，无白名单限制，仅供管理员使用
+         * @param appId
+         * @param host
+         * @param port
+         * @param command
+         * @param timeout
+         * @return
+         */
     String executeAdminCommand(long appId, String host, int port, String command,Integer timeout);
 
     /**
-     * 获取jedisSentinelPool实例,必须是sentinel类型应用
-     *
-     * @param appDesc
+     * 执行redis命令， 无黑白名单限制，仅供管理员使用
+     * @param jedis
+     * @param command
+     * @param args
      * @return
      */
+    Object executeAdminRedisCommandByJedis(Jedis jedis, ProtocolCommand command, String... args);
+
+        /**
+         * 获取jedisSentinelPool实例,必须是sentinel类型应用
+         *
+         * @param appDesc
+         * @return
+         */
     public JedisSentinelPool getJedisSentinelPool(AppDesc appDesc);
 
     /**
@@ -487,14 +516,18 @@ public interface RedisCenter {
      */
     public List<InstanceInfo> checkInstanceModule(long appId);
 
-    public Map loadModule(long appId, String moduleName);
-
     public Map loadModule(long appId, int versionId);
+
+    //获取模块默认配置并返回 配置文件中的模块格式
+    List<String> getLoadModuleDefaultConfig(long appId, List<ModuleVersion> moduleList);
 
     public Map unloadModule(long appId, String moduleName);
 
+    // 校验是否存在并自动下载so
+    void checkAndDownloadModule(String ip, List<ModuleVersion> moduleList);
+
     /**
-     * 检查主从节点是否有redis插件
+     * 检查是否有redis插件
      */
-    public boolean checkAndLoadModule(long appId, String host, int port, String currentHost, int currentPort);
+    public boolean checkAndLoadModule(long appId, String host, int port);
 }

@@ -129,8 +129,8 @@
                     <%--<button type="button" class="btn btn-small btn-warning" data-target="#unloadModuleModal"--%>
                     <%--data-toggle="modal">卸载模块</button>--%>
                 </h4>
-                <label class="label label-success">bf</label>：布隆过滤器模块
-                <label class="label label-success">search</label>：redis-search模块
+                <%--<label class="label label-success">bf</label>：布隆过滤器模块
+                <label class="label label-success">search</label>：redis-search模块--%>
                 <tbody>
                     <c:forEach items="${instanceList}" var="instance">
                         <c:if test="${instance.status!=2}">
@@ -144,7 +144,7 @@
                                 <td>${instance.roleDesc}</td>
                                 <td>
                                     <c:forEach items="${instance.modules}" var="module">
-                                        <label class="label label-success">${module.name}</label>
+                                        <label class="label label-success">${module.name}-${module.version}</label>
                                     </c:forEach>
                                 </td>
                                  <td>

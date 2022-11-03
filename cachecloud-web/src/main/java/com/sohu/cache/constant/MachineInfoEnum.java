@@ -81,6 +81,50 @@ public class MachineInfoEnum {
 
     }
 
+    /**
+     * 机器发现操作系统类型
+     *
+     * @author zengyizhao
+     * @Date 2022年9月5日
+     * @Time 下午4:26:58
+     */
+    public static enum DisTypeEnum {
+        CENTOS(0, "centos"),
+        UBUNTU(1, "ubuntu");
+
+        private int type;
+
+        private String info;
+
+        private static Map<Integer, DisTypeEnum> MAP = new HashMap<>();
+
+        static {
+            for (DisTypeEnum typeEnum : DisTypeEnum.values()) {
+                MAP.put(typeEnum.getType(), typeEnum);
+            }
+        }
+
+        public static DisTypeEnum getByType(int type) {
+            return MAP.get(type);
+        }
+
+        private DisTypeEnum(int type, String info) {
+            this.type = type;
+            this.info = info;
+        }
+
+        public int getType() {
+            return type;
+        }
+
+        public String getInfo() {
+            return info;
+        }
+
+
+    }
+
+
     public static enum MachineEnum {
         HOST("host"),
         CONTAINER("container");

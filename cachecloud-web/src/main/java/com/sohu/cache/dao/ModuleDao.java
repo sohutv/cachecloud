@@ -2,6 +2,7 @@ package com.sohu.cache.dao;
 
 import com.sohu.cache.entity.ModuleInfo;
 import com.sohu.cache.entity.ModuleVersion;
+import com.sohu.cache.web.vo.ModuleVersionDetailVo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -21,4 +22,9 @@ public interface ModuleDao {
     public void saveOrUpdate(ModuleInfo moduleInfo);
 
     public void saveOrUpdateVersion(ModuleVersion moduleVersion);
+
+    public ModuleVersionDetailVo getModuleVersionDetail(@Param("soName") String soName);
+
+    public ModuleVersionDetailVo getModuleDetail(@Param("versionId") int versionId);
+
 }

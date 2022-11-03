@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sohu.cache.dao.AppToModuleDao">
+    <sql id="app_to_module_column">
+    	id,app_id,module_id,module_version_id
+    </sql>
+
+    <sql id="app_to_module_save_column">
+    	app_id,module_id,module_version_id
+    </sql>
+    
+    <insert id="save" parameterType="com.sohu.cache.entity.AppToModule">
+    	insert into app_to_module
+    		(<include refid="app_to_module_save_column"/>)
+		values
+			(#{appId},#{moduleId},#{moduleVersionId})
+    </insert>
+
+    <insert id="saveAll">
+        insert into app_to_module
+        (<include refid="app_to_module_save_column"/>)
+        values
+        <foreach collection="list" item="appToModule" separator=",">
+            (#{appToModule.appId},#{appToModule.moduleId},#{appToModule.moduleVersionId})
+        </foreach>
+    </insert>
+
+    <!-- 获取用户的app -->
+    <select id="getByAppId" resultType="com.sohu.cache.entity.AppToModule" parameterType="long">
+    	select           
+        	<include refid="app_to_module_column"/>
+        from app_to_module where app_id=#{appId}
+    </select>
+
+    <delete id="deleteByAppIdAndModuleVersionId">
+        delete from app_to_module where app_id=#{appId} and module_version_id=#{moduleVersonId}
+    </delete>
+
+</mapper>
+
+

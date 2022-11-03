@@ -112,6 +112,14 @@ public class MachineInfo {
     @ApiModelProperty(hidden = true)
     private int type;
 
+
+    /**
+     * 机器类型：详见MachineInfoEnum.DisTypeEnum
+     */
+    @ApiModelProperty(hidden = true)
+    private int disType;
+
+
     /**
      * groupId
      */

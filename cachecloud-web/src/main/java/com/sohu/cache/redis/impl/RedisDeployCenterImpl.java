@@ -290,6 +290,133 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         return true;
     }
 
+    public boolean startClusterMaster(final long appId, Map<Jedis, Jedis> clusterMap) {
+        final Jedis jedis = new ArrayList<Jedis>(clusterMap.keySet()).get(0);
+        //meet集群节点
+        for (final Map.Entry<Jedis, Jedis> entry : clusterMap.entrySet()) {
+            final Jedis master = entry.getKey();
+            boolean isMeet = new IdempotentConfirmer() {
+
+                @Override
+                public boolean execute() {
+                    boolean isMeet = clusterMeet(jedis, appId, master.getClient().getHost(),
+                            master.getClient().getPort());
+                    if (!isMeet) {
+                        return false;
+                    }
+                    return true;
+                }
+            }.run();
+            if (!isMeet) {
+                return false;
+            }
+        }
+        int masterSize = clusterMap.size();
+        int perSize = (int) Math.ceil(16384 * 1.0D / masterSize);
+        int index = 0;
+        int masterIndex = 0;
+        final ArrayList<Integer> slots = new ArrayList<Integer>();
+        List<Jedis> masters = new ArrayList<Jedis>(clusterMap.keySet());
+        //分配slot
+        for (int slot = 0; slot <= 16383; slot++) {
+            slots.add(slot);
+            if (index++ >= perSize || slot == 16383) {
+                final int[] slotArr = new int[slots.size()];
+                for (int i = 0; i < slotArr.length; i++) {
+                    slotArr[i] = slots.get(i);
+                }
+                final Jedis masterJedis = masters.get(masterIndex++);
+                boolean isSlot = new IdempotentConfirmer() {
+                    @Override
+                    public boolean execute() {
+                        String response = masterJedis.clusterAddSlots(slotArr);
+                        boolean isSlot = response != null && response.equalsIgnoreCase("OK");
+                        if (!isSlot) {
+                            return false;
+                        }
+                        return true;
+                    }
+                }.run();
+                if (!isSlot) {
+                    logger.error("{}:{} set slots:{}", masterJedis.getClient().getHost(),
+                            masterJedis.getClient().getPort(), slots);
+                    return false;
+                }
+                slots.clear();
+                index = 0;
+            }
+        }
+        return true;
+    }
+
+    public boolean startClusterSlave(final long appId, Map<Jedis, Jedis> clusterMap) {
+        final Jedis jedis = new ArrayList<Jedis>(clusterMap.keySet()).get(0);
+        //meet集群节点
+        for (final Map.Entry<Jedis, Jedis> entry : clusterMap.entrySet()) {
+            final Jedis slave = entry.getValue();
+            if (slave != null) {
+                boolean isMeet = new IdempotentConfirmer() {
+                    @Override
+                    public boolean execute() {
+                        boolean isMeet = clusterMeet(jedis, appId, slave.getClient().getHost(),
+                                slave.getClient().getPort());
+                        if (!isMeet) {
+                            return false;
+                        }
+                        return true;
+                    }
+                }.run();
+                if (!isMeet) {
+                    return false;
+                }
+            }
+        }
+        //设置从节点
+        for (Map.Entry<Jedis, Jedis> entry : clusterMap.entrySet()) {
+            final Jedis masterJedis = entry.getKey();
+            final Jedis slaveJedis = entry.getValue();
+            if (slaveJedis == null) {
+                continue;
+            }
+            final String nodeId = getClusterNodeId(masterJedis);
+            boolean isReplicate = new IdempotentConfirmer() {
+                @Override
+                public boolean execute() {
+                    try {
+                        //等待广播节点
+                        TimeUnit.SECONDS.sleep(2);
+                    } catch (Exception e) {
+                        logger.error(e.getMessage(), e);
+                    }
+                    String response = null;
+                    try {
+                        response = slaveJedis.clusterReplicate(nodeId);
+                    } catch (Exception e) {
+                        logger.error(e.getMessage(), e);
+                    }
+                    boolean isReplicate = response != null && response.equalsIgnoreCase("OK");
+                    if (!isReplicate) {
+                        try {
+                            //等待广播节点
+                            TimeUnit.SECONDS.sleep(2);
+                        } catch (Exception e) {
+                            logger.error(e.getMessage(), e);
+                        }
+                        return false;
+                    }
+                    return true;
+                }
+            }.run();
+
+            if (!isReplicate) {
+                logger.error("{}:{} set replicate:{}", slaveJedis.getClient().getHost(),
+                        slaveJedis.getClient().getPort(), isReplicate);
+                return false;
+            }
+        }
+        return true;
+    }
+
     private String getClusterNodeId(Jedis jedis) {
         try {
             String infoOutput = jedis.clusterNodes();
@@ -428,6 +555,10 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
     }
 
     private boolean runInstance(AppDesc appDesc, String host, Integer port, int maxMemory, boolean isCluster) {
+        return this.runInstanceWithDefaultConfig(appDesc, host, port, maxMemory, isCluster, null);
+    }
+
+    private boolean runInstanceWithDefaultConfig(AppDesc appDesc, String host, Integer port, int maxMemory, boolean isCluster, List<String> defautlConfigs) {
         long appId = appDesc.getAppId();
         String password = appDesc.getAppPassword();
         // 获取redis路径
@@ -459,6 +590,11 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
             runShell = getRedisRunShell(false, host, port, redisDir);
             fileName = RedisProtocol.getConfig(port, false);
         }
+
+        if(CollectionUtils.isNotEmpty(defautlConfigs)){
+            configs.addAll(defautlConfigs);
+        }
+
         String pathFile = machineCenter.createRemoteFile(host, fileName, configs);
         if (StringUtils.isBlank(pathFile)) {
             logger.error("createFile={} error", pathFile);
@@ -984,11 +1120,20 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
             logger.error("host={} getAvailablePort is null", slaveHost);
             return false;
         }
+
+        //检查插件安装情况
+        List<ModuleVersion> moduleList = appService.getAppToModuleList(appId);
+        List<String> defaultConfigs = new ArrayList<>();
+        if(CollectionUtils.isNotEmpty(moduleList)) {
+            redisCenter.checkAndDownloadModule(slaveHost, moduleList);
+            defaultConfigs = redisCenter.getLoadModuleDefaultConfig(appId, moduleList);
+        }
+
         boolean isRun;
         if (TypeUtil.isRedisCluster(type)) {
-            isRun = runInstance(appDesc, slaveHost, slavePort, instanceInfo.getMem(), true);
+            isRun = runInstanceWithDefaultConfig(appDesc, slaveHost, slavePort, instanceInfo.getMem(), true, defaultConfigs);
         } else {
-            isRun = runInstance(appDesc, slaveHost, slavePort, instanceInfo.getMem(), false);
+            isRun = runInstanceWithDefaultConfig(appDesc, slaveHost, slavePort, instanceInfo.getMem(), false, defaultConfigs);
         }
 
         if (!isRun) {
@@ -1009,6 +1154,9 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
                     .getJedis(appId, slaveHost, slavePort, Protocol.DEFAULT_TIMEOUT, Protocol.DEFAULT_TIMEOUT);
             try {
 
+//                // 检查主节点是否有加载redis插件
+//                redisCenter.checkAndLoadModule(appId, slaveHost, slavePort);
+
                 boolean isClusterMeet = clusterMeet(masterJedis, appId, slaveHost, slavePort);
                 if (!isClusterMeet) {
                     logger.error("{}:{} cluster is failed", slaveHost, slaveHost);
@@ -1019,9 +1167,6 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
                     logger.error("{}:{} getNodeId failed", masterHost, masterPort);
                     return false;
                 }
-
-                // 检查主节点是否有加载redis插件
-                redisCenter.checkAndLoadModule(appId, masterHost, masterPort, slaveHost, slavePort);
 
                 boolean isClusterReplicate = new IdempotentConfirmer() {
                     @Override
@@ -1788,8 +1933,8 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
                            final int slavePort) {
         final Jedis slave = redisCenter.getJedis(appId, slaveHost, slavePort, Protocol.DEFAULT_TIMEOUT * 3, Protocol.DEFAULT_TIMEOUT * 3);
         try {
-            // 检查主节点是否有加载redis插件
-            redisCenter.checkAndLoadModule(appId, masterHost, masterPort, slaveHost, slavePort);
+//            // 检查主节点是否有加载redis插件
+//            redisCenter.checkAndLoadModule(appId, slaveHost, slavePort);
 
             boolean isSlave = new IdempotentConfirmer() {
                 @Override

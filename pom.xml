@@ -49,6 +49,7 @@
         <cachecloud-cloud.version>1.0-SNAPSHOT</cachecloud-cloud.version>
         <springfox-swagger2.version>2.9.2</springfox-swagger2.version>
         <swagger-ui.version>2.9.2</swagger-ui.version>
+        <apache.ant.version>1.10.11</apache.ant.version>
     </properties>
 
     <dependencyManagement>
@@ -218,6 +219,12 @@
                 <groupId>io.springfox</groupId>
                 <artifactId>springfox-swagger-ui</artifactId>
                 <version>${swagger-ui.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.ant</groupId>
+                <artifactId>ant</artifactId>
+                <version>${apache.ant.version}</version>
             </dependency>
 
         </dependencies>

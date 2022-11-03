@@ -18,6 +18,7 @@ import com.sohu.cache.web.enums.SuccessEnum;
 import com.sohu.cache.web.enums.UseTypeEnum;
 import com.sohu.cache.web.service.AppService;
 import com.sohu.cache.web.vo.AppDetailVO;
+import com.sohu.cache.web.vo.ModuleVersionDetailVo;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
@@ -67,6 +68,15 @@ public class AppServiceImpl implements AppService {
      */
     @Autowired
     private AppToUserDao appToUserDao;
+
+    /**
+     * 应用模块关系相关dao
+     */
+    @Autowired
+    private AppToModuleDao appToModuleDao;
+
+    @Autowired
+    ModuleDao moduleDao;
 
     /**
      * 应用申请相关dao
@@ -192,6 +202,61 @@ public class AppServiceImpl implements AppService {
         }
     }
 
+    /**
+     * 保存应用与模块关系
+     *
+     * @param appToModuleList
+     * @return
+     */
+    @Override
+    public int saveAppToModule(List<AppToModule> appToModuleList){
+        int result = 0;
+        if(CollectionUtils.isNotEmpty(appToModuleList)){
+            appToModuleDao.saveAll(appToModuleList);
+        }
+        return result;
+    }
+
+    /**
+     * 获取应用安装模块信息
+     *
+     * @param appId
+     * @return
+     */
+    public List<ModuleVersion> getAppToModuleList(Long appId){
+        List<ModuleVersion> moduleVersions = new ArrayList<>();
+        List<AppToModule> appToModules = appToModuleDao.getByAppId(appId);
+        appToModules.forEach(appToModule -> moduleVersions.add(moduleDao.getVersion(appToModule.getModuleVersionId())));
+        return moduleVersions;
+    }
+
+    /**
+     * 获取应用是否安装模块
+     *
+     * @param appId
+     * @return
+     */
+    public boolean isInstallModule(Long appId){
+        List<AppToModule> appToModules = appToModuleDao.getByAppId(appId);
+        if(CollectionUtils.isEmpty(appToModules)){
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 获取应用安装模块详细信息
+     *
+     * @param appId
+     * @return
+     */
+    public List<ModuleVersionDetailVo> getAppModuleList(Long appId){
+        List<ModuleVersionDetailVo> moduleInfos = new ArrayList<>();
+        List<AppToModule> appToModules = appToModuleDao.getByAppId(appId);
+        appToModules.forEach(appToModule -> moduleInfos.add(moduleDao.getModuleDetail(appToModule.getModuleVersionId())));
+        return moduleInfos;
+    }
+
     @Override
     public void updateAppAuditStatus(Long id, Long appId, Integer status, AppUser appUser) {
         appAuditDao.updateAppAuditUser(id, status, appUser.getId());
@@ -302,6 +367,7 @@ public class AppServiceImpl implements AppService {
                         if (type == ConstUtils.CACHE_REDIS_STANDALONE || type == ConstUtils.CACHE_TYPE_REDIS_CLUSTER) {
                             jedis = redisCenter.getJedis(appId, host, port);
                             List<Module> modules = jedis.moduleList();
+                            modules = modules.stream().sorted(Comparator.comparing(Module::getName)).collect(Collectors.toList());
                             instanceInfo.setModules(modules);
                         }
                     }catch (JedisDataException e){

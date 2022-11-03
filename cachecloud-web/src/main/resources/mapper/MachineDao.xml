@@ -3,7 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sohu.cache.dao.MachineDao">
     <sql id="machine_info_columns">
-        ssh_user,ssh_passwd,ip,room,mem,cpu,`virtual`,real_ip,service_time,fault_count,warn,available,type,groupId,extra_desc,collect,version_install,use_type,k8s_type,rack,disk
+        ssh_user,ssh_passwd,ip,room,mem,cpu,`virtual`,real_ip,service_time,fault_count,warn,available,type,groupId,extra_desc,collect,version_install,use_type,k8s_type,rack,disk,dis_type
     </sql>
 
     <sql id="machine_men_stat_info_columns">
@@ -12,7 +12,7 @@
 
     <sql id="machine_info_fields">
         #{sshUser},#{sshPasswd},#{ip},#{room},#{mem},#{cpu},#{virtual},#{realIp},#{serviceTime},
-        #{faultCount},#{warn},#{available},#{type},#{groupId},#{extraDesc},#{collect},#{versionInstall},#{useType},#{k8sType},#{rack},#{disk}
+        #{faultCount},#{warn},#{available},#{type},#{groupId},#{extraDesc},#{collect},#{versionInstall},#{useType},#{k8sType},#{rack},#{disk},#{disType}
     </sql>
 
     <!--返回所有可用的机器资源-->
@@ -154,7 +154,7 @@
         update ssh_user=#{sshUser},ssh_passwd=#{sshPasswd},room=#{room},mem=#{mem},cpu=#{cpu},disk=#{disk},
         `virtual`=#{virtual},real_ip=#{realIp},service_time=#{serviceTime},fault_count=#{faultCount},
         warn=#{warn},available=#{available},type=#{type},groupId=#{groupId},extra_desc=#{extraDesc},collect=#{collect},version_install=#{versionInstall},
-        use_type=#{useType},k8s_type=#{k8sType},rack=#{rack}
+        use_type=#{useType},k8s_type=#{k8sType},rack=#{rack},dis_type=#{disType}
     </insert>
 
     <!--根据ip删除一台机器的信息:置无效-->

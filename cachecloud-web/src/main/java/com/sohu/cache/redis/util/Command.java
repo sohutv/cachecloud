@@ -33,4 +33,41 @@ public enum Command implements ProtocolCommand {
     public byte[] getRaw() {
       return raw;
     }
+
+
+
+    public enum SearchCommand implements ProtocolCommand {
+
+        CREATE("FT.CREATE"),
+        ALTER("FT.ALTER"),
+        INFO("FT.INFO"),
+        SEARCH("FT.SEARCH"),
+        EXPLAIN("FT.EXPLAIN"),
+        EXPLAINCLI("FT.EXPLAINCLI"),
+        AGGREGATE("FT.AGGREGATE"),
+        CURSOR("FT.CURSOR"),
+        CONFIG("FT.CONFIG"),
+        ALIASADD("FT.ALIASADD"),
+        ALIASUPDATE("FT.ALIASUPDATE"),
+        ALIASDEL("FT.ALIASDEL"),
+        SYNUPDATE("FT.SYNUPDATE"),
+        SYNDUMP("FT.SYNDUMP"),
+        SUGADD("FT.SUGADD"),
+        SUGGET("FT.SUGGET"),
+        SUGDEL("FT.SUGDEL"),
+        SUGLEN("FT.SUGLEN"),
+        DROPINDEX("FT.DROPINDEX"),
+        LIST("FT._LIST");
+
+        private final byte[] raw;
+
+        private SearchCommand(String alt) {
+            raw = SafeEncoder.encode(alt);
+        }
+
+        @Override
+        public byte[] getRaw() {
+            return raw;
+        }
+    }
   }

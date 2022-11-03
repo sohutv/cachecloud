@@ -3,6 +3,8 @@ package com.sohu.cache.web.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
+import com.sohu.cache.async.AsyncThreadPoolFactory;
+import com.sohu.cache.async.KeyCallable;
 import com.sohu.cache.constant.*;
 import com.sohu.cache.dao.AppUserDao;
 import com.sohu.cache.entity.*;
@@ -10,6 +12,7 @@ import com.sohu.cache.machine.MachineCenter;
 import com.sohu.cache.redis.enums.InstanceAlertCheckCycleEnum;
 import com.sohu.cache.redis.enums.InstanceAlertCompareTypeEnum;
 import com.sohu.cache.redis.enums.InstanceAlertTypeEnum;
+import com.sohu.cache.redis.util.Command;
 import com.sohu.cache.stats.app.AppDailyDataCenter;
 import com.sohu.cache.stats.app.AppDeployCenter;
 import com.sohu.cache.stats.app.AppStatsCenter;
@@ -28,6 +31,7 @@ import com.sohu.cache.web.util.AppEmailUtil;
 import com.sohu.cache.web.util.DateUtil;
 import com.sohu.cache.web.util.Page;
 import com.sohu.cache.web.vo.AppDetailVO;
+import com.sohu.cache.web.vo.ModuleVersionDetailVo;
 import net.sf.json.JSONArray;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -39,9 +43,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
+import redis.clients.jedis.util.SafeEncoder;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -51,6 +57,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -169,6 +177,11 @@ public class AppController extends BaseController {
         }
 
         int conditionInt = StringUtils.isEmpty(condition) ? 0 : Integer.parseInt(condition);
+
+        //查询是否安装有模块
+        boolean installModule = appService.isInstallModule(appId);
+        model.addAttribute("installModuleFlag", installModule);
+
         model.addAttribute("condition", conditionInt);
 
         model.addAttribute("startDate", startDateParam);
@@ -289,6 +302,12 @@ public class AppController extends BaseController {
     @RequestMapping("/topology")
     public ModelAndView statTopology(HttpServletRequest request,
                                      HttpServletResponse response, Long appId, Model model) {
+        AppUser userInfo = this.getUserInfo(request);
+        int isAdmin = 0;
+        if(userInfo.getType() == AppUserTypeEnum.ADMIN_USER.value()){
+            isAdmin = 1;
+        }
+        model.addAttribute("isAdmin", isAdmin);
         //应用信息
         AppDesc appDesc = appService.getByAppId(appId);
         model.addAttribute("appDesc", appDesc);
@@ -731,7 +750,7 @@ public class AppController extends BaseController {
      */
     @RequestMapping("/appInstanceExpiredEvictedKeysStat")
     public ModelAndView appInstanceExpiredEvictedKeysStat(HttpServletRequest request, Model model,
-                                                    Long appId) throws ParseException {
+                                                          Long appId) throws ParseException {
         // 应用基本信息
         AppDesc appDesc = appService.getByAppId(appId);
         model.addAttribute("appDesc", appDesc);
@@ -747,7 +766,7 @@ public class AppController extends BaseController {
      */
     @RequestMapping("/getAppInstancesExpiredEvictedKeysStat")
     public void getAppInstancesExpiredEvictedKeysStat(HttpServletRequest request, HttpServletResponse response, Model model,
-                                                Long appId) throws ParseException {
+                                                      Long appId) throws ParseException {
         //时间转换
         TimeBetween timeBetween = getJsonTimeBetween(request);
 
@@ -1255,10 +1274,9 @@ public class AppController extends BaseController {
                                              Long appId, String nodeInfos, int jobType, String reason, String param) {
         try {
             AppUser appUser = getUserInfo(request);
-            AppDesc appDesc = appService.getByAppId(appId);
 
             AppAudit appAudit = new AppAudit();
-            appAudit.setAppId(appDesc.getAppId());
+            appAudit.setAppId(appId == null ? -1 : appId);
             appAudit.setUserId(appUser.getId());
             appAudit.setUserName(appUser.getName());
             appAudit.setModifyTime(new Date());
@@ -1408,6 +1426,133 @@ public class AppController extends BaseController {
             model.addAttribute("appId", appId);
         }
         return new ModelAndView("app/appCommand");
+    }
+
+    /**
+     * 应用模块查询
+     *
+     * @param appId
+     * @return
+     */
+    @RequestMapping("/module")
+    public ModelAndView module(HttpServletRequest request, HttpServletResponse response, Model model, Long appId) {
+        if (appId != null && appId > 0) {
+            List<ModuleVersionDetailVo> moduleList = appService.getAppModuleList(appId);
+            model.addAttribute("moduleList", moduleList);
+            model.addAttribute("appId", appId);
+
+            List<String> indexList = new ArrayList<>();
+            Optional<ModuleVersionDetailVo> redisearchModule = moduleList.stream().filter(moduleVersionDetailVo -> moduleVersionDetailVo.getName().toLowerCase().contains("redisearch")).findFirst();
+            if(redisearchModule.isPresent()){
+                AppDesc appDesc = appService.getByAppId(appId);
+                //执行ft._list, 获取索引信息
+                List<byte[]> indexListResult = (List<byte[]>) redisCenter.executeAdminCommand(appDesc, Command.SearchCommand.LIST);
+                indexListResult.stream().forEach(index -> indexList.add(SafeEncoder.encode((byte[]) index)));
+                model.addAttribute("indexList", indexList);
+            }
+        }
+        return new ModelAndView("app/appModule");
+    }
+
+    /**
+     * 应用模块redisearch 索引查询
+     *
+     * @param appId
+     * @return
+     */
+    @GetMapping("/module/redisearch/list")
+    public ModelAndView moduleRedisearchList(HttpServletRequest request, HttpServletResponse response, Model model, Long appId) {
+        List<String> indexList = new ArrayList<>();
+        if (appId != null && appId > 0) {
+            List<ModuleVersionDetailVo> moduleList = appService.getAppModuleList(appId);
+            Optional<ModuleVersionDetailVo> redisearchModule = moduleList.stream().filter(moduleVersionDetailVo -> moduleVersionDetailVo.getName().toLowerCase().contains("redisearch")).findFirst();
+            if(redisearchModule.isPresent()){
+                AppDesc appDesc = appService.getByAppId(appId);
+                //执行ft._list, 获取索引信息
+                List<byte[]> indexListResult = (List<byte[]>) redisCenter.executeAdminCommand(appDesc, Command.SearchCommand.LIST);
+                indexListResult.stream().forEach(index -> indexList.add(SafeEncoder.encode((byte[]) index)));
+            }
+        }
+        model.addAttribute("appId", appId);
+        model.addAttribute("indexList", indexList);
+        return new ModelAndView("app/appModuleRedisearchInfo");
+    }
+
+    /**
+     * 应用模块redisearch info查询
+     *
+     * @param appId
+     * @return
+     */
+    @GetMapping("/module/redisearch/info")
+    public ModelAndView moduleRedisearchInfo(HttpServletRequest request, HttpServletResponse response, Model model, Long appId, String indexName) {
+        Map<String, Object> infoMap = new HashMap<>();
+        List<String> indexList = new ArrayList<>();
+        if (appId != null && appId > 0) {
+            List<ModuleVersionDetailVo> moduleList = appService.getAppModuleList(appId);
+            Optional<ModuleVersionDetailVo> redisearchModule = moduleList.stream().filter(moduleVersionDetailVo -> moduleVersionDetailVo.getName().toLowerCase().contains("redisearch")).findFirst();
+            if(redisearchModule.isPresent()){
+                AppDesc appDesc = appService.getByAppId(appId);
+                //执行ft._list, 获取索引信息
+                List<byte[]> indexListResult = (List<byte[]>) redisCenter.executeAdminCommand(appDesc, Command.SearchCommand.LIST);
+                indexListResult.stream().forEach(index -> indexList.add(SafeEncoder.encode((byte[]) index)));
+                if(CollectionUtils.isNotEmpty(indexList)){
+                    if(StringUtils.isBlank(indexName)){
+                        indexName = indexList.get(0);
+                    }
+                    //执行ft.info, 获取索引信息
+                    List<Object> list = (List<Object>) redisCenter.executeAdminCommand(appDesc, Command.SearchCommand.INFO, indexName);
+                    Map<String, Object> map = new HashMap<>(list.size() / 2, 1);
+                    Iterator iterator = list.iterator();
+                    while(iterator.hasNext()) {
+                        map.put(SafeEncoder.encode((byte[]) (iterator.next())), SafeEncoder.encodeObject(iterator.next()));
+                    }
+                    map.values().stream().forEach(value -> {
+                        if(value instanceof List){
+
+                        }
+                    });
+                    infoMap = map;
+                }
+            }
+        }
+        model.addAttribute("appId", appId);
+        model.addAttribute("indexName", indexName);
+        model.addAttribute("infoMap", infoMap);
+        model.addAttribute("indexList", indexList);
+        return new ModelAndView("app/appModuleRedisearchInfo");
+    }
+
+    /**
+     * 应用模块redisearch config查询
+     *
+     * @param appId
+     * @return
+     */
+    @GetMapping("/module/redisearch/config")
+    public ModelAndView moduleRedisearchConfig(HttpServletRequest request, HttpServletResponse response, Model model, Long appId) {
+        List<Map<String, Object>> configList = new ArrayList<>();
+        Map configMap = new HashMap();
+        if (appId != null && appId > 0) {
+            List<ModuleVersionDetailVo> moduleList = appService.getAppModuleList(appId);
+            Optional<ModuleVersionDetailVo> redisearchModule = moduleList.stream().filter(moduleVersionDetailVo -> moduleVersionDetailVo.getName().toLowerCase().contains("redisearch")).findFirst();
+            if(redisearchModule.isPresent()){
+                AppDesc appDesc = appService.getByAppId(appId);
+                //执行ft.config, 获取索引信息
+                List<ArrayList> list = (List<ArrayList>)redisCenter.executeAdminCommand(appDesc, Command.SearchCommand.CONFIG, new String[]{"GET", "*"});
+                list.stream().forEach(configItem -> {
+                    Map<String, Object> map = new HashMap<>(configItem.size() / 2, 1);
+                    Iterator iterator = configItem.iterator();
+                    while(iterator.hasNext()) {
+                        map.put(SafeEncoder.encode((byte[]) (iterator.next())), SafeEncoder.encodeObject(iterator.next()));
+                    }
+                    configList.add(map);
+                });
+            }
+        }
+        model.addAttribute("appId", appId);
+        model.addAttribute("configList", configList);
+        return new ModelAndView("app/appModuleRedisearchConfig");
     }
 
     /**

@@ -85,10 +85,17 @@
                   </td>
                   <td>
                     <c:forEach items="${instance.modules}" var="module">
-                        <label class="label label-success">${module.name}</label>
+                        <label class="label label-success">${module.name}-${module.version}</label>
                     </c:forEach>
                   </td>
-                  <td>${instance.roleDesc}</td>
+                  <c:choose>
+                      <c:when test="${isAdmin == 1}">
+                          <td><a target="_blank" href="/manage/instance/log?instanceId=${instance.id}&pageSize=1000">${instance.roleDesc}</a></td>
+                      </c:when>
+                      <c:otherwise>
+                        <td>${instance.roleDesc}</td>
+                      </c:otherwise>
+                  </c:choose>
                   <c:choose>
                      <c:when test="${instance.masterInstanceId >0}">
                          <td>

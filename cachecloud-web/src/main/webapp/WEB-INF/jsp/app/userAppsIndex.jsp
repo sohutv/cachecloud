@@ -35,6 +35,13 @@
             <li id="app_command" data-url="/admin/app/command?appId=${appId}">
                 <a href="?appId=${appId}&tabTag=app_command">命令执行</a>
             </li>
+
+            <c:if test="${installModuleFlag != null && installModuleFlag == true}">
+                <li id="app_module" data-url="/admin/app/module?appId=${appId}">
+                    <a href="?appId=${appId}&tabTag=app_module">模块扩展</a>
+                </li>
+            </c:if>
+
             <li id="app_demo" data-url="/wiki/access/client?entry=client">
                 <a href="?appId=${appId}&tabTag=app_demo">接入代码</a>
             </li>
@@ -63,6 +70,8 @@
             <div class="tab-pane" id="app_command_analysisTab">
             </div>
             <div class="tab-pane" id="app_commandTab">
+            </div>
+            <div class="tab-pane" id="app_moduleTab">
             </div>
             <div class="tab-pane" id="app_demoTab">
             </div>

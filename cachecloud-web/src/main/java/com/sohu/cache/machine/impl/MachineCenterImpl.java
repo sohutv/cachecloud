@@ -32,6 +32,7 @@ import com.sohu.cache.web.enums.AlertTypeEnum;
 import com.sohu.cache.web.service.AppAlertRecordService;
 import com.sohu.cache.web.vo.MachineEnv;
 import com.sohu.cache.web.vo.MachineStatsVo;
+import com.sohu.cache.web.vo.ModuleVersionDetailVo;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -93,6 +94,8 @@ public class MachineCenterImpl implements MachineCenter {
     private AppAlertRecordService appAlertRecordService;
     @Autowired
     private ReportDataComponent reportDataComponent;
+    @Autowired
+    private ModuleDao moduleDao;
 
     /**
      * 邮箱报警
@@ -952,13 +955,13 @@ public class MachineCenterImpl implements MachineCenter {
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
         List<MachineInfo> allMachines = machineDao.getAllMachines();
-        Set<String> iplist = new HashSet<String>();
+        Map<String, MachineInfo> ipMap = new HashMap<>();
         Set<String> hostlist = new HashSet<String>();
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH);
         if (!CollectionUtils.isEmpty(allMachines)) {
             for (MachineInfo machineInfo : allMachines) {
-                iplist.add(machineInfo.getIp());
+                ipMap.put(machineInfo.getIp(), machineInfo);
                 hostlist.add(machineInfo.getRealIp());
             }
         }
@@ -975,6 +978,14 @@ public class MachineCenterImpl implements MachineCenter {
                         "cat /sys/kernel/mm/transparent_hugepage/enabled;" +
                         "cat /sys/kernel/mm/transparent_hugepage/defrag;" +
                         "cat /etc/security/limits.d/*-nproc.conf | grep '*          soft    nproc'" +
+                        "";
+
+        String ubuntu_container_cmd =
+                "cat /proc/sys/vm/overcommit_memory;" +
+                        "cat /proc/sys/vm/swappiness;" +
+                        "cat /sys/kernel/mm/transparent_hugepage/enabled;" +
+                        "cat /sys/kernel/mm/transparent_hugepage/defrag;" +
+                        "cat /etc/security/limits.conf | grep '*          soft    nproc'" +
                         "";
         /**
          * 检测宿主机:
@@ -1002,8 +1013,16 @@ public class MachineCenterImpl implements MachineCenter {
         List<Map<String, Object>> machineInfo = new ArrayList<>();
         long phase1 = System.currentTimeMillis();
         if (type == MachineInfoEnum.MachineTypeEnum.CONTAINER.getValue() || type == MachineInfoEnum.MachineTypeEnum.ALL.getValue()) {
-            if (!CollectionUtils.isEmpty(iplist)) {
-                ForkJoinTask<Map<String, Map<String, Object>>> container_task = forkJoinPool.submit(() -> iplist.parallelStream().collect(Collectors.toMap(containerIp -> containerIp, containerIp -> new MachinetaskCallable(containerIp, container_cmd, sshService, MachineInfoEnum.MachineEnum.CONTAINER.getValue()).call())));
+            if (MapUtils.isNotEmpty(ipMap)) {
+                ForkJoinTask<Map<String, Map<String, Object>>> container_task = forkJoinPool.submit(() -> ipMap.entrySet().parallelStream()
+                        .collect(Collectors.toMap(ipEntry -> ipEntry.getKey(), ipEntry ->
+                        {
+                            if(ipEntry.getValue().getDisType() == MachineInfoEnum.DisTypeEnum.CENTOS.getType()){
+                                return new MachinetaskCallable(ipEntry.getKey(), container_cmd, sshService, MachineInfoEnum.MachineEnum.CONTAINER.getValue()).call();
+                            }else{
+                                return new MachinetaskCallable(ipEntry.getKey(), ubuntu_container_cmd, sshService, MachineInfoEnum.MachineEnum.CONTAINER.getValue()).call();
+                            }
+                        })));
                 try {
                     Map<String, Map<String, Object>> container_result = container_task.get(30, TimeUnit.SECONDS);
                     if (!MapUtils.isEmpty(container_result)) {
@@ -1165,7 +1184,7 @@ public class MachineCenterImpl implements MachineCenter {
 
                 String moduleBasePath = ConstUtils.MODULE_BASE_PATH;
                 String cmd = String.format("cd %s && ls -l | grep .so", moduleBasePath);
-                String cmd2 = String.format("cat /etc/redhat-release");
+                String cmd2 = String.format("lsb_release -ds");
 
                 try {
                     String ip = machineStats.getInfo().getIp();
@@ -1173,14 +1192,22 @@ public class MachineCenterImpl implements MachineCenter {
                     logger.info("ip :{} ,exe cmd :{},module info:{}", ip, cmd,   executeResult);
 
                     Map<String,Object> moduleInfo = new HashMap<String,Object>();
-                    for(String moduleName : ConstUtils.MODULE_LIST){
-                        if(!StringUtil.isBlank(executeResult)) {
-                            moduleInfo.put(moduleName, executeResult.contains(moduleName));
-                        }else{
-                            moduleInfo.put(moduleName, false);
+                    List<ModuleInfo> allModules = moduleDao.getAllModules();
+                    allModules.forEach(module -> moduleInfo.put(module.getName(), false));
+                    if(StringUtils.isNotBlank(executeResult)){
+                        String[] moduleSoFiles = executeResult.split(System.lineSeparator());
+                        for (String moduleSoFile : moduleSoFiles) {
+                            if(StringUtils.isNotBlank(moduleSoFile)){
+                                String[] moduleFileInfos = moduleSoFile.split(" ");
+                                if(moduleFileInfos != null && moduleFileInfos.length > 0){
+                                    ModuleVersionDetailVo moduleVersionDetail = moduleDao.getModuleVersionDetail(moduleFileInfos[moduleFileInfos.length - 1]);
+                                    if(moduleVersionDetail != null){
+                                        moduleInfo.put(moduleVersionDetail.getName(), true);
+                                    }
+                                }
+                            }
                         }
                     }
-
                     String version = sshService.execute(ip, cmd2);
                     machineStats.setVersionInfo(version);
                     machineStats.setModuleInfo(moduleInfo);

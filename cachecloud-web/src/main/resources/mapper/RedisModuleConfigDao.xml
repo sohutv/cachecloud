@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sohu.cache.dao.RedisModuleConfigDao">
+    <sql id="columns">
+    	config_key, config_value, info, update_time, type, status, version_id, refresh, module_id, config_type
+    </sql>
+
+    <select id="getModuleConfigByModuleId" resultType="com.sohu.cache.entity.RedisModuleConfig">
+        select id,<include refid="columns"/> from redis_module_config where module_id = #{moduleId}
+    </select>
+
+    <select id="getModuleConfigByVersionId" resultType="com.sohu.cache.entity.RedisModuleConfig">
+        select id,<include refid="columns"/> from redis_module_config where version_id = #{versionId}
+    </select>
+
+    <select id="getById" resultType="com.sohu.cache.entity.RedisModuleConfig">
+        select id,<include refid="columns"/> from redis_module_config where id = #{id}
+    </select>
+
+    <select id="getByCondition" resultType="com.sohu.cache.entity.RedisModuleConfig">
+        select id,<include refid="columns"/> from redis_module_config
+        <where>
+            <if test="configKey != null">
+                and config_key=#{configKey}
+            </if>
+            <if test="configValue != null">
+                and config_value=#{configValue}
+            </if>
+            <if test="info != null">
+                and info=#{info}
+            </if>
+            <if test="type != null and type != ''">
+                and type=#{type}
+            </if>
+            <if test="status != null">
+                and status=#{status}
+            </if>
+            <if test="versionId != null">
+                and version_id=#{versionId}
+            </if>
+            <if test="refresh != null">
+                and refresh=#{refresh}
+            </if>
+            <if test="configType != null">
+                and config_type=#{configType}
+            </if>
+        </where>
+    </select>
+    
+    <insert id="saveOrUpdate">
+		insert into redis_module_config(<include refid="columns" />)
+		values(#{configKey},#{configValue},#{info},now(),#{type},#{status},#{versionId},#{refresh},#{moduleId},#{configType})
+	    on duplicate key update
+	    config_value = #{configValue}, info = #{info}, 
+	    update_time = now(),status = #{status} ,version_id=#{versionId} ,refresh=#{refresh} ,module_id=#{moduleId} ,config_type=#{configType}
+	</insert>
+	
+	<update id="updateStatus">
+		update redis_module_config set status = #{status} where id = #{id}
+	</update>
+
+</mapper>
