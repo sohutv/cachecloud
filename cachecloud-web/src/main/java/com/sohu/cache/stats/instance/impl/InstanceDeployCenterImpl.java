@@ -113,6 +113,11 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
             logger.info("{} is install :{}", host, redisResource.getName());
             return false;
         }
+        //校验是否需要推送module
+        if(TypeUtil.isRedisDataType(type)){
+            List<ModuleVersion> appToModuleList = appService.getAppToModuleList(appId);
+            redisCenter.checkAndDownloadModule(host, appToModuleList);
+        }
         boolean isRun;
         if (TypeUtil.isRedisType(type)) {
             if (TypeUtil.isRedisSentinel(type)) {

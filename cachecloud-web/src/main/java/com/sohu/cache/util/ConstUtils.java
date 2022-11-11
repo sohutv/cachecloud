@@ -1,12 +1,8 @@
 package com.sohu.cache.util;
 
-import com.sohu.cache.web.enums.ModuleEnum;
 import com.sohu.cache.web.enums.SshAuthTypeEnum;
-import org.apache.commons.collections.map.HashedMap;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * cachecloud常量
@@ -150,18 +146,6 @@ public class ConstUtils {
      * module info
      */
     public static final String MODULE_BASE_PATH = "/opt/cachecloud/module/";
-    public static List<String> MODULE_LIST = new ArrayList<String>();
-    public static Map<String,Object> MODULE_MAP = new HashedMap();
-    static {
-        // 布隆过滤器 & redis search
-        MODULE_LIST.add(ModuleEnum.BLOOMFILTER_SO.getValue());
-        MODULE_LIST.add(ModuleEnum.REDISSEARCH_SO.getValue());
-        // 存redis moduleName & 模块文件名 一一对应关系
-        MODULE_MAP.put(ModuleEnum.BLOOMFILTER_SO.getValue(),ModuleEnum.BLOOMFILTER_NAME.getValue());
-        MODULE_MAP.put(ModuleEnum.REDISSEARCH_SO.getValue(),ModuleEnum.REDISSEARCH_NAME.getValue());
-        MODULE_MAP.put(ModuleEnum.BLOOMFILTER_NAME.getValue(),ModuleEnum.BLOOMFILTER_SO.getValue());
-        MODULE_MAP.put(ModuleEnum.REDISSEARCH_NAME.getValue(),ModuleEnum.REDISSEARCH_SO.getValue());
-    }
 
     /**
      * 管理员相关

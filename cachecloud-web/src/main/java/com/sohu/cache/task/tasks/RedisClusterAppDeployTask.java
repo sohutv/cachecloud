@@ -2,6 +2,7 @@ package com.sohu.cache.task.tasks;
 
 import com.alibaba.fastjson.JSONArray;
 import com.sohu.cache.constant.AppCheckEnum;
+import com.sohu.cache.constant.RedisConstant;
 import com.sohu.cache.entity.MachineInfo;
 import com.sohu.cache.entity.MachineStats;
 import com.sohu.cache.redis.util.JedisUtil;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
@@ -109,6 +111,8 @@ public class RedisClusterAppDeployTask extends BaseTask {
         taskStepList.add("deployCollection");
         //14. 设置密码
         taskStepList.add("setPasswd");
+        //14. rdb
+        taskStepList.add("checkFullSync");
         //14. 装载组件
         taskStepList.add("loadModule");
         //14. 审核
@@ -432,6 +436,125 @@ public class RedisClusterAppDeployTask extends BaseTask {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return TaskFlowStatusEnum.ABORT;
+        }
+        return TaskFlowStatusEnum.SUCCESS;
+    }
+
+    public TaskFlowStatusEnum checkFullSync(){
+        Map<RedisServerNode, Boolean> fullSyncSet = new HashMap<>();
+        Map<RedisServerNode, Boolean> slaveOnLoadingSet = new HashMap<>();
+        // 耗时
+        int totalSeconds = 0;
+        redisServerNodes.stream().filter(redisServerNode -> StringUtils.isBlank(redisServerNode.getMasterHost()) && redisServerNode.getMasterPort() == 0)
+                .forEach(redisServerNode -> fullSyncSet.put(redisServerNode, false));
+        redisServerNodes.stream().filter(redisServerNode -> StringUtils.isNotBlank(redisServerNode.getMasterHost()) && redisServerNode.getMasterPort() != 0)
+                .forEach(redisServerNode -> slaveOnLoadingSet.put(redisServerNode, false));
+        while (true) {
+            // 简单的计时器
+            long startTime = System.currentTimeMillis();
+            boolean syncFlag = true;
+            for (Map.Entry<RedisServerNode, Boolean> entry : fullSyncSet.entrySet()) {
+                if(entry.getValue().equals(false)){
+                    syncFlag = false;
+                    Jedis jedis = null;
+                    try {
+                        jedis = redisCenter.getJedis(appId, entry.getKey().getIp(), entry.getKey().getPort());
+                        String statsInfo = jedis.info(RedisConstant.Stats.getValue());
+                        if(StringUtils.isNotBlank(statsInfo)){
+                            String[] split = statsInfo.split("\r\n");
+                            for (String str : split){
+                                if(StringUtils.isNotBlank(str) && str.contains("sync_full:")){
+                                    String[] pair = StringUtils.splitByWholeSeparator(str, ":");
+                                    Long aLong = Long.valueOf(pair[1]);
+                                    if(aLong > 0){
+                                        fullSyncSet.put(entry.getKey(), true);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }catch (Exception e){
+                        logger.error(marker, "check full sync, appId:{}, error:{}!", appId, e.getMessage());
+                    }finally {
+                        if (jedis != null) {
+                            jedis.close();
+                        }
+                    }
+                }else{
+                    continue;
+                }
+            }
+            if(syncFlag){
+                break;
+            }
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                logger.error(marker, e.getMessage(), e);
+            }
+            // 简单的计时器(秒)
+            long costTime = System.currentTimeMillis() - startTime;
+            totalSeconds += (costTime / 1000);
+            if (totalSeconds > TaskConstants.REDIS_SERVER_INSTALL_TIMEOUT) {
+                return TaskFlowStatusEnum.ABORT;
+            }
+        }
+
+        try {
+            TimeUnit.SECONDS.sleep(20);
+        } catch (InterruptedException e) {
+            logger.error(marker, "check full sync, appId:{}, error:{}!", appId, e.getMessage());
+            logger.error(marker, e.getMessage());
+        }
+        while (true) {
+            // 简单的计时器
+            long startTime = System.currentTimeMillis();
+            boolean loadingFlag = true;
+            for (Map.Entry<RedisServerNode, Boolean> entry : slaveOnLoadingSet.entrySet()) {
+                if (entry.getValue().equals(false)) {
+                    loadingFlag = false;
+                    Jedis jedis = null;
+                    try {
+                        jedis = redisCenter.getJedis(appId, entry.getKey().getIp(), entry.getKey().getPort());
+                        String statsInfo = jedis.info(RedisConstant.Replication.getValue());
+                        if (StringUtils.isNotBlank(statsInfo)) {
+                            String[] split = statsInfo.split("\r\n");
+                            for (String str : split) {
+                                if (StringUtils.isNotBlank(str) && str.contains("master_sync_in_progress:")) {
+                                    String[] pair = StringUtils.splitByWholeSeparator(str, ":");
+                                    Long aLong = Long.valueOf(pair[1]);
+                                    if (aLong == 0) {
+                                        slaveOnLoadingSet.put(entry.getKey(), true);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        logger.error(marker, "check not on sync progress, appId:{}, error:{}!", appId, e.getMessage());
+                    } finally {
+                        if (jedis != null) {
+                            jedis.close();
+                        }
+                    }
+                } else {
+                    continue;
+                }
+            }
+            if(loadingFlag){
+                break;
+            }
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                logger.error(marker, e.getMessage(), e);
+            }
+            // 简单的计时器(秒)
+            long costTime = System.currentTimeMillis() - startTime;
+            totalSeconds += (costTime / 1000);
+            if (totalSeconds > TaskConstants.REDIS_SERVER_INSTALL_TIMEOUT) {
+                return TaskFlowStatusEnum.ABORT;
+            }
         }
         return TaskFlowStatusEnum.SUCCESS;
     }

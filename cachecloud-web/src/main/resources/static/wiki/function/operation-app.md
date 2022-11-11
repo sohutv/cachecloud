@@ -17,10 +17,12 @@
 <img src="../../img/function/operation/operation-app.png" width="100%">
 
 <a name="cc1"/>
+
 ### 应用运维
 点击”应用运维“操作，可管理应用实例、查看应用机器列表，应用详情和审批列表，修改应用密码等。
 
 <a name="cc1-1"/>
+
 #### 管理应用实例
 
 **1. Redis Sentinel类型应用**
@@ -48,6 +50,7 @@ f. config/restart（修改配置/滚动重启）
 <img src="../../img/function/server/app-operation-cluster.png" width="100%">
 
 <a name="cc1-6"/>
+
 #### 管理应用模块
 
 查看机器集成模块情况，实例装载模块情况，安装模块，查看实例日志等。
@@ -55,6 +58,7 @@ f. config/restart（修改配置/滚动重启）
 <img src="../../img/function/server/app-module.png" width="100%">
 
 <a name="cc1-2"/>
+
 #### 应用机器列表
 
 查看该应用分布机器的使用情况，包括内存使用率、已分配内存、cpu使用率等信息。
@@ -63,16 +67,19 @@ f. config/restart（修改配置/滚动重启）
 
 
 <a name="cc1-3"/>
+
 #### 应用详情和审批列表
 
 <img src="../../img/function/server/app-detail.png" width="100%">
 
 <a name="cc1-4"/>
+
 #### 应用密码修改
 
 <img src="../../img/function/server/app-redisPassword.png" width="100%">
 
 <a name="cc1-5"/>
+
 #### 应用拓扑诊断
 
 提供对应用拓扑分布规范的检查功能，便于发现问题，做出调整。
@@ -80,6 +87,7 @@ f. config/restart（修改配置/滚动重启）
 <img src="../../img/function/server/topology.png" width="100%"/>
 
 <a name="cc2"/>
+
 #### 2.应用迁移
 
 在CacheCloud后台的“应用运维”页面，选择要进行迁移的应用，点击“应用迁移”。 这种迁移方式不会更换应用的appId，通过主从节点的failover实现，是对客户端无感知迁移。注意：此操作通过failover实现节点切换，仅支持同redis版本/小版本应用的迁移升级。
@@ -121,11 +129,13 @@ f. config/restart（修改配置/滚动重启）
 <img src="../../img/operate/appMigrate/app-migrate8.png" width="100%"/>
 
 <a name="cc3"/>
+
 #### 3.应用下线
 
 下线当前应用，销毁所有存活节点。点击“应用下线”，跳转到应用下线任务流，可查看下线情况。
 
 <a name="cc4"/>
+
 #### 4.版本升级
 
 升级应用的redis版本。详细操作可参考：[运维手册-Redis版本管理.应用版本升级](../access/redisVersion.md)。

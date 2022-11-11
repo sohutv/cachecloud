@@ -4,11 +4,11 @@
 
 <img width="100%" src="../../img/function/server/cc-alert-all.png"/>
 
-<img width="100%" src="../../img/function/server/cc-alter-special.png"/>
+<img width="100%" src="../../img/function/server/cc-alert-special.png"/>
 
-<img width="100%" src="../../img/function/server/cc-alter-add-common.png"/>
+<img width="100%" src="../../img/function/server/cc-alert-add-common.png"/>
 
-<img width="100%" src="../../img/function/server/cc-alter-add-app.png"/>
+<img width="100%" src="../../img/function/server/cc-alert-add-app.png"/>
 
-<img width="100%" src="../../img/function/server/cc-alter-add-instance.png"/>
+<img width="100%" src="../../img/function/server/cc-alert-add-instance.png"/>
 
