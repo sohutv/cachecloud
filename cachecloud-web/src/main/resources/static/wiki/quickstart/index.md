@@ -18,7 +18,11 @@
 <a name="cc1"/>
 
 ### 一、准备war包	
-a.下载war包：[cachecloud-web.war](http://124.222.77.220/redis-ecs/cachecloud-web.war)
+a.下载war包：
+
+[2.2版本 cachecloud-web.war](http://124.222.77.220/redis-ecs/cachecloud-web.war)
+
+[3.0版本 cachecloud-web.war](http://124.222.77.220/redis-ecs/3.0/cachecloud-web.war)
 
 b.也可以clone源码，自行打包：
 
