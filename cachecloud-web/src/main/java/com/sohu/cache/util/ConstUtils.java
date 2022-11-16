@@ -45,7 +45,7 @@ public class ConstUtils {
     /**
      * 服务端版本
      */
-    public static final String CACHECLOUD_VERSION = "2.0.0";
+    public static final String CACHECLOUD_VERSION = "3.0.0";
     /**
      * 逗号
      */
