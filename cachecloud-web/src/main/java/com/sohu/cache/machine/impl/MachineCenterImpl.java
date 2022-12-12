@@ -962,7 +962,9 @@ public class MachineCenterImpl implements MachineCenter {
         if (!CollectionUtils.isEmpty(allMachines)) {
             for (MachineInfo machineInfo : allMachines) {
                 ipMap.put(machineInfo.getIp(), machineInfo);
-                hostlist.add(machineInfo.getRealIp());
+                if(StringUtils.isNotBlank(machineInfo.getRealIp())){
+                    hostlist.add(machineInfo.getRealIp());
+                }
             }
         }
         /**

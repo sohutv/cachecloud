@@ -1239,11 +1239,26 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         InstanceInfo instanceInfo = instanceDao.getInstanceInfoById(instanceId);
         String ip = instanceInfo.getIp();
         MachineInfo machineInfo = machineCenter.getMachineInfoByIp(ip);
-        //先从该应用下的机器进行选择
-        List<MachineMemStatInfo> machineCandiList = machineCenter.getAllValidMachineMem(Arrays.asList(ip), machineInfo.getRoom(), UseTypeEnum.Machine_mix.getValue());
+        //先从混合部署机器进行选择
+        List<MachineMemStatInfo> machineMixCandiList = machineCenter.getAllValidMachineMem(Arrays.asList(ip), machineInfo.getRoom(), UseTypeEnum.Machine_mix.getValue());
+        String slaveIp = this.getSlaveIp(machineMixCandiList, ip, machineInfo, instanceInfo);
+        if(StringUtils.isEmpty(slaveIp)){
+            //再从专用部署机器进行选择
+            List<MachineMemStatInfo> machineSpecialCandiList = machineCenter.getAllValidMachineMem(Arrays.asList(ip), machineInfo.getRoom(), UseTypeEnum.Machine_special.getValue());
+            slaveIp = this.getSlaveIp(machineSpecialCandiList, ip, machineInfo, instanceInfo);
+        }
+        if(StringUtils.isEmpty(slaveIp)){
+            //再从测试部署机器进行选择
+            List<MachineMemStatInfo> machineTestCandiList = machineCenter.getAllValidMachineMem(Arrays.asList(ip), machineInfo.getRoom(), UseTypeEnum.Machine_test.getValue());
+            slaveIp = this.getSlaveIp(machineTestCandiList, ip, machineInfo, instanceInfo);
+        }
         //若该应用下的机器没有满足条件的，选择其他机器
-        if (CollectionUtils.isNotEmpty(machineCandiList)) {
-            List<String> machineResList = getMachineCandi(machineCandiList, ip, instanceInfo.getMem(), machineInfo.getRack());
+        return slaveIp;
+    }
+
+    private String getSlaveIp(List<MachineMemStatInfo> machineList, String ip, MachineInfo machineInfo, InstanceInfo instanceInfo){
+        if (CollectionUtils.isNotEmpty(machineList)) {
+            List<String> machineResList = getMachineCandi(machineList, ip, instanceInfo.getMem(), machineInfo.getRack());
             if (CollectionUtils.isNotEmpty(machineResList)) {
                 int random = new Random().nextInt(machineResList.size());
                 return machineResList.get(random);
@@ -1264,7 +1279,8 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
     private List<String> getMachineCandi(List<MachineMemStatInfo> machineCandiList, String ip, int reqMem, String rack) {
         return machineCandiList.stream()
                 .filter(machineCandi -> !isSameRealMachine(ip, machineCandi.getIp()))
-                .filter(machineCandi -> StringUtils.isNotEmpty(rack) && !rack.equals(machineCandi.getRack()))
+                .filter(machineCandi -> StringUtils.isEmpty(rack) || StringUtils.isEmpty(machineCandi.getRack()) ||
+                        !rack.equals(machineCandi.getRack()))
                 .filter(machineCandi -> (machineCandi.getMem() * 1024 - machineCandi.getUsedMem() / 1024 / 1024) > reqMem)
                 .map(MachineMemStatInfo::getIp)
                 .collect(Collectors.toList());
