@@ -220,6 +220,7 @@ public class ResourceController extends BaseController {
         resource.setStatus(NumberUtils.toInt(request.getParameter("resourceStatus")));
         resource.setType(resourceType);
         resource.setUrl(request.getParameter("resourceUrl"));
+        resource.setOrderNum(NumberUtils.toInt(request.getParameter("orderNum")));
         resource.setLastmodify(new Date());
         resource.setUsername(getUserInfo(request).getName());
 

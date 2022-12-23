@@ -75,6 +75,7 @@
                     <th>最后修改时间</th>
                     <th>操作人</th>
                     <th>状态</th>
+                    <th>排序</th>
                     <th>操作</th>
                 </tr>
                 </thead>
@@ -110,6 +111,9 @@
                             <c:if test="${resource.ispush == 0}">未推送</c:if>
                             <c:if test="${resource.ispush == 1}"><span style="color:green"><a href="/manage/task/flow?taskId=${resource.taskId}" target="_blank">已推送</a></span></c:if>
                             <c:if test="${resource.ispush == 4}"><span style="color:orange">编译中<a href="/manage/task/flow?taskId=${resource.taskId}" target="_blank">[查看任务]</a></span></c:if>
+                        </td>
+                        <td>
+                            ${resource.orderNum}
                         </td>
                         <td>
                             <button type="button" class="btn btn-info" data-target="#addResourceModal" data-toggle="modal"

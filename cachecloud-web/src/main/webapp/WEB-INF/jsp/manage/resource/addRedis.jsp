@@ -13,7 +13,8 @@
                 resourceType: $('#resourceType').val(),
                 resourceUrl: $('#resourceUrl').val(),
                 copyVersion: $('#copyVersion option:selected').attr("versionid"),
-                resourceStatus: $('#resourceStatus').val()
+                resourceStatus: $('#resourceStatus').val(),
+                orderNum: $('#orderNum').val()
             },
             function (data) {
                 var status = data.status;
@@ -41,6 +42,7 @@
         $('#resourceUrl').val("");
         $('#resourceType').val("3");
         $('#resourceStatus').val("1");
+        $('#orderNum').val(0);
         $('#modal-title').html("新建资源");
         $('#resourceId').html("");
 
@@ -66,6 +68,7 @@
                      $('#resourceUrl').val(data.resource.url);
                      $('#resourceType').val(data.resource.type);
                      $('#resourceStatus').val(data.resource.status);
+                     $('#orderNum').val(data.resource.orderNum);
                 }
             }
         );
@@ -200,6 +203,17 @@
 									</div>
 									<div>(生成备份版本配置)</div>
 								</div>
+
+                                <%-- 排序 --%>
+                                <div class="form-group">
+                                    <label class="control-label col-md-3">
+                                        排序:
+                                    </label>
+                                    <div class="col-md-9">
+                                        <input type="text" name="orderNum" id="orderNum" placeholder="序号越大越靠前"
+                                               class="form-control"/>
+                                    </div>
+                                </div>
 
                             </div>
                         </div>

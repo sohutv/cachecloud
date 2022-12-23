@@ -3,11 +3,11 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sohu.cache.dao.ResourceDao">
 	<sql id="resource_columns">
-		id,name,intro,type,lastmodify,dir,url,ispush,status,username,task_id
+		id,name,intro,type,lastmodify,dir,url,ispush,status,username,task_id,order_num
 	</sql>
 
 	<sql id="resource_fields">
-		#{id}, #{name}, #{intro}, #{type}, #{lastmodify}, #{dir}, #{url}, #{ispush}, #{status}, #{username},#{taskId}
+		#{id}, #{name}, #{intro}, #{type}, #{lastmodify}, #{dir}, #{url}, #{ispush}, #{status}, #{username},#{taskId},#{orderNum}
 	</sql>
 
 	<select id="getResourceList" resultType="com.sohu.cache.entity.SystemResource">
@@ -19,7 +19,15 @@
                 and type = #{resourceType}
             </when>
         </choose>
-		order by type asc,dir asc,name desc
+		<choose>
+			<when test="resourceType > 0">
+				order by order_num desc,dir asc,name desc
+			</when>
+			<otherwise>
+				order by type asc,dir asc,name desc
+			</otherwise>
+		</choose>
+
 	</select>
 
 	<select id="getResourceListByName" resultType="com.sohu.cache.entity.SystemResource">
@@ -49,7 +57,7 @@
 	<update id="update" parameterType="SystemResource">
 		update system_resource
 		set name=#{name}, intro=#{intro}, type=#{type}, url=#{url},dir=#{dir}, ispush=#{ispush}, lastmodify=now(),
-		status=#{status}, username=#{username}, task_id=#{taskId}
+		status=#{status}, username=#{username}, task_id=#{taskId}, order_num=#{orderNum}
 		where id=#{id}
 	</update>
 

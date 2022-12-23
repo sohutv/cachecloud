@@ -33,4 +33,6 @@ public class SystemResource {
     private long taskId;
 
     private String compileInfo;
+
+    private int orderNum;
 }
