@@ -154,12 +154,17 @@ public class InstanceRunInspector extends BaseAlertService implements Inspector 
                     return BooleanEnum.TRUE;
                 }
             } else {
-                if (info.getStatus() != InstanceStatusEnum.ERROR_STATUS.getStatus()) {
+                if (info.getStatus() != InstanceStatusEnum.ERROR_STATUS.getStatus()
+                        && info.getStatus() != InstanceStatusEnum.OFFLINE_STATUS.getStatus()) {
                     info.setStatus(InstanceStatusEnum.ERROR_STATUS.getStatus());
                     instanceDao.update(info);
                     logger.error("instance:{} instance failed", info);
                     saveFault(info, isRun);
                     return BooleanEnum.FALSE;
+                }else if(info.getStatus() == InstanceStatusEnum.OFFLINE_STATUS.getStatus()){
+                    logger.error("instance:{} instance is offline", info);
+                    saveFault(info, isRun);
+                    return BooleanEnum.OTHER;
                 }
             }
         } catch (Exception e) {
