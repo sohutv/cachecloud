@@ -14,25 +14,25 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS `app_audit`;
 CREATE TABLE `app_audit` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `app_id` bigint(20) NOT NULL COMMENT 'Ó¦ÓÃid',
-  `user_id` bigint(20) NOT NULL COMMENT 'ÉêÇëÈËµÄid',
-  `user_name` varchar(64) NOT NULL COMMENT 'ÓÃ»§Ãû',
-  `type` tinyint(4) NOT NULL COMMENT 'ÉêÇëÀàĞÍ:0:ÉêÇëÓ¦ÓÃ,1:Ó¦ÓÃÀ©Èİ,2:ĞŞ¸ÄÅäÖÃ',
-  `param1` varchar(600) DEFAULT NULL COMMENT 'Ô¤Áô²ÎÊı1',
-  `param2` varchar(600) DEFAULT NULL COMMENT 'Ô¤Áô²ÎÊı2',
-  `param3` varchar(600) DEFAULT NULL COMMENT 'Ô¤Áô²ÎÊı3',
-  `info` varchar(360) NOT NULL COMMENT 'ÉêÇëÃèÊö',
-  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0:µÈ´ıÉóÅú; 1:ÉóÅúÍ¨¹ı; -1:²µ»Ø',
+  `app_id` bigint(20) NOT NULL COMMENT 'åº”ç”¨id',
+  `user_id` bigint(20) NOT NULL COMMENT 'ç”³è¯·äººçš„id',
+  `user_name` varchar(64) NOT NULL COMMENT 'ç”¨æˆ·å',
+  `type` tinyint(4) NOT NULL COMMENT 'ç”³è¯·ç±»å‹:0:ç”³è¯·åº”ç”¨,1:åº”ç”¨æ‰©å®¹,2:ä¿®æ”¹é…ç½®',
+  `param1` varchar(600) DEFAULT NULL COMMENT 'é¢„ç•™å‚æ•°1',
+  `param2` varchar(600) DEFAULT NULL COMMENT 'é¢„ç•™å‚æ•°2',
+  `param3` varchar(600) DEFAULT NULL COMMENT 'é¢„ç•™å‚æ•°3',
+  `info` varchar(360) NOT NULL COMMENT 'ç”³è¯·æè¿°',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0:ç­‰å¾…å®¡æ‰¹; 1:å®¡æ‰¹é€šè¿‡; -1:é©³å›',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `modify_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `refuse_reason` varchar(360) DEFAULT NULL COMMENT '²µ»ØÀíÓÉ',
-  `task_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'ÈÎÎñid',
-  `operate_id` bigint(20) DEFAULT NULL COMMENT '¹¤µ¥´¦ÀíÈË',
+  `refuse_reason` varchar(360) DEFAULT NULL COMMENT 'é©³å›ç†ç”±',
+  `task_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'ä»»åŠ¡id',
+  `operate_id` bigint(20) DEFAULT NULL COMMENT 'å·¥å•å¤„ç†äºº',
   PRIMARY KEY (`id`),
   KEY `idx_appid` (`app_id`),
   KEY `idx_create_time` (`create_time`),
   KEY `idx_status_create_time` (`status`,`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Ó¦ÓÃÉóºË±í' /* `compression`='tokudb_zlib' */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='åº”ç”¨å®¡æ ¸è¡¨' /* `compression`='tokudb_zlib' */;
 
 --
 -- Table structure for table `app_audit_log`
@@ -41,15 +41,15 @@ CREATE TABLE `app_audit` (
 DROP TABLE IF EXISTS `app_audit_log`;
 CREATE TABLE `app_audit_log` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `app_id` bigint(20) NOT NULL COMMENT 'Ó¦ÓÃid',
-  `user_id` bigint(20) NOT NULL COMMENT 'ÉóÅú²Ù×÷ÈËid',
-  `info` longtext NOT NULL COMMENT 'appÉóÅúµÄÏêÏ¸ĞÅÏ¢',
+  `app_id` bigint(20) NOT NULL COMMENT 'åº”ç”¨id',
+  `user_id` bigint(20) NOT NULL COMMENT 'å®¡æ‰¹æ“ä½œäººid',
+  `info` longtext NOT NULL COMMENT 'appå®¡æ‰¹çš„è¯¦ç»†ä¿¡æ¯',
   `type` tinyint(4) NOT NULL,
   `create_time` datetime NOT NULL,
-  `app_audit_id` bigint(20) NOT NULL COMMENT 'ÉóÅúid',
+  `app_audit_id` bigint(20) NOT NULL COMMENT 'å®¡æ‰¹id',
   PRIMARY KEY (`id`),
   KEY `idx_audit_appid` (`app_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='appÉóºËÈÕÖ¾±í' /* `compression`='tokudb_zlib' */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='appå®¡æ ¸æ—¥å¿—è¡¨' /* `compression`='tokudb_zlib' */;
 
 --
 -- Table structure for table `app_client_command_minute_statistics`
@@ -58,19 +58,19 @@ CREATE TABLE `app_audit_log` (
 DROP TABLE IF EXISTS `app_client_command_minute_statistics`;
 CREATE TABLE `app_client_command_minute_statistics` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `current_min` bigint(20) NOT NULL COMMENT 'Í³¼ÆÊ±¼ä',
-  `client_ip` varchar(20) NOT NULL COMMENT '¿Í»§¶Ëip',
-  `app_id` bigint(20) NOT NULL COMMENT 'Ó¦ÓÃid',
-  `command` varchar(20) NOT NULL COMMENT 'ÃüÁîÃ÷ÎÄ',
-  `cost` bigint(20) DEFAULT NULL COMMENT 'ÃüÁîÀÛ¼ÆºÁÃëºÄÊ±',
-  `bytes_in` bigint(20) DEFAULT NULL COMMENT 'ÊäÈëÁ÷Á¿',
-  `bytes_out` bigint(20) DEFAULT NULL COMMENT 'Êä³öÁ÷Á¿',
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '´´½¨Ê±¼ä',
+  `current_min` bigint(20) NOT NULL COMMENT 'ç»Ÿè®¡æ—¶é—´',
+  `client_ip` varchar(20) NOT NULL COMMENT 'å®¢æˆ·ç«¯ip',
+  `app_id` bigint(20) NOT NULL COMMENT 'åº”ç”¨id',
+  `command` varchar(20) NOT NULL COMMENT 'å‘½ä»¤æ˜æ–‡',
+  `cost` bigint(20) DEFAULT NULL COMMENT 'å‘½ä»¤ç´¯è®¡æ¯«ç§’è€—æ—¶',
+  `bytes_in` bigint(20) DEFAULT NULL COMMENT 'è¾“å…¥æµé‡',
+  `bytes_out` bigint(20) DEFAULT NULL COMMENT 'è¾“å‡ºæµé‡',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
   `count` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx__appid_client_command_currentMin` (`app_id`,`client_ip`,`command`,`current_min`),
   KEY `idx_currentmin_appid_count_cost` (`current_min`,`app_id`,`count`,`cost`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='¿Í»§¶ËÃ¿·ÖÖÓÃüÁîµ÷ÓÃÉÏ±¨Êı¾İ';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='å®¢æˆ·ç«¯æ¯åˆ†é’Ÿå‘½ä»¤è°ƒç”¨ä¸ŠæŠ¥æ•°æ®';
 
 --
 -- Table structure for table `app_client_exception_minute_statistics`
@@ -79,20 +79,20 @@ CREATE TABLE `app_client_command_minute_statistics` (
 DROP TABLE IF EXISTS `app_client_exception_minute_statistics`;
 CREATE TABLE `app_client_exception_minute_statistics` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `current_min` bigint(20) NOT NULL COMMENT 'Í³¼ÆÊ±¼ä',
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '´´½¨Ê±¼ä',
-  `client_ip` varchar(20) NOT NULL COMMENT '¿Í»§¶Ëip',
+  `current_min` bigint(20) NOT NULL COMMENT 'ç»Ÿè®¡æ—¶é—´',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `client_ip` varchar(20) NOT NULL COMMENT 'å®¢æˆ·ç«¯ip',
   `type` tinyint(4) NOT NULL COMMENT '0:connect exception;1:command exception',
-  `app_id` bigint(20) DEFAULT NULL COMMENT 'Ó¦ÓÃid',
-  `node` varchar(30) NOT NULL COMMENT '½ÚµãĞÅÏ¢host:port',
-  `count` bigint(20) DEFAULT NULL COMMENT 'ÀÛ¼ÆÁ¬½ÓÊ§°Ü´ÎÊı',
-  `cost` bigint(20) DEFAULT NULL COMMENT 'ÀÛ¼ÆÁ¬½ÓÊ§°ÜºÁÃëºÄÊ±',
-  `latency_commands` varchar(255) DEFAULT NULL COMMENT 'Í³¼ÆÃüÁîtopN id,¶ººÅ·Ö¸ô',
-  `redis_pool_config` varchar(255) DEFAULT NULL COMMENT 'redisÁ¬½Ó³ØÅäÖÃĞÅÏ¢',
+  `app_id` bigint(20) DEFAULT NULL COMMENT 'åº”ç”¨id',
+  `node` varchar(30) NOT NULL COMMENT 'èŠ‚ç‚¹ä¿¡æ¯host:port',
+  `count` bigint(20) DEFAULT NULL COMMENT 'ç´¯è®¡è¿æ¥å¤±è´¥æ¬¡æ•°',
+  `cost` bigint(20) DEFAULT NULL COMMENT 'ç´¯è®¡è¿æ¥å¤±è´¥æ¯«ç§’è€—æ—¶',
+  `latency_commands` varchar(255) DEFAULT NULL COMMENT 'ç»Ÿè®¡å‘½ä»¤topN id,é€—å·åˆ†éš”',
+  `redis_pool_config` varchar(255) DEFAULT NULL COMMENT 'redisè¿æ¥æ± é…ç½®ä¿¡æ¯',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx__client_node_type_currentMin` (`client_ip`,`node`,`type`,`current_min`),
   KEY `idx_appid_current_min` (`app_id`,`current_min`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='¿Í»§¶ËÃ¿·ÖÖÓÒì³£ÉÏ±¨Êı¾İ';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='å®¢æˆ·ç«¯æ¯åˆ†é’Ÿå¼‚å¸¸ä¸ŠæŠ¥æ•°æ®';
 
 --
 -- Table structure for table `app_client_latency_command`
@@ -101,13 +101,13 @@ CREATE TABLE `app_client_exception_minute_statistics` (
 DROP TABLE IF EXISTS `app_client_latency_command`;
 CREATE TABLE `app_client_latency_command` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `command` varchar(255) NOT NULL COMMENT 'ÃüÁîÃ÷ÎÄ',
-  `size` bigint(20) DEFAULT NULL COMMENT '²ÎÊı³¤¶È',
-  `args` varchar(255) DEFAULT NULL COMMENT '²Ã¼ôºó²ÎÊıÃ÷ÎÄ',
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '´´½¨Ê±¼ä',
-  `invoke_time` bigint(20) DEFAULT NULL COMMENT 'ÃüÁîµ÷ÓÃÊ±¼ä´Á',
+  `command` varchar(255) NOT NULL COMMENT 'å‘½ä»¤æ˜æ–‡',
+  `size` bigint(20) DEFAULT NULL COMMENT 'å‚æ•°é•¿åº¦',
+  `args` varchar(255) DEFAULT NULL COMMENT 'è£å‰ªåå‚æ•°æ˜æ–‡',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `invoke_time` bigint(20) DEFAULT NULL COMMENT 'å‘½ä»¤è°ƒç”¨æ—¶é—´æˆ³',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='¿Í»§¶ËÒì³£ÃüÁîµ÷ÓÃÏêÇé';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='å®¢æˆ·ç«¯å¼‚å¸¸å‘½ä»¤è°ƒç”¨è¯¦æƒ…';
 
 --
 -- Table structure for table `app_client_statistic_gather`
@@ -117,31 +117,31 @@ DROP TABLE IF EXISTS `app_client_statistic_gather`;
 CREATE TABLE `app_client_statistic_gather` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '´´½¨Ê±¼ä',
-  `gather_time` varchar(20) NOT NULL COMMENT 'Í³¼ÆÊ±¼ä£¬¸ñÊ½yyyy-mm-dd',
-  `app_id` bigint(20) NOT NULL COMMENT 'Ó¦ÓÃid',
-  `cmd_count` bigint(20) DEFAULT '0' COMMENT 'ÃüÁîµ÷ÓÃ´ÎÊı',
-  `conn_exp_count` bigint(20) DEFAULT '0' COMMENT 'Á¬½ÓÒì³£´ÎÊı',
-  `avg_cmd_cost` double DEFAULT '0' COMMENT 'ÃüÁîµ÷ÓÃÆ½¾ùºÄÊ±£¬µ¥Î»ºÁÃë',
-  `avg_cmd_exp_cost` double DEFAULT '0' COMMENT 'ÃüÁî³¬Ê±Æ½¾ùºÄÊ±£¬µ¥Î»ºÁÃë',
-  `avg_conn_exp_cost` double DEFAULT '0' COMMENT 'Á¬½ÓÒì³£Æ½¾ùºÄÊ±£¬µ¥Î»ºÁÃë',
-  `cmd_exp_count` bigint(20) DEFAULT '0' COMMENT 'ÃüÁî³¬Ê±´ÎÊı',
-  `instance_count` int(11) DEFAULT NULL COMMENT 'Ó¦ÓÃÊµÀıÊı',
-  `avg_mem_frag_ratio` double DEFAULT NULL COMMENT 'Æ½¾ùËéÆ¬ÂÊ',
-  `mem_used_ratio` double DEFAULT NULL COMMENT 'ÄÚ´æÊ¹ÓÃÂÊ',
-  `exception_count` bigint(20) DEFAULT '0' COMMENT 'Òì³£Êı£¨¾É£¬´ıÏÂÏß£©',
-  `slow_log_count` bigint(20) DEFAULT '0' COMMENT 'Âı²éÑ¯´ÎÊı',
-  `latency_count` bigint(20) DEFAULT '0' COMMENT 'ÑÓ³ÙÊÂ¼ş´ÎÊı',
-  `object_size` bigint(20) DEFAULT '0' COMMENT '´æ´¢¶ÔÏóÊı',
-  `used_memory` bigint(20) DEFAULT '0' COMMENT 'ÄÚ´æÕ¼ÓÃ byte',
-  `used_memory_rss` bigint(20) DEFAULT '0' COMMENT 'ÎïÀíÄÚ´æÕ¼ÓÃ byte',
-  `max_cpu_sys` bigint(20) DEFAULT '0' COMMENT '½ø³ÌÏµÍ³Ì¬ÏûºÄ(µ¥Î»:Ãë)',
-  `max_cpu_user` bigint(20) DEFAULT '0' COMMENT '½ø³ÌÓÃ»§Ì¬ÏûºÄ(µ¥Î»:Ãë)',
-  `connected_clients` bigint(20) DEFAULT '0' COMMENT 'Ó¦ÓÃ¿Í»§¶ËÁ¬½ÓÊı',
-  `topology_exam_result` tinyint(4) DEFAULT NULL COMMENT 'ÍØÆËÕï¶Ï½á¹û£¬0£ºÕı³££¬1£ºÒì³£',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `gather_time` varchar(20) NOT NULL COMMENT 'ç»Ÿè®¡æ—¶é—´ï¼Œæ ¼å¼yyyy-mm-dd',
+  `app_id` bigint(20) NOT NULL COMMENT 'åº”ç”¨id',
+  `cmd_count` bigint(20) DEFAULT '0' COMMENT 'å‘½ä»¤è°ƒç”¨æ¬¡æ•°',
+  `conn_exp_count` bigint(20) DEFAULT '0' COMMENT 'è¿æ¥å¼‚å¸¸æ¬¡æ•°',
+  `avg_cmd_cost` double DEFAULT '0' COMMENT 'å‘½ä»¤è°ƒç”¨å¹³å‡è€—æ—¶ï¼Œå•ä½æ¯«ç§’',
+  `avg_cmd_exp_cost` double DEFAULT '0' COMMENT 'å‘½ä»¤è¶…æ—¶å¹³å‡è€—æ—¶ï¼Œå•ä½æ¯«ç§’',
+  `avg_conn_exp_cost` double DEFAULT '0' COMMENT 'è¿æ¥å¼‚å¸¸å¹³å‡è€—æ—¶ï¼Œå•ä½æ¯«ç§’',
+  `cmd_exp_count` bigint(20) DEFAULT '0' COMMENT 'å‘½ä»¤è¶…æ—¶æ¬¡æ•°',
+  `instance_count` int(11) DEFAULT NULL COMMENT 'åº”ç”¨å®ä¾‹æ•°',
+  `avg_mem_frag_ratio` double DEFAULT NULL COMMENT 'å¹³å‡ç¢ç‰‡ç‡',
+  `mem_used_ratio` double DEFAULT NULL COMMENT 'å†…å­˜ä½¿ç”¨ç‡',
+  `exception_count` bigint(20) DEFAULT '0' COMMENT 'å¼‚å¸¸æ•°ï¼ˆæ—§ï¼Œå¾…ä¸‹çº¿ï¼‰',
+  `slow_log_count` bigint(20) DEFAULT '0' COMMENT 'æ…¢æŸ¥è¯¢æ¬¡æ•°',
+  `latency_count` bigint(20) DEFAULT '0' COMMENT 'å»¶è¿Ÿäº‹ä»¶æ¬¡æ•°',
+  `object_size` bigint(20) DEFAULT '0' COMMENT 'å­˜å‚¨å¯¹è±¡æ•°',
+  `used_memory` bigint(20) DEFAULT '0' COMMENT 'å†…å­˜å ç”¨ byte',
+  `used_memory_rss` bigint(20) DEFAULT '0' COMMENT 'ç‰©ç†å†…å­˜å ç”¨ byte',
+  `max_cpu_sys` bigint(20) DEFAULT '0' COMMENT 'è¿›ç¨‹ç³»ç»Ÿæ€æ¶ˆè€—(å•ä½:ç§’)',
+  `max_cpu_user` bigint(20) DEFAULT '0' COMMENT 'è¿›ç¨‹ç”¨æˆ·æ€æ¶ˆè€—(å•ä½:ç§’)',
+  `connected_clients` bigint(20) DEFAULT '0' COMMENT 'åº”ç”¨å®¢æˆ·ç«¯è¿æ¥æ•°',
+  `topology_exam_result` tinyint(4) DEFAULT NULL COMMENT 'æ‹“æ‰‘è¯Šæ–­ç»“æœï¼Œ0ï¼šæ­£å¸¸ï¼Œ1ï¼šå¼‚å¸¸',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_appid_gathertime` (`app_id`,`gather_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='¿Í»§¶ËÉÏ±¨Êı¾İÈ«ÌìÍ³¼Æ';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='å®¢æˆ·ç«¯ä¸ŠæŠ¥æ•°æ®å…¨å¤©ç»Ÿè®¡';
 
 --
 -- Table structure for table `app_client_value_minute_stat`
@@ -150,16 +150,16 @@ CREATE TABLE `app_client_statistic_gather` (
 DROP TABLE IF EXISTS `app_client_value_minute_stat`;
 CREATE TABLE `app_client_value_minute_stat` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `app_id` bigint(20) NOT NULL COMMENT 'Ó¦ÓÃappid',
-  `collect_time` bigint(20) NOT NULL COMMENT 'Êı¾İÊÕ¼¯Ê±¼äyyyyMMddHHmm00',
-  `update_time` datetime NOT NULL COMMENT '¸üĞÂÊ±¼ä',
-  `command` varchar(20) NOT NULL COMMENT 'Ö´ĞĞÃüÁî',
-  `distribute_type` tinyint(4) NOT NULL COMMENT 'Öµ·Ö²¼',
-  `count` int(11) NOT NULL COMMENT 'ÃüÁîÖ´ĞĞ´ÎÊı',
+  `app_id` bigint(20) NOT NULL COMMENT 'åº”ç”¨appid',
+  `collect_time` bigint(20) NOT NULL COMMENT 'æ•°æ®æ”¶é›†æ—¶é—´yyyyMMddHHmm00',
+  `update_time` datetime NOT NULL COMMENT 'æ›´æ–°æ—¶é—´',
+  `command` varchar(20) NOT NULL COMMENT 'æ‰§è¡Œå‘½ä»¤',
+  `distribute_type` tinyint(4) NOT NULL COMMENT 'å€¼åˆ†å¸ƒ',
+  `count` int(11) NOT NULL COMMENT 'å‘½ä»¤æ‰§è¡Œæ¬¡æ•°',
   PRIMARY KEY (`id`),
   UNIQUE KEY `app_collect_command_dis` (`app_id`,`collect_time`,`command`,`distribute_type`),
   KEY `idx_collect_time` (`collect_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='¿Í»§¶ËÃ¿·ÖÖÓÖµ·Ö²¼ÉÏ±¨Êı¾İÍ³¼Æ';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='å®¢æˆ·ç«¯æ¯åˆ†é’Ÿå€¼åˆ†å¸ƒä¸ŠæŠ¥æ•°æ®ç»Ÿè®¡';
 
 --
 -- Table structure for table `app_client_version_statistic`
@@ -168,14 +168,14 @@ CREATE TABLE `app_client_value_minute_stat` (
 DROP TABLE IF EXISTS `app_client_version_statistic`;
 CREATE TABLE `app_client_version_statistic` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `app_id` bigint(20) NOT NULL COMMENT 'Ó¦ÓÃid',
-  `client_ip` varchar(20) NOT NULL COMMENT '¿Í»§¶ËipµØÖ·',
-  `client_version` varchar(20) NOT NULL COMMENT '¿Í»§¶Ë°æ±¾',
-  `report_time` datetime DEFAULT NULL COMMENT 'ÉÏ±¨Ê±¼ä',
+  `app_id` bigint(20) NOT NULL COMMENT 'åº”ç”¨id',
+  `client_ip` varchar(20) NOT NULL COMMENT 'å®¢æˆ·ç«¯ipåœ°å€',
+  `client_version` varchar(20) NOT NULL COMMENT 'å®¢æˆ·ç«¯ç‰ˆæœ¬',
+  `report_time` datetime DEFAULT NULL COMMENT 'ä¸ŠæŠ¥æ—¶é—´',
   PRIMARY KEY (`id`),
   UNIQUE KEY `app_client_ip` (`app_id`,`client_ip`),
   KEY `app_id` (`app_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='¿Í»§¶ËÉÏ±¨°æ±¾ĞÅÏ¢Í³¼Æ' /* `compression`='tokudb_zlib' */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='å®¢æˆ·ç«¯ä¸ŠæŠ¥ç‰ˆæœ¬ä¿¡æ¯ç»Ÿè®¡' /* `compression`='tokudb_zlib' */;
 
 --
 -- Table structure for table `app_daily`
@@ -183,40 +183,40 @@ CREATE TABLE `app_client_version_statistic` (
 
 DROP TABLE IF EXISTS `app_daily`;
 CREATE TABLE `app_daily` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '×ÔÔöid',
-  `app_id` bigint(20) NOT NULL COMMENT 'Ó¦ÓÃid',
-  `date` date NOT NULL COMMENT 'ÈÕÆÚ',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'è‡ªå¢id',
+  `app_id` bigint(20) NOT NULL COMMENT 'åº”ç”¨id',
+  `date` date NOT NULL COMMENT 'æ—¥æœŸ',
   `create_time` datetime NOT NULL,
-  `slow_log_count` bigint(20) NOT NULL COMMENT 'Âı²éÑ¯¸öÊı',
-  `client_exception_count` bigint(20) NOT NULL COMMENT '¿Í»§¶ËÒì³£¸öÊı',
-  `max_minute_client_count` bigint(20) NOT NULL COMMENT 'Ã¿·ÖÖÓ×î´ó¿Í»§¶ËÁ¬½ÓÊı',
-  `avg_minute_client_count` bigint(20) NOT NULL COMMENT 'Ã¿·ÖÖÓÆ½¾ù¿Í»§¶ËÁ¬½ÓÊı',
-  `max_minute_command_count` bigint(20) NOT NULL COMMENT 'Ã¿·ÖÖÓ×î´óÃüÁîÊı',
-  `avg_minute_command_count` bigint(20) NOT NULL COMMENT 'Ã¿·ÖÖÓÆ½¾ùÃüÁîÊı',
-  `avg_hit_ratio` double NOT NULL COMMENT 'Æ½¾ùÃüÖĞÂÊ',
-  `min_minute_hit_ratio` double NOT NULL COMMENT 'Ã¿·ÖÖÓ×îĞ¡ÃüÖĞÂÊ',
-  `max_minute_hit_ratio` double NOT NULL COMMENT 'Ã¿·ÖÖÓ×î´óÃüÖĞÂÊ',
-  `avg_used_memory` bigint(20) NOT NULL COMMENT '×î´óÄÚ´æÊ¹ÓÃÁ¿',
-  `max_used_memory` bigint(20) NOT NULL COMMENT 'Æ½¾ùÄÚ´æÊ¹ÓÃÁ¿',
-  `expired_keys_count` bigint(20) NOT NULL COMMENT '¹ıÆÚ¼ü¸öÊı',
-  `evicted_keys_count` bigint(20) NOT NULL COMMENT 'ÌŞ³ı¼ü¸öÊı',
-  `avg_minute_net_input_byte` double NOT NULL COMMENT 'Ã¿·ÖÖÓÆ½¾ùÍøÂçinputÁ¿',
-  `max_minute_net_input_byte` double NOT NULL COMMENT 'Ã¿·ÖÖÓ×î´óÍøÂçinputÁ¿',
-  `avg_minute_net_output_byte` double NOT NULL COMMENT 'Ã¿·ÖÖÓÆ½¾ùÍøÂçoutputÁ¿',
-  `max_minute_net_output_byte` double NOT NULL COMMENT 'Ã¿·ÖÖÓ×î´óÍøÂçoutputÁ¿',
-  `avg_object_size` bigint(20) NOT NULL COMMENT '¼ü¸öÊıÆ½¾ùÖµ',
-  `max_object_size` bigint(20) NOT NULL COMMENT '¼ü¸öÊı×î´óÖµ',
-  `big_key_times` bigint(20) NOT NULL COMMENT 'bigkey´ÎÊı',
-  `big_key_info` varchar(512) COLLATE utf8_bin NOT NULL COMMENT 'bigkeyÏêÇé',
-  `client_cmd_count` bigint(20) NOT NULL COMMENT 'ÀÛ¼ÆÃüÁîµ÷ÓÃ´ÎÊı',
-  `client_avg_cmd_cost` double NOT NULL COMMENT 'Æ½¾ùÃüÁîµ÷ÓÃºÄÊ±',
-  `client_conn_exp_count` bigint(20) NOT NULL COMMENT 'ÀÛ¼ÆÁ¬½ÓÒì³£ÊÂ¼ş´ÎÊı',
-  `client_avg_conn_exp_cost` double NOT NULL COMMENT 'Æ½¾ùÁ¬½ÓÒì³£ÊÂ¼şºÄÊ±',
-  `client_cmd_exp_count` bigint(20) NOT NULL COMMENT 'ÀÛ¼ÆÃüÁî³¬Ê±ÊÂ¼ş´ÎÊı',
-  `client_avg_cmd_exp_cost` double NOT NULL COMMENT 'Æ½¾ùÃüÁî³¬Ê±ÊÂ¼şºÄÊ±',
+  `slow_log_count` bigint(20) NOT NULL COMMENT 'æ…¢æŸ¥è¯¢ä¸ªæ•°',
+  `client_exception_count` bigint(20) NOT NULL COMMENT 'å®¢æˆ·ç«¯å¼‚å¸¸ä¸ªæ•°',
+  `max_minute_client_count` bigint(20) NOT NULL COMMENT 'æ¯åˆ†é’Ÿæœ€å¤§å®¢æˆ·ç«¯è¿æ¥æ•°',
+  `avg_minute_client_count` bigint(20) NOT NULL COMMENT 'æ¯åˆ†é’Ÿå¹³å‡å®¢æˆ·ç«¯è¿æ¥æ•°',
+  `max_minute_command_count` bigint(20) NOT NULL COMMENT 'æ¯åˆ†é’Ÿæœ€å¤§å‘½ä»¤æ•°',
+  `avg_minute_command_count` bigint(20) NOT NULL COMMENT 'æ¯åˆ†é’Ÿå¹³å‡å‘½ä»¤æ•°',
+  `avg_hit_ratio` double NOT NULL COMMENT 'å¹³å‡å‘½ä¸­ç‡',
+  `min_minute_hit_ratio` double NOT NULL COMMENT 'æ¯åˆ†é’Ÿæœ€å°å‘½ä¸­ç‡',
+  `max_minute_hit_ratio` double NOT NULL COMMENT 'æ¯åˆ†é’Ÿæœ€å¤§å‘½ä¸­ç‡',
+  `avg_used_memory` bigint(20) NOT NULL COMMENT 'æœ€å¤§å†…å­˜ä½¿ç”¨é‡',
+  `max_used_memory` bigint(20) NOT NULL COMMENT 'å¹³å‡å†…å­˜ä½¿ç”¨é‡',
+  `expired_keys_count` bigint(20) NOT NULL COMMENT 'è¿‡æœŸé”®ä¸ªæ•°',
+  `evicted_keys_count` bigint(20) NOT NULL COMMENT 'å‰”é™¤é”®ä¸ªæ•°',
+  `avg_minute_net_input_byte` double NOT NULL COMMENT 'æ¯åˆ†é’Ÿå¹³å‡ç½‘ç»œinputé‡',
+  `max_minute_net_input_byte` double NOT NULL COMMENT 'æ¯åˆ†é’Ÿæœ€å¤§ç½‘ç»œinputé‡',
+  `avg_minute_net_output_byte` double NOT NULL COMMENT 'æ¯åˆ†é’Ÿå¹³å‡ç½‘ç»œoutputé‡',
+  `max_minute_net_output_byte` double NOT NULL COMMENT 'æ¯åˆ†é’Ÿæœ€å¤§ç½‘ç»œoutputé‡',
+  `avg_object_size` bigint(20) NOT NULL COMMENT 'é”®ä¸ªæ•°å¹³å‡å€¼',
+  `max_object_size` bigint(20) NOT NULL COMMENT 'é”®ä¸ªæ•°æœ€å¤§å€¼',
+  `big_key_times` bigint(20) NOT NULL COMMENT 'bigkeyæ¬¡æ•°',
+  `big_key_info` varchar(512) COLLATE utf8_bin NOT NULL COMMENT 'bigkeyè¯¦æƒ…',
+  `client_cmd_count` bigint(20) NOT NULL COMMENT 'ç´¯è®¡å‘½ä»¤è°ƒç”¨æ¬¡æ•°',
+  `client_avg_cmd_cost` double NOT NULL COMMENT 'å¹³å‡å‘½ä»¤è°ƒç”¨è€—æ—¶',
+  `client_conn_exp_count` bigint(20) NOT NULL COMMENT 'ç´¯è®¡è¿æ¥å¼‚å¸¸äº‹ä»¶æ¬¡æ•°',
+  `client_avg_conn_exp_cost` double NOT NULL COMMENT 'å¹³å‡è¿æ¥å¼‚å¸¸äº‹ä»¶è€—æ—¶',
+  `client_cmd_exp_count` bigint(20) NOT NULL COMMENT 'ç´¯è®¡å‘½ä»¤è¶…æ—¶äº‹ä»¶æ¬¡æ•°',
+  `client_avg_cmd_exp_cost` double NOT NULL COMMENT 'å¹³å‡å‘½ä»¤è¶…æ—¶äº‹ä»¶è€—æ—¶',
   PRIMARY KEY (`id`),
   KEY `idx_appid_date` (`app_id`,`date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='appÈÕ±¨';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='appæ—¥æŠ¥';
 
 --
 -- Table structure for table `app_data_migrate_status`
@@ -224,27 +224,27 @@ CREATE TABLE `app_daily` (
 
 DROP TABLE IF EXISTS `app_data_migrate_status`;
 CREATE TABLE `app_data_migrate_status` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '×ÔÔöid',
-  `migrate_machine_ip` varchar(255) NOT NULL COMMENT 'Ç¨ÒÆ¹¤¾ßËùÔÚ»úÆ÷ip',
-  `migrate_machine_port` int(11) NOT NULL COMMENT 'Ç¨ÒÆ¹¤¾ßËùÕ¼port',
-  `source_migrate_type` tinyint(4) NOT NULL COMMENT 'Ô´Ç¨ÒÆÀàĞÍ,0:single,1:redis cluster,2:rdb file,3:twemproxy',
-  `source_servers` varchar(2048) NOT NULL COMMENT 'Ô´ÊµÀıÁĞ±í',
-  `target_migrate_type` tinyint(4) NOT NULL COMMENT 'Ä¿±êÇ¨ÒÆÀàĞÍ,0:single,1:redis cluster,2:rdb file,3:twemproxy',
-  `target_servers` varchar(2048) NOT NULL COMMENT 'Ä¿±êÊµÀıÁĞ±í',
-  `source_app_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'Ô´Ó¦ÓÃid',
-  `target_app_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'Ä¿±êÓ¦ÓÃid',
-  `user_id` bigint(20) NOT NULL COMMENT '²Ù×÷ÈË',
-  `status` tinyint(4) NOT NULL COMMENT 'Ç¨ÒÆÖ´ĞĞ×´Ì¬,0:¿ªÊ¼,1:½áÊø,2:Òì³£',
-  `start_time` datetime NOT NULL COMMENT 'Ç¨ÒÆ¿ªÊ¼Ö´ĞĞÊ±¼ä',
-  `end_time` datetime DEFAULT NULL COMMENT 'Ç¨ÒÆ½áÊøÖ´ĞĞÊ±¼ä',
-  `log_path` varchar(255) NOT NULL COMMENT 'ÈÕÖ¾ÎÄ¼şÂ·¾¶',
-  `config_path` varchar(255) NOT NULL COMMENT 'ÅäÖÃÎÄ¼şÂ·¾¶',
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'è‡ªå¢id',
+  `migrate_machine_ip` varchar(255) NOT NULL COMMENT 'è¿ç§»å·¥å…·æ‰€åœ¨æœºå™¨ip',
+  `migrate_machine_port` int(11) NOT NULL COMMENT 'è¿ç§»å·¥å…·æ‰€å port',
+  `source_migrate_type` tinyint(4) NOT NULL COMMENT 'æºè¿ç§»ç±»å‹,0:single,1:redis cluster,2:rdb file,3:twemproxy',
+  `source_servers` varchar(2048) NOT NULL COMMENT 'æºå®ä¾‹åˆ—è¡¨',
+  `target_migrate_type` tinyint(4) NOT NULL COMMENT 'ç›®æ ‡è¿ç§»ç±»å‹,0:single,1:redis cluster,2:rdb file,3:twemproxy',
+  `target_servers` varchar(2048) NOT NULL COMMENT 'ç›®æ ‡å®ä¾‹åˆ—è¡¨',
+  `source_app_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'æºåº”ç”¨id',
+  `target_app_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'ç›®æ ‡åº”ç”¨id',
+  `user_id` bigint(20) NOT NULL COMMENT 'æ“ä½œäºº',
+  `status` tinyint(4) NOT NULL COMMENT 'è¿ç§»æ‰§è¡ŒçŠ¶æ€,0:å¼€å§‹,1:ç»“æŸ,2:å¼‚å¸¸',
+  `start_time` datetime NOT NULL COMMENT 'è¿ç§»å¼€å§‹æ‰§è¡Œæ—¶é—´',
+  `end_time` datetime DEFAULT NULL COMMENT 'è¿ç§»ç»“æŸæ‰§è¡Œæ—¶é—´',
+  `log_path` varchar(255) NOT NULL COMMENT 'æ—¥å¿—æ–‡ä»¶è·¯å¾„',
+  `config_path` varchar(255) NOT NULL COMMENT 'é…ç½®æ–‡ä»¶è·¯å¾„',
   `migrate_id` varchar(50) DEFAULT NULL COMMENT 'migrate id',
   `migrate_tool` tinyint(4) DEFAULT NULL COMMENT 'migrate_tool, 0:redis-shake,1:redis-migrate-tool',
   `redis_source_version` varchar(20) DEFAULT NULL,
   `redis_target_version` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Ó¦ÓÃÇ¨ÒÆ¼ÇÂ¼ÏêÇé';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='åº”ç”¨è¿ç§»è®°å½•è¯¦æƒ…';
 
 --
 -- Table structure for table `app_desc`
@@ -252,36 +252,36 @@ CREATE TABLE `app_data_migrate_status` (
 
 DROP TABLE IF EXISTS `app_desc`;
 CREATE TABLE `app_desc` (
-  `app_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'Ó¦ÓÃid',
-  `name` varchar(36) NOT NULL COMMENT 'Ó¦ÓÃÃû',
-  `user_id` bigint(20) NOT NULL COMMENT 'ÉêÇëÈËid',
-  `status` tinyint(4) NOT NULL COMMENT 'Ó¦ÓÃ×´Ì¬, 0Î´·ÖÅä£¬1ÉêÇëÎ´ÉóÅú£¬2ÉóÅú²¢·¢²¼ 3:Ó¦ÓÃÏÂÏß',
-  `intro` varchar(255) NOT NULL COMMENT 'Ó¦ÓÃÃèÊö',
-  `create_time` datetime NOT NULL COMMENT '´´½¨Ê±¼ä',
-  `passed_time` datetime NOT NULL COMMENT 'ÉóÅúÍ¨¹ıÊ±¼ä',
-  `type` int(10) NOT NULL DEFAULT '0' COMMENT 'cacheÀàĞÍ£¬1. memcached, 2. redis-cluster, 3. memcacheq, 4. ·Çcache-cloud ,5. redis-sentinel ,6.redis-standalone ',
-  `officer` varchar(32) NOT NULL COMMENT '¸ºÔğÈË£¬ÖĞÎÄ',
-  `ver_id` int(11) NOT NULL COMMENT '°æ±¾',
-  `is_test` tinyint(4) DEFAULT '0' COMMENT 'ÊÇ·ñ²âÊÔ£º1ÊÇ0·ñ',
-  `need_persistence` tinyint(4) DEFAULT '1' COMMENT 'ÊÇ·ñĞèÒª³Ö¾Ã»¯: 1ÊÇ0·ñ',
-  `need_hot_back_up` tinyint(4) DEFAULT '1' COMMENT 'ÊÇ·ñĞèÒªÈÈ±¸: 1ÊÇ0·ñ',
-  `has_back_store` tinyint(4) DEFAULT '1' COMMENT 'ÊÇ·ñÓĞºó¶ËÊı¾İÔ´: 1ÊÇ0·ñ',
-  `forecase_qps` int(11) DEFAULT NULL COMMENT 'Ô¤¹Àqps',
-  `forecast_obj_num` int(11) DEFAULT NULL COMMENT 'Ô¤¹ÀÌõÄ¿Êı',
-  `mem_alert_value` int(11) DEFAULT NULL COMMENT 'ÄÚ´æ±¨¾¯·§Öµ',
-  `client_machine_room` varchar(36) DEFAULT NULL COMMENT '¿Í»§¶Ë»ú·¿ĞÅÏ¢',
-  `client_conn_alert_value` int(11) DEFAULT '2000' COMMENT '¿Í»§¶ËÁ¬½Ó±¨¾¯·§Öµ',
-  `app_key` varchar(255) DEFAULT NULL COMMENT 'Ó¦ÓÃÃØÔ¿',
-  `important_level` tinyint(4) NOT NULL DEFAULT '2' COMMENT 'Ó¦ÓÃ¼¶±ğ£¬1:×îÖØÒª£¬2:Ò»°ãÖØÒª£¬3:Ò»°ã',
-  `password` varchar(255) DEFAULT '' COMMENT 'redisÃÜÂë',
-  `custom_password` varchar(255) DEFAULT NULL COMMENT '×Ô¶¨ÒåÃÜÂë',
-  `hit_precent_alert_value` int(11) DEFAULT '0' COMMENT 'ÃüÖĞÂÊ±¨¾¯·§Öµ 0:²»±¨¾¯ ',
-  `is_access_monitor` int(11) DEFAULT '0' COMMENT 'ÊÇ·ñ½ÓÈëÈ«¾Ö¼à¿Ø±¨¾¯ Ä¬ÈÏ0,0:²»½ÓÈë¼à¿Ø 1:½ÓÈë¼à¿Ø',
-  `app_fsync_value` int(11) DEFAULT '1' COMMENT 'Ó¦ÓÃË¢ÅÌ²ßÂÔ 1:Ö÷´Ó½Úµãappdendfsync=everysec 2:Ö÷´Ó½Úµã appdendfsync=no',
-  `version_id` int(11) NOT NULL DEFAULT '1' COMMENT 'Redis°æ±¾±íÖ÷¼üid',
+  `app_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'åº”ç”¨id',
+  `name` varchar(36) NOT NULL COMMENT 'åº”ç”¨å',
+  `user_id` bigint(20) NOT NULL COMMENT 'ç”³è¯·äººid',
+  `status` tinyint(4) NOT NULL COMMENT 'åº”ç”¨çŠ¶æ€, 0æœªåˆ†é…ï¼Œ1ç”³è¯·æœªå®¡æ‰¹ï¼Œ2å®¡æ‰¹å¹¶å‘å¸ƒ 3:åº”ç”¨ä¸‹çº¿',
+  `intro` varchar(255) NOT NULL COMMENT 'åº”ç”¨æè¿°',
+  `create_time` datetime NOT NULL COMMENT 'åˆ›å»ºæ—¶é—´',
+  `passed_time` datetime NOT NULL COMMENT 'å®¡æ‰¹é€šè¿‡æ—¶é—´',
+  `type` int(10) NOT NULL DEFAULT '0' COMMENT 'cacheç±»å‹ï¼Œ1. memcached, 2. redis-cluster, 3. memcacheq, 4. écache-cloud ,5. redis-sentinel ,6.redis-standalone ',
+  `officer` varchar(32) NOT NULL COMMENT 'è´Ÿè´£äººï¼Œä¸­æ–‡',
+  `ver_id` int(11) NOT NULL COMMENT 'ç‰ˆæœ¬',
+  `is_test` tinyint(4) DEFAULT '0' COMMENT 'æ˜¯å¦æµ‹è¯•ï¼š1æ˜¯0å¦',
+  `need_persistence` tinyint(4) DEFAULT '1' COMMENT 'æ˜¯å¦éœ€è¦æŒä¹…åŒ–: 1æ˜¯0å¦',
+  `need_hot_back_up` tinyint(4) DEFAULT '1' COMMENT 'æ˜¯å¦éœ€è¦çƒ­å¤‡: 1æ˜¯0å¦',
+  `has_back_store` tinyint(4) DEFAULT '1' COMMENT 'æ˜¯å¦æœ‰åç«¯æ•°æ®æº: 1æ˜¯0å¦',
+  `forecase_qps` int(11) DEFAULT NULL COMMENT 'é¢„ä¼°qps',
+  `forecast_obj_num` int(11) DEFAULT NULL COMMENT 'é¢„ä¼°æ¡ç›®æ•°',
+  `mem_alert_value` int(11) DEFAULT NULL COMMENT 'å†…å­˜æŠ¥è­¦é˜€å€¼',
+  `client_machine_room` varchar(36) DEFAULT NULL COMMENT 'å®¢æˆ·ç«¯æœºæˆ¿ä¿¡æ¯',
+  `client_conn_alert_value` int(11) DEFAULT '2000' COMMENT 'å®¢æˆ·ç«¯è¿æ¥æŠ¥è­¦é˜€å€¼',
+  `app_key` varchar(255) DEFAULT NULL COMMENT 'åº”ç”¨ç§˜é’¥',
+  `important_level` tinyint(4) NOT NULL DEFAULT '2' COMMENT 'åº”ç”¨çº§åˆ«ï¼Œ1:æœ€é‡è¦ï¼Œ2:ä¸€èˆ¬é‡è¦ï¼Œ3:ä¸€èˆ¬',
+  `password` varchar(255) DEFAULT '' COMMENT 'rediså¯†ç ',
+  `custom_password` varchar(255) DEFAULT NULL COMMENT 'è‡ªå®šä¹‰å¯†ç ',
+  `hit_precent_alert_value` int(11) DEFAULT '0' COMMENT 'å‘½ä¸­ç‡æŠ¥è­¦é˜€å€¼ 0:ä¸æŠ¥è­¦ ',
+  `is_access_monitor` int(11) DEFAULT '0' COMMENT 'æ˜¯å¦æ¥å…¥å…¨å±€ç›‘æ§æŠ¥è­¦ é»˜è®¤0,0:ä¸æ¥å…¥ç›‘æ§ 1:æ¥å…¥ç›‘æ§',
+  `app_fsync_value` int(11) DEFAULT '1' COMMENT 'åº”ç”¨åˆ·ç›˜ç­–ç•¥ 1:ä¸»ä»èŠ‚ç‚¹appdendfsync=everysec 2:ä¸»ä»èŠ‚ç‚¹ appdendfsync=no',
+  `version_id` int(11) NOT NULL DEFAULT '1' COMMENT 'Redisç‰ˆæœ¬è¡¨ä¸»é”®id',
   PRIMARY KEY (`app_id`),
   UNIQUE KEY `uidx_app_name` (`name`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='appÓ¦ÓÃÃèÊö' /* `compression`='tokudb_zlib' */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='appåº”ç”¨æè¿°' /* `compression`='tokudb_zlib' */;
 
 --
 -- Table structure for table `app_hour_command_statistics`
@@ -290,17 +290,17 @@ CREATE TABLE `app_desc` (
 DROP TABLE IF EXISTS `app_hour_command_statistics`;
 CREATE TABLE `app_hour_command_statistics` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `app_id` bigint(20) NOT NULL COMMENT 'Ó¦ÓÃid',
-  `collect_time` bigint(20) NOT NULL COMMENT 'Í³¼ÆÊ±¼ä:¸ñÊ½yyyyMMddHH',
-  `command_name` varchar(60) NOT NULL COMMENT 'ÃüÁîÃû³Æ',
-  `command_count` bigint(20) NOT NULL COMMENT 'ÃüÁîÖ´ĞĞ´ÎÊı',
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '´´½¨Ê±¼ä',
-  `modify_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'ĞŞ¸ÄÊ±¼ä',
+  `app_id` bigint(20) NOT NULL COMMENT 'åº”ç”¨id',
+  `collect_time` bigint(20) NOT NULL COMMENT 'ç»Ÿè®¡æ—¶é—´:æ ¼å¼yyyyMMddHH',
+  `command_name` varchar(60) NOT NULL COMMENT 'å‘½ä»¤åç§°',
+  `command_count` bigint(20) NOT NULL COMMENT 'å‘½ä»¤æ‰§è¡Œæ¬¡æ•°',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `modify_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'ä¿®æ”¹æ—¶é—´',
   PRIMARY KEY (`id`),
   UNIQUE KEY `app_id` (`app_id`,`command_name`,`collect_time`),
   KEY `idx_create_time` (`create_time`),
   KEY `idx_modify_time` (`modify_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Ó¦ÓÃµÄÃ¿Ğ¡Ê±ÃüÁîÍ³¼Æ' /* `compression`='tokudb_zlib' */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='åº”ç”¨çš„æ¯å°æ—¶å‘½ä»¤ç»Ÿè®¡' /* `compression`='tokudb_zlib' */;
 
 --
 -- Table structure for table `app_hour_statistics`
@@ -309,31 +309,31 @@ CREATE TABLE `app_hour_command_statistics` (
 DROP TABLE IF EXISTS `app_hour_statistics`;
 CREATE TABLE `app_hour_statistics` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `app_id` bigint(20) NOT NULL COMMENT 'Ó¦ÓÃid',
-  `collect_time` bigint(20) NOT NULL COMMENT 'ÊÕ¼¯Ê±¼ä:¸ñÊ½yyyyMMddHH',
-  `hits` bigint(20) NOT NULL COMMENT 'Ã¿Ğ¡Ê±ÃüÖĞÊıÁ¿ºÍ',
-  `misses` bigint(20) NOT NULL COMMENT 'Ã¿Ğ¡Ê±Î´ÃüÖĞÊıÁ¿ºÍ',
-  `command_count` bigint(20) DEFAULT '0' COMMENT 'ÃüÁî×ÜÊı',
-  `used_memory` bigint(20) NOT NULL COMMENT 'Ã¿Ğ¡Ê±ÄÚ´æÕ¼ÓÃ×î´óÖµ',
-  `used_memory_rss` bigint(20) NOT NULL DEFAULT '0' COMMENT 'ÎïÀíÄÚ´æÕ¼ÓÃ',
-  `expired_keys` bigint(20) NOT NULL COMMENT 'Ã¿Ğ¡Ê±¹ıÆÚkeyÊıÁ¿ºÍ',
-  `evicted_keys` bigint(20) NOT NULL COMMENT 'Ã¿Ğ¡Ê±ÇıÖğkeyÊıÁ¿ºÍ',
-  `net_input_byte` bigint(20) DEFAULT '0' COMMENT 'ÍøÂçÊäÈë×Ö½Ú',
-  `net_output_byte` bigint(20) DEFAULT '0' COMMENT 'ÍøÂçÊä³ö×Ö½Ú',
-  `connected_clients` int(10) NOT NULL COMMENT 'Ã¿Ğ¡Ê±¿Í»§¶ËÁ¬½ÓÊı×î´óÖµ',
-  `object_size` bigint(20) NOT NULL COMMENT 'Ã¿Ğ¡Ê±´æ´¢¶ÔÏóÊı×î´óÖµ',
-  `cpu_sys` bigint(20) DEFAULT '0' COMMENT '½ø³ÌÏµÍ³Ì¬ÏûºÄ',
-  `cpu_user` bigint(20) DEFAULT '0' COMMENT '½ø³ÌÓÃ»§Ì¬ÏûºÄ',
-  `cpu_sys_children` bigint(20) DEFAULT '0' COMMENT '×Ó½ø³ÌÏµÍ³Ì¬ÏûºÄ',
-  `cpu_user_children` bigint(20) DEFAULT '0' COMMENT '×Ó½ø³ÌÓÃ»§Ì¬ÏûºÄ',
-  `accumulation` int(10) NOT NULL DEFAULT '0' COMMENT 'Ã¿Ğ¡Ê±²ÎÓëÀÛ¼ÓÊµÀıÊı×îĞ¡Öµ',
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '´´½¨Ê±¼ä',
-  `modify_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Ã¿Ğ¡Ê±ĞŞ¸ÄÊ±¼ä×î´óÖµ',
+  `app_id` bigint(20) NOT NULL COMMENT 'åº”ç”¨id',
+  `collect_time` bigint(20) NOT NULL COMMENT 'æ”¶é›†æ—¶é—´:æ ¼å¼yyyyMMddHH',
+  `hits` bigint(20) NOT NULL COMMENT 'æ¯å°æ—¶å‘½ä¸­æ•°é‡å’Œ',
+  `misses` bigint(20) NOT NULL COMMENT 'æ¯å°æ—¶æœªå‘½ä¸­æ•°é‡å’Œ',
+  `command_count` bigint(20) DEFAULT '0' COMMENT 'å‘½ä»¤æ€»æ•°',
+  `used_memory` bigint(20) NOT NULL COMMENT 'æ¯å°æ—¶å†…å­˜å ç”¨æœ€å¤§å€¼',
+  `used_memory_rss` bigint(20) NOT NULL DEFAULT '0' COMMENT 'ç‰©ç†å†…å­˜å ç”¨',
+  `expired_keys` bigint(20) NOT NULL COMMENT 'æ¯å°æ—¶è¿‡æœŸkeyæ•°é‡å’Œ',
+  `evicted_keys` bigint(20) NOT NULL COMMENT 'æ¯å°æ—¶é©±é€keyæ•°é‡å’Œ',
+  `net_input_byte` bigint(20) DEFAULT '0' COMMENT 'ç½‘ç»œè¾“å…¥å­—èŠ‚',
+  `net_output_byte` bigint(20) DEFAULT '0' COMMENT 'ç½‘ç»œè¾“å‡ºå­—èŠ‚',
+  `connected_clients` int(10) NOT NULL COMMENT 'æ¯å°æ—¶å®¢æˆ·ç«¯è¿æ¥æ•°æœ€å¤§å€¼',
+  `object_size` bigint(20) NOT NULL COMMENT 'æ¯å°æ—¶å­˜å‚¨å¯¹è±¡æ•°æœ€å¤§å€¼',
+  `cpu_sys` bigint(20) DEFAULT '0' COMMENT 'è¿›ç¨‹ç³»ç»Ÿæ€æ¶ˆè€—',
+  `cpu_user` bigint(20) DEFAULT '0' COMMENT 'è¿›ç¨‹ç”¨æˆ·æ€æ¶ˆè€—',
+  `cpu_sys_children` bigint(20) DEFAULT '0' COMMENT 'å­è¿›ç¨‹ç³»ç»Ÿæ€æ¶ˆè€—',
+  `cpu_user_children` bigint(20) DEFAULT '0' COMMENT 'å­è¿›ç¨‹ç”¨æˆ·æ€æ¶ˆè€—',
+  `accumulation` int(10) NOT NULL DEFAULT '0' COMMENT 'æ¯å°æ—¶å‚ä¸ç´¯åŠ å®ä¾‹æ•°æœ€å°å€¼',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `modify_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'æ¯å°æ—¶ä¿®æ”¹æ—¶é—´æœ€å¤§å€¼',
   PRIMARY KEY (`id`),
   UNIQUE KEY `app_id` (`app_id`,`collect_time`),
   KEY `idx_create_time` (`create_time`) USING BTREE,
   KEY `idx_modify_time` (`modify_time`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Ó¦ÓÃÍ³¼ÆÊı¾İÃ¿Ğ¡Ê±Í³¼Æ' /* `compression`='tokudb_zlib' */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='åº”ç”¨ç»Ÿè®¡æ•°æ®æ¯å°æ—¶ç»Ÿè®¡' /* `compression`='tokudb_zlib' */;
 
 --
 -- Table structure for table `app_minute_command_statistics`
@@ -342,17 +342,17 @@ CREATE TABLE `app_hour_statistics` (
 DROP TABLE IF EXISTS `app_minute_command_statistics`;
 CREATE TABLE `app_minute_command_statistics` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `app_id` bigint(20) NOT NULL COMMENT 'Ó¦ÓÃid',
-  `collect_time` bigint(20) NOT NULL COMMENT 'Í³¼ÆÊ±¼ä:¸ñÊ½yyyyMMddHHmm',
-  `command_name` varchar(60) NOT NULL COMMENT 'ÃüÁîÃû³Æ',
-  `command_count` bigint(20) NOT NULL COMMENT 'ÃüÁîÖ´ĞĞ´ÎÊı',
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '´´½¨Ê±¼ä',
-  `modify_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'ĞŞ¸ÄÊ±¼ä',
+  `app_id` bigint(20) NOT NULL COMMENT 'åº”ç”¨id',
+  `collect_time` bigint(20) NOT NULL COMMENT 'ç»Ÿè®¡æ—¶é—´:æ ¼å¼yyyyMMddHHmm',
+  `command_name` varchar(60) NOT NULL COMMENT 'å‘½ä»¤åç§°',
+  `command_count` bigint(20) NOT NULL COMMENT 'å‘½ä»¤æ‰§è¡Œæ¬¡æ•°',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `modify_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'ä¿®æ”¹æ—¶é—´',
   PRIMARY KEY (`id`),
   UNIQUE KEY `app_id` (`app_id`,`collect_time`,`command_name`),
   KEY `idx_create_time` (`create_time`),
   KEY `idx_modify_time` (`modify_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Ó¦ÓÃµÄÃ¿·ÖÖÓÃüÁîÍ³¼Æ' /* `compression`='tokudb_zlib' */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='åº”ç”¨çš„æ¯åˆ†é’Ÿå‘½ä»¤ç»Ÿè®¡' /* `compression`='tokudb_zlib' */;
 
 --
 -- Table structure for table `app_minute_statistics`
@@ -361,26 +361,26 @@ CREATE TABLE `app_minute_command_statistics` (
 DROP TABLE IF EXISTS `app_minute_statistics`;
 CREATE TABLE `app_minute_statistics` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `app_id` bigint(20) NOT NULL COMMENT 'Ó¦ÓÃid',
-  `collect_time` bigint(20) NOT NULL COMMENT 'ÊÕ¼¯Ê±¼ä:¸ñÊ½yyyyMMddHHmm',
-  `hits` bigint(20) NOT NULL COMMENT 'ÃüÖĞÊıÁ¿',
-  `misses` bigint(20) NOT NULL COMMENT 'Î´ÃüÖĞÊıÁ¿',
-  `command_count` bigint(20) DEFAULT '0' COMMENT 'ÃüÁî×ÜÊı',
-  `used_memory` bigint(20) NOT NULL COMMENT 'ÄÚ´æÕ¼ÓÃ',
-  `used_memory_rss` bigint(20) NOT NULL DEFAULT '0' COMMENT 'ÎïÀíÄÚ´æÕ¼ÓÃ',
-  `expired_keys` bigint(20) NOT NULL COMMENT '¹ıÆÚkeyÊıÁ¿',
-  `evicted_keys` bigint(20) NOT NULL COMMENT 'ÇıÖğkeyÊıÁ¿',
-  `net_input_byte` bigint(20) DEFAULT '0' COMMENT 'ÍøÂçÊäÈë×Ö½Ú',
-  `net_output_byte` bigint(20) DEFAULT '0' COMMENT 'ÍøÂçÊä³ö×Ö½Ú',
-  `connected_clients` int(10) NOT NULL COMMENT '¿Í»§¶ËÁ¬½ÓÊı',
-  `object_size` bigint(20) NOT NULL COMMENT 'Ã¿·ÖÖÓ´æ´¢¶ÔÏóÊı×î´óÖµ',
-  `cpu_sys` bigint(20) DEFAULT '0' COMMENT '½ø³ÌÏµÍ³Ì¬ÏûºÄ',
-  `cpu_user` bigint(20) DEFAULT '0' COMMENT '½ø³ÌÓÃ»§Ì¬ÏûºÄ',
-  `cpu_sys_children` bigint(20) DEFAULT '0' COMMENT '×Ó½ø³ÌÏµÍ³Ì¬ÏûºÄ',
-  `cpu_user_children` bigint(20) DEFAULT '0' COMMENT '×Ó½ø³ÌÓÃ»§Ì¬ÏûºÄ',
-  `accumulation` int(10) NOT NULL DEFAULT '0' COMMENT '²ÎÓëÀÛ¼ÓÊµÀıÊı',
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '´´½¨Ê±¼ä',
-  `modify_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'ĞŞ¸ÄÊ±¼ä',
+  `app_id` bigint(20) NOT NULL COMMENT 'åº”ç”¨id',
+  `collect_time` bigint(20) NOT NULL COMMENT 'æ”¶é›†æ—¶é—´:æ ¼å¼yyyyMMddHHmm',
+  `hits` bigint(20) NOT NULL COMMENT 'å‘½ä¸­æ•°é‡',
+  `misses` bigint(20) NOT NULL COMMENT 'æœªå‘½ä¸­æ•°é‡',
+  `command_count` bigint(20) DEFAULT '0' COMMENT 'å‘½ä»¤æ€»æ•°',
+  `used_memory` bigint(20) NOT NULL COMMENT 'å†…å­˜å ç”¨',
+  `used_memory_rss` bigint(20) NOT NULL DEFAULT '0' COMMENT 'ç‰©ç†å†…å­˜å ç”¨',
+  `expired_keys` bigint(20) NOT NULL COMMENT 'è¿‡æœŸkeyæ•°é‡',
+  `evicted_keys` bigint(20) NOT NULL COMMENT 'é©±é€keyæ•°é‡',
+  `net_input_byte` bigint(20) DEFAULT '0' COMMENT 'ç½‘ç»œè¾“å…¥å­—èŠ‚',
+  `net_output_byte` bigint(20) DEFAULT '0' COMMENT 'ç½‘ç»œè¾“å‡ºå­—èŠ‚',
+  `connected_clients` int(10) NOT NULL COMMENT 'å®¢æˆ·ç«¯è¿æ¥æ•°',
+  `object_size` bigint(20) NOT NULL COMMENT 'æ¯åˆ†é’Ÿå­˜å‚¨å¯¹è±¡æ•°æœ€å¤§å€¼',
+  `cpu_sys` bigint(20) DEFAULT '0' COMMENT 'è¿›ç¨‹ç³»ç»Ÿæ€æ¶ˆè€—',
+  `cpu_user` bigint(20) DEFAULT '0' COMMENT 'è¿›ç¨‹ç”¨æˆ·æ€æ¶ˆè€—',
+  `cpu_sys_children` bigint(20) DEFAULT '0' COMMENT 'å­è¿›ç¨‹ç³»ç»Ÿæ€æ¶ˆè€—',
+  `cpu_user_children` bigint(20) DEFAULT '0' COMMENT 'å­è¿›ç¨‹ç”¨æˆ·æ€æ¶ˆè€—',
+  `accumulation` int(10) NOT NULL DEFAULT '0' COMMENT 'å‚ä¸ç´¯åŠ å®ä¾‹æ•°',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `modify_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'ä¿®æ”¹æ—¶é—´',
   PRIMARY KEY (`id`),
   UNIQUE KEY `app_id` (`app_id`,`collect_time`),
   KEY `idx_create_time` (`create_time`) USING BTREE,
@@ -394,8 +394,8 @@ CREATE TABLE `app_minute_statistics` (
 DROP TABLE IF EXISTS `app_to_user`;
 CREATE TABLE `app_to_user` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) NOT NULL COMMENT 'ÓÃ»§id',
-  `app_id` bigint(20) NOT NULL COMMENT 'Ó¦ÓÃid',
+  `user_id` bigint(20) NOT NULL COMMENT 'ç”¨æˆ·id',
+  `app_id` bigint(20) NOT NULL COMMENT 'åº”ç”¨id',
   PRIMARY KEY (`id`),
   KEY `app_id` (`app_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin /* `compression`='tokudb_zlib' */;
@@ -407,20 +407,20 @@ CREATE TABLE `app_to_user` (
 DROP TABLE IF EXISTS `app_user`;
 CREATE TABLE `app_user` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(64) NOT NULL COMMENT 'ÓÃ»§Ãû',
-  `ch_name` varchar(255) NOT NULL COMMENT 'ÖĞÎÄÃû',
-  `email` varchar(64) NOT NULL COMMENT 'ÓÊÏä',
-  `mobile` varchar(16) NOT NULL COMMENT 'ÊÖ»ú',
-  `type` int(4) NOT NULL DEFAULT '2' COMMENT '0¹ÜÀíÔ±£¬1Ô¤Áô£¬2ÆÕÍ¨ÓÃ»§£¬-1ÎŞĞ§',
-  `weChat` varchar(32) DEFAULT NULL COMMENT 'Î¢ĞÅºÅ',
-  `isAlert` tinyint(4) NOT NULL DEFAULT '1' COMMENT 'ÓÃ»§ÊÇ·ñ½ÓÊÕ±¨¾¯ 0:²»½ÓÊÕ 1:½ÓÊÕ',
-  `password` varchar(64) DEFAULT NULL COMMENT 'ÃÜÂë',
-  `register_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '×¢²áÊ±¼ä',
-  `purpose` varchar(255) DEFAULT NULL COMMENT 'Ê¹ÓÃÄ¿µÄ',
-  `company` varchar(255) DEFAULT NULL COMMENT '¹«Ë¾Ãû³Æ',
+  `name` varchar(64) NOT NULL COMMENT 'ç”¨æˆ·å',
+  `ch_name` varchar(255) NOT NULL COMMENT 'ä¸­æ–‡å',
+  `email` varchar(64) NOT NULL COMMENT 'é‚®ç®±',
+  `mobile` varchar(16) NOT NULL COMMENT 'æ‰‹æœº',
+  `type` int(4) NOT NULL DEFAULT '2' COMMENT '0ç®¡ç†å‘˜ï¼Œ1é¢„ç•™ï¼Œ2æ™®é€šç”¨æˆ·ï¼Œ-1æ— æ•ˆ',
+  `weChat` varchar(32) DEFAULT NULL COMMENT 'å¾®ä¿¡å·',
+  `isAlert` tinyint(4) NOT NULL DEFAULT '1' COMMENT 'ç”¨æˆ·æ˜¯å¦æ¥æ”¶æŠ¥è­¦ 0:ä¸æ¥æ”¶ 1:æ¥æ”¶',
+  `password` varchar(64) DEFAULT NULL COMMENT 'å¯†ç ',
+  `register_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'æ³¨å†Œæ—¶é—´',
+  `purpose` varchar(255) DEFAULT NULL COMMENT 'ä½¿ç”¨ç›®çš„',
+  `company` varchar(255) DEFAULT NULL COMMENT 'å…¬å¸åç§°',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uidx_user_name` (`name`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='ÓÃ»§±í' /* `compression`='tokudb_zlib' */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='ç”¨æˆ·è¡¨' /* `compression`='tokudb_zlib' */;
 
 -- ----------------------------
 --  Records of `app_user`
@@ -436,14 +436,14 @@ COMMIT;
 DROP TABLE IF EXISTS `brevity_schedule_resources`;
 CREATE TABLE `brevity_schedule_resources` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `type` tinyint(4) NOT NULL COMMENT 'ÀàĞÍ,¼û:BrevityScheduleType',
-  `version` bigint(20) NOT NULL DEFAULT '0' COMMENT 'Ê±¼ä°æ±¾',
-  `host` varchar(16) NOT NULL COMMENT '×ÊÔ´ip',
-  `port` int(11) NOT NULL DEFAULT '0' COMMENT '¶Ë¿Ú',
-  `create_time` datetime NOT NULL COMMENT '´´½¨Ê±¼ä',
+  `type` tinyint(4) NOT NULL COMMENT 'ç±»å‹,è§:BrevityScheduleType',
+  `version` bigint(20) NOT NULL DEFAULT '0' COMMENT 'æ—¶é—´ç‰ˆæœ¬',
+  `host` varchar(16) NOT NULL COMMENT 'èµ„æºip',
+  `port` int(11) NOT NULL DEFAULT '0' COMMENT 'ç«¯å£',
+  `create_time` datetime NOT NULL COMMENT 'åˆ›å»ºæ—¶é—´',
   PRIMARY KEY (`id`),
   KEY `idx_type_host_port` (`type`,`host`,`port`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='¶ÌÆµÈÎÎñ±í';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='çŸ­é¢‘ä»»åŠ¡è¡¨';
 
 --
 -- Table structure for table `diagnostic_task_record`
@@ -452,22 +452,22 @@ CREATE TABLE `brevity_schedule_resources` (
 DROP TABLE IF EXISTS `diagnostic_task_record`;
 CREATE TABLE `diagnostic_task_record` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `app_id` bigint(20) DEFAULT NULL COMMENT 'Ó¦ÓÃid',
-  `type` int(11) DEFAULT NULL COMMENT 'Õï¶ÏÀàĞÍ£º0scan 1bigkey 2idle key 3hotkey 4del key 5slot analysis 6topology exam',
-  `task_id` bigint(20) DEFAULT NULL COMMENT 'ÈÎÎñÁ÷id',
-  `audit_id` bigint(20) DEFAULT NULL COMMENT 'ÉóÅúid',
-  `status` int(11) DEFAULT NULL COMMENT 'Õï¶Ï×´Ì¬£º0¿ªÊ¼ 1½áÊø 2Òì³£',
-  `cost` bigint(20) DEFAULT NULL COMMENT 'ºÄÊ±£¬ºÁÃë',
+  `app_id` bigint(20) DEFAULT NULL COMMENT 'åº”ç”¨id',
+  `type` int(11) DEFAULT NULL COMMENT 'è¯Šæ–­ç±»å‹ï¼š0scan 1bigkey 2idle key 3hotkey 4del key 5slot analysis 6topology exam',
+  `task_id` bigint(20) DEFAULT NULL COMMENT 'ä»»åŠ¡æµid',
+  `audit_id` bigint(20) DEFAULT NULL COMMENT 'å®¡æ‰¹id',
+  `status` int(11) DEFAULT NULL COMMENT 'è¯Šæ–­çŠ¶æ€ï¼š0å¼€å§‹ 1ç»“æŸ 2å¼‚å¸¸',
+  `cost` bigint(20) DEFAULT NULL COMMENT 'è€—æ—¶ï¼Œæ¯«ç§’',
   `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `modify_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `redis_key` varchar(100) DEFAULT NULL COMMENT '½á¹ûµÄkey',
-  `node` varchar(100) DEFAULT NULL COMMENT 'ÊµÀı£¬host:port',
-  `parent_task_id` bigint(20) DEFAULT NULL COMMENT '¸¸ÈÎÎñid',
-  `diagnostic_condition` varchar(100) DEFAULT NULL COMMENT 'Õï¶ÏÌõ¼ş',
-  `param1` varchar(100) DEFAULT NULL COMMENT '±¸ÓÃ²ÎÊı1',
-  `param2` varchar(100) DEFAULT NULL COMMENT '±¸ÓÃ²ÎÊı2',
+  `redis_key` varchar(100) DEFAULT NULL COMMENT 'ç»“æœçš„key',
+  `node` varchar(100) DEFAULT NULL COMMENT 'å®ä¾‹ï¼Œhost:port',
+  `parent_task_id` bigint(20) DEFAULT NULL COMMENT 'çˆ¶ä»»åŠ¡id',
+  `diagnostic_condition` varchar(100) DEFAULT NULL COMMENT 'è¯Šæ–­æ¡ä»¶',
+  `param1` varchar(100) DEFAULT NULL COMMENT 'å¤‡ç”¨å‚æ•°1',
+  `param2` varchar(100) DEFAULT NULL COMMENT 'å¤‡ç”¨å‚æ•°2',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Ó¦ÓÃÕï¶Ï¼ÇÂ¼';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='åº”ç”¨è¯Šæ–­è®°å½•';
 
 --
 -- Table structure for table `instance_alert_configs`
@@ -475,27 +475,27 @@ CREATE TABLE `diagnostic_task_record` (
 
 DROP TABLE IF EXISTS `instance_alert_configs`;
 CREATE TABLE `instance_alert_configs` (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '×ÔÔöid',
-  `alert_config` varchar(255) NOT NULL COMMENT '±¨¾¯ÅäÖÃ',
-  `alert_value` varchar(512) NOT NULL COMMENT '±¨¾¯·§Öµ',
-  `config_info` varchar(255) NOT NULL COMMENT 'ÅäÖÃËµÃ÷',
-  `type` tinyint(4) NOT NULL COMMENT '1:È«¾Ö±¨¾¯,2:ÊµÀı±¨¾¯',
-  `instance_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '0:È«¾ÖÅäÖÃ£¬ÆäËû´ú±íÊµÀıid',
-  `status` tinyint(4) NOT NULL COMMENT '1:¿ÉÓÃ,0:²»¿ÉÓÃ',
-  `compare_type` tinyint(4) NOT NULL COMMENT '±È½ÏÀàĞÍ£º1Ğ¡ÓÚ,2µÈÓÚ,3´óÓÚ,4²»µÈÓÚ',
-  `check_cycle` tinyint(4) NOT NULL COMMENT '1:Ò»·ÖÖÓ,2:Îå·ÖÖÓ,3:°ëĞ¡Ê±4:Ò»¸öĞ¡Ê±,5:Ò»Ìì',
-  `update_time` datetime NOT NULL COMMENT '±¨¾¯ÅäÖÃ¸üĞÂÊ±¼ä',
-  `last_check_time` datetime NOT NULL COMMENT 'ÉÏ´Î¼ì²éÊ±¼ä',
-  `important_level` tinyint(4) unsigned NOT NULL DEFAULT '0' COMMENT 'ÖØÒª³Ì¶È£¨0£ºÒ»°ã£»1£ºÖØÒª£»2£º½ô¼±£©',
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'è‡ªå¢id',
+  `alert_config` varchar(255) NOT NULL COMMENT 'æŠ¥è­¦é…ç½®',
+  `alert_value` varchar(512) NOT NULL COMMENT 'æŠ¥è­¦é˜€å€¼',
+  `config_info` varchar(255) NOT NULL COMMENT 'é…ç½®è¯´æ˜',
+  `type` tinyint(4) NOT NULL COMMENT '1:å…¨å±€æŠ¥è­¦,2:å®ä¾‹æŠ¥è­¦',
+  `instance_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '0:å…¨å±€é…ç½®ï¼Œå…¶ä»–ä»£è¡¨å®ä¾‹id',
+  `status` tinyint(4) NOT NULL COMMENT '1:å¯ç”¨,0:ä¸å¯ç”¨',
+  `compare_type` tinyint(4) NOT NULL COMMENT 'æ¯”è¾ƒç±»å‹ï¼š1å°äº,2ç­‰äº,3å¤§äº,4ä¸ç­‰äº',
+  `check_cycle` tinyint(4) NOT NULL COMMENT '1:ä¸€åˆ†é’Ÿ,2:äº”åˆ†é’Ÿ,3:åŠå°æ—¶4:ä¸€ä¸ªå°æ—¶,5:ä¸€å¤©',
+  `update_time` datetime NOT NULL COMMENT 'æŠ¥è­¦é…ç½®æ›´æ–°æ—¶é—´',
+  `last_check_time` datetime NOT NULL COMMENT 'ä¸Šæ¬¡æ£€æŸ¥æ—¶é—´',
+  `important_level` tinyint(4) unsigned NOT NULL DEFAULT '0' COMMENT 'é‡è¦ç¨‹åº¦ï¼ˆ0ï¼šä¸€èˆ¬ï¼›1ï¼šé‡è¦ï¼›2ï¼šç´§æ€¥ï¼‰',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_index` (`type`,`instance_id`,`alert_config`,`compare_type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='ÊµÀı±¨¾¯·§ÖµÅäÖÃ';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='å®ä¾‹æŠ¥è­¦é˜€å€¼é…ç½®';
 
 -- ----------------------------
 --  Records of `instance_alert_configs`
 -- ----------------------------
 BEGIN;
-INSERT INTO `instance_alert_configs` VALUES ('9', 'aof_current_size', '6000', 'aofµ±Ç°³ß´ç(µ¥Î»£ºMB)', '1', '0', '1', '3', '3', '2017-06-19 09:43:22', '2020-09-17 10:52:00', 0), ('10', 'aof_delayed_fsync', '3', '·ÖÖÓaof×èÈû¸öÊı', '1', '0', '1', '3', '1', '2017-06-19 10:38:19', '2020-09-17 11:09:00', 1), ('11', 'client_biggest_input_buf', '10', 'ÊäÈë»º³åÇø×î´óbuffer´óĞ¡(µ¥Î»£ºMB)', '1', '0', '1', '3', '1', '2017-06-19 10:47:03', '2020-09-17 11:09:00', 1), ('12', 'client_longest_output_list', '50000', 'Êä³ö»º³åÇø×î´ó¶ÓÁĞ³¤¶È', '1', '0', '1', '3', '1', '2017-06-19 10:55:45', '2020-09-17 11:09:00', 1), ('13', 'instantaneous_ops_per_sec', '60000', 'ÊµÊ±ops', '1', '0', '1', '3', '1', '2017-06-19 11:02:38', '2020-09-17 11:09:00', 1),('14', 'latest_fork_usec', '400000', 'ÉÏ´ÎforkËùÓÃÊ±¼ä(µ¥Î»£ºÎ¢Ãë)', '1', '0', '1', '3', '5', '2017-06-19 11:21:35', '2020-09-16 16:51:00', 1), ('15', 'mem_fragmentation_ratio', '1.5', 'ÄÚ´æËéÆ¬ÂÊ(¼ì²â´óÓÚ500MB)', '1', '0', '1', '3', '5', '2017-06-19 12:49:16', '2020-09-16 16:51:00', 0), ('16', 'rdb_last_bgsave_status', 'ok', 'ÉÏÒ»´Îbgsave×´Ì¬', '1', '0', '1', '4', '4', '2017-06-19 14:15:21', '2020-09-17 10:19:00', 0), ('17', 'total_net_output_bytes', '5000', '·ÖÖÓÍøÂçÊä³öÁ÷Á¿(µ¥Î»£ºMB)', '1', '0', '1', '3', '1', '2017-06-19 16:39:44', '2020-09-17 11:09:00', 0), ('19', 'total_net_input_bytes', '1200', '·ÖÖÓÍøÂçÊäÈëÁ÷Á¿(µ¥Î»£ºMB)', '1', '0', '1', '3', '1', '2017-06-19 16:45:44', '2020-09-17 11:09:00', 0), ('20', 'sync_partial_err', '0', '·ÖÖÓ²¿·Ö¸´ÖÆÊ§°Ü´ÎÊı', '1', '0', '1', '3', '1', '2017-06-19 18:34:41', '2020-09-17 11:09:00', 1), ('21', 'sync_partial_ok', '0', '·ÖÖÓ²¿·Ö¸´ÖÆ³É¹¦´ÎÊı', '1', '0', '1', '3', '1', '2017-06-19 18:35:01', '2020-09-17 11:09:00', 1), ('22', 'sync_full', '0', '·ÖÖÓÈ«Á¿¸´ÖÆÖ´ĞĞ´ÎÊı', '1', '0', '1', '3', '1', '2017-06-19 18:35:17', '2020-09-17 11:09:00', 1), ('23', 'rejected_connections', '0', '·ÖÖÓ¾Ü¾øÁ¬½ÓÊı', '1', '0', '1', '3', '1', '2017-06-19 18:35:36', '2020-09-17 11:09:00', 2), ('54', 'master_slave_offset_diff', '20000000', 'Ö÷´Ó½ÚµãÆ«ÒÆÁ¿²î(µ¥Î»£º×Ö½Ú)', '1', '0', '1', '3', '2', '2017-06-20 18:58:56', '2020-09-17 11:06:00', 0), ('56', 'cluster_state', 'ok', '¼¯Èº×´Ì¬', '1', '0', '1', '4', '1', '2017-06-21 18:01:52', '2020-09-17 11:09:00', 2), ('57', 'cluster_slots_ok', '16384', '¼¯Èº³É¹¦·ÖÅä²Û¸öÊı', '1', '0', '1', '4', '1', '2017-06-21 18:02:04', '2020-09-17 11:09:00', 2);
+INSERT INTO `instance_alert_configs` VALUES ('9', 'aof_current_size', '6000', 'aofå½“å‰å°ºå¯¸(å•ä½ï¼šMB)', '1', '0', '1', '3', '3', '2017-06-19 09:43:22', '2020-09-17 10:52:00', 0), ('10', 'aof_delayed_fsync', '3', 'åˆ†é’Ÿaofé˜»å¡ä¸ªæ•°', '1', '0', '1', '3', '1', '2017-06-19 10:38:19', '2020-09-17 11:09:00', 1), ('11', 'client_biggest_input_buf', '10', 'è¾“å…¥ç¼“å†²åŒºæœ€å¤§bufferå¤§å°(å•ä½ï¼šMB)', '1', '0', '1', '3', '1', '2017-06-19 10:47:03', '2020-09-17 11:09:00', 1), ('12', 'client_longest_output_list', '50000', 'è¾“å‡ºç¼“å†²åŒºæœ€å¤§é˜Ÿåˆ—é•¿åº¦', '1', '0', '1', '3', '1', '2017-06-19 10:55:45', '2020-09-17 11:09:00', 1), ('13', 'instantaneous_ops_per_sec', '60000', 'å®æ—¶ops', '1', '0', '1', '3', '1', '2017-06-19 11:02:38', '2020-09-17 11:09:00', 1),('14', 'latest_fork_usec', '400000', 'ä¸Šæ¬¡forkæ‰€ç”¨æ—¶é—´(å•ä½ï¼šå¾®ç§’)', '1', '0', '1', '3', '5', '2017-06-19 11:21:35', '2020-09-16 16:51:00', 1), ('15', 'mem_fragmentation_ratio', '1.5', 'å†…å­˜ç¢ç‰‡ç‡(æ£€æµ‹å¤§äº500MB)', '1', '0', '1', '3', '5', '2017-06-19 12:49:16', '2020-09-16 16:51:00', 0), ('16', 'rdb_last_bgsave_status', 'ok', 'ä¸Šä¸€æ¬¡bgsaveçŠ¶æ€', '1', '0', '1', '4', '4', '2017-06-19 14:15:21', '2020-09-17 10:19:00', 0), ('17', 'total_net_output_bytes', '5000', 'åˆ†é’Ÿç½‘ç»œè¾“å‡ºæµé‡(å•ä½ï¼šMB)', '1', '0', '1', '3', '1', '2017-06-19 16:39:44', '2020-09-17 11:09:00', 0), ('19', 'total_net_input_bytes', '1200', 'åˆ†é’Ÿç½‘ç»œè¾“å…¥æµé‡(å•ä½ï¼šMB)', '1', '0', '1', '3', '1', '2017-06-19 16:45:44', '2020-09-17 11:09:00', 0), ('20', 'sync_partial_err', '0', 'åˆ†é’Ÿéƒ¨åˆ†å¤åˆ¶å¤±è´¥æ¬¡æ•°', '1', '0', '1', '3', '1', '2017-06-19 18:34:41', '2020-09-17 11:09:00', 1), ('21', 'sync_partial_ok', '0', 'åˆ†é’Ÿéƒ¨åˆ†å¤åˆ¶æˆåŠŸæ¬¡æ•°', '1', '0', '1', '3', '1', '2017-06-19 18:35:01', '2020-09-17 11:09:00', 1), ('22', 'sync_full', '0', 'åˆ†é’Ÿå…¨é‡å¤åˆ¶æ‰§è¡Œæ¬¡æ•°', '1', '0', '1', '3', '1', '2017-06-19 18:35:17', '2020-09-17 11:09:00', 1), ('23', 'rejected_connections', '0', 'åˆ†é’Ÿæ‹’ç»è¿æ¥æ•°', '1', '0', '1', '3', '1', '2017-06-19 18:35:36', '2020-09-17 11:09:00', 2), ('54', 'master_slave_offset_diff', '20000000', 'ä¸»ä»èŠ‚ç‚¹åç§»é‡å·®(å•ä½ï¼šå­—èŠ‚)', '1', '0', '1', '3', '2', '2017-06-20 18:58:56', '2020-09-17 11:06:00', 0), ('56', 'cluster_state', 'ok', 'é›†ç¾¤çŠ¶æ€', '1', '0', '1', '4', '1', '2017-06-21 18:01:52', '2020-09-17 11:09:00', 2), ('57', 'cluster_slots_ok', '16384', 'é›†ç¾¤æˆåŠŸåˆ†é…æ§½ä¸ªæ•°', '1', '0', '1', '4', '1', '2017-06-21 18:02:04', '2020-09-17 11:09:00', 2);
 COMMIT;
 
 --
@@ -505,21 +505,21 @@ COMMIT;
 DROP TABLE IF EXISTS `instance_big_key`;
 CREATE TABLE `instance_big_key` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `instance_id` bigint(20) NOT NULL COMMENT 'ÊµÀıµÄid',
+  `instance_id` bigint(20) NOT NULL COMMENT 'å®ä¾‹çš„id',
   `app_id` bigint(20) NOT NULL COMMENT 'app id',
   `audit_id` bigint(20) NOT NULL COMMENT 'audit id',
-  `role` tinyint(255) NOT NULL COMMENT 'Ö÷´Ó£¬1Ö÷2´Ó£¬Ïê¼ûInstanceRoleEnum',
+  `role` tinyint(255) NOT NULL COMMENT 'ä¸»ä»ï¼Œ1ä¸»2ä»ï¼Œè¯¦è§InstanceRoleEnum',
   `ip` varchar(32) NOT NULL COMMENT 'ip',
   `port` int(11) NOT NULL COMMENT 'port',
-  `big_key` varchar(255) NOT NULL COMMENT '¼ü',
-  `type` varchar(16) NOT NULL COMMENT 'ÀàĞÍ:string,hash,list,set,zset',
-  `length` int(11) NOT NULL COMMENT '³¤¶È',
-  `create_time` datetime NOT NULL COMMENT '¼ÇÂ¼´´½¨Ê±¼ä',
+  `big_key` varchar(255) NOT NULL COMMENT 'é”®',
+  `type` varchar(16) NOT NULL COMMENT 'ç±»å‹:string,hash,list,set,zset',
+  `length` int(11) NOT NULL COMMENT 'é•¿åº¦',
+  `create_time` datetime NOT NULL COMMENT 'è®°å½•åˆ›å»ºæ—¶é—´',
   PRIMARY KEY (`id`),
   KEY `idx_app_audit` (`app_id`,`audit_id`),
   KEY `idx_app_create_time` (`app_id`,`create_time`),
   KEY `idx_create_time` (`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='ÊµÀıbigkeyÁĞ±í';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='å®ä¾‹bigkeyåˆ—è¡¨';
 
 --
 -- Table structure for table `instance_config`
@@ -528,23 +528,23 @@ CREATE TABLE `instance_big_key` (
 DROP TABLE IF EXISTS `instance_config`;
 CREATE TABLE `instance_config` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `config_key` varchar(128) NOT NULL COMMENT 'ÅäÖÃÃû',
-  `config_value` varchar(512) NOT NULL COMMENT 'ÅäÖÃÖµ',
-  `info` varchar(512) NOT NULL COMMENT 'ÅäÖÃËµÃ÷',
-  `update_time` datetime NOT NULL COMMENT '¸üĞÂÊ±¼ä',
-  `type` mediumint(9) NOT NULL COMMENT 'ÀàĞÍ£º2.cluster½ÚµãÌØÊâÅäÖÃ, 5:sentinel½ÚµãÅäÖÃ, 6:redisÆÕÍ¨½Úµã',
-  `status` tinyint(4) NOT NULL COMMENT '1ÓĞĞ§,0ÎŞĞ§',
-  `version_id` int(11) NOT NULL COMMENT 'Redis°æ±¾±íÖ÷¼üid',
-  `refresh` mediumint(9) DEFAULT '0' COMMENT 'ÊÇ·ñ¿ÉÖØÖÃ£º0²»¿É£¬1¿ÉÖØÖÃ',
+  `config_key` varchar(128) NOT NULL COMMENT 'é…ç½®å',
+  `config_value` varchar(512) NOT NULL COMMENT 'é…ç½®å€¼',
+  `info` varchar(512) NOT NULL COMMENT 'é…ç½®è¯´æ˜',
+  `update_time` datetime NOT NULL COMMENT 'æ›´æ–°æ—¶é—´',
+  `type` mediumint(9) NOT NULL COMMENT 'ç±»å‹ï¼š2.clusterèŠ‚ç‚¹ç‰¹æ®Šé…ç½®, 5:sentinelèŠ‚ç‚¹é…ç½®, 6:redisæ™®é€šèŠ‚ç‚¹',
+  `status` tinyint(4) NOT NULL COMMENT '1æœ‰æ•ˆ,0æ— æ•ˆ',
+  `version_id` int(11) NOT NULL COMMENT 'Redisç‰ˆæœ¬è¡¨ä¸»é”®id',
+  `refresh` mediumint(9) DEFAULT '0' COMMENT 'æ˜¯å¦å¯é‡ç½®ï¼š0ä¸å¯ï¼Œ1å¯é‡ç½®',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_configkey_type_version_id` (`config_key`,`type`,`version_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='ÊµÀıÅäÖÃÄ£°å';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='å®ä¾‹é…ç½®æ¨¡æ¿';
 
 -- ----------------------------
 --  Records of `instance_config`
 -- ----------------------------
 BEGIN;
-INSERT INTO `instance_config` VALUES ('1', 'cluster-enabled', 'yes', 'ÊÇ·ñ¿ªÆô¼¯ÈºÄ£Ê½', '2016-07-05 15:08:30', '2', '1', '29', '0'), ('2', 'cluster-node-timeout', '15000', '¼¯Èº½Úµã³¬Ê±Ê±¼ä,Ä¬ÈÏ15Ãë', '2016-07-05 15:08:30', '2', '1', '29', '0'), ('3', 'cluster-slave-validity-factor', '10', '´Ó½ÚµãÑÓ³ÙÓĞĞ§ĞÔÅĞ¶ÏÒò×Ó,Ä¬ÈÏ10Ãë', '2016-07-05 15:08:30', '2', '1', '29', '0'), ('4', 'cluster-migration-barrier', '1', 'Ö÷´ÓÇ¨ÒÆÖÁÉÙĞèÒªµÄ´Ó½ÚµãÊı,Ä¬ÈÏ1¸ö', '2016-07-05 15:08:30', '2', '1', '29', '0'), ('5', 'cluster-config-file', 'nodes-%d.conf', '¼¯ÈºÅäÖÃÎÄ¼şÃû³Æ,¸ñÊ½:nodes-{port}.conf', '2016-07-05 15:08:30', '2', '1', '29', '0'), ('6', 'cluster-require-full-coverage', 'no', '½Úµã²¿·ÖÊ§°ÜÆÚ¼ä,ÆäËû½ÚµãÊÇ·ñ¼ÌĞø¹¤×÷', '2016-07-05 15:08:31', '2', '1', '29', '0'), ('7', 'port', '%d', 'sentinelÊµÀı¶Ë¿Ú', '2016-07-05 15:08:31', '5', '1', '29', '0'), ('8', 'dir', '%s', '¹¤×÷Ä¿Â¼', '2016-07-05 15:08:31', '5', '1', '29', '0'), ('9', 'sentinel monitor', '%s %s %d 1', 'masterÃû³Æ¶¨ÒåºÍ×îÉÙ²ÎÓë¼à¿ØµÄsentinelÊı,¸ñÊ½:masterName ip port num', '2016-07-05 15:08:31', '5', '1', '29', '0'), ('10', 'sentinel down-after-milliseconds', '%s 20000', 'SentinelÅĞ¶¨·şÎñÆ÷¶ÏÏßµÄºÁÃëÊı', '2016-07-05 15:08:31', '5', '1', '29', '0'), ('11', 'sentinel failover-timeout', '%s 180000', '¹ÊÕÏÇ¨ÒÆ³¬Ê±Ê±¼ä,Ä¬ÈÏ:3·ÖÖÓ', '2016-07-05 15:08:31', '5', '1', '29', '0'), ('12', 'sentinel parallel-syncs', '%s 1', 'ÔÚÖ´ĞĞ¹ÊÕÏ×ªÒÆÊ±,×î¶àÓĞ¶àÉÙ¸ö´Ó·şÎñÆ÷Í¬Ê±¶ÔĞÂµÄÖ÷·şÎñÆ÷½øĞĞÍ¬²½,Ä¬ÈÏ:1', '2016-07-05 15:08:31', '5', '1', '29', '0'), ('13', 'daemonize', 'no', 'ÊÇ·ñÊØ»¤½ø³Ì', '2016-07-14 14:00:05', '6', '1', '29', '0'), ('14', 'tcp-backlog', '511', 'TCPÁ¬½ÓÍê³É¶ÓÁĞ', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('15', 'timeout', '0', '¿Í»§¶ËÏĞÖÃ¶àÉÙÃëºó¹Ø±ÕÁ¬½Ó,Ä¬ÈÏÎª0,ÓÀ²»¹Ø±Õ', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('16', 'tcp-keepalive', '60', '¼ì²â¿Í»§¶ËÊÇ·ñ½¡¿µÖÜÆÚ,Ä¬ÈÏ¹Ø±Õ', '2016-12-06 11:40:46', '6', '1', '29', '0'), ('17', 'loglevel', 'notice', 'ÈÕÖ¾¼¶±ğ', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('18', 'databases', '16', '¿ÉÓÃµÄÊı¾İ¿âÊı£¬Ä¬ÈÏÖµÎª16¸ö,Ä¬ÈÏÊı¾İ¿âÎª0', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('19', 'dir', '%s', 'redis¹¤×÷Ä¿Â¼', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('20', 'stop-writes-on-bgsave-error', 'no', 'bgsave³ö´íÁË²»Í£Ğ´', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('21', 'repl-timeout', '60', 'masterÅúÁ¿Êı¾İ´«ÊäÊ±¼ä»òÕßping»Ø¸´Ê±¼ä¼ä¸ô,Ä¬ÈÏ:60Ãë', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('22', 'repl-ping-slave-period', '10', 'Ö¸¶¨slave¶¨ÆÚping masterµÄÖÜÆÚ,Ä¬ÈÏ:10Ãë', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('23', 'repl-disable-tcp-nodelay', 'no', 'ÊÇ·ñ½ûÓÃsocketµÄNO_DELAY,Ä¬ÈÏ¹Ø±Õ£¬Ó°ÏìÖ÷´ÓÑÓ³Ù', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('24', 'repl-backlog-size', '10M', '¸´ÖÆ»º´æÇø,Ä¬ÈÏ:1mb,ÅäÖÃÎª:10Mb', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('25', 'repl-backlog-ttl', '7200', 'masterÔÚÃ»ÓĞSlaveµÄÇé¿öÏÂÊÍ·ÅBACKLOGµÄÊ±¼ä¶à¾Ã:Ä¬ÈÏ:3600,ÅäÖÃÎª:7200', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('26', 'slave-serve-stale-data', 'yes', 'µ±slave·şÎñÆ÷ºÍmaster·şÎñÆ÷Ê§È¥Á¬½Óºó£¬»òÕßµ±Êı¾İÕıÔÚ¸´ÖÆ´«ÊäµÄÊ±ºò£¬Èç¹û´Ë²ÎÊıÖµÉèÖÃ¡°yes¡±£¬slave·şÎñÆ÷¿ÉÒÔ¼ÌĞø½ÓÊÜ¿Í»§¶ËµÄÇëÇó', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('27', 'slave-read-only', 'yes', 'slave·şÎñÆ÷½ÚµãÊÇ·ñÖ»¶Á,clusterµÄslave½ÚµãÄ¬ÈÏ¶ÁĞ´¶¼²»¿ÉÓÃ,ĞèÒªµ÷ÓÃreadonly¿ªÆô¿É¶ÁÄ£Ê½', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('28', 'slave-priority', '100', 'slaveµÄÓÅÏÈ¼¶,Ó°Ïìsentinel/cluster½úÉımaster²Ù×÷,0ÓÀÔ¶²»½úÉı', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('29', 'lua-time-limit', '5000', 'Lua½Å±¾×î³¤µÄÖ´ĞĞÊ±¼ä£¬µ¥Î»ÎªºÁÃë', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('30', 'slowlog-log-slower-than', '10000', 'Âı²éÑ¯±»¼ÇÂ¼µÄ·§Öµ,Ä¬ÈÏ10ºÁÃë', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('31', 'slowlog-max-len', '128', '×î¶à¼ÇÂ¼Âı²éÑ¯µÄÌõÊı', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('32', 'hash-max-ziplist-entries', '512', 'hashÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('33', 'hash-max-ziplist-value', '64', 'hashÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('34', 'list-max-ziplist-entries', '512', 'listÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('35', 'list-max-ziplist-value', '64', 'listÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('36', 'set-max-intset-entries', '512', 'setÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('37', 'zset-max-ziplist-entries', '128', 'zsetÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('38', 'zset-max-ziplist-value', '64', 'zsetÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('39', 'activerehashing', 'yes', 'ÊÇ·ñ¼¤»îÖØÖÃ¹şÏ£,Ä¬ÈÏ:yes', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('40', 'client-output-buffer-limit normal', '0 0 0', '¿Í»§¶ËÊä³ö»º³åÇøÏŞÖÆ(¿Í»§¶Ë)', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('41', 'client-output-buffer-limit slave', '512mb 256mb 60', '¿Í»§¶ËÊä³ö»º³åÇøÏŞÖÆ(¸´ÖÆ)', '2016-11-24 10:24:21', '6', '1', '29', '0'), ('42', 'client-output-buffer-limit pubsub', '32mb 8mb 60', '¿Í»§¶ËÊä³ö»º³åÇøÏŞÖÆ(·¢²¼¶©ÔÄ)', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('43', 'hz', '10', 'Ö´ĞĞºóÌ¨taskÊıÁ¿,Ä¬ÈÏ:10', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('44', 'port', '%d', '¶Ë¿Ú', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('45', 'maxmemory', '%dmb', 'µ±Ç°ÊµÀı×î´ó¿ÉÓÃÄÚ´æ', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('46', 'maxmemory-policy', 'volatile-lru', 'ÄÚ´æ²»¹»Ê±,ÌÔÌ­²ßÂÔ,Ä¬ÈÏ:volatile-lru', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('47', 'appendonly', 'yes', '¿ªÆôappend only³Ö¾Ã»¯Ä£Ê½', '2016-07-05 15:08:32', '6', '1', '29', '0'), ('48', 'appendfsync', 'everysec', 'Ä¬ÈÏ:aofÃ¿ÃëÍ¬²½Ò»´Î', '2016-07-05 15:08:32', '6', '1', '29', '0'), ('49', 'appendfilename', 'appendonly-%d.aof', 'aofÎÄ¼şÃû³Æ,Ä¬ÈÏ:appendonly-{port}.aof', '2016-07-05 15:08:32', '6', '1', '29', '0'), ('50', 'dbfilename', 'dump-%d.rdb', 'RDBÎÄ¼şÄ¬ÈÏÃû³Æ,Ä¬ÈÏdump-{port}.rdb', '2016-07-05 15:08:32', '6', '1', '29', '0'), ('51', 'aof-rewrite-incremental-fsync', 'yes', 'aof rewrite¹ı³ÌÖĞ,ÊÇ·ñ²ÉÈ¡ÔöÁ¿ÎÄ¼şÍ¬²½²ßÂÔ,Ä¬ÈÏ:yes', '2016-07-05 15:08:32', '6', '1', '29', '0'), ('52', 'no-appendfsync-on-rewrite', 'yes', 'ÊÇ·ñÔÚºóÌ¨aofÎÄ¼şrewriteÆÚ¼äµ÷ÓÃfsync,Ä¬ÈÏµ÷ÓÃ,ĞŞ¸ÄÎªyes,·ÀÖ¹¿ÉÄÜfsync×èÈû,µ«¿ÉÄÜ¶ªÊ§rewriteÆÚ¼äµÄÊı¾İ', '2016-07-05 15:08:32', '6', '1', '29', '0'), ('53', 'auto-aof-rewrite-min-size', '64m', '´¥·¢rewriteµÄaofÎÄ¼ş×îĞ¡·§Öµ,Ä¬ÈÏ64m', '2016-07-05 15:08:32', '6', '1', '29', '0'), ('54', 'auto-aof-rewrite-percentage', '%d', 'RedisÖØĞ´aofÎÄ¼şµÄ±ÈÀıÌõ¼ş,Ä¬ÈÏ´Ó100¿ªÊ¼,Í³Ò»»úÆ÷ÏÂ²»Í¬ÊµÀı°´4%µİ¼õ', '2016-07-05 15:08:32', '6', '1', '29', '0'), ('55', 'maxclients', '10000', '¿Í»§¶Ë×î´óÁ¬½ÓÊı', '2016-07-05 15:08:32', '6', '1', '29', '0'), ('126', 'cluster-enabled', 'yes', 'ÊÇ·ñ¿ªÆô¼¯ÈºÄ£Ê½', '2018-09-18 18:23:03', '2', '1', '31', '0'), ('127', 'cluster-node-timeout', '15000', '¼¯Èº½Úµã³¬Ê±Ê±¼ä,Ä¬ÈÏ15Ãë', '2018-09-18 18:23:03', '2', '1', '31', '0'), ('128', 'cluster-slave-validity-factor', '10', '´Ó½ÚµãÑÓ³ÙÓĞĞ§ĞÔÅĞ¶ÏÒò×Ó,Ä¬ÈÏ10Ãë', '2018-09-18 18:23:03', '2', '1', '31', '0'), ('129', 'cluster-migration-barrier', '1', 'Ö÷´ÓÇ¨ÒÆÖÁÉÙĞèÒªµÄ´Ó½ÚµãÊı,Ä¬ÈÏ1¸ö', '2018-09-18 18:23:03', '2', '1', '31', '0'), ('130', 'cluster-config-file', 'nodes-%d.conf', '¼¯ÈºÅäÖÃÎÄ¼şÃû³Æ,¸ñÊ½:nodes-{port}.conf', '2018-09-18 18:23:03', '2', '1', '31', '0'), ('131', 'cluster-require-full-coverage', 'no', '½Úµã²¿·ÖÊ§°ÜÆÚ¼ä,ÆäËû½ÚµãÊÇ·ñ¼ÌĞø¹¤×÷', '2018-09-18 18:23:03', '2', '1', '31', '0'), ('132', 'port', '%d', 'sentinelÊµÀı¶Ë¿Ú', '2018-09-18 18:23:03', '5', '1', '31', '0'), ('133', 'dir', '%s', '¹¤×÷Ä¿Â¼', '2018-09-18 18:23:03', '5', '1', '31', '0'), ('134', 'sentinel monitor', '%s %s %d 1', 'masterÃû³Æ¶¨ÒåºÍ×îÉÙ²ÎÓë¼à¿ØµÄsentinelÊı,¸ñÊ½:masterName ip port num', '2018-09-18 18:23:03', '5', '1', '31', '0'), ('135', 'sentinel down-after-milliseconds', '%s 20000', 'SentinelÅĞ¶¨·şÎñÆ÷¶ÏÏßµÄºÁÃëÊı', '2018-09-18 18:23:03', '5', '1', '31', '0'), ('136', 'sentinel failover-timeout', '%s 180000', '¹ÊÕÏÇ¨ÒÆ³¬Ê±Ê±¼ä,Ä¬ÈÏ:3·ÖÖÓ', '2018-09-18 18:23:03', '5', '1', '31', '0'), ('137', 'sentinel parallel-syncs', '%s 1', 'ÔÚÖ´ĞĞ¹ÊÕÏ×ªÒÆÊ±,×î¶àÓĞ¶àÉÙ¸ö´Ó·şÎñÆ÷Í¬Ê±¶ÔĞÂµÄÖ÷·şÎñÆ÷½øĞĞÍ¬²½,Ä¬ÈÏ:1', '2018-09-18 18:23:03', '5', '1', '31', '0'), ('138', 'daemonize', 'no', 'ÊÇ·ñÊØ»¤½ø³Ì', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('139', 'tcp-backlog', '511', 'TCPÁ¬½ÓÍê³É¶ÓÁĞ', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('140', 'timeout', '0', '¿Í»§¶ËÏĞÖÃ¶àÉÙÃëºó¹Ø±ÕÁ¬½Ó,Ä¬ÈÏÎª0,ÓÀ²»¹Ø±Õ', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('141', 'tcp-keepalive', '60', '¼ì²â¿Í»§¶ËÊÇ·ñ½¡¿µÖÜÆÚ,Ä¬ÈÏ¹Ø±Õ', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('142', 'loglevel', 'notice', 'ÈÕÖ¾¼¶±ğ', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('143', 'databases', '16', '¿ÉÓÃµÄÊı¾İ¿âÊı£¬Ä¬ÈÏÖµÎª16¸ö,Ä¬ÈÏÊı¾İ¿âÎª0', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('144', 'dir', '%s', 'redis¹¤×÷Ä¿Â¼', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('145', 'stop-writes-on-bgsave-error', 'no', 'bgsave³ö´íÁË²»Í£Ğ´', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('146', 'repl-timeout', '60', 'masterÅúÁ¿Êı¾İ´«ÊäÊ±¼ä»òÕßping»Ø¸´Ê±¼ä¼ä¸ô,Ä¬ÈÏ:60Ãë', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('147', 'repl-ping-slave-period', '10', 'Ö¸¶¨slave¶¨ÆÚping masterµÄÖÜÆÚ,Ä¬ÈÏ:10Ãë', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('148', 'repl-disable-tcp-nodelay', 'no', 'ÊÇ·ñ½ûÓÃsocketµÄNO_DELAY,Ä¬ÈÏ¹Ø±Õ£¬Ó°ÏìÖ÷´ÓÑÓ³Ù', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('149', 'repl-backlog-size', '10M', '¸´ÖÆ»º´æÇø,Ä¬ÈÏ:1mb,ÅäÖÃÎª:10Mb', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('150', 'repl-backlog-ttl', '7200', 'masterÔÚÃ»ÓĞSlaveµÄÇé¿öÏÂÊÍ·ÅBACKLOGµÄÊ±¼ä¶à¾Ã:Ä¬ÈÏ:3600,ÅäÖÃÎª:7200', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('151', 'slave-serve-stale-data', 'yes', 'µ±slave·şÎñÆ÷ºÍmaster·şÎñÆ÷Ê§È¥Á¬½Óºó£¬»òÕßµ±Êı¾İÕıÔÚ¸´ÖÆ´«ÊäµÄÊ±ºò£¬Èç¹û´Ë²ÎÊıÖµÉèÖÃ¡°yes¡±£¬slave·şÎñÆ÷¿ÉÒÔ¼ÌĞø½ÓÊÜ¿Í»§¶ËµÄÇëÇó', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('152', 'slave-read-only', 'yes', 'slave·şÎñÆ÷½ÚµãÊÇ·ñÖ»¶Á,clusterµÄslave½ÚµãÄ¬ÈÏ¶ÁĞ´¶¼²»¿ÉÓÃ,ĞèÒªµ÷ÓÃreadonly¿ªÆô¿É¶ÁÄ£Ê½', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('153', 'slave-priority', '100', 'slaveµÄÓÅÏÈ¼¶,Ó°Ïìsentinel/cluster½úÉımaster²Ù×÷,0ÓÀÔ¶²»½úÉı', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('154', 'lua-time-limit', '5000', 'Lua½Å±¾×î³¤µÄÖ´ĞĞÊ±¼ä£¬µ¥Î»ÎªºÁÃë', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('155', 'slowlog-log-slower-than', '10000', 'Âı²éÑ¯±»¼ÇÂ¼µÄ·§Öµ,Ä¬ÈÏ10ºÁÃë', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('156', 'slowlog-max-len', '128', '×î¶à¼ÇÂ¼Âı²éÑ¯µÄÌõÊı', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('157', 'hash-max-ziplist-entries', '512', 'hashÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('158', 'hash-max-ziplist-value', '64', 'hashÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('159', 'list-max-ziplist-entries', '512', 'listÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2018-09-18 18:25:32', '6', '0', '31', '0'), ('160', 'list-max-ziplist-value', '64', 'listÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2018-09-18 18:25:40', '6', '0', '31', '0'), ('161', 'set-max-intset-entries', '512', 'setÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('162', 'zset-max-ziplist-entries', '128', 'zsetÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('163', 'zset-max-ziplist-value', '64', 'zsetÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('164', 'activerehashing', 'yes', 'ÊÇ·ñ¼¤»îÖØÖÃ¹şÏ£,Ä¬ÈÏ:yes', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('165', 'client-output-buffer-limit normal', '0 0 0', '¿Í»§¶ËÊä³ö»º³åÇøÏŞÖÆ(¿Í»§¶Ë)', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('166', 'client-output-buffer-limit slave', '512mb 256mb 60', '¿Í»§¶ËÊä³ö»º³åÇøÏŞÖÆ(¸´ÖÆ)', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('167', 'client-output-buffer-limit pubsub', '32mb 8mb 60', '¿Í»§¶ËÊä³ö»º³åÇøÏŞÖÆ(·¢²¼¶©ÔÄ)', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('168', 'hz', '10', 'Ö´ĞĞºóÌ¨taskÊıÁ¿,Ä¬ÈÏ:10', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('169', 'port', '%d', '¶Ë¿Ú', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('170', 'maxmemory', '%dmb', 'µ±Ç°ÊµÀı×î´ó¿ÉÓÃÄÚ´æ', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('171', 'maxmemory-policy', 'volatile-lru', 'ÄÚ´æ²»¹»Ê±,ÌÔÌ­²ßÂÔ,Ä¬ÈÏ:volatile-lru', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('172', 'appendonly', 'yes', '¿ªÆôappend only³Ö¾Ã»¯Ä£Ê½', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('173', 'appendfsync', 'everysec', 'Ä¬ÈÏ:aofÃ¿ÃëÍ¬²½Ò»´Î', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('174', 'appendfilename', 'appendonly-%d.aof', 'aofÎÄ¼şÃû³Æ,Ä¬ÈÏ:appendonly-{port}.aof', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('175', 'dbfilename', 'dump-%d.rdb', 'RDBÎÄ¼şÄ¬ÈÏÃû³Æ,Ä¬ÈÏdump-{port}.rdb', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('176', 'aof-rewrite-incremental-fsync', 'yes', 'aof rewrite¹ı³ÌÖĞ,ÊÇ·ñ²ÉÈ¡ÔöÁ¿ÎÄ¼şÍ¬²½²ßÂÔ,Ä¬ÈÏ:yes', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('177', 'no-appendfsync-on-rewrite', 'yes', 'ÊÇ·ñÔÚºóÌ¨aofÎÄ¼şrewriteÆÚ¼äµ÷ÓÃfsync,Ä¬ÈÏµ÷ÓÃ,ĞŞ¸ÄÎªyes,·ÀÖ¹¿ÉÄÜfsync×èÈû,µ«¿ÉÄÜ¶ªÊ§rewriteÆÚ¼äµÄÊı¾İ', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('178', 'auto-aof-rewrite-min-size', '64m', '´¥·¢rewriteµÄaofÎÄ¼ş×îĞ¡·§Öµ,Ä¬ÈÏ64m', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('179', 'auto-aof-rewrite-percentage', '%d', 'RedisÖØĞ´aofÎÄ¼şµÄ±ÈÀıÌõ¼ş,Ä¬ÈÏ´Ó100¿ªÊ¼,Í³Ò»»úÆ÷ÏÂ²»Í¬ÊµÀı°´4%µİ¼õ', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('180', 'maxclients', '10000', '¿Í»§¶Ë×î´óÁ¬½ÓÊı', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('181', 'protected-mode', 'yes', '¿ªÆô±£»¤Ä£Ê½', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('182', 'bind', '0.0.0.0', 'Ä¬ÈÏ¿Í»§¶Ë¶¼¿ÉÁ¬½Ó', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('185', 'list-max-ziplist-size', '-2', '8Kb¶ÔÏóÒÔÄÚ²ÉÓÃziplist', '2018-09-18 18:26:32', '6', '1', '31', '0'), ('186', 'list-compress-depth', '0', 'Ñ¹Ëõ·½Ê½£¬0:²»Ñ¹Ëõ', '2018-09-18 18:27:12', '6', '1', '31', '0'), ('253', 'protected-mode', 'no', '¹Ø±Õ±£»¤Ä£Ê½', '2018-11-01 16:10:59', '5', '1', '31', '0'), ('354', 'cluster-enabled', 'yes', 'ÊÇ·ñ¿ªÆô¼¯ÈºÄ£Ê½', '2019-10-24 17:33:26', '2', '1', '12', '0'), ('355', 'cluster-node-timeout', '15000', '¼¯Èº½Úµã³¬Ê±Ê±¼ä,Ä¬ÈÏ15Ãë', '2019-10-24 17:33:26', '2', '1', '12', '0'), ('356', 'cluster-slave-validity-factor', '10', '´Ó½ÚµãÑÓ³ÙÓĞĞ§ĞÔÅĞ¶ÏÒò×Ó,Ä¬ÈÏ10Ãë', '2019-10-24 17:33:26', '2', '1', '12', '0'), ('357', 'cluster-migration-barrier', '1', 'Ö÷´ÓÇ¨ÒÆÖÁÉÙĞèÒªµÄ´Ó½ÚµãÊı,Ä¬ÈÏ1¸ö', '2019-10-24 17:33:26', '2', '1', '12', '0'), ('358', 'cluster-config-file', 'nodes-%d.conf', '¼¯ÈºÅäÖÃÎÄ¼şÃû³Æ,¸ñÊ½:nodes-{port}.conf', '2019-10-24 17:33:26', '2', '1', '12', '0'), ('359', 'cluster-require-full-coverage', 'no', '½Úµã²¿·ÖÊ§°ÜÆÚ¼ä,ÆäËû½ÚµãÊÇ·ñ¼ÌĞø¹¤×÷', '2019-10-24 17:33:26', '2', '1', '12', '0'), ('360', 'port', '%d', 'sentinelÊµÀı¶Ë¿Ú', '2019-10-24 17:33:26', '5', '1', '12', '0'), ('361', 'dir', '%s', '¹¤×÷Ä¿Â¼', '2019-10-24 17:33:26', '5', '1', '12', '0'), ('362', 'sentinel monitor', '%s %s %d 1', 'masterÃû³Æ¶¨ÒåºÍ×îÉÙ²ÎÓë¼à¿ØµÄsentinelÊı,¸ñÊ½:masterName ip port num', '2019-10-24 17:33:26', '5', '1', '12', '0'), ('363', 'sentinel down-after-milliseconds', '%s 20000', 'SentinelÅĞ¶¨·şÎñÆ÷¶ÏÏßµÄºÁÃëÊı', '2019-10-24 17:33:26', '5', '1', '12', '0'), ('364', 'sentinel failover-timeout', '%s 180000', '¹ÊÕÏÇ¨ÒÆ³¬Ê±Ê±¼ä,Ä¬ÈÏ:3·ÖÖÓ', '2019-10-24 17:33:26', '5', '1', '12', '0'), ('365', 'sentinel parallel-syncs', '%s 1', 'ÔÚÖ´ĞĞ¹ÊÕÏ×ªÒÆÊ±,×î¶àÓĞ¶àÉÙ¸ö´Ó·şÎñÆ÷Í¬Ê±¶ÔĞÂµÄÖ÷·şÎñÆ÷½øĞĞÍ¬²½,Ä¬ÈÏ:1', '2019-10-24 17:33:26', '5', '1', '12', '0'), ('366', 'daemonize', 'no', 'ÊÇ·ñÊØ»¤½ø³Ì', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('367', 'tcp-backlog', '511', 'TCPÁ¬½ÓÍê³É¶ÓÁĞ', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('368', 'timeout', '0', '¿Í»§¶ËÏĞÖÃ¶àÉÙÃëºó¹Ø±ÕÁ¬½Ó,Ä¬ÈÏÎª0,ÓÀ²»¹Ø±Õ', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('369', 'tcp-keepalive', '60', '¼ì²â¿Í»§¶ËÊÇ·ñ½¡¿µÖÜÆÚ,Ä¬ÈÏ¹Ø±Õ', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('370', 'loglevel', 'notice', 'ÈÕÖ¾¼¶±ğ', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('371', 'databases', '16', '¿ÉÓÃµÄÊı¾İ¿âÊı£¬Ä¬ÈÏÖµÎª16¸ö,Ä¬ÈÏÊı¾İ¿âÎª0', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('372', 'dir', '%s', 'redis¹¤×÷Ä¿Â¼', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('373', 'stop-writes-on-bgsave-error', 'no', 'bgsave³ö´íÁË²»Í£Ğ´', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('374', 'repl-timeout', '60', 'masterÅúÁ¿Êı¾İ´«ÊäÊ±¼ä»òÕßping»Ø¸´Ê±¼ä¼ä¸ô,Ä¬ÈÏ:60Ãë', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('375', 'repl-ping-slave-period', '10', 'Ö¸¶¨slave¶¨ÆÚping masterµÄÖÜÆÚ,Ä¬ÈÏ:10Ãë', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('376', 'repl-disable-tcp-nodelay', 'no', 'ÊÇ·ñ½ûÓÃsocketµÄNO_DELAY,Ä¬ÈÏ¹Ø±Õ£¬Ó°ÏìÖ÷´ÓÑÓ³Ù', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('377', 'repl-backlog-size', '10M', '¸´ÖÆ»º´æÇø,Ä¬ÈÏ:1mb,ÅäÖÃÎª:10Mb', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('378', 'repl-backlog-ttl', '7200', 'masterÔÚÃ»ÓĞSlaveµÄÇé¿öÏÂÊÍ·ÅBACKLOGµÄÊ±¼ä¶à¾Ã:Ä¬ÈÏ:3600,ÅäÖÃÎª:7200', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('379', 'slave-serve-stale-data', 'yes', 'µ±slave·şÎñÆ÷ºÍmaster·şÎñÆ÷Ê§È¥Á¬½Óºó£¬»òÕßµ±Êı¾İÕıÔÚ¸´ÖÆ´«ÊäµÄÊ±ºò£¬Èç¹û´Ë²ÎÊıÖµÉèÖÃ¡°yes¡±£¬slave·şÎñÆ÷¿ÉÒÔ¼ÌĞø½ÓÊÜ¿Í»§¶ËµÄÇëÇó', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('380', 'slave-read-only', 'yes', 'slave·şÎñÆ÷½ÚµãÊÇ·ñÖ»¶Á,clusterµÄslave½ÚµãÄ¬ÈÏ¶ÁĞ´¶¼²»¿ÉÓÃ,ĞèÒªµ÷ÓÃreadonly¿ªÆô¿É¶ÁÄ£Ê½', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('381', 'slave-priority', '100', 'slaveµÄÓÅÏÈ¼¶,Ó°Ïìsentinel/cluster½úÉımaster²Ù×÷,0ÓÀÔ¶²»½úÉı', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('382', 'lua-time-limit', '5000', 'Lua½Å±¾×î³¤µÄÖ´ĞĞÊ±¼ä£¬µ¥Î»ÎªºÁÃë', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('383', 'slowlog-log-slower-than', '10000', 'Âı²éÑ¯±»¼ÇÂ¼µÄ·§Öµ,Ä¬ÈÏ10ºÁÃë', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('384', 'slowlog-max-len', '128', '×î¶à¼ÇÂ¼Âı²éÑ¯µÄÌõÊı', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('385', 'hash-max-ziplist-entries', '512', 'hashÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('386', 'hash-max-ziplist-value', '64', 'hashÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('387', 'list-max-ziplist-entries', '512', 'listÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2019-10-24 17:33:26', '6', '0', '12', '0'), ('388', 'list-max-ziplist-value', '64', 'listÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2019-10-24 17:33:26', '6', '0', '12', '0'), ('389', 'set-max-intset-entries', '512', 'setÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('390', 'zset-max-ziplist-entries', '128', 'zsetÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('391', 'zset-max-ziplist-value', '64', 'zsetÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('392', 'activerehashing', 'yes', 'ÊÇ·ñ¼¤»îÖØÖÃ¹şÏ£,Ä¬ÈÏ:yes', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('393', 'client-output-buffer-limit normal', '0 0 0', '¿Í»§¶ËÊä³ö»º³åÇøÏŞÖÆ(¿Í»§¶Ë)', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('394', 'client-output-buffer-limit slave', '512mb 256mb 60', '¿Í»§¶ËÊä³ö»º³åÇøÏŞÖÆ(¸´ÖÆ)', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('395', 'client-output-buffer-limit pubsub', '32mb 8mb 60', '¿Í»§¶ËÊä³ö»º³åÇøÏŞÖÆ(·¢²¼¶©ÔÄ)', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('396', 'hz', '10', 'Ö´ĞĞºóÌ¨taskÊıÁ¿,Ä¬ÈÏ:10', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('397', 'port', '%d', '¶Ë¿Ú', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('398', 'maxmemory', '%dmb', 'µ±Ç°ÊµÀı×î´ó¿ÉÓÃÄÚ´æ', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('399', 'maxmemory-policy', 'volatile-lfu', 'ÄÚ´æ²»¹»Ê±,ÌÔÌ­²ßÂÔ,Ä¬ÈÏ:volatile-lfu', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('400', 'appendonly', 'yes', '¿ªÆôappend only³Ö¾Ã»¯Ä£Ê½', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('401', 'appendfsync', 'everysec', 'Ä¬ÈÏ:aofÃ¿ÃëÍ¬²½Ò»´Î', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('402', 'appendfilename', 'appendonly-%d.aof', 'aofÎÄ¼şÃû³Æ,Ä¬ÈÏ:appendonly-{port}.aof', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('403', 'dbfilename', 'dump-%d.rdb', 'RDBÎÄ¼şÄ¬ÈÏÃû³Æ,Ä¬ÈÏdump-{port}.rdb', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('404', 'aof-rewrite-incremental-fsync', 'yes', 'aof rewrite¹ı³ÌÖĞ,ÊÇ·ñ²ÉÈ¡ÔöÁ¿ÎÄ¼şÍ¬²½²ßÂÔ,Ä¬ÈÏ:yes', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('405', 'no-appendfsync-on-rewrite', 'yes', 'ÊÇ·ñÔÚºóÌ¨aofÎÄ¼şrewriteÆÚ¼äµ÷ÓÃfsync,Ä¬ÈÏµ÷ÓÃ,ĞŞ¸ÄÎªyes,·ÀÖ¹¿ÉÄÜfsync×èÈû,µ«¿ÉÄÜ¶ªÊ§rewriteÆÚ¼äµÄÊı¾İ', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('406', 'auto-aof-rewrite-min-size', '64m', '´¥·¢rewriteµÄaofÎÄ¼ş×îĞ¡·§Öµ,Ä¬ÈÏ64m', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('407', 'auto-aof-rewrite-percentage', '%d', 'RedisÖØĞ´aofÎÄ¼şµÄ±ÈÀıÌõ¼ş,Ä¬ÈÏ´Ó100¿ªÊ¼,Í³Ò»»úÆ÷ÏÂ²»Í¬ÊµÀı°´4%µİ¼õ', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('408', 'maxclients', '10000', '¿Í»§¶Ë×î´óÁ¬½ÓÊı', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('409', 'protected-mode', 'yes', '¿ªÆô±£»¤Ä£Ê½', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('410', 'bind', '0.0.0.0', 'Ä¬ÈÏ¿Í»§¶Ë¶¼¿ÉÁ¬½Ó', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('411', 'list-max-ziplist-size', '-2', '8Kb¶ÔÏóÒÔÄÚ²ÉÓÃziplist', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('412', 'list-compress-depth', '0', 'Ñ¹Ëõ·½Ê½£¬0:²»Ñ¹Ëõ', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('413', 'always-show-logo', 'yes', 'redisÆô¶¯ÊÇ·ñÏÔÊ¾logo', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('414', 'lazyfree-lazy-eviction', 'yes', 'ÔÚ±»¶¯ÌÔÌ­¼üÊ±£¬ÊÇ·ñ²ÉÓÃlazy free»úÖÆ,Ä¬ÈÏ:no', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('415', 'lazyfree-lazy-expire', 'yes', 'TTLµÄ¼ü¹ıÆÚÊÇ·ñ²ÉÓÃlazyfree»úÖÆ Ä¬ÈÏÖµ:no', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('416', 'lazyfree-lazy-server-del', 'yes', 'ÒşÊ½µÄDEL¼ü(rename)ÊÇ·ñ²ÉÓÃlazyfree»úÖÆ Ä¬ÈÏÖµ:no', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('417', 'slave-lazy-flush', 'yes', 'slave·¢ÆğÈ«Á¿¸´ÖÆ,ÊÇ·ñ²ÉÓÃflushall asyncÇåÀíÀÏÊı¾İ Ä¬ÈÏÖµ no', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('418', 'aof-use-rdb-preamble', 'yes', 'ÊÇ·ñ¿ªÆô»ìºÏ³Ö¾Ã»¯,Ä¬ÈÏÖµ no ²»¿ªÆô', '2019-10-31 11:15:57', '6', '1', '12', '0'), ('419', 'protected-mode', 'no', '¹Ø±Õsentinel±£»¤Ä£Ê½', '2019-10-24 17:33:26', '5', '1', '12', '0'), ('420', 'activedefrag', 'no', 'ËéÆ¬ÕûÀí¿ªÆô', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('421', 'active-defrag-threshold-lower', '10', 'ËéÆ¬ÂÊ´ïµ½°Ù·ÖÖ®¶àÉÙ¿ªÆôÕûÀí', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('422', 'active-defrag-threshold-upper', '100', 'ËéÆ¬ÂÊĞ¡Óà¶àÉÙ°Ù·Ö±È¿ªÆôÕûÀí', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('423', 'active-defrag-ignore-bytes', '300mb', 'ÄÚ´æËéÆ¬´ïµ½¶àÉÙÕ×¿ªÆôËéÆ¬', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('424', 'active-defrag-cycle-min', '10', 'ËéÆ¬ÕûÀí×îĞ¡cpu°Ù·Ö±È', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('425', 'active-defrag-cycle-max', '30', 'ËéÆ¬ÕûÀí×î´ócpu°Ù·Ö±È', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('506', 'cluster-enabled', 'yes', 'ÊÇ·ñ¿ªÆô¼¯ÈºÄ£Ê½', '2020-04-26 18:12:55', '2', '1', '37', '0'), ('507', 'cluster-node-timeout', '15000', '¼¯Èº½Úµã³¬Ê±Ê±¼ä,Ä¬ÈÏ15Ãë', '2020-04-26 18:12:55', '2', '1', '37', '0'), ('508', 'cluster-migration-barrier', '1', 'Ö÷´ÓÇ¨ÒÆÖÁÉÙĞèÒªµÄ´Ó½ÚµãÊı,Ä¬ÈÏ1¸ö', '2020-04-26 18:12:55', '2', '1', '37', '0'), ('509', 'cluster-config-file', 'nodes-%d.conf', '¼¯ÈºÅäÖÃÎÄ¼şÃû³Æ,¸ñÊ½:nodes-{port}.conf', '2020-04-26 18:12:55', '2', '1', '37', '0'), ('510', 'cluster-require-full-coverage', 'no', '½Úµã²¿·ÖÊ§°ÜÆÚ¼ä,ÆäËû½ÚµãÊÇ·ñ¼ÌĞø¹¤×÷', '2020-04-26 18:12:55', '2', '1', '37', '0'), ('511', 'port', '%d', 'sentinelÊµÀı¶Ë¿Ú', '2020-04-26 18:12:55', '5', '1', '37', '0'), ('512', 'dir', '%s', '¹¤×÷Ä¿Â¼', '2020-04-26 18:12:55', '5', '1', '37', '0'), ('513', 'sentinel monitor', '%s %s %d 1', 'masterÃû³Æ¶¨ÒåºÍ×îÉÙ²ÎÓë¼à¿ØµÄsentinelÊı,¸ñÊ½:masterName ip port num', '2020-04-26 18:12:55', '5', '1', '37', '0'), ('514', 'sentinel down-after-milliseconds', '%s 20000', 'SentinelÅĞ¶¨·şÎñÆ÷¶ÏÏßµÄºÁÃëÊı', '2020-04-26 18:12:55', '5', '1', '37', '0'), ('515', 'sentinel failover-timeout', '%s 180000', '¹ÊÕÏÇ¨ÒÆ³¬Ê±Ê±¼ä,Ä¬ÈÏ:3·ÖÖÓ', '2020-04-26 18:12:55', '5', '1', '37', '0'), ('516', 'sentinel parallel-syncs', '%s 1', 'ÔÚÖ´ĞĞ¹ÊÕÏ×ªÒÆÊ±,×î¶àÓĞ¶àÉÙ¸ö´Ó·şÎñÆ÷Í¬Ê±¶ÔĞÂµÄÖ÷·şÎñÆ÷½øĞĞÍ¬²½,Ä¬ÈÏ:1', '2020-04-26 18:12:55', '5', '1', '37', '0'), ('517', 'daemonize', 'no', 'ÊÇ·ñÊØ»¤½ø³Ì', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('518', 'tcp-backlog', '511', 'TCPÁ¬½ÓÍê³É¶ÓÁĞ', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('519', 'timeout', '0', '¿Í»§¶ËÏĞÖÃ¶àÉÙÃëºó¹Ø±ÕÁ¬½Ó,Ä¬ÈÏÎª0,ÓÀ²»¹Ø±Õ', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('520', 'tcp-keepalive', '60', '¼ì²â¿Í»§¶ËÊÇ·ñ½¡¿µÖÜÆÚ,Ä¬ÈÏ¹Ø±Õ', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('521', 'loglevel', 'notice', 'ÈÕÖ¾¼¶±ğ', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('522', 'databases', '16', '¿ÉÓÃµÄÊı¾İ¿âÊı£¬Ä¬ÈÏÖµÎª16¸ö,Ä¬ÈÏÊı¾İ¿âÎª0', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('523', 'dir', '%s', 'redis¹¤×÷Ä¿Â¼', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('524', 'stop-writes-on-bgsave-error', 'no', 'bgsave³ö´íÁË²»Í£Ğ´', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('525', 'repl-timeout', '60', 'masterÅúÁ¿Êı¾İ´«ÊäÊ±¼ä»òÕßping»Ø¸´Ê±¼ä¼ä¸ô,Ä¬ÈÏ:60Ãë', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('526', 'repl-disable-tcp-nodelay', 'no', 'ÊÇ·ñ½ûÓÃsocketµÄNO_DELAY,Ä¬ÈÏ¹Ø±Õ£¬Ó°ÏìÖ÷´ÓÑÓ³Ù', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('527', 'repl-backlog-size', '10M', '¸´ÖÆ»º´æÇø,Ä¬ÈÏ:1mb,ÅäÖÃÎª:10Mb', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('528', 'repl-backlog-ttl', '7200', 'masterÔÚÃ»ÓĞ´Ó½ÚµãµÄÇé¿öÏÂÊÍ·ÅBACKLOGµÄÊ±¼ä¶à¾Ã:Ä¬ÈÏ:3600,ÅäÖÃÎª:7200', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('529', 'lua-time-limit', '5000', 'Lua½Å±¾×î³¤µÄÖ´ĞĞÊ±¼ä£¬µ¥Î»ÎªºÁÃë', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('530', 'slowlog-log-slower-than', '10000', 'Âı²éÑ¯±»¼ÇÂ¼µÄ·§Öµ,Ä¬ÈÏ10ºÁÃë', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('531', 'slowlog-max-len', '128', '×î¶à¼ÇÂ¼Âı²éÑ¯µÄÌõÊı', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('532', 'hash-max-ziplist-entries', '512', 'hashÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('533', 'hash-max-ziplist-value', '64', 'hashÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('534', 'list-max-ziplist-entries', '512', 'listÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2020-04-26 18:12:55', '6', '0', '37', '0'), ('535', 'list-max-ziplist-value', '64', 'listÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2020-04-26 18:12:55', '6', '0', '37', '0'), ('536', 'set-max-intset-entries', '512', 'setÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('537', 'zset-max-ziplist-entries', '128', 'zsetÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('538', 'zset-max-ziplist-value', '64', 'zsetÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('539', 'activerehashing', 'yes', 'ÊÇ·ñ¼¤»îÖØÖÃ¹şÏ£,Ä¬ÈÏ:yes', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('540', 'client-output-buffer-limit normal', '0 0 0', '¿Í»§¶ËÊä³ö»º³åÇøÏŞÖÆ(¿Í»§¶Ë)', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('541', 'client-output-buffer-limit pubsub', '32mb 8mb 60', '¿Í»§¶ËÊä³ö»º³åÇøÏŞÖÆ(·¢²¼¶©ÔÄ)', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('542', 'hz', '10', 'Ö´ĞĞºóÌ¨taskÊıÁ¿,Ä¬ÈÏ:10', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('543', 'port', '%d', '¶Ë¿Ú', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('544', 'maxmemory', '%dmb', 'µ±Ç°ÊµÀı×î´ó¿ÉÓÃÄÚ´æ', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('545', 'maxmemory-policy', 'volatile-lfu', 'ÄÚ´æ²»¹»Ê±,ÌÔÌ­²ßÂÔ,Ä¬ÈÏ:volatile-lfu', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('546', 'appendonly', 'yes', '¿ªÆôappend only³Ö¾Ã»¯Ä£Ê½', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('547', 'appendfsync', 'everysec', 'Ä¬ÈÏ:aofÃ¿ÃëÍ¬²½Ò»´Î', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('548', 'appendfilename', 'appendonly-%d.aof', 'aofÎÄ¼şÃû³Æ,Ä¬ÈÏ:appendonly-{port}.aof', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('549', 'dbfilename', 'dump-%d.rdb', 'RDBÎÄ¼şÄ¬ÈÏÃû³Æ,Ä¬ÈÏdump-{port}.rdb', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('550', 'aof-rewrite-incremental-fsync', 'yes', 'aof rewrite¹ı³ÌÖĞ,ÊÇ·ñ²ÉÈ¡ÔöÁ¿ÎÄ¼şÍ¬²½²ßÂÔ,Ä¬ÈÏ:yes', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('551', 'no-appendfsync-on-rewrite', 'yes', 'ÊÇ·ñÔÚºóÌ¨aofÎÄ¼şrewriteÆÚ¼äµ÷ÓÃfsync,Ä¬ÈÏµ÷ÓÃ,ĞŞ¸ÄÎªyes,·ÀÖ¹¿ÉÄÜfsync×èÈû,µ«¿ÉÄÜ¶ªÊ§rewriteÆÚ¼äµÄÊı¾İ', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('552', 'auto-aof-rewrite-min-size', '64m', '´¥·¢rewriteµÄaofÎÄ¼ş×îĞ¡·§Öµ,Ä¬ÈÏ64m', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('553', 'auto-aof-rewrite-percentage', '%d', 'RedisÖØĞ´aofÎÄ¼şµÄ±ÈÀıÌõ¼ş,Ä¬ÈÏ´Ó100¿ªÊ¼,Í³Ò»»úÆ÷ÏÂ²»Í¬ÊµÀı°´4%µİ¼õ', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('554', 'maxclients', '10000', '¿Í»§¶Ë×î´óÁ¬½ÓÊı', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('555', 'protected-mode', 'yes', '¿ªÆô±£»¤Ä£Ê½', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('556', 'bind', '0.0.0.0', 'Ä¬ÈÏ¿Í»§¶Ë¶¼¿ÉÁ¬½Ó', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('557', 'list-max-ziplist-size', '-2', '8Kb¶ÔÏóÒÔÄÚ²ÉÓÃziplist', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('558', 'list-compress-depth', '0', 'Ñ¹Ëõ·½Ê½£¬0:²»Ñ¹Ëõ', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('559', 'always-show-logo', 'yes', 'redisÆô¶¯ÊÇ·ñÏÔÊ¾logo', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('560', 'lazyfree-lazy-eviction', 'yes', 'ÔÚ±»¶¯ÌÔÌ­¼üÊ±£¬ÊÇ·ñ²ÉÓÃlazy free»úÖÆ,Ä¬ÈÏ:no', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('561', 'lazyfree-lazy-expire', 'yes', 'TTLµÄ¼ü¹ıÆÚÊÇ·ñ²ÉÓÃlazyfree»úÖÆ Ä¬ÈÏÖµ:no', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('562', 'lazyfree-lazy-server-del', 'yes', 'ÒşÊ½µÄDEL¼ü(rename)ÊÇ·ñ²ÉÓÃlazyfree»úÖÆ Ä¬ÈÏÖµ:no', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('563', 'aof-use-rdb-preamble', 'yes', 'ÊÇ·ñ¿ªÆô»ìºÏ³Ö¾Ã»¯,Ä¬ÈÏÖµ no ²»¿ªÆô', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('564', 'protected-mode', 'no', '¹Ø±Õsentinel±£»¤Ä£Ê½', '2020-04-26 18:12:55', '5', '1', '37', '0'), ('565', 'activedefrag', 'yes', 'ËéÆ¬ÕûÀí¿ªÆô', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('566', 'active-defrag-threshold-lower', '10', 'ËéÆ¬ÂÊ´ïµ½°Ù·ÖÖ®¶àÉÙ¿ªÆôÕûÀí', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('567', 'active-defrag-threshold-upper', '100', 'ËéÆ¬ÂÊĞ¡Óà¶àÉÙ°Ù·Ö±È¿ªÆôÕûÀí', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('568', 'active-defrag-ignore-bytes', '300mb', 'ÄÚ´æËéÆ¬´ïµ½¶àÉÙÕ×¿ªÆôËéÆ¬', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('569', 'active-defrag-cycle-min', '10', 'ËéÆ¬ÕûÀí×îĞ¡cpu°Ù·Ö±È', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('570', 'active-defrag-cycle-max', '30', 'ËéÆ¬ÕûÀí×î´ócpu°Ù·Ö±È', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('571', 'active-defrag-max-scan-fields', '1000', 'ÄÚ´æËéÆ¬´¦Àíset/hash/zset/list ÖĞµÄ×î´óÊıÁ¿µÄÏî', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('572', 'replica-serve-stale-data', 'yes', '´Ó½ÚµãÓëmaster¶ÏÁ¬»ò¸´ÖÆÃüÁîÏìÓ¦£ºyes ¼ÌĞøÏìÓ¦ no:Ïà¹ØÃüÁî·µ»ØÒì³£ĞÅÏ¢', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('573', 'cluster-replica-validity-factor', '10', '´Ó½ÚµãÑÓ³ÙÓĞĞ§ĞÔÅĞ¶ÏÒò×Ó,Ä¬ÈÏ10Ãë', '2020-04-26 18:12:55', '2', '1', '37', '0'), ('574', 'replica-priority', '100', '´Ó½ÚµãµÄÓÅÏÈ¼¶,Ó°Ïìsentinel/cluster½úÉımaster²Ù×÷,0ÓÀÔ¶²»½úÉı', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('575', 'replica-read-only', 'yes', '´Ó½ÚµãÊÇ·ñÖ»¶Á: yes Ö»¶Á', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('576', 'replica-lazy-flush', 'yes', '´Ó½Úµã·¢ÆğÈ«Á¿¸´ÖÆ,ÊÇ·ñ²ÉÓÃflushall asyncÇåÀíÀÏÊı¾İ Ä¬ÈÏÖµ no', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('577', 'client-output-buffer-limit replica', '512mb 256mb 60', '¿Í»§¶ËÊä³ö»º³åÇøÏŞÖÆ', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('578', 'replica-ignore-maxmemory', 'yes', '´Ó½ÚµãÊÇ·ñ¿ªÆô×î´óÄÚ´æ£¬±ÜÃâÒ»Ğ©¹ı´ó»º³åÇøµ¼ÖÂoom', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('579', 'stream-node-max-bytes', '4096', 'streamÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('580', 'stream-node-max-entries', '100', 'streamÊı¾İ½á¹¹ÓÅ»¯²ÎÊı', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('581', 'dynamic-hz', 'yes', '×ÔÊÊÓ¦Æ½ºâ¿ÕÏĞCPUµÄÊ¹ÓÃÂÊºÍÏìÓ¦', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('582', 'rdb-save-incremental-fsync', 'yes', 'rdbÍ¬²½Ë¢ÅÌÊÇ·ñ²ÉÓÃÔöÁ¿fsync£¬Ã¿32MBÖ´ĞĞÒ»´Îfsync', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('583', 'repl-ping-replica-period', '10', 'Ö¸¶¨´Ó½Úµã¶¨ÆÚping masterµÄÖÜÆÚ,Ä¬ÈÏ:10Ãë', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('585', 'latency-monitor-threshold', '30', 'ÑÓ³ÙÊÂ¼ş·§Öµ£¬µ¥Î»ms', '2020-05-26 15:45:22', '6', '1', '37', '0'), ('587', 'latency-monitor-threshold', '30', 'ÑÓ³ÙÊÂ¼ş·§Öµ£¬µ¥Î»ms', '2020-05-26 15:46:18', '6', '1', '12', '0'), ('589', 'latency-monitor-threshold', '30', 'ÑÓ³ÙÊÂ¼ş·§Öµ£¬µ¥Î»ms', '2020-05-26 15:46:49', '6', '1', '31', '0'), ('590', 'latency-monitor-threshold', '30', 'ÑÓ³ÙÊÂ¼ş·§Öµ£¬µ¥Î»ms', '2020-05-26 15:49:47', '6', '1', '29', '0');
+INSERT INTO `instance_config` VALUES ('1', 'cluster-enabled', 'yes', 'æ˜¯å¦å¼€å¯é›†ç¾¤æ¨¡å¼', '2016-07-05 15:08:30', '2', '1', '29', '0'), ('2', 'cluster-node-timeout', '15000', 'é›†ç¾¤èŠ‚ç‚¹è¶…æ—¶æ—¶é—´,é»˜è®¤15ç§’', '2016-07-05 15:08:30', '2', '1', '29', '0'), ('3', 'cluster-slave-validity-factor', '10', 'ä»èŠ‚ç‚¹å»¶è¿Ÿæœ‰æ•ˆæ€§åˆ¤æ–­å› å­,é»˜è®¤10ç§’', '2016-07-05 15:08:30', '2', '1', '29', '0'), ('4', 'cluster-migration-barrier', '1', 'ä¸»ä»è¿ç§»è‡³å°‘éœ€è¦çš„ä»èŠ‚ç‚¹æ•°,é»˜è®¤1ä¸ª', '2016-07-05 15:08:30', '2', '1', '29', '0'), ('5', 'cluster-config-file', 'nodes-%d.conf', 'é›†ç¾¤é…ç½®æ–‡ä»¶åç§°,æ ¼å¼:nodes-{port}.conf', '2016-07-05 15:08:30', '2', '1', '29', '0'), ('6', 'cluster-require-full-coverage', 'no', 'èŠ‚ç‚¹éƒ¨åˆ†å¤±è´¥æœŸé—´,å…¶ä»–èŠ‚ç‚¹æ˜¯å¦ç»§ç»­å·¥ä½œ', '2016-07-05 15:08:31', '2', '1', '29', '0'), ('7', 'port', '%d', 'sentinelå®ä¾‹ç«¯å£', '2016-07-05 15:08:31', '5', '1', '29', '0'), ('8', 'dir', '%s', 'å·¥ä½œç›®å½•', '2016-07-05 15:08:31', '5', '1', '29', '0'), ('9', 'sentinel monitor', '%s %s %d 1', 'masteråç§°å®šä¹‰å’Œæœ€å°‘å‚ä¸ç›‘æ§çš„sentinelæ•°,æ ¼å¼:masterName ip port num', '2016-07-05 15:08:31', '5', '1', '29', '0'), ('10', 'sentinel down-after-milliseconds', '%s 20000', 'Sentinelåˆ¤å®šæœåŠ¡å™¨æ–­çº¿çš„æ¯«ç§’æ•°', '2016-07-05 15:08:31', '5', '1', '29', '0'), ('11', 'sentinel failover-timeout', '%s 180000', 'æ•…éšœè¿ç§»è¶…æ—¶æ—¶é—´,é»˜è®¤:3åˆ†é’Ÿ', '2016-07-05 15:08:31', '5', '1', '29', '0'), ('12', 'sentinel parallel-syncs', '%s 1', 'åœ¨æ‰§è¡Œæ•…éšœè½¬ç§»æ—¶,æœ€å¤šæœ‰å¤šå°‘ä¸ªä»æœåŠ¡å™¨åŒæ—¶å¯¹æ–°çš„ä¸»æœåŠ¡å™¨è¿›è¡ŒåŒæ­¥,é»˜è®¤:1', '2016-07-05 15:08:31', '5', '1', '29', '0'), ('13', 'daemonize', 'no', 'æ˜¯å¦å®ˆæŠ¤è¿›ç¨‹', '2016-07-14 14:00:05', '6', '1', '29', '0'), ('14', 'tcp-backlog', '511', 'TCPè¿æ¥å®Œæˆé˜Ÿåˆ—', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('15', 'timeout', '0', 'å®¢æˆ·ç«¯é—²ç½®å¤šå°‘ç§’åå…³é—­è¿æ¥,é»˜è®¤ä¸º0,æ°¸ä¸å…³é—­', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('16', 'tcp-keepalive', '60', 'æ£€æµ‹å®¢æˆ·ç«¯æ˜¯å¦å¥åº·å‘¨æœŸ,é»˜è®¤å…³é—­', '2016-12-06 11:40:46', '6', '1', '29', '0'), ('17', 'loglevel', 'notice', 'æ—¥å¿—çº§åˆ«', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('18', 'databases', '16', 'å¯ç”¨çš„æ•°æ®åº“æ•°ï¼Œé»˜è®¤å€¼ä¸º16ä¸ª,é»˜è®¤æ•°æ®åº“ä¸º0', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('19', 'dir', '%s', 'rediså·¥ä½œç›®å½•', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('20', 'stop-writes-on-bgsave-error', 'no', 'bgsaveå‡ºé”™äº†ä¸åœå†™', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('21', 'repl-timeout', '60', 'masteræ‰¹é‡æ•°æ®ä¼ è¾“æ—¶é—´æˆ–è€…pingå›å¤æ—¶é—´é—´éš”,é»˜è®¤:60ç§’', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('22', 'repl-ping-slave-period', '10', 'æŒ‡å®šslaveå®šæœŸping masterçš„å‘¨æœŸ,é»˜è®¤:10ç§’', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('23', 'repl-disable-tcp-nodelay', 'no', 'æ˜¯å¦ç¦ç”¨socketçš„NO_DELAY,é»˜è®¤å…³é—­ï¼Œå½±å“ä¸»ä»å»¶è¿Ÿ', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('24', 'repl-backlog-size', '10M', 'å¤åˆ¶ç¼“å­˜åŒº,é»˜è®¤:1mb,é…ç½®ä¸º:10Mb', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('25', 'repl-backlog-ttl', '7200', 'masteråœ¨æ²¡æœ‰Slaveçš„æƒ…å†µä¸‹é‡Šæ”¾BACKLOGçš„æ—¶é—´å¤šä¹…:é»˜è®¤:3600,é…ç½®ä¸º:7200', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('26', 'slave-serve-stale-data', 'yes', 'å½“slaveæœåŠ¡å™¨å’ŒmasteræœåŠ¡å™¨å¤±å»è¿æ¥åï¼Œæˆ–è€…å½“æ•°æ®æ­£åœ¨å¤åˆ¶ä¼ è¾“çš„æ—¶å€™ï¼Œå¦‚æœæ­¤å‚æ•°å€¼è®¾ç½®â€œyesâ€ï¼ŒslaveæœåŠ¡å™¨å¯ä»¥ç»§ç»­æ¥å—å®¢æˆ·ç«¯çš„è¯·æ±‚', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('27', 'slave-read-only', 'yes', 'slaveæœåŠ¡å™¨èŠ‚ç‚¹æ˜¯å¦åªè¯»,clusterçš„slaveèŠ‚ç‚¹é»˜è®¤è¯»å†™éƒ½ä¸å¯ç”¨,éœ€è¦è°ƒç”¨readonlyå¼€å¯å¯è¯»æ¨¡å¼', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('28', 'slave-priority', '100', 'slaveçš„ä¼˜å…ˆçº§,å½±å“sentinel/clusteræ™‹å‡masteræ“ä½œ,0æ°¸è¿œä¸æ™‹å‡', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('29', 'lua-time-limit', '5000', 'Luaè„šæœ¬æœ€é•¿çš„æ‰§è¡Œæ—¶é—´ï¼Œå•ä½ä¸ºæ¯«ç§’', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('30', 'slowlog-log-slower-than', '10000', 'æ…¢æŸ¥è¯¢è¢«è®°å½•çš„é˜€å€¼,é»˜è®¤10æ¯«ç§’', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('31', 'slowlog-max-len', '128', 'æœ€å¤šè®°å½•æ…¢æŸ¥è¯¢çš„æ¡æ•°', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('32', 'hash-max-ziplist-entries', '512', 'hashæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('33', 'hash-max-ziplist-value', '64', 'hashæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('34', 'list-max-ziplist-entries', '512', 'listæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('35', 'list-max-ziplist-value', '64', 'listæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('36', 'set-max-intset-entries', '512', 'setæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('37', 'zset-max-ziplist-entries', '128', 'zsetæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('38', 'zset-max-ziplist-value', '64', 'zsetæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('39', 'activerehashing', 'yes', 'æ˜¯å¦æ¿€æ´»é‡ç½®å“ˆå¸Œ,é»˜è®¤:yes', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('40', 'client-output-buffer-limit normal', '0 0 0', 'å®¢æˆ·ç«¯è¾“å‡ºç¼“å†²åŒºé™åˆ¶(å®¢æˆ·ç«¯)', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('41', 'client-output-buffer-limit slave', '512mb 256mb 60', 'å®¢æˆ·ç«¯è¾“å‡ºç¼“å†²åŒºé™åˆ¶(å¤åˆ¶)', '2016-11-24 10:24:21', '6', '1', '29', '0'), ('42', 'client-output-buffer-limit pubsub', '32mb 8mb 60', 'å®¢æˆ·ç«¯è¾“å‡ºç¼“å†²åŒºé™åˆ¶(å‘å¸ƒè®¢é˜…)', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('43', 'hz', '10', 'æ‰§è¡Œåå°taskæ•°é‡,é»˜è®¤:10', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('44', 'port', '%d', 'ç«¯å£', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('45', 'maxmemory', '%dmb', 'å½“å‰å®ä¾‹æœ€å¤§å¯ç”¨å†…å­˜', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('46', 'maxmemory-policy', 'volatile-lru', 'å†…å­˜ä¸å¤Ÿæ—¶,æ·˜æ±°ç­–ç•¥,é»˜è®¤:volatile-lru', '2016-07-05 15:08:31', '6', '1', '29', '0'), ('47', 'appendonly', 'yes', 'å¼€å¯append onlyæŒä¹…åŒ–æ¨¡å¼', '2016-07-05 15:08:32', '6', '1', '29', '0'), ('48', 'appendfsync', 'everysec', 'é»˜è®¤:aofæ¯ç§’åŒæ­¥ä¸€æ¬¡', '2016-07-05 15:08:32', '6', '1', '29', '0'), ('49', 'appendfilename', 'appendonly-%d.aof', 'aofæ–‡ä»¶åç§°,é»˜è®¤:appendonly-{port}.aof', '2016-07-05 15:08:32', '6', '1', '29', '0'), ('50', 'dbfilename', 'dump-%d.rdb', 'RDBæ–‡ä»¶é»˜è®¤åç§°,é»˜è®¤dump-{port}.rdb', '2016-07-05 15:08:32', '6', '1', '29', '0'), ('51', 'aof-rewrite-incremental-fsync', 'yes', 'aof rewriteè¿‡ç¨‹ä¸­,æ˜¯å¦é‡‡å–å¢é‡æ–‡ä»¶åŒæ­¥ç­–ç•¥,é»˜è®¤:yes', '2016-07-05 15:08:32', '6', '1', '29', '0'), ('52', 'no-appendfsync-on-rewrite', 'yes', 'æ˜¯å¦åœ¨åå°aofæ–‡ä»¶rewriteæœŸé—´è°ƒç”¨fsync,é»˜è®¤è°ƒç”¨,ä¿®æ”¹ä¸ºyes,é˜²æ­¢å¯èƒ½fsyncé˜»å¡,ä½†å¯èƒ½ä¸¢å¤±rewriteæœŸé—´çš„æ•°æ®', '2016-07-05 15:08:32', '6', '1', '29', '0'), ('53', 'auto-aof-rewrite-min-size', '64m', 'è§¦å‘rewriteçš„aofæ–‡ä»¶æœ€å°é˜€å€¼,é»˜è®¤64m', '2016-07-05 15:08:32', '6', '1', '29', '0'), ('54', 'auto-aof-rewrite-percentage', '%d', 'Redisé‡å†™aofæ–‡ä»¶çš„æ¯”ä¾‹æ¡ä»¶,é»˜è®¤ä»100å¼€å§‹,ç»Ÿä¸€æœºå™¨ä¸‹ä¸åŒå®ä¾‹æŒ‰4%é€’å‡', '2016-07-05 15:08:32', '6', '1', '29', '0'), ('55', 'maxclients', '10000', 'å®¢æˆ·ç«¯æœ€å¤§è¿æ¥æ•°', '2016-07-05 15:08:32', '6', '1', '29', '0'), ('126', 'cluster-enabled', 'yes', 'æ˜¯å¦å¼€å¯é›†ç¾¤æ¨¡å¼', '2018-09-18 18:23:03', '2', '1', '31', '0'), ('127', 'cluster-node-timeout', '15000', 'é›†ç¾¤èŠ‚ç‚¹è¶…æ—¶æ—¶é—´,é»˜è®¤15ç§’', '2018-09-18 18:23:03', '2', '1', '31', '0'), ('128', 'cluster-slave-validity-factor', '10', 'ä»èŠ‚ç‚¹å»¶è¿Ÿæœ‰æ•ˆæ€§åˆ¤æ–­å› å­,é»˜è®¤10ç§’', '2018-09-18 18:23:03', '2', '1', '31', '0'), ('129', 'cluster-migration-barrier', '1', 'ä¸»ä»è¿ç§»è‡³å°‘éœ€è¦çš„ä»èŠ‚ç‚¹æ•°,é»˜è®¤1ä¸ª', '2018-09-18 18:23:03', '2', '1', '31', '0'), ('130', 'cluster-config-file', 'nodes-%d.conf', 'é›†ç¾¤é…ç½®æ–‡ä»¶åç§°,æ ¼å¼:nodes-{port}.conf', '2018-09-18 18:23:03', '2', '1', '31', '0'), ('131', 'cluster-require-full-coverage', 'no', 'èŠ‚ç‚¹éƒ¨åˆ†å¤±è´¥æœŸé—´,å…¶ä»–èŠ‚ç‚¹æ˜¯å¦ç»§ç»­å·¥ä½œ', '2018-09-18 18:23:03', '2', '1', '31', '0'), ('132', 'port', '%d', 'sentinelå®ä¾‹ç«¯å£', '2018-09-18 18:23:03', '5', '1', '31', '0'), ('133', 'dir', '%s', 'å·¥ä½œç›®å½•', '2018-09-18 18:23:03', '5', '1', '31', '0'), ('134', 'sentinel monitor', '%s %s %d 1', 'masteråç§°å®šä¹‰å’Œæœ€å°‘å‚ä¸ç›‘æ§çš„sentinelæ•°,æ ¼å¼:masterName ip port num', '2018-09-18 18:23:03', '5', '1', '31', '0'), ('135', 'sentinel down-after-milliseconds', '%s 20000', 'Sentinelåˆ¤å®šæœåŠ¡å™¨æ–­çº¿çš„æ¯«ç§’æ•°', '2018-09-18 18:23:03', '5', '1', '31', '0'), ('136', 'sentinel failover-timeout', '%s 180000', 'æ•…éšœè¿ç§»è¶…æ—¶æ—¶é—´,é»˜è®¤:3åˆ†é’Ÿ', '2018-09-18 18:23:03', '5', '1', '31', '0'), ('137', 'sentinel parallel-syncs', '%s 1', 'åœ¨æ‰§è¡Œæ•…éšœè½¬ç§»æ—¶,æœ€å¤šæœ‰å¤šå°‘ä¸ªä»æœåŠ¡å™¨åŒæ—¶å¯¹æ–°çš„ä¸»æœåŠ¡å™¨è¿›è¡ŒåŒæ­¥,é»˜è®¤:1', '2018-09-18 18:23:03', '5', '1', '31', '0'), ('138', 'daemonize', 'no', 'æ˜¯å¦å®ˆæŠ¤è¿›ç¨‹', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('139', 'tcp-backlog', '511', 'TCPè¿æ¥å®Œæˆé˜Ÿåˆ—', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('140', 'timeout', '0', 'å®¢æˆ·ç«¯é—²ç½®å¤šå°‘ç§’åå…³é—­è¿æ¥,é»˜è®¤ä¸º0,æ°¸ä¸å…³é—­', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('141', 'tcp-keepalive', '60', 'æ£€æµ‹å®¢æˆ·ç«¯æ˜¯å¦å¥åº·å‘¨æœŸ,é»˜è®¤å…³é—­', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('142', 'loglevel', 'notice', 'æ—¥å¿—çº§åˆ«', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('143', 'databases', '16', 'å¯ç”¨çš„æ•°æ®åº“æ•°ï¼Œé»˜è®¤å€¼ä¸º16ä¸ª,é»˜è®¤æ•°æ®åº“ä¸º0', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('144', 'dir', '%s', 'rediså·¥ä½œç›®å½•', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('145', 'stop-writes-on-bgsave-error', 'no', 'bgsaveå‡ºé”™äº†ä¸åœå†™', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('146', 'repl-timeout', '60', 'masteræ‰¹é‡æ•°æ®ä¼ è¾“æ—¶é—´æˆ–è€…pingå›å¤æ—¶é—´é—´éš”,é»˜è®¤:60ç§’', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('147', 'repl-ping-slave-period', '10', 'æŒ‡å®šslaveå®šæœŸping masterçš„å‘¨æœŸ,é»˜è®¤:10ç§’', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('148', 'repl-disable-tcp-nodelay', 'no', 'æ˜¯å¦ç¦ç”¨socketçš„NO_DELAY,é»˜è®¤å…³é—­ï¼Œå½±å“ä¸»ä»å»¶è¿Ÿ', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('149', 'repl-backlog-size', '10M', 'å¤åˆ¶ç¼“å­˜åŒº,é»˜è®¤:1mb,é…ç½®ä¸º:10Mb', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('150', 'repl-backlog-ttl', '7200', 'masteråœ¨æ²¡æœ‰Slaveçš„æƒ…å†µä¸‹é‡Šæ”¾BACKLOGçš„æ—¶é—´å¤šä¹…:é»˜è®¤:3600,é…ç½®ä¸º:7200', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('151', 'slave-serve-stale-data', 'yes', 'å½“slaveæœåŠ¡å™¨å’ŒmasteræœåŠ¡å™¨å¤±å»è¿æ¥åï¼Œæˆ–è€…å½“æ•°æ®æ­£åœ¨å¤åˆ¶ä¼ è¾“çš„æ—¶å€™ï¼Œå¦‚æœæ­¤å‚æ•°å€¼è®¾ç½®â€œyesâ€ï¼ŒslaveæœåŠ¡å™¨å¯ä»¥ç»§ç»­æ¥å—å®¢æˆ·ç«¯çš„è¯·æ±‚', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('152', 'slave-read-only', 'yes', 'slaveæœåŠ¡å™¨èŠ‚ç‚¹æ˜¯å¦åªè¯»,clusterçš„slaveèŠ‚ç‚¹é»˜è®¤è¯»å†™éƒ½ä¸å¯ç”¨,éœ€è¦è°ƒç”¨readonlyå¼€å¯å¯è¯»æ¨¡å¼', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('153', 'slave-priority', '100', 'slaveçš„ä¼˜å…ˆçº§,å½±å“sentinel/clusteræ™‹å‡masteræ“ä½œ,0æ°¸è¿œä¸æ™‹å‡', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('154', 'lua-time-limit', '5000', 'Luaè„šæœ¬æœ€é•¿çš„æ‰§è¡Œæ—¶é—´ï¼Œå•ä½ä¸ºæ¯«ç§’', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('155', 'slowlog-log-slower-than', '10000', 'æ…¢æŸ¥è¯¢è¢«è®°å½•çš„é˜€å€¼,é»˜è®¤10æ¯«ç§’', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('156', 'slowlog-max-len', '128', 'æœ€å¤šè®°å½•æ…¢æŸ¥è¯¢çš„æ¡æ•°', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('157', 'hash-max-ziplist-entries', '512', 'hashæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('158', 'hash-max-ziplist-value', '64', 'hashæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('159', 'list-max-ziplist-entries', '512', 'listæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2018-09-18 18:25:32', '6', '0', '31', '0'), ('160', 'list-max-ziplist-value', '64', 'listæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2018-09-18 18:25:40', '6', '0', '31', '0'), ('161', 'set-max-intset-entries', '512', 'setæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('162', 'zset-max-ziplist-entries', '128', 'zsetæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('163', 'zset-max-ziplist-value', '64', 'zsetæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('164', 'activerehashing', 'yes', 'æ˜¯å¦æ¿€æ´»é‡ç½®å“ˆå¸Œ,é»˜è®¤:yes', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('165', 'client-output-buffer-limit normal', '0 0 0', 'å®¢æˆ·ç«¯è¾“å‡ºç¼“å†²åŒºé™åˆ¶(å®¢æˆ·ç«¯)', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('166', 'client-output-buffer-limit slave', '512mb 256mb 60', 'å®¢æˆ·ç«¯è¾“å‡ºç¼“å†²åŒºé™åˆ¶(å¤åˆ¶)', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('167', 'client-output-buffer-limit pubsub', '32mb 8mb 60', 'å®¢æˆ·ç«¯è¾“å‡ºç¼“å†²åŒºé™åˆ¶(å‘å¸ƒè®¢é˜…)', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('168', 'hz', '10', 'æ‰§è¡Œåå°taskæ•°é‡,é»˜è®¤:10', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('169', 'port', '%d', 'ç«¯å£', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('170', 'maxmemory', '%dmb', 'å½“å‰å®ä¾‹æœ€å¤§å¯ç”¨å†…å­˜', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('171', 'maxmemory-policy', 'volatile-lru', 'å†…å­˜ä¸å¤Ÿæ—¶,æ·˜æ±°ç­–ç•¥,é»˜è®¤:volatile-lru', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('172', 'appendonly', 'yes', 'å¼€å¯append onlyæŒä¹…åŒ–æ¨¡å¼', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('173', 'appendfsync', 'everysec', 'é»˜è®¤:aofæ¯ç§’åŒæ­¥ä¸€æ¬¡', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('174', 'appendfilename', 'appendonly-%d.aof', 'aofæ–‡ä»¶åç§°,é»˜è®¤:appendonly-{port}.aof', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('175', 'dbfilename', 'dump-%d.rdb', 'RDBæ–‡ä»¶é»˜è®¤åç§°,é»˜è®¤dump-{port}.rdb', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('176', 'aof-rewrite-incremental-fsync', 'yes', 'aof rewriteè¿‡ç¨‹ä¸­,æ˜¯å¦é‡‡å–å¢é‡æ–‡ä»¶åŒæ­¥ç­–ç•¥,é»˜è®¤:yes', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('177', 'no-appendfsync-on-rewrite', 'yes', 'æ˜¯å¦åœ¨åå°aofæ–‡ä»¶rewriteæœŸé—´è°ƒç”¨fsync,é»˜è®¤è°ƒç”¨,ä¿®æ”¹ä¸ºyes,é˜²æ­¢å¯èƒ½fsyncé˜»å¡,ä½†å¯èƒ½ä¸¢å¤±rewriteæœŸé—´çš„æ•°æ®', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('178', 'auto-aof-rewrite-min-size', '64m', 'è§¦å‘rewriteçš„aofæ–‡ä»¶æœ€å°é˜€å€¼,é»˜è®¤64m', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('179', 'auto-aof-rewrite-percentage', '%d', 'Redisé‡å†™aofæ–‡ä»¶çš„æ¯”ä¾‹æ¡ä»¶,é»˜è®¤ä»100å¼€å§‹,ç»Ÿä¸€æœºå™¨ä¸‹ä¸åŒå®ä¾‹æŒ‰4%é€’å‡', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('180', 'maxclients', '10000', 'å®¢æˆ·ç«¯æœ€å¤§è¿æ¥æ•°', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('181', 'protected-mode', 'yes', 'å¼€å¯ä¿æŠ¤æ¨¡å¼', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('182', 'bind', '0.0.0.0', 'é»˜è®¤å®¢æˆ·ç«¯éƒ½å¯è¿æ¥', '2018-09-18 18:23:03', '6', '1', '31', '0'), ('185', 'list-max-ziplist-size', '-2', '8Kbå¯¹è±¡ä»¥å†…é‡‡ç”¨ziplist', '2018-09-18 18:26:32', '6', '1', '31', '0'), ('186', 'list-compress-depth', '0', 'å‹ç¼©æ–¹å¼ï¼Œ0:ä¸å‹ç¼©', '2018-09-18 18:27:12', '6', '1', '31', '0'), ('253', 'protected-mode', 'no', 'å…³é—­ä¿æŠ¤æ¨¡å¼', '2018-11-01 16:10:59', '5', '1', '31', '0'), ('354', 'cluster-enabled', 'yes', 'æ˜¯å¦å¼€å¯é›†ç¾¤æ¨¡å¼', '2019-10-24 17:33:26', '2', '1', '12', '0'), ('355', 'cluster-node-timeout', '15000', 'é›†ç¾¤èŠ‚ç‚¹è¶…æ—¶æ—¶é—´,é»˜è®¤15ç§’', '2019-10-24 17:33:26', '2', '1', '12', '0'), ('356', 'cluster-slave-validity-factor', '10', 'ä»èŠ‚ç‚¹å»¶è¿Ÿæœ‰æ•ˆæ€§åˆ¤æ–­å› å­,é»˜è®¤10ç§’', '2019-10-24 17:33:26', '2', '1', '12', '0'), ('357', 'cluster-migration-barrier', '1', 'ä¸»ä»è¿ç§»è‡³å°‘éœ€è¦çš„ä»èŠ‚ç‚¹æ•°,é»˜è®¤1ä¸ª', '2019-10-24 17:33:26', '2', '1', '12', '0'), ('358', 'cluster-config-file', 'nodes-%d.conf', 'é›†ç¾¤é…ç½®æ–‡ä»¶åç§°,æ ¼å¼:nodes-{port}.conf', '2019-10-24 17:33:26', '2', '1', '12', '0'), ('359', 'cluster-require-full-coverage', 'no', 'èŠ‚ç‚¹éƒ¨åˆ†å¤±è´¥æœŸé—´,å…¶ä»–èŠ‚ç‚¹æ˜¯å¦ç»§ç»­å·¥ä½œ', '2019-10-24 17:33:26', '2', '1', '12', '0'), ('360', 'port', '%d', 'sentinelå®ä¾‹ç«¯å£', '2019-10-24 17:33:26', '5', '1', '12', '0'), ('361', 'dir', '%s', 'å·¥ä½œç›®å½•', '2019-10-24 17:33:26', '5', '1', '12', '0'), ('362', 'sentinel monitor', '%s %s %d 1', 'masteråç§°å®šä¹‰å’Œæœ€å°‘å‚ä¸ç›‘æ§çš„sentinelæ•°,æ ¼å¼:masterName ip port num', '2019-10-24 17:33:26', '5', '1', '12', '0'), ('363', 'sentinel down-after-milliseconds', '%s 20000', 'Sentinelåˆ¤å®šæœåŠ¡å™¨æ–­çº¿çš„æ¯«ç§’æ•°', '2019-10-24 17:33:26', '5', '1', '12', '0'), ('364', 'sentinel failover-timeout', '%s 180000', 'æ•…éšœè¿ç§»è¶…æ—¶æ—¶é—´,é»˜è®¤:3åˆ†é’Ÿ', '2019-10-24 17:33:26', '5', '1', '12', '0'), ('365', 'sentinel parallel-syncs', '%s 1', 'åœ¨æ‰§è¡Œæ•…éšœè½¬ç§»æ—¶,æœ€å¤šæœ‰å¤šå°‘ä¸ªä»æœåŠ¡å™¨åŒæ—¶å¯¹æ–°çš„ä¸»æœåŠ¡å™¨è¿›è¡ŒåŒæ­¥,é»˜è®¤:1', '2019-10-24 17:33:26', '5', '1', '12', '0'), ('366', 'daemonize', 'no', 'æ˜¯å¦å®ˆæŠ¤è¿›ç¨‹', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('367', 'tcp-backlog', '511', 'TCPè¿æ¥å®Œæˆé˜Ÿåˆ—', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('368', 'timeout', '0', 'å®¢æˆ·ç«¯é—²ç½®å¤šå°‘ç§’åå…³é—­è¿æ¥,é»˜è®¤ä¸º0,æ°¸ä¸å…³é—­', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('369', 'tcp-keepalive', '60', 'æ£€æµ‹å®¢æˆ·ç«¯æ˜¯å¦å¥åº·å‘¨æœŸ,é»˜è®¤å…³é—­', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('370', 'loglevel', 'notice', 'æ—¥å¿—çº§åˆ«', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('371', 'databases', '16', 'å¯ç”¨çš„æ•°æ®åº“æ•°ï¼Œé»˜è®¤å€¼ä¸º16ä¸ª,é»˜è®¤æ•°æ®åº“ä¸º0', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('372', 'dir', '%s', 'rediså·¥ä½œç›®å½•', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('373', 'stop-writes-on-bgsave-error', 'no', 'bgsaveå‡ºé”™äº†ä¸åœå†™', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('374', 'repl-timeout', '60', 'masteræ‰¹é‡æ•°æ®ä¼ è¾“æ—¶é—´æˆ–è€…pingå›å¤æ—¶é—´é—´éš”,é»˜è®¤:60ç§’', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('375', 'repl-ping-slave-period', '10', 'æŒ‡å®šslaveå®šæœŸping masterçš„å‘¨æœŸ,é»˜è®¤:10ç§’', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('376', 'repl-disable-tcp-nodelay', 'no', 'æ˜¯å¦ç¦ç”¨socketçš„NO_DELAY,é»˜è®¤å…³é—­ï¼Œå½±å“ä¸»ä»å»¶è¿Ÿ', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('377', 'repl-backlog-size', '10M', 'å¤åˆ¶ç¼“å­˜åŒº,é»˜è®¤:1mb,é…ç½®ä¸º:10Mb', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('378', 'repl-backlog-ttl', '7200', 'masteråœ¨æ²¡æœ‰Slaveçš„æƒ…å†µä¸‹é‡Šæ”¾BACKLOGçš„æ—¶é—´å¤šä¹…:é»˜è®¤:3600,é…ç½®ä¸º:7200', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('379', 'slave-serve-stale-data', 'yes', 'å½“slaveæœåŠ¡å™¨å’ŒmasteræœåŠ¡å™¨å¤±å»è¿æ¥åï¼Œæˆ–è€…å½“æ•°æ®æ­£åœ¨å¤åˆ¶ä¼ è¾“çš„æ—¶å€™ï¼Œå¦‚æœæ­¤å‚æ•°å€¼è®¾ç½®â€œyesâ€ï¼ŒslaveæœåŠ¡å™¨å¯ä»¥ç»§ç»­æ¥å—å®¢æˆ·ç«¯çš„è¯·æ±‚', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('380', 'slave-read-only', 'yes', 'slaveæœåŠ¡å™¨èŠ‚ç‚¹æ˜¯å¦åªè¯»,clusterçš„slaveèŠ‚ç‚¹é»˜è®¤è¯»å†™éƒ½ä¸å¯ç”¨,éœ€è¦è°ƒç”¨readonlyå¼€å¯å¯è¯»æ¨¡å¼', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('381', 'slave-priority', '100', 'slaveçš„ä¼˜å…ˆçº§,å½±å“sentinel/clusteræ™‹å‡masteræ“ä½œ,0æ°¸è¿œä¸æ™‹å‡', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('382', 'lua-time-limit', '5000', 'Luaè„šæœ¬æœ€é•¿çš„æ‰§è¡Œæ—¶é—´ï¼Œå•ä½ä¸ºæ¯«ç§’', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('383', 'slowlog-log-slower-than', '10000', 'æ…¢æŸ¥è¯¢è¢«è®°å½•çš„é˜€å€¼,é»˜è®¤10æ¯«ç§’', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('384', 'slowlog-max-len', '128', 'æœ€å¤šè®°å½•æ…¢æŸ¥è¯¢çš„æ¡æ•°', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('385', 'hash-max-ziplist-entries', '512', 'hashæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('386', 'hash-max-ziplist-value', '64', 'hashæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('387', 'list-max-ziplist-entries', '512', 'listæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2019-10-24 17:33:26', '6', '0', '12', '0'), ('388', 'list-max-ziplist-value', '64', 'listæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2019-10-24 17:33:26', '6', '0', '12', '0'), ('389', 'set-max-intset-entries', '512', 'setæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('390', 'zset-max-ziplist-entries', '128', 'zsetæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('391', 'zset-max-ziplist-value', '64', 'zsetæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('392', 'activerehashing', 'yes', 'æ˜¯å¦æ¿€æ´»é‡ç½®å“ˆå¸Œ,é»˜è®¤:yes', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('393', 'client-output-buffer-limit normal', '0 0 0', 'å®¢æˆ·ç«¯è¾“å‡ºç¼“å†²åŒºé™åˆ¶(å®¢æˆ·ç«¯)', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('394', 'client-output-buffer-limit slave', '512mb 256mb 60', 'å®¢æˆ·ç«¯è¾“å‡ºç¼“å†²åŒºé™åˆ¶(å¤åˆ¶)', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('395', 'client-output-buffer-limit pubsub', '32mb 8mb 60', 'å®¢æˆ·ç«¯è¾“å‡ºç¼“å†²åŒºé™åˆ¶(å‘å¸ƒè®¢é˜…)', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('396', 'hz', '10', 'æ‰§è¡Œåå°taskæ•°é‡,é»˜è®¤:10', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('397', 'port', '%d', 'ç«¯å£', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('398', 'maxmemory', '%dmb', 'å½“å‰å®ä¾‹æœ€å¤§å¯ç”¨å†…å­˜', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('399', 'maxmemory-policy', 'volatile-lfu', 'å†…å­˜ä¸å¤Ÿæ—¶,æ·˜æ±°ç­–ç•¥,é»˜è®¤:volatile-lfu', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('400', 'appendonly', 'yes', 'å¼€å¯append onlyæŒä¹…åŒ–æ¨¡å¼', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('401', 'appendfsync', 'everysec', 'é»˜è®¤:aofæ¯ç§’åŒæ­¥ä¸€æ¬¡', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('402', 'appendfilename', 'appendonly-%d.aof', 'aofæ–‡ä»¶åç§°,é»˜è®¤:appendonly-{port}.aof', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('403', 'dbfilename', 'dump-%d.rdb', 'RDBæ–‡ä»¶é»˜è®¤åç§°,é»˜è®¤dump-{port}.rdb', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('404', 'aof-rewrite-incremental-fsync', 'yes', 'aof rewriteè¿‡ç¨‹ä¸­,æ˜¯å¦é‡‡å–å¢é‡æ–‡ä»¶åŒæ­¥ç­–ç•¥,é»˜è®¤:yes', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('405', 'no-appendfsync-on-rewrite', 'yes', 'æ˜¯å¦åœ¨åå°aofæ–‡ä»¶rewriteæœŸé—´è°ƒç”¨fsync,é»˜è®¤è°ƒç”¨,ä¿®æ”¹ä¸ºyes,é˜²æ­¢å¯èƒ½fsyncé˜»å¡,ä½†å¯èƒ½ä¸¢å¤±rewriteæœŸé—´çš„æ•°æ®', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('406', 'auto-aof-rewrite-min-size', '64m', 'è§¦å‘rewriteçš„aofæ–‡ä»¶æœ€å°é˜€å€¼,é»˜è®¤64m', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('407', 'auto-aof-rewrite-percentage', '%d', 'Redisé‡å†™aofæ–‡ä»¶çš„æ¯”ä¾‹æ¡ä»¶,é»˜è®¤ä»100å¼€å§‹,ç»Ÿä¸€æœºå™¨ä¸‹ä¸åŒå®ä¾‹æŒ‰4%é€’å‡', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('408', 'maxclients', '10000', 'å®¢æˆ·ç«¯æœ€å¤§è¿æ¥æ•°', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('409', 'protected-mode', 'yes', 'å¼€å¯ä¿æŠ¤æ¨¡å¼', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('410', 'bind', '0.0.0.0', 'é»˜è®¤å®¢æˆ·ç«¯éƒ½å¯è¿æ¥', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('411', 'list-max-ziplist-size', '-2', '8Kbå¯¹è±¡ä»¥å†…é‡‡ç”¨ziplist', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('412', 'list-compress-depth', '0', 'å‹ç¼©æ–¹å¼ï¼Œ0:ä¸å‹ç¼©', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('413', 'always-show-logo', 'yes', 'rediså¯åŠ¨æ˜¯å¦æ˜¾ç¤ºlogo', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('414', 'lazyfree-lazy-eviction', 'yes', 'åœ¨è¢«åŠ¨æ·˜æ±°é”®æ—¶ï¼Œæ˜¯å¦é‡‡ç”¨lazy freeæœºåˆ¶,é»˜è®¤:no', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('415', 'lazyfree-lazy-expire', 'yes', 'TTLçš„é”®è¿‡æœŸæ˜¯å¦é‡‡ç”¨lazyfreeæœºåˆ¶ é»˜è®¤å€¼:no', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('416', 'lazyfree-lazy-server-del', 'yes', 'éšå¼çš„DELé”®(rename)æ˜¯å¦é‡‡ç”¨lazyfreeæœºåˆ¶ é»˜è®¤å€¼:no', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('417', 'slave-lazy-flush', 'yes', 'slaveå‘èµ·å…¨é‡å¤åˆ¶,æ˜¯å¦é‡‡ç”¨flushall asyncæ¸…ç†è€æ•°æ® é»˜è®¤å€¼ no', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('418', 'aof-use-rdb-preamble', 'yes', 'æ˜¯å¦å¼€å¯æ··åˆæŒä¹…åŒ–,é»˜è®¤å€¼ no ä¸å¼€å¯', '2019-10-31 11:15:57', '6', '1', '12', '0'), ('419', 'protected-mode', 'no', 'å…³é—­sentinelä¿æŠ¤æ¨¡å¼', '2019-10-24 17:33:26', '5', '1', '12', '0'), ('420', 'activedefrag', 'no', 'ç¢ç‰‡æ•´ç†å¼€å¯', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('421', 'active-defrag-threshold-lower', '10', 'ç¢ç‰‡ç‡è¾¾åˆ°ç™¾åˆ†ä¹‹å¤šå°‘å¼€å¯æ•´ç†', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('422', 'active-defrag-threshold-upper', '100', 'ç¢ç‰‡ç‡å°ä½™å¤šå°‘ç™¾åˆ†æ¯”å¼€å¯æ•´ç†', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('423', 'active-defrag-ignore-bytes', '300mb', 'å†…å­˜ç¢ç‰‡è¾¾åˆ°å¤šå°‘å…†å¼€å¯ç¢ç‰‡', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('424', 'active-defrag-cycle-min', '10', 'ç¢ç‰‡æ•´ç†æœ€å°cpuç™¾åˆ†æ¯”', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('425', 'active-defrag-cycle-max', '30', 'ç¢ç‰‡æ•´ç†æœ€å¤§cpuç™¾åˆ†æ¯”', '2019-10-24 17:33:26', '6', '1', '12', '0'), ('506', 'cluster-enabled', 'yes', 'æ˜¯å¦å¼€å¯é›†ç¾¤æ¨¡å¼', '2020-04-26 18:12:55', '2', '1', '37', '0'), ('507', 'cluster-node-timeout', '15000', 'é›†ç¾¤èŠ‚ç‚¹è¶…æ—¶æ—¶é—´,é»˜è®¤15ç§’', '2020-04-26 18:12:55', '2', '1', '37', '0'), ('508', 'cluster-migration-barrier', '1', 'ä¸»ä»è¿ç§»è‡³å°‘éœ€è¦çš„ä»èŠ‚ç‚¹æ•°,é»˜è®¤1ä¸ª', '2020-04-26 18:12:55', '2', '1', '37', '0'), ('509', 'cluster-config-file', 'nodes-%d.conf', 'é›†ç¾¤é…ç½®æ–‡ä»¶åç§°,æ ¼å¼:nodes-{port}.conf', '2020-04-26 18:12:55', '2', '1', '37', '0'), ('510', 'cluster-require-full-coverage', 'no', 'èŠ‚ç‚¹éƒ¨åˆ†å¤±è´¥æœŸé—´,å…¶ä»–èŠ‚ç‚¹æ˜¯å¦ç»§ç»­å·¥ä½œ', '2020-04-26 18:12:55', '2', '1', '37', '0'), ('511', 'port', '%d', 'sentinelå®ä¾‹ç«¯å£', '2020-04-26 18:12:55', '5', '1', '37', '0'), ('512', 'dir', '%s', 'å·¥ä½œç›®å½•', '2020-04-26 18:12:55', '5', '1', '37', '0'), ('513', 'sentinel monitor', '%s %s %d 1', 'masteråç§°å®šä¹‰å’Œæœ€å°‘å‚ä¸ç›‘æ§çš„sentinelæ•°,æ ¼å¼:masterName ip port num', '2020-04-26 18:12:55', '5', '1', '37', '0'), ('514', 'sentinel down-after-milliseconds', '%s 20000', 'Sentinelåˆ¤å®šæœåŠ¡å™¨æ–­çº¿çš„æ¯«ç§’æ•°', '2020-04-26 18:12:55', '5', '1', '37', '0'), ('515', 'sentinel failover-timeout', '%s 180000', 'æ•…éšœè¿ç§»è¶…æ—¶æ—¶é—´,é»˜è®¤:3åˆ†é’Ÿ', '2020-04-26 18:12:55', '5', '1', '37', '0'), ('516', 'sentinel parallel-syncs', '%s 1', 'åœ¨æ‰§è¡Œæ•…éšœè½¬ç§»æ—¶,æœ€å¤šæœ‰å¤šå°‘ä¸ªä»æœåŠ¡å™¨åŒæ—¶å¯¹æ–°çš„ä¸»æœåŠ¡å™¨è¿›è¡ŒåŒæ­¥,é»˜è®¤:1', '2020-04-26 18:12:55', '5', '1', '37', '0'), ('517', 'daemonize', 'no', 'æ˜¯å¦å®ˆæŠ¤è¿›ç¨‹', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('518', 'tcp-backlog', '511', 'TCPè¿æ¥å®Œæˆé˜Ÿåˆ—', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('519', 'timeout', '0', 'å®¢æˆ·ç«¯é—²ç½®å¤šå°‘ç§’åå…³é—­è¿æ¥,é»˜è®¤ä¸º0,æ°¸ä¸å…³é—­', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('520', 'tcp-keepalive', '60', 'æ£€æµ‹å®¢æˆ·ç«¯æ˜¯å¦å¥åº·å‘¨æœŸ,é»˜è®¤å…³é—­', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('521', 'loglevel', 'notice', 'æ—¥å¿—çº§åˆ«', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('522', 'databases', '16', 'å¯ç”¨çš„æ•°æ®åº“æ•°ï¼Œé»˜è®¤å€¼ä¸º16ä¸ª,é»˜è®¤æ•°æ®åº“ä¸º0', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('523', 'dir', '%s', 'rediså·¥ä½œç›®å½•', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('524', 'stop-writes-on-bgsave-error', 'no', 'bgsaveå‡ºé”™äº†ä¸åœå†™', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('525', 'repl-timeout', '60', 'masteræ‰¹é‡æ•°æ®ä¼ è¾“æ—¶é—´æˆ–è€…pingå›å¤æ—¶é—´é—´éš”,é»˜è®¤:60ç§’', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('526', 'repl-disable-tcp-nodelay', 'no', 'æ˜¯å¦ç¦ç”¨socketçš„NO_DELAY,é»˜è®¤å…³é—­ï¼Œå½±å“ä¸»ä»å»¶è¿Ÿ', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('527', 'repl-backlog-size', '10M', 'å¤åˆ¶ç¼“å­˜åŒº,é»˜è®¤:1mb,é…ç½®ä¸º:10Mb', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('528', 'repl-backlog-ttl', '7200', 'masteråœ¨æ²¡æœ‰ä»èŠ‚ç‚¹çš„æƒ…å†µä¸‹é‡Šæ”¾BACKLOGçš„æ—¶é—´å¤šä¹…:é»˜è®¤:3600,é…ç½®ä¸º:7200', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('529', 'lua-time-limit', '5000', 'Luaè„šæœ¬æœ€é•¿çš„æ‰§è¡Œæ—¶é—´ï¼Œå•ä½ä¸ºæ¯«ç§’', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('530', 'slowlog-log-slower-than', '10000', 'æ…¢æŸ¥è¯¢è¢«è®°å½•çš„é˜€å€¼,é»˜è®¤10æ¯«ç§’', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('531', 'slowlog-max-len', '128', 'æœ€å¤šè®°å½•æ…¢æŸ¥è¯¢çš„æ¡æ•°', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('532', 'hash-max-ziplist-entries', '512', 'hashæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('533', 'hash-max-ziplist-value', '64', 'hashæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('534', 'list-max-ziplist-entries', '512', 'listæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2020-04-26 18:12:55', '6', '0', '37', '0'), ('535', 'list-max-ziplist-value', '64', 'listæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2020-04-26 18:12:55', '6', '0', '37', '0'), ('536', 'set-max-intset-entries', '512', 'setæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('537', 'zset-max-ziplist-entries', '128', 'zsetæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('538', 'zset-max-ziplist-value', '64', 'zsetæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('539', 'activerehashing', 'yes', 'æ˜¯å¦æ¿€æ´»é‡ç½®å“ˆå¸Œ,é»˜è®¤:yes', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('540', 'client-output-buffer-limit normal', '0 0 0', 'å®¢æˆ·ç«¯è¾“å‡ºç¼“å†²åŒºé™åˆ¶(å®¢æˆ·ç«¯)', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('541', 'client-output-buffer-limit pubsub', '32mb 8mb 60', 'å®¢æˆ·ç«¯è¾“å‡ºç¼“å†²åŒºé™åˆ¶(å‘å¸ƒè®¢é˜…)', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('542', 'hz', '10', 'æ‰§è¡Œåå°taskæ•°é‡,é»˜è®¤:10', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('543', 'port', '%d', 'ç«¯å£', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('544', 'maxmemory', '%dmb', 'å½“å‰å®ä¾‹æœ€å¤§å¯ç”¨å†…å­˜', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('545', 'maxmemory-policy', 'volatile-lfu', 'å†…å­˜ä¸å¤Ÿæ—¶,æ·˜æ±°ç­–ç•¥,é»˜è®¤:volatile-lfu', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('546', 'appendonly', 'yes', 'å¼€å¯append onlyæŒä¹…åŒ–æ¨¡å¼', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('547', 'appendfsync', 'everysec', 'é»˜è®¤:aofæ¯ç§’åŒæ­¥ä¸€æ¬¡', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('548', 'appendfilename', 'appendonly-%d.aof', 'aofæ–‡ä»¶åç§°,é»˜è®¤:appendonly-{port}.aof', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('549', 'dbfilename', 'dump-%d.rdb', 'RDBæ–‡ä»¶é»˜è®¤åç§°,é»˜è®¤dump-{port}.rdb', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('550', 'aof-rewrite-incremental-fsync', 'yes', 'aof rewriteè¿‡ç¨‹ä¸­,æ˜¯å¦é‡‡å–å¢é‡æ–‡ä»¶åŒæ­¥ç­–ç•¥,é»˜è®¤:yes', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('551', 'no-appendfsync-on-rewrite', 'yes', 'æ˜¯å¦åœ¨åå°aofæ–‡ä»¶rewriteæœŸé—´è°ƒç”¨fsync,é»˜è®¤è°ƒç”¨,ä¿®æ”¹ä¸ºyes,é˜²æ­¢å¯èƒ½fsyncé˜»å¡,ä½†å¯èƒ½ä¸¢å¤±rewriteæœŸé—´çš„æ•°æ®', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('552', 'auto-aof-rewrite-min-size', '64m', 'è§¦å‘rewriteçš„aofæ–‡ä»¶æœ€å°é˜€å€¼,é»˜è®¤64m', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('553', 'auto-aof-rewrite-percentage', '%d', 'Redisé‡å†™aofæ–‡ä»¶çš„æ¯”ä¾‹æ¡ä»¶,é»˜è®¤ä»100å¼€å§‹,ç»Ÿä¸€æœºå™¨ä¸‹ä¸åŒå®ä¾‹æŒ‰4%é€’å‡', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('554', 'maxclients', '10000', 'å®¢æˆ·ç«¯æœ€å¤§è¿æ¥æ•°', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('555', 'protected-mode', 'yes', 'å¼€å¯ä¿æŠ¤æ¨¡å¼', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('556', 'bind', '0.0.0.0', 'é»˜è®¤å®¢æˆ·ç«¯éƒ½å¯è¿æ¥', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('557', 'list-max-ziplist-size', '-2', '8Kbå¯¹è±¡ä»¥å†…é‡‡ç”¨ziplist', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('558', 'list-compress-depth', '0', 'å‹ç¼©æ–¹å¼ï¼Œ0:ä¸å‹ç¼©', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('559', 'always-show-logo', 'yes', 'rediså¯åŠ¨æ˜¯å¦æ˜¾ç¤ºlogo', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('560', 'lazyfree-lazy-eviction', 'yes', 'åœ¨è¢«åŠ¨æ·˜æ±°é”®æ—¶ï¼Œæ˜¯å¦é‡‡ç”¨lazy freeæœºåˆ¶,é»˜è®¤:no', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('561', 'lazyfree-lazy-expire', 'yes', 'TTLçš„é”®è¿‡æœŸæ˜¯å¦é‡‡ç”¨lazyfreeæœºåˆ¶ é»˜è®¤å€¼:no', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('562', 'lazyfree-lazy-server-del', 'yes', 'éšå¼çš„DELé”®(rename)æ˜¯å¦é‡‡ç”¨lazyfreeæœºåˆ¶ é»˜è®¤å€¼:no', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('563', 'aof-use-rdb-preamble', 'yes', 'æ˜¯å¦å¼€å¯æ··åˆæŒä¹…åŒ–,é»˜è®¤å€¼ no ä¸å¼€å¯', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('564', 'protected-mode', 'no', 'å…³é—­sentinelä¿æŠ¤æ¨¡å¼', '2020-04-26 18:12:55', '5', '1', '37', '0'), ('565', 'activedefrag', 'yes', 'ç¢ç‰‡æ•´ç†å¼€å¯', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('566', 'active-defrag-threshold-lower', '10', 'ç¢ç‰‡ç‡è¾¾åˆ°ç™¾åˆ†ä¹‹å¤šå°‘å¼€å¯æ•´ç†', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('567', 'active-defrag-threshold-upper', '100', 'ç¢ç‰‡ç‡å°ä½™å¤šå°‘ç™¾åˆ†æ¯”å¼€å¯æ•´ç†', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('568', 'active-defrag-ignore-bytes', '300mb', 'å†…å­˜ç¢ç‰‡è¾¾åˆ°å¤šå°‘å…†å¼€å¯ç¢ç‰‡', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('569', 'active-defrag-cycle-min', '10', 'ç¢ç‰‡æ•´ç†æœ€å°cpuç™¾åˆ†æ¯”', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('570', 'active-defrag-cycle-max', '30', 'ç¢ç‰‡æ•´ç†æœ€å¤§cpuç™¾åˆ†æ¯”', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('571', 'active-defrag-max-scan-fields', '1000', 'å†…å­˜ç¢ç‰‡å¤„ç†set/hash/zset/list ä¸­çš„æœ€å¤§æ•°é‡çš„é¡¹', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('572', 'replica-serve-stale-data', 'yes', 'ä»èŠ‚ç‚¹ä¸masteræ–­è¿æˆ–å¤åˆ¶å‘½ä»¤å“åº”ï¼šyes ç»§ç»­å“åº” no:ç›¸å…³å‘½ä»¤è¿”å›å¼‚å¸¸ä¿¡æ¯', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('573', 'cluster-replica-validity-factor', '10', 'ä»èŠ‚ç‚¹å»¶è¿Ÿæœ‰æ•ˆæ€§åˆ¤æ–­å› å­,é»˜è®¤10ç§’', '2020-04-26 18:12:55', '2', '1', '37', '0'), ('574', 'replica-priority', '100', 'ä»èŠ‚ç‚¹çš„ä¼˜å…ˆçº§,å½±å“sentinel/clusteræ™‹å‡masteræ“ä½œ,0æ°¸è¿œä¸æ™‹å‡', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('575', 'replica-read-only', 'yes', 'ä»èŠ‚ç‚¹æ˜¯å¦åªè¯»: yes åªè¯»', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('576', 'replica-lazy-flush', 'yes', 'ä»èŠ‚ç‚¹å‘èµ·å…¨é‡å¤åˆ¶,æ˜¯å¦é‡‡ç”¨flushall asyncæ¸…ç†è€æ•°æ® é»˜è®¤å€¼ no', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('577', 'client-output-buffer-limit replica', '512mb 256mb 60', 'å®¢æˆ·ç«¯è¾“å‡ºç¼“å†²åŒºé™åˆ¶', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('578', 'replica-ignore-maxmemory', 'yes', 'ä»èŠ‚ç‚¹æ˜¯å¦å¼€å¯æœ€å¤§å†…å­˜ï¼Œé¿å…ä¸€äº›è¿‡å¤§ç¼“å†²åŒºå¯¼è‡´oom', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('579', 'stream-node-max-bytes', '4096', 'streamæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('580', 'stream-node-max-entries', '100', 'streamæ•°æ®ç»“æ„ä¼˜åŒ–å‚æ•°', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('581', 'dynamic-hz', 'yes', 'è‡ªé€‚åº”å¹³è¡¡ç©ºé—²CPUçš„ä½¿ç”¨ç‡å’Œå“åº”', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('582', 'rdb-save-incremental-fsync', 'yes', 'rdbåŒæ­¥åˆ·ç›˜æ˜¯å¦é‡‡ç”¨å¢é‡fsyncï¼Œæ¯32MBæ‰§è¡Œä¸€æ¬¡fsync', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('583', 'repl-ping-replica-period', '10', 'æŒ‡å®šä»èŠ‚ç‚¹å®šæœŸping masterçš„å‘¨æœŸ,é»˜è®¤:10ç§’', '2020-04-26 18:12:55', '6', '1', '37', '0'), ('585', 'latency-monitor-threshold', '30', 'å»¶è¿Ÿäº‹ä»¶é˜€å€¼ï¼Œå•ä½ms', '2020-05-26 15:45:22', '6', '1', '37', '0'), ('587', 'latency-monitor-threshold', '30', 'å»¶è¿Ÿäº‹ä»¶é˜€å€¼ï¼Œå•ä½ms', '2020-05-26 15:46:18', '6', '1', '12', '0'), ('589', 'latency-monitor-threshold', '30', 'å»¶è¿Ÿäº‹ä»¶é˜€å€¼ï¼Œå•ä½ms', '2020-05-26 15:46:49', '6', '1', '31', '0'), ('590', 'latency-monitor-threshold', '30', 'å»¶è¿Ÿäº‹ä»¶é˜€å€¼ï¼Œå•ä½ms', '2020-05-26 15:49:47', '6', '1', '29', '0');
 COMMIT;
 
 
@@ -557,19 +557,19 @@ DROP TABLE IF EXISTS `instance_fault`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `instance_fault` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `app_id` bigint(20) NOT NULL COMMENT 'Ó¦ÓÃid',
-  `inst_id` bigint(20) NOT NULL COMMENT 'ÊµÀıid',
-  `ip` varchar(16) NOT NULL COMMENT 'ipµØÖ·',
-  `port` int(11) NOT NULL COMMENT '¶Ë¿Ú',
-  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '×´Ì¬:0:ĞÄÌøÍ£Ö¹,1:ĞÄÌø»Ö¸´',
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '´´½¨Ê±¼ä',
-  `type` mediumint(4) NOT NULL COMMENT 'ÀàĞÍ£º1. memcached, 2. redis-cluster, 3. memcacheq, 4. ·Çcache-cloud 5. redis-sentinel 6.redis-standalone',
-  `reason` mediumtext NOT NULL COMMENT '¹ÊÕÏÔ­ÒòÃèÊö',
+  `app_id` bigint(20) NOT NULL COMMENT 'åº”ç”¨id',
+  `inst_id` bigint(20) NOT NULL COMMENT 'å®ä¾‹id',
+  `ip` varchar(16) NOT NULL COMMENT 'ipåœ°å€',
+  `port` int(11) NOT NULL COMMENT 'ç«¯å£',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'çŠ¶æ€:0:å¿ƒè·³åœæ­¢,1:å¿ƒè·³æ¢å¤',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `type` mediumint(4) NOT NULL COMMENT 'ç±»å‹ï¼š1. memcached, 2. redis-cluster, 3. memcacheq, 4. écache-cloud 5. redis-sentinel 6.redis-standalone',
+  `reason` mediumtext NOT NULL COMMENT 'æ•…éšœåŸå› æè¿°',
   PRIMARY KEY (`id`),
   KEY `idx_ip_port` (`ip`,`port`),
   KEY `app_id` (`app_id`),
   KEY `inst_id` (`inst_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8927 DEFAULT CHARSET=utf8 COMMENT='ÊµÀı¹ÊÕÏ±í' /* `compression`='tokudb_zlib' */;
+) ENGINE=InnoDB AUTO_INCREMENT=8927 DEFAULT CHARSET=utf8 COMMENT='å®ä¾‹æ•…éšœè¡¨' /* `compression`='tokudb_zlib' */;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -579,13 +579,13 @@ CREATE TABLE `instance_fault` (
 DROP TABLE IF EXISTS `instance_host`;
 CREATE TABLE `instance_host` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `ip` varchar(16) NOT NULL COMMENT '»úÆ÷ip',
-  `ssh_user` varchar(32) DEFAULT NULL COMMENT 'sshÓÃ»§',
-  `ssh_pwd` varchar(32) DEFAULT NULL COMMENT 'sshÃÜÂë',
-  `warn` int(5) DEFAULT '1' COMMENT '0²»±¨¾¯£¬1±¨¾¯',
+  `ip` varchar(16) NOT NULL COMMENT 'æœºå™¨ip',
+  `ssh_user` varchar(32) DEFAULT NULL COMMENT 'sshç”¨æˆ·',
+  `ssh_pwd` varchar(32) DEFAULT NULL COMMENT 'sshå¯†ç ',
+  `warn` int(5) DEFAULT '1' COMMENT '0ä¸æŠ¥è­¦ï¼Œ1æŠ¥è­¦',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uidx_host_ip` (`ip`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='»úÆ÷±í' /* `compression`='tokudb_zlib' */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='æœºå™¨è¡¨' /* `compression`='tokudb_zlib' */;
 
 --
 -- Table structure for table `instance_info`
@@ -594,21 +594,21 @@ CREATE TABLE `instance_host` (
 DROP TABLE IF EXISTS `instance_info`;
 CREATE TABLE `instance_info` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'memcached instance id',
-  `parent_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '¶ÔµÈÊµÀıµÄid',
-  `app_id` bigint(20) NOT NULL COMMENT 'Ó¦ÓÃid£¬Óëapp_desc¹ØÁª',
-  `host_id` bigint(20) NOT NULL COMMENT '¶ÔÓ¦µÄÖ÷»úid£¬Óëinstance_host¹ØÁª',
-  `ip` varchar(16) NOT NULL COMMENT 'ÊµÀıµÄip',
-  `port` int(11) NOT NULL COMMENT 'ÊµÀı¶Ë¿Ú',
-  `status` tinyint(4) NOT NULL COMMENT 'ÊÇ·ñÆôÓÃ:0:½ÚµãÒì³£,1:Õı³£ÆôÓÃ,2:½ÚµãÏÂÏß',
-  `mem` int(11) NOT NULL COMMENT 'ÄÚ´æ´óĞ¡',
-  `conn` int(11) NOT NULL COMMENT 'Á¬½ÓÊı',
-  `cmd` varchar(255) NOT NULL COMMENT 'Æô¶¯ÊµÀıµÄÃüÁî/redis-sentinelµÄmasterName',
-  `type` mediumint(11) NOT NULL COMMENT 'ÀàĞÍ£º1. memcached, 2. redis-cluster, 3. memcacheq, 4. ·Çcache-cloud 5. redis-sentinel 6.redis-standalone',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '¸üĞÂÊ±¼ä',
+  `parent_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'å¯¹ç­‰å®ä¾‹çš„id',
+  `app_id` bigint(20) NOT NULL COMMENT 'åº”ç”¨idï¼Œä¸app_descå…³è”',
+  `host_id` bigint(20) NOT NULL COMMENT 'å¯¹åº”çš„ä¸»æœºidï¼Œä¸instance_hostå…³è”',
+  `ip` varchar(16) NOT NULL COMMENT 'å®ä¾‹çš„ip',
+  `port` int(11) NOT NULL COMMENT 'å®ä¾‹ç«¯å£',
+  `status` tinyint(4) NOT NULL COMMENT 'æ˜¯å¦å¯ç”¨:0:èŠ‚ç‚¹å¼‚å¸¸,1:æ­£å¸¸å¯ç”¨,2:èŠ‚ç‚¹ä¸‹çº¿',
+  `mem` int(11) NOT NULL COMMENT 'å†…å­˜å¤§å°',
+  `conn` int(11) NOT NULL COMMENT 'è¿æ¥æ•°',
+  `cmd` varchar(255) NOT NULL COMMENT 'å¯åŠ¨å®ä¾‹çš„å‘½ä»¤/redis-sentinelçš„masterName',
+  `type` mediumint(11) NOT NULL COMMENT 'ç±»å‹ï¼š1. memcached, 2. redis-cluster, 3. memcacheq, 4. écache-cloud 5. redis-sentinel 6.redis-standalone',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uidx_inst_ipport` (`ip`,`port`) USING BTREE,
   KEY `app_id` (`app_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='ÊµÀıĞÅÏ¢' /* `compression`='tokudb_zlib' */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='å®ä¾‹ä¿¡æ¯' /* `compression`='tokudb_zlib' */;
 
 --
 -- Table structure for table `instance_latency_history`
@@ -616,21 +616,21 @@ CREATE TABLE `instance_info` (
 
 DROP TABLE IF EXISTS `instance_latency_history`;
 CREATE TABLE `instance_latency_history` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '×ÔÔöid',
-  `instance_id` bigint(20) NOT NULL COMMENT 'ÊµÀıµÄid',
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'è‡ªå¢id',
+  `instance_id` bigint(20) NOT NULL COMMENT 'å®ä¾‹çš„id',
   `app_id` bigint(20) NOT NULL COMMENT 'app id',
   `ip` varchar(32) NOT NULL COMMENT 'ip',
   `port` int(11) NOT NULL COMMENT 'port',
-  `event` varchar(255) NOT NULL COMMENT 'ÊÂ¼şÃû³Æ',
-  `execute_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Ö´ĞĞÊ±¼äµã',
-  `execution_cost` bigint(20) NOT NULL COMMENT 'ºÄÊ±(Î¢Ãî)',
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '´´½¨Ê±¼ä',
+  `event` varchar(255) NOT NULL COMMENT 'äº‹ä»¶åç§°',
+  `execute_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ‰§è¡Œæ—¶é—´ç‚¹',
+  `execution_cost` bigint(20) NOT NULL COMMENT 'è€—æ—¶(å¾®å¦™)',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
   PRIMARY KEY (`id`),
   UNIQUE KEY `latencyistorykey` (`instance_id`,`event`,`execute_date`),
   KEY `idx_app_create_time` (`app_id`,`create_time`),
   KEY `idx_app_executedate` (`app_id`,`execute_date`),
   KEY `idx_executedate` (`execute_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='ÊµÀıÑÓ³ÙÊÂ¼şĞÅÏ¢±í';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='å®ä¾‹å»¶è¿Ÿäº‹ä»¶ä¿¡æ¯è¡¨';
 
 --
 -- Table structure for table `instance_minute_stats`
@@ -639,17 +639,17 @@ CREATE TABLE `instance_latency_history` (
 DROP TABLE IF EXISTS `instance_minute_stats`;
 CREATE TABLE `instance_minute_stats` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `collect_time` bigint(20) NOT NULL COMMENT 'ÊÕ¼¯Ê±¼ä:¸ñÊ½yyyyMMddHHmm',
-  `ip` varchar(16) NOT NULL COMMENT 'ipµØÖ·',
-  `port` int(11) NOT NULL COMMENT '¶Ë¿Ú/hostId',
-  `db_type` varchar(16) NOT NULL COMMENT 'ÊÕ¼¯µÄÊı¾İÀàĞÍ',
-  `json` text NOT NULL COMMENT 'Í³¼ÆjsonÊı¾İ',
-  `created_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '´´½¨Ê±¼ä',
+  `collect_time` bigint(20) NOT NULL COMMENT 'æ”¶é›†æ—¶é—´:æ ¼å¼yyyyMMddHHmm',
+  `ip` varchar(16) NOT NULL COMMENT 'ipåœ°å€',
+  `port` int(11) NOT NULL COMMENT 'ç«¯å£/hostId',
+  `db_type` varchar(16) NOT NULL COMMENT 'æ”¶é›†çš„æ•°æ®ç±»å‹',
+  `json` text NOT NULL COMMENT 'ç»Ÿè®¡jsonæ•°æ®',
+  `created_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_index` (`ip`,`port`,`db_type`,`collect_time`),
   KEY `idx_collect_time` (`collect_time`),
   KEY `idx_created_time` (`created_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='ÊµÀı·ÖÖÓÍ³¼Æ±í';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='å®ä¾‹åˆ†é’Ÿç»Ÿè®¡è¡¨';
 
 --
 -- Table structure for table `instance_reshard_process`
@@ -657,24 +657,24 @@ CREATE TABLE `instance_minute_stats` (
 
 DROP TABLE IF EXISTS `instance_reshard_process`;
 CREATE TABLE `instance_reshard_process` (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '×ÔÔöid',
-  `app_id` bigint(20) NOT NULL COMMENT 'Ó¦ÓÃid',
-  `audit_id` bigint(20) NOT NULL COMMENT 'ÉóºËid',
-  `source_instance_id` int(11) NOT NULL COMMENT 'Ô´ÊµÀıid',
-  `target_instance_id` int(11) NOT NULL COMMENT 'Ä¿±êÊµÀıid',
-  `start_slot` int(11) NOT NULL COMMENT '¿ªÊ¼slot',
-  `end_slot` int(11) NOT NULL COMMENT '½áÊøslot',
-  `migrating_slot` int(11) NOT NULL COMMENT 'ÕıÔÚÇ¨ÒÆµÄslot',
-  `is_pipeline` tinyint(4) NOT NULL COMMENT 'ÊÇ·ñÎªpipeline,0:·ñ,1:ÊÇ',
-  `finish_slot_num` int(11) NOT NULL COMMENT 'ÒÑ¾­Íê³ÉÇ¨ÒÆµÄslotÊıÁ¿',
-  `status` tinyint(4) NOT NULL COMMENT '0:ÔËĞĞÖĞ 1:Íê³É 2:³ö´í',
-  `start_time` datetime NOT NULL COMMENT 'Ç¨ÒÆ¿ªÊ¼Ê±¼ä',
-  `end_time` datetime NOT NULL COMMENT 'Ç¨ÒÆ½áÊøÊ±¼ä',
-  `create_time` datetime NOT NULL COMMENT '´´½¨Ê±¼ä',
-  `update_time` datetime NOT NULL COMMENT '¸üĞÂÊ±¼ä',
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'è‡ªå¢id',
+  `app_id` bigint(20) NOT NULL COMMENT 'åº”ç”¨id',
+  `audit_id` bigint(20) NOT NULL COMMENT 'å®¡æ ¸id',
+  `source_instance_id` int(11) NOT NULL COMMENT 'æºå®ä¾‹id',
+  `target_instance_id` int(11) NOT NULL COMMENT 'ç›®æ ‡å®ä¾‹id',
+  `start_slot` int(11) NOT NULL COMMENT 'å¼€å§‹slot',
+  `end_slot` int(11) NOT NULL COMMENT 'ç»“æŸslot',
+  `migrating_slot` int(11) NOT NULL COMMENT 'æ­£åœ¨è¿ç§»çš„slot',
+  `is_pipeline` tinyint(4) NOT NULL COMMENT 'æ˜¯å¦ä¸ºpipeline,0:å¦,1:æ˜¯',
+  `finish_slot_num` int(11) NOT NULL COMMENT 'å·²ç»å®Œæˆè¿ç§»çš„slotæ•°é‡',
+  `status` tinyint(4) NOT NULL COMMENT '0:è¿è¡Œä¸­ 1:å®Œæˆ 2:å‡ºé”™',
+  `start_time` datetime NOT NULL COMMENT 'è¿ç§»å¼€å§‹æ—¶é—´',
+  `end_time` datetime NOT NULL COMMENT 'è¿ç§»ç»“æŸæ—¶é—´',
+  `create_time` datetime NOT NULL COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime NOT NULL COMMENT 'æ›´æ–°æ—¶é—´',
   PRIMARY KEY (`id`),
   KEY `idx_audit` (`audit_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='ÊµÀıReshard½ø¶È';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='å®ä¾‹Reshardè¿›åº¦';
 
 --
 -- Table structure for table `instance_slow_log`
@@ -682,22 +682,22 @@ CREATE TABLE `instance_reshard_process` (
 
 DROP TABLE IF EXISTS `instance_slow_log`;
 CREATE TABLE `instance_slow_log` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '×ÔÔöid',
-  `instance_id` bigint(20) NOT NULL COMMENT 'ÊµÀıµÄid',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'è‡ªå¢id',
+  `instance_id` bigint(20) NOT NULL COMMENT 'å®ä¾‹çš„id',
   `app_id` bigint(20) NOT NULL COMMENT 'app id',
   `ip` varchar(32) NOT NULL COMMENT 'ip',
   `port` int(11) NOT NULL COMMENT 'port',
-  `slow_log_id` bigint(20) NOT NULL COMMENT 'Âı²éÑ¯id',
-  `cost_time` int(11) NOT NULL COMMENT 'ºÄÊ±(Î¢Ãî)',
-  `command` varchar(255) NOT NULL COMMENT 'Ö´ĞĞÃüÁî',
-  `execute_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Ö´ĞĞÊ±¼äµã',
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '¼ÇÂ¼´´½¨Ê±¼ä',
+  `slow_log_id` bigint(20) NOT NULL COMMENT 'æ…¢æŸ¥è¯¢id',
+  `cost_time` int(11) NOT NULL COMMENT 'è€—æ—¶(å¾®å¦™)',
+  `command` varchar(255) NOT NULL COMMENT 'æ‰§è¡Œå‘½ä»¤',
+  `execute_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ‰§è¡Œæ—¶é—´ç‚¹',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'è®°å½•åˆ›å»ºæ—¶é—´',
   PRIMARY KEY (`id`),
   UNIQUE KEY `slowlogkey` (`instance_id`,`slow_log_id`,`execute_time`),
   KEY `idx_app_create_time` (`app_id`,`create_time`),
   KEY `idx_app_executetime` (`app_id`,`execute_time`),
   KEY `idx_executetime` (`execute_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='ÊµÀıÂı²éÑ¯ÁĞ±í';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='å®ä¾‹æ…¢æŸ¥è¯¢åˆ—è¡¨';
 
 --
 -- Table structure for table `instance_statistics`
@@ -705,29 +705,29 @@ CREATE TABLE `instance_slow_log` (
 
 DROP TABLE IF EXISTS `instance_statistics`;
 CREATE TABLE `instance_statistics` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '×ÔÔöid',
-  `inst_id` bigint(20) NOT NULL COMMENT 'ÊµÀıµÄid',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'è‡ªå¢id',
+  `inst_id` bigint(20) NOT NULL COMMENT 'å®ä¾‹çš„id',
   `app_id` bigint(20) NOT NULL COMMENT 'app id',
-  `host_id` bigint(20) NOT NULL COMMENT '»úÆ÷µÄid',
+  `host_id` bigint(20) NOT NULL COMMENT 'æœºå™¨çš„id',
   `ip` varchar(16) COLLATE utf8_bin NOT NULL COMMENT 'ip',
   `port` int(255) NOT NULL COMMENT 'port',
-  `role` tinyint(255) NOT NULL COMMENT 'Ö÷´Ó£¬1Ö÷2´Ó',
-  `max_memory` bigint(255) NOT NULL COMMENT 'Ô¤·ÖÅäÄÚ´æ£¬µ¥Î»byte',
-  `used_memory` bigint(255) NOT NULL COMMENT 'ÒÑÊ¹ÓÃÄÚ´æ£¬µ¥Î»byte',
-  `curr_items` bigint(255) NOT NULL COMMENT 'µ±Ç°itemÊıÁ¿',
-  `curr_connections` int(255) NOT NULL COMMENT 'µ±Ç°Á¬½ÓÊı',
-  `misses` bigint(255) NOT NULL COMMENT 'missÊı',
-  `hits` bigint(255) NOT NULL COMMENT 'ÃüÖĞÊı',
+  `role` tinyint(255) NOT NULL COMMENT 'ä¸»ä»ï¼Œ1ä¸»2ä»',
+  `max_memory` bigint(255) NOT NULL COMMENT 'é¢„åˆ†é…å†…å­˜ï¼Œå•ä½byte',
+  `used_memory` bigint(255) NOT NULL COMMENT 'å·²ä½¿ç”¨å†…å­˜ï¼Œå•ä½byte',
+  `curr_items` bigint(255) NOT NULL COMMENT 'å½“å‰itemæ•°é‡',
+  `curr_connections` int(255) NOT NULL COMMENT 'å½“å‰è¿æ¥æ•°',
+  `misses` bigint(255) NOT NULL COMMENT 'missæ•°',
+  `hits` bigint(255) NOT NULL COMMENT 'å‘½ä¸­æ•°',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `modify_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `mem_fragmentation_ratio` double DEFAULT '0' COMMENT 'ËéÆ¬ÂÊ',
-  `aof_delayed_fsync` int(11) DEFAULT '0' COMMENT 'aof×èÈû´ÎÊı',
+  `mem_fragmentation_ratio` double DEFAULT '0' COMMENT 'ç¢ç‰‡ç‡',
+  `aof_delayed_fsync` int(11) DEFAULT '0' COMMENT 'aofé˜»å¡æ¬¡æ•°',
   PRIMARY KEY (`id`),
   UNIQUE KEY `ip` (`ip`,`port`),
   KEY `app_id` (`app_id`),
   KEY `machine_id` (`host_id`),
   KEY `idx_inst_id` (`inst_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='ÊµÀıµÄ×îĞÂÍ³¼ÆĞÅÏ¢' /* `compression`='tokudb_zlib' */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='å®ä¾‹çš„æœ€æ–°ç»Ÿè®¡ä¿¡æ¯' /* `compression`='tokudb_zlib' */;
 
 --
 -- Table structure for table `machine_info`
@@ -735,34 +735,34 @@ CREATE TABLE `instance_statistics` (
 
 DROP TABLE IF EXISTS `machine_info`;
 CREATE TABLE `machine_info` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '»úÆ÷µÄid',
-  `ssh_user` varchar(20) COLLATE utf8_bin NOT NULL DEFAULT 'cachecloud' COMMENT 'sshÓÃ»§',
-  `ssh_passwd` varchar(20) COLLATE utf8_bin NOT NULL DEFAULT 'cachecloud' COMMENT 'sshÃÜÂë',
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'æœºå™¨çš„id',
+  `ssh_user` varchar(20) COLLATE utf8_bin NOT NULL DEFAULT 'cachecloud' COMMENT 'sshç”¨æˆ·',
+  `ssh_passwd` varchar(20) COLLATE utf8_bin NOT NULL DEFAULT 'cachecloud' COMMENT 'sshå¯†ç ',
   `ip` varchar(16) COLLATE utf8_bin NOT NULL COMMENT 'ip',
-  `room` varchar(20) COLLATE utf8_bin NOT NULL COMMENT 'ËùÊô»ú·¿',
-  `mem` int(11) unsigned NOT NULL COMMENT 'ÄÚ´æ´óĞ¡£¬µ¥Î»G',
-  `cpu` mediumint(24) unsigned NOT NULL COMMENT 'cpuÊıÁ¿',
-  `virtual` tinyint(8) unsigned NOT NULL DEFAULT '1' COMMENT 'ÊÇ·ñĞéÄâ£¬0±íÊ¾·ñ£¬1±íÊ¾ÊÇ',
-  `real_ip` varchar(16) COLLATE utf8_bin NOT NULL COMMENT 'ËŞÖ÷»úip',
-  `service_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'ÉÏÏßÊ±¼ä',
-  `fault_count` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '¹ÊÕÏ´ÎÊı',
-  `modify_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'ĞŞ¸ÄÊ±¼ä',
-  `warn` tinyint(255) unsigned NOT NULL DEFAULT '1' COMMENT 'ÊÇ·ñÆôÓÃ±¨¾¯£¬0²»ÆôÓÃ£¬1ÆôÓÃ',
-  `available` tinyint(255) NOT NULL COMMENT '±íÊ¾»úÆ÷ÊÇ·ñ¿ÉÓÃ£¬1±íÊ¾¿ÉÓÃ£¬0±íÊ¾²»¿ÉÓÃ£»',
-  `groupId` int(11) NOT NULL DEFAULT '0' COMMENT '»úÆ÷·Ö×é£¬Ä¬ÈÏÎª0£¬±íÊ¾Ô­Éú×ÊÔ´£¬·Ç0±íÊ¾Íâ²¿Ìá¹©µÄ×ÊÔ´(¿ÉÀ©Õ¹)',
-  `type` int(11) NOT NULL DEFAULT '0' COMMENT '0Ô­Éú 1 ÆäËû',
-  `extra_desc` varchar(255) COLLATE utf8_bin DEFAULT NULL COMMENT '¶ÔÓÚ»úÆ÷µÄ¶îÍâËµÃ÷(ÀıÈç»úÆ÷°²×°µÄÆäËû·şÎñ(web,mysql,queueµÈµÈ))',
+  `room` varchar(20) COLLATE utf8_bin NOT NULL COMMENT 'æ‰€å±æœºæˆ¿',
+  `mem` int(11) unsigned NOT NULL COMMENT 'å†…å­˜å¤§å°ï¼Œå•ä½G',
+  `cpu` mediumint(24) unsigned NOT NULL COMMENT 'cpuæ•°é‡',
+  `virtual` tinyint(8) unsigned NOT NULL DEFAULT '1' COMMENT 'æ˜¯å¦è™šæ‹Ÿï¼Œ0è¡¨ç¤ºå¦ï¼Œ1è¡¨ç¤ºæ˜¯',
+  `real_ip` varchar(16) COLLATE utf8_bin NOT NULL COMMENT 'å®¿ä¸»æœºip',
+  `service_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'ä¸Šçº¿æ—¶é—´',
+  `fault_count` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'æ•…éšœæ¬¡æ•°',
+  `modify_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'ä¿®æ”¹æ—¶é—´',
+  `warn` tinyint(255) unsigned NOT NULL DEFAULT '1' COMMENT 'æ˜¯å¦å¯ç”¨æŠ¥è­¦ï¼Œ0ä¸å¯ç”¨ï¼Œ1å¯ç”¨',
+  `available` tinyint(255) NOT NULL COMMENT 'è¡¨ç¤ºæœºå™¨æ˜¯å¦å¯ç”¨ï¼Œ1è¡¨ç¤ºå¯ç”¨ï¼Œ0è¡¨ç¤ºä¸å¯ç”¨ï¼›',
+  `groupId` int(11) NOT NULL DEFAULT '0' COMMENT 'æœºå™¨åˆ†ç»„ï¼Œé»˜è®¤ä¸º0ï¼Œè¡¨ç¤ºåŸç”Ÿèµ„æºï¼Œé0è¡¨ç¤ºå¤–éƒ¨æä¾›çš„èµ„æº(å¯æ‰©å±•)',
+  `type` int(11) NOT NULL DEFAULT '0' COMMENT '0åŸç”Ÿ 1 å…¶ä»–',
+  `extra_desc` varchar(255) COLLATE utf8_bin DEFAULT NULL COMMENT 'å¯¹äºæœºå™¨çš„é¢å¤–è¯´æ˜(ä¾‹å¦‚æœºå™¨å®‰è£…çš„å…¶ä»–æœåŠ¡(web,mysql,queueç­‰ç­‰))',
   `collect` int(11) DEFAULT '1' COMMENT 'switch of collect server status, 1:open, 0:close',
-  `version_install` varchar(512) COLLATE utf8_bin DEFAULT NULL COMMENT '»úÆ÷°²×°redis°æ±¾×´Ì¬',
-  `use_type` tinyint(4) DEFAULT '2' COMMENT 'Ê¹ÓÃÀàĞÍ£ºRedis×¨ÓÃ»úÆ÷(0)£¬Redis²âÊÔ»úÆ÷(1)£¬»ìºÏ²¿Êğ»úÆ÷(2)£¬Redis-Sentinel»úÆ÷(3)',
-  `k8s_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'ÊÇ·ñk8sÈİÆ÷£º0:²»ÊÇ 1:ÊÇ',
-  `rack` varchar(128) COLLATE utf8_bin DEFAULT '' COMMENT '»úÆ÷ËùÔÚ»ú¼ÜĞÅÏ¢',
-  `is_allocating` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'ÊÇ·ñÔÚ·ÖÅäÖĞ,1ÊÇ0·ñ',
-  `disk` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '´ÅÅÌ¿Õ¼ä:G',
-  `dis_type` tinyint(4) DEFAULT 0 NOT NULL COMMENT '²Ù×÷ÏµÍ³·¢ĞĞ°æ±¾£¬0:centos;1:ubuntu',
+  `version_install` varchar(512) COLLATE utf8_bin DEFAULT NULL COMMENT 'æœºå™¨å®‰è£…redisç‰ˆæœ¬çŠ¶æ€',
+  `use_type` tinyint(4) DEFAULT '2' COMMENT 'ä½¿ç”¨ç±»å‹ï¼šRedisä¸“ç”¨æœºå™¨(0)ï¼ŒRedisæµ‹è¯•æœºå™¨(1)ï¼Œæ··åˆéƒ¨ç½²æœºå™¨(2)ï¼ŒRedis-Sentinelæœºå™¨(3)',
+  `k8s_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'æ˜¯å¦k8så®¹å™¨ï¼š0:ä¸æ˜¯ 1:æ˜¯',
+  `rack` varchar(128) COLLATE utf8_bin DEFAULT '' COMMENT 'æœºå™¨æ‰€åœ¨æœºæ¶ä¿¡æ¯',
+  `is_allocating` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'æ˜¯å¦åœ¨åˆ†é…ä¸­,1æ˜¯0å¦',
+  `disk` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'ç£ç›˜ç©ºé—´:G',
+  `dis_type` tinyint(4) DEFAULT 0 NOT NULL COMMENT 'æ“ä½œç³»ç»Ÿå‘è¡Œç‰ˆæœ¬ï¼Œ0:centos;1:ubuntu',
   PRIMARY KEY (`id`),
   UNIQUE KEY `ip` (`ip`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='»úÆ÷ĞÅÏ¢±í' /* `compression`='tokudb_zlib' */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='æœºå™¨ä¿¡æ¯è¡¨' /* `compression`='tokudb_zlib' */;
 
 --
 -- Table structure for table `machine_relation`
@@ -770,15 +770,15 @@ CREATE TABLE `machine_info` (
 
 DROP TABLE IF EXISTS `machine_relation`;
 CREATE TABLE `machine_relation` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Ö÷¼üid',
-  `ip` varchar(64) NOT NULL COMMENT 'ĞéÄâ»úip',
-  `real_ip` varchar(64) NOT NULL COMMENT 'ËŞÖ÷»úip',
-  `extra_desc` varchar(128) DEFAULT NULL COMMENT 'ÊµÀıÃèÊöĞÅÏ¢',
-  `status` int(255) NOT NULL COMMENT 'ÊµÀı±ä¸ü×´Ì¬ 0:offline ,1:online',
-  `is_sync` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'Êı¾İÍ¬²½×´Ì¬ 0: Î´Í¬²½Êı¾İ  -1:Í¬²½ÖĞ 1:Êı¾İÒÑÍ¬²½ -2:Í¬²½Ê§°Ü ',
-  `sync_time` timestamp NULL DEFAULT NULL COMMENT 'Í¬²½Ê±¼ä',
-  `update_time` timestamp NULL DEFAULT NULL COMMENT 'pod×îºó¸üĞÂÊ±¼ä',
-  `taskid` bigint(11) DEFAULT NULL COMMENT 'ÈÎÎñid',
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ä¸»é”®id',
+  `ip` varchar(64) NOT NULL COMMENT 'è™šæ‹Ÿæœºip',
+  `real_ip` varchar(64) NOT NULL COMMENT 'å®¿ä¸»æœºip',
+  `extra_desc` varchar(128) DEFAULT NULL COMMENT 'å®ä¾‹æè¿°ä¿¡æ¯',
+  `status` int(255) NOT NULL COMMENT 'å®ä¾‹å˜æ›´çŠ¶æ€ 0:offline ,1:online',
+  `is_sync` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'æ•°æ®åŒæ­¥çŠ¶æ€ 0: æœªåŒæ­¥æ•°æ®  -1:åŒæ­¥ä¸­ 1:æ•°æ®å·²åŒæ­¥ -2:åŒæ­¥å¤±è´¥ ',
+  `sync_time` timestamp NULL DEFAULT NULL COMMENT 'åŒæ­¥æ—¶é—´',
+  `update_time` timestamp NULL DEFAULT NULL COMMENT 'podæœ€åæ›´æ–°æ—¶é—´',
+  `taskid` bigint(11) DEFAULT NULL COMMENT 'ä»»åŠ¡id',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -788,12 +788,12 @@ CREATE TABLE `machine_relation` (
 
 DROP TABLE IF EXISTS `machine_room`;
 CREATE TABLE `machine_room` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '»ú·¿id',
-  `name` varchar(255) NOT NULL COMMENT '»ú·¿Ãû³Æ',
-  `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0:ÎŞĞ§ 1:ÓĞĞ§',
-  `desc` varchar(255) DEFAULT NULL COMMENT '»ú·¿ÃèÊöĞÅÏ¢',
-  `ip_network` varchar(32) NOT NULL DEFAULT '' COMMENT '»ú·¿Íø¶ÎĞÅÏ¢',
-  `operator` varchar(255) DEFAULT NULL COMMENT 'ÔËÓªÉÌ',
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'æœºæˆ¿id',
+  `name` varchar(255) NOT NULL COMMENT 'æœºæˆ¿åç§°',
+  `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0:æ— æ•ˆ 1:æœ‰æ•ˆ',
+  `desc` varchar(255) DEFAULT NULL COMMENT 'æœºæˆ¿æè¿°ä¿¡æ¯',
+  `ip_network` varchar(32) NOT NULL DEFAULT '' COMMENT 'æœºæˆ¿ç½‘æ®µä¿¡æ¯',
+  `operator` varchar(255) DEFAULT NULL COMMENT 'è¿è¥å•†',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -801,7 +801,7 @@ CREATE TABLE `machine_room` (
 --  Records of `machine_room`
 -- ----------------------------
 BEGIN;
-INSERT INTO `machine_room` VALUES ('1', '°¢ÀïÔÆº¼Öİ', '1', '°¢ÀïÔÆ-º¼Öİ»ú·¿', '172.27.*.*', '°¢ÀïÔÆ');
+INSERT INTO `machine_room` VALUES ('1', 'é˜¿é‡Œäº‘æ­å·', '1', 'é˜¿é‡Œäº‘-æ­å·æœºæˆ¿', '172.27.*.*', 'é˜¿é‡Œäº‘');
 COMMIT;
 
 --
@@ -811,23 +811,23 @@ COMMIT;
 DROP TABLE IF EXISTS `machine_statistics`;
 CREATE TABLE `machine_statistics` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `host_id` bigint(20) NOT NULL COMMENT '»úÆ÷id',
-  `ip` varchar(16) NOT NULL COMMENT '»úÆ÷ip',
-  `cpu_usage` varchar(120) NOT NULL COMMENT 'cpuÊ¹ÓÃÂÊ',
-  `load` varchar(120) NOT NULL COMMENT '»úÆ÷¸ºÔØ',
-  `traffic` varchar(120) NOT NULL COMMENT 'ioÍøÂçÁ÷Á¿',
-  `memory_usage_ratio` varchar(120) NOT NULL COMMENT 'ÄÚ´æÊ¹ÓÃÂÊ',
-  `memory_free` varchar(120) NOT NULL COMMENT 'ÄÚ´æÊ£Óà',
-  `memory_total` varchar(120) NOT NULL COMMENT '×ÜÄÚ´æÁ¿',
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '´´½¨Ê±¼ä',
-  `modify_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'ĞŞ¸ÄÊ±¼ä',
-  `max_memory` int(11) DEFAULT '0' COMMENT '»úÆ÷·ÖÅäÄÚ´æ,µ¥Î»MB',
-  `instance_count` int(11) DEFAULT '0' COMMENT '»úÆ÷ÊµÀıÊıÁ¿',
-  `machine_memory` int(11) DEFAULT '0' COMMENT '»úÆ÷Èë¿â×ÜÄÚ´æ,µ¥Î»MB',
+  `host_id` bigint(20) NOT NULL COMMENT 'æœºå™¨id',
+  `ip` varchar(16) NOT NULL COMMENT 'æœºå™¨ip',
+  `cpu_usage` varchar(120) NOT NULL COMMENT 'cpuä½¿ç”¨ç‡',
+  `load` varchar(120) NOT NULL COMMENT 'æœºå™¨è´Ÿè½½',
+  `traffic` varchar(120) NOT NULL COMMENT 'ioç½‘ç»œæµé‡',
+  `memory_usage_ratio` varchar(120) NOT NULL COMMENT 'å†…å­˜ä½¿ç”¨ç‡',
+  `memory_free` varchar(120) NOT NULL COMMENT 'å†…å­˜å‰©ä½™',
+  `memory_total` varchar(120) NOT NULL COMMENT 'æ€»å†…å­˜é‡',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `modify_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'ä¿®æ”¹æ—¶é—´',
+  `max_memory` int(11) DEFAULT '0' COMMENT 'æœºå™¨åˆ†é…å†…å­˜,å•ä½MB',
+  `instance_count` int(11) DEFAULT '0' COMMENT 'æœºå™¨å®ä¾‹æ•°é‡',
+  `machine_memory` int(11) DEFAULT '0' COMMENT 'æœºå™¨å…¥åº“æ€»å†…å­˜,å•ä½MB',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uidx_ip` (`ip`),
   KEY `host_id` (`host_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='»úÆ÷×´Ì¬Í³¼ÆĞÅÏ¢' /* `compression`='tokudb_zlib' */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='æœºå™¨çŠ¶æ€ç»Ÿè®¡ä¿¡æ¯' /* `compression`='tokudb_zlib' */;
 
 --
 -- Table structure for table `qrtz_blob_triggers`
@@ -841,7 +841,7 @@ CREATE TABLE `qrtz_blob_triggers` (
   `BLOB_DATA` blob,
   PRIMARY KEY (`SCHED_NAME`,`TRIGGER_NAME`,`TRIGGER_GROUP`),
   KEY `SCHED_NAME` (`SCHED_NAME`,`TRIGGER_NAME`,`TRIGGER_GROUP`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Trigger ×÷Îª Blob ÀàĞÍ´æ´¢(ÓÃÓÚ Quartz ÓÃ»§ÓÃ JDBC ´´½¨ËûÃÇ×Ô¼º¶¨ÖÆµÄ Trigger ÀàĞÍ' /* `compression`='tokudb_zlib' */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Trigger ä½œä¸º Blob ç±»å‹å­˜å‚¨(ç”¨äº Quartz ç”¨æˆ·ç”¨ JDBC åˆ›å»ºä»–ä»¬è‡ªå·±å®šåˆ¶çš„ Trigger ç±»å‹' /* `compression`='tokudb_zlib' */;
 
 --
 -- Table structure for table `qrtz_calendars`
@@ -851,11 +851,11 @@ DROP TABLE IF EXISTS `qrtz_calendars`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `qrtz_calendars` (
-  `SCHED_NAME` varchar(120) NOT NULL COMMENT 'schedulerÃû³Æ',
-  `CALENDAR_NAME` varchar(200) NOT NULL COMMENT 'calendarÃû³Æ',
-  `CALENDAR` blob NOT NULL COMMENT 'calendarĞÅÏ¢',
+  `SCHED_NAME` varchar(120) NOT NULL COMMENT 'scheduleråç§°',
+  `CALENDAR_NAME` varchar(200) NOT NULL COMMENT 'calendaråç§°',
+  `CALENDAR` blob NOT NULL COMMENT 'calendarä¿¡æ¯',
   PRIMARY KEY (`SCHED_NAME`,`CALENDAR_NAME`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='ÒÔ Blob ÀàĞÍ´æ´¢ Quartz µÄ Calendar ĞÅÏ¢' /* `compression`='tokudb_zlib' */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='ä»¥ Blob ç±»å‹å­˜å‚¨ Quartz çš„ Calendar ä¿¡æ¯' /* `compression`='tokudb_zlib' */;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -864,13 +864,13 @@ CREATE TABLE `qrtz_calendars` (
 
 DROP TABLE IF EXISTS `qrtz_cron_triggers`;
 CREATE TABLE `qrtz_cron_triggers` (
-  `SCHED_NAME` varchar(120) NOT NULL COMMENT 'schedulerÃû³Æ',
-  `TRIGGER_NAME` varchar(200) NOT NULL COMMENT 'triggerÃû',
-  `TRIGGER_GROUP` varchar(200) NOT NULL COMMENT 'trigger×é',
-  `CRON_EXPRESSION` varchar(120) NOT NULL COMMENT 'cron±í´ïÊ½',
-  `TIME_ZONE_ID` varchar(80) DEFAULT NULL COMMENT 'Ê±Çø',
+  `SCHED_NAME` varchar(120) NOT NULL COMMENT 'scheduleråç§°',
+  `TRIGGER_NAME` varchar(200) NOT NULL COMMENT 'triggerå',
+  `TRIGGER_GROUP` varchar(200) NOT NULL COMMENT 'triggerç»„',
+  `CRON_EXPRESSION` varchar(120) NOT NULL COMMENT 'cronè¡¨è¾¾å¼',
+  `TIME_ZONE_ID` varchar(80) DEFAULT NULL COMMENT 'æ—¶åŒº',
   PRIMARY KEY (`SCHED_NAME`,`TRIGGER_NAME`,`TRIGGER_GROUP`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='´æ´¢ Cron Trigger£¬°üÀ¨ Cron ±í´ïÊ½ºÍÊ±ÇøĞÅÏ¢' /* `compression`='tokudb_zlib' */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='å­˜å‚¨ Cron Triggerï¼ŒåŒ…æ‹¬ Cron è¡¨è¾¾å¼å’Œæ—¶åŒºä¿¡æ¯' /* `compression`='tokudb_zlib' */;
 
 --
 -- Table structure for table `qrtz_fired_triggers`
@@ -889,8 +889,8 @@ CREATE TABLE `qrtz_fired_triggers` (
   `STATE` varchar(16) NOT NULL,
   `JOB_NAME` varchar(200) DEFAULT NULL,
   `JOB_GROUP` varchar(200) DEFAULT NULL,
-  `IS_NONCONCURRENT` varchar(1) DEFAULT NULL COMMENT 'ÊÇ·ñ·Ç²¢ĞĞÖ´ĞĞ',
-  `REQUESTS_RECOVERY` varchar(1) DEFAULT NULL COMMENT 'ÊÇ·ñ³Ö¾Ã»¯',
+  `IS_NONCONCURRENT` varchar(1) DEFAULT NULL COMMENT 'æ˜¯å¦éå¹¶è¡Œæ‰§è¡Œ',
+  `REQUESTS_RECOVERY` varchar(1) DEFAULT NULL COMMENT 'æ˜¯å¦æŒä¹…åŒ–',
   PRIMARY KEY (`SCHED_NAME`,`ENTRY_ID`),
   KEY `IDX_QRTZ_FT_TRIG_INST_NAME` (`SCHED_NAME`,`INSTANCE_NAME`),
   KEY `IDX_QRTZ_FT_INST_JOB_REQ_RCVRY` (`SCHED_NAME`,`INSTANCE_NAME`,`REQUESTS_RECOVERY`),
@@ -898,7 +898,7 @@ CREATE TABLE `qrtz_fired_triggers` (
   KEY `IDX_QRTZ_FT_JG` (`SCHED_NAME`,`JOB_GROUP`),
   KEY `IDX_QRTZ_FT_T_G` (`SCHED_NAME`,`TRIGGER_NAME`,`TRIGGER_GROUP`),
   KEY `IDX_QRTZ_FT_TG` (`SCHED_NAME`,`TRIGGER_GROUP`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='´æ´¢ÒÑ´¥·¢µÄ TriggerÏà¹ØµÄ×´Ì¬ĞÅÏ¢£¬ÒÔ¼°¹ØÁª Job µÄÖ´ĞĞĞÅÏ¢' /* `compression`='tokudb_zlib' */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='å­˜å‚¨å·²è§¦å‘çš„ Triggerç›¸å…³çš„çŠ¶æ€ä¿¡æ¯ï¼Œä»¥åŠå…³è” Job çš„æ‰§è¡Œä¿¡æ¯' /* `compression`='tokudb_zlib' */;
 
 --
 -- Table structure for table `qrtz_job_details`
@@ -911,15 +911,15 @@ CREATE TABLE `qrtz_job_details` (
   `JOB_GROUP` varchar(200) NOT NULL,
   `DESCRIPTION` varchar(250) DEFAULT NULL,
   `JOB_CLASS_NAME` varchar(250) NOT NULL,
-  `IS_DURABLE` varchar(1) NOT NULL COMMENT 'ÊÇ·ñ³Ö¾Ã»¯£¬0²»³Ö¾Ã»¯£¬1³Ö¾Ã»¯',
-  `IS_NONCONCURRENT` varchar(1) NOT NULL COMMENT 'ÊÇ·ñ·Ç²¢·¢£¬0·Ç²¢·¢£¬1²¢·¢',
+  `IS_DURABLE` varchar(1) NOT NULL COMMENT 'æ˜¯å¦æŒä¹…åŒ–ï¼Œ0ä¸æŒä¹…åŒ–ï¼Œ1æŒä¹…åŒ–',
+  `IS_NONCONCURRENT` varchar(1) NOT NULL COMMENT 'æ˜¯å¦éå¹¶å‘ï¼Œ0éå¹¶å‘ï¼Œ1å¹¶å‘',
   `IS_UPDATE_DATA` varchar(1) NOT NULL,
-  `REQUESTS_RECOVERY` varchar(1) NOT NULL COMMENT 'ÊÇ·ñ¿É»Ö¸´£¬0²»»Ö¸´£¬1»Ö¸´',
+  `REQUESTS_RECOVERY` varchar(1) NOT NULL COMMENT 'æ˜¯å¦å¯æ¢å¤ï¼Œ0ä¸æ¢å¤ï¼Œ1æ¢å¤',
   `JOB_DATA` blob,
   PRIMARY KEY (`SCHED_NAME`,`JOB_NAME`,`JOB_GROUP`),
   KEY `IDX_QRTZ_J_REQ_RECOVERY` (`SCHED_NAME`,`REQUESTS_RECOVERY`),
   KEY `IDX_QRTZ_J_GRP` (`SCHED_NAME`,`JOB_GROUP`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='´æ´¢Ã¿Ò»¸öÒÑÅäÖÃµÄ Job µÄÏêÏ¸ĞÅÏ¢' /* `compression`='tokudb_zlib' */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='å­˜å‚¨æ¯ä¸€ä¸ªå·²é…ç½®çš„ Job çš„è¯¦ç»†ä¿¡æ¯' /* `compression`='tokudb_zlib' */;
 
 --
 -- Table structure for table `qrtz_locks`
@@ -930,7 +930,7 @@ CREATE TABLE `qrtz_locks` (
   `SCHED_NAME` varchar(120) NOT NULL,
   `LOCK_NAME` varchar(40) NOT NULL,
   PRIMARY KEY (`SCHED_NAME`,`LOCK_NAME`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='´æ´¢³ÌĞòµÄ±¯¹ÛËøµÄĞÅÏ¢(¼ÙÈçÊ¹ÓÃÁË±¯¹ÛËø)' /* `compression`='tokudb_zlib' */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='å­˜å‚¨ç¨‹åºçš„æ‚²è§‚é”çš„ä¿¡æ¯(å‡å¦‚ä½¿ç”¨äº†æ‚²è§‚é”)' /* `compression`='tokudb_zlib' */;
 
 --
 -- Table structure for table `qrtz_paused_trigger_grps`
@@ -941,7 +941,7 @@ CREATE TABLE `qrtz_paused_trigger_grps` (
   `SCHED_NAME` varchar(120) NOT NULL,
   `TRIGGER_GROUP` varchar(200) NOT NULL,
   PRIMARY KEY (`SCHED_NAME`,`TRIGGER_GROUP`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='´æ´¢ÒÑÔİÍ£µÄ Trigger ×éµÄĞÅÏ¢' /* `compression`='tokudb_zlib' */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='å­˜å‚¨å·²æš‚åœçš„ Trigger ç»„çš„ä¿¡æ¯' /* `compression`='tokudb_zlib' */;
 
 --
 -- Table structure for table `qrtz_scheduler_state`
@@ -950,11 +950,11 @@ CREATE TABLE `qrtz_paused_trigger_grps` (
 DROP TABLE IF EXISTS `qrtz_scheduler_state`;
 CREATE TABLE `qrtz_scheduler_state` (
   `SCHED_NAME` varchar(120) NOT NULL,
-  `INSTANCE_NAME` varchar(200) NOT NULL COMMENT 'Ö´ĞĞquartzÊµÀıµÄÖ÷»úÃû',
-  `LAST_CHECKIN_TIME` bigint(13) NOT NULL COMMENT 'ÊµÀı½«×´Ì¬±¨¸æ¸ø¼¯ÈºÖĞµÄÆäËüÊµÀıµÄÉÏÒ»´ÎÊ±¼ä',
-  `CHECKIN_INTERVAL` bigint(13) NOT NULL COMMENT 'ÊµÀı¼ä×´Ì¬±¨¸æµÄÊ±¼äÆµÂÊ',
+  `INSTANCE_NAME` varchar(200) NOT NULL COMMENT 'æ‰§è¡Œquartzå®ä¾‹çš„ä¸»æœºå',
+  `LAST_CHECKIN_TIME` bigint(13) NOT NULL COMMENT 'å®ä¾‹å°†çŠ¶æ€æŠ¥å‘Šç»™é›†ç¾¤ä¸­çš„å…¶å®ƒå®ä¾‹çš„ä¸Šä¸€æ¬¡æ—¶é—´',
+  `CHECKIN_INTERVAL` bigint(13) NOT NULL COMMENT 'å®ä¾‹é—´çŠ¶æ€æŠ¥å‘Šçš„æ—¶é—´é¢‘ç‡',
   PRIMARY KEY (`SCHED_NAME`,`INSTANCE_NAME`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='´æ´¢ÉÙÁ¿µÄÓĞ¹Ø Scheduler µÄ×´Ì¬ĞÅÏ¢' /* `compression`='tokudb_zlib' */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='å­˜å‚¨å°‘é‡çš„æœ‰å…³ Scheduler çš„çŠ¶æ€ä¿¡æ¯' /* `compression`='tokudb_zlib' */;
 
 --
 -- Table structure for table `qrtz_simple_triggers`
@@ -965,11 +965,11 @@ CREATE TABLE `qrtz_simple_triggers` (
   `SCHED_NAME` varchar(120) NOT NULL,
   `TRIGGER_NAME` varchar(200) NOT NULL,
   `TRIGGER_GROUP` varchar(200) NOT NULL,
-  `REPEAT_COUNT` bigint(7) NOT NULL COMMENT 'ÖØ¸´´ÎÊı',
-  `REPEAT_INTERVAL` bigint(12) NOT NULL COMMENT 'ÖØ¸´¼ä¸ô',
-  `TIMES_TRIGGERED` bigint(10) NOT NULL COMMENT 'ÒÑ³ö·¢´ÎÊı',
+  `REPEAT_COUNT` bigint(7) NOT NULL COMMENT 'é‡å¤æ¬¡æ•°',
+  `REPEAT_INTERVAL` bigint(12) NOT NULL COMMENT 'é‡å¤é—´éš”',
+  `TIMES_TRIGGERED` bigint(10) NOT NULL COMMENT 'å·²å‡ºå‘æ¬¡æ•°',
   PRIMARY KEY (`SCHED_NAME`,`TRIGGER_NAME`,`TRIGGER_GROUP`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='´æ´¢¼òµ¥µÄ Trigger£¬°üÀ¨ÖØ¸´´ÎÊı£¬¼ä¸ô£¬ÒÔ¼°ÒÑ´¥µÄ´ÎÊı' /* `compression`='tokudb_zlib' */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='å­˜å‚¨ç®€å•çš„ Triggerï¼ŒåŒ…æ‹¬é‡å¤æ¬¡æ•°ï¼Œé—´éš”ï¼Œä»¥åŠå·²è§¦çš„æ¬¡æ•°' /* `compression`='tokudb_zlib' */;
 
 --
 -- Table structure for table `qrtz_simprop_triggers`
@@ -1029,7 +1029,7 @@ CREATE TABLE `qrtz_triggers` (
   KEY `IDX_QRTZ_T_NFT_MISFIRE` (`SCHED_NAME`,`MISFIRE_INSTR`,`NEXT_FIRE_TIME`),
   KEY `IDX_QRTZ_T_NFT_ST_MISFIRE` (`SCHED_NAME`,`MISFIRE_INSTR`,`NEXT_FIRE_TIME`,`TRIGGER_STATE`),
   KEY `IDX_QRTZ_T_NFT_ST_MISFIRE_GRP` (`SCHED_NAME`,`MISFIRE_INSTR`,`NEXT_FIRE_TIME`,`TRIGGER_GROUP`,`TRIGGER_STATE`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='´æ´¢ÒÑÅäÖÃµÄ Trigger µÄĞÅÏ¢' /* `compression`='tokudb_zlib' */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='å­˜å‚¨å·²é…ç½®çš„ Trigger çš„ä¿¡æ¯' /* `compression`='tokudb_zlib' */;
 
 
 --
@@ -1042,9 +1042,9 @@ CREATE TABLE `server` (
   `host` varchar(255) DEFAULT NULL COMMENT 'host',
   `nmon` varchar(255) DEFAULT NULL COMMENT 'nmon version',
   `cpus` tinyint(4) DEFAULT NULL COMMENT 'logic cpu num',
-  `cpu_model` varchar(255) DEFAULT NULL COMMENT 'cpu ĞÍºÅ',
-  `dist` varchar(255) DEFAULT NULL COMMENT '·¢ĞĞ°æĞÅÏ¢',
-  `kernel` varchar(255) DEFAULT NULL COMMENT 'ÄÚºËĞÅÏ¢',
+  `cpu_model` varchar(255) DEFAULT NULL COMMENT 'cpu å‹å·',
+  `dist` varchar(255) DEFAULT NULL COMMENT 'å‘è¡Œç‰ˆä¿¡æ¯',
+  `kernel` varchar(255) DEFAULT NULL COMMENT 'å†…æ ¸ä¿¡æ¯',
   `ulimit` varchar(255) DEFAULT NULL COMMENT 'ulimit -n,ulimit -u',
   `updatetime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`ip`)
@@ -1057,34 +1057,34 @@ CREATE TABLE `server` (
 DROP TABLE IF EXISTS `server_stat`;
 CREATE TABLE `server_stat` (
   `ip` varchar(16) NOT NULL COMMENT 'ip',
-  `cdate` date NOT NULL COMMENT 'Êı¾İÊÕ¼¯Ìì',
-  `ctime` char(4) NOT NULL COMMENT 'Êı¾İÊÕ¼¯Ğ¡Ê±·ÖÖÓ',
-  `cuser` float DEFAULT NULL COMMENT 'ÓÃ»§Ì¬Õ¼±È',
-  `csys` float DEFAULT NULL COMMENT 'ÄÚºËÌ¬Õ¼±È',
-  `cwio` float DEFAULT NULL COMMENT 'wioÕ¼±È',
-  `c_ext` text COMMENT '×ÓcpuÕ¼±È',
-  `cload1` float DEFAULT NULL COMMENT '1·ÖÖÓload',
-  `cload5` float DEFAULT NULL COMMENT '5·ÖÖÓload',
-  `cload15` float DEFAULT NULL COMMENT '15·ÖÖÓload',
-  `mtotal` float DEFAULT NULL COMMENT '×ÜÄÚ´æ,µ¥Î»M',
-  `mfree` float DEFAULT NULL COMMENT '¿ÕÏĞÄÚ´æ',
+  `cdate` date NOT NULL COMMENT 'æ•°æ®æ”¶é›†å¤©',
+  `ctime` char(4) NOT NULL COMMENT 'æ•°æ®æ”¶é›†å°æ—¶åˆ†é’Ÿ',
+  `cuser` float DEFAULT NULL COMMENT 'ç”¨æˆ·æ€å æ¯”',
+  `csys` float DEFAULT NULL COMMENT 'å†…æ ¸æ€å æ¯”',
+  `cwio` float DEFAULT NULL COMMENT 'wioå æ¯”',
+  `c_ext` text COMMENT 'å­cpuå æ¯”',
+  `cload1` float DEFAULT NULL COMMENT '1åˆ†é’Ÿload',
+  `cload5` float DEFAULT NULL COMMENT '5åˆ†é’Ÿload',
+  `cload15` float DEFAULT NULL COMMENT '15åˆ†é’Ÿload',
+  `mtotal` float DEFAULT NULL COMMENT 'æ€»å†…å­˜,å•ä½M',
+  `mfree` float DEFAULT NULL COMMENT 'ç©ºé—²å†…å­˜',
   `mcache` float DEFAULT NULL COMMENT 'cache',
   `mbuffer` float DEFAULT NULL COMMENT 'buffer',
   `mswap` float DEFAULT NULL COMMENT 'cache',
   `mswap_free` float DEFAULT NULL COMMENT 'cache',
-  `nin` float DEFAULT NULL COMMENT 'ÍøÂçÈëÁ÷Á¿ µ¥Î»K/s',
-  `nout` float DEFAULT NULL COMMENT 'ÍøÂç³öÁ÷Á¿ µ¥Î»k/s',
-  `nin_ext` text COMMENT '¸÷Íø¿¨ÈëÁ÷Á¿ÏêÇé',
-  `nout_ext` text COMMENT '¸÷Íø¿¨³öÁ÷Á¿ÏêÇé',
-  `tuse` int(11) DEFAULT NULL COMMENT 'tcp estabÁ¬½ÓÊı',
-  `torphan` int(11) DEFAULT NULL COMMENT 'tcp orphanÁ¬½ÓÊı',
-  `twait` int(11) DEFAULT NULL COMMENT 'tcp time waitÁ¬½ÓÊı',
-  `dread` float DEFAULT NULL COMMENT '´ÅÅÌ¶ÁËÙÂÊ µ¥Î»K/s',
-  `dwrite` float DEFAULT NULL COMMENT '´ÅÅÌĞ´ËÙÂÊ µ¥Î»K/s',
-  `diops` float DEFAULT NULL COMMENT '´ÅÅÌioËÙÂÊ ½»»¥´ÎÊı/s',
-  `dbusy` float DEFAULT NULL COMMENT '´ÅÅÌio´ø¿íÊ¹ÓÃ°Ù·Ö±È',
-  `d_ext` text COMMENT '´ÅÅÌ¸÷·ÖÇøÕ¼±È',
-  `dspace` text COMMENT '´ÅÅÌ¸÷·ÖÇø¿Õ¼äÊ¹ÓÃÂÊ',
+  `nin` float DEFAULT NULL COMMENT 'ç½‘ç»œå…¥æµé‡ å•ä½K/s',
+  `nout` float DEFAULT NULL COMMENT 'ç½‘ç»œå‡ºæµé‡ å•ä½k/s',
+  `nin_ext` text COMMENT 'å„ç½‘å¡å…¥æµé‡è¯¦æƒ…',
+  `nout_ext` text COMMENT 'å„ç½‘å¡å‡ºæµé‡è¯¦æƒ…',
+  `tuse` int(11) DEFAULT NULL COMMENT 'tcp estabè¿æ¥æ•°',
+  `torphan` int(11) DEFAULT NULL COMMENT 'tcp orphanè¿æ¥æ•°',
+  `twait` int(11) DEFAULT NULL COMMENT 'tcp time waitè¿æ¥æ•°',
+  `dread` float DEFAULT NULL COMMENT 'ç£ç›˜è¯»é€Ÿç‡ å•ä½K/s',
+  `dwrite` float DEFAULT NULL COMMENT 'ç£ç›˜å†™é€Ÿç‡ å•ä½K/s',
+  `diops` float DEFAULT NULL COMMENT 'ç£ç›˜ioé€Ÿç‡ äº¤äº’æ¬¡æ•°/s',
+  `dbusy` float DEFAULT NULL COMMENT 'ç£ç›˜ioå¸¦å®½ä½¿ç”¨ç™¾åˆ†æ¯”',
+  `d_ext` text COMMENT 'ç£ç›˜å„åˆ†åŒºå æ¯”',
+  `dspace` text COMMENT 'ç£ç›˜å„åˆ†åŒºç©ºé—´ä½¿ç”¨ç‡',
   PRIMARY KEY (`ip`,`cdate`,`ctime`),
   KEY `idx_cdate` (`cdate`),
   KEY `idx_cdate_ctime` (`cdate`,`ctime`)
@@ -1096,19 +1096,19 @@ CREATE TABLE `server_stat` (
 
 DROP TABLE IF EXISTS `system_config`;
 CREATE TABLE `system_config` (
-  `config_key` varchar(255) NOT NULL COMMENT 'ÅäÖÃkey',
-  `config_value` varchar(512) NOT NULL COMMENT 'ÅäÖÃvalue',
-  `info` varchar(255) NOT NULL COMMENT 'ÅäÖÃËµÃ÷',
-  `status` tinyint(4) NOT NULL COMMENT '1:¿ÉÓÃ,0:²»¿ÉÓÃ',
-  `order_id` int(11) NOT NULL COMMENT 'Ë³Ğò',
+  `config_key` varchar(255) NOT NULL COMMENT 'é…ç½®key',
+  `config_value` varchar(512) NOT NULL COMMENT 'é…ç½®value',
+  `info` varchar(255) NOT NULL COMMENT 'é…ç½®è¯´æ˜',
+  `status` tinyint(4) NOT NULL COMMENT '1:å¯ç”¨,0:ä¸å¯ç”¨',
+  `order_id` int(11) NOT NULL COMMENT 'é¡ºåº',
   PRIMARY KEY (`config_key`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='ÏµÍ³ÅäÖÃ';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='ç³»ç»Ÿé…ç½®';
 
 -- ----------------------------
 --  Records of `system_config`
 -- ----------------------------
 BEGIN;
-INSERT INTO `system_config` VALUES ('cachecloud.admin.user.name','admin','cachecloud-adminÓÃ»§Ãû',1,11),('cachecloud.admin.user.password','admin','cachelcoud-adminÃÜÂë',1,12),('cachecloud.app.client.conn.threshold','2000','Ó¦ÓÃÁ¬½ÓÊı±¨¾¯·§Öµ',1,33),('cachecloud.base.dir','/opt','cachecloud¸ùÄ¿Â¼£¬ÒªºÍcachecloud-init.sh½Å±¾ÖĞµÄÄ¿Â¼Ò»ÖÂ',1,31),('cachecloud.contact','user1:(xx@zz.com, user1:135xxxxxxxx)<br/>user2: (user2@zz.com, user2:138xxxxxxxx)','Öµ°àÁªÏµÈËĞÅÏ¢',1,14),('cachecloud.cookie.domain','','cookieµÇÂ¼·½Ê½ËùĞèÒªµÄÓòÃû',1,22),('cachecloud.email.alert.interface','','ÓÊ¼ş±¨¾¯½Ó¿Ú(²Î¿¼±¨¾¯½Ó¿Ú¹æ·¶)',1,24),('cachecloud.machine.ssh.name','cachecloud-open','»úÆ÷sshÓÃ»§Ãû',1,2),('cachecloud.machine.ssh.password','cachecloud-open','»úÆ÷sshÃÜÂë',1,3),('cachecloud.machine.ssh.port','22','»úÆ÷ssh¶Ë¿Ú',1,10),('cachecloud.machine.stats.cron.minute','1','»úÆ÷ĞÔÄÜÍ³¼ÆÖÜÆÚ(·ÖÖÓ)',1,35),('cachecloud.nmon.dir','/opt/cachecloud','nmon°²×°Ä¿Â¼',1,32),('cachecloud.owner.email','xx@sohu.com,yy@qq.com','ÓÊ¼ş±¨¾¯(¶ººÅ¸ô¿ª)',1,21),('cachecloud.owner.phone','xxx,yyy','ÊÖ»úºÅ±¨¾¯(¶ººÅ¸ô¿ª)',1,21),('cachecloud.owner.weChat','xxx,yyy','Î¢ĞÅºÅ±¨¾¯(¶ººÅ¸ô¿ª)',1,21),('cachecloud.public.key.pem','/opt/ssh/id_rsa','ÃÜÔ¿Â·¾¶',1,5),('cachecloud.public.user.name','cachecloud-open','¹«Ô¿ÓÃ»§Ãû',1,4),('cachecloud.ssh.auth.type','1','sshÊÚÈ¨·½Ê½',1,1),('cachecloud.superAdmin','admin,xx,yy','³¬¼¶¹ÜÀíÔ±×é',1,13),('cachecloud.user.login.type','1','ÓÃ»§µÇÂ¼×´Ì¬±£´æ·½Ê½(session»òcookie)',1,22),('cachecloud.weChat.alert.interface','','Î¢ĞÅ±¨¾¯½Ó¿Ú(²Î¿¼±¨¾¯½Ó¿Ú¹æ·¶)',1,23),('cachecloud.whether.schedule.clean.data','false','ÊÇ·ñ¶¨ÆÚÇåÀíÍ³¼ÆÊı¾İ',1,34),('machine.load.alert.ratio','8.0','»úÆ÷¸ºÔØ±¨¾¯·§Öµ',1,32);
+INSERT INTO `system_config` VALUES ('cachecloud.admin.user.name','admin','cachecloud-adminç”¨æˆ·å',1,11),('cachecloud.admin.user.password','admin','cachelcoud-adminå¯†ç ',1,12),('cachecloud.app.client.conn.threshold','2000','åº”ç”¨è¿æ¥æ•°æŠ¥è­¦é˜€å€¼',1,33),('cachecloud.base.dir','/opt','cachecloudæ ¹ç›®å½•ï¼Œè¦å’Œcachecloud-init.shè„šæœ¬ä¸­çš„ç›®å½•ä¸€è‡´',1,31),('cachecloud.contact','user1:(xx@zz.com, user1:135xxxxxxxx)<br/>user2: (user2@zz.com, user2:138xxxxxxxx)','å€¼ç­è”ç³»äººä¿¡æ¯',1,14),('cachecloud.cookie.domain','','cookieç™»å½•æ–¹å¼æ‰€éœ€è¦çš„åŸŸå',1,22),('cachecloud.email.alert.interface','','é‚®ä»¶æŠ¥è­¦æ¥å£(å‚è€ƒæŠ¥è­¦æ¥å£è§„èŒƒ)',1,24),('cachecloud.machine.ssh.name','cachecloud-open','æœºå™¨sshç”¨æˆ·å',1,2),('cachecloud.machine.ssh.password','cachecloud-open','æœºå™¨sshå¯†ç ',1,3),('cachecloud.machine.ssh.port','22','æœºå™¨sshç«¯å£',1,10),('cachecloud.machine.stats.cron.minute','1','æœºå™¨æ€§èƒ½ç»Ÿè®¡å‘¨æœŸ(åˆ†é’Ÿ)',1,35),('cachecloud.nmon.dir','/opt/cachecloud','nmonå®‰è£…ç›®å½•',1,32),('cachecloud.owner.email','xx@sohu.com,yy@qq.com','é‚®ä»¶æŠ¥è­¦(é€—å·éš”å¼€)',1,21),('cachecloud.owner.phone','xxx,yyy','æ‰‹æœºå·æŠ¥è­¦(é€—å·éš”å¼€)',1,21),('cachecloud.owner.weChat','xxx,yyy','å¾®ä¿¡å·æŠ¥è­¦(é€—å·éš”å¼€)',1,21),('cachecloud.public.key.pem','/opt/ssh/id_rsa','å¯†é’¥è·¯å¾„',1,5),('cachecloud.public.user.name','cachecloud-open','å…¬é’¥ç”¨æˆ·å',1,4),('cachecloud.ssh.auth.type','1','sshæˆæƒæ–¹å¼',1,1),('cachecloud.superAdmin','admin,xx,yy','è¶…çº§ç®¡ç†å‘˜ç»„',1,13),('cachecloud.user.login.type','1','ç”¨æˆ·ç™»å½•çŠ¶æ€ä¿å­˜æ–¹å¼(sessionæˆ–cookie)',1,22),('cachecloud.weChat.alert.interface','','å¾®ä¿¡æŠ¥è­¦æ¥å£(å‚è€ƒæŠ¥è­¦æ¥å£è§„èŒƒ)',1,23),('cachecloud.whether.schedule.clean.data','false','æ˜¯å¦å®šæœŸæ¸…ç†ç»Ÿè®¡æ•°æ®',1,34),('machine.load.alert.ratio','8.0','æœºå™¨è´Ÿè½½æŠ¥è­¦é˜€å€¼',1,32);
 COMMIT;
 
 -- ----------------------------
@@ -1116,18 +1116,18 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `system_resource`;
 CREATE TABLE `system_resource` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '×ÊÔ´ID',
-  `name` varchar(64) NOT NULL COMMENT '×ÊÔ´Ãû³Æ',
-  `intro` varchar(255) DEFAULT NULL COMMENT '×ÊÔ´ËµÃ÷',
-  `type` tinyint(4) NOT NULL COMMENT '1:²Ö¿âµØÖ· 2:½Å±¾ 3:×ÊÔ´°ü 4:¹«Ô¿/Ë½Ô¿ 6:Ä¿Â¼¹ÜÀí 7:Ç¨ÒÆ¹¤¾ß¹ÜÀí',
-  `lastmodify` datetime DEFAULT NULL COMMENT '×îºó¸üĞÂÊ±¼ä',
-  `dir` varchar(128) DEFAULT NULL COMMENT '×ÊÔ´Â·¾¶',
-  `url` varchar(128) DEFAULT NULL COMMENT '²Ö¿âµØÖ·',
-  `ispush` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0:Î´ÍÆËÍ 1:ÒÑÍÆËÍ',
-  `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0:ÎŞĞ§ 1:ÓĞĞ§',
-  `username` varchar(255) DEFAULT NULL COMMENT '×îºóĞŞ¸ÄÈË',
-  `task_id` bigint(11) DEFAULT NULL COMMENT 'Ç¨ÒÆÈÎÎñid',
-  `compile_info` varchar(255) DEFAULT NULL COMMENT '±àÒëĞÅÏ¢',
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'èµ„æºID',
+  `name` varchar(64) NOT NULL COMMENT 'èµ„æºåç§°',
+  `intro` varchar(255) DEFAULT NULL COMMENT 'èµ„æºè¯´æ˜',
+  `type` tinyint(4) NOT NULL COMMENT '1:ä»“åº“åœ°å€ 2:è„šæœ¬ 3:èµ„æºåŒ… 4:å…¬é’¥/ç§é’¥ 6:ç›®å½•ç®¡ç† 7:è¿ç§»å·¥å…·ç®¡ç†',
+  `lastmodify` datetime DEFAULT NULL COMMENT 'æœ€åæ›´æ–°æ—¶é—´',
+  `dir` varchar(128) DEFAULT NULL COMMENT 'èµ„æºè·¯å¾„',
+  `url` varchar(128) DEFAULT NULL COMMENT 'ä»“åº“åœ°å€',
+  `ispush` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0:æœªæ¨é€ 1:å·²æ¨é€',
+  `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0:æ— æ•ˆ 1:æœ‰æ•ˆ',
+  `username` varchar(255) DEFAULT NULL COMMENT 'æœ€åä¿®æ”¹äºº',
+  `task_id` bigint(11) DEFAULT NULL COMMENT 'è¿ç§»ä»»åŠ¡id',
+  `compile_info` varchar(255) DEFAULT NULL COMMENT 'ç¼–è¯‘ä¿¡æ¯',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=50 DEFAULT CHARSET=utf8;
 
@@ -1135,7 +1135,7 @@ CREATE TABLE `system_resource` (
 --  Records of `system_resource`
 -- ----------------------------
 BEGIN;
-INSERT INTO `system_resource` VALUES (1,'cachecloud-init.sh','ÈİÆ÷³õÊ¼»¯½Å±¾',2,'2020-07-15 18:35:41','/script','',0,1,NULL,NULL,NULL),(2,'x.x.x.x',NULL,1,'2020-08-10 10:31:51','/opt/download/software/cachecloud/resource','http://x.x.x.x/software/cachecloud/resource',0,1,'admin',0,NULL),(4,'cachecloud-env.sh','ËŞÖ÷»·¾³½Å±¾',2,'2020-07-15 18:36:28','/script','',0,1,NULL,NULL,NULL),(5,'id_rsa','Ë½Ô¿ÎÄ¼ş',4,'2020-07-07 10:45:39','/ssh','',0,1,NULL,NULL,NULL),(6,'id_rsa.pub','¹«Ô¿ÎÄ¼ş',4,'2020-07-07 10:45:45','/ssh','',0,1,NULL,NULL,NULL),(12,'redis-4.0.14','redis 4.0.14×ÊÔ´°ü',3,'2020-08-10 09:52:41','/redis','http://download.redis.io/releases/redis-4.0.14.tar.gz',0,1,'admin',532,NULL),(21,'/script','½Å±¾Ä¿Â¼¹ÜÀí',6,'2020-08-10 10:51:34','',NULL,0,1,'admin',0,NULL),(28,'/ssh','sshÄ¿Â¼',6,'2020-07-20 17:55:03',NULL,NULL,0,1,'admin',0,NULL),(29,'redis-3.0.7','redis3.0.7 ×ÊÔ´°ü',3,'2020-08-10 09:53:32','/redis','http://download.redis.io/releases/redis-3.0.7.tar.gz',0,1,'admin',529,NULL),(31,'redis-3.2.12','redis 3.2.12 ×ÊÔ´°ü',3,'2020-08-10 15:08:21','/redis','http://download.redis.io/releases/redis-3.2.12.tar.gz',0,1,'admin',530,NULL),(32,'/redis','redis×ÊÔ´°ü¹ÜÀí',6,'2020-07-20 17:54:59',NULL,NULL,0,1,'admin',0,NULL),(33,'/tool','Ç¨ÒÆ¹¤¾ß×ÊÔ´°ü',6,'2020-07-20 17:54:53',NULL,NULL,0,1,'admin',0,NULL),(37,'redis-5.0.9','redis5.0.9 ×ÊÔ´°ü',3,'2020-08-10 09:51:41','/redis','http://download.redis.io/releases/redis-5.0.9.tar.gz',0,1,'admin',533,NULL),(40,'redis-shake-2.0.3','redis 2.0.3\nĞŞ¸´fix 5.0Ç¨ÒÆÀàĞÍÎÊÌâ',7,'2020-08-11 10:53:26','/tool','https://github.com/alibaba/RedisShake/releases/download/release-v2.0.3-20200724/redis-shake-v2.0.3.tar.gz',0,1,'admin',518,NULL);
+INSERT INTO `system_resource` VALUES (1,'cachecloud-init.sh','å®¹å™¨åˆå§‹åŒ–è„šæœ¬',2,'2020-07-15 18:35:41','/script','',0,1,NULL,NULL,NULL),(2,'x.x.x.x',NULL,1,'2020-08-10 10:31:51','/opt/download/software/cachecloud/resource','http://x.x.x.x/software/cachecloud/resource',0,1,'admin',0,NULL),(4,'cachecloud-env.sh','å®¿ä¸»ç¯å¢ƒè„šæœ¬',2,'2020-07-15 18:36:28','/script','',0,1,NULL,NULL,NULL),(5,'id_rsa','ç§é’¥æ–‡ä»¶',4,'2020-07-07 10:45:39','/ssh','',0,1,NULL,NULL,NULL),(6,'id_rsa.pub','å…¬é’¥æ–‡ä»¶',4,'2020-07-07 10:45:45','/ssh','',0,1,NULL,NULL,NULL),(12,'redis-4.0.14','redis 4.0.14èµ„æºåŒ…',3,'2020-08-10 09:52:41','/redis','http://download.redis.io/releases/redis-4.0.14.tar.gz',0,1,'admin',532,NULL),(21,'/script','è„šæœ¬ç›®å½•ç®¡ç†',6,'2020-08-10 10:51:34','',NULL,0,1,'admin',0,NULL),(28,'/ssh','sshç›®å½•',6,'2020-07-20 17:55:03',NULL,NULL,0,1,'admin',0,NULL),(29,'redis-3.0.7','redis3.0.7 èµ„æºåŒ…',3,'2020-08-10 09:53:32','/redis','http://download.redis.io/releases/redis-3.0.7.tar.gz',0,1,'admin',529,NULL),(31,'redis-3.2.12','redis 3.2.12 èµ„æºåŒ…',3,'2020-08-10 15:08:21','/redis','http://download.redis.io/releases/redis-3.2.12.tar.gz',0,1,'admin',530,NULL),(32,'/redis','redisèµ„æºåŒ…ç®¡ç†',6,'2020-07-20 17:54:59',NULL,NULL,0,1,'admin',0,NULL),(33,'/tool','è¿ç§»å·¥å…·èµ„æºåŒ…',6,'2020-07-20 17:54:53',NULL,NULL,0,1,'admin',0,NULL),(37,'redis-5.0.9','redis5.0.9 èµ„æºåŒ…',3,'2020-08-10 09:51:41','/redis','http://download.redis.io/releases/redis-5.0.9.tar.gz',0,1,'admin',533,NULL),(40,'redis-shake-2.0.3','redis 2.0.3\nä¿®å¤fix 5.0è¿ç§»ç±»å‹é—®é¢˜',7,'2020-08-11 10:53:26','/tool','https://github.com/alibaba/RedisShake/releases/download/release-v2.0.3-20200724/redis-shake-v2.0.3.tar.gz',0,1,'admin',518,NULL);
 COMMIT;
 
 --
@@ -1145,25 +1145,25 @@ COMMIT;
 DROP TABLE IF EXISTS `task_queue`;
 CREATE TABLE `task_queue` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `app_id` bigint(20) NOT NULL COMMENT 'Ó¦ÓÃid',
-  `class_name` varchar(255) NOT NULL COMMENT 'ÀàÃû',
-  `important_info` varchar(255) NOT NULL DEFAULT '' COMMENT 'ÖØÒªĞÅÏ¢',
-  `execute_ip_port` varchar(255) DEFAULT '' COMMENT 'Ö´ĞĞÈÎÎñµÄip:port',
-  `param` longtext NOT NULL COMMENT 'ÈÎÎñ²ÎÊı(json):Ëæ×ÅÈÎÎñ±ä»¯',
-  `init_param` longtext NOT NULL COMMENT '³õÊ¼»¯ÈÎÎñ²ÎÊı(json):²»±ä',
-  `status` tinyint(4) NOT NULL COMMENT '×´Ì¬£º0µÈ´ı£¬1ÔËĞĞ£¬2ÖĞ¶Ï£¬3Ê§°Ü',
-  `parent_task_id` bigint(20) NOT NULL COMMENT '¸¸ÈÎÎñid',
-  `create_time` datetime NOT NULL COMMENT '´´½¨Ê±¼ä',
-  `update_time` datetime NOT NULL COMMENT 'ĞŞ¸ÄÊ±¼ä',
-  `start_time` datetime NOT NULL COMMENT '¿ªÊ¼Ê±¼ä',
-  `end_time` datetime NOT NULL COMMENT '½áÊøÊ±¼ä',
-  `priority` int(11) NOT NULL COMMENT 'ÓÅÏÈ¼¶',
-  `error_code` int(11) NOT NULL COMMENT '´íÎó´úÂë',
-  `error_msg` varchar(255) NOT NULL COMMENT '´íÎóÏûÏ¢',
-  `task_note` varchar(255) NOT NULL COMMENT '±¸×¢',
+  `app_id` bigint(20) NOT NULL COMMENT 'åº”ç”¨id',
+  `class_name` varchar(255) NOT NULL COMMENT 'ç±»å',
+  `important_info` varchar(255) NOT NULL DEFAULT '' COMMENT 'é‡è¦ä¿¡æ¯',
+  `execute_ip_port` varchar(255) DEFAULT '' COMMENT 'æ‰§è¡Œä»»åŠ¡çš„ip:port',
+  `param` longtext NOT NULL COMMENT 'ä»»åŠ¡å‚æ•°(json):éšç€ä»»åŠ¡å˜åŒ–',
+  `init_param` longtext NOT NULL COMMENT 'åˆå§‹åŒ–ä»»åŠ¡å‚æ•°(json):ä¸å˜',
+  `status` tinyint(4) NOT NULL COMMENT 'çŠ¶æ€ï¼š0ç­‰å¾…ï¼Œ1è¿è¡Œï¼Œ2ä¸­æ–­ï¼Œ3å¤±è´¥',
+  `parent_task_id` bigint(20) NOT NULL COMMENT 'çˆ¶ä»»åŠ¡id',
+  `create_time` datetime NOT NULL COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime NOT NULL COMMENT 'ä¿®æ”¹æ—¶é—´',
+  `start_time` datetime NOT NULL COMMENT 'å¼€å§‹æ—¶é—´',
+  `end_time` datetime NOT NULL COMMENT 'ç»“æŸæ—¶é—´',
+  `priority` int(11) NOT NULL COMMENT 'ä¼˜å…ˆçº§',
+  `error_code` int(11) NOT NULL COMMENT 'é”™è¯¯ä»£ç ',
+  `error_msg` varchar(255) NOT NULL COMMENT 'é”™è¯¯æ¶ˆæ¯',
+  `task_note` varchar(255) NOT NULL COMMENT 'å¤‡æ³¨',
   PRIMARY KEY (`id`),
   KEY `idx_app_id` (`app_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='ÈÎÎñ±í';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='ä»»åŠ¡è¡¨';
 
 --
 -- Table structure for table `task_step_flow`
@@ -1172,21 +1172,21 @@ CREATE TABLE `task_queue` (
 DROP TABLE IF EXISTS `task_step_flow`;
 CREATE TABLE `task_step_flow` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `task_id` bigint(20) NOT NULL COMMENT 'ÈÎÎñid',
-  `child_task_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '×ÓÈÎÎñid',
-  `execute_ip_port` varchar(255) DEFAULT '' COMMENT 'Ö´ĞĞÈÎÎñµÄip:port',
-  `class_name` varchar(255) NOT NULL COMMENT 'ÀàÃû',
-  `step_name` varchar(255) NOT NULL COMMENT '²½ÖèÃû',
-  `order_no` int(11) NOT NULL COMMENT 'ĞòºÅ',
-  `status` tinyint(4) NOT NULL COMMENT '×´Ì¬£º0Î´¿ªÊ¼¡¢1³É¹¦¡¢2ÖĞ¶Ï¡¢3Ìø¹ı¡¢4Ê§°Ü',
-  `log` text COMMENT 'ÈÕÖ¾',
-  `start_time` datetime NOT NULL COMMENT '¿ªÊ¼Ê±¼ä',
-  `end_time` datetime NOT NULL COMMENT '½áÊøÊ±¼ä',
-  `create_time` datetime NOT NULL COMMENT '´´½¨Ê±¼ä',
-  `update_time` datetime NOT NULL COMMENT 'ĞŞ¸ÄÊ±¼ä',
+  `task_id` bigint(20) NOT NULL COMMENT 'ä»»åŠ¡id',
+  `child_task_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'å­ä»»åŠ¡id',
+  `execute_ip_port` varchar(255) DEFAULT '' COMMENT 'æ‰§è¡Œä»»åŠ¡çš„ip:port',
+  `class_name` varchar(255) NOT NULL COMMENT 'ç±»å',
+  `step_name` varchar(255) NOT NULL COMMENT 'æ­¥éª¤å',
+  `order_no` int(11) NOT NULL COMMENT 'åºå·',
+  `status` tinyint(4) NOT NULL COMMENT 'çŠ¶æ€ï¼š0æœªå¼€å§‹ã€1æˆåŠŸã€2ä¸­æ–­ã€3è·³è¿‡ã€4å¤±è´¥',
+  `log` text COMMENT 'æ—¥å¿—',
+  `start_time` datetime NOT NULL COMMENT 'å¼€å§‹æ—¶é—´',
+  `end_time` datetime NOT NULL COMMENT 'ç»“æŸæ—¶é—´',
+  `create_time` datetime NOT NULL COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime NOT NULL COMMENT 'ä¿®æ”¹æ—¶é—´',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_task_class_step` (`task_id`,`class_name`,`step_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='ÈÎÎñ²½ÖèÁ÷±í';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='ä»»åŠ¡æ­¥éª¤æµè¡¨';
 
 --
 -- Table structure for table `task_step_meta`
@@ -1195,17 +1195,17 @@ CREATE TABLE `task_step_flow` (
 DROP TABLE IF EXISTS `task_step_meta`;
 CREATE TABLE `task_step_meta` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `class_name` varchar(255) NOT NULL COMMENT 'ÀàÃû',
-  `step_name` varchar(255) NOT NULL COMMENT '²½ÖèÃû',
-  `step_desc` varchar(255) NOT NULL COMMENT '²½ÖèÃèÊö',
-  `ops_device` varchar(255) NOT NULL COMMENT 'ÔËÎ¬½¨Òé',
-  `timeout` int(11) NOT NULL COMMENT '³¬Ê±Ê±¼ä',
-  `create_time` datetime NOT NULL COMMENT '´´½¨Ê±¼ä',
-  `update_time` datetime NOT NULL COMMENT 'ĞŞ¸ÄÊ±¼ä',
-  `order_no` int(11) NOT NULL COMMENT 'ĞòºÅ',
+  `class_name` varchar(255) NOT NULL COMMENT 'ç±»å',
+  `step_name` varchar(255) NOT NULL COMMENT 'æ­¥éª¤å',
+  `step_desc` varchar(255) NOT NULL COMMENT 'æ­¥éª¤æè¿°',
+  `ops_device` varchar(255) NOT NULL COMMENT 'è¿ç»´å»ºè®®',
+  `timeout` int(11) NOT NULL COMMENT 'è¶…æ—¶æ—¶é—´',
+  `create_time` datetime NOT NULL COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime NOT NULL COMMENT 'ä¿®æ”¹æ—¶é—´',
+  `order_no` int(11) NOT NULL COMMENT 'åºå·',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_class_step` (`class_name`,`step_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='ÈÎÎñ²½ÖèÔªÊı¾İ±í';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='ä»»åŠ¡æ­¥éª¤å…ƒæ•°æ®è¡¨';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 -- ----------------------------
@@ -1214,14 +1214,14 @@ CREATE TABLE `task_step_meta` (
 DROP TABLE IF EXISTS `standard_statistics`;
 CREATE TABLE `standard_statistics` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `collect_time` bigint(20) NOT NULL COMMENT 'ÊÕ¼¯Ê±¼ä:¸ñÊ½yyyyMMddHHmm',
-  `ip` varchar(16) NOT NULL COMMENT 'ipµØÖ·',
-  `port` int(11) NOT NULL COMMENT '¶Ë¿Ú/hostId',
-  `db_type` varchar(16) NOT NULL COMMENT 'ÊÕ¼¯µÄÊı¾İÀàĞÍ',
-  `info_json` text NOT NULL COMMENT 'ÊÕ¼¯µÄjsonÊı¾İ',
-  `diff_json` text NOT NULL COMMENT 'ÉÏÒ»´ÎÊÕ¼¯²îÒìµÄjsonÊı¾İ',
-  `created_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '´´½¨Ê±¼ä',
-  `cluster_info_json` varchar(20480) NOT NULL DEFAULT '' COMMENT 'ÊÕ¼¯µÄcluster info jsonÊı¾İ',
+  `collect_time` bigint(20) NOT NULL COMMENT 'æ”¶é›†æ—¶é—´:æ ¼å¼yyyyMMddHHmm',
+  `ip` varchar(16) NOT NULL COMMENT 'ipåœ°å€',
+  `port` int(11) NOT NULL COMMENT 'ç«¯å£/hostId',
+  `db_type` varchar(16) NOT NULL COMMENT 'æ”¶é›†çš„æ•°æ®ç±»å‹',
+  `info_json` text NOT NULL COMMENT 'æ”¶é›†çš„jsonæ•°æ®',
+  `diff_json` text NOT NULL COMMENT 'ä¸Šä¸€æ¬¡æ”¶é›†å·®å¼‚çš„jsonæ•°æ®',
+  `created_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `cluster_info_json` varchar(20480) NOT NULL DEFAULT '' COMMENT 'æ”¶é›†çš„cluster info jsonæ•°æ®',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_index` (`ip`,`port`,`db_type`,`collect_time`),
   KEY `idx_create_time` (`created_time`)
@@ -1232,21 +1232,21 @@ CREATE TABLE `standard_statistics` (
 --
 DROP TABLE IF EXISTS `app_alert_record`;
 CREATE TABLE `app_alert_record` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '×ÔÔöid',
-  `visible_type` int(1) NOT NULL COMMENT '¿É¼ûÀàĞÍ£¨0£º¾ù¿É¼û£»1£º½ö¹ÜÀíÔ±¿É¼û£»£©',
-  `important_level` int(1) NOT NULL COMMENT 'ÖØÒªÀàĞÍ£¨0£ºÒ»°ã£»1£ºÖØÒª£»2£º½ô¼±£©',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'è‡ªå¢id',
+  `visible_type` int(1) NOT NULL COMMENT 'å¯è§ç±»å‹ï¼ˆ0ï¼šå‡å¯è§ï¼›1ï¼šä»…ç®¡ç†å‘˜å¯è§ï¼›ï¼‰',
+  `important_level` int(1) NOT NULL COMMENT 'é‡è¦ç±»å‹ï¼ˆ0ï¼šä¸€èˆ¬ï¼›1ï¼šé‡è¦ï¼›2ï¼šç´§æ€¥ï¼‰',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `app_id` bigint(20) DEFAULT NULL COMMENT 'app id',
-  `instance_id` bigint(20) DEFAULT NULL COMMENT 'ÊµÀıid',
-  `ip` varchar(16) COLLATE utf8_bin DEFAULT NULL COMMENT '»úÆ÷ip',
-  `port` int(10) DEFAULT NULL COMMENT '¶Ë¿ÚºÅ',
-  `title` varchar(255) COLLATE utf8_bin NOT NULL COMMENT '±¨¾¯±êÌâ',
-  `content` varchar(500) COLLATE utf8_bin NOT NULL COMMENT '±¨¾¯ÄÚÈİ',
+  `instance_id` bigint(20) DEFAULT NULL COMMENT 'å®ä¾‹id',
+  `ip` varchar(16) COLLATE utf8_bin DEFAULT NULL COMMENT 'æœºå™¨ip',
+  `port` int(10) DEFAULT NULL COMMENT 'ç«¯å£å·',
+  `title` varchar(255) COLLATE utf8_bin NOT NULL COMMENT 'æŠ¥è­¦æ ‡é¢˜',
+  `content` varchar(500) COLLATE utf8_bin NOT NULL COMMENT 'æŠ¥è­¦å†…å®¹',
   PRIMARY KEY (`id`),
   KEY `app_id` (`app_id`),
   KEY `ip` (`ip`),
   KEY `idx_inst_id` (`instance_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='±¨¾¯¼ÇÂ¼±í';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='æŠ¥è­¦è®°å½•è¡¨';
 
 --
 -- Table structure for table `config_restart_record`
@@ -1254,21 +1254,21 @@ CREATE TABLE `app_alert_record` (
 DROP TABLE IF EXISTS `config_restart_record`;
 CREATE TABLE `config_restart_record` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `app_id` bigint(20) NOT NULL COMMENT 'Ó¦ÓÃid',
-  `app_name` varchar(36) NOT NULL COMMENT 'Ó¦ÓÃÃû³Æ',
-  `operate_type` char(1) NOT NULL COMMENT '²Ù×÷ÀàĞÍ£¨0:¹ö¶¯ÖØÆô£¬1:ĞŞ¸ÄÅäÖÃÇ¿ÖÆÖØÆô£»2£ºĞŞ¸ÄÅäÖÃ£©',
-  `param` varchar(2000) NOT NULL COMMENT '³õÊ¼»¯ÈÎÎñ²ÎÊı(json):²»±ä',
-  `status` tinyint(4) NOT NULL COMMENT '×´Ì¬£º0µÈ´ı£¬1ÔËĞĞ£¬2³É¹¦£¬3Ê§°Ü£¬4ÅäÖÃĞŞ¸Ä´ıÖØÆô',
-  `start_time` datetime NOT NULL COMMENT '¿ªÊ¼Ê±¼ä',
-  `end_time` datetime NOT NULL COMMENT '½áÊøÊ±¼ä',
-  `create_time` datetime NOT NULL COMMENT '´´½¨Ê±¼ä',
-  `update_time` datetime NOT NULL COMMENT 'ĞŞ¸ÄÊ±¼ä',
-  `log` longtext COMMENT 'ÈÕÖ¾ĞÅÏ¢',
-  `user_name` varchar(64) DEFAULT NULL COMMENT '²Ù×÷ÈËÔ±ĞÕÃû',
-  `user_id` bigint(20) NOT NULL COMMENT 'ÓÃ»§id',
-  `instances` varchar(1000) DEFAULT NULL COMMENT 'Éæ¼°ÊµÀıidÁĞ±íµÄjson¸ñÊ½',
+  `app_id` bigint(20) NOT NULL COMMENT 'åº”ç”¨id',
+  `app_name` varchar(36) NOT NULL COMMENT 'åº”ç”¨åç§°',
+  `operate_type` char(1) NOT NULL COMMENT 'æ“ä½œç±»å‹ï¼ˆ0:æ»šåŠ¨é‡å¯ï¼Œ1:ä¿®æ”¹é…ç½®å¼ºåˆ¶é‡å¯ï¼›2ï¼šä¿®æ”¹é…ç½®ï¼‰',
+  `param` varchar(2000) NOT NULL COMMENT 'åˆå§‹åŒ–ä»»åŠ¡å‚æ•°(json):ä¸å˜',
+  `status` tinyint(4) NOT NULL COMMENT 'çŠ¶æ€ï¼š0ç­‰å¾…ï¼Œ1è¿è¡Œï¼Œ2æˆåŠŸï¼Œ3å¤±è´¥ï¼Œ4é…ç½®ä¿®æ”¹å¾…é‡å¯',
+  `start_time` datetime NOT NULL COMMENT 'å¼€å§‹æ—¶é—´',
+  `end_time` datetime NOT NULL COMMENT 'ç»“æŸæ—¶é—´',
+  `create_time` datetime NOT NULL COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime NOT NULL COMMENT 'ä¿®æ”¹æ—¶é—´',
+  `log` longtext COMMENT 'æ—¥å¿—ä¿¡æ¯',
+  `user_name` varchar(64) DEFAULT NULL COMMENT 'æ“ä½œäººå‘˜å§“å',
+  `user_id` bigint(20) NOT NULL COMMENT 'ç”¨æˆ·id',
+  `instances` varchar(1000) DEFAULT NULL COMMENT 'æ¶‰åŠå®ä¾‹idåˆ—è¡¨çš„jsonæ ¼å¼',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='ÖØÆô¼ÇÂ¼±í';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='é‡å¯è®°å½•è¡¨';
 
 --
 -- Table structure for table `module_info`
@@ -1278,11 +1278,11 @@ CREATE TABLE `module_info` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(64) NOT NULL,
   `git_url` varchar(255) NOT NULL DEFAULT '' COMMENT 'git resource',
-  `info` varchar(128) DEFAULT NULL COMMENT 'Ä£¿éĞÅÏ¢ËµÃ÷',
-  `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0:ÎŞĞ§ 1:ÓĞĞ§',
+  `info` varchar(128) DEFAULT NULL COMMENT 'æ¨¡å—ä¿¡æ¯è¯´æ˜',
+  `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0:æ— æ•ˆ 1:æœ‰æ•ˆ',
   PRIMARY KEY (`id`),
   UNIQUE KEY `NAMEKEY` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='RedisÄ£¿éĞÅÏ¢±í';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Redisæ¨¡å—ä¿¡æ¯è¡¨';
 
 --
 -- Table structure for table `module_version`
@@ -1291,13 +1291,13 @@ DROP TABLE IF EXISTS `module_version`;
 CREATE TABLE `module_version` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `module_id` int(11) NOT NULL,
-  `version_id` int(11) NOT NULL COMMENT '¹ØÁª°æ±¾ºÅ',
-  `create_time` datetime DEFAULT NULL COMMENT '´´½¨Ê±¼ä',
-  `so_path` varchar(255) DEFAULT NULL COMMENT '±àÒëºóso¿âµÄµØÖ·',
-  `tag` varchar(64) NOT NULL COMMENT 'Ä£¿é°æ±¾ºÅ',
-  `status` int(255) NOT NULL DEFAULT '0' COMMENT 'ÊÇ·ñ¿ÉÓÃ(¹ØÁªsoµØÖ·)£º0 ²»¿ÉÓÃ 1£º¿ÉÓÃ',
+  `version_id` int(11) NOT NULL COMMENT 'å…³è”ç‰ˆæœ¬å·',
+  `create_time` datetime DEFAULT NULL COMMENT 'åˆ›å»ºæ—¶é—´',
+  `so_path` varchar(255) DEFAULT NULL COMMENT 'ç¼–è¯‘åsoåº“çš„åœ°å€',
+  `tag` varchar(64) NOT NULL COMMENT 'æ¨¡å—ç‰ˆæœ¬å·',
+  `status` int(255) NOT NULL DEFAULT '0' COMMENT 'æ˜¯å¦å¯ç”¨(å…³è”soåœ°å€)ï¼š0 ä¸å¯ç”¨ 1ï¼šå¯ç”¨',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='RedisÄ£¿é°æ±¾¹ÜÀí±í';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Redisæ¨¡å—ç‰ˆæœ¬ç®¡ç†è¡¨';
 
 --
 -- Table structure for table `app_import`
@@ -1305,18 +1305,18 @@ CREATE TABLE `module_version` (
 DROP TABLE IF EXISTS `app_import`;
 CREATE TABLE `app_import` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `app_id` bigint(20) DEFAULT NULL COMMENT 'Ä¿±êÓ¦ÓÃid',
-  `instance_info` text COMMENT 'Ô´redisÊµÀıĞÅÏ¢',
-  `redis_password` varchar(200) DEFAULT NULL COMMENT 'Ô´redisÃÜÂë',
-  `status` int(11) DEFAULT NULL COMMENT 'Ç¨ÒÆ×´Ì¬£ºPREPARE(0, "×¼±¸", "Ó¦ÓÃµ¼Èë-Î´¿ªÊ¼"),     START(1, "½øĞĞÖĞ...", "Ó¦ÓÃµ¼Èë-¿ªÊ¼"),     ERROR(2, "error", "Ó¦ÓÃµ¼Èë-³ö´í"),     VERSION_BUILD_START(11, "½øĞĞÖĞ...", "ĞÂ½¨redis°æ±¾-½øĞĞÖĞ"),     VERSION_BUILD_ERROR(12, "error", "ĞÂ½¨redis°æ±¾-³ö´í"),     VERSION_BUILD_END(20, "³É¹¦", "ĞÂ½¨redis°æ±¾-Íê³É"),     APP_BUILD_INIT(21, "×¼±¸¾ÍĞ÷", "ĞÂ½¨redisÓ¦ÓÃ-×¼±¸¾ÍĞ÷"),     APP_BUILD_START(22, "½øĞĞÖĞ...", "ĞÂ½¨redisÓ¦ÓÃ-½øĞĞÖĞ"),     APP_BUILD_ERROR(23, "error", "ĞÂ½¨redisÓ¦ÓÃ-³ö´í"),     APP_BUILD_END(30, "³É¹¦", "ĞÂ½¨redisÓ¦ÓÃ-Íê³É"),     MIGRATE_INIT(31, "×¼±¸¾ÍĞ÷", "Êı¾İÇ¨ÒÆ-×¼±¸¾ÍĞ÷"),     MIGRATE_START(32, "½øĞĞÖĞ...", "Êı¾İÇ¨ÒÆ-½øĞĞÖĞ"),     MIGRATE_ERROR(33, "error", "Êı¾İÇ¨ÒÆ-³ö´í"),     MIGRATE_END(3, "³É¹¦", "Ó¦ÓÃµ¼Èë-³É¹¦")',
-  `step` int(11) DEFAULT NULL COMMENT 'µ¼Èë½×¶Î',
+  `app_id` bigint(20) DEFAULT NULL COMMENT 'ç›®æ ‡åº”ç”¨id',
+  `instance_info` text COMMENT 'æºrediså®ä¾‹ä¿¡æ¯',
+  `redis_password` varchar(200) DEFAULT NULL COMMENT 'æºrediså¯†ç ',
+  `status` int(11) DEFAULT NULL COMMENT 'è¿ç§»çŠ¶æ€ï¼šPREPARE(0, "å‡†å¤‡", "åº”ç”¨å¯¼å…¥-æœªå¼€å§‹"),     START(1, "è¿›è¡Œä¸­...", "åº”ç”¨å¯¼å…¥-å¼€å§‹"),     ERROR(2, "error", "åº”ç”¨å¯¼å…¥-å‡ºé”™"),     VERSION_BUILD_START(11, "è¿›è¡Œä¸­...", "æ–°å»ºredisç‰ˆæœ¬-è¿›è¡Œä¸­"),     VERSION_BUILD_ERROR(12, "error", "æ–°å»ºredisç‰ˆæœ¬-å‡ºé”™"),     VERSION_BUILD_END(20, "æˆåŠŸ", "æ–°å»ºredisç‰ˆæœ¬-å®Œæˆ"),     APP_BUILD_INIT(21, "å‡†å¤‡å°±ç»ª", "æ–°å»ºredisåº”ç”¨-å‡†å¤‡å°±ç»ª"),     APP_BUILD_START(22, "è¿›è¡Œä¸­...", "æ–°å»ºredisåº”ç”¨-è¿›è¡Œä¸­"),     APP_BUILD_ERROR(23, "error", "æ–°å»ºredisåº”ç”¨-å‡ºé”™"),     APP_BUILD_END(30, "æˆåŠŸ", "æ–°å»ºredisåº”ç”¨-å®Œæˆ"),     MIGRATE_INIT(31, "å‡†å¤‡å°±ç»ª", "æ•°æ®è¿ç§»-å‡†å¤‡å°±ç»ª"),     MIGRATE_START(32, "è¿›è¡Œä¸­...", "æ•°æ®è¿ç§»-è¿›è¡Œä¸­"),     MIGRATE_ERROR(33, "error", "æ•°æ®è¿ç§»-å‡ºé”™"),     MIGRATE_END(3, "æˆåŠŸ", "åº”ç”¨å¯¼å…¥-æˆåŠŸ")',
+  `step` int(11) DEFAULT NULL COMMENT 'å¯¼å…¥é˜¶æ®µ',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `migrate_id` bigint(20) DEFAULT NULL COMMENT 'Êı¾İÇ¨ÒÆid',
-  `mem_size` int(11) DEFAULT NULL COMMENT 'Ä¿±êÓ¦ÓÃÄÚ´æ´óĞ¡£¬µ¥Î»G',
-  `redis_version_name` varchar(20) DEFAULT NULL COMMENT 'Ä¿±êÓ¦ÓÃredis°æ±¾£¬¸ñÊ½£ºredis-x.x.x',
-  `app_build_task_id` bigint(20) DEFAULT NULL COMMENT 'Ä¿±êÓ¦ÓÃ²¿ÊğÈÎÎñid',
-  `source_type` int(11) DEFAULT NULL COMMENT 'Ô´redisÀàĞÍ£º7:cluster, 6:sentinel, 5:standalone',
+  `migrate_id` bigint(20) DEFAULT NULL COMMENT 'æ•°æ®è¿ç§»id',
+  `mem_size` int(11) DEFAULT NULL COMMENT 'ç›®æ ‡åº”ç”¨å†…å­˜å¤§å°ï¼Œå•ä½G',
+  `redis_version_name` varchar(20) DEFAULT NULL COMMENT 'ç›®æ ‡åº”ç”¨redisç‰ˆæœ¬ï¼Œæ ¼å¼ï¼šredis-x.x.x',
+  `app_build_task_id` bigint(20) DEFAULT NULL COMMENT 'ç›®æ ‡åº”ç”¨éƒ¨ç½²ä»»åŠ¡id',
+  `source_type` int(11) DEFAULT NULL COMMENT 'æºredisç±»å‹ï¼š7:cluster, 6:sentinel, 5:standalone',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -1324,28 +1324,28 @@ CREATE TABLE `app_import` (
 
 CREATE TABLE `redis_module_config` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `config_key` varchar(128) NOT NULL COMMENT 'ÅäÖÃÃû',
-  `config_value` varchar(512) NOT NULL COMMENT 'ÅäÖÃÖµ',
-  `info` varchar(512) NOT NULL COMMENT 'ÅäÖÃËµÃ÷',
-  `update_time` datetime NOT NULL COMMENT '¸üĞÂÊ±¼ä',
-  `type` mediumint(9) NOT NULL COMMENT 'ÀàĞÍ£º2.cluster½ÚµãÌØÊâÅäÖÃ, 5:sentinel½ÚµãÅäÖÃ, 6:redisÆÕÍ¨½Úµã',
-  `status` tinyint(4) NOT NULL COMMENT '1ÓĞĞ§,0ÎŞĞ§',
-  `version_id` int(11) NOT NULL COMMENT 'Module version°æ±¾±íÖ÷¼üid',
-  `refresh` tinyint(4) DEFAULT '0' COMMENT 'ÊÇ·ñ¿ÉÖØÖÃ£º0²»¿É£¬1¿ÉÖØÖÃ',
-  `module_id` int(11) NOT NULL DEFAULT '7' COMMENT 'Module ĞÅÏ¢±íid',
-  `config_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'ÅäÖÃÀàĞÍ£¬0£º¼ÓÔØºÍÔËĞĞÅäÖÃ£»1£º¼ÓÔØÊ±ÅäÖÃ£»2£ºÔËĞĞÊ±ÅäÖÃ',
+  `config_key` varchar(128) NOT NULL COMMENT 'é…ç½®å',
+  `config_value` varchar(512) NOT NULL COMMENT 'é…ç½®å€¼',
+  `info` varchar(512) NOT NULL COMMENT 'é…ç½®è¯´æ˜',
+  `update_time` datetime NOT NULL COMMENT 'æ›´æ–°æ—¶é—´',
+  `type` mediumint(9) NOT NULL COMMENT 'ç±»å‹ï¼š2.clusterèŠ‚ç‚¹ç‰¹æ®Šé…ç½®, 5:sentinelèŠ‚ç‚¹é…ç½®, 6:redisæ™®é€šèŠ‚ç‚¹',
+  `status` tinyint(4) NOT NULL COMMENT '1æœ‰æ•ˆ,0æ— æ•ˆ',
+  `version_id` int(11) NOT NULL COMMENT 'Module versionç‰ˆæœ¬è¡¨ä¸»é”®id',
+  `refresh` tinyint(4) DEFAULT '0' COMMENT 'æ˜¯å¦å¯é‡ç½®ï¼š0ä¸å¯ï¼Œ1å¯é‡ç½®',
+  `module_id` int(11) NOT NULL DEFAULT '7' COMMENT 'Module ä¿¡æ¯è¡¨id',
+  `config_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'é…ç½®ç±»å‹ï¼Œ0ï¼šåŠ è½½å’Œè¿è¡Œé…ç½®ï¼›1ï¼šåŠ è½½æ—¶é…ç½®ï¼›2ï¼šè¿è¡Œæ—¶é…ç½®',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_configkey_type_version_id` (`config_key`,`type`,`version_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='redisÄ£¿éÅäÖÃ±í';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='redisæ¨¡å—é…ç½®è¡¨';
 
 
 -- app_to_module definition
 
 CREATE TABLE `app_to_module` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'Ö÷¼ü',
-  `app_id` bigint(20) NOT NULL COMMENT 'Ó¦ÓÃid',
-  `module_id` int(11) NOT NULL COMMENT 'Ä£¿éinfo id',
-  `module_version_id` int(11) NOT NULL COMMENT 'Ä£¿é°æ±¾id',
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ä¸»é”®',
+  `app_id` bigint(20) NOT NULL COMMENT 'åº”ç”¨id',
+  `module_id` int(11) NOT NULL COMMENT 'æ¨¡å—info id',
+  `module_version_id` int(11) NOT NULL COMMENT 'æ¨¡å—ç‰ˆæœ¬id',
   PRIMARY KEY (`id`),
   UNIQUE KEY `app_to_module_un` (`app_id`,`module_id`,`module_version_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Ó¦ÓÃÓëÄ£¿é¹ØÏµ±í';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='åº”ç”¨ä¸æ¨¡å—å…³ç³»è¡¨';
