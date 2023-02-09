@@ -1101,7 +1101,6 @@ CREATE TABLE `system_config` (
   `info` varchar(255) NOT NULL COMMENT '配置说明',
   `status` tinyint(4) NOT NULL COMMENT '1:可用,0:不可用',
   `order_id` int(11) NOT NULL COMMENT '顺序',
-  `order_num` int(6) NOT NULL DEFAULT '0' COMMENT '排序',
   PRIMARY KEY (`config_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='系统配置';
 
@@ -1129,6 +1128,7 @@ CREATE TABLE `system_resource` (
   `username` varchar(255) DEFAULT NULL COMMENT '最后修改人',
   `task_id` bigint(11) DEFAULT NULL COMMENT '迁移任务id',
   `compile_info` varchar(255) DEFAULT NULL COMMENT '编译信息',
+  `order_num` int(6) NOT NULL DEFAULT '0' COMMENT '排序',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=50 DEFAULT CHARSET=utf8;
 
