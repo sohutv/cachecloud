@@ -13,7 +13,7 @@
 
 ## 一、CacheCloud发展
 
-CacheCloud项目是从2016年以来一直在持续迭代开发,**如果你喜欢这个项目[CacheCloud试用版本](http://124.222.77.220:8080/admin/app/list),欢迎Star多多支持.**  
+CacheCloud项目是从2016年以来一直在持续迭代开发,**如果你喜欢这个项目[CacheCloud试用版本](http://43.137.44.6:8080/admin/app/list),欢迎Star多多支持.**  
 
 为了给大家带来更好的CacheCloud使用体验,希望您能在issue里提供宝贵建议：https://github.com/sohutv/cachecloud/issues/281
 
@@ -64,7 +64,7 @@ CacheCloud是一个Redis云管理平台：支持Redis多种架构(Standalone、S
 <a name="cc6"/>
 
 ## 六、ECS服务器试用版本
-+ CacheCloud后台地址：[地址](http://124.222.77.220:8080/admin/app/list)
++ CacheCloud后台地址：[地址](http://43.137.44.6:8080/admin/app/list)
 + 新用户注册成功可试用Redis集群
 + 开源版本试用截止时间：2023-02-01，如果大家有空闲公网资源可以贡献，请[联系我们](#cc8)
 
