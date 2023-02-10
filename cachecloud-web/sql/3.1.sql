@@ -830,11 +830,11 @@ CREATE TABLE `machine_statistics` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='机器状态统计信息' /* `compression`='tokudb_zlib' */;
 
 --
--- Table structure for table `qrtz_blob_triggers`
+-- Table structure for table `QRTZ_BLOB_TRIGGERS`
 --
 
-DROP TABLE IF EXISTS `qrtz_blob_triggers`;
-CREATE TABLE `qrtz_blob_triggers` (
+DROP TABLE IF EXISTS `QRTZ_BLOB_TRIGGERS`;
+CREATE TABLE `QRTZ_BLOB_TRIGGERS` (
   `SCHED_NAME` varchar(120) NOT NULL,
   `TRIGGER_NAME` varchar(200) NOT NULL,
   `TRIGGER_GROUP` varchar(200) NOT NULL,
@@ -844,13 +844,13 @@ CREATE TABLE `qrtz_blob_triggers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Trigger 作为 Blob 类型存储(用于 Quartz 用户用 JDBC 创建他们自己定制的 Trigger 类型' /* `compression`='tokudb_zlib' */;
 
 --
--- Table structure for table `qrtz_calendars`
+-- Table structure for table `QRTZ_CALENDARS`
 --
 
-DROP TABLE IF EXISTS `qrtz_calendars`;
+DROP TABLE IF EXISTS `QRTZ_CALENDARS`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `qrtz_calendars` (
+CREATE TABLE `QRTZ_CALENDARS` (
   `SCHED_NAME` varchar(120) NOT NULL COMMENT 'scheduler名称',
   `CALENDAR_NAME` varchar(200) NOT NULL COMMENT 'calendar名称',
   `CALENDAR` blob NOT NULL COMMENT 'calendar信息',
@@ -859,11 +859,11 @@ CREATE TABLE `qrtz_calendars` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `qrtz_cron_triggers`
+-- Table structure for table `QRTZ_CRON_TRIGGERS`
 --
 
-DROP TABLE IF EXISTS `qrtz_cron_triggers`;
-CREATE TABLE `qrtz_cron_triggers` (
+DROP TABLE IF EXISTS `QRTZ_CRON_TRIGGERS`;
+CREATE TABLE `QRTZ_CRON_TRIGGERS` (
   `SCHED_NAME` varchar(120) NOT NULL COMMENT 'scheduler名称',
   `TRIGGER_NAME` varchar(200) NOT NULL COMMENT 'trigger名',
   `TRIGGER_GROUP` varchar(200) NOT NULL COMMENT 'trigger组',
@@ -873,11 +873,11 @@ CREATE TABLE `qrtz_cron_triggers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='存储 Cron Trigger，包括 Cron 表达式和时区信息' /* `compression`='tokudb_zlib' */;
 
 --
--- Table structure for table `qrtz_fired_triggers`
+-- Table structure for table `QRTZ_FIRED_TRIGGERS`
 --
 
-DROP TABLE IF EXISTS `qrtz_fired_triggers`;
-CREATE TABLE `qrtz_fired_triggers` (
+DROP TABLE IF EXISTS `QRTZ_FIRED_TRIGGERS`;
+CREATE TABLE `QRTZ_FIRED_TRIGGERS` (
   `SCHED_NAME` varchar(120) NOT NULL,
   `ENTRY_ID` varchar(195) NOT NULL,
   `TRIGGER_NAME` varchar(200) NOT NULL,
@@ -901,11 +901,11 @@ CREATE TABLE `qrtz_fired_triggers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='存储已触发的 Trigger相关的状态信息，以及关联 Job 的执行信息' /* `compression`='tokudb_zlib' */;
 
 --
--- Table structure for table `qrtz_job_details`
+-- Table structure for table `QRTZ_JOB_DETAILS`
 --
 
-DROP TABLE IF EXISTS `qrtz_job_details`;
-CREATE TABLE `qrtz_job_details` (
+DROP TABLE IF EXISTS `QRTZ_JOB_DETAILS`;
+CREATE TABLE `QRTZ_JOB_DETAILS` (
   `SCHED_NAME` varchar(120) NOT NULL,
   `JOB_NAME` varchar(200) NOT NULL,
   `JOB_GROUP` varchar(200) NOT NULL,
@@ -922,33 +922,33 @@ CREATE TABLE `qrtz_job_details` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='存储每一个已配置的 Job 的详细信息' /* `compression`='tokudb_zlib' */;
 
 --
--- Table structure for table `qrtz_locks`
+-- Table structure for table `QRTZ_LOCKS`
 --
 
-DROP TABLE IF EXISTS `qrtz_locks`;
-CREATE TABLE `qrtz_locks` (
+DROP TABLE IF EXISTS `QRTZ_LOCKS`;
+CREATE TABLE `QRTZ_LOCKS` (
   `SCHED_NAME` varchar(120) NOT NULL,
   `LOCK_NAME` varchar(40) NOT NULL,
   PRIMARY KEY (`SCHED_NAME`,`LOCK_NAME`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='存储程序的悲观锁的信息(假如使用了悲观锁)' /* `compression`='tokudb_zlib' */;
 
 --
--- Table structure for table `qrtz_paused_trigger_grps`
+-- Table structure for table `QRTZ_PAUSED_TRIGGER_GRPS`
 --
 
-DROP TABLE IF EXISTS `qrtz_paused_trigger_grps`;
-CREATE TABLE `qrtz_paused_trigger_grps` (
+DROP TABLE IF EXISTS `QRTZ_PAUSED_TRIGGER_GRPS`;
+CREATE TABLE `QRTZ_PAUSED_TRIGGER_GRPS` (
   `SCHED_NAME` varchar(120) NOT NULL,
   `TRIGGER_GROUP` varchar(200) NOT NULL,
   PRIMARY KEY (`SCHED_NAME`,`TRIGGER_GROUP`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='存储已暂停的 Trigger 组的信息' /* `compression`='tokudb_zlib' */;
 
 --
--- Table structure for table `qrtz_scheduler_state`
+-- Table structure for table `QRTZ_SCHEDULER_STATE`
 --
 
-DROP TABLE IF EXISTS `qrtz_scheduler_state`;
-CREATE TABLE `qrtz_scheduler_state` (
+DROP TABLE IF EXISTS `QRTZ_SCHEDULER_STATE`;
+CREATE TABLE `QRTZ_SCHEDULER_STATE` (
   `SCHED_NAME` varchar(120) NOT NULL,
   `INSTANCE_NAME` varchar(200) NOT NULL COMMENT '执行quartz实例的主机名',
   `LAST_CHECKIN_TIME` bigint(13) NOT NULL COMMENT '实例将状态报告给集群中的其它实例的上一次时间',
@@ -957,11 +957,11 @@ CREATE TABLE `qrtz_scheduler_state` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='存储少量的有关 Scheduler 的状态信息' /* `compression`='tokudb_zlib' */;
 
 --
--- Table structure for table `qrtz_simple_triggers`
+-- Table structure for table `QRTZ_SIMPLE_TRIGGERS`
 --
 
-DROP TABLE IF EXISTS `qrtz_simple_triggers`;
-CREATE TABLE `qrtz_simple_triggers` (
+DROP TABLE IF EXISTS `QRTZ_SIMPLE_TRIGGERS`;
+CREATE TABLE `QRTZ_SIMPLE_TRIGGERS` (
   `SCHED_NAME` varchar(120) NOT NULL,
   `TRIGGER_NAME` varchar(200) NOT NULL,
   `TRIGGER_GROUP` varchar(200) NOT NULL,
@@ -972,11 +972,11 @@ CREATE TABLE `qrtz_simple_triggers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='存储简单的 Trigger，包括重复次数，间隔，以及已触的次数' /* `compression`='tokudb_zlib' */;
 
 --
--- Table structure for table `qrtz_simprop_triggers`
+-- Table structure for table `QRTZ_SIMPROP_TRIGGERS`
 --
 
-DROP TABLE IF EXISTS `qrtz_simprop_triggers`;
-CREATE TABLE `qrtz_simprop_triggers` (
+DROP TABLE IF EXISTS `QRTZ_SIMPROP_TRIGGERS`;
+CREATE TABLE `QRTZ_SIMPROP_TRIGGERS` (
   `SCHED_NAME` varchar(120) NOT NULL,
   `TRIGGER_NAME` varchar(200) NOT NULL,
   `TRIGGER_GROUP` varchar(200) NOT NULL,
@@ -995,11 +995,11 @@ CREATE TABLE `qrtz_simprop_triggers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 /* `compression`='tokudb_zlib' */;
 
 --
--- Table structure for table `qrtz_triggers`
+-- Table structure for table `QRTZ_TRIGGERS`
 --
 
-DROP TABLE IF EXISTS `qrtz_triggers`;
-CREATE TABLE `qrtz_triggers` (
+DROP TABLE IF EXISTS `QRTZ_TRIGGERS`;
+CREATE TABLE `QRTZ_TRIGGERS` (
   `SCHED_NAME` varchar(120) NOT NULL,
   `TRIGGER_NAME` varchar(200) NOT NULL,
   `TRIGGER_GROUP` varchar(200) NOT NULL,
@@ -1136,7 +1136,7 @@ CREATE TABLE `system_resource` (
 --  Records of `system_resource`
 -- ----------------------------
 BEGIN;
-INSERT INTO `system_resource` VALUES (1,'cachecloud-init.sh','容器初始化脚本',2,'2020-07-15 18:35:41','/script','',0,1,NULL,NULL,NULL),(2,'x.x.x.x',NULL,1,'2020-08-10 10:31:51','/opt/download/software/cachecloud/resource','http://x.x.x.x/software/cachecloud/resource',0,1,'admin',0,NULL),(4,'cachecloud-env.sh','宿主环境脚本',2,'2020-07-15 18:36:28','/script','',0,1,NULL,NULL,NULL),(5,'id_rsa','私钥文件',4,'2020-07-07 10:45:39','/ssh','',0,1,NULL,NULL,NULL),(6,'id_rsa.pub','公钥文件',4,'2020-07-07 10:45:45','/ssh','',0,1,NULL,NULL,NULL),(12,'redis-4.0.14','redis 4.0.14资源包',3,'2020-08-10 09:52:41','/redis','http://download.redis.io/releases/redis-4.0.14.tar.gz',0,1,'admin',532,NULL),(21,'/script','脚本目录管理',6,'2020-08-10 10:51:34','',NULL,0,1,'admin',0,NULL),(28,'/ssh','ssh目录',6,'2020-07-20 17:55:03',NULL,NULL,0,1,'admin',0,NULL),(29,'redis-3.0.7','redis3.0.7 资源包',3,'2020-08-10 09:53:32','/redis','http://download.redis.io/releases/redis-3.0.7.tar.gz',0,1,'admin',529,NULL),(31,'redis-3.2.12','redis 3.2.12 资源包',3,'2020-08-10 15:08:21','/redis','http://download.redis.io/releases/redis-3.2.12.tar.gz',0,1,'admin',530,NULL),(32,'/redis','redis资源包管理',6,'2020-07-20 17:54:59',NULL,NULL,0,1,'admin',0,NULL),(33,'/tool','迁移工具资源包',6,'2020-07-20 17:54:53',NULL,NULL,0,1,'admin',0,NULL),(37,'redis-5.0.9','redis5.0.9 资源包',3,'2020-08-10 09:51:41','/redis','http://download.redis.io/releases/redis-5.0.9.tar.gz',0,1,'admin',533,NULL),(40,'redis-shake-2.0.3','redis 2.0.3\n修复fix 5.0迁移类型问题',7,'2020-08-11 10:53:26','/tool','https://github.com/alibaba/RedisShake/releases/download/release-v2.0.3-20200724/redis-shake-v2.0.3.tar.gz',0,1,'admin',518,NULL);
+INSERT INTO `system_resource1` VALUES (1,'cachecloud-init.sh','容器初始化脚本',2,'2020-07-15 18:35:41','/script','',0,1,NULL,NULL,NULL,0),(2,'x.x.x.x',NULL,1,'2020-08-10 10:31:51','/opt/download/software/cachecloud/resource','http://x.x.x.x/software/cachecloud/resource',0,1,'admin',0,NULL,0),(4,'cachecloud-env.sh','宿主环境脚本',2,'2020-07-15 18:36:28','/script','',0,1,NULL,NULL,NULL,0),(5,'id_rsa','私钥文件',4,'2020-07-07 10:45:39','/ssh','',0,1,NULL,NULL,NULL,0),(6,'id_rsa.pub','公钥文件',4,'2020-07-07 10:45:45','/ssh','',0,1,NULL,NULL,NULL,0),(12,'redis-4.0.14','redis 4.0.14资源包',3,'2020-08-10 09:52:41','/redis','http://download.redis.io/releases/redis-4.0.14.tar.gz',0,1,'admin',532,NULL,0),(21,'/script','脚本目录管理',6,'2020-08-10 10:51:34','',NULL,0,1,'admin',0,NULL,0),(28,'/ssh','ssh目录',6,'2020-07-20 17:55:03',NULL,NULL,0,1,'admin',0,NULL,0),(29,'redis-3.0.7','redis3.0.7 资源包',3,'2020-08-10 09:53:32','/redis','http://download.redis.io/releases/redis-3.0.7.tar.gz',0,1,'admin',529,NULL,0),(31,'redis-3.2.12','redis 3.2.12 资源包',3,'2020-08-10 15:08:21','/redis','http://download.redis.io/releases/redis-3.2.12.tar.gz',0,1,'admin',530,NULL,0),(32,'/redis','redis资源包管理',6,'2020-07-20 17:54:59',NULL,NULL,0,1,'admin',0,NULL,0),(33,'/tool','迁移工具资源包',6,'2020-07-20 17:54:53',NULL,NULL,0,1,'admin',0,NULL,0),(37,'redis-5.0.9','redis5.0.9 资源包',3,'2020-08-10 09:51:41','/redis','http://download.redis.io/releases/redis-5.0.9.tar.gz',0,1,'admin',533,NULL,0),(40,'redis-shake-2.0.3','redis 2.0.3\n修复fix 5.0迁移类型问题',7,'2020-08-11 10:53:26','/tool','https://github.com/alibaba/RedisShake/releases/download/release-v2.0.3-20200724/redis-shake-v2.0.3.tar.gz',0,1,'admin',518,NULL,0);
 COMMIT;
 
 --

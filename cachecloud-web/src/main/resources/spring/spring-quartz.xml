@@ -128,7 +128,7 @@
                 <prop key="org.quartz.scheduler.batchTriggerAcquisitionMaxCount">200</prop>
                 <prop key="org.quartz.jobStore.driverDelegateClass">org.quartz.impl.jdbcjobstore.StdJDBCDelegate</prop>
                 <!-- 表名前缀 -->
-                <prop key="org.quartz.jobStore.tablePrefix">qrtz_</prop>
+                <prop key="org.quartz.jobStore.tablePrefix">QRTZ_</prop>
                 <prop key="org.quartz.jobStore.isClustered">true</prop>
                 <prop key="org.quartz.jobStore.clusterCheckinInterval">15000</prop>
                 <prop key="org.quartz.jobStore.maxMisfiresToHandleAtATime">20</prop>
