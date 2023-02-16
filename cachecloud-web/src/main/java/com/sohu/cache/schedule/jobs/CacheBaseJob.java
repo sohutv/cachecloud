@@ -31,14 +31,13 @@ public abstract class CacheBaseJob implements Job, Serializable {
     public void execute(JobExecutionContext context) throws JobExecutionException {
         long start = System.currentTimeMillis();
         this.action(context);
-        long end = System.currentTimeMillis();
-        long cost = (start - end);
+        long cost = System.currentTimeMillis() - start;
         if (cost > 2000) {
             logger.warn("slowJob: job: {}, trigger: {}, cost: {} ms", context.getJobDetail().getKey(),
-                    context.getTrigger().getKey(), (end - start));
+                    context.getTrigger().getKey(), cost);
         } else {
             logger.debug("job: {}, trigger: {}, cost: {} ms", context.getJobDetail().getKey(),
-                    context.getTrigger().getKey(), (end - start));
+                    context.getTrigger().getKey(), cost);
         }
     }
 }
