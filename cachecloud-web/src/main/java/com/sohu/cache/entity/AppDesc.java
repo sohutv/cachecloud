@@ -162,6 +162,11 @@ public class AppDesc implements Serializable {
      */
     private String customPassword;
 
+    /**
+     * 最大内存淘汰策略
+     * 见AppDescEnum.MaxmemoryPolicyType
+     */
+    private Integer maxmemoryPolicy;
     public String getAuthPassword() {
         if(StringUtils.isNotBlank(customPassword)){
             return customPassword;
@@ -308,5 +313,16 @@ public class AppDesc implements Serializable {
 
     public void setPassedTime(Date passedTime) {
         this.passedTime = (Date) passedTime.clone();
+    }
+
+    public String getMaxmemoryPolicyDesc() {
+        if(maxmemoryPolicy != null){
+            AppDescEnum.MaxmemoryPolicyType policyType = AppDescEnum.MaxmemoryPolicyType.getByType(maxmemoryPolicy);
+            if(policyType != null){
+                return policyType.getName();
+
+            }
+        }
+        return null;
     }
 }

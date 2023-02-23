@@ -1,0 +1,2 @@
+-- app_desc change
+ALTER TABLE app_desc ADD maxmemory_policy tinyint(4) DEFAULT NULL COMMENT '淘汰策略(0：noeviction; 1:allkeys-lru;2:allkeys-lfu;3:volatile-lru;4:volatile-lfu;5:allkeys-random;6:volatile-random;7:volatile-ttl)';

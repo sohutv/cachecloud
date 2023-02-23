@@ -1021,6 +1021,7 @@ public class AppController extends BaseController {
         model.addAttribute("roomList", roomList);
         model.addAttribute("versionList", versionList);
         model.addAttribute("allModules", allModules);
+        model.addAttribute("policyList", AppDescEnum.MaxmemoryPolicyType.getAll());
 
         return new ModelAndView("app/jobIndex/appInitIndex");
     }

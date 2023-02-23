@@ -27,6 +27,9 @@
         <!-- 后台管理员验证 -->
         <mvc:interceptor>
             <mvc:mapping path="/manage/app/*"/>
+            <mvc:mapping path="/manage/app/**"/>
+            <mvc:mapping path="/manage/import/**"/>
+            <mvc:mapping path="/manage/task/**"/>
             <mvc:mapping path="/manage/instance/*"/>
             <mvc:mapping path="/manage/user/*"/>
             <mvc:mapping path="/manage/quartz/*"/>

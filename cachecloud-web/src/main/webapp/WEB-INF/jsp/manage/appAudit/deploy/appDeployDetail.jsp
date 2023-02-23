@@ -108,6 +108,8 @@
 								<tr>
 									<td>申请安装Redis模块</td>
 									<td class="col-md-4">${appAudit.param3}</td>
+									<td>淘汰策略</td>
+									<td>${appDesc.maxmemoryPolicyDesc}</td>
 								</tr>
 							</table>
 						</div>

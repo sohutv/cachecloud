@@ -279,6 +279,7 @@ CREATE TABLE `app_desc` (
   `is_access_monitor` int(11) DEFAULT '0' COMMENT '是否接入全局监控报警 默认0,0:不接入监控 1:接入监控',
   `app_fsync_value` int(11) DEFAULT '1' COMMENT '应用刷盘策略 1:主从节点appdendfsync=everysec 2:主从节点 appdendfsync=no',
   `version_id` int(11) NOT NULL DEFAULT '1' COMMENT 'Redis版本表主键id',
+  `maxmemory_policy` tinyint(4) DEFAULT NULL COMMENT '淘汰策略(0：noeviction; 1:allkeys-lru;2:allkeys-lfu;3:volatile-lru;4:volatile-lfu;5:allkeys-random;6:volatile-random;7:volatile-ttl)',
   PRIMARY KEY (`app_id`),
   UNIQUE KEY `uidx_app_name` (`name`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='app应用描述' /* `compression`='tokudb_zlib' */;

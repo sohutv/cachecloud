@@ -155,7 +155,7 @@
     </select>
 
     <update id="updateStatus">
-    	update app_data_migrate_status set status = #{status}, end_time=now() where id = #{id}
+    	update app_data_migrate_status set status = #{status}, end_time=now() where id = #{id} and status != 1
     </update>
 
     <select id="getAllOnMigrateId" resultType="long">

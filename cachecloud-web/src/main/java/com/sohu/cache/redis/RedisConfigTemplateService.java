@@ -87,10 +87,11 @@ public interface RedisConfigTemplateService {
      * 普通节点配置
      * @param port
      * @param maxMemory
+     * @param maxMemoryPolicy
      * @param versionId Redis版本
      * @return 普通配置列表
      */
-    List<String> handleCommonConfig(String host, int port, int maxMemory, int versionId);
+    List<String> handleCommonConfig(String host, int port, int maxMemory, String maxMemoryPolicy, int versionId);
 
     /**
      * sentinel节点配置(兼容k8s)

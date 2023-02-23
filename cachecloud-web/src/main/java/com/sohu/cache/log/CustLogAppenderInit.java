@@ -4,20 +4,20 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-
 @Component
-public class CustLogAppenderInit {
+public class CustLogAppenderInit implements ApplicationRunner{
 
     @Autowired
     private TaskFlowRecordAppender taskFlowRecordAppender;
 
     private final org.slf4j.Logger logger = LoggerFactory.getLogger(CustLogAppenderInit.class);
 
-    @PostConstruct
-    public void init() {
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
         logger.warn("custLogAppender init begin!");
         if (LoggerFactory.getILoggerFactory() instanceof LoggerContext) {
             LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -32,5 +32,4 @@ public class CustLogAppenderInit {
                     LoggerFactory.getILoggerFactory());
         }
     }
-
 }

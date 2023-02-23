@@ -256,7 +256,7 @@ public class RedisConfigTemplateController extends BaseController {
         // 根据类型生成配置模板
         List<String> configList = new ArrayList<String>();
         if (ConstUtils.CACHE_REDIS_STANDALONE == type) {
-            configList = redisConfigTemplateService.handleCommonConfig(host, port, maxMemory, versionId);
+            configList = redisConfigTemplateService.handleCommonConfig(host, port, maxMemory, null, versionId);
         } else if (ConstUtils.CACHE_REDIS_SENTINEL == type) {
             configList = redisConfigTemplateService.handleSentinelConfig(masterName, host, port, host, sentinelPort, versionId);
         } else if (ConstUtils.CACHE_TYPE_REDIS_CLUSTER == type) {

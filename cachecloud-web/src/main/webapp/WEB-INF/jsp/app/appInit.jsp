@@ -264,6 +264,26 @@
 												</div>
 											</div>
 
+											<div class="form-group">
+												<label class="control-label col-md-3">
+													淘汰策略<font color='red'>(*)</font>:
+												</label>
+												<div class="col-md-5">
+													<select name="maxmemoryPolicy" id="maxmemoryPolicy" class="form-control select2_category">
+														<c:forEach items="${policyList}" var="policy">
+															<c:choose>
+																<c:when test="${policy.type == 4}">
+																	<option value="${policy.type}" selected>${policy.name} (${policy.desc})</option>
+																</c:when>
+																<c:otherwise>
+																	<option value="${policy.type}">${policy.name} (${policy.desc})</option>
+																</c:otherwise>
+															</c:choose>
+														</c:forEach>
+													</select>
+												</div>
+											</div>
+
 											<input name="userId" id="userId" value="${userInfo.id}" type="hidden" />
 											<input id="appExist" value="0" type="hidden" />
 

@@ -42,6 +42,7 @@
                                 <td>命中率</td>
                                 <td>天数</td>
                                 <td>申请状态</td>
+                                <td>淘汰策略</td>
                                 <td>操作</td>
                             </tr>
                             </thead>
@@ -146,6 +147,16 @@
                                             <c:when test="${appDetail.appDesc.status == 4}">
                                                 <font color="red">驳回</font>
                                             </c:when>
+                                        </c:choose>
+                                    </td>
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${appDetail.appDesc.maxmemoryPolicyDesc == null}">
+                                                默认
+                                            </c:when>
+                                            <c:otherwise>
+                                                ${appDetail.appDesc.maxmemoryPolicyDesc}
+                                            </c:otherwise>
                                         </c:choose>
                                     </td>
                                     <td>

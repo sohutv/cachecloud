@@ -82,6 +82,8 @@
 	                <tr>
 	                	<td>内存报警阀值</td>
 	                	<td>${appDesc.memAlertValue}%</td>
+						<td>淘汰策略</td>
+						<td>${appDesc.maxmemoryPolicyDesc}</td>
 	                </tr>
                 </tbody>
             </table>

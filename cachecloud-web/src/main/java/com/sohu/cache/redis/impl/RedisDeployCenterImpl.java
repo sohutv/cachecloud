@@ -1,6 +1,7 @@
 package com.sohu.cache.redis.impl;
 
 import com.google.common.collect.Lists;
+import com.sohu.cache.constant.AppDescEnum;
 import com.sohu.cache.constant.ClusterOperateResult;
 import com.sohu.cache.constant.InstanceStatusEnum;
 import com.sohu.cache.dao.AppDao;
@@ -570,7 +571,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
             throw new RuntimeException(String.format("machine: %s version :%s is installed %s", host, redisResource, installStatus));
         }
         // 生成配置
-        List<String> configs = handleCommonConfig(host, port, maxMemory, appDesc.getVersionId());
+        List<String> configs = handleCommonConfig(host, port, maxMemory, appDesc.getMaxmemoryPolicy(), appDesc.getVersionId());
         if (isCluster) {
             configs.addAll(handleClusterConfig(port, appDesc.getVersionId()));
         }
@@ -633,7 +634,7 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
         SystemResource redisResource = resourceService.getResourceById(appDesc.getVersionId());
         String redisDir = redisResource == null ? ConstUtils.REDIS_DEFAULT_DIR : ConstUtils.getRedisDir(redisResource.getName());
         // 生成配置
-        List<String> configs = handleCommonConfig(host, port, maxMemory, appDesc.getVersionId());
+        List<String> configs = handleCommonConfig(host, port, maxMemory, appDesc.getMaxmemoryPolicy(), appDesc.getVersionId());
         if (isCluster) {
             configs.addAll(handleClusterConfig(port, appDesc.getVersionId()));
         }
@@ -757,10 +758,17 @@ public class RedisDeployCenterImpl implements RedisDeployCenter {
      * @param maxMemory
      * @return
      */
-    public List<String> handleCommonConfig(String host, int port, int maxMemory, int versionId) {
+    public List<String> handleCommonConfig(String host, int port, int maxMemory, Integer maxMemoryPolicyType, int versionId) {
         List<String> configs = null;
         try {
-            configs = redisConfigTemplateService.handleCommonConfig(host, port, maxMemory, versionId);
+            String maxMemoryPolicy = null;
+            if(maxMemoryPolicyType != null){
+                AppDescEnum.MaxmemoryPolicyType policyType = AppDescEnum.MaxmemoryPolicyType.getByType(maxMemoryPolicyType);
+                if(policyType != null){
+                    maxMemoryPolicy = policyType.getName();
+                }
+            }
+            configs = redisConfigTemplateService.handleCommonConfig(host, port, maxMemory, maxMemoryPolicy, versionId);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }

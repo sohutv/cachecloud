@@ -1563,6 +1563,9 @@ public class RedisCenterImpl implements RedisCenter {
                 if(instanceInfo.getType() == ConstUtils.CACHE_REDIS_SENTINEL){
                     continue;
                 }
+                if(instanceInfo.isOffline()){
+                    continue;
+                }
                 host = instanceInfo.getIp();
                 port = instanceInfo.getPort();
                 BooleanEnum isMaster = this.isMaster(appId, host, port);

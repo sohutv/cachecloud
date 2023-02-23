@@ -163,7 +163,7 @@ public class RedisConfigTemplateServiceImpl implements RedisConfigTemplateServic
 
 
     @Override
-    public List<String> handleCommonConfig(String host, int port, int maxMemory, int versionId) {
+    public List<String> handleCommonConfig(String host, int port, int maxMemory, String maxMemoryPolicy, int versionId) {
         //2018-08-24
         List<InstanceConfig> instanceConfigList = getByVesionAndType(ConstUtils.CACHE_REDIS_STANDALONE, versionId);
         if (CollectionUtils.isEmpty(instanceConfigList)) {
@@ -193,6 +193,10 @@ public class RedisConfigTemplateServiceImpl implements RedisConfigTemplateServic
                 configValue = String.format(configValue, percent);
             } else if (RedisConfigEnum.BIND.getKey().equals(configKey)) {
                 configValue = String.format(configValue, host);
+            } else if (RedisConfigEnum.MAXMEMORY_POLICY.getKey().equals(configKey)) {
+                if(StringUtils.isNotEmpty(maxMemoryPolicy)){
+                    configValue = maxMemoryPolicy;
+                }
             }
             configs.add(combineConfigKeyValue(configKey, configValue));
         }

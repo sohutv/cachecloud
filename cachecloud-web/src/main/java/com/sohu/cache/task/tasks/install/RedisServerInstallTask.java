@@ -1,5 +1,6 @@
 package com.sohu.cache.task.tasks.install;
 
+import com.sohu.cache.constant.AppDescEnum;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.SystemResource;
 import com.sohu.cache.protocol.RedisProtocol;
@@ -143,7 +144,7 @@ public class RedisServerInstallTask extends BaseTask {
         //实例基准目录
         String instanceRemoteBasePath = ConstUtils.CACHECLOUD_BASE_DIR;
         AppDesc appDesc = appService.getByAppId(appId);
-        List<String> configList = handleCommonConfig(host, port, maxMemory, appDesc.getVersionId(),isCluster);
+        List<String> configList = handleCommonConfig(host, port, maxMemory, appDesc.getMaxmemoryPolicy(), appDesc.getVersionId(), isCluster);
         if (CollectionUtils.isEmpty(configList)) {
             logger.error(marker, "appId {} port {} maxmemory {} versionId:{} instanceRemoteBasePath {} configList is empty", appId, port, maxMemory, appDesc.getVersionId(), instanceRemoteBasePath);
             return TaskFlowStatusEnum.ABORT;
@@ -232,9 +233,16 @@ public class RedisServerInstallTask extends BaseTask {
      * @version 1.0
      * @date 2019/1/9
      */
-    private List<String> handleCommonConfig(String host, int port, int maxMemory, int versionId, boolean isCluster) {
+    private List<String> handleCommonConfig(String host, int port, int maxMemory, Integer maxMemoryPolicyType, int versionId, boolean isCluster) {
         try {
-            List<String> configs = redisConfigTemplateService.handleCommonConfig(host, port, maxMemory, versionId);
+            String maxMemoryPolicy = null;
+            if(maxMemoryPolicyType != null){
+                AppDescEnum.MaxmemoryPolicyType policyType = AppDescEnum.MaxmemoryPolicyType.getByType(maxMemoryPolicyType);
+                if(policyType != null){
+                    maxMemoryPolicy = policyType.getName();
+                }
+            }
+            List<String> configs = redisConfigTemplateService.handleCommonConfig(host, port, maxMemory, maxMemoryPolicy, versionId);
             if (isCluster) {
                 configs.addAll(redisConfigTemplateService.handleClusterConfig(port, versionId));
             }

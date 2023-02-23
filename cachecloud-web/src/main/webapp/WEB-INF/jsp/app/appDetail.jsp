@@ -117,6 +117,8 @@
                 <tr>
                     <td>应用描述</td>
                     <td>${appDetail.appDesc.intro}</td>
+                    <td>淘汰策略</td>
+                    <td>${appDetail.appDesc.maxmemoryPolicyDesc}</td>
                 </tr>
                 </tbody>
             </table>
