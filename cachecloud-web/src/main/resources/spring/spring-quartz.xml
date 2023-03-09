@@ -32,20 +32,6 @@
         <property name="durability" value="true"/>
     </bean>
 
-    <bean id="errorLogMinuteStatJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="name" value="errorLogMinuteStatJob"/>
-        <property name="group" value="errorLogMinuteStatGroup"/>
-        <property name="jobClass" value="com.sohu.cache.schedule.jobs.ErrorLogMinuteStatJob"/>
-        <property name="durability" value="true" />
-    </bean>
-
-    <bean id="errorLogMinuteStatTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="name" value="errorLogMinuteStatTrigger"/>
-        <property name="group" value="errorLogMinuteStatGroup"/>
-        <property name="jobDetail" ref="errorLogMinuteStatJobDetail"/>
-        <property name="cronExpression" value="0 0/1 * ? * *"/>
-    </bean>
-
     <!-- inJvm模式 -->
     <bean id="jvmQuartzScheduler" name="jvmQuartzScheduler" lazy-init="false"
           class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
@@ -70,7 +56,6 @@
             <array>
                 <ref bean="systemConfigRefreshTrigger"/>
                 <ref bean="dispatcherBrevityScheduleTrigger"/>
-                <ref bean="errorLogMinuteStatTrigger"/>
             </array>
         </property>
 
@@ -78,7 +63,6 @@
             <array>
                 <ref bean="systemConfigRefreshJobDetail"/>
                 <ref bean="dispatcherBrevityScheduleJobDetail"/>
-                <ref bean="errorLogMinuteStatJobDetail"/>
             </array>
         </property>
     </bean>
