@@ -296,13 +296,17 @@ json = response.json()
 
 shard_info_array = json['shardInfo'].split(' ')
 
-seed = {'host': 'localhost', 'port': '6379'}
+startup_nodes = []
 
 if len(shard_info_array) > 0:
-    seed['host'] = shard_info_array[0].split(':')[0]
-    seed['port'] = shard_info_array[0].split(':')[1]
+    for shardinfo in shard_info_array:
+        seed = {'host': 'localhost', 'port': '6379'}
+        seed['host'] = shardinfo.split(':')[0]
+        seed['port'] = shardinfo.split(':')[1]
+        startup_nodes.append(seed)
 
-startup_nodes = [seed]
+if len(startup_nodes) <= 0:
+    startup_nodes = [{'host': 'localhost', 'port': '6379'}]
 
 # Note: decode_responses must be set to True when used with python3
 rc = RedisCluster(startup_nodes=startup_nodes, decode_responses=True, password=password)
