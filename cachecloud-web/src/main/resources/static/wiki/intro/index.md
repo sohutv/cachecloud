@@ -41,7 +41,7 @@ CacheCloud是一个Redis云管理平台：支持Redis多种架构(Standalone、S
 + 运维管理：宿主环境、资源管理、应用审计、应用运维、应用质量监控、应用拓扑诊断；
 + 弹性伸缩：资源评估、垂直伸缩、水平伸缩、外部接入；
 + 统计监控：指标采集、应用统计、节点统计、机器统计、监控报警、问题诊断；
-<img src="../../img/readme/CacheCloud功能架构.png" width="100%"/>
+<img src="http://photocdn.tv.sohu.com/img/q_mini/20230720/pic_org_9d708b75-56d4-4eb1-9efa-bddebf4c3972.png" width="100%"/>
 
 <a name="cc4"/>
 
