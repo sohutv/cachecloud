@@ -55,11 +55,9 @@ CacheCloud是一个Redis云管理平台：支持Redis多种架构(Standalone、S
 
 ## 五、CacheCloud资源部署VS云厂商
 
-+ Redis Sentinel部署成本:          
-<img src="cachecloud-web/src/main/resources/static/img/readme/sentinel-cost.png" width="50%"/>
++ Redis 主从/集群部署成本:
 
-+ Redis 集群部署成本:
-<img src="cachecloud-web/src/main/resources/static/img/readme/cluster-cost.png" width="50%"/>
+<img src="cachecloud-web/src/main/resources/static/img/readme/sentinel-cost.png" width="50%" align="left"/><img src="cachecloud-web/src/main/resources/static/img/readme/cluster-cost.png" width="50%" align="right"/>
 
 <a name="cc6"/>
 
