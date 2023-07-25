@@ -2,7 +2,7 @@
 
 ![cachecloud云平台](cachecloud-web/src/main/resources/static/img/readme/cachecloud-head.png)
 
-[![latest release badge]][latest release link] [![github stars badge]][github stars link] [![github forks badge]][github forks link][![CI checks on main badge]][CI checks on main link]
+[![latest release badge]][latest release link] [![github stars badge]][github stars link] [![github forks badge]][github forks link] [![CI checks on main badge]][CI checks on main link]
 
 [![github open issues badge]][github open issues link] [![github open prs badge]][github open prs link] [![latest commit to main badge]][latest commit to main link]
 
@@ -40,25 +40,24 @@
 </div>
 
 
-## CacheCloud是什么？
+## What is CacheCloud？
 
-CacheCloud是一个Redis云管理平台：支持Redis多种架构(Standalone、Sentinel、Cluster)高效管理、有效降低大规模redis运维成本，提升资源管控能力和利用率。平台提供快速搭建/迁移，运维管理，弹性伸缩，统计监控，客户端整合接入等功能。
-
+CacheCloud is a Redis cloud management platform that supports efficient management of multiple Redis architectures (Standalone, Sentinel, and Cluster), effectively reduces large-scale redis Operation and Maintenance costs, and improves resource management capabilities and utilization. The platform provides functions such as rapid construction/migration, operation and maintenance management, elastic scaling, statistical monitoring, and client integration and access.
 <img src="cachecloud-web/src/main/resources/static/img/readme/cachecloud-info.png" width="100%"/>
 
-## CacheCloud功能架构
+## CacheCloud Function Architecture
 
-+ Redis搭建：宿主环境初始化、实例部署安装、类型架构支持；
-+ 运维管理：宿主环境、资源管理、应用审计、应用运维、质量监控、诊断分析；
-+ 统计监控：日志采集、实例采集、机器采集、应用统计、监控告警、问题诊断；
-+ 客户端接入：SDK接入、语言接入、客户端监控；
-+ 弹性伸缩：资源收缩、应用伸缩、外部接入；
++ Redis build: Machine environment initialization, Instance deployment and installation, Redis architecture support;
++ DevOps: Machine environment, Resource management, Application audit, Application operation and maintenance, Quality monitoring, Diagnostic analysis;
++ Statistical monitoring: Redis log collection, Instance indicator collection, Machine indicator collection, Application statistics, Monitoring alarms, Problem diagnosis;
++ Client access: SDK access support, Language access support, Client monitoring;
++ Elastic scaling: Memory Resource shrinkage, Application scaling, External access;
 
 <img src="cachecloud-web/src/main/resources/static/img/readme/CacheCloud功能架构.png" width="100%"/>
 
 <a name="cc4"/>
 
-##  CacheCloud使用规模
+## CacheCloud Scale
 
 + 800亿+ commands/day
 + 18T+ Memory Total
@@ -67,31 +66,31 @@ CacheCloud是一个Redis云管理平台：支持Redis多种架构(Standalone、S
 
 <a name="cc5"/>
 
-## CacheCloud VS 云厂商
+## CacheCloud VS Cloud vendor
 
 <img src="cachecloud-web/src/main/resources/static/img/readme/sentinel-cost.png" width="50%"/><img src="cachecloud-web/src/main/resources/static/img/readme/cluster-cost.png" width="50%"/>
 
-<div align="center">Redis 主从/集群部署成本</div>
+<div align="center">Redis Sentinel/Cluster deploy cost</div>
 
-## 感谢支持者
+## Supporters
 
 [![Stargazers repo roster for @sohutv/cachecloud](https://reporoster.com/stars/sohutv/cachecloud)](https://github.com/sohutv/cachecloud/stargazers)
 [![Forkers repo roster for @sohutv/cachecloud](https://reporoster.com/forks/sohutv/cachecloud)](https://github.com/sohutv/cachecloud/network/members)
 
 <a name="contact"/>
 
-## 联系我们
+## Contact us
 
-+ QQ群: 534429768(已满) / 2群:894022242 / 3群:908821300
++ QQ: 534429768(Full) / 2群:894022242 / 3群:908821300
 
-+ 微信群:
++ Wechat Group:
 
-<img src="http://photocdn.tv.sohu.com/img/cachecloud/weixin.jpg" width="30%"/>
+<img src="http://photocdn.tv.sohu.com/img/cachecloud/weixin.jpg" width="40%"/>
 
-<img src="cachecloud-web/src/main/resources/static/img/readme/subcribe.png" width="30%"/>
+<img src="cachecloud-web/src/main/resources/static/img/readme/subcribe.png" width="40%"/>
 
-+ 微信：如果大家有公网资源可以联系我，会加入到开源版本服务资源部署试用，提高大家的用户体验。
++ Wechat：If you have public network resources can contact me, I will join the open source version service resource deployment trial, improve everyone's user experience.
 
 <img src="cachecloud-web/src/main/resources/static/img/readme/wechat.png" width="30%"/>
 
-如果你觉得CacheCloud对你有帮助，欢迎Star⭐。
+If you find CacheCloud is helpful, welcome to Star⭐️.

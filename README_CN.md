@@ -67,7 +67,7 @@ CacheCloud是一个Redis云管理平台：支持Redis多种架构(Standalone、S
 
 <a name="cc5"/>
 
-## CacheCloud VS 云厂商
+## CacheCloud VS 云厂商 
 
 <img src="cachecloud-web/src/main/resources/static/img/readme/sentinel-cost.png" width="50%"/><img src="cachecloud-web/src/main/resources/static/img/readme/cluster-cost.png" width="50%"/>
 
@@ -83,7 +83,7 @@ CacheCloud是一个Redis云管理平台：支持Redis多种架构(Standalone、S
 ## 联系我们
 
 + QQ群: 534429768(已满) / 2群:894022242 / 3群:908821300
-
+   
 + 微信群:
 
 <img src="http://photocdn.tv.sohu.com/img/cachecloud/weixin.jpg" width="30%"/>
