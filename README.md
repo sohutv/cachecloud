@@ -1,4 +1,4 @@
-[中文](README_CN.md)|[EN](README_EN.md)
+[中文](README_CN.md) | [EN](README_EN.md)
 
 ![cachecloud云平台](cachecloud-web/src/main/resources/static/img/readme/cachecloud-head.png)
 
@@ -70,6 +70,12 @@ CacheCloud是一个Redis云管理平台：支持Redis多种架构(Standalone、S
 <img src="cachecloud-web/src/main/resources/static/img/readme/sentinel-cost.png" width="50%"/><img src="cachecloud-web/src/main/resources/static/img/readme/cluster-cost.png" width="50%"/>
 
 <div align="center">Redis 主从/集群部署成本</div>
+
+## 贡献成员
+
+<a href="https://github.com/sohutv/cachecloud/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=sohutv/cachecloud" />
+</a>
 
 ## 感谢支持者
 

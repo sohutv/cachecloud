@@ -1,4 +1,4 @@
-[中文](README_CN.md)|[EN](README_EN.md)
+[中文](README_CN.md) | [EN](README_EN.md)
 
 ![cachecloud云平台](cachecloud-web/src/main/resources/static/img/readme/cachecloud-head.png)
 
@@ -69,6 +69,12 @@ CacheCloud is a Redis cloud management platform that supports efficient manageme
 <img src="cachecloud-web/src/main/resources/static/img/readme/sentinel-cost.png" width="50%"/><img src="cachecloud-web/src/main/resources/static/img/readme/cluster-cost.png" width="50%"/>
 
 <div align="center">Redis Sentinel/Cluster deploy cost</div>
+
+## Contributing member
+
+<a href="https://github.com/sohutv/cachecloud/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=sohutv/cachecloud" />
+</a>
 
 ## Supporters
 
