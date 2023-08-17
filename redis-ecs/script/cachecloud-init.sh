@@ -50,12 +50,12 @@ checkExist() {
       echo -e "\033[41;36m delete existed user: $1. \033[0m"
       userdel -r "$1"
       createUser "$1" "$2"
-      init "$1"
+      init "$1" "$1"
       return 0
     fi
   else
     createUser "$1" "$2"
-    init "$1"
+    init "$1" "$1"
   fi
   return 0
 }
@@ -87,11 +87,11 @@ init() {
   mkdir -p /data/redis
 
   # change owner
-  chown -R $1:$1 /opt/cachecloud
-  chown -R $1:$1 /tmp/cachecloud
-  chown -R $1:$1 /home/$1
-  chown -R $1 /var/run
-  chown -R $1:$1 /data/redis
+  chown -R $1:$2 /opt/cachecloud
+  chown -R $1:$2 /tmp/cachecloud
+  chown -R $1:$2 /home/$1
+  chown -R $1:$2 /var/run
+  chown -R $1:$2 /data/redis
   echo -e "\033[41;36m OK: init done. \033[0m"
 }
 
@@ -114,9 +114,9 @@ output() {
   echo "swappiness="
   cat /proc/sys/vm/swappiness
   echo "user="
-  cat /etc/passwd | grep cachecloud
+  cat /etc/passwd | grep $1
   echo "auth_key="
-  cat /home/$1/.ssh/authorized_keys
+  [ -f "/home/$1/.ssh/authorized_keys" ] && cat /home/$1/.ssh/authorized_keys
   echo "sshpass="
   sshpass -V | head -1
 
@@ -135,7 +135,7 @@ installRedis() {
 
     if [[ $? == 0 ]]; then
       echo -e "\033[41;36m OK: ${redisTarGz} is installed, exit. \033[0m"
-      chown -R $1:$2 ${redisDir}
+      chown -R $1:$1 ${redisDir}
       if [[ ${redisVersion} == "redis-5.0.9" ]]; then
         export PATH=$PATH:${redisDir}/src
         echo $PATH
@@ -170,3 +170,4 @@ installSshpass
 output "${username}"
 # 6.install install
 installRedis "${username}" "${password}"
+
