@@ -592,7 +592,7 @@ public class TaskConstants {
     /**
      * 最大内存限制(MB)
      */
-    public final static int MAX_MEMORY_LIMIT = 1024 * 20;
+    public final static int MAX_MEMORY_LIMIT = 1024 * 10;
 
     /**
      * 一次分配每个机器最大rediserver实例数

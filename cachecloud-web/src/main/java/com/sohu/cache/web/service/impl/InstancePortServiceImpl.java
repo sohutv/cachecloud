@@ -94,7 +94,7 @@ public class InstancePortServiceImpl implements InstancePortService {
             redisServerNodeList.add(new RedisServerNode(masterHost, masterPort, InstanceRoleEnum.MASTER.getRole(),
                         maxMemory, "", 0));   
            
-            if (hostInfoArray.length >= 2) {
+            if (hostInfoArray.length >= 3) {
                 String slaveHost = hostInfoArray[2];
                 int slavePort = masterPort + ConstUtils.SLAVE_PORT_INCREASE;
                 while (checkHostPortExist(ipPortSetMap, slaveHost, slavePort)) {
