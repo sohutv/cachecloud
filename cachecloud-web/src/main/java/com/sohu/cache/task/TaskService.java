@@ -289,7 +289,7 @@ public interface TaskService {
      * @param parentTaskId           父任务id
      * @return
      */
-    long addRedisClusterAppTask(long appId, long appAuditId, int maxMemory, List<String> redisServerMachineList,
+    long addRedisClusterAppTask(long appId, long appAuditId, int maxMemory, List<String> appDeployInfoList, List<String> redisServerMachineList,
                                 int masterPerMachine, String dbVersion,String moduleinfos, long parentTaskId);
 
     /**

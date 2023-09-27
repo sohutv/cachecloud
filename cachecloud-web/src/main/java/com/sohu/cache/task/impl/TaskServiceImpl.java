@@ -522,11 +522,12 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public long addRedisClusterAppTask(long appId, long appAuditId, int maxMemory, List<String> redisServerMachineList, int masterPerMachine, String dbVersion,String moduleinfos, long parentTaskId) {
+    public long addRedisClusterAppTask(long appId, long appAuditId, int maxMemory, List<String> appDeployInfoList, List<String> redisServerMachineList, int masterPerMachine, String dbVersion,String moduleinfos, long parentTaskId) {
         Map<String, Object> paramMap = new HashMap<String, Object>();
         paramMap.put(TaskConstants.APPID_KEY, appId);
         paramMap.put(TaskConstants.AUDIT_ID_KEY, appAuditId);
         paramMap.put(TaskConstants.REDIS_SERVER_MAX_MEMORY_KEY, maxMemory);
+        paramMap.put(TaskConstants.APP_DEPLOY_INFO_LIST_KEY,appDeployInfoList);
         paramMap.put(TaskConstants.REDIS_SERVER_MACHINE_LIST_KEY, redisServerMachineList);
         paramMap.put(TaskConstants.MASTER_PER_MACHINE_KEY, masterPerMachine);
         paramMap.put(TaskConstants.VERSION_KEY, dbVersion.replaceAll(RedisConstUtils.REDIS_VERSION_PREFIX,""));
