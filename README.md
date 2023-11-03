@@ -79,8 +79,8 @@ CacheCloud是一个Redis云管理平台：支持Redis多种架构(Standalone、S
 
 ## 感谢支持者
 
-[![Stargazers repo roster for @sohutv/cachecloud](https://reporoster.com/stars/sohutv/cachecloud)](https://github.com/sohutv/cachecloud/stargazers)
-[![Forkers repo roster for @sohutv/cachecloud](https://reporoster.com/forks/sohutv/cachecloud)](https://github.com/sohutv/cachecloud/network/members)
+![Stargazers repo roster for @sohutv/cachecloud](https://bytecrank.com/nastyox/reporoster/php/stargazersSVG.php?user=sohutv&repo=cachecloud))
+![Forkers repo roster for @sohutv/cachecloud](https://bytecrank.com/nastyox/reporoster/php/forkersSVG.php?user=sohutv&repo=cachecloud))
 
 <a name="contact"/>
 
