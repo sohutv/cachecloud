@@ -50,6 +50,13 @@ public class RedisClusterAppDeployTask extends BaseTask {
      */
     private long auditId;
 
+
+    /**
+     * redis server部署实例列表
+     */
+    private List<String> appDeployInfoList;
+
+
     /**
      * redis server机器列表
      */
@@ -153,6 +160,14 @@ public class RedisClusterAppDeployTask extends BaseTask {
             return TaskFlowStatusEnum.ABORT;
         }
 
+       //appDeployInfo
+        String appDeployInfoStr = MapUtils.getString(paramMap, TaskConstants.APP_DEPLOY_INFO_LIST_KEY);
+        appDeployInfoList = JSONArray.parseArray(appDeployInfoStr, String.class);
+        if (CollectionUtils.isEmpty(appDeployInfoList)) {
+            logger.error(marker, "task {} appDeployInfoList is empty", taskId);
+            return TaskFlowStatusEnum.ABORT;
+        }
+
         //redis server machine
         String redisServerMachineStr = MapUtils.getString(paramMap, TaskConstants.REDIS_SERVER_MACHINE_LIST_KEY);
         redisServerMachineList = JSONArray.parseArray(redisServerMachineStr, String.class);
@@ -241,7 +256,7 @@ public class RedisClusterAppDeployTask extends BaseTask {
      */
     public TaskFlowStatusEnum generateInstanceNodes() {
 
-        redisServerNodes = instancePortService.generateRedisServerNodeList(appId, redisServerMachineList, masterPerMachine, maxMemory);
+        redisServerNodes = instancePortService.generateRedisServerNodeList(appId, appDeployInfoList,  masterPerMachine, maxMemory);
         if (CollectionUtils.isEmpty(redisServerNodes)) {
             logger.warn(marker, "redisServerNodes is empty, appId is {}, redisServerMachineList is {}, masterPerMachine is {}, maxMemory is {}",
                     appId, redisServerMachineList, masterPerMachine, maxMemory);

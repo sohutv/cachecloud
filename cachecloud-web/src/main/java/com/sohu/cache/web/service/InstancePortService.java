@@ -50,7 +50,7 @@ public interface InstancePortService {
 	 */
 	public List<RedisServerNode> generateRedisServerNodeList(long appId, List<String> redisServerMachineList,
 															 int masterPerMachine, int maxMemory);
-	
+
 	/**
 	 * 生成redis sentinel 实例列表
 	 * @param appId

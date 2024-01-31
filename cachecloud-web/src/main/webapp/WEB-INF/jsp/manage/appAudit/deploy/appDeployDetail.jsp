@@ -470,7 +470,7 @@
 														<br/><br/><br/>部署信息预览:<font color='red'>(*)</font>:
 													</label>
 													<div class="col-md-5">
-														<textarea rows="10" name="appDeployInfo" id="appDeployInfo" placeholder="部署详情" class="form-control" disabled="disabled"></textarea>
+														<textarea rows="10" name="appDeployInfo" id="appDeployInfo" placeholder="部署详情" class="form-control" ></textarea>
 													</div>
 													<br/>
 													<button id="clearInfo" class="btn btn-info" onclick="clearinfo()" data-toggle="modal" style="background:#CCCCCC;display:none;">清除</button>

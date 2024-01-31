@@ -109,6 +109,7 @@ public class TaskConstants {
     /**
      * twemproxy
      */
+    public final static String APP_DEPLOY_INFO_LIST_KEY = "appDeployInfoList";
     public final static String REDIS_SERVER_MACHINE_LIST_KEY = "redisServerMachineList";
     public final static String REDIS_SENTINEL_MACHINE_LIST_KEY = "redisSentinelMachineList";
     public final static String NUT_CRACKER_MACHINE_LIST_KEY = "nutCrackerMachineList";

@@ -512,6 +512,7 @@ public class AppManageController extends BaseController {
                                            int sentinelNum,
                                            int pikaNum,
                                            int twemproxyNum,
+                                           String appDeployInfo,
                                            String redisMachines,
                                            String sentinelMachines,
                                            String twemproxyMachines,
@@ -634,6 +635,7 @@ public class AppManageController extends BaseController {
                                            int sentinelNum,
                                            int pikaNum,
                                            int twemproxyNum,
+                                           String appDeployInfo,
                                            String redisMachines,
                                            String sentinelMachines,
                                            String twemproxyMachines,
@@ -646,12 +648,14 @@ public class AppManageController extends BaseController {
         AppUser appUser = getUserInfo(request);
         logger.warn("user {} appid:{} ,appAuditId:{}, importantLevel:{} ,isSetPasswd:{},versionId:{},customPassword:{}", appUser.getName(), appid, appAuditId, importantLevel, isSetPasswd, versionId, customPassword);
         logger.info("type:{} ,maxMemory:{} MB ", type, maxMemory);
+        logger.info("appDeployInfo :{} ", appDeployInfo);
         logger.info("redisMachines:{} ,num:{} ", redisMachines, redisNum);
         logger.info("sentinelMachines:{} ,num:{} ", sentinelMachines, sentinelNum);
         logger.info("twemproxyMachines:{} ,num:{} ", twemproxyMachines, twemproxyNum);
         logger.info("pikaMachines:{} ,num:{} ", pikaMachines, pikaNum);
         logger.info("moduleinfos:{} ", moduleinfos);
         try {
+            List<String> appDeployInfolist = Arrays.asList(appDeployInfo.split("\n"));
             List<String> redisMachinelist = Arrays.asList(redisMachines.split(";"));
             List<String> sentinelMachinelist = Arrays.asList(sentinelMachines.split(";"));
             List<String> twemproxyMachinelist = Arrays.asList(twemproxyMachines.split(";"));
@@ -688,7 +692,7 @@ public class AppManageController extends BaseController {
             //2.根据应用类型获取部署拓扑信息
             switch (type) {
                 case 2: //  部署task :redis cluster
-                    taskid = taskService.addRedisClusterAppTask(appid, appAuditId, maxMemory, redisMachinelist, redisNum, redisResource.getName(),moduleinfos, -1);
+                    taskid = taskService.addRedisClusterAppTask(appid, appAuditId, maxMemory, appDeployInfolist, redisMachinelist, redisNum, redisResource.getName(),moduleinfos, -1);
                     break;
                 case 5: //  部署task :sentinel + redis
                     taskid = taskService.addRedisSentinelAppTask(appid, appAuditId, maxMemory, redisMachinelist, sentinelMachinelist, redisNum, sentinelNum, redisResource.getName(),moduleinfos, -1);

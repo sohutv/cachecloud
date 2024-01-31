@@ -336,7 +336,30 @@ function addAppDeployTask() {
             moduleinfos +=  $("#moduleVersionId-"+moduleId+" option:selected").attr("versionid")+";";
         }
     })
+    // 获取原始字符串
+    var originalValue = $("#appDeployInfo").val();
 
+    // 使用换行符分割字符串，得到一组主机信息
+    var hostInfoArray = originalValue.split('\n');
+
+    // 初始化一个 Set 来存储不同的主机IP
+    var uniqueHostIPs = new Set();
+
+    // 遍历主机信息数组，提取每个主机的IP地址
+    for (var i = 0; i < hostInfoArray.length; i++) {
+        var hostInfo = hostInfoArray[i];
+        // 使用冒号分割每行信息
+        var parts = hostInfo.split(':');
+        // 确保有足够的部分
+        var firstIP = parts[0];
+        uniqueHostIPs.add(firstIP);
+        if (parts.length >= 3) {
+            var thirdIP = parts[2];
+            uniqueHostIPs.add(thirdIP);
+        }
+     }
+
+    redisMachines = Array.from(uniqueHostIPs).join(';');
     $.post(
         '/manage/app/addAppDeployTask.json',
         {
@@ -351,6 +374,7 @@ function addAppDeployTask() {
             sentinelNum: $("#sentinelNum option:selected").val(),
             pikaNum: $("#pikaNum option:selected").val(),
             twemproxyNum: $("#twemproxyNum option:selected").val(),
+            appDeployInfo: $("#appDeployInfo").val(),
             redisMachines: redisMachines,
             sentinelMachines: sentinelMachines,
             pikaMachines: pikaMachines,
