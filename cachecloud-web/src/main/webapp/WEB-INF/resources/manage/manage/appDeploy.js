@@ -10,11 +10,13 @@ function generateDeployInfo() {
     var sentinelMachines = "";
     var twemproxyMachines = "";
     var pikaMachines = "";
+    var redisMachineNum = 0;
     // 1.获取不同类型的机器信息
     if (redisMachines == '') {
         $("#redisMachineList option:selected").each(function () {
             if (this.value != '') {
                 redisMachines += this.value + ";";
+                redisMachineNum++;
             }
         });
     }
@@ -49,6 +51,20 @@ function generateDeployInfo() {
         toastr.error("请填写maxMemory内存大小!");
         $("#maxMemory").focus();
         return;
+    }
+    var redisNum = $("#redisNum option:selected").val();
+    if(redisNum == '0' && $("#appType").val() != '2'){
+        toastr.error("仅redis cluster支持指定单机单实例部署!");
+        $("#redisNum").focus();
+        return;
+    }
+
+    if(redisNum == '0' && $("#appType").val() == '2'){
+        if(redisMachineNum < 6 || redisMachineNum % 2 != 0){
+            toastr.error("单机单实例部署，请选择大于等于6的偶数台机器!");
+            $("#redisNum").focus();
+            return;
+        }
     }
 
     if ($("#appType").val() == '2' || $("#appType").val() == '6') {  //rediscluster /redis standalone
@@ -143,6 +159,9 @@ function generateDeployInfo() {
                  */
                 $("#selectMachineId").removeAttr("style");
                 $("#clearInfo").attr("style", "background:#CCCCCC");
+                if ($("#appType").val() == 2) {
+                    $("#manualSwitch").attr("style", "background:#FF0000");
+                }
                 var resMachines = data.resMachines;
                 var machineDeployStatMap = data.machineDeployStatMap;
                 resMachines.forEach(function (machine) {
@@ -245,6 +264,18 @@ function clearinfo() {
     $("#selectMachineId").attr("style", "display:none");
     $("#appDeployText").val("");
     $("#appDeployInfo").val("");
+    $("#appDeployInfo").attr("disabled", "disabled");
+    $("#clearInfo").attr("style", "background:#CCCCCC;display:none;");
+    $("#manualSwitch").attr("style", "background:#FF0000;display:none;");
+}
+
+/**
+ * 开启手动编辑
+ */
+function manualSwitchFunc() {
+    if($("#appType").val() == 2){
+        $("#appDeployInfo").removeAttr("disabled");
+    }
 }
 
 function changePwd(defaultPwd){

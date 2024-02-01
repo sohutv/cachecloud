@@ -7,12 +7,12 @@ import java.util.List;
 /**
  * @Author: zengyizhao
  * @DateTime: 2021/9/3 13:38
- * @Description: 报警记录
+ * @Description: 鎶ヨ璁板綍
  */
 public interface AppAlertRecordDao {
 
     /**
-     * 保存报警信息
+     * 淇濆瓨鎶ヨ淇℃伅
      *
      * @param appAlertRecord
      * @return
@@ -20,7 +20,7 @@ public interface AppAlertRecordDao {
     public int save(AppAlertRecord appAlertRecord);
 
     /**
-     * 批量保存报警信息
+     * 鎵归噺淇濆瓨鎶ヨ淇℃伅
      *
      * @param appAlertRecordList
      * @return

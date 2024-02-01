@@ -66,15 +66,15 @@ public class InstancePortServiceImpl implements InstancePortService {
 	@Autowired
     @Lazy
 	private RedisCenter redisCenter;
-	
-	
-	/**
-	 * 1. 主从不同机器
-	 * 2. 端口从起始端口开始自增1
-	 */
-	@Override
-	public List<RedisServerNode> generateRedisServerNodeList(long appId, List<String> appDeployInfoList,
-															 int masterPerMachine, int maxMemory) {
+
+
+    /**
+     * 1. 主从不同机器
+     * 2. 端口从起始端口开始自增1
+     */
+    @Override
+    public List<RedisServerNode> generateRedisServerNodeList(long appId, List<String> redisServerMachineList,
+                                                             int masterPerMachine, int maxMemory) {
 
         // 最终结果
         List<RedisServerNode> redisServerNodeList = new ArrayList<RedisServerNode>();
@@ -83,29 +83,7 @@ public class InstancePortServiceImpl implements InstancePortService {
 
         // 记录本次每个机器分配的port
         Map<String, Set<Integer>> ipPortSetMap = new HashMap<String, Set<Integer>>();
-        for (int i=0; i < appDeployInfoList.size(); i++) {
-            String masterAndSlaveHost = appDeployInfoList.get(i);
-            String[] hostInfoArray = masterAndSlaveHost.split(":"); 
-            String masterHost = hostInfoArray[0];
-            maxMemory = Integer.parseInt(hostInfoArray[1]);
-            while (checkHostPortExist(ipPortSetMap, masterHost, masterPort)) {
-                    masterPort++;
-                }
-            redisServerNodeList.add(new RedisServerNode(masterHost, masterPort, InstanceRoleEnum.MASTER.getRole(),
-                        maxMemory, "", 0));   
-           
-            if (hostInfoArray.length >= 3) {
-                String slaveHost = hostInfoArray[2];
-                int slavePort = masterPort + ConstUtils.SLAVE_PORT_INCREASE;
-                while (checkHostPortExist(ipPortSetMap, slaveHost, slavePort)) {
-                    slavePort++;
-                }
-                redisServerNodeList.add(new RedisServerNode(slaveHost, slavePort, InstanceRoleEnum.SLAVE.getRole(),
-                      maxMemory, masterHost, masterPort));            
-            }
-            masterPort += 1;
-        }
-        /*
+
         for (int i = 0; i < redisServerMachineList.size(); i++) {
 
             String masterHost = redisServerMachineList.get(i);
@@ -132,7 +110,47 @@ public class InstancePortServiceImpl implements InstancePortService {
                 masterPort += 1;
             }
         }
-        */
+
+        return redisServerNodeList;
+    }
+
+    /**
+     * 1. 主从不同机器
+     * 2. 端口从起始端口开始自增1
+     */
+    @Override
+    public List<RedisServerNode> generateRedisServerNodeListWithDeployInfo(long appId, List<String> appDeployInfoList,
+                                                             int masterPerMachine, int maxMemory) {
+
+        // 最终结果
+        List<RedisServerNode> redisServerNodeList = new ArrayList<RedisServerNode>();
+        // 起始节点
+        int masterPort = (int) (ConstUtils.REDIS_SERVER_BASE_PORT + (appId % 10) * 10);
+
+        // 记录本次每个机器分配的port
+        Map<String, Set<Integer>> ipPortSetMap = new HashMap<String, Set<Integer>>();
+        for (int i=0; i < appDeployInfoList.size(); i++) {
+            String masterAndSlaveHost = appDeployInfoList.get(i);
+            String[] hostInfoArray = masterAndSlaveHost.split(":");
+            String masterHost = hostInfoArray[0];
+            maxMemory = Integer.parseInt(hostInfoArray[1]);
+            while (checkHostPortExist(ipPortSetMap, masterHost, masterPort)) {
+                masterPort++;
+            }
+            redisServerNodeList.add(new RedisServerNode(masterHost, masterPort, InstanceRoleEnum.MASTER.getRole(),
+                    maxMemory, "", 0));
+
+            if (hostInfoArray.length >= 3) {
+                String slaveHost = hostInfoArray[2];
+                int slavePort = masterPort + ConstUtils.SLAVE_PORT_INCREASE;
+                while (checkHostPortExist(ipPortSetMap, slaveHost, slavePort)) {
+                    slavePort++;
+                }
+                redisServerNodeList.add(new RedisServerNode(slaveHost, slavePort, InstanceRoleEnum.SLAVE.getRole(),
+                        maxMemory, masterHost, masterPort));
+            }
+            masterPort += 1;
+        }
         return redisServerNodeList;
     }
 

@@ -108,7 +108,7 @@
             <props>
                 <prop key="org.quartz.scheduler.instanceName">CacheCloudScheduler</prop>
                 <prop key="org.quartz.scheduler.instanceId">AUTO</prop>
-                <prop key="org.quartz.jobStore.class">org.quartz.impl.jdbcjobstore.JobStoreTX</prop>
+                <prop key="org.quartz.jobStore.class">org.springframework.scheduling.quartz.LocalDataSourceJobStore</prop>
                 <prop key="org.quartz.scheduler.batchTriggerAcquisitionMaxCount">200</prop>
                 <prop key="org.quartz.jobStore.driverDelegateClass">org.quartz.impl.jdbcjobstore.StdJDBCDelegate</prop>
                 <!-- 表名前缀 -->

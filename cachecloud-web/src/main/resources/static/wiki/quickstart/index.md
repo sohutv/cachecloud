@@ -26,10 +26,16 @@ a.下载war包：
 
 [3.1版本 cachecloud-web.war](http://43.137.44.6/redis-ecs/3.1/cachecloud-web.war)
 
+[3.2版本 cachecloud-web.war](http://43.137.44.6/redis-ecs/3.2/cachecloud-web.war)
+
 b.也可以clone源码，自行打包：
 
 	//clone项目
 	git clone https://github.com/sohutv/cachecloud.git
+	//切换到指定分支
+	git checkout 3.2
+	//修改指定应用和数据库配置
+	[参见 三、启动工程](#cc3)
 	//打包
 	mvn clean package
 
@@ -44,12 +50,13 @@ b.也可以clone源码，自行打包：
 	user: xxx
 	password: xxx
 
-导入建表文件：/cachecloud-open/cachecloud-web/sql/cc2.0.sql
+导入建表文件：/cachecloud-web/sql/cc3.2.sql
+（根据指定版本导入，如为升级，请执行update {源版本} to {目标版本}.sql文件）
 
 <a name="cc3"/>
 
 ### 三、启动工程
-准备配置文件：application-open.yml，放到war包同目录下
+准备配置文件：cachecloud-web/src/main/resources/application-open.yml，修改指定应用和数据库配置
 
 	#配置应用名称
 	spring:

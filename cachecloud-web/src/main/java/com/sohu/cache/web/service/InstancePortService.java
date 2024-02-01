@@ -52,6 +52,17 @@ public interface InstancePortService {
 															 int masterPerMachine, int maxMemory);
 
 	/**
+	 * 生成redis server 实例列表
+	 * @param appId
+	 * @param appDeployInfoList (masterIp:maxmemory:slaveIp)
+	 * @param masterPerMachine
+	 * @param maxMemory
+	 * @return
+	 */
+	public List<RedisServerNode> generateRedisServerNodeListWithDeployInfo(long appId, List<String> appDeployInfoList,
+																		   int masterPerMachine, int maxMemory);
+
+	/**
 	 * 生成redis sentinel 实例列表
 	 * @param appId
 	 * @param redisSentinelMachineList

@@ -155,7 +155,7 @@ public class RedisClusterAppDeployTask extends BaseTask {
 
         //masterPerMachine
         masterPerMachine = MapUtils.getIntValue(paramMap, TaskConstants.MASTER_PER_MACHINE_KEY);
-        if (masterPerMachine <= 0 || masterPerMachine > TaskConstants.MAX_MASTER_PER_MACHINE) {
+        if (masterPerMachine < 0 || masterPerMachine > TaskConstants.MAX_MASTER_PER_MACHINE) {
             logger.error(marker, "task {} masterPerMachine {} is wrong", taskId, masterPerMachine);
             return TaskFlowStatusEnum.ABORT;
         }
@@ -227,7 +227,12 @@ public class RedisClusterAppDeployTask extends BaseTask {
             }
             //兆
             long memoryFree = NumberUtils.toLong(machineStats.getMemoryFree()) / 1024 / 1024;
-            long memoryNeed = Long.valueOf(masterPerMachine) * maxMemory;
+            long memoryNeed = 0L;
+            if (masterPerMachine == 0) {
+                memoryNeed = maxMemory;
+            } else {
+                memoryNeed = Long.valueOf(masterPerMachine) * maxMemory;
+            }
             if (memoryNeed > memoryFree * 0.85) {
                 logger.error(marker, "{} need {} MB, but memoryFree is {} MB", redisServerIp, memoryNeed, memoryFree);
                 return TaskFlowStatusEnum.ABORT;
@@ -256,7 +261,7 @@ public class RedisClusterAppDeployTask extends BaseTask {
      */
     public TaskFlowStatusEnum generateInstanceNodes() {
 
-        redisServerNodes = instancePortService.generateRedisServerNodeList(appId, appDeployInfoList,  masterPerMachine, maxMemory);
+        redisServerNodes = instancePortService.generateRedisServerNodeListWithDeployInfo(appId, appDeployInfoList,  masterPerMachine, maxMemory);
         if (CollectionUtils.isEmpty(redisServerNodes)) {
             logger.warn(marker, "redisServerNodes is empty, appId is {}, redisServerMachineList is {}, masterPerMachine is {}, maxMemory is {}",
                     appId, redisServerMachineList, masterPerMachine, maxMemory);

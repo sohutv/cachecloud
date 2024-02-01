@@ -395,18 +395,19 @@
 														</select>
 													</div>
 													<div class="col-md-2">
-														&nbsp;&nbsp;部署主实例数：
+														&nbsp;&nbsp;实例数：
 														<select name="redisNum" id="redisNum">
-															<option value="1">1</option>
-															<option value="2">2</option>
-															<option value="3">3</option>
-															<option value="4">4</option>
-															<option value="5">5</option>
-															<option value="6">6</option>
-															<option value="7">7</option>
-															<option value="8">8</option>
-															<option value="9">9</option>
-															<option value="10">10</option>
+															<option value="1">1主1从</option>
+															<option value="0">1个(主/从)</option>
+															<option value="2">2主2从</option>
+															<option value="3">3主3从</option>
+															<option value="4">4主4从</option>
+															<option value="5">5主5从</option>
+															<option value="6">6主6从</option>
+															<option value="7">7主7从</option>
+															<option value="8">8主8从</option>
+															<option value="9">9主9从</option>
+															<option value="10">10主10从</option>
 														</select>
 													</div>
 												</div>
@@ -470,10 +471,15 @@
 														<br/><br/><br/>部署信息预览:<font color='red'>(*)</font>:
 													</label>
 													<div class="col-md-5">
-														<textarea rows="10" name="appDeployInfo" id="appDeployInfo" placeholder="部署详情" class="form-control" ></textarea>
+														<textarea rows="10" name="appDeployInfo" id="appDeployInfo" placeholder="部署详情" class="form-control" disabled="disabled"></textarea>
 													</div>
-													<br/>
-													<button id="clearInfo" class="btn btn-info" onclick="clearinfo()" data-toggle="modal" style="background:#CCCCCC;display:none;">清除</button>
+
+													<div class="col-md-4">
+														<br/>
+														<button id="clearInfo" class="btn btn-info" onclick="clearinfo()" data-toggle="modal" style="background:#CCCCCC;display:none;">清除</button>
+														<br>
+														<button id="manualSwitch" class="btn btn-info" onclick="manualSwitchFunc()" title="可启用编辑，修改部署信息，将按此信息进行部署"  data-toggle="modal" style="background:#FF0000;display:none;">编辑</button>
+													</div>
 												</div>
 
 												<div class="modal-footer">

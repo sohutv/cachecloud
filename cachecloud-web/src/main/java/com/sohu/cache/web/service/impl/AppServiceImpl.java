@@ -934,7 +934,7 @@ public class AppServiceImpl implements AppService {
     /**
      * @param machinelist 机器信息
      * @param type        应用类型
-     * @param instanceNum 实例数量
+     * @param instanceNum 实例数量 实例数据为0时，则每个机器部署一个实例
      * @param maxMemory   内存大小
      * @param hasSalve    是否有从节点
      * @return 添加部署Redis/Pika节点信息
@@ -954,6 +954,29 @@ public class AppServiceImpl implements AppService {
                 }
                 if (deployInfo != null) {
                     deployInfoList.add(deployInfo);
+                }
+            }
+            //每台机器仅部署一个实例处理逻辑
+            if (instanceNum == 0) {
+                for (int index = 0; index < machinelist.size() - 1; ) {
+                    DeployInfo deployInfo = null;
+                    if (DeployInfo.isRedisNode(type)) {
+                        deployInfo = hasSalve == 1
+                                ? DeployInfo.getRedisInfo(appType, machinelist.get(index), maxMemory, machinelist.get(index + 1))
+                                : DeployInfo.getRedisInfo(appType, machinelist.get(index), maxMemory, null);
+                    } else {
+                        deployInfo  = hasSalve == 1
+                                ? DeployInfo.getPikaInfo(appType, machinelist.get(index), maxMemory, machinelist.get(index + 1))
+                                : DeployInfo.getPikaInfo(appType, machinelist.get(index), maxMemory, null);
+                    }
+                    if (deployInfo != null) {
+                        deployInfoList.add(deployInfo);
+                    }
+                    if(hasSalve == 1) {
+                        index += 2;
+                    } else {
+                        index += 1;
+                    }
                 }
             }
         }
