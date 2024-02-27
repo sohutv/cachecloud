@@ -35,6 +35,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
@@ -635,7 +636,7 @@ public class AppManageController extends BaseController {
                                            int sentinelNum,
                                            int pikaNum,
                                            int twemproxyNum,
-                                           String appDeployInfo,
+                                           @RequestParam(required = false)  String appDeployInfo,
                                            String redisMachines,
                                            String sentinelMachines,
                                            String twemproxyMachines,
