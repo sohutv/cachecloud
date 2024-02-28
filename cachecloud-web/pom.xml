@@ -156,14 +156,17 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- ssh -->
         <dependency>
-            <groupId>ch.ethz.ganymed</groupId>
-            <artifactId>ganymed-ssh2</artifactId>
+            <groupId>org.apache.sshd</groupId>
+            <artifactId>sshd-core</artifactId>
+            <version>${ssh-version}</version>
         </dependency>
 
         <dependency>
-            <groupId>com.hierynomus</groupId>
-            <artifactId>sshj</artifactId>
+            <groupId>org.apache.sshd</groupId>
+            <artifactId>sshd-scp</artifactId>
+            <version>${ssh-version}</version>
         </dependency>
 
         <dependency>

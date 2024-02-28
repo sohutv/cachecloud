@@ -1,21 +1,38 @@
 package com.sohu.cache.ssh;
 
-import ch.ethz.ssh2.Connection;
-import ch.ethz.ssh2.SCPClient;
-import ch.ethz.ssh2.Session;
-import ch.ethz.ssh2.StreamGobbler;
-import com.sohu.cache.async.AsyncThreadPoolFactory;
 import com.sohu.cache.exception.SSHException;
 import com.sohu.cache.util.ConstUtils;
-import com.sohu.cache.util.IdempotentConfirmer;
 import com.sohu.cache.web.enums.SshAuthTypeEnum;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.pool2.impl.GenericKeyedObjectPool;
+import org.apache.sshd.client.channel.ClientChannel;
+import org.apache.sshd.client.channel.ClientChannelEvent;
+import org.apache.sshd.client.session.ClientSession;
+import org.apache.sshd.common.config.keys.loader.KeyPairResourceLoader;
+import org.apache.sshd.common.util.security.SecurityUtils;
+import org.apache.sshd.scp.client.ScpClient;
+import org.apache.sshd.scp.client.ScpClientCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.file.FileSystems;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
+import java.security.KeyPair;
 import java.util.Arrays;
-import java.util.concurrent.*;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * SSH操作模板类
  */
@@ -23,14 +40,18 @@ import java.util.concurrent.*;
 public class SSHTemplate {
 	private static final Logger logger = LoggerFactory.getLogger(SSHTemplate.class);
 
-	private static final int CONNCET_TIMEOUT = 5000;
+    public static final List<PosixFilePermission> PERMS = Arrays.asList(PosixFilePermission.OWNER_READ,
+            PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE, PosixFilePermission.GROUP_READ, PosixFilePermission.OTHERS_READ);
+
+    @Autowired
+    private GenericKeyedObjectPool<String, ClientSession> clientSessionPool;
+
+    private static final int CONNCET_TIMEOUT = 5000;
 
 	private static final int OP_TIMEOUT = 10000;
 
-	private static ThreadPoolExecutor taskPool = AsyncThreadPoolFactory.MACHINE_THREAD_POOL;
-
 	public Result execute(String ip, SSHCallback callback) throws SSHException{
-		return execute(ip,ConstUtils.DEFAULT_SSH_PORT_DEFAULT, ConstUtils.USERNAME,
+		return execute(ip,ConstUtils.SSH_PORT_DEFAULT, ConstUtils.USERNAME,
 				ConstUtils.PASSWORD, callback);
 	}
 
@@ -45,125 +66,34 @@ public class SSHTemplate {
 	 */
     public Result execute(String ip, int port, String username, String password,
     		SSHCallback callback) throws SSHException{
-        Connection conn = null;
+        ClientSession session = null;
         try {
-            conn = getConnection(ip, port, username, password);
-            return callback.call(new SSHSession(conn, ip+":"+port));
+            session = clientSessionPool.borrowObject(ip);
+            session.setUsername(username);
+            if (ConstUtils.SSH_AUTH_TYPE == SshAuthTypeEnum.PASSWORD.getValue()) {
+                session.addPasswordIdentity(password);
+            } else if (ConstUtils.SSH_AUTH_TYPE == SshAuthTypeEnum.PUBLIC_KEY.getValue()) {
+                KeyPairResourceLoader loader = SecurityUtils.getKeyPairResourceParser();
+                Collection<KeyPair> keys = loader.loadKeyPairs(null, Paths.get(ConstUtils.PUBLIC_KEY_PEM), null);
+                session.addPublicKeyIdentity(keys.iterator().next());
+            }
+            return callback.call(new SSHSession(session, ip));
         } catch (Exception e) {
             throw new SSHException("SSH exception: " + e.getMessage(), e);
         } finally {
-        	close(conn);
+            close(ip, session);
         }
     }
 
-    public Result executeByPerm(String ip, int port, SSHCallback callback) throws SSHException{
-        Connection conn = null;
-        try {
-            conn = getConnectionByPerm(ip, port);
-            return callback.call(new SSHSession(conn, ip+":"+port));
-        } catch (Exception e) {
-            throw new SSHException("SSH exception: " + e.getMessage(), e);
-        } finally {
-            close(conn);
-        }
-    }
-
-    /**
-     * 获取连接并校验
-     * @param ip
-     * @param port
-     * @param username
-     * @param password
-     * @return Connection
-     * @throws Exception
-     */
-    private Connection getConnection(final String ip, final int port, final String username, final String password) throws Exception {
-
-        int connectRetryTimes = 3;
-
-        final Connection conn = new Connection(ip, port);
-
-        final StringBuffer pemFilePath = new StringBuffer();
-        if (ConstUtils.MEMCACHE_USER.equals(username)) {
-            pemFilePath.append(ConstUtils.MEMCACHE_KEY_PEM);
-        } else {
-            pemFilePath.append(ConstUtils.PUBLIC_KEY_PEM);
-        }
-
-        new IdempotentConfirmer(connectRetryTimes) {
-            private int timeOutFactor = 1;
-            @Override
-            public boolean execute() {
-                try {
-                    if (timeOutFactor > 1) {
-                        logger.warn("connect {}:{} timeOutFactor is {}", ip, port, timeOutFactor);
-                    }
-                    int timeout = (timeOutFactor++) * CONNCET_TIMEOUT;
-                    conn.connect(null, timeout, timeout);
-                    boolean isAuthenticated = false;
-                    if (ConstUtils.SSH_AUTH_TYPE == SshAuthTypeEnum.PASSWORD.getValue()) {
-                        isAuthenticated = conn.authenticateWithPassword(username, password);
-                    } else if (ConstUtils.SSH_AUTH_TYPE == SshAuthTypeEnum.PUBLIC_KEY.getValue()) {
-                        isAuthenticated = conn.authenticateWithPublicKey( ConstUtils.PUBLIC_USERNAME, new File(pemFilePath.toString()), password);
-                    }
-                    if (isAuthenticated == false) {
-                        if (ConstUtils.SSH_AUTH_TYPE == SshAuthTypeEnum.PASSWORD.getValue()) {
-                            logger.error("SSH authentication {} failed with [userName: {} password: {}]", ip, username, password);
-                        } else if (ConstUtils.SSH_AUTH_TYPE == SshAuthTypeEnum.PUBLIC_KEY.getValue()) {
-                            logger.error("SSH authentication {} failed with [userName: {} pemfile: {}]", ip, username, ConstUtils.PUBLIC_KEY_PEM);
-                        }
-                    }
-                    return isAuthenticated;
-                } catch (Exception e) {
-                    logger.error("getConnection {}:{} error message is {} ", ip, port, e.getMessage(), e);
-                    return false;
+    private DefaultLineProcessor generateDefaultLineProcessor(StringBuilder buffer) {
+        return new DefaultLineProcessor() {
+            public void process(String line, int lineNum) throws Exception {
+                if (lineNum > 1) {
+                    buffer.append(System.lineSeparator());
                 }
+                buffer.append(line);
             }
-        }.run();
-
-        return conn;
-    }
-
-    /**
-     * 获取连接并校验
-     * @param ip
-     * @param port
-     * @return Connection
-     * @throws Exception
-     */
-    private Connection getConnectionByPerm(final String ip, final int port) throws Exception {
-
-        int connectRetryTimes = 3;
-
-        final Connection conn = new Connection(ip, port);
-
-        final StringBuffer pemFilePath = new StringBuffer();
-        pemFilePath.append(ConstUtils.PUBLIC_KEY_PEM);
-
-        new IdempotentConfirmer(connectRetryTimes) {
-            private int timeOutFactor = 1;
-            @Override
-            public boolean execute() {
-                try {
-                    if (timeOutFactor > 1) {
-                        logger.warn("connect {}:{} timeOutFactor is {}", ip, port, timeOutFactor);
-                    }
-                    int timeout = (timeOutFactor++) * CONNCET_TIMEOUT;
-                    conn.connect(null, timeout, timeout);
-                    boolean isAuthenticated = conn.authenticateWithPublicKey( ConstUtils.PUBLIC_USERNAME, new File(pemFilePath.toString()), "");
-
-                    if (isAuthenticated == false) {
-                        logger.error("SSH authentication {} failed with [ pemfile: {}]", ip, ConstUtils.PUBLIC_KEY_PEM);
-                    }
-                    return isAuthenticated;
-                } catch (Exception e) {
-                    logger.error("getConnection {}:{} error message is {} ", ip, port, e.getMessage(), e);
-                    return false;
-                }
-            }
-        }.run();
-
-        return conn;
+        };
     }
 
     /**
@@ -192,18 +122,21 @@ public class SSHTemplate {
     private void processStream(InputStream is, LineProcessor lineProcessor) {
     	BufferedReader reader = null;
         try {
-        	reader = new BufferedReader(new InputStreamReader(new StreamGobbler(is), "UTF-8"));
+        	reader = new BufferedReader(new InputStreamReader(is));
 	    	String line = null;
 	    	int lineNum = 1;
 	        while ((line = reader.readLine()) != null) {
 	        	try {
 					lineProcessor.process(line, lineNum);
 				} catch (Exception e) {
-					logger.error("err line:"+line, e);
+					logger.error("err line:" + line, e);
 				}
+                if (lineProcessor instanceof DefaultLineProcessor) {
+                    ((DefaultLineProcessor) lineProcessor).setLineNum(lineNum);
+                }
 				lineNum++;
 	        }
-	        lineProcessor.finish();
+            lineProcessor.finish();
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         } finally {
@@ -221,20 +154,10 @@ public class SSHTemplate {
         }
     }
 
-    private void close(Connection conn) {
-        if (conn != null) {
-            try {
-                conn.close();
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-            }
-        }
-    }
-
-    private static void close(Session session) {
+    private void close(String ip, ClientSession session) {
         if (session != null) {
             try {
-                session.close();
+                clientSessionPool.returnObject(ip, session);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }
@@ -244,13 +167,16 @@ public class SSHTemplate {
     /**
      * 可以调用多次executeCommand， 并返回结果
      */
-    public class SSHSession{
+    public class SSHSession {
+
         private String address;
-        private Connection conn;
-        private SSHSession(Connection conn, String address) {
-            this.conn = conn;
+        private ClientSession clientSession;
+
+        private SSHSession(ClientSession clientSession, String address) {
+            this.clientSession = clientSession;
             this.address = address;
         }
+
         /**
          * 执行命令并返回结果，可以执行多次
          * @param cmd
@@ -277,56 +203,47 @@ public class SSHTemplate {
          * @return 如果lineProcessor不为null,那么永远返回Result.true
          */
         public Result executeCommand(String cmd, LineProcessor lineProcessor, int timoutMillis) {
-            Session session = null;
-            try {
-                session = conn.openSession();
-                return executeCommand(session, cmd, timoutMillis, lineProcessor);
-            } catch (Exception e) {
-                logger.error("ip:{} cmd:{} {}",conn.getHostname(),cmd, e);
-                return new Result(e);
-            } finally {
-                close(session);
-            }
-        }
-
-        public Result executeCommand(final Session session, final String cmd,
-                                     final int timoutMillis, final LineProcessor lineProcessor) throws Exception{
-            Future<Result> future = taskPool.submit(new Callable<Result>() {
-                public Result call() throws Exception {
-                    session.execCommand(cmd);
-                    //如果客户端需要进行行处理，则直接进行回调
-                    if(lineProcessor != null) {
-                        processStream(session.getStdout(), lineProcessor);
-                    } else {
-                        //获取标准输出
-                        String rst = getResult(session.getStdout());
-                        if(rst != null) {
-                            return new Result(true, rst);
-                        }
-                        //返回为null代表可能有异常，需要检测标准错误输出，以便记录日志
-                        Result errResult = tryLogError(session.getStderr(), cmd);
-                        if(errResult != null) {
-                            return errResult;
-                        }
+            try (ByteArrayOutputStream stdout = new ByteArrayOutputStream();
+                 ByteArrayOutputStream stderr = new ByteArrayOutputStream();
+                 ClientChannel channel = clientSession.createExecChannel(cmd)) {
+                channel.setOut(stdout);
+                channel.setErr(stderr);
+                channel.open().verify(timoutMillis);
+                // Wait (forever) for the channel to close - signalling command finished
+                channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), 0L);
+                LineProcessor tmpLP = lineProcessor;
+                // 如果客户端需要进行行处理，则直接进行回调
+                if (tmpLP != null) {
+                    processStream(new ByteArrayInputStream(stdout.toByteArray()), tmpLP);
+                } else {
+                    StringBuilder buffer = new StringBuilder();
+                    tmpLP = generateDefaultLineProcessor(buffer);
+                    processStream(new ByteArrayInputStream(stdout.toByteArray()), tmpLP);
+                    if (buffer.length() > 0) {
+                        return new Result(true, buffer.toString());
                     }
-                    return new Result(true, null);
                 }
-            });
-            Result rst = null;
-            try {
-                rst = future.get(timoutMillis, TimeUnit.MILLISECONDS);
-                future.cancel(true);
-            } catch (TimeoutException e) {
-                logger.error("ip :{} exec {} timeout:{}",conn.getHostname(), cmd, timoutMillis);
-                throw new SSHException(e);
+                if(tmpLP.lineNum() == 0) {
+                    // 返回为null代表可能有异常，需要检测标准错误输出，以便记录日志
+                    Result errResult = tryLogError(new ByteArrayInputStream(stderr.toByteArray()), cmd);
+                    if (errResult != null) {
+                        return errResult;
+                    }
+                }
+                return new Result(true, null);
+            } catch (Exception e) {
+                logger.error("execute ip:{} cmd:{}", address, cmd, e);
+                return new Result(e);
             }
-            return rst;
         }
 
         private Result tryLogError(InputStream is, String cmd) {
-            String errInfo = getResult(is);
-            if(errInfo != null) {
-                logger.error("address "+address+" execute cmd:({}), err:{}", cmd, errInfo);
+            StringBuilder buffer = new StringBuilder();
+            LineProcessor lp = generateDefaultLineProcessor(buffer);
+            processStream(is, lp);
+            String errInfo = buffer.length() > 0 ? buffer.toString() : null;
+            if (errInfo != null) {
+                logger.error("address " + address + " execute cmd:({}), err:{}", cmd, errInfo);
                 return new Result(false, errInfo);
             }
             return null;
@@ -337,7 +254,7 @@ public class SSHTemplate {
          * creating the file on the remote side.
          * @param localFiles
          *            Path and name of local file.
-         * @param remoteFiles
+         * @param remoteFile
          *            name of remote file.
          * @param remoteTargetDirectory
          *            Remote target directory. Use an empty string to specify the default directory.
@@ -345,15 +262,44 @@ public class SSHTemplate {
          *            a four digit string (e.g., 0644, see "man chmod", "man open")
          * @throws IOException
          */
-        public Result scp(String[] localFiles, String[] remoteFiles, String remoteTargetDirectory, String mode) {
+        public Result scp(String[] localFiles, String remoteFile, String remoteTargetDirectory, String mode) {
             try {
-                SCPClient client = conn.createSCPClient();
-                client.put(localFiles, remoteFiles, remoteTargetDirectory, mode);
-
+                ScpClient client = ScpClientCreator.instance().createScpClient(clientSession);
+                String separator = FileSystems.getDefault().getSeparator();
+                if(localFiles.length == 1){
+                    if(StringUtils.isBlank(remoteFile)){
+                        client.upload(localFiles, remoteTargetDirectory, ScpClient.Option.TargetIsDirectory);
+                        int index = localFiles[0].lastIndexOf(separator);
+                        if(index <= 0){
+                            index = 0;
+                        }else{
+                            index = index + 1;
+                        }
+                        String fileName = localFiles[0].substring(index);
+                        clientSession.executeRemoteCommand("chmod " + mode + " \"" + remoteTargetDirectory + "/" + fileName + "\"");
+                    } else {
+                        client.upload(localFiles, remoteTargetDirectory + "/" + remoteFile);
+                        clientSession.executeRemoteCommand("chmod " + mode + " \"" + remoteTargetDirectory + "/" + remoteFile + "\"");
+                    }
+                } else {
+                    client.upload(localFiles, remoteTargetDirectory, ScpClient.Option.TargetIsDirectory);
+                    StringBuffer sb = new StringBuffer();
+                    List<String> files = Arrays.asList(localFiles);
+                    String remoteFiles = files.stream().map(file -> {
+                        int index = file.lastIndexOf(separator);
+                        if(index <= 0){
+                            index = 0;
+                        }else{
+                            index = index + 1;
+                        }
+                        return " \"" + remoteTargetDirectory + "/" + file.substring(index) + "\"";
+                    }).collect(Collectors.joining(" "));
+                    clientSession.executeRemoteCommand("chmod " + mode + " " + remoteFiles);
+                }
                 return new Result(true);
             } catch (Exception e) {
-                logger.error("scp local="+Arrays.toString(localFiles)+" to "+
-                        remoteTargetDirectory+" remote="+Arrays.toString(remoteFiles)+" err", e);
+                logger.error("scp local="+Arrays.toString(localFiles) + " to " +
+                        remoteTargetDirectory + " remote=" + remoteFile + " err", e);
                 return new Result(e);
             }
         }
@@ -373,7 +319,7 @@ public class SSHTemplate {
             return scpToFile(localFile, remoteFile, remoteTargetDirectory, "0744");
         }
         public Result scpToFile(String localFile, String remoteFile, String remoteTargetDirectory, String mode) {
-            return scp(new String[] { localFile }, new String[] { remoteFile }, remoteTargetDirectory, "0744");
+            return scp(new String[] { localFile }, remoteFile, remoteTargetDirectory, "0744");
         }
     }
 
@@ -384,13 +330,16 @@ public class SSHTemplate {
         private boolean success;
         private String result;
         private Exception excetion;
+
         public Result(boolean success) {
             this.success = success;
         }
+
         public Result(boolean success, String result) {
             this.success = success;
             this.result = result;
         }
+
         public Result(Exception excetion) {
             this.success = false;
             this.excetion = excetion;
@@ -399,21 +348,27 @@ public class SSHTemplate {
         public Exception getExcetion() {
             return excetion;
         }
+
         public void setExcetion(Exception excetion) {
             this.excetion = excetion;
         }
+
         public boolean isSuccess() {
             return success;
         }
+
         public void setSuccess(boolean success) {
             this.success = success;
         }
+
         public String getResult() {
             return result;
         }
+
         public void setResult(String result) {
             this.result = result;
         }
+
         @Override
         public String toString() {
             return "Result [success=" + success + ", result=" + result
@@ -435,7 +390,7 @@ public class SSHTemplate {
     /**
      * 从流中直接解析数据
      */
-    public static interface LineProcessor{
+    public static interface LineProcessor {
         /**
          * 处理行
          * @param line  内容
@@ -445,12 +400,29 @@ public class SSHTemplate {
         void process(String line, int lineNum) throws Exception;
 
         /**
+         * 返回内容的行数，如果为0需要检测错误流
+         * @return
+         */
+        int lineNum();
+
+        /**
          * 所有的行处理完毕回调该方法
          */
         void finish();
     }
 
-    public static abstract class DefaultLineProcessor implements LineProcessor{
+    public static abstract class DefaultLineProcessor implements LineProcessor {
+        protected int lineNum;
+
+        @Override
+        public int lineNum() {
+            return lineNum;
+        }
+
+        public void setLineNum(int lineNum) {
+            this.lineNum = lineNum;
+        }
+
         public void finish() {}
     }
 }

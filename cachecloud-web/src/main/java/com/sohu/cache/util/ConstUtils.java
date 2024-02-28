@@ -254,6 +254,7 @@ public class ConstUtils {
     public static int LIST_MAX_LENGTH = DEFAULT_LIST_MAX_LENGTH;
     public static int SET_MAX_LENGTH = DEFAULT_SET_MAX_LENGTH;
     public static int ZSET_MAX_LENGTH = DEFAULT_ZSET_MAX_LENGTH;
+    public static int SSH_CONNECTION_TIMEOUT = 5000;
 
     public static String getRedisMigrateToolCmd(String name) {
         return ConstUtils.getRedisToolDir(name) + "src/redis-migrate-tool";

@@ -43,7 +43,7 @@ public interface SSHService {
      * @return
      * @throws SSHException
      */
-    SSHTemplate.Result executeWithResult(String ip, int port, String username, String password, final String command,int timeoutMills) throws SSHException;
+    SSHTemplate.Result executeWithResult(String ip, int port, String username, String password, final String command, int timeoutMills) throws SSHException;
 
     /**
      * 拷贝文件到远程目录
@@ -57,7 +57,7 @@ public interface SSHService {
      * @throws SSHException
      */
     SSHTemplate.Result scpFileToRemote(String ip, int port, String username,
-            String password, final String localPath, final String remoteDir) throws SSHException;
+                                           String password, final String localPath, final String remoteDir) throws SSHException;
 
     /**
      * 拷贝文件到远程目录
@@ -94,7 +94,7 @@ public interface SSHService {
      * @return
      * @throws SSHException
      */
-    SSHTemplate.Result executeWithResult(String ip, String cmd,int millsSecond) throws SSHException;
+    SSHTemplate.Result executeWithResult(String ip, String cmd, int millsSecond) throws SSHException;
 
     /**
      * 查看机器ip上的端口port是否已被占用；

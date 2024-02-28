@@ -49,6 +49,7 @@
         <springfox-swagger2.version>2.9.2</springfox-swagger2.version>
         <swagger-ui.version>2.9.2</swagger-ui.version>
         <apache.ant.version>1.10.11</apache.ant.version>
+        <ssh-version>2.9.2</ssh-version>
     </properties>
 
     <dependencyManagement>
@@ -115,16 +116,15 @@
 
             <!-- SSH远程 -->
             <dependency>
-                <groupId>ch.ethz.ganymed</groupId>
-                <artifactId>ganymed-ssh2</artifactId>
-                <version>${ganymed.ssh.version}</version>
+                <groupId>org.apache.sshd</groupId>
+                <artifactId>sshd-core</artifactId>
+                <version>${ssh-version}</version>
             </dependency>
 
-            <!-- ssh -->
             <dependency>
-                <groupId>com.hierynomus</groupId>
-                <artifactId>sshj</artifactId>
-                <version>${sshj.version}</version>
+                <groupId>org.apache.sshd</groupId>
+                <artifactId>sshd-scp</artifactId>
+                <version>${ssh-version}</version>
             </dependency>
 
             <dependency>

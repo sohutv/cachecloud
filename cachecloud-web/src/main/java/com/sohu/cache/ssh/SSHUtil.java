@@ -4,7 +4,6 @@ import com.google.common.collect.Maps;
 import com.sohu.cache.entity.MachineStats;
 import com.sohu.cache.exception.IllegalParamException;
 import com.sohu.cache.exception.SSHException;
-import com.sohu.cache.ssh.SSHTemplate;
 import com.sohu.cache.ssh.SSHTemplate.DefaultLineProcessor;
 import com.sohu.cache.ssh.SSHTemplate.Result;
 import com.sohu.cache.ssh.SSHTemplate.SSHCallback;
@@ -16,7 +15,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.text.DecimalFormat;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -29,6 +31,7 @@ import static com.sohu.cache.constant.SymbolConstant.COMMA;
 /**
  * Created by yijunzhang on 14-6-20.
  */
+@Component
 public class SSHUtil {
     private static final Logger logger = LoggerFactory.getLogger(SSHUtil.class);
 
@@ -44,8 +47,16 @@ public class SSHUtil {
     private final static String MEM_BUFFERS = "Buffers";
     private final static String MEM_CACHED = "Cached";
 
+    @Autowired
+    private SSHTemplate sshTemplate;
+
     //使用 @SSHTemplate 重构SSHUtil
-    private final static SSHTemplate sshTemplate = new SSHTemplate();
+    private static SSHTemplate sshTemplateNew;
+
+    @PostConstruct
+    private void initSSHTemplate(){
+        sshTemplateNew = sshTemplate;
+    }
 
     /**
      * Get HostPerformanceEntity[cpuUsage, memUsage, load] by ssh.<br>
@@ -70,7 +81,7 @@ public class SSHUtil {
         final MachineStats machineStats = new MachineStats();
         machineStats.setIp(ip);
 
-        sshTemplate.execute(ip, port, userName, password, session -> {
+        sshTemplateNew.execute(ip, port, userName, password, session -> {
             //解析top命令
             session.executeCommand(COMMAND_CPU_MEM_DF, new DefaultLineProcessor() {
                 private String totalMem;
@@ -169,7 +180,7 @@ public class SSHUtil {
         }
         port = IntegerUtil.defaultIfSmallerThan0(port, ConstUtils.SSH_PORT_DEFAULT);
 
-        Result rst = sshTemplate.execute(ip, port, username, password, new SSHCallback() {
+        Result rst = sshTemplateNew.execute(ip, port, username, password, new SSHCallback() {
             public Result call(SSHSession session) {
                 return session.executeCommand(command);
             }
@@ -189,7 +200,7 @@ public class SSHUtil {
         }
         port = IntegerUtil.defaultIfSmallerThan0(port, ConstUtils.SSH_PORT_DEFAULT);
 
-        Result rst = sshTemplate.execute(ip, port, username, password, new SSHCallback() {
+        Result rst = sshTemplateNew.execute(ip, port, username, password, new SSHCallback() {
             public Result call(SSHSession session) {
                 return session.executeCommand(command, timeout);
             }
@@ -212,7 +223,7 @@ public class SSHUtil {
      */
     public static boolean scpFileToRemote(String ip, int port, String username,
                                           String password, final String localPath, final String remoteDir) throws SSHException {
-        Result rst = sshTemplate.execute(ip, port, username, password, new SSHCallback() {
+        Result rst = sshTemplateNew.execute(ip, port, username, password, new SSHCallback() {
             public Result call(SSHSession session) {
                 return session.scpToDir(localPath, remoteDir);
             }

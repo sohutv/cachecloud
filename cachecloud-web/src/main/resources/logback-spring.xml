@@ -131,8 +131,8 @@
             <appender-ref ref="quartzAppender"/>
         </logger>
 
-        <logger name="net.schmizz.sshj.transport.TransportImpl" level="off"/>
-        <logger name="net.schmizz.sshj.transport.random.BouncyCastleRandom" level="off"/>
+        <!--<logger name="net.schmizz.sshj.transport.TransportImpl" level="off"/>
+        <logger name="net.schmizz.sshj.transport.random.BouncyCastleRandom" level="off"/>-->
     </springProfile>
 
 
