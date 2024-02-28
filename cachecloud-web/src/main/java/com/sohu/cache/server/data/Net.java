@@ -30,7 +30,7 @@ public class Net implements LineParser{
 			String[] items = line.split(",");
 			if(items[1].startsWith("Network")) {
 				for(int i = 0; i < items.length; ++i) {
-					if(items[i].startsWith("eth")) {
+					if(items[i].startsWith("eth") || items[i].startsWith("ens") items[i].startsWith("enp")) {
 						NetworkInterfaceCard nic = new NetworkInterfaceCard();
 						nic.setName(items[i]);
 						nic.setIdx(i);
