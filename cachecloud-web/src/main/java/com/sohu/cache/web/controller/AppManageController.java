@@ -656,7 +656,10 @@ public class AppManageController extends BaseController {
         logger.info("pikaMachines:{} ,num:{} ", pikaMachines, pikaNum);
         logger.info("moduleinfos:{} ", moduleinfos);
         try {
-            List<String> appDeployInfolist = Arrays.asList(appDeployInfo.split("\n"));
+            List<String> appDeployInfolist = new ArrayList<>();
+            if(StringUtils.isNotEmpty(appDeployInfo)){
+                appDeployInfolist = Arrays.asList(appDeployInfo.split("\n"));
+            }
             List<String> redisMachinelist = Arrays.asList(redisMachines.split(";"));
             List<String> sentinelMachinelist = Arrays.asList(sentinelMachines.split(";"));
             List<String> twemproxyMachinelist = Arrays.asList(twemproxyMachines.split(";"));
