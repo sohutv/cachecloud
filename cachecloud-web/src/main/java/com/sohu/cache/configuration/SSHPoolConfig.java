@@ -1,5 +1,6 @@
 package com.sohu.cache.configuration;
 
+import com.sohu.cache.ssh.SSHMachineInfo;
 import com.sohu.cache.ssh.SSHSessionPooledObjectFactory;
 import org.apache.commons.pool2.impl.GenericKeyedObjectPool;
 import org.apache.commons.pool2.impl.GenericKeyedObjectPoolConfig;
@@ -24,7 +25,7 @@ public class SSHPoolConfig {
      * @return
      */
     @Bean
-    public GenericKeyedObjectPool<String, ClientSession> clientSessionPool() throws GeneralSecurityException, IOException {
+    public GenericKeyedObjectPool<SSHMachineInfo, ClientSession> clientSessionPool() throws GeneralSecurityException, IOException {
         GenericKeyedObjectPoolConfig genericKeyedObjectPoolConfig = new GenericKeyedObjectPoolConfig();
         genericKeyedObjectPoolConfig.setTestWhileIdle(true);
         genericKeyedObjectPoolConfig.setTestOnReturn(true);
@@ -35,7 +36,7 @@ public class SSHPoolConfig {
         genericKeyedObjectPoolConfig.setTimeBetweenEvictionRunsMillis(20000);
         genericKeyedObjectPoolConfig.setJmxEnabled(false);
         SSHSessionPooledObjectFactory factory = new SSHSessionPooledObjectFactory();
-        GenericKeyedObjectPool<String, ClientSession> genericKeyedObjectPool = new GenericKeyedObjectPool<>(
+        GenericKeyedObjectPool<SSHMachineInfo, ClientSession> genericKeyedObjectPool = new GenericKeyedObjectPool<>(
                 factory,
                 genericKeyedObjectPoolConfig);
         return genericKeyedObjectPool;

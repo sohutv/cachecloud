@@ -6,11 +6,16 @@ import org.apache.commons.pool2.KeyedPooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.apache.sshd.client.session.ClientSession;
+import org.apache.sshd.common.config.keys.loader.KeyPairResourceLoader;
+import org.apache.sshd.common.util.security.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -19,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  * @Auther: yongfeigao
  * @Date: 2023/10/20
  */
-public class SSHSessionPooledObjectFactory implements KeyedPooledObjectFactory<String, ClientSession> {
+public class SSHSessionPooledObjectFactory implements KeyedPooledObjectFactory<SSHMachineInfo, ClientSession> {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -38,45 +43,53 @@ public class SSHSessionPooledObjectFactory implements KeyedPooledObjectFactory<S
     }
 
     @Override
-    public PooledObject<ClientSession> makeObject(String ip) throws Exception {
+    public PooledObject<ClientSession> makeObject(SSHMachineInfo sshMachineInfo) throws Exception {
         int port = ConstUtils.SSH_PORT_DEFAULT;
-        ClientSession session = sshClient.getClient().connect(ConstUtils.USERNAME, ip,
+        ClientSession session = sshClient.getClient().connect(ConstUtils.USERNAME, sshMachineInfo.getIp(),
                 port).verify(ConstUtils.SSH_CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS).getSession();
+        session.setUsername(sshMachineInfo.getUsername());
+        if(sshMachineInfo.getAuthType() == SshAuthTypeEnum.PASSWORD.getValue()){
+            session.addPasswordIdentity(sshMachineInfo.getPassword());
+        }else if(sshMachineInfo.getAuthType() == SshAuthTypeEnum.PUBLIC_KEY.getValue()){
+            KeyPairResourceLoader loader = SecurityUtils.getKeyPairResourceParser();
+            Collection<KeyPair> keys = loader.loadKeyPairs(null, Paths.get(ConstUtils.PUBLIC_KEY_PEM), null);
+            session.addPublicKeyIdentity(keys.iterator().next());
+        }
         session.auth().verify(ConstUtils.SSH_CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS);
-        logger.info("create object, key:{}", ip);
+        logger.info("create object, key:{}", sshMachineInfo);
         return new DefaultPooledObject<>(session);
     }
 
     @Override
-    public void destroyObject(String ip, PooledObject<ClientSession> pooledObject) throws Exception {
+    public void destroyObject(SSHMachineInfo sshMachineInfo, PooledObject<ClientSession> pooledObject) throws Exception {
         ClientSession clientSession = pooledObject.getObject();
         if (clientSession != null) {
             try {
                 clientSession.close();
             } catch (Exception e) {
-                logger.warn("close err, key:{}", ip, e);
+                logger.warn("close err, key:{}", sshMachineInfo, e);
             }
         }
-        logger.info("destroy object {}", ip);
+        logger.info("destroy object {}", sshMachineInfo);
     }
 
     @Override
-    public boolean validateObject(String ip, PooledObject<ClientSession> pooledObject) {
+    public boolean validateObject(SSHMachineInfo sshMachineInfo, PooledObject<ClientSession> pooledObject) {
         boolean closed = pooledObject.getObject().isClosed();
         if (closed) {
-            logger.warn("{} session closed", ip);
+            logger.warn("{} session closed", sshMachineInfo);
             return false;
         }
         return true;
     }
 
     @Override
-    public void activateObject(String ip, PooledObject<ClientSession> pooledObject) throws Exception {
+    public void activateObject(SSHMachineInfo sshMachineInfo, PooledObject<ClientSession> pooledObject) throws Exception {
 
     }
 
     @Override
-    public void passivateObject(String ip, PooledObject<ClientSession> pooledObject) throws Exception {
+    public void passivateObject(SSHMachineInfo sshMachineInfo, PooledObject<ClientSession> pooledObject) throws Exception {
 
     }
 }

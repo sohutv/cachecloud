@@ -2,14 +2,11 @@ package com.sohu.cache.ssh;
 
 import com.sohu.cache.exception.SSHException;
 import com.sohu.cache.util.ConstUtils;
-import com.sohu.cache.web.enums.SshAuthTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.pool2.impl.GenericKeyedObjectPool;
 import org.apache.sshd.client.channel.ClientChannel;
 import org.apache.sshd.client.channel.ClientChannelEvent;
 import org.apache.sshd.client.session.ClientSession;
-import org.apache.sshd.common.config.keys.loader.KeyPairResourceLoader;
-import org.apache.sshd.common.util.security.SecurityUtils;
 import org.apache.sshd.scp.client.ScpClient;
 import org.apache.sshd.scp.client.ScpClientCreator;
 import org.slf4j.Logger;
@@ -24,11 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.FileSystems;
-import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
-import java.security.KeyPair;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,7 +38,7 @@ public class SSHTemplate {
             PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE, PosixFilePermission.GROUP_READ, PosixFilePermission.OTHERS_READ);
 
     @Autowired
-    private GenericKeyedObjectPool<String, ClientSession> clientSessionPool;
+    private GenericKeyedObjectPool<SSHMachineInfo, ClientSession> clientSessionPool;
 
     private static final int CONNCET_TIMEOUT = 5000;
 
@@ -67,21 +61,15 @@ public class SSHTemplate {
     public Result execute(String ip, int port, String username, String password,
     		SSHCallback callback) throws SSHException{
         ClientSession session = null;
+        SSHMachineInfo sshMachineInfo = SSHMachineInfo.builder().ip(ip).username(username)
+                .authType(ConstUtils.SSH_AUTH_TYPE).password(password).build();
         try {
-            session = clientSessionPool.borrowObject(ip);
-            session.setUsername(username);
-            if (ConstUtils.SSH_AUTH_TYPE == SshAuthTypeEnum.PASSWORD.getValue()) {
-                session.addPasswordIdentity(password);
-            } else if (ConstUtils.SSH_AUTH_TYPE == SshAuthTypeEnum.PUBLIC_KEY.getValue()) {
-                KeyPairResourceLoader loader = SecurityUtils.getKeyPairResourceParser();
-                Collection<KeyPair> keys = loader.loadKeyPairs(null, Paths.get(ConstUtils.PUBLIC_KEY_PEM), null);
-                session.addPublicKeyIdentity(keys.iterator().next());
-            }
+            session = clientSessionPool.borrowObject(sshMachineInfo);
             return callback.call(new SSHSession(session, ip));
         } catch (Exception e) {
             throw new SSHException("SSH exception: " + e.getMessage(), e);
         } finally {
-            close(ip, session);
+            close(sshMachineInfo, session);
         }
     }
 
@@ -154,10 +142,10 @@ public class SSHTemplate {
         }
     }
 
-    private void close(String ip, ClientSession session) {
+    private void close(SSHMachineInfo sshMachineInfo, ClientSession session) {
         if (session != null) {
             try {
-                clientSessionPool.returnObject(ip, session);
+                clientSessionPool.returnObject(sshMachineInfo, session);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }
