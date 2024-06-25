@@ -4,6 +4,8 @@ import org.apache.ibatis.annotations.Param;
 
 import com.sohu.cache.entity.AppAuditLog;
 
+import java.util.List;
+
 
 /**
  * 应用审批日志记录
@@ -21,6 +23,6 @@ public interface AppAuditLogDao {
      * @param type
      * @return
      */
-    public AppAuditLog getAuditByType(@Param("appAuditId") Long appAuditId, @Param("type") int type);
+    public List<AppAuditLog> getAuditByType(@Param("appAuditId") Long appAuditId, @Param("type") int type);
 
 }

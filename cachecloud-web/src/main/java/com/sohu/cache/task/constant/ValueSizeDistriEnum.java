@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 值分布debug object序列化后的
+ * 值分布memory usage 结果
  *
  * @author fulei
  */

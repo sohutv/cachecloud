@@ -8,11 +8,11 @@ import java.util.Map;
  */
 public enum AppTypeEnum {
     TWEMPROXY(1, "twemproxy"),
-    REDIS_CLUSTER(2, "redis-cluster"),
+    REDIS_CLUSTER(2, "Redis-Cluster"),
     CODIS(3, "codis"),
     PIKA(4, "pika"),
-    REDIS_SENTINEL(5, "redis-sentinel"),
-    REDIS_STANDALONE(6, "redis-standalone"),
+    REDIS_SENTINEL(5, "Redis-Sentinel"),
+    REDIS_STANDALONE(6, "Redis-Standalone"),
     MEMCACHED(7, "memcached"),
     PIKA_SENTINEL(8, "pika-sentinel");
 

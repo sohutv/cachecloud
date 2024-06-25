@@ -1,0 +1,164 @@
+  <#if user??>
+    <#assign userIdValue = user.id>
+    <#assign nameValue = user.name!>
+    <#assign chNameValue = user.chName!>
+    <#assign emailValue = user.email!>
+    <#assign mobileValue = user.mobile!>
+    <#assign weChatValue = (user.weChat!)>
+    <#assign companyValue = (user.company!)>
+    <#assign purposeValue = (user.purpose!)>
+    <#if user.type??>
+      <#assign userTypeValue = (user.type)>
+    </#if>
+    <#if user.bizId??>
+      <#assign userBizValue = (user.bizId)>
+    </#if>
+    <#if user.isAlert??>
+      <#assign isAlertValue = (user.isAlert)>
+    </#if>
+  <#else>
+    <#assign userIdValue = ''>
+    <#assign nameValue = ''>
+    <#assign chNameValue = ''>
+    <#assign emailValue = ''>
+    <#assign mobileValue = ''>
+    <#assign weChatValue = ''>
+    <#assign companyValue = ''>
+    <#assign purposeValue = ''>
+  </#if>
+
+  <div id="addUserModal${userIdValue!}" class="modal fade" tabindex="-1" data-width="400">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">管理用户</h4>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+          </div>
+
+          <form class="form-horizontal form-bordered form-row-stripped">
+            <div class="modal-body">
+              <div class="row">
+                <!-- 控件开始 -->
+                <div class="col-md-12">
+                  <!-- form-body开始 -->
+                  <div class="form-body">
+                    <div class="form-group row">
+                      <label class="col-form-label col-md-3 text-end">
+                        域账户名:
+                      </label>
+                      <div class="col-md-7">
+                        <input type="text" name="name" id="user_name${userIdValue!}"
+                             value="${nameValue!}" placeholder="域账户名(邮箱前缀)"
+                             class="form-control" />
+                      </div>
+                    </div>
+
+                    <div class="form-group row">
+                      <label class="col-form-label col-md-3 text-end">
+                        中文名:
+                      </label>
+                      <div class="col-md-7">
+                        <input type="text" name="chName" id="chName${userIdValue!}"
+                             value="${chNameValue!}" placeholder="中文名"
+                             class="form-control" />
+                      </div>
+                    </div>
+
+                    <div class="form-group row">
+                      <label class="col-form-label col-md-3 text-end">
+                        邮箱:
+                      </label>
+                      <div class="col-md-7">
+
+                        <input type="text" name="email" id="email${userIdValue!}"
+                             value="${emailValue!}" placeholder="邮箱"
+                             class="form-control" />
+                      </div>
+                    </div>
+
+                    <div class="form-group row">
+                      <label class="col-form-label col-md-3 text-end">
+                        手机:
+                      </label>
+                      <div class="col-md-7">
+
+                        <input type="text" name="mobile" id="mobile${userIdValue!}"
+                             value="${mobileValue!}" placeholder="手机"
+                             class="form-control" />
+                      </div>
+                    </div>
+
+                    <div class="form-group row">
+                      <label class="col-form-label col-md-3 text-end">
+                        微信:
+                      </label>
+                      <div class="col-md-7">
+
+                        <input type="text" name="weChat" id="weChat${userIdValue!}"
+                             value="${weChatValue!}" placeholder="微信"
+                             class="form-control" />
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-form-label col-md-3 text-end">
+                        类型:
+                      </label>
+                      <div class="col-md-7">
+                        <select name="type" id="type${userIdValue!}" class="form-select select2_category">
+                          <option value="0" <#if userTypeValue?? && (userTypeValue == 0)>selected="selected"</#if>>
+                          管理员
+                          </option>
+                          <option value="2" <#if userTypeValue?? && (userTypeValue == 2)>selected="selected"</#if>>
+                          普通用户
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-form-label col-md-3 text-end">
+                        是否收报警:
+                      </label>
+                      <div class="col-md-7">
+                        <select name="isAlert" id="isAlert${userIdValue!}" class="form-select select2_category">
+                          <option value="1" <#if isAlertValue?? && (isAlertValue == 1)>selected</#if>>
+                          是
+                          </option>
+                          <option value="0" <#if isAlertValue?? && (isAlertValue == 0)>selected</#if>>
+                          否
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <#if bizList?? && bizList?size gt 0>
+                      <div class="form-group row">
+                        <label class="col-form-label col-md-3 text-end">
+                          所属业务组:
+                        </label>
+                        <div class="col-md-7">
+                          <select id="bizId${userIdValue!}" name="bizId" class="form-select select2_category">
+                            <option value="">业务组</option>
+                            <#list bizList as biz>
+                              <option value="${biz.id}" <#if userBizValue?? && (biz.id == userBizValue)>selected</#if>>${biz.name}</option>
+                            </#list>
+                            </select>
+                        </div>
+                      </div>
+                    </#if>
+                    <input type="hidden" id="userId${userIdValue!}" name="userId" value="${userIdValue!}"/>
+                  </div>
+                  <!-- form-body 结束 -->
+                </div>
+                <div id="info{userIdValue!}"></div>
+                <!-- 控件结束 -->
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" data-bs-dismiss="modal" class="btn btn-secondary" >Close</button>
+              <button type="button" id="userBtn${userIdValue!}" class="btn btn-danger" onclick="saveOrUpdateUser('${userIdValue!}', '${request.contextPath}')">Ok</button>
+            </div>
+          </form>
+
+        </div>
+      </div>
+</div>

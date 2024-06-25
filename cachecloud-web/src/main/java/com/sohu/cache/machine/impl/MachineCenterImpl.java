@@ -32,7 +32,6 @@ import com.sohu.cache.web.enums.AlertTypeEnum;
 import com.sohu.cache.web.service.AppAlertRecordService;
 import com.sohu.cache.web.vo.MachineEnv;
 import com.sohu.cache.web.vo.MachineStatsVo;
-import com.sohu.cache.web.vo.ModuleVersionDetailVo;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -94,8 +93,6 @@ public class MachineCenterImpl implements MachineCenter {
     private AppAlertRecordService appAlertRecordService;
     @Autowired
     private ReportDataComponent reportDataComponent;
-    @Autowired
-    private ModuleDao moduleDao;
 
     /**
      * 邮箱报警
@@ -370,11 +367,19 @@ public class MachineCenterImpl implements MachineCenter {
      */
     @Override
     public Integer getAvailablePort(final String ip, final int type) {
-
-        Integer availablePort = PortGenerator.getRedisPort(ip);
-        // 去实例表中再check一下，该端口是否从来没被使用过
-        while (instanceDao.getCountByIpAndPort(ip, availablePort) > 0) {
-            availablePort++;
+        Integer availablePort = null;
+        if (type == ConstUtils.CACHE_REDIS_STANDALONE || type == ConstUtils.CACHE_TYPE_REDIS_CLUSTER) {
+            availablePort = PortGenerator.getRedisPort(ip);
+            // 去实例表中再check一下，该端口是否从来没被使用过
+            while (instanceDao.getCountByIpAndPort(ip, availablePort) > 0) {
+                availablePort++;
+            }
+        } else if (type == ConstUtils.CACHE_REDIS_SENTINEL) {
+            availablePort = PortGenerator.getRedisSentinelPort(ip);
+            // 去实例表中再check一下，该端口是否从来没被使用过
+            while (instanceDao.getCountByIpAndPort(ip, availablePort) > 0) {
+                availablePort++;
+            }
         }
         return availablePort;
     }
@@ -630,10 +635,19 @@ public class MachineCenterImpl implements MachineCenter {
     public MachineStats getMachineMemoryDetail(String ip) {
         long applyMem = 0;
         long usedMem = 0;
+        long usedMemRss = 0;
+        long usedDisk = 0;
         List<InstanceStats> instanceStats = instanceStatsDao.getInstanceStatsByIp(ip);
         for (InstanceStats instance : instanceStats) {
             applyMem += instance.getMaxMemory();
             usedMem += instance.getUsedMemory();
+            double memFragmentationRatio = instance.getMemFragmentationRatio();
+            if (memFragmentationRatio > 1d) {
+                usedMemRss += instance.getUsedMemory() * memFragmentationRatio;
+            } else {
+                usedMemRss += instance.getUsedMemory();
+            }
+            usedDisk += instance.getUsedDisk();
         }
 
         MachineStats machineStats = machineStatsDao.getMachineStatsByIp(ip);
@@ -650,6 +664,8 @@ public class MachineCenterImpl implements MachineCenter {
         machineMemInfo.setIp(ip);
         machineMemInfo.setApplyMem(applyMem);
         machineMemInfo.setUsedMem(usedMem);
+        machineMemInfo.setUsedMemRss(usedMemRss);
+        machineMemInfo.setUsedDisk(usedDisk);
         machineStats.setMachineMemInfo(machineMemInfo);
 
         int memoryHost = instanceDao.getMemoryByHost(ip);
@@ -828,6 +844,11 @@ public class MachineCenterImpl implements MachineCenter {
         return resultMap;
     }
 
+    public int getMachineNum(int type) {
+        List<MachineInfo> machineInfoList = machineDao.getMachineInfoByType(type);
+        return machineInfoList.size();
+    }
+
     @Override
     public List<MachineStatsVo> getmachineStatsVoList() {
         List<MachineInfo> machineInfoList = machineDao.getAllMachines();
@@ -847,8 +868,10 @@ public class MachineCenterImpl implements MachineCenter {
         }
 
         Map<String, MachineStatsVo> machineRoomMachineStatsVoMap = new HashMap<String, MachineStatsVo>();
+        Set<String> realIpSet = new HashSet<>();
         for (MachineInfo machineInfo : machineInfoList) {
             String ip = machineInfo.getIp();
+            String realIp = machineInfo.getRealIp();
 
             //机器统计
             MachineStats machineStats = machineStatsMap.get(ip);
@@ -866,6 +889,21 @@ public class MachineCenterImpl implements MachineCenter {
             }
             long instanceMaxMemory = machineInstanceStat.getMaxMemory();
             long instanceUsedmemory = machineInstanceStat.getUsedMemory();
+            long instanceApplyDisk = machineInstanceStat.getApplyDisk();
+            long instanceUsedDisk = machineInstanceStat.getUsedDisk();
+            String diskTotal = machineStats.getDiskTotal();
+            String diskAvailable = machineStats.getDiskAvailable();
+            long machineDiskTotal = 0;
+            long machineDiskAvailable = 0;
+            if (StringUtils.isEmpty(realIp) || !realIpSet.contains(realIp)) {
+                if (StringUtils.isNotEmpty(diskTotal)) {
+                    machineDiskTotal = Long.parseLong(diskTotal);
+                }
+                if (StringUtils.isNotEmpty(diskAvailable)) {
+                    machineDiskAvailable = Long.parseLong(diskAvailable);
+                }
+            }
+            realIpSet.add(realIp);
 
             String machineRoom = machineInfo.getRoom();
             if (machineRoomMachineStatsVoMap.containsKey(machineRoom)) {
@@ -874,6 +912,11 @@ public class MachineCenterImpl implements MachineCenter {
                 machineStatsVo.setTotalMachineFreeMem(machineFreeTotal + machineStatsVo.getTotalMachineFreeMem());
                 machineStatsVo.setTotalInstanceMaxMem(instanceMaxMemory + machineStatsVo.getTotalInstanceMaxMem());
                 machineStatsVo.setTotalInstanceUsedMem(instanceUsedmemory + machineStatsVo.getTotalInstanceUsedMem());
+
+                machineStatsVo.setTotalMachineDisk(machineDiskTotal + machineStatsVo.getTotalMachineDisk());
+                machineStatsVo.setTotalMachineFreeDisk(machineDiskAvailable + machineStatsVo.getTotalMachineFreeDisk());
+                machineStatsVo.setTotalInstanceApplyDisk(instanceApplyDisk + machineStatsVo.getTotalInstanceApplyDisk());
+                machineStatsVo.setTotalInstanceUsedDisk(instanceUsedDisk + machineStatsVo.getTotalInstanceUsedDisk());
             } else {
                 MachineStatsVo machineStatsVo = new MachineStatsVo();
                 machineStatsVo.setMachineRoom(machineRoom);
@@ -881,6 +924,11 @@ public class MachineCenterImpl implements MachineCenter {
                 machineStatsVo.setTotalMachineFreeMem(machineFreeTotal);
                 machineStatsVo.setTotalInstanceMaxMem(instanceMaxMemory);
                 machineStatsVo.setTotalInstanceUsedMem(instanceUsedmemory);
+
+                machineStatsVo.setTotalMachineDisk(machineDiskTotal);
+                machineStatsVo.setTotalMachineFreeDisk(machineDiskAvailable);
+                machineStatsVo.setTotalInstanceApplyDisk(instanceApplyDisk);
+                machineStatsVo.setTotalInstanceUsedDisk(instanceUsedDisk);
                 machineRoomMachineStatsVoMap.put(machineRoom, machineStatsVo);
             }
         }
@@ -894,6 +942,11 @@ public class MachineCenterImpl implements MachineCenter {
             totalMachineStatsVo.setTotalMachineFreeMem(totalMachineStatsVo.getTotalMachineFreeMem() + machineStatsVo.getTotalMachineFreeMem());
             totalMachineStatsVo.setTotalInstanceMaxMem(totalMachineStatsVo.getTotalInstanceMaxMem() + machineStatsVo.getTotalInstanceMaxMem());
             totalMachineStatsVo.setTotalInstanceUsedMem(totalMachineStatsVo.getTotalInstanceUsedMem() + machineStatsVo.getTotalInstanceUsedMem());
+
+            totalMachineStatsVo.setTotalMachineDisk(totalMachineStatsVo.getTotalMachineDisk() + machineStatsVo.getTotalMachineDisk());
+            totalMachineStatsVo.setTotalMachineFreeDisk(totalMachineStatsVo.getTotalMachineFreeDisk() + machineStatsVo.getTotalMachineFreeDisk());
+            totalMachineStatsVo.setTotalInstanceApplyDisk(totalMachineStatsVo.getTotalInstanceApplyDisk() + machineStatsVo.getTotalInstanceApplyDisk());
+            totalMachineStatsVo.setTotalInstanceUsedDisk(totalMachineStatsVo.getTotalInstanceUsedDisk() + machineStatsVo.getTotalInstanceUsedDisk());
         }
         machineStatsVoList.add(0, totalMachineStatsVo);
 
@@ -962,7 +1015,7 @@ public class MachineCenterImpl implements MachineCenter {
         if (!CollectionUtils.isEmpty(allMachines)) {
             for (MachineInfo machineInfo : allMachines) {
                 ipMap.put(machineInfo.getIp(), machineInfo);
-                if(StringUtils.isNotBlank(machineInfo.getRealIp())){
+                if (StringUtils.isNotBlank(machineInfo.getRealIp())) {
                     hostlist.add(machineInfo.getRealIp());
                 }
             }
@@ -1008,8 +1061,8 @@ public class MachineCenterImpl implements MachineCenter {
                         "echo 0;" +
                         "df -h | grep '/dev' | grep '/data' | awk '{print $5\"(\"$3\"/\"$2\")\"}';" +
                         "ps -ef | grep redis | wc -l;" +
+                        "cat /etc/security/limits.d/*-nproc.conf | grep '*          soft    nproc';" +
                         "";
-
 
         List<Map<String, Object>> containerInfo = new ArrayList<>();
         List<Map<String, Object>> machineInfo = new ArrayList<>();
@@ -1019,9 +1072,9 @@ public class MachineCenterImpl implements MachineCenter {
                 ForkJoinTask<Map<String, Map<String, Object>>> container_task = forkJoinPool.submit(() -> ipMap.entrySet().parallelStream()
                         .collect(Collectors.toMap(ipEntry -> ipEntry.getKey(), ipEntry ->
                         {
-                            if(ipEntry.getValue().getDisType() == MachineInfoEnum.DisTypeEnum.CENTOS.getType()){
+                            if (ipEntry.getValue().getDisType() == MachineInfoEnum.DisTypeEnum.CENTOS.getType()) {
                                 return new MachinetaskCallable(ipEntry.getKey(), container_cmd, sshService, MachineInfoEnum.MachineEnum.CONTAINER.getValue()).call();
-                            }else{
+                            } else {
                                 return new MachinetaskCallable(ipEntry.getKey(), ubuntu_container_cmd, sshService, MachineInfoEnum.MachineEnum.CONTAINER.getValue()).call();
                             }
                         })));
@@ -1037,11 +1090,11 @@ public class MachineCenterImpl implements MachineCenter {
                     }
                     logger.info("container result size:{}", container_result.size());
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    logger.error("container error", e);
                 } catch (ExecutionException e) {
-                    e.printStackTrace();
+                    logger.error("container error", e);
                 } catch (TimeoutException e) {
-                    e.printStackTrace();
+                    logger.error("container error", e);
                 }
             }
         }
@@ -1126,7 +1179,7 @@ public class MachineCenterImpl implements MachineCenter {
                     machineResult.put("envs", MachineEnv.getDefaultEnv());
                 }
             } catch (SSHException e) {
-                logger.error("MachinetaskCallable ip:{} error msg :{}",ip,e.getMessage());
+                logger.error("MachinetaskCallable ip:{} error msg :{}", ip, e.getMessage());
                 machineResult.put("status", CheckEnum.EXCEPTION.getValue());
                 machineResult.put("envs", MachineEnv.getDefaultEnv());
             }
@@ -1141,7 +1194,9 @@ public class MachineCenterImpl implements MachineCenter {
         String[] envs = cmdResult.split("\n");
         String nproc = "";
         try {
-            nproc = StringUtils.isBlank(envs[4]) ? "" : envs[4];
+            if(envs.length >= 5){
+                nproc = StringUtils.isBlank(envs[4]) ? "" : envs[4];
+            }
         } catch (Exception e) {
             logger.error("MachineEnv convertContainer cmdResult:{} error {}:", cmdResult, e.getMessage());
         }
@@ -1157,7 +1212,7 @@ public class MachineCenterImpl implements MachineCenter {
         int unlimit_used = -1;
         int instanceNum = -1;
         try {
-            String[] envs = cmdResult.split("\n");
+            String[] envs = cmdResult.split(System.lineSeparator());
             fsync_delay_times = StringUtils.isBlank(envs[1]) ? -1 : Integer.parseInt(envs[1]);
             nproc_threads = StringUtils.isBlank(envs[2]) ? -1 : Integer.parseInt(envs[2]);
             unlimit = StringUtils.isBlank(envs[4]) ? -1 : Integer.parseInt(envs[4]);
@@ -1179,55 +1234,25 @@ public class MachineCenterImpl implements MachineCenter {
         return null;
     }
 
-    public List<MachineStats> checkMachineModule(List<MachineStats> machineStatsList) {
-
-        if (!CollectionUtils.isEmpty(machineStatsList)) {
-            for (MachineStats machineStats : machineStatsList) {
-
-                String moduleBasePath = ConstUtils.MODULE_BASE_PATH;
-                String cmd = String.format("cd %s && ls -l | grep .so", moduleBasePath);
-                String cmd2 = String.format("lsb_release -ds");
-
-                try {
-                    String ip = machineStats.getInfo().getIp();
-                    String executeResult = sshService.execute(ip, cmd);
-                    logger.info("ip :{} ,exe cmd :{},module info:{}", ip, cmd,   executeResult);
-
-                    Map<String,Object> moduleInfo = new HashMap<String,Object>();
-                    List<ModuleInfo> allModules = moduleDao.getAllModules();
-                    allModules.forEach(module -> moduleInfo.put(module.getName(), false));
-                    if(StringUtils.isNotBlank(executeResult)){
-                        String[] moduleSoFiles = executeResult.split(System.lineSeparator());
-                        for (String moduleSoFile : moduleSoFiles) {
-                            if(StringUtils.isNotBlank(moduleSoFile)){
-                                String[] moduleFileInfos = moduleSoFile.split(" ");
-                                if(moduleFileInfos != null && moduleFileInfos.length > 0){
-                                    ModuleVersionDetailVo moduleVersionDetail = moduleDao.getModuleVersionDetail(moduleFileInfos[moduleFileInfos.length - 1]);
-                                    if(moduleVersionDetail != null){
-                                        moduleInfo.put(moduleVersionDetail.getName(), true);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    String version = sshService.execute(ip, cmd2);
-                    machineStats.setVersionInfo(version);
-                    machineStats.setModuleInfo(moduleInfo);
-                } catch (SSHException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return machineStatsList;
-    }
-
-    public boolean checkMachineMemory(String ip){
+    public boolean checkMachineMemory(String ip) {
 
         MachineStats machineStats = machineStatsDao.getMachineStatsByIp(ip);
-        float memThreshold= Float.parseFloat(machineStats.getMemoryFree())/Float.parseFloat(machineStats.getMemoryTotal());
+        float memThreshold = Float.parseFloat(machineStats.getMemoryFree()) / Float.parseFloat(machineStats.getMemoryTotal());
         if (machineStats == null || memThreshold < 0.15) {
             return false;
         }
         return true;
     }
+
+    public List<MachineInfo> getMachineListByRealIp(String realIp){
+        return machineDao.getMachineListByRealIp(realIp);
+    }
+
+    /**
+     * 获取机器配置信息及已分布redis实例（数量、申请内存、使用内存、使用内存rss等）
+     */
+    public List<MachineMemStatInfo> getMachineInfoAndUsedInfo(String room, Integer type, Integer useType, Integer disType, String ip){
+        return machineDao.getMachineInfoAndUsedInfo(room, type, useType, disType, ip);
+    }
+
 }

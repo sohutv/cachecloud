@@ -1,8 +1,11 @@
 package com.sohu.cache.util;
 
+import com.sohu.cache.entity.SystemResource;
 import com.sohu.cache.web.enums.SshAuthTypeEnum;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * cachecloud常量
@@ -120,6 +123,10 @@ public class ConstUtils {
      */
     public static final double DEFAULT_MEMORY_USAGE_RATIO_THRESHOLD = 85.0;
     /**
+     * 机器磁盘报警阀值
+     */
+    public static final double DEFAULT_DISK_USAGE_RATIO_THRESHOLD = 70.0;
+    /**
      * 应用客户端连接数报警阀值
      */
     public static final int DEFAULT_APP_CLIENT_CONN_THRESHOLD = 2000;
@@ -142,10 +149,6 @@ public class ConstUtils {
     public static final String DEFAULT_PUBLIC_USERNAME = "cachecloud";
     public static final String MEMCACHE_USER = "memcached_server";
     public static final String MEMCACHE_KEY_PEM = "/home/redis_server/cachecloud/cachecloud/memcache_server_key/id_rsa";
-    /**
-     * module info
-     */
-    public static final String MODULE_BASE_PATH = "/opt/cachecloud/module/";
 
     /**
      * 管理员相关
@@ -165,7 +168,8 @@ public class ConstUtils {
     /**
      * redis sentinel基准端口
      */
-    public static final int DEFAULT_REDIS_SENTINEL_BASE_PORT = 7500;
+    public static final int DEFAULT_REDIS_SENTINEL_BASE_PORT = 26379;
+
     /**
      * 1是session,2是cookie(参考UserLoginTypeEnum)
      */
@@ -186,6 +190,152 @@ public class ConstUtils {
      * 机器性能统计周期(分钟)
      */
     public static final int DEFAULT_MACHINE_STATS_CRON_MINUTE = 1;
+
+    //应用自动扩容与内存审计（判断是否可缩容）相关 start
+    /**
+     * 后台自动处理用户
+     */
+    public static final long DEFAULT_BOT_USER_ID = 0;
+
+    public static long BOT_USER_ID = ConstUtils.DEFAULT_BOT_USER_ID;
+
+    /**
+     * 自动扩容最大允许分片内存大小
+     */
+    public static final long DEFAULT_REDIS_EXPAND_CAPACITY_LIMIT = 8L * 1024 * 1024 * 1024;
+
+    public static long REDIS_EXPAND_CAPACITY_LIMIT = ConstUtils.DEFAULT_REDIS_EXPAND_CAPACITY_LIMIT;
+
+    /**
+     * 应用上线多少天之后，可判断缩容
+     */
+    public static final int DEFAULT_REDIS_REDUCE_CAPACITY_BUFFER_TIME = 15;
+
+    public static int REDIS_REDUCE_CAPACITY_BUFFER_TIME = ConstUtils.DEFAULT_REDIS_REDUCE_CAPACITY_BUFFER_TIME;
+
+    /**
+     * 应用缩容预计处理时间
+     */
+    public static final int DEFAULT_REDIS_REDUCE_CAPACITY_SCHEDULE_TIME = 15;
+
+    public static int REDIS_REDUCE_CAPACITY_SCHEDULE_TIME = ConstUtils.DEFAULT_REDIS_REDUCE_CAPACITY_SCHEDULE_TIME;
+
+    /**
+     * 应用缩容审计告警，是否发送应用负责人
+     */
+    public static final boolean DEFAULT_REDIS_REDUCE_CAPACITY_SENDMAIL = false;
+
+    public static boolean REDIS_REDUCE_CAPACITY_SENDMAIL = ConstUtils.DEFAULT_REDIS_REDUCE_CAPACITY_SENDMAIL;
+
+    /**
+     * 应用扩容告警，是否发送应用负责人
+     */
+    public static final boolean DEFAULT_REDIS_EXPAND_CAPACITY_SENDMAIL = false;
+
+    public static boolean REDIS_EXPAND_CAPACITY_SENDMAIL = ConstUtils.DEFAULT_REDIS_EXPAND_CAPACITY_SENDMAIL;
+
+    /**
+     * 应用内存使用近几天最大值，用于判断是否有峰值
+     */
+    public static final int DEFAULT_REDIS_MEM_USED_MAX_DAYS = 3;
+
+    public static int REDIS_MEM_USED_MAX_DAYS = ConstUtils.DEFAULT_REDIS_MEM_USED_MAX_DAYS;
+    /**
+     * 分片内存缩容最小值（低于不可缩容）
+     */
+    public static final long DEFAULT_REDIS_REDUCE_CAPACITY_SHARDING_MEM = 125L * 1024 * 1024 * 1024 / 1000 ;
+
+    public static long REDIS_REDUCE_CAPACITY_SHARDING_MEM = ConstUtils.DEFAULT_REDIS_REDUCE_CAPACITY_SHARDING_MEM ;
+
+    /**
+     * 分片内存缩容——报警内存最小缩容容量
+     */
+    public static final long DEFAULT_REDIS_REDUCE_CAPACITY_MEM_MIN = 5L * 1024 * 1024 * 1024 / 10;
+
+    public static long REDIS_REDUCE_CAPACITY_MEM_MIN = ConstUtils.DEFAULT_REDIS_REDUCE_CAPACITY_MEM_MIN;
+
+    /**
+     * 分片内存扩容步长
+     */
+    public static final long DEFAULT_REDIS_EXPAND_CAPACITY_STEP = 125L * 1024 * 1024 * 1024 / 1000 ;
+
+    public static long REDIS_EXPAND_CAPACITY_STEP = ConstUtils.DEFAULT_REDIS_EXPAND_CAPACITY_STEP ;
+
+    /**
+     * 应用内存扩容AppAutoCapacityServiceImpl.ExpandConfig
+     */
+    public static final String DEFAULT_REDIS_EXPAND_CAPACITY_CONFIG = "0,3,0,85,20,1000;3,5,10,85,20,200;5,10,10,85,15,200;10,20,10,85,10,150;20,40,5,90,10,50;40,80,5,95,5,30;80,120,3,95,5,20;120,1000,1,95,0,0";
+
+    public static String REDIS_EXPAND_CAPACITY_CONFIG = ConstUtils.DEFAULT_REDIS_EXPAND_CAPACITY_CONFIG;
+
+    /**
+     * 应用内存扩容开关
+     */
+    public static final boolean DEFAULT_REDIS_EXPAND_CAPACITY_OPEN_FLAG = false;
+
+    public static boolean REDIS_EXPAND_CAPACITY_OPEN_FLAG = ConstUtils.DEFAULT_REDIS_EXPAND_CAPACITY_OPEN_FLAG;
+    //应用自动扩容与内存审计（判断是否可缩容）相关 end
+
+
+    /**
+     * rdb文件物理机存储路径
+     */
+    public static final String DEFAULT_RDB_MACHINE_DIR = "/data/redis/data/";
+
+    public static String RDB_MACHINE_DIR = ConstUtils.DEFAULT_RDB_MACHINE_DIR;
+
+    /**
+     * redis 版本
+     */
+    public static Map<Integer, SystemResource> REDIS_RESOURCE = new HashMap<>();
+
+    /**
+     * 应用持久化主从特殊配置
+     */
+    public static final String DEFAULT_APP_PERSISTENCE_CONFIG_MAP = "[" +
+            "{" +
+            "\"isMaster\":\"true\"," +
+            "\"persistenceMap\":{" +
+            "\"0\":{" +
+            "\"appendonly\":\"yes\"," +
+            "\"appendfsync\":\"everysec\"" +
+            "}," +
+            "\"1\":{" +
+            "\"appendonly\":\"yes\"," +
+            "\"appendfsync\":\"no\"" +
+            "}," +
+            "\"2\":{" +
+            "\"appendonly\":\"no\"" +
+            "}," +
+            "\"3\":{" +
+            "\"appendonly\":\"no\"" +
+            "}" +
+            "}" +
+            "}," +
+            "{" +
+            "\"isMaster\":\"false\"," +
+            "\"persistenceMap\":{" +
+            "\"0\":{" +
+            "\"appendonly\":\"yes\"," +
+            "\"appendfsync\":\"everysec\"" +
+            "}," +
+            "\"1\":{" +
+            "\"appendonly\":\"yes\"," +
+            "\"appendfsync\":\"everysec\"" +
+            "}," +
+            "\"2\":{" +
+            "\"appendonly\":\"yes\"," +
+            "\"appendfsync\":\"everysec\"" +
+            "}," +
+            "\"3\":{" +
+            "\"appendonly\":\"no\"" +
+            "}" +
+            "}" +
+            "}" +
+            "]";
+
+    public static String APP_PERSISTENCE_CONFIG_MAP = ConstUtils.DEFAULT_APP_PERSISTENCE_CONFIG_MAP;
+
     /**
      * big key阈值
      */
@@ -195,11 +345,14 @@ public class ConstUtils {
     public static final int DEFAULT_SET_MAX_LENGTH = 50000;
     public static final int DEFAULT_ZSET_MAX_LENGTH = 50000;
     public static double MEMORY_USAGE_RATIO_THRESHOLD = DEFAULT_MEMORY_USAGE_RATIO_THRESHOLD;
+    public static double DISK_USAGE_RATIO_THRESHOLD = DEFAULT_DISK_USAGE_RATIO_THRESHOLD;
     public static int APP_CLIENT_CONN_THRESHOLD = DEFAULT_APP_CLIENT_CONN_THRESHOLD;
     public static String USERNAME = DEFAULT_USERNAME;
     public static String PASSWORD = DEFAULT_PASSWORD;
     public static int SSH_PORT_DEFAULT = DEFAULT_SSH_PORT_DEFAULT;
     public static int SSH_AUTH_TYPE = DEFAULT_SSH_AUTH_TYPE;
+
+    public static int SSH_CONNECTION_TIMEOUT = 5000;
     public static String PUBLIC_KEY_PEM = DEFAULT_PUBLIC_KEY_PEM;
     public static String PUBLIC_USERNAME = DEFAULT_PUBLIC_USERNAME;
     public static String SUPER_ADMIN_NAME = DEFAULT_SUPER_ADMIN_NAME;
@@ -254,7 +407,6 @@ public class ConstUtils {
     public static int LIST_MAX_LENGTH = DEFAULT_LIST_MAX_LENGTH;
     public static int SET_MAX_LENGTH = DEFAULT_SET_MAX_LENGTH;
     public static int ZSET_MAX_LENGTH = DEFAULT_ZSET_MAX_LENGTH;
-    public static int SSH_CONNECTION_TIMEOUT = 5000;
 
     public static String getRedisMigrateToolCmd(String name) {
         return ConstUtils.getRedisToolDir(name) + "src/redis-migrate-tool";

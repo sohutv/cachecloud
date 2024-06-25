@@ -1,0 +1,95 @@
+<div class="col-md-12">
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <div id="containerRead"
+               style="max-width: 100%; min-width: 310px; height: 400px; margin: 0 auto"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <div id="containerWrite"
+              style="max-width: 100%; min-width: 310px; height: 400px; margin: 0 auto"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <div id="containerBusy"
+           style="max-width: 100%; min-width: 310px; height: 400px; margin: 0 auto"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <div id="containerIops"
+           style="max-width: 100%; min-width: 310px; height: 400px; margin: 0 auto"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <div id="containerSpace"
+           style="max-width: 100%; min-width: 310px; height: 400px; margin: 0 auto"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+  $(document).ready(function() {
+    initReadChart();
+    initWriteChart();
+    initBusyChart();
+    initIopsChart();
+    initSpaceChart();
+  });
+
+  function initReadChart(){
+    var options = getOptions("read", "containerRead");
+    options.subtitle.text = "max:${read.max!}k/s avg:${read.avg!}k/s";
+    <#list read.series as item>
+      options.series.push(${item.toJson()});
+    </#list>
+    new Highcharts.Chart(options);
+  }
+  function initWriteChart(){
+    var options = getOptions("write", "containerWrite");
+    options.subtitle.text = "max:${write.max!}k/s avg:${write.avg!}k/s";
+    <#list write.series as item>
+      options.series.push(${item.toJson()});
+    </#list>
+    new Highcharts.Chart(options);
+  }
+  function initBusyChart(){
+    var options = getOptions("busy", "containerBusy");
+    options.subtitle.text = "max:${busy.max!}% avg:${busy.avg!}%";
+    <#list busy.series as item>
+      options.series.push(${item.toJson()});
+    </#list>
+    new Highcharts.Chart(options);
+  }
+  function initIopsChart(){
+    var options = getOptions("iops", "containerIops");
+    options.subtitle.text = "max:${iops.max!}次/s avg:${iops.avg!}次/s";
+    <#list iops.series as item>
+      options.series.push(${item.toJson()});
+    </#list>
+    new Highcharts.Chart(options);
+  }
+  function initSpaceChart(){
+    var options = getOptions("space use", "containerSpace");
+    options.subtitle.text = "max:${space.max!}% avg:${space.avg!}%";
+    <#list space.series as item>
+      options.series.push(${item.toJson()});
+    </#list>
+    new Highcharts.Chart(options);
+  }
+</script>

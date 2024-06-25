@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>客户端超时命令详情</title>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <#include '/inc/frontResources.html'>
+</head>
+<body class="hold-transition sidebar-mini layout-navbar-fixed">
+  <div class="wrapper">
+    <#include '/inc/head.html'>
+    <div class="content-wrapper ml-0">
+      <div class="content">
+        <div class="container">
+          <div class="row">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">&nbsp;&nbsp;应用：<label class="label label-success">${appId!}</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    查询时间：<label class="label label-success">${searchDate!}</label>
+                  </h3>
+                </div>
+                <div class="card-body table-responsive">
+                  <table class="table table-striped table-hover">
+                    <thead>
+                    <tr>
+                      <td>序号</td>
+                      <td>实例信息</td>
+                      <td>次数</td>
+                      <td>平均耗时(单位:毫秒)</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <#list sumCmdExpStatMap?keys as key>
+                      <tr>
+                        <td>${key_index + 1}</td>
+                        <td><a href="#${key!}">${key!}</a></td>
+                        <td>${sumCmdExpStatMap[key]['count']}</td>
+                        <td>${sumCmdExpStatMap[key]['cost']}</td>
+                      </tr>
+                    </#list>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-body">
+                  <#list latencyCommandDetailMap?keys as key>
+                    <div style="margin-top: 20px">
+                      <div class="page-header" id="${key!}">
+                        <h4>${key!}</h4>
+                      </div>
+                      <table class="table table-bordered table-striped table-hover">
+                        <thead>
+                        <tr>
+                          <td>序号</td>
+                          <td>执行时间</td>
+                          <td>命令明文</td>
+                          <td>参数(长参数裁剪)</td>
+                          <td>参数字节数</td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <#list latencyCommandDetailMap[key]  as latencyCommandDetail>
+                          <tr>
+                            <td>${latencyCommandDetail_index + 1}</td>
+                            <td>${latencyCommandDetail.format_invoke_time!}</td>
+                            <td>${latencyCommandDetail.command!}</td>
+                            <td>${latencyCommandDetail.args!}</td>
+                            <td>${latencyCommandDetail.size!}</td>
+                          </tr>
+                        </#list>
+                        </tbody>
+                      </table>
+                    </div>
+                  </#list>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <#include "/inc/footer.html">
+  </div>
+</body>
+</html>

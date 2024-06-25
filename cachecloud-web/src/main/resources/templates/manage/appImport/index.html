@@ -1,0 +1,66 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">应用导入列表</h3>
+            </div>
+            <div class="card-body table-responsive">
+                <table class="table table-hover table-sm" id="tableDataList">
+                    <thead>
+                    <tr>
+                        <th scope="col">序号</th>
+                        <th scope="col">源：实例信息</th>
+                        <th scope="col">目标：应用id</th>
+                        <th scope="col">应用部署任务id</th>
+                        <th scope="col">迁移任务id</th>
+                        <th scope="col">创建时间</th>
+                        <th scope="col">更新时间</th>
+                        <th scope="col">导入状态</th>
+                        <th scope="col">查看流程</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <#list appImportList as record>
+                            <#assign app_id = record.appId>
+                            <tr>
+                                <td>${record_index + 1!}</td>
+                                <td>
+                                    <#assign instanceInfo = record.instanceInfo?replace("\n", '<br/>')>
+                                    ${instanceInfo!}
+                                </td>
+                                <td>
+                                    <a target="_blank" href="${request.contextPath}/manage/app/index?appId=${app_id!}">${app_id!}</a>
+                                </td>
+                                <td>
+                                    <#if record.appBuildTaskId?? && (record.appBuildTaskId > 0)>
+                                        <a target="_blank" href="${request.contextPath}/manage/task/flow?taskId=${record.appBuildTaskId!}">${record.appBuildTaskId!}</a>
+                                    </#if>
+                                </td>
+                                <td>
+                                    <#if (record.migrateId>0)>${record.migrateId!}</#if>
+                                </td>
+                                <td>
+                                    ${record.createTime?string('yyyy-MM-dd HH:mm:ss')}
+                                </td>
+                                <td>
+                                    ${record.updateTime?string('yyyy-MM-dd HH:mm:ss')}
+                                </td>
+                                <td>${appImportStatusMap?api.get(record.status).info!}</td>
+                                <td>
+                                    <#if (record.status==0)>
+                                        <a target="_blank" type="button" class="btn btn-sm btn-success"
+                                           href="${request.contextPath}/import/app/init?importId=${record.id!}">导入</a>
+                                    </#if>
+                                    <#if (record.status!=0)>
+                                        <a target="_blank" type="button" class="btn btn-sm btn-info"
+                                           href="${request.contextPath}/import/app/init?importId=${record.id!}">查看</a>
+                                    </#if>
+                                </td>
+                            </tr>
+                        </#list>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

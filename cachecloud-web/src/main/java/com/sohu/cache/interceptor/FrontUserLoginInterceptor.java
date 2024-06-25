@@ -38,7 +38,7 @@ public class FrontUserLoginInterceptor extends HandlerInterceptorAdapter {
             response.sendRedirect(redirectUrl);
             return false;
         }
-            request.setAttribute("userInfo", user);
+        request.setAttribute("userInfo", user);
         request.setAttribute("uri", request.getRequestURI());
 
         return true;

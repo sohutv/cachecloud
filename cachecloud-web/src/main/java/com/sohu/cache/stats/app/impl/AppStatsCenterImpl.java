@@ -1,5 +1,6 @@
 package com.sohu.cache.stats.app.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.sohu.cache.constant.AppTopology;
 import com.sohu.cache.constant.TimeDimensionalityEnum;
@@ -18,7 +19,6 @@ import com.sohu.cache.web.enums.StatEnum;
 import com.sohu.cache.web.service.UserService;
 import com.sohu.cache.web.util.DateUtil;
 import com.sohu.cache.web.vo.AppDetailVO;
-import net.sf.json.JSONArray;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -70,6 +70,8 @@ public class AppStatsCenterImpl implements AppStatsCenter {
     private MachineCenter machineCenter;
     @Autowired
     private ResourceDao resourceDao;
+    @Autowired
+    private AppDailyDao appDailyDao;
 
     @Override
     public List<AppStats> getAppStatsListByMinuteTime(long appId, long beginTime, long endTime) {
@@ -109,6 +111,56 @@ public class AppStatsCenterImpl implements AppStatsCenter {
             logger.error(e.getMessage(), e);
         }
         return appStatsList;
+    }
+
+    /**
+     * 通过时间区间查询app的每日日报数据
+     *
+     * @param appId
+     * @param beginDate 时间，格式：yyyyMMdd
+     * @param endDate   时间，格式：yyyyMMdd
+     * @return
+     */
+    @Override
+    public List<AppDailyData> getAppHitRatioList(final long appId, long beginDate, long endDate) {
+        Assert.isTrue(appId > 0);
+        Assert.isTrue(beginDate > 0 && endDate > 0);
+
+        List<AppDailyData> appStatsList = null;
+        try {
+                appStatsList = appDailyDao.getAppDailyList(appId, beginDate, endDate);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        return appStatsList;
+    }
+
+    /**
+     * 按照分钟查询应用历史最大使用内存，时间跨度不可过大，会有性能问题
+     * @param appId
+     * @param beginTime
+     * @param endTime
+     * @return
+     */
+    @Override
+    public Long getUsedMemoryMaxByTimeBetween(final long appId, long beginTime, long endTime){
+        return appStatsDao.getUsedMemoryMaxByTimeBetween(appId, beginTime, endTime);
+    }
+
+    /**
+     * 通过时间区间查询一条app的分钟统计数据
+     *
+     * @param appId
+     * @param beginTime 时间，格式：yyyyMMddHHmm
+     * @param endTime   时间，格式：yyyyMMddHHmm
+     * @return
+     */
+    @Override
+    public AppStats getOneAppStats(final long appId, long beginTime, long endTime) {
+        Assert.isTrue(appId > 0);
+        Assert.isTrue(beginTime > 0 && endTime > 0);
+        AppStats appStats = appStatsDao.getOneAppStatsByMinute(appId, beginTime, endTime);
+        return appStats;
     }
 
     @Override
@@ -278,6 +330,20 @@ public class AppStatsCenterImpl implements AppStatsCenter {
     }
 
     /**
+     * 获取应用命令调用次数分布
+     *
+     * @param appId
+     * @param beginTime
+     * @param endTime
+     * @return
+     */
+    @Override
+    public Long getAppCommandCount(long appId, long beginTime, long endTime) {
+        Long count = appStatsDao.getAppCommandCount(appId, beginTime, endTime);
+        return count == null ? 0L : count;
+    }
+
+    /**
      * 获取应用详细信息
      */
     @Override
@@ -323,6 +389,8 @@ public class AppStatsCenterImpl implements AppStatsCenter {
         long hits = 0L;
         long miss = 0L;
         long allUsedMemory = 0L;
+        long allUsedDisk = 0L;
+        long allMaxDisk = 0L;
         long allMaxMemory = 0L;
         double highestMemFragRatio = 0D;        //碎片率最大值
         long instId = 0L;           //碎片率最大值的实例id
@@ -346,6 +414,10 @@ public class AppStatsCenterImpl implements AppStatsCenter {
 
                 long usedMemory = instanceStats.getUsedMemory();
                 long usedMemoryMB = usedMemory / 1024 / 1024;
+                long usedDisk = instanceStats.getUsedDisk();
+                long usedDiskMB = usedDisk / 1024 / 1024;
+                allUsedDisk += usedDisk;
+                allMaxDisk += instanceInfo.getMem() * 1024L * 1024;
 
                 allUsedMemory += usedMemory;
                 allMaxMemory += instanceStats.getMaxMemory();
@@ -363,6 +435,7 @@ public class AppStatsCenterImpl implements AppStatsCenter {
                     resultVO.setCurrentMem(resultVO.getCurrentMem() + usedMemoryMB);
                     resultVO.setCurrentObjNum(resultVO.getCurrentObjNum() + instanceStats.getCurrItems());
                     resultVO.setMasterNum(resultVO.getMasterNum() + 1);
+                    resultVO.setCurrentDisk(resultVO.getCurrentDisk() + usedDiskMB);
                     //按instanceStats计算conn
                     resultVO.setConn(resultVO.getConn() + instanceStats.getCurrConnections());
                 } else {
@@ -388,6 +461,13 @@ public class AppStatsCenterImpl implements AppStatsCenter {
             double percent = 100 * (double) allUsedMemory / (allMaxMemory);
             DecimalFormat df = new DecimalFormat("##.##");
             resultVO.setMemUsePercent(Double.parseDouble(df.format(percent)));
+        }
+        if (allMaxDisk == 0L) {
+            resultVO.setDiskUsePercent(0.0D);
+        } else {
+            double diskPercent = 100 * (double) allUsedDisk / (allMaxDisk);
+            DecimalFormat df = new DecimalFormat("##.##");
+            resultVO.setDiskUsePercent(Double.parseDouble(df.format(diskPercent)));
         }
         //最大碎片率及对应实例Id
         resultVO.setHighestMemFragRatio(highestMemFragRatio);
@@ -565,6 +645,12 @@ public class AppStatsCenterImpl implements AppStatsCenter {
             // 1.2 机器数量
             List<MachineInfo> machineInfoList = machineDao.getAllMachines();
             totalMap.put(StatEnum.TOTAL_MACHINE_NUM.value(), machineInfoList.size());
+            //1.2.1 物理机数量，增加物理机数量
+            Set<String> physicalMachineSet = machineInfoList.stream()
+                    .map(machineInfo -> machineInfo.getRealIp())
+                    .filter(realIp -> StringUtils.isNotEmpty(realIp))
+                    .collect(Collectors.toSet());
+            totalMap.put(StatEnum.TOTAL_PHYSICAL_MACHINE_NUM.value(), physicalMachineSet.size());
             // 1.3 获取实例数量
             List<InstanceInfo> allInsts = instanceDao.getAllInsts();
             totalMap.put(StatEnum.TOTAL_INSTANCE_NUM.value(), allInsts.size());
@@ -589,7 +675,7 @@ public class AppStatsCenterImpl implements AppStatsCenter {
                     }
                 }
             }
-            totalMap.put(StatEnum.REDIS_VERSION_DISTRIBUTE.value(), JSONArray.fromObject(redisDistribute));
+            totalMap.put(StatEnum.REDIS_VERSION_DISTRIBUTE.value(), JSONObject.toJSONString(redisDistribute));
             totalMap.put(StatEnum.REDIS_VERSION_COUNT.value(), versionList.size());
 
             // 4.获取机器内存分配/机器内存使用分布
@@ -600,7 +686,7 @@ public class AppStatsCenterImpl implements AppStatsCenter {
                 ParamCount paramCount = new ParamCount(entry.getKey().getInfo(), entry.getValue(), "");
                 machineMemoryDistributeList.add(paramCount);
             }
-            totalMap.put(StatEnum.MACHINE_USEDMEMORY_DISTRIBUTE.value(), JSONArray.fromObject(machineMemoryDistributeList));
+            totalMap.put(StatEnum.MACHINE_USEDMEMORY_DISTRIBUTE.value(), JSONObject.toJSONString(machineMemoryDistributeList));
             // 4.2 机器内存分配分布
             Map<MachineMemoryDistriEnum, Integer> maxMemoryDistributeMap = machineCenter.getMaxMemoryDistribute();
             List<ParamCount> maxMemoryDistributeList = new ArrayList<ParamCount>();
@@ -608,7 +694,7 @@ public class AppStatsCenterImpl implements AppStatsCenter {
                 ParamCount paramCount = new ParamCount(entry.getKey().getInfo(), entry.getValue(), "");
                 maxMemoryDistributeList.add(paramCount);
             }
-            totalMap.put(StatEnum.MACHINE_MAXMEMORY_DISTRIBUTE.value(), JSONArray.fromObject(maxMemoryDistributeList));
+            totalMap.put(StatEnum.MACHINE_MAXMEMORY_DISTRIBUTE.value(), JSONObject.toJSONString(maxMemoryDistributeList));
             // 4.3 机房分布
             List<Map<String, Object>> roomStat = machineDao.getRoomStat();
             List<ParamCount> roomDistribute = new ArrayList<ParamCount>();
@@ -618,7 +704,7 @@ public class AppStatsCenterImpl implements AppStatsCenter {
                     roomDistribute.add(paramCount);
                 }
             }
-            totalMap.put(StatEnum.MACHIEN_ROOM_DISTRIBUTE.value(), JSONArray.fromObject(roomDistribute));
+            totalMap.put(StatEnum.MACHIEN_ROOM_DISTRIBUTE.value(), JSONObject.toJSONString(roomDistribute));
 
             // 5.最后一次从数据库获取时间
             totalMap.put(PandectUtil.KEY_LASTTIME, System.currentTimeMillis());

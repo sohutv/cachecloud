@@ -1,0 +1,75 @@
+<!-- Navbar -->
+<nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <!-- Left navbar links -->
+    <ul class="navbar-nav">
+        <li class="nav-item">
+            <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+        </li>
+        <li class="nav-item d-sm-inline-block">
+            <a href="${request.contextPath}/" class="nav-link">Home</a>
+        </li>
+        <li class="nav-item d-none d-sm-inline-block">
+            <a target="_blank" href="https://github.com/sohutv/cachecloud" class="nav-link">Github</a>
+        </li>
+        <li class="nav-item d-none d-sm-inline-block">
+            <a target="_blank" href="${request.contextPath}/wiki/quickstart/index" class="nav-link">Docs</a>
+        </li>
+        <li class="nav-item d-none d-sm-inline-block">
+            <a target="_blank" href="/web/resource/inc/daily" class="nav-link">Contact</a>
+        </li>
+    </ul>
+
+
+    <!-- Right navbar links -->
+    <ul class="navbar-nav ml-auto">
+        <!-- Messages Dropdown Menu -->
+        <li class="nav-item dropdown">
+            <a class="nav-link" data-bs-toggle="dropdown" href="#">
+                <i class="bi bi-gear-fill"></i>
+                <span class="dropdown-toggle ps-2">
+                        <#if userInfo?? && userInfo.chName??>
+                            ${userInfo.chName!}
+                        </#if>
+                </span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
+
+                <#if (userInfo?? && (userInfo.type == 0))>
+                    <li>
+                        <a target="_blank" href="${request.contextPath}/manage/total/statlist" class="dropdown-item d-flex align-items-center">
+                            <i class="bi bi-grid-fill"></i>
+                            <span>管理后台</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                    </li>
+                </#if>
+                <li>
+                    <a target="_blank" class="dropdown-item d-flex align-items-center" href="${request.contextPath}/admin/app/list">
+                        <i class="bi bi-card-list"></i>
+                        <span>应用列表</span>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                </li>
+                <li>
+                    <a target="_blank" class="dropdown-item d-flex align-items-center" href="${request.contextPath}/admin/app/jobs">
+                        <i class="bi bi-list-task"></i>
+                        <span>我的申请</span>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                </li>
+                <li>
+                    <a class="dropdown-item d-flex align-items-center" href="${request.contextPath}/manage/logout">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>注销</span>
+                    </a>
+                </li>
+            </ul><!-- End Profile Dropdown Items -->
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-widget="fullscreen" href="#" role="button">
+                <i class="fas fa-expand-arrows-alt"></i>
+            </a>
+        </li>
+    </ul>
+</nav>
+<!-- /.navbar -->

@@ -13,11 +13,9 @@ import com.sohu.cache.task.constant.TaskStepFlowEnum.TaskFlowStatusEnum;
 import com.sohu.cache.task.entity.RedisSentinelNode;
 import com.sohu.cache.task.entity.RedisServerNode;
 import com.sohu.cache.util.EnvUtil;
-import com.sohu.cache.web.enums.SuccessEnum;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -79,12 +77,6 @@ public class RedisSentinelAppDeployTask extends BaseTask {
 
     private String version;
 
-    /**
-     * Redis模块信息
-     */
-    private String moduleInfo;
-
-
     @Override
     public List<String> getTaskSteps() {
         List<String> taskStepList = new ArrayList<String>();
@@ -105,25 +97,28 @@ public class RedisSentinelAppDeployTask extends BaseTask {
         taskStepList.add("createRedisServerTask");
         //8. 等待redis server job完成
         taskStepList.add("waitRedisServerFinish");
-        //9. 主从复制
-        taskStepList.add("configReplication");
-        //10. 创建redis sentinel job
-        taskStepList.add("createRedisSentinelTask");
-        //11. 等待redis sentinel job完成
-        taskStepList.add("waitRedisSentinelFinish");
-        //12. 更改实例状态
-        taskStepList.add("updateInstanceStatus");
-        //13. 开始收集部署
-        taskStepList.add("deployCollection");
-        //14. 设置密码
+        /*
+            9. 设置密码已放到实例配置文件中，启动后自动带有密码，
+            此步骤是设置app_desc表的密码字段，避免后续访问操作失败
+         */
         taskStepList.add("setPasswd");
-        //14. 装载组件
-        taskStepList.add("loadModule");
-        //15. 重置sentinel实例状态
+        //10. 更改实例状态
+        taskStepList.add("updateInstanceStatus");
+        //11. 主从复制
+        taskStepList.add("configReplication");
+        //12. 创建redis sentinel job
+        taskStepList.add("createRedisSentinelTask");
+        //13. 等待redis sentinel job完成
+        taskStepList.add("waitRedisSentinelFinish");
+        //14. 更改实例状态
+        taskStepList.add("updateSentinelInstanceStatus");
+        //15. 开始收集部署
+        taskStepList.add("deployCollection");
+        //16. 重置sentinel实例状态
         taskStepList.add("sentinelReset");
-        //16. 审核
+        //17. 审核
         taskStepList.add("updateAudit");
-        //17. 更新机器分配状态
+        //18. 更新机器分配状态
         taskStepList.add("updateMachineAllocateFalse");
         return taskStepList;
     }
@@ -203,9 +198,6 @@ public class RedisSentinelAppDeployTask extends BaseTask {
         }
         version = MapUtils.getString(paramMap, TaskConstants.VERSION_KEY);
 
-        // 模块安装
-        moduleInfo = MapUtils.getString(paramMap, TaskConstants.MODULE_KEY);
-
         return TaskFlowStatusEnum.SUCCESS;
     }
 
@@ -219,35 +211,11 @@ public class RedisSentinelAppDeployTask extends BaseTask {
             return TaskFlowStatusEnum.SUCCESS;
         }
         // 容量和代理
-        for (String redisServerIp : redisServerMachineList) {
-            MachineStats machineStats = machineStatsDao.getMachineStatsByIp(redisServerIp);
-            if (machineStats == null) {
-                logger.error(marker, "{} redis server machineStats is null", redisServerIp);
-                return TaskFlowStatusEnum.ABORT;
-            }
-            MachineInfo machineInfo = machineDao.getMachineInfoByIp(redisServerIp);
-            if (machineInfo == null) {
-                logger.error(marker, "redis server machine info is null");
-                return TaskFlowStatusEnum.ABORT;
-            }
-            // 机器是否分配 isAllocate
-            if (machineInfo.getIsAllocating() == 1) {
-                logger.error(marker, "redis server machine info {} {} allocating is 1", machineInfo.getIp(), redisServerIp);
-                return TaskFlowStatusEnum.ABORT;
-            }
-            if (!checkMachineStatIsUpdate(machineStats)) {
-                logger.error(marker, "redis server machine stats {} update_time is {}, may be not updated recently", machineInfo.getIp(), machineStats.getUpdateTimeFormat());
-                return TaskFlowStatusEnum.ABORT;
-            }
-            //兆
-            long memoryFree = NumberUtils.toLong(machineStats.getMemoryFree()) / 1024 / 1024;
-            long memoryNeed = Long.valueOf(masterPerMachine) * maxMemory;
-            if (memoryNeed > memoryFree * 0.7) {
-                logger.error(marker, "{} need {} MB, but memoryFree is {} MB", redisServerIp, memoryNeed, memoryFree);
-                return TaskFlowStatusEnum.ABORT;
-            }
+        long memoryNeed = Long.valueOf(masterPerMachine) * maxMemory;
+        TaskFlowStatusEnum taskFlowStatusEnum = checkResourceAllow(redisServerMachineList, memoryNeed);
+        if(taskFlowStatusEnum.equals(TaskFlowStatusEnum.ABORT)){
+            return TaskFlowStatusEnum.ABORT;
         }
-
         // sentinel
         for (String redisSentinelIp : redisSentinelMachineList) {
             MachineStats machineStats = machineStatsDao.getMachineStatsByIp(redisSentinelIp);
@@ -265,29 +233,18 @@ public class RedisSentinelAppDeployTask extends BaseTask {
                 return TaskFlowStatusEnum.ABORT;
             }
         }
-
         return TaskFlowStatusEnum.SUCCESS;
     }
 
 
     public TaskFlowStatusEnum checkMachineConnect() {
         // redis server
-        for (String redisServerIp : redisServerMachineList) {
-            boolean isConnected = checkMachineIsConnect(redisServerIp);
-            if (!isConnected) {
-                logger.error(marker, "sentinelredisServer {} is not connected", redisServerIp);
-                return TaskFlowStatusEnum.ABORT;
-            }
+        TaskFlowStatusEnum taskFlowStatusEnum = checkMachineConnect(redisServerMachineList, "sentinelredisServer {} is not connected");
+        if(taskFlowStatusEnum.equals(TaskFlowStatusEnum.ABORT)){
+            return TaskFlowStatusEnum.ABORT;
         }
         // redis sentinel
-        for (String redisSentinelIp : redisSentinelMachineList) {
-            boolean isConnected = checkMachineIsConnect(redisSentinelIp);
-            if (!isConnected) {
-                logger.error(marker, "redisSentinel {} is not connected", redisSentinelIp);
-                return TaskFlowStatusEnum.ABORT;
-            }
-        }
-        return TaskFlowStatusEnum.SUCCESS;
+        return checkMachineConnect(redisSentinelMachineList, "redisSentinel {} is not connected");
     }
 
     /**
@@ -532,17 +489,21 @@ public class RedisSentinelAppDeployTask extends BaseTask {
      * @return
      */
     public TaskFlowStatusEnum updateInstanceStatus() {
-        for (RedisServerNode redisServerNode : redisServerNodes) {
-            String host = redisServerNode.getIp();
-            int port = redisServerNode.getPort();
-            instanceDao.updateStatus(appId, host, port, InstanceStatusEnum.GOOD_STATUS.getStatus());
+        redisServerNodes.forEach(redisServerNode ->
+            instanceDao.updateStatus(appId, redisServerNode.getIp(), redisServerNode.getPort(), InstanceStatusEnum.GOOD_STATUS.getStatus())
+        );
+        return TaskFlowStatusEnum.SUCCESS;
+    }
 
-        }
-        for (RedisSentinelNode redisSentinelNode : redisSentinelNodes) {
-            String host = redisSentinelNode.getIp();
-            int port = redisSentinelNode.getPort();
-            instanceDao.updateStatus(appId, host, port, InstanceStatusEnum.GOOD_STATUS.getStatus());
-        }
+    /**
+     * 更新实例状态
+     *
+     * @return
+     */
+    public TaskFlowStatusEnum updateSentinelInstanceStatus() {
+        redisSentinelNodes.forEach(redisSentinelNode ->
+            instanceDao.updateStatus(appId, redisSentinelNode.getIp(), redisSentinelNode.getPort(), InstanceStatusEnum.GOOD_STATUS.getStatus())
+        );
         return TaskFlowStatusEnum.SUCCESS;
     }
 
@@ -571,7 +532,7 @@ public class RedisSentinelAppDeployTask extends BaseTask {
         try {
             if (appId > 0) {
                 // 设置密码
-                redisDeployCenter.fixPassword(appId, null, null, true);
+                appService.updateAppPwd(appId, String.valueOf(appId));
                 // 密码校验逻辑
                 boolean checkFlag = redisDeployCenter.checkAuths(appId);
                 logger.info(marker, "check app sentinel passwd:{}", checkFlag);
@@ -583,23 +544,6 @@ public class RedisSentinelAppDeployTask extends BaseTask {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return TaskFlowStatusEnum.ABORT;
-        }
-        return TaskFlowStatusEnum.SUCCESS;
-    }
-
-    public TaskFlowStatusEnum loadModule(){
-        if (!StringUtils.isEmpty(moduleInfo)) {
-            for (String versionId : moduleInfo.split(";")) {
-                if (!StringUtils.isEmpty(versionId)) {
-                    Map map = redisCenter.loadModule(appId, Integer.parseInt(versionId));
-                    Integer status = MapUtils.getInteger(map, "status");
-                    String message = MapUtils.getString(map, "message");
-                    logger.info(marker, "module load info status:{} message:{}",status, message);
-                    if (status != SuccessEnum.SUCCESS.value()) {
-                        return TaskFlowStatusEnum.ABORT;
-                    }
-                }
-            }
         }
         return TaskFlowStatusEnum.SUCCESS;
     }

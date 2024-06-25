@@ -1,0 +1,69 @@
+<script type="text/javascript">
+    function checkNoticeText(){
+        var notice = document.getElementById("notice");
+        if(notice.value == ""){
+            alert("系统通知不能为空!");
+            notice.focus();
+            return false;
+        }
+        $.post(
+            '${request.contextPath}/manage/notice/add.json',
+            {
+                notice: notice.value,
+            },
+            function(data){
+                if(data.success==1){
+                    alert("更新成功!");
+                }else{
+                    alert("更新失败!");
+                }
+                window.location.reload();
+            }
+        );
+
+    }
+</script>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    系统通知管理
+                    <#if success?? && (success == 1)>
+                        <font color="red">更新成功</font>
+                    <#elseif success?? && (success == 0)>
+                        <font color="red">更新失败</font>
+                    </#if>
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form action="${request.contextPath}/manage/notice/add" method="post" class="w-100 align-items-center">
+                            <div class="row mb-2">
+                                <label class="col-form-label offset-md-1 col-md-2">
+                                    系统通知:<font color='red'>(*)</font>:
+                                </label>
+                                <div class="col-md-7">
+                                    <textarea rows="10" name="notice" id="notice" placeholder="系统通知" class="form-text w-100">${notice!}</textarea>
+                                    <span class="help-block">
+                                        例如:<br/>
+                                        1.CacheCloud相关文档可以在菜单栏查询(2014-12-16)<br/>
+                                        2.接入代码模块加入了Protostuff序列化的演示。(2014-12-19)
+                                        </span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <button type="submit" class="btn btn-success btn-sm offset-md-5 col-md-1" onclick="checkNoticeText()">
+                                    <i class="bi bi-check"></i>提交</button>
+                            </div>
+                            <br>
+                            <br>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

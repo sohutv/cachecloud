@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  * Created by rucao on 2019/12/13
  */
 @Slf4j
-@Service
+@Service("appClientReportExceptionService")
 public class AppClientReportExceptionServiceImpl implements AppClientReportExceptionService {
 
     private static int ARGS_MAX_LEN = 255;
@@ -46,6 +46,7 @@ public class AppClientReportExceptionServiceImpl implements AppClientReportExcep
             // 2.解析
             List<AppClientExceptionStatistics> appClientExceptionStatisticsList = exceptionModels.stream()
                     .map(exceptionModel -> generate(appId, clientIp, redisPoolConfig, currentMin, exceptionModel))
+                    .filter(exceptionStatistics -> (exceptionStatistics != null))
                     .collect(Collectors.toList());
             // 4.批量保存
             if (CollectionUtils.isNotEmpty(appClientExceptionStatisticsList)) {
@@ -205,12 +206,15 @@ public class AppClientReportExceptionServiceImpl implements AppClientReportExcep
                                     return null;
                                 }
                             })
+                            .filter(latencyCommand -> (latencyCommand != null))
                             .collect(Collectors.toList());
-                    appClientLatencyCommandDao.batchSave(appClientLatencyCommandList);
-                    String latencyCommands = appClientLatencyCommandList.stream()
-                            .map(appClientLatencyCommand -> String.valueOf(appClientLatencyCommand.getId()))
-                            .collect(Collectors.joining(","));
-                    appClientExceptionStatistics.setLatencyCommands(latencyCommands);
+                    if(CollectionUtils.isNotEmpty(appClientLatencyCommandList)){
+                        appClientLatencyCommandDao.batchSave(appClientLatencyCommandList);
+                        String latencyCommands = appClientLatencyCommandList.stream()
+                                .map(appClientLatencyCommand -> String.valueOf(appClientLatencyCommand.getId()))
+                                .collect(Collectors.joining(","));
+                        appClientExceptionStatistics.setLatencyCommands(latencyCommands);
+                    }
                 }
             }
             return appClientExceptionStatistics;

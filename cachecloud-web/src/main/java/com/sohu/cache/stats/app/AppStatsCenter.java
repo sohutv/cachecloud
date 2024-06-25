@@ -37,6 +37,35 @@ public interface AppStatsCenter {
     public List<AppStats> getAppStatsList(final long appId, long beginTime, long endTime, TimeDimensionalityEnum timeDimensionalityEnum);
 
     /**
+     * 通过时间区间查询app的每日日报数据
+     *
+     * @param appId
+     * @param beginDate 时间，格式：yyyyMMdd
+     * @param endDate   时间，格式：yyyyMMdd
+     * @return
+     */
+    public List<AppDailyData> getAppHitRatioList(final long appId, long beginDate, long endDate);
+
+    /**
+     * 按照分钟查询应用历史最大使用内存
+     * @param appId
+     * @param beginTime
+     * @param endTime
+     * @return
+     */
+    public Long getUsedMemoryMaxByTimeBetween(final long appId, long beginTime, long endTime);
+
+    /**
+     * 通过时间区间查询一条app的分钟统计数据
+     *
+     * @param appId
+     * @param beginTime 时间，格式：yyyyMMddHHmm
+     * @param endTime   时间，格式：yyyyMMddHHmm
+     * @return
+     */
+    AppStats getOneAppStats(long appId, long beginTime, long endTime);
+
+    /**
      * 查询一天中应用的命令执行次数的top5
      *
      * @param appId 应用id
@@ -149,6 +178,16 @@ public interface AppStatsCenter {
      * @return
      */
     public List<AppCommandGroup> getAppCommandGroup(long appId, Long beginTime, Long endTime);
+
+    /**
+     * 获取应用命令调用总次数
+     *
+     * @param appId
+     * @param beginTime
+     * @param endTime
+     * @return
+     */
+    public Long getAppCommandCount(long appId, long beginTime, long endTime);
 
     /**
      * 在appId级别执行命令

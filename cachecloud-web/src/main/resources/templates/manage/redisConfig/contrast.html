@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>配置预览</title>
+</head>
+
+<body STYLE="BACKGROUND-COLOR:#000;color:#FFF">
+
+==================================<font color="green">1.${currentVersion.name!}&${upgradeVersion.name!} 配置差异项:</font>======================================
+<br/>
+版本<a style="color:green" href="${request.contextPath}/manage/redisConfig/init?versionid=${upgradeVersion.id!}" targer="_self">${upgradeVersion.name!}</a> 差异项数:(<font style="color:red">${upgradeConfigMap?size}</font>)<br/>
+<#list upgradeConfigMap?keys as key>
+  <font color="red">${key!}:${upgradeConfigMap[key]!}</font><br/>
+</#list>
+<br/>
+版本<a style="color:green" href="${request.contextPath}/manage/redisConfig/init?versionid=${currentVersion.id!}" targer="_self">${currentVersion.name!}</a> 差异项数:(<font style="color:red">${currentConfigMap?size}</font>)<br/>
+<#list currentConfigMap?keys as key>
+  <font style="color:red">${key!}:${currentConfigMap[key]!}</font><br/>
+</#list>
+<br/>
+==================================<font color="green">2.${currentVersion.name!}&${upgradeVersion.name!} 配置相同项:</font>===================================================
+<br/>
+配置项数:(<font color="green">${sameConfigMap?size}</font>)<br/>
+<#list sameConfigMap?keys as key>
+  <font color="white">${key!}:${sameConfigMap[key]!}</font><br/>
+</#list>
+</body>
+</html>

@@ -135,6 +135,8 @@ public class HighchartPoint {
             count = appStat.getExpiredKeys();
         } else if ("evictedKeys".equals(statName)) {
             count = appStat.getEvictedKeys();
+        } else if ("usedDisk".equals(statName)) {
+            count = appStat.getUsedDisk() / 1024 / 1024;
         }
         //为了显示在一个时间范围内
         if (diffDays > 0) {

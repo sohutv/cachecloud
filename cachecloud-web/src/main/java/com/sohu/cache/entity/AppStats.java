@@ -117,6 +117,11 @@ public class AppStats {
     private List<AppCommandStats> commandStatsList;
 
     /**
+     * 磁盘占用
+     */
+    private long usedDisk;
+
+    /**
      * 命中率
      *
      * @return

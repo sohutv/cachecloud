@@ -19,8 +19,8 @@
     </insert>
 
     <select id="getMigrateTaskCount" resultType="int">
-        select count(*)
-        from app_data_migrate_status where 1=1
+        select count(DISTINCT migrate_id)
+        from app_data_migrate_status where 1=1 and source_migrate_type != 9
         <choose>
             <when test="appDataMigrateSearch.sourceAppId != null and appDataMigrateSearch.sourceAppId > 0">
                 and source_app_id = #{appDataMigrateSearch.sourceAppId}
@@ -72,8 +72,8 @@
     </select>
 
     <select id="search" resultType="AppDataMigrateStatus">
-        select app_data_migrate_status.id,<include refid="migrate_data_status_fields"/>,app_user.ch_name as user_name
-        from app_data_migrate_status, app_user where 1=1 and app_data_migrate_status.user_id=app_user.id
+        select app_data_migrate_status.id,<include refid="migrate_data_status_fields"/>,app_user.ch_name as user_name,count(migrate_id) as task_count
+        from app_data_migrate_status, app_user where 1=1 and source_migrate_type != 9 and app_data_migrate_status.user_id=app_user.id
         <choose>
             <when test="appDataMigrateSearch.migrateId != null and appDataMigrateSearch.migrateId > 0">
                 and migrate_id = #{appDataMigrateSearch.migrateId}
@@ -126,7 +126,7 @@
                 and user_id = #{appDataMigrateSearch.userId}
             </when>
         </choose>
-        order by start_time desc
+        group by migrate_id order by start_time desc
         <choose>
             <when test="appDataMigrateSearch.page != null">
                 <choose>
@@ -147,6 +147,12 @@
         from app_data_migrate_status where id = #{id}
     </select>
 
+    <select id="getList" resultType="AppDataMigrateStatus">
+        select id,
+        <include refid="migrate_data_status_fields"/>
+        from app_data_migrate_status where migrate_id = #{migrateId}
+    </select>
+
 
     <select id="getByMigrateId" resultType="AppDataMigrateStatus">
         select id,
@@ -160,6 +166,20 @@
 
     <select id="getAllOnMigrateId" resultType="long">
         select id from app_data_migrate_status where status !=1;
+    </select>
+
+    <select id="getRunningMigrateByIp" resultType="AppDataMigrateStatus">
+        select id,
+            <include refid="migrate_data_status_fields"/>
+        from app_data_migrate_status
+        where migrate_machine_ip = #{migrateMachineIp}
+          and (status !=1 and status != 2)
+    </select>
+
+    <select id="getMaxMigratePortByIp" resultType="int">
+        select max(migrate_machine_port)
+        from app_data_migrate_status
+        where migrate_machine_ip = #{migrateMachineIp}
     </select>
 
 </mapper>

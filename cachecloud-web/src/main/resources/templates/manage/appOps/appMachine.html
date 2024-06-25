@@ -1,0 +1,102 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          应用机器列表-${appDesc.name!}(${appDesc.typeDesc!})
+        </h3>
+      </div>
+      <div class="card-body table-responsive">
+        <table class="table table-bordered table-striped table-hover">
+          <thead>
+          <tr>
+            <th>ip</th>
+            <th>内存使用率</th>
+            <th>已分配内存</th>
+            <th>磁盘使用率</th>
+            <th>已分配磁盘</th>
+            <th>CPU使用率</th>
+            <th>网络流量</th>
+            <th>机器负载</th>
+            <th>最后统计时间</th>
+            <th>是否虚机</th>
+            <th>机房</th>
+          </tr>
+          </thead>
+          <tbody>
+          <#list appMachineList as machine>
+            <tr>
+              <td>
+                <a target="_blank" href="${request.contextPath}/manage/machine/machineInstances?ip=${machine.ip!}">${machine.ip!}</a>
+              </td>
+              <td>
+                <span style="display:none">${((machine.memoryUsageRatio?number) / 100)?string("0.00")}</span>
+                <div class="progress progress-fs-1" role="progressbar" aria-valuenow="${machine.memoryUsageRatio!}" aria-valuemax="100"
+                     aria-valuemin="0" >
+                  <#assign fmtMemoryUsageRatio = machine.memoryUsageRatio>
+                  <#if (fmtMemoryUsageRatio?number >= 80.00)>
+                    <div class="progress-bar bg-danger"
+                        style="width: ${machine.memoryUsageRatio!}%; overflow: visible;">
+                      <span style="color: #000000; margin-bottom: 0">
+                        ${((machine.memoryTotal?number-machine.memoryFree?number)/1024/1024/1024)?string("0.00")}G&nbsp;&nbsp;Used/
+                        ${(machine.memoryTotal?number/1024/1024/1024)?string("0.00")}G&nbsp;&nbsp;Total
+                      </span>
+                    </div>
+                  <#else>
+                    <div class="progress-bar bg-success"
+                         style="width: ${machine.memoryUsageRatio!}%; overflow: visible;">
+                      <span style="color: #000000; margin-bottom: 0">
+                        ${((machine.memoryTotal?number-machine.memoryFree?number)/1024/1024/1024)?string("0.00")}G&nbsp;&nbsp;Used/
+                        ${(machine.memoryTotal?number/1024/1024/1024)?string("0.00")}G&nbsp;&nbsp;Total
+                      </span>
+                    </div>
+                  </#if>
+                </div>
+              </td>
+              <td>
+                <#assign fmtMemoryAllocatedRatio = (((machine.memoryAllocated?number)/1024)*100.0/(machine.memoryTotal?number/1024/1024/1024))?string("0.00")>
+                <span  style="display:none">${((fmtMemoryAllocatedRatio?number) / 100)?string("0.00")}</span>
+                <div class="progress progress-fs-1" role="progressbar" aria-valuenow="${fmtMemoryAllocatedRatio!}" aria-valuemax="100"
+                     aria-valuemin="0">
+                  <#if (fmtMemoryAllocatedRatio?number >= 80.00)>
+                    <div class="progress-bar bg-danger"
+                         style="width: ${fmtMemoryAllocatedRatio!}%; overflow: visible;">
+                      <span style="color: #000000; margin-bottom: 0">
+                        ${((machine.memoryAllocated?number)/1024)?string("0.00")}G&nbsp;&nbsp;Used/${(machine.memoryTotal?number/1024/1024/1024)?string("0.00")}G&nbsp;&nbsp;Total
+                      </span>
+                    </div>
+                  <#else>
+                    <div class="progress-bar bg-success"
+                        style="width: ${fmtMemoryAllocatedRatio!}%; overflow: visible;">
+                      <span style="color: #000000; margin-bottom: 0">
+                        ${((machine.memoryAllocated?number)/1024)?string("0.00")}G&nbsp;&nbsp;Used/${(machine.memoryTotal?number/1024/1024/1024)?string("0.00")}G&nbsp;&nbsp;Total
+                      </span>
+                    </div>
+                  </#if>
+                </div>
+              </td>
+              <td>todo--</td>
+              <td>todo--</td>
+              <td>${machine.cpuUsage!}</td>
+              <td>${machine.traffic!}</td>
+              <td>${machine.load!}</td>
+              <td>${(machine.modifyTime)?string("yyyy-MM-dd HH:mm")}</td>
+              <td>
+                <#if (machine.info.virtual == 1)>
+                  是
+                  <br/>
+                  物理机:${machine.info.realIp!}
+                <#else>
+                  否
+                </#if>
+              </td>
+              <td>${machine.info.room!}</td>
+            </tr>
+          </#list>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+

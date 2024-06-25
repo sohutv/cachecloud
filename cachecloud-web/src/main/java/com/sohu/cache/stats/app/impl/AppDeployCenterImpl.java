@@ -60,7 +60,7 @@ public class AppDeployCenterImpl implements AppDeployCenter {
     private RedisConfigTemplateService redisConfigTemplateService;
 
     @Override
-    public boolean createApp(AppDesc appDesc, AppUser appUser, String memSize, String isInstall, String moduleInfo) {
+    public boolean createApp(AppDesc appDesc, AppUser appUser, String memSize) {
         try {
             appService.save(appDesc);
             // 保存应用和用户的关系
@@ -88,10 +88,6 @@ public class AppDeployCenterImpl implements AppDeployCenter {
             appAudit.setModifyTime(new Date());
             appAudit.setParam1(memSize);
             appAudit.setParam2(appDesc.getTypeDesc());
-            //模块信息
-            if ("1".equals(isInstall)) {
-                appAudit.setParam3(moduleInfo);
-            }
             appAudit.setInfo("类型:" + appDesc.getTypeDesc() + ";初始申请空间:" + memSize);
             appAudit.setStatus(AppCheckEnum.APP_WATING_CHECK.value());
             appAudit.setType(AppAuditType.APP_AUDIT.getValue());

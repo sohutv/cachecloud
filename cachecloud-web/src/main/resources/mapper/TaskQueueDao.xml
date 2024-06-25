@@ -100,11 +100,12 @@
                  and status = #{status}
             </when>
         </choose>
+        order by id desc
         <choose>
         	<when test="page != null">
         		<choose>
 		        	<when test="page.totalCount > page.pageSize">
-            			limit #{page.start},#{page.pageSize};
+            			limit #{page.start},#{page.pageSize}
 		        	</when>
 		        	<otherwise>
 		        	    limit #{page.totalCount}

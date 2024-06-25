@@ -1,9 +1,0 @@
-<%--<script src="/resources/manage/plugins/jquery-1.10.2.min.js" type="text/javascript"></script>--%>
-<script src="/resources/manage/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
-<script src="/resources/manage/plugins/data-tables/jquery.dataTables.js" type="text/javascript"></script>
-<script type="text/javascript" src="/resources/select/bootstrap-select.js"></script>
-<script src="/resources/manage/plugins/data-tables/DT_bootstrap.js" type="text/javascript"></script>
-<script src="/resources/manage/scripts/app.js" type="text/javascript"></script>
-<script src="/resources/manage/manage/userManage.js?<%=System.currentTimeMillis()%>" type="text/javascript"></script>
-<script src="/resources/manage/manage/machineManage.js?<%=System.currentTimeMillis()%>" type="text/javascript"></script>
-<script src="/resources/manage/manage/auditManage.js?<%=System.currentTimeMillis()%>" type="text/javascript"></script>

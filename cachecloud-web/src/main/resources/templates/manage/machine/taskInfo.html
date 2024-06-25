@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>迁移信息</title>
+  <#include '/inc/frontResources.html'>
+</head>
+<body role="document dashboard">
+<div class="container">
+  <#include '/inc/head.html'>
+  <div id="systemAlert">
+  </div>
+  <main id="main" class="main px-5 ms-0">
+    <div class="page-content">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            迁移信息
+          </h3>
+        </div>
+
+        <div class="form">
+          <div class="form-body">
+            <div class="card-body">
+              <div class="form-group row">
+                <div class="col-md-12">
+                  <h3 class="card-title text-warning">
+                    迁移状态： ${taskStatus!}  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                    <#if taskId??>
+                      <a target="_blank" href="${request.contextPath}/manage/task/flow?taskId=${taskId!}"> 查看任务详情</a>
+                    </#if>
+                  </h3>
+                  <br>
+                  <br>
+                  <h3 class="card-title">
+                    迁移信息：
+                  </h3>
+                  <table class="table table-striped table-bordered table-hover table-sm" style="white-space: nowrap">
+                    <thead>
+                      <tr>
+                        <th scope="col">物理机ip</th>
+                        <th scope="col">待迁移ip</th>
+                        <th scope="col">已迁移实例/总实例数</th>
+                        <th scope="col">新pod 已迁移实例数</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                          <td>
+                            ${machineIp!}
+                          </td>
+                          <td>
+                            <#if podInstancesMap?? && podInstancesMap?keys??>
+                              <#list podInstancesMap?keys as podIp>
+                                <a target="_blank" href="${request.contextPath}/manage/machine/machineInstances?ip=${podIp!}"> ${podIp!}</a>
+                                <br>
+                              </#list>
+                            </#if>
+                          </td>
+                          <td>
+                            <#assign totalAddCount = 0>
+                            <#if newPodAddedInstancesMap??>
+                              <#list newPodAddedInstancesMap?keys as podIp>
+                                <#assign addCount = newPodAddedInstancesMap[podIp]>
+                                <#assign totalAddCount = totalAddCount + addCount>
+                              </#list>
+                            </#if>
+                            <#assign totalCount = 0>
+                            <#if podInstancesMap?? && podInstancesMap?keys??>
+                              <#list podInstancesMap?keys as podIp>
+                                <#assign totalCount = totalCount + podInstancesMap[podIp]>
+                              </#list>
+                            </#if>
+                            ${totalAddCount!} / ${totalCount!}
+                          </td>
+
+                          <#if newPodAddedInstancesMap??>
+                            <td>
+                              <#list newPodAddedInstancesMap?keys as podIp>
+                                  <a target="_blank" href="${request.contextPath}/manage/machine/machineInstances?ip=${podIp!}"> ${podIp!}</a> &nbsp;&nbsp;&nbsp;&nbsp; ${newPodAddedInstancesMap[podIp]}
+                                  <br>
+                              </#list>
+                            </td>
+                          <#else>
+                            <td></td>
+                          </#if>
+                        </tr>
+                    </tbody>
+                  </table>
+                  <br/>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

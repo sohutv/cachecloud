@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -152,4 +153,48 @@ public class DateUtil {
         long endTime = NumberUtils.toLong(com.sohu.cache.web.util.DateUtil.formatDate(endDate, COLLECT_TIME_FORMAT));
         return new TimeBetween(startTime, endTime, startDate, endDate);
     }
+
+    public static Date customDateByHHMM(int hh, int mm){
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, hh);
+        calendar.set(Calendar.MINUTE, mm);
+        calendar.set(Calendar.SECOND, 0);
+        return calendar.getTime();
+    }
+
+    public static boolean timeLessDiffAfter(Date date1, Date date2, int diffSecond){
+        return (date2.getTime()/1000 > date1.getTime()/1000) && (date2.getTime() - date1.getTime()) / 1000 <= diffSecond;
+    }
+
+    public static boolean timeMoreDiffAfter(Date date1, Date date2, int diffSecond){
+        return (date2.getTime() - date1.getTime()) / 1000 >= diffSecond;
+    }
+
+    public static Date getBeginOfDay(Date date){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
+    }
+
+    public static Date getBeginOfTomorrow(Date date){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.DATE, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
+    }
+
+    public static String getTimeBeforePointedMinute(Date date, int mm){
+        Date newDate = DateUtils.addMinutes(date, 0 - mm);
+        SimpleDateFormat sf = new SimpleDateFormat("yyyyMMddHHmm00");
+        return sf.format(newDate);
+    }
+
 }

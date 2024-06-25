@@ -1,6 +1,7 @@
 package com.sohu.cache.task.entity;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.sohu.cache.task.constant.TaskQueueEnum.TaskStatusEnum;
 import lombok.Data;
 import org.apache.commons.collections.CollectionUtils;
@@ -120,7 +121,7 @@ public class TaskQueue {
             return null;
         }
         JSONObject jsonObject = JSONObject.parseObject(param);
-        return JSONObject.toJSONString(jsonObject, true);
+        return JSONObject.toJSONString(jsonObject, SerializerFeature.PrettyFormat);
     }
 
     public String getStatusDesc() {

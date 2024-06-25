@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sohu.cache.dao.AppBizDao">
+	<sql id="biz_column">
+		id,name,biz_desc
+    </sql>
+
+    <select id="get" resultType="com.sohu.cache.entity.AppBiz" parameterType="long">
+        select           
+        	<include refid="biz_column"/>
+        from app_biz
+        where id = #{id};
+    </select>
+
+    <insert id="save" parameterType="com.sohu.cache.entity.AppBiz" keyProperty="id" useGeneratedKeys="true">
+    	insert into app_biz
+    		(<include refid="biz_column"/>)
+		values
+			(#{id},#{name},#{bizDesc})
+    </insert>
+    
+    <delete id="delete" parameterType="long">
+    	delete from app_biz where id=#{id}
+    </delete>
+
+    <update id="update" parameterType="com.sohu.cache.entity.AppBiz">
+    	update app_biz
+    		set name=#{name}, biz_desc=#{bizDesc}
+    	where id=#{id}
+    </update>
+
+    <select id="getBizList" resultType="com.sohu.cache.entity.AppBiz">
+        select
+        <include refid="biz_column"/>
+        from app_biz order by id
+    </select>
+    
+</mapper>
+
+

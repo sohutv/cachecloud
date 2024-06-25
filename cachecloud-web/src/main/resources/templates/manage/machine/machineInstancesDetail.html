@@ -1,0 +1,593 @@
+<script type="text/javascript">
+  $(window).on('load', function () {
+    $('.selectpicker').selectpicker({
+      'selectedText': 'cat'
+    });
+  });
+
+  var TableManaged = function () {
+    return {
+      //main function to initiate the module
+      init: function () {
+        // begin first table
+        $('#tableDataList').dataTable({
+          "searching": false,
+          "lengthChange": false,
+          "pageLength": 100,
+          "language": {
+            "lengthMenu": "Display _MENU_ records",
+            "paginate": {
+              "previous": "<",
+              "next": ">"
+            },
+            "info": "共_PAGES_页,_TOTAL_条",
+            "infoFiltered": "",
+            "infoEmpty":"共0页,0条",
+            "zeroRecords": "没有找到符合条件的数据",
+          },
+        });
+        jQuery('#tableDataList_wrapper>div:first-child').css("display","none");
+      }
+    };
+  }();
+
+  $(function () {
+    TableManaged.init();
+  });
+
+  function startInstance(appId, instanceId){
+    if(confirm("确认要开启"+instanceId+"实例吗?")){
+      $.ajax({
+        type: "get",
+        url: "${request.contextPath}/manage/instance/startInstance.json",
+        data:
+                {
+                  appId: appId,
+                  instanceId: instanceId
+                },
+        success: function (result) {
+          if(result.success == 1){
+            alert("开启成功!");
+          }else{
+            alert("开启失败, msg: " + result.message)
+          }
+          window.location.reload();
+        }
+      });
+    }
+  }
+
+  function scrollStartInstance(machineIp){
+    if(confirm("确认滚动重启容器"+machineIp+"下所有实例吗?")){
+      $.ajax({
+        type: "get",
+        url: "${request.contextPath}/manage/instance/scrollStartInstance.json",
+        data:
+                {
+                  machineIp: machineIp
+                },
+        success: function (result) {
+          if(result.success == 1){
+            alert(result.message);
+          }else{
+            alert("重启失败, msg: " + result.message)
+          }
+          window.location.reload();
+        }
+      });
+    }
+  }
+
+  function migrateInstance(machineIp){
+
+    var content = "";
+    // 1.判断是全部实例迁移还是部分实例
+    var instanceIds ="";
+    $('#selectInstance option:selected').each(function(){
+      var instanceId = parseInt($(this).attr("value"));
+      if(instanceId > 0){
+        instanceIds += instanceId+",";
+      }else{
+        instanceIds = -1;
+        return false;;
+      }
+    });
+    // 2.目标机器判断
+    var targetIp = $('#targetContainer option:selected').attr("value");
+    if(typeof(targetIp) == "undefined" || targetIp == ''){
+      alert("请选择目标机器！");
+      return;
+    }
+    //3.确认实例
+    if(isEmpty(instanceIds)){
+      alert("请选择要迁移的实例！");
+      return;
+    }
+
+    // 4.是否强制迁移
+    var forceFlag = $('#forceFlag option:selected').attr("value");
+    if(forceFlag == 'true'){
+      if(parseInt(instanceIds) == -1){
+        content = "确认将容器"+machineIp+"全部实例——强制——迁移到"+targetIp+"容器?";
+      }else{
+        alert("强制迁移无需选择实例！");
+        return;
+      }
+    }else{
+      if(parseInt(instanceIds) == -1){
+        content = "确认将容器"+machineIp+"全部实例迁移到"+targetIp+"容器?";
+      }else{
+        content = "确认将容器"+machineIp+"实例ID("+instanceIds+")迁移到"+targetIp+"容器?";
+      }
+    }
+
+    // 4.资源是否充足判断
+    if(parseFloat($("#containerMM").attr("value")).toFixed(2) * 0.9 < parseFloat($("#needMM").attr("value")).toFixed(2)){
+      alert("目标机器内存使用率将超过90%,请重新分配实例或选择其他目标机器！");
+      return;
+    }
+
+    // 5.发起迁移
+    if(confirm(content)){
+      $.ajax({
+        type: "get",
+        url: "${request.contextPath}/manage/instance/migrate.json",
+        data:
+                {
+                  sourceIp: machineIp,
+                  targetIp: targetIp,
+                  instanceIds: instanceIds, // -1:迁移所有实例 ，部分实例迁移,部分实例迁移存这些实例id
+                  forceFlag: forceFlag // 是否强制迁移
+                },
+        success: function (result) {
+          if(result.status == 1){
+            $("#migrateInstanceBtn").click();
+            if(parseInt(instanceIds) == -1){
+              $("#tips").html("<label style=\"color:red\">当前机器实例正在迁移到新容器:<a target=\"blank\" href=\"${request.contextPath}/manage/machine/machineInstances?ip="+targetIp+"\">"+targetIp+"</a></label>");
+            }else{
+              $("#tips").html("<label style=\"color:red\">当前机器实例("+instanceIds+")正在迁移到新容器:<a target=\"blank\" href=\"${request.contextPath}/manage/machine/machineInstances?ip="+targetIp+"\">"+targetIp+"</a></label>");
+            }
+          }
+        }
+      });
+    }
+  }
+
+  function isEmpty(property) {
+    return (property === null || property === "" || typeof property === "undefined");
+  }
+
+  // 计算迁移实例需要内存
+  function instanceChange(){
+
+    var totalUsed = 0.00;
+    $('#selectInstance option:selected').each(function(){
+      totalUsed += parseFloat($(this).attr("memoryUsed"));
+    });
+    $("#needMM").html("<label style=\"color:darkgray\">需要空间:"+totalUsed.toFixed(2)+"G<label>");
+    $("#needMM").attr("value",totalUsed);
+  }
+
+  // 迁移机器内存剩余内存
+  function containerChange(){
+
+    var totalUsed = 0.00;
+    $('#targetContainer option:selected').each(function(){
+      totalUsed += parseFloat($(this).attr("memoryUsed"));
+    });
+    $("#containerMM").attr("value",totalUsed);
+
+    //内存提示
+    if(parseFloat(totalUsed).toFixed(2) - parseFloat($("#needMM").attr("value")).toFixed(2) > 0){
+      $("#containerMM").html("<label style=\"color:green\">剩余空间:"+totalUsed.toFixed(2)+"G<label>");
+    }else{
+      $("#containerMM").html("<label style=\"color:red\">空间不够:"+totalUsed.toFixed(2)+"G<label>");
+    }
+  }
+
+  function shutdownInstance(appId, instanceId){
+    if(confirm("确认要下线"+instanceId+"实例吗?")){
+      $.ajax({
+        type: "get",
+        url: "${request.contextPath}/manage/instance/shutdownInstance.json",
+        data:
+                {
+                  appId: appId,
+                  instanceId: instanceId
+                },
+        success: function (result) {
+          if(result.success == 1){
+            alert("关闭成功!");
+          }else{
+            alert("关闭失败, msg: " + result.message)
+          }
+          window.location.reload();
+        }
+      });
+    }
+  }
+</script>
+
+<div class="card col-md-12">
+  <div class="card-header">
+    <h3 class="card-title">
+      <#if (machineInfo.k8sType==1)>
+        机器(ip=<a target="_blank" href="${request.contextPath}/manage/machine/pod/changelist?ip=${machineInfo.ip!}" title="查看pod变更记录">${machineInfo.ip!}</a>)实例列表
+      <#else>
+        机器(ip=${machineInfo.ip!})实例列表
+      </#if>
+      <a target="_blank" onclick="scrollStartInstance('${machineInfo.ip!}')" class="btn btn-success">
+        滚动重启
+      </a>
+      <button id="sample_editable_1_new" class="btn btn-success" data-bs-target="#migrateInstanceModal" data-bs-toggle="modal" onclick="instanceChange()">
+        一键迁移
+      </button>
+      <label id="tips"></label>
+    </h3>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="portlet-title">
+          <div class="caption"><i class="bi bi-globe"></i>实例列表</div>
+          <div class="tools">
+            <a href="javascript:;" class="collapse"></a>
+          </div>
+        </div>
+        <div class="portlet box light-grey table-responsive" id="clientIndex">
+          <table class="table table-striped table-bordered table-hover table-sm" id="tableDataList" style="white-space: nowrap">
+            <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">应用ID</th>
+              <th scope="col">应用名</th>
+              <th scope="col">应用类型</th>
+              <th scope="col">负责人</th>
+              <th scope="col">服务器ip:port</th>
+              <th scope="col">实例空间使用情况</th>
+              <#if machineInfo.type?? && (machineInfo.type == 6)>
+                <th scope="col">实例磁盘使用情况</th>
+              </#if>
+              <th scope="col">连接数</th>
+              <th scope="col">角色</th>
+              <th scope="col">机器可用内存(G)</th>
+              <#if machineInfo.type?? && (machineInfo.type == 6)>
+                <th scope="col">机器可用磁盘(G)</th>
+              </#if>
+              <th scope="col">日志</th>
+              <th scope="col">实例操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <#list instanceList as instance>
+            <tr>
+              <td><a href="${request.contextPath}/admin/instance/index?instanceId=${instance.id!}"
+                     target="_blank">${instance.id!}</a></td>
+              <#assign instanceStatsMapKey = (instance.ip + ":" + instance.port)>
+              <#assign curAppId = instance.appId>
+              <td>
+                <#if (curAppId > 0)>
+                  <a target="_blank" href="${request.contextPath}/manage/app/index?appId=${curAppId!}">
+                    ${curAppId!}
+                  </a>
+                </#if>
+              </td>
+              <td>
+                <#if (curAppId > 0) && appInfoMap?? && (appInfoMap?api.get(curAppId))??>
+                  <a target="_blank" href="${request.contextPath}/admin/app/index?appId=${curAppId!}">
+                    ${(appInfoMap?api.get(curAppId)).name!}
+                  </a>
+                </#if>
+              </td>
+              <td>
+                <#if (curAppId > 0) && appInfoMap?? && (appInfoMap?api.get(curAppId))??>
+                  <a target="_blank" href="${request.contextPath}/admin/app/index?appId=${curAppId!}">
+                    ${(appInfoMap?api.get(curAppId)).typeDesc!}
+                  </a>
+                </#if>
+              </td>
+              <td>
+                <#if appInfoMap?? && (appInfoMap?api.get(curAppId))??>
+                  ${(appInfoMap?api.get(curAppId)).officer!}
+                </#if>
+              </td>
+              <td>${instance.ip!}:${instance.port!}</td>
+              <td>
+                <div class="progress progress-fs-1">
+                  <#if instanceStatsMap?? && instanceStatsMap[instanceStatsMapKey]?? && instanceStatsMap[instanceStatsMapKey].memUsePercent?? && (instanceStatsMap[instanceStatsMapKey].memUsePercent >= 80)>
+                    <#assign progressBarStatus = "bg-danger">
+                  <#else>
+                    <#assign progressBarStatus = "bg-success">
+                  </#if>
+                  <#if instanceStatsMap?? && instanceStatsMap[instanceStatsMapKey]??>
+                    <#assign memUsePercentValue = (instanceStatsMap[instanceStatsMapKey].memUsePercent)!>
+                  <#else>
+                    <#assign memUsePercentValue = 0>
+                  </#if>
+                  <div class="progress-bar ${progressBarStatus!}"
+                       role="progressbar"
+                       aria-valuenow="${memUsePercentValue!}"
+                       aria-valuemax="100"
+                       aria-valuemin="0"
+                       style="width: ${memUsePercentValue!}%; overflow: visible;">
+                    <span style="color: #000000; margin-bottom: 0">
+                      <#if instanceStatsMap?? && instanceStatsMap[instanceStatsMapKey]??>
+                        <#assign usedMemoryValue = (instanceStatsMap[instanceStatsMapKey].usedMemory!?number)>
+                        <#assign maxMemoryValue = (instanceStatsMap[instanceStatsMapKey].maxMemory!?number)>
+                      <#else>
+                        <#assign usedMemoryValue = 0>
+                        <#assign maxMemoryValue = 0>
+                      </#if>
+                      ${(usedMemoryValue/ 1024 / 1024 / 1024)?string("0.00")}G&nbsp;&nbsp;Used
+                      <#if machineInfo.type?? && (machineInfo.type != 6)>
+                        /${(maxMemoryValue/ 1024 / 1024 / 1024)?string("0.00")}G&nbsp;&nbsp;Total
+                      </#if>
+                    </span>
+                  </div>
+                </div>
+              </td>
+              <#if machineInfo.type?? && (machineInfo.type == 6)>
+                <td>
+                  <div class="progress progress-fs-1">
+                    <#if instanceStatsMap?? && (instanceStatsMap[instanceStatsMapKey])?? && ((instanceStatsMap[instanceStatsMapKey]).usedDisk??)
+                    && (instance.mem > 0)>
+                      <#assign diskUsedPercentValue = ((instanceStatsMap[instanceStatsMapKey]).usedDisk * 100/(instance.mem * 1024 * 1024))>
+                    <#else>
+                      <#assign diskUsedPercentValue = 0>
+                    </#if>
+                    <#if (diskUsedPercentValue >= 80)>
+                      <#assign progressBarStatus = "bg-danger">
+                    <#else>
+                      <#assign progressBarStatus = "bg-success">
+                    </#if>
+                    <div class="progress-bar ${progressBarStatus!}" role="progressbar"
+                         aria-valuenow="${diskUsedPercentValue}"
+                         aria-valuemax="100"
+                         aria-valuemin="0"
+                         style="width: ${diskUsedPercentValue!}%; overflow: visible;">
+                      <span style="color: #000000; margin-bottom: 0">
+                        <#if instanceStatsMap?? && (instanceStatsMap[instanceStatsMapKey])?? && ((instanceStatsMap[instanceStatsMapKey]).usedDisk??)>
+                          <#assign userDiskValue = ((instanceStatsMap[instanceStatsMapKey]).usedDisk / 1024 / 1024 / 1024)>
+                        <#else>
+                          <#assign userDiskValue = 0>
+                        </#if>
+                        <#if (instance.mem??)>
+                          <#assign maxDiskValue = (instance.mem / 1024)>
+                        <#else>
+                          <#assign maxDiskValue = 0>
+                        </#if>
+                        ${userDiskValue?string("0.00")}G&nbsp;&nbsp;Used/${maxDiskValue?string("0.00")}G&nbsp;&nbsp;Total
+                      </span>
+                    </div>
+                  </div>
+                </td>
+              </#if>
+              <td>
+                <#if instanceStatsMap?? && instanceStatsMap[instanceStatsMapKey]??>
+                  <#assign currConnectionsValue = (instanceStatsMap[instanceStatsMapKey].currConnections)!>
+                <#else>
+                  <#assign currConnectionsValue = 0>
+                </#if>
+                ${currConnectionsValue!}
+              </td>
+              <td>${instance.roleDesc!}</td>
+              <td>
+                <#if machineInfo.type?? && (machineInfo.type == 6)>
+                  <#if machineStatsMap?? && machineStatsMap[instance.ip]?? && (machineStatsMap[instance.ip].info??) &&
+                    (machineStatsMap[instance.ip].info.mem??) && (machineStatsMap[instance.ip].machineMemInfo??) && (machineStatsMap[instance.ip].machineMemInfo.usedMemRss??)>
+                    ${((machineStatsMap[instance.ip].info.mem)?number - (machineStatsMap[instance.ip].machineMemInfo.usedMemRss/1024/1024/1024))?string("0.00")}
+                  </#if>
+                <#else>
+                  <#if machineCanUseMem?? && (machineCanUseMem[instance.ip])??>
+                    <#assign machineCanUseMemValue = (machineCanUseMem[instance.ip])>
+                  <#else>
+                    <#assign machineCanUseMemValue = 0>
+                  </#if>
+                  ${(machineCanUseMemValue/1024/1024/1024)?string("0.00")}
+                </#if>
+              </td>
+              <#if machineInfo.type?? && (machineInfo.type == 6)>
+                <td>
+                  <#if machineStatsMap?? && machineStatsMap[instance.ip]?? && (machineStatsMap[instance.ip].info??) &&
+                    (machineStatsMap[instance.ip].info.disk??) && (machineStatsMap[instance.ip].machineMemInfo??) && (machineStatsMap[instance.ip].machineMemInfo.usedDisk??)>
+                    ${((machineStatsMap[instance.ip].info.disk)?number - (machineStatsMap[instance.ip].machineMemInfo.usedDisk/1024/1024/1024))?string("0.00")}
+                  </#if>
+                </td>
+              </#if>
+              <td>
+                <a target="_blank" href="${request.contextPath}/manage/instance/log?instanceId=${instance.id!}">查看</a>
+              </td>
+              <td>
+                <#if (instance.status == 0)>
+                  <a target="_blank" onclick="startInstance('${curAppId!}', '${instance.id!}')" class="btn btn-success">
+                    启动实例
+                  </a>
+                </#if>
+                <a target="_blank" onclick="shutdownInstance('${curAppId!}', '${instance.id!}')" class="btn btn-danger">
+                  下线实例
+                </a>
+              </td>
+            </tr>
+            </#list>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="migrateInstanceModal" class="modal fade" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">实例替换迁移</h4>
+        <b style="font-size:12px;color:blue"><i>支持所有/部分cluster实例迁移</i></b>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+      </div>
+
+      <form class="form-horizontal form-bordered form-row-stripped">
+        <div class="modal-body">
+          <div class="row">
+            <!-- 控件开始 -->
+            <div class="col-md-12">
+              <!-- form-body开始 -->
+              <div class="form-body">
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    当前机器ip：
+                  </label>
+                  <div class="col-md-8">
+                    ${machineInfo.ip!}
+                    <#if machineInfo.type?? && (machineInfo.type == 6)>
+                      <label class="label label-info">宿主:${machineInfo.realIp!} cpu:${machineInfo.cpu!}核  mem:${machineInfo.mem!}G  disk:${machineInfo.disk!}G</label>
+                    <#else>
+                      <label class="label label-info">宿主:${machineInfo.realIp!} cpu:${machineInfo.cpu!}核  mem:${machineInfo.mem!}G</label>
+                    </#if>
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    <font color="red">*</font>选择实例：
+                  </label>
+                  <div class="col-md-5">
+                    <#assign instanceMemoryUsed = 0>
+                    <#assign instanceDiskUsed = 0>
+                    <#list instanceList as instance>
+                      <#if (instance.type==2) || (instance.type==12)>
+                        <#assign instanceStatsMapKey = (instance.ip + ":" + instance.port)>
+                        <#if instanceStatsMap?? && instanceStatsMap[instanceStatsMapKey]??>
+                          <#assign instanceMemoryUsed = (((instanceStatsMap[instanceStatsMapKey].usedMemory?number) / 1024 / 1024 / 1024) + instanceMemoryUsed)>
+                        <#else>
+                          <#assign instanceMemoryUsed = (0 + instanceMemoryUsed)>
+                        </#if>
+                      </#if>
+
+                      <#if (instance.type==12)>
+                        <#assign instanceStatsMapKey = (instance.ip + ":" + instance.port)>
+                        <#if instanceStatsMap?? && instanceStatsMap[instanceStatsMapKey]??>
+                          <#assign instanceDiskUsed = (((instanceStatsMap[instanceStatsMapKey].usedDisk?number) / 1024 / 1024 / 1024) + instanceDiskUsed)>
+                        <#else>
+                          <#assign instanceDiskUsed = (0 + instanceDiskUsed)>
+                        </#if>
+                      </#if>
+                    </#list>
+
+                    <#if (machineInfo.type==6)>
+                        <#assign machineUsedCapacity = instanceDiskUsed>
+                    <#else>
+                        <#assign machineUsedCapacity = instanceMemoryUsed>
+                    </#if>
+
+                    <select id="selectInstance" class="selectpicker bla bla bli w-100 border rounded" multiple data-live-search="true" onchange="instanceChange()">
+                      <option value="-1" selected="true" memoryUsed="${machineUsedCapacity!}">全部cluster实例(默认)</option>
+                      <#list instanceList as instance>
+                        <#assign instanceStatsMapKey = (instance.ip + ":" + instance.port)>
+                        <#if instanceStatsMap?? && instanceStatsMap[instanceStatsMapKey]??>
+                          <#assign instanceMemoryUsedValue = ((instanceStatsMap[instanceStatsMapKey].usedMemory?number) / 1024 / 1024 / 1024)>
+                          <#assign instanceDiskUsedValue = ((instanceStatsMap[instanceStatsMapKey].usedDisk?number) / 1024 / 1024 / 1024)>
+                          <#assign maxMemoryValue = ((instanceStatsMap[instanceStatsMapKey].maxMemory?number) / 1024 / 1024 / 1024)>
+                        <#else>
+                          <#assign instanceMemoryUsedValue = 0>
+                          <#assign instanceDiskUsedValue = 0>
+                          <#assign maxMemoryValue = 0>
+                        </#if>
+                        <#if (instance.type==2)>
+                          <option value="${instance.id!}" memoryUsed="${instanceMemoryUsedValue!}"> 【${instance.id!}】 ${instance.ip!}:${instance.port!}
+                            (Used:${(instanceMemoryUsedValue)?string("0.00")}G/
+                              ${(maxMemoryValue)?string("0.00")}G)
+                          </option>
+                        </#if>
+                        <#if (instance.type==12)>
+                          <option value="${instance.id!}" memoryUsed="${instanceDiskUsedValue!}"> 【${instance.id!}】 ${instance.ip!}:${instance.port!}
+                            (Used:${(instanceDiskUsedValue)?string("0.00")}G/
+                            ${(instance.mem/1024)?string("0.00")}G) (Mem:${(instanceMemoryUsedValue)?string("0.00")}G)
+                          </option>
+                        </#if>
+                      </#list>
+                    </select>
+                  </div>
+                  <label class="col-form-label col-md-4" id="needMM" value="0">
+                  </label>
+                </div>
+
+                <div id="redisMachines" class="form-group row" >
+                  <label class="col-form-label col-md-3 text-end">
+                    <font color="red">*</font>目标机器ip：
+                  </label>
+                  <div class="col-md-5">
+                    <select id="targetContainer" class="selectpicker bla bla bli w-100 border rounded" data-live-search="true" onchange="containerChange()">
+                      <#list machineList as machine>
+                        <#if (machine.info.type==0) || (machine.info.type==6)>
+                          <#if machine.info.ip?? && machineInstanceCountMap[machine.info.ip]??>
+                            <#assign usedCpu = machineInstanceCountMap[machine.info.ip]?string("0")>
+                          <#else>
+                            <#assign usedCpu = "0">
+                          </#if>
+                          <#assign cpu = machine.info.cpu?string("0")>
+                          <#assign cpuUsage = ((usedCpu?number)/(cpu?number)*10)?string("0")>
+                          <#assign usedMemRss = ((machine.machineMemInfo.usedMemRss?number)/1024/1024/1024)?string("0.0")>
+                          <#assign mem = machine.info.mem?string("0.0")>
+                          <#assign disk = machine.info.disk?string("0.0")>
+                          <#assign memUsage = ((usedMemRss?number)/(mem?number)*100)?string("0")>
+                          <#if machine.diskUsageRatio?? && machine.diskTotal??>
+                            <#assign diskUsageRatio = machine.diskUsageRatio>
+                            <#assign diskUsage = (((machine.diskTotal?number)/1024 - (machine.diskAvailable?number)/1024)?string("0"))>
+                          <#else>
+                            <#assign diskUsageRatio = '0'>
+                            <#assign diskUsage = '0'>
+                          </#if>
+
+                          <#if (machine.info.useType==0)>
+                            <option value="${machine.ip!}" memoryUsed="${(mem?number)-(usedMemRss?number)}">${machine.ip!}：${usedCpu!}/${cpu!}核(${cpuUsage!}%) ${usedMemRss!}/${mem!}G(${memUsage!}%)  ${diskUsage!}/${disk!}G(${diskUsageRatio!}%) 【${machine.info.realIp!}-${machine.info.rack!}】【专用:${machine.info.extraDesc!}】</option>
+                          </#if>
+                          <#if (machine.info.useType==1)>
+                            <option value="${machine.ip!}" memoryUsed="${(mem?number)-(usedMemRss?number)!}">${machine.ip!}：${usedCpu!}/${cpu!}核(${cpuUsage!}%) ${usedMemRss!}/${mem!}G(${memUsage!}%) 【${machine.info.realIp!}-${machine.info.rack!}】【测试:${machine.info.extraDesc!}】</option>
+                          </#if>
+                          <#if (machine.info.useType==2)>
+                            <option value="${machine.ip!}" memoryUsed="${(mem?number)-(usedMemRss?number)}">${machine.ip!}：${usedCpu!}/${cpu!}核(${cpuUsage!}%) ${usedMemRss!}/${mem!}G(${memUsage!}%) 【${machine.info.realIp!}-${machine.info.rack!}】【混合:${machine.info.extraDesc!}】</option>
+                          </#if>
+                        </#if>
+                      </#list>
+                      </optgroup>
+                    </select>
+                  </div>
+                  <label class="col-form-label col-md-4" id="containerMM" value="0">
+                  </label>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    <font color="red">!</font>是否强制：
+                  </label>
+                  <div class="col-md-5">
+                    <select id="forceFlag" name="forceFlag" class="selectpicker bla bla bli w-100 border rounded">
+                      <option value="false" selected>否 &nbsp;&nbsp;&nbsp;&nbsp;</option>
+                      <option value="true">是——仅机器(磁盘)故障使用&nbsp;&nbsp;&nbsp;&nbsp;</option>
+                    </select>
+                  </div>
+                </div>
+
+              </div>
+              <!-- form-body 结束 -->
+            </div>
+            <#if machine?? && machine.info??>
+                <#assign machineInfoId = machine.info.id!>
+            <#else>
+                <#assign machineInfoId = ''>
+            </#if>
+            <div id="machineInfo${machineInfoId!}"></div>
+            <!-- 控件结束 -->
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="migrateInstanceBtn"  data-bs-dismiss="modal" class="btn btn-secondary" >Close</button>
+          <button type="button" class="btn btn-danger" onclick="migrateInstance('${machineInfo.ip!}')">Ok</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>

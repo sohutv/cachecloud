@@ -1,0 +1,56 @@
+<div class="row">
+  <div class="col-12">
+    <#include "instanceConfig.html">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">配置修改(<font color="red">${appAudit.info!}</font>)</h4>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <h4 class="card-title">
+            <i class="bi bi-globe"></i>配置
+          </h4>
+        </div>
+        <!-- BEGIN FORM-->
+        <form action="${request.contextPath}/manage/instance/addInstanceConfigChange" method="post"
+              class="form-horizontal form-bordered form-row-stripped"
+              onsubmit="return checkInstanceConfig();">
+          <div class="form-body">
+            <div class="form-group row">
+              <label class="col-form-label col-md-3 text-end">
+                配置项:
+              </label>
+              <div class="col-md-5">
+                <input type="text" name="instanceConfigKey" id="instanceConfigKey" value="${instanceConfigKey!}" class="form-control" />
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label class="col-form-label col-md-3 text-end">配置值:</label>
+              <div class="col-md-5">
+                <input type="text" name="instanceConfigValue" id="instanceConfigValue" value="${instanceConfigValue!}" class="form-control">
+              </div>
+            </div>
+            <#if instanceInfo??>
+              <input type="hidden" name="host" value="${instanceInfo.ip!}">
+              <input type="hidden" name="port" value="${instanceInfo.port!}">
+            </#if>
+
+            <input type="hidden" name="appId" value="${appId!}">
+            <input type="hidden" name="appAuditId" value="${appAuditId!}">
+
+            <div class="form-group row">
+              <div class="offset-md-3 col-md-9">
+                <button type="submit" class="btn btn-success">
+                  <i class="bi bi-check"></i>
+                  确认
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+        <!-- END FORM-->
+      </div>
+    </div>
+  </div>
+</div>

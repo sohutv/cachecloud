@@ -27,6 +27,14 @@ public interface InstanceAlertConfigService {
     List<InstanceAlertConfig> getByType(int type);
 
     /**
+     * 根据类型获取实例报警配置列表
+     * @param type 报警类型
+     * @param appType 应用类型
+     * @return
+     */
+    List<InstanceAlertConfig> getByTypeAndAppType(int type, int appType);
+
+    /**
      * 保存
      * @param instanceAlertConfig 报警实例
      * @return
@@ -58,9 +66,10 @@ public interface InstanceAlertConfigService {
      * 根据alertConfig 获取全局配置，并根据比较类型进行筛选出紧急程度
      * @param alertConfig
      * @param compareType
+     * @param appType
      * @return
      */
-    int getImportantLevelByAlertConfigAndCompareType(String alertConfig, int compareType);
+    InstanceAlertConfig getGlobalAlertConfigByCondition(String alertConfig, int compareType, Integer appType);
 
     /**
      * 更新alertValue和checkCycle
@@ -77,8 +86,9 @@ public interface InstanceAlertConfigService {
      * @param alertConfig
      * @param compareType
      * @param importantLevel
+     * @param appType
      */
-    void updateImportantLevel(String alertConfig, int compareType, int importantLevel);
+    void updateImportantLevel(String alertConfig, int compareType, int importantLevel, Integer appType);
 
     /**
      * 更新配置的最后检测时间

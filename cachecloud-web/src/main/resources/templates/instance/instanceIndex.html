@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>实例统计信息</title>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <#include '/inc/frontResources.html'>
+</head>
+<body class="hold-transition sidebar-mini layout-navbar-fixed">
+  <div class="wrapper">
+    <#include '/inc/head.html'>
+    <div class="content-wrapper ml-0">
+      <div class="content">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-12">
+              <div id="systemAlert">
+              </div>
+              <div class="card">
+                <div class="card-body">
+                  <nav class="nav">
+                    <ul class="nav nav-tabs d-flex align-items-center" id="app_tabs">
+                      <li id="instance_stat" class="nav-item" data-url="${request.contextPath}/admin/instance/stat?instanceId=${instanceId!}&startDate=${startDate!}&endDate=${endDate!}">
+                        <a class="nav-link d-flex" href="?instanceId=${instanceId!}&tabTag=instance_stat">实例统计信息</a>
+                      </li>
+                      <li id="app_topology" class="nav-item" data-url="${request.contextPath}/admin/app/topology?appId=${appId!}">
+                        <a class="nav-link d-flex" href="?instanceId=${instanceId!}&tabTag=app_topology">拓扑结构</a>
+                      </li>
+                      <#if (type == 2) || (type == 6) ||  (type == 11) || (type == 12)>
+                        <li id="instance_slowSelect" class="nav-item" data-url="${request.contextPath}/admin/instance/slowSelect?instanceId=${instanceId!}">
+                          <a class="nav-link d-flex" href="?instanceId=${instanceId!}&tabTag=instance_slowSelect">慢查询分析</a>
+                        </li>
+                        <li id="instance_configSelect" class="nav-item" data-url="${request.contextPath}/admin/instance/configSelect?instanceId=${instanceId!}&appId=${appId!}">
+                          <a class="nav-link d-flex" href="?instanceId=${instanceId!}&tabTag=instance_configSelect">配置查询</a>
+                        </li>
+                      </#if>
+                      <li id="instance_clientList" class="nav-item" data-url="${request.contextPath}/admin/instance/clientList?instanceId=${instanceId!}&condition=${condition!}">
+                        <a class="nav-link d-flex" href="?instanceId=${instanceId!}&tabTag=instance_clientList">连接信息</a>
+                      </li>
+                      <li id="instance_fault" class="nav-item" data-url="${request.contextPath}/admin/instance/fault?instanceId=${instanceId!}&startDate=${startDate!}&endDate=${endDate!}">
+                        <a class="nav-link d-flex" href="?instanceId=${instanceId!}&tabTag=instance_fault">故障报警</a>
+                      </li>
+              <!--        <li id="instance_advancedAnalysis" class="nav-item" data-url="${request.contextPath}/admin/instance/advancedAnalysis?instanceId=${instanceId!}&startDate=${startDate!}&endDate=${endDate!}">-->
+              <!--          <a class="nav-link d-flex" href="?instanceId=${instanceId!}&tabTag=instance_advancedAnalysis">命令曲线</a>-->
+              <!--        </li>-->
+                      <li id="instance_command" class="nav-item" data-url="${request.contextPath}/admin/instance/command?instanceId=${instanceId!}">
+                        <a class="nav-link d-flex" href="?instanceId=${instanceId!}&tabTag=instance_command">命令执行</a>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-body">
+                  <div class="tab-content">
+                    <div class="tab-pane active" id="instance_statTab"></div>
+                    <div class="tab-pane" id="app_topologyTab"></div>
+                    <div class="tab-pane" id="instance_slowSelectTab"></div>
+                    <div class="tab-pane" id="instance_configSelectTab"></div>
+                    <div class="tab-pane" id="instance_clientListTab"></div>
+                    <div class="tab-pane" id="instance_faultTab"></div>
+                    <div class="tab-pane" id="instance_advancedAnalysisTab"></div>
+                    <div class="tab-pane" id="instance_commandTab"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <#include "/inc/footer.html">
+  </div>
+  <script type="text/javascript">
+    function showTab(tab) {
+      var url = $("#" + tab).attr("data-url");
+      if(url == null || url == undefined || url == ""){
+        return;
+      }
+      $.get($("#" + tab).attr("data-url"), function (result) {
+        $("#" + tab + "Tab").html(result);
+      });
+    }
+
+    function refreshActiveTab() {
+      var tab = getQueryString("tabTag");
+      if (tab) {
+        $("#" + tab + " a").addClass("active");
+        $("#" + tab + "Tab").addClass("active").siblings().removeClass("active");
+      } else {
+        tab = "instance_stat";
+        $("#" + tab + " a").addClass("active");
+      }
+      console.log("tab:" + tab)
+      showTab(tab);
+      $("#tabs li a").tooltip({placement: "bottom"});
+    }
+
+    $(function () {
+      refreshActiveTab();
+    });
+
+    function getQueryString(name) {
+      var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+      console.log("window.location.search: "+ window.location.search);
+      var r = window.location.search.substr(1).match(reg);
+      if (r != null) return unescape(r[2]);
+      return null;
+    }
+  </script>
+</body>
+</html>

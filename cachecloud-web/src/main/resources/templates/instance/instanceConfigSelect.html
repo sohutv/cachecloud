@@ -1,0 +1,79 @@
+<script type="text/javascript">
+  function reloadInstanceDetailPage(appId,instanceId){
+    location.href = "${request.contextPath}/admin/instance/index?instanceId="+instanceId + "&appId="+appId + "&tabTag=instance_configSelect";
+  }
+  function instanceConfigChange(appId, instanceId){
+    var instanceConfigKey = document.getElementById("instanceConfigKey");
+    if(instanceConfigKey.value == ""){
+      alert("配置项不能为空");
+      instanceConfigKey.focus();
+      return false;
+    }
+
+    var instanceConfigValue = document.getElementById("instanceConfigValue");
+    if(instanceConfigValue.value == ""){
+      alert("配置值不能为空");
+      instanceConfigValue.focus();
+      return false;
+    }
+
+    var instanceConfigReason = document.getElementById("instanceConfigReason");
+    if(instanceConfigReason.value == ""){
+      alert("配置原因不能为空");
+      instanceConfigReason.focus();
+      return false;
+    }
+
+    var instanceConfigChangeBtn = document.getElementById("instanceConfigChangeBtn");
+    instanceConfigChangeBtn.disabled = true;
+
+    $.post(
+            '${request.contextPath}/admin/app/changeInstanceConfig',
+            {
+              appId: appId,
+              instanceId: instanceId,
+              instanceConfigKey: instanceConfigKey.value,
+              instanceConfigValue: instanceConfigValue.value,
+              instanceConfigReason: instanceConfigReason.value
+            },
+            function(data){
+              if(data==1){
+                alert("申请成功，请在邮件中关注申请状况.");
+                $("#instanceConfigChangeInfo").html("<div class='alert alert-error' ><strong>Success!</strong>更新成功，窗口会自动关闭<button class='btn-close' data-bs-dismiss='alert'></button></div>");
+                setTimeout("$('instanceConfigChangeModal').modal('hide');reloadInstanceDetailPage("+appId+","+instanceId+");",1000);
+              }else{
+                instanceConfigChangeBtn.disabled = false;
+                $("#instanceConfigChangeInfo").html("<div class='alert alert-error' ><strong>Error!</strong>更新失败！<button class='btn-close' data-bs-dismiss='alert'></button></div>");
+              }
+            }
+    );
+  }
+</script>
+<div class="col-md-12">
+  <div class="card-header">
+    <h3 class="card-title">
+      实例当前配置信息
+      <a target="_blank" href="${request.contextPath}/admin/app/appConfig?appId=${appId!}&instanceId=${instanceId!}" class="btn btn-info" role="button">配置修改申请(当前实例)</a>
+    </h3>
+  </div>
+  <div class="card-body table-responsive">
+    <!-- table begin -->
+    <table class="table table-striped border">
+      <thead>
+      <th scope="col">配置项</td>
+      <th scope="col">配置值</td>
+      </thead>
+      <tbody>
+      <#list redisConfigList?keys as key>
+        <tr>
+          <th scope="row">
+            ${key}
+          </th>
+          <td>${(redisConfigList[key])!}</td>
+        </tr>
+      </#list>
+      </tbody>
+    </table>
+    <!-- End Table with stripped rows -->
+  </div>
+</div>

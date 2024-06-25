@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>CacheCloud服务器状态</title>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <#include '/inc/frontResources.html'>
+</head>
+<body class="hold-transition sidebar-mini layout-navbar-fixed">
+<div class="wrapper">
+  <#include '/inc/head.html'>
+  <div class="content-wrapper ml-0">
+    <div class="content">
+      <div id="main" class="container">
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body">
+                <nav class="nav">
+                  <ul class="nav nav-tabs d-flex align-items-center" id="app_tabs">
+                    <li id="overview" class="nav-item" data-url="${request.contextPath}/server/overview?ip=${ip!}&date=${date!}">
+                      <a class="nav-link d-flex" onclick="refreshActiveTab('overview')">概览</a>
+                    </li>
+                    <li id="cpu" class="nav-item" data-url="${request.contextPath}/server/cpu?ip=${ip!}&date=${date!}">
+                      <a class="nav-link d-flex" onclick="refreshActiveTab('cpu')">cpu</a>
+                    </li>
+                    <li id="net" class="nav-item" data-url="${request.contextPath}/server/net?ip=${ip!}&date=${date!}">
+                      <a class="nav-link d-flex" onclick="refreshActiveTab('net')">net</a>
+                    </li>
+                    <li id="disk" class="nav-item" data-url="${request.contextPath}/server/disk?ip=${ip!}&date=${date!}">
+                      <a class="nav-link d-flex" onclick="refreshActiveTab('disk')">disk</a>
+                    </li>
+                  </ul>
+                </nav>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-body">
+                <div class="tab-content">
+                  <div class="tab-pane active" id="overviewTab">
+                  </div>
+                  <div class="tab-pane" id="cpuTab">
+                  </div>
+                  <div class="tab-pane" id="netTab">
+                  </div>
+                  <div class="tab-pane" id="diskTab">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <#include "/inc/footer.html">
+</div>
+<script type="text/javascript">
+  function showTab(tab) {
+    $.get($("#" + tab).attr("data-url"), function (result) {
+      $("#" + tab + "Tab").html(result);
+    });
+  }
+
+  function refreshActiveTab(tab) {
+    if (tab == undefined || tab == null || tab.length == 0) {
+      tab = 'overview';
+    }
+    if (tab != undefined && tab != null && tab.length > 0) {
+      $("#app_tabs li a").removeClass("active");
+      $("#" + tab + " a").addClass("active");
+      $("#" + tab + "Tab").addClass("active").siblings().removeClass("active");
+    } else {
+      tab = "overview";
+      $("#app_tabs li a").removeClass("active");
+      $("#" + tab + " a").addClass("active");
+    }
+    showTab(tab);
+    $("#app_tabs li a").tooltip({placement: "bottom"});
+  }
+
+  $(function () {
+    refreshActiveTab();
+  });
+</script>
+</body>
+</html>

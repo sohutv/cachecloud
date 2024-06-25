@@ -1,0 +1,164 @@
+<!-- ======= Sidebar ======= -->
+<aside id="sidebar" class="main-sidebar sidebar-dark-primary elevation-4">
+
+    <!-- Brand Logo -->
+    <a href="${request.contextPath}/manage/total/statlist" class="brand-link">
+        <img src="${request.contextPath}/assets/img/logo_new.png" alt="Cachecloud" class="brand-image img-rounded elevation-0" style="opacity: .8">
+        <span class="brand-text font-weight-light">Cachecloud</span>
+    </a>
+
+    <div class="sidebar">
+
+        <!-- SidebarSearch Form -->
+        <div class="form-inline">
+            <div class="input-group" data-widget="sidebar-search">
+                <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
+                <div class="input-group-append">
+                    <button class="btn btn-sidebar">
+                        <i class="fas fa-search fa-fw"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Menu -->
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false" id="sidebar-nav">
+                <li class="nav-item">
+                    <a class="nav-link <#if totalActive?? && (totalActive == 1)>active<#else>collapsed</#if>" href="${request.contextPath}/manage/total/statlist">
+                        <i class="bi bi-grid"></i>
+                        <p>全局统计</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link <#if appStatActive?? && (appStatActive == 1)>active<#else>collapsed</#if>" href="${request.contextPath}/manage/app/stat/list">
+                        <i class="bi bi-bar-chart"></i>
+                        <p>client统计</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link <#if appStatServerActive?? && (appStatServerActive == 1)>active<#else>collapsed</#if>" href="${request.contextPath}/manage/app/stat/list/server">
+                        <i class="bi bi-bar-chart"></i>
+                        <p>server统计</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link <#if checkActive?? && (checkActive == 1)>active<#else>collapsed</#if>" href="${request.contextPath}/manage/app/auditList">
+                        <i class="bi bi-fast-forward"></i>
+                        <p>工单审批</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a id="appOpsTab" class="nav-link <#if appOperateActive?? && (appOperateActive == 1)>active<#else>collapsed</#if>" href="${request.contextPath}/manage/total/list">
+                        <i class="bi bi-card-list"></i>
+                        <p>应用运维</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link <#if insOperateActive?? && (insOperateActive == 1)>active<#else>collapsed</#if>" href="${request.contextPath}/manage/instance/opsList">
+                        <i class="bi bi-view-list"></i>
+                        <p>实例运维</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link <#if appImportActive?? && (appImportActive == 1)>active<#else>collapsed</#if>" href="${request.contextPath}/import/app/index">
+                        <i class="bi bi-box-arrow-in-down"></i>
+                        <p>应用导入</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <#if appMigrateActive?? && (appMigrateActive == 1)>active<#else>collapsed</#if>" href="${request.contextPath}/data/migrate/index">
+                        <i class="bi bi-database-down"></i>
+                        <p>数据迁移</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <#if diagnosticActive?? && (diagnosticActive == 1)>active<#else>collapsed</#if>" href="${request.contextPath}/manage/app/tool/index">
+                        <i class="bi bi-question-circle"></i>
+                        <p>诊断工具</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <#if machineActive?? && (machineActive == 1)>active<#else>collapsed</#if>" href="${request.contextPath}/manage/machine/index">
+                        <i class="bi bi-wrench"></i>
+                        <p>机器管理</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <p>报警配置</p>
+                        <i class="fas fa-angle-left right"></i>
+                    </a>
+                    <ul class="nav nav-treeview <#if redisAlertValueActive??>menu-open</#if>" style="display: none;">
+                        <li class="nav-item">
+                            <a href="${request.contextPath}/manage/instanceAlert/init" class="nav-link <#if redisAlertValueActive?? && (redisAlertValueActive == 1)>active<#else>collapsed</#if>">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Redis报警配置</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <#if configActive?? && (configActive == 1)>active<#else>collapsed</#if>" href="${request.contextPath}/manage/config/init">
+                        <i class="bi bi-gear"></i>
+                        <p>系统配置</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <#if reourcesActive?? && (reourcesActive == 1)>active<#else>collapsed</#if>" href="${request.contextPath}/manage/app/resource/index">
+                        <i class="bi bi-cloud"></i>
+                        <p>资源管理</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link">
+                        <i class="bi bi-palette"></i>
+                        <p>模版配置</p>
+                        <i class="fas fa-angle-left right"></i>
+                    </a>
+                    <ul class="nav nav-treeview <#if redisConfigActive??>menu-open</#if>" style="display: none;">
+                        <li class="nav-item">
+                            <a href="${request.contextPath}/manage/redisConfig/init" class="nav-link <#if redisConfigActive?? && (redisConfigActive == 1)>active<#else>collapsed</#if>">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Redis配置模版</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <#if taskActive?? && (taskActive == 1)>active<#else>collapsed</#if>" href="${request.contextPath}/manage/task/list?status=1">
+                        <i class="bi bi-chat-left-text"></i>
+                        <p>任务管理</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <#if quartzActive?? && (quartzActive == 1)>active<#else>collapsed</#if>" href="${request.contextPath}/manage/quartz/list">
+                        <i class="bi bi-list-task"></i>
+                        <p>调度任务</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link <#if userActive?? && (userActive == 1)>active<#else>collapsed</#if>" href="${request.contextPath}/manage/user/list">
+                        <i class="bi bi-person-gear"></i>
+                        <p>用户管理</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <#if noticeActive?? && (noticeActive == 1)>active<#else>collapsed</#if>" href="${request.contextPath}/manage/notice/initNotice">
+                        <i class="bi bi-bell"></i>
+                        <p>系统通知</p>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+</aside><!-- End Sidebar-->

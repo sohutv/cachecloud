@@ -1,6 +1,7 @@
 package com.sohu.cache.redis.impl;
 
 import com.sohu.cache.redis.AssistRedisService;
+import com.sohu.cache.redis.util.Command;
 import com.sohu.cache.redis.util.ProtostuffSerializer;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
@@ -11,8 +12,10 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Protocol;
 import redis.clients.jedis.Tuple;
+import redis.clients.jedis.commands.ProtocolCommand;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.params.SetParams;
+import redis.clients.jedis.util.SafeEncoder;
 
 import javax.annotation.PostConstruct;
 import java.nio.charset.Charset;
@@ -70,6 +73,23 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             return true;
         } catch (Exception e) {
             logger.warn("rpush {} {} error " + e.getMessage(), key, item, e);
+            return false;
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+    }
+
+    @Override
+    public boolean rpush(String key, String... items) {
+        Jedis jedis = null;
+        try {
+            jedis = getFromJedisPool();
+            jedis.rpush(key, items);
+            return true;
+        } catch (Exception e) {
+            logger.warn("rpush {} {} error " + e.getMessage(), key, items, e);
             return false;
         } finally {
             if (jedis != null) {
@@ -144,6 +164,41 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             }
         }
     }
+
+    @Override
+    public Long lrem(final String key, long count, String element){
+        Jedis jedis = null;
+        try {
+            jedis = getFromJedisPool();
+            Long lrem = jedis.lrem(key, count, element);
+            return lrem;
+        } catch (Exception e) {
+            logger.warn("lrem {} {} {} error " + e.getMessage(), key, count, element);
+            return null;
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+    }
+
+    @Override
+    public String ltrim(final String key, long start, long end){
+        Jedis jedis = null;
+        try {
+            jedis = getFromJedisPool();
+            String lrem = jedis.ltrim(key, start, end);
+            return lrem;
+        } catch (Exception e) {
+            logger.warn("ltrim {} {} {} error " + e.getMessage(), key, start, end);
+            return null;
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+    }
+
 
     @Override
     public boolean saddSet(String key, Set<String> items) {
@@ -384,6 +439,22 @@ public class AssistRedisServiceImpl implements AssistRedisService {
     }
 
     @Override
+    public String hget(String key, String field){
+        Jedis jedis = null;
+        try {
+            jedis = getFromJedisPool();
+            return jedis.hget(key, field);
+        } catch (Exception e) {
+            logger.warn("hget {} {} error " + e.getMessage(), key, field);
+            return null;
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+    }
+
+    @Override
     public boolean hset(String key, String field, String value) {
         Jedis jedis = null;
         try {
@@ -399,6 +470,23 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             }
         }
     }
+
+    @Override
+    public Long hsetnx(String key, String field, String value){
+        Jedis jedis = null;
+        try {
+            jedis = getFromJedisPool();
+            return jedis.hsetnx(key, field, value);
+        } catch (Exception e) {
+            logger.warn("hsetnx {} {} {} error " + e.getMessage(), key, field, value);
+            return 0L;
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+    }
+
 
 
     @Override
@@ -427,6 +515,22 @@ public class AssistRedisServiceImpl implements AssistRedisService {
         } catch (Exception e) {
             logger.warn("hgetAll {} error " + e.getMessage(), key);
             return Collections.emptyMap();
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+    }
+
+    @Override
+    public Long hdel(String key, String field) {
+        Jedis jedis = null;
+        try {
+            jedis = getFromJedisPool();
+            return jedis.hdel(key, field);
+        } catch (Exception e) {
+            logger.warn("hdel {} error " + e.getMessage(), key);
+            return 0L;
         } finally {
             if (jedis != null) {
                 jedis.close();
@@ -464,6 +568,23 @@ public class AssistRedisServiceImpl implements AssistRedisService {
             return true;
         } catch (Exception e) {
             logger.warn("del {} error " + e.getMessage(), key);
+            return false;
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+    }
+
+    @Override
+    public boolean delMulti(String... keys) {
+        Jedis jedis = null;
+        try {
+            jedis = getFromJedisPool();
+            jedis.del(keys);
+            return true;
+        } catch (Exception e) {
+            logger.warn("delMulti {} error " + e.getMessage(), keys);
             return false;
         } finally {
             if (jedis != null) {
@@ -521,5 +642,28 @@ public class AssistRedisServiceImpl implements AssistRedisService {
 
     public void setProtostuffSerializer(ProtostuffSerializer protostuffSerializer) {
         this.protostuffSerializer = protostuffSerializer;
+    }
+
+    @Override
+    public boolean setNEX(String key, String value, int seconds) {
+        Jedis jedis = null;
+        try {
+            jedis = getFromJedisPool();
+            Object rst = jedis.sendCommand(Command.SET, key, value, "NX", "EX", String.valueOf(seconds));
+            if(rst != null){
+                String encode = SafeEncoder.encode((byte[]) rst);
+                if("OK".equals(encode)){
+                    return true;
+                }
+            }
+            return false;
+        } catch (Exception e) {
+            logger.warn("smembers {} error " + e.getMessage(), key);
+            return false;
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
     }
 }

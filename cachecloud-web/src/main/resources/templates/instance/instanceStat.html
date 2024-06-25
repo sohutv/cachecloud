@@ -1,0 +1,151 @@
+<div class="col-12">
+  <div class="card">
+    <div class="card-header">
+      <h4 class="card-title">实例信息-所属应用<a href="${request.contextPath}/admin/app/index?appId=${appDetail.appDesc.appId!}" target="_blank">【${appDetail.appDesc.name!}】</a></h4>
+    </div>
+    <div class="card-body table-responsive">
+      <table class="table table-striped table-hover">
+        <tbody>
+          <tr>
+            <th>空间使用率</td>
+            <td>
+                <div class="progress progress-fs-1">
+                  <#if instanceStats?? && instanceStats.memUsePercent??>
+                    <#assign memUsePercentValue = instanceStats.memUsePercent!>
+                  <#else>
+                    <#assign memUsePercentValue = 0>
+                  </#if>
+                  <#if (memUsePercentValue >= 80)>
+                    <div class="progress-bar bg-danger"
+                         role="progressbar" aria-valuenow="${memUsePercentValue!}" aria-valuemax="100"
+                         aria-valuemin="0" style="width: ${memUsePercentValue!}%; overflow: visible;">
+                  <#else>
+                    <div class="progress-bar bg-success"
+                         role="progressbar" aria-valuenow="${memUsePercentValue!}" aria-valuemax="100"
+                         aria-valuemin="0" style="width: ${memUsePercentValue!}%; overflow: visible;">
+                  </#if>
+                    <span style="color: #000000; margin-bottom: 0">
+                      ${(instanceInfo.mem  * memUsePercentValue / 100 / 1024)?string("0.00")}G&nbsp;&nbsp;Used/${instanceInfo.mem / 1024 * 1.0}G&nbsp;&nbsp;Total
+                    </span>
+                  </div>
+                </div>
+            </td>
+            <th>命中率</th>
+            <#if instanceStats??>
+              <#if instanceStats.misses??>
+                  <#assign missValue = instanceStats.misses!>
+              <#else>
+                  <#assign missValue = 0>
+              </#if>
+              <#if instanceStats.hits??>
+                <#assign hitsValue = instanceStats.hits!>
+              <#else>
+                <#assign hitsValue = 0>
+              </#if>
+            <#else>
+              <#assign missValue = 0>
+              <#assign hitsValue = 0>
+            </#if>
+            <#if (missValue+hitsValue==0)>
+                <td>无操作数据</td>
+            <#else>
+              <td>${(hitsValue/(missValue+hitsValue))?string("0.00%")}</td>
+            </#if>
+            <th>实例角色</th>
+            <td>
+              <#if instanceStats?? && instanceStats.role??>
+                <#if (instanceStats.role == 1)>master</#if>
+                <#if (instanceStats.role == 2)>slave</#if>
+              </#if>
+            </td>
+          </tr>
+          <tr>
+            <th>当前对象数</th>
+            <td>
+              <#if instanceStats?? && instanceStats.currItems??>
+                ${instanceStats.currItems?string("#,#00")}
+              </#if>
+            </td>
+            <th>实例类型</th>
+            <td>${instanceInfo.typeDesc!}</td>
+            <th>当前连接数</th>
+            <td>
+              <#if instanceStats?? && instanceStats.currConnections??>
+                ${instanceStats.currConnections!}
+              </#if>
+            </td>
+          </tr>
+          <tr>
+            <th>实例地址</th>
+            <td>${instanceInfo.ip!}:${instanceInfo.port!}</td>
+            <th>运行状态</th>
+            <td>${instanceInfo.statusDesc!}</td>
+            <th>运行天数</th>
+            <td>
+              <#if (instanceInfo.type == 1) && instanceStats.infoMap??>
+                ${(instanceStats.infoMap['stats'].uptime/60/60/24)?string("0.0")}
+              <#else>
+                <#if instanceStats?? && instanceStats.infoMap??>
+                  ${instanceStats.infoMap['Server'].uptime_in_days!}
+                </#if>
+              </#if>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">
+        实时状态
+      </h3>
+    </div>
+    <div class="card-body table-responsive">
+      <#if (instanceInfo.type == 2) || (instanceInfo.type == 5) || (instanceInfo.type == 6) || (instanceInfo.type == 11) || (instanceInfo.type == 12)>
+        <table class="table table-bordered table-striped table-hover">
+          <thead>
+          <tr>
+            <th scope="col">分组</th>
+            <th scope="col">键值</th>
+            <th scope="col">值</th>
+          </tr>
+          </thead>
+          <tbody>
+            <#if instanceStats?? && instanceStats.infoMap??>
+              <#list instanceStats.infoMap as instanceKey, infoMap>
+                <#list infoMap?keys as key>
+                  <#if (key_index == ((infoMap?size) - 1))>
+                    <#assign rows = (key_index + 1)>
+                  </#if>
+                </#list>
+                <#list infoMap?keys as key>
+                  <tr>
+                    <#if key_index == 0>
+                      <td rowspan="${rows!}">${instanceKey}</td>
+                    </#if>
+                    <td>${key!}</td>
+                    <td>${infoMap[key]!}</td>
+                  </tr>
+                </#list>
+              </#list>
+            </#if>
+          </tbody>
+        </table>
+      </#if>
+    </div>
+  </div>
+</div>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+ 

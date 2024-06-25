@@ -6,16 +6,9 @@
        default-autowire="byName">
 
 
-    <!-- 耗时分布  -->
-    <bean id="clientReportCostDistriService"
-          class="com.sohu.cache.client.service.impl.ClientReportCostDistriServiceImpl"/>
     <!-- 客户端异常 -->
     <bean id="clientReportExceptionService"
           class="com.sohu.cache.client.service.impl.ClientReportExceptionServiceImpl"/>
-    <!-- 值分布 -->
-    <bean id="clientReportValueDistriService"
-          class="com.sohu.cache.client.service.impl.ClientReportValueDistriServiceImplV2"/>
-
 
     <!-- 客户端版本收集 -->
     <bean id="clientVersionService" class="com.sohu.cache.client.service.impl.ClientVersionServiceImpl"/>

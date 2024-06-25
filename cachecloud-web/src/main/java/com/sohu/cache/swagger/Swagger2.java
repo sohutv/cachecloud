@@ -1,5 +1,6 @@
 package com.sohu.cache.swagger;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.ApiInfoBuilder;
@@ -10,10 +11,11 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+@ConditionalOnProperty(name = "springfox.documentation.enabled", havingValue = "true")
 @Configuration
 @EnableSwagger2
 public class Swagger2 {
- 
+
     @Bean
     public Docket createRestApi() {
         return new Docket(DocumentationType.SWAGGER_2)
@@ -23,13 +25,13 @@ public class Swagger2 {
                 .paths(PathSelectors.any())
                 .build();
     }
- 
+
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("CacheCloud项目 RESTful APIs")
                 .description("CacheCloud项目后台api接口文档")
-                .version("1.0")
+                .version("3.0")
                 .build();
     }
- 
+
 }

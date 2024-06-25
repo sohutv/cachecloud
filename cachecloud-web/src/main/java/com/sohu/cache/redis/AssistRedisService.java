@@ -34,6 +34,8 @@ public interface AssistRedisService {
 
     boolean rpush(String key, String item);
 
+    boolean rpush(String key, String... item);
+
     boolean rpushList(String key, List<String> items);
 
     boolean saddSet(String key, Set<String> items);
@@ -50,20 +52,34 @@ public interface AssistRedisService {
 
     String lpop(final String key);
 
+    Long lrem(final String key, long count, String element);
+
+    String ltrim(final String key, long start, long end);
+
     boolean zadd(String key, long score, String member);
 
+    String hget(String key, String field);
+
     boolean hset(String key, String field, String value);
+
+    Long hsetnx(String key, String field, String value);
 
     boolean hmset(String key, Map<String, String> map);
 
     Map<String, String> hgetAll(String key);
 
+    Long hdel(String key, String field);
+
     boolean del(String key);
+
+    boolean delMulti(String... keys);
 
     void zincrby(String key, double score, String member);
 
     Set<Tuple> zrangeWithScores(String key, long start, long end);
 
     boolean exists(String key);
+
+    boolean setNEX(String key, String value, int seconds);
 
 }

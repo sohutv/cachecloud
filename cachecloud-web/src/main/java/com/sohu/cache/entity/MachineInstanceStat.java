@@ -11,4 +11,8 @@ public class MachineInstanceStat {
 	
 	private long usedMemory;
 
+	private long applyDisk;
+
+	private long usedDisk;
+
 }

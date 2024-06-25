@@ -2,8 +2,10 @@ package com.sohu.cache.web.service;
 
 import java.util.List;
 
+import com.sohu.cache.entity.AppBiz;
 import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.web.enums.SuccessEnum;
+import com.sohu.cache.web.vo.AppUserVo;
 
 /**
  * 用户管理service
@@ -26,6 +28,14 @@ public interface UserService {
      * @return
      */
     List<AppUser> getUserList(String chName);
+
+    /**
+     * 通过中文名和业务组名获取用户
+     * @param chName
+     * @param bizName
+     * @return
+     */
+    List<AppUserVo> getUserWithBizList(String chName, String bizName);
 
     /**
      * 获取所有用户
@@ -99,5 +109,47 @@ public interface UserService {
      * @return
      */
     List<AppUser> getOfficerUserByUserIds(String officer);
+
+    /**
+     * 接手用户
+     * @param toRemoveUser
+     * @param toChargeUser
+     * @return
+     */
+    SuccessEnum takeoverUser(AppUser toRemoveUser, AppUser toChargeUser);
+
+    /**
+     * 通过id获取业务组
+     * @param bizId
+     * @return
+     */
+    AppBiz getBiz(Long bizId);
+
+    /**
+     * 获取所有业务组
+     * @return
+     */
+    List<AppBiz> getBizList();
+
+    /**
+     * 保存业务组
+     * @param appBiz
+     * @return
+     */
+    SuccessEnum saveBiz(AppBiz appBiz);
+
+    /**
+     * 更新业务组
+     * @param appBiz
+     * @return
+     */
+    SuccessEnum updateBiz(AppBiz appBiz);
+
+    /**
+     * 删除业务组
+     * @param bizId
+     * @return
+     */
+    SuccessEnum deleteBiz(Long bizId);
 
 }

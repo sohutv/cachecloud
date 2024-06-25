@@ -15,7 +15,7 @@
         ver_id,is_test,has_back_store,need_persistence,need_hot_back_up,forecase_qps,
         forecast_obj_num,mem_alert_value,client_machine_room,app_key,client_conn_alert_value,
         hit_precent_alert_value,is_access_monitor,important_level,password "pkey",version_id,
-        custom_password, maxmemory_policy
+        custom_password, persistence_type,maxmemory_policy
     </sql>
     <!--通过appId查询app的信息-->
     <select id="getAppDescById" resultType="AppDesc" parameterType="long">
@@ -81,8 +81,18 @@
     </sql>
     <select id="getAppDescList" resultType="AppDesc" parameterType="long">
     	select
-        	<include refid="app_desc_select_column"/>
-        from app_desc,app_to_user where app_to_user.user_id=#{userId} and app_to_user.app_id=app_desc.app_id and app_desc.status &lt; 3
+            ad.app_id,ad.name,ad.user_id,ad.status,ad.intro,ad.create_time,
+            ad.passed_time,ad.type,ad.officer,ad.ver_id,ad.app_key,ad.password "pkey",
+            ad.version_id,ad.is_test,ad.custom_password,ad.mem_alert_value,
+            ad.client_conn_alert_value, ad.is_access_monitor
+        from
+            app_desc ad
+        left join app_to_user atu
+            on ad.app_id = atu.app_id
+        where atu.user_id=#{userId}
+          and ad.status &lt; 3
+        GROUP BY ad.app_id
+        ORDER BY ad.app_id desc
     </select>
 
     <select id="getOnlineApps" resultType="AppDesc">
@@ -112,89 +122,133 @@
     </select>
 
     <select id="getAllAppCount" resultType="int" parameterType="AppSearch">
-    	select count(app_id) from app_desc where 1=1 and status &lt; 3
+
+        select count(distinct ad.app_id)
+        from app_desc ad
+        <if test="bizId != null and bizId > 0">
+            left join app_to_user atu
+                on ad.app_id = atu.app_id
+            left join app_user au
+                on atu.user_id = au.id
+        </if>
+        where ad.status &lt; 3
         <choose>
             <when test="appName != null and appName != ''">
-                and instr(name, #{appName}) > 0
-       	 	</when>
+                and instr(ad.name, #{appName}) > 0
+            </when>
         </choose>
         <choose>
             <when test="appType != null and appType > 0">
-            	and type = #{appType}
-       	 	</when>
+                and ad.type = #{appType}
+            </when>
         </choose>
         <choose>
             <when test="appStatus != null and appStatus >= 0">
-            	and status = #{appStatus}
-       	 	</when>
+                and ad.status = #{appStatus}
+            </when>
         </choose>
         <choose>
             <when test="appId != null and appId > 0">
-            	and app_id = #{appId}
-       	 	</when>
+                and ad.app_id = #{appId}
+            </when>
         </choose>
         <choose>
             <when test="importantLevel != null and importantLevel > 0">
-            	and important_level = #{importantLevel}
-       	 	</when>
+                and ad.important_level = #{importantLevel}
+            </when>
         </choose>
         <choose>
             <when test="versionId != null and versionId > 0">
-                and version_id = #{versionId}
+                and ad.version_id = #{versionId}
             </when>
         </choose>
         <choose>
             <when test="userId != null and userId > 0">
-                and app_id in (select app_id from app_to_user where user_id = #{userId})
+                and ad.app_id in (select app_id from app_to_user where user_id = #{userId})
+            </when>
+        </choose>
+        <choose>
+            <when test="persistenceType != null">
+                and ad.persistence_type = #{persistenceType}
+            </when>
+        </choose>
+        <choose>
+            <when test="bizId != null and bizId > 0">
+                and au.biz_id = #{bizId}
             </when>
         </choose>
     </select>
 
     <select id="getAllAppDescList" resultType="AppDesc" parameterType="AppSearch">
     	select
-        	<include refid="app_desc_fields"/>
-        from app_desc where 1=1 and status &lt; 3
+            ad.app_id, ad.name, ad.user_id, ad.status, ad.intro, ad.create_time, ad.passed_time,
+            ad.type, ad.officer, ad.ver_id, ad.is_test, ad.has_back_store, ad.need_persistence,
+            ad.need_hot_back_up, ad.forecase_qps, ad.forecast_obj_num, ad.mem_alert_value,
+            ad.client_machine_room, ad.app_key, ad.client_conn_alert_value, ad.hit_precent_alert_value,
+            ad.is_access_monitor, ad.important_level, ad.password "pkey", ad.version_id,
+            ad.custom_password, ad.persistence_type, ad.maxmemory_policy,
+            group_concat(distinct ab.name order by ab.name desc separator ',') bizGroup
+        from
+            app_desc ad
+        left join app_to_user atu
+            on ad.app_id = atu.app_id
+        left join app_user au
+            on atu.user_id = au.id
+        left join app_biz ab
+            on au.biz_id  = ab.id
+        where status &lt; 3
         <choose>
             <when test="appName != null and appName != ''">
-                and instr(name, #{appName}) > 0
+                and instr(ad.name, #{appName}) > 0
             </when>
         </choose>
         <choose>
             <when test="appType != null and appType > 0">
-            	and type = #{appType}
+            	and ad.type = #{appType}
        	 	</when>
         </choose>
         <choose>
             <when test="appStatus != null and appStatus >= 0">
-            	and status = #{appStatus}
+            	and ad.status = #{appStatus}
        	 	</when>
         </choose>
         <choose>
             <when test="appId != null and appId > 0">
-            	and app_id = #{appId}
+            	and ad.app_id = #{appId}
        	 	</when>
         </choose>
         <choose>
             <when test="importantLevel != null and importantLevel > 0">
-            	and important_level = #{importantLevel}
+            	and ad.important_level = #{importantLevel}
        	 	</when>
         </choose>
         <choose>
             <when test="versionId != null and versionId > 0">
-                and version_id = #{versionId}
+                and ad.version_id = #{versionId}
             </when>
         </choose>
         <choose>
             <when test="userId != null and userId > 0">
-                and app_id in (select app_id from app_to_user where user_id = #{userId})
+                and ad.app_id in (select app_id from app_to_user where user_id = #{userId})
+            </when>
+        </choose>
+        <choose>
+            <when test="persistenceType != null">
+                and ad.persistence_type = #{persistenceType}
             </when>
         </choose>
         <choose>
             <when test="isTest != null and isTest > 0">
-                and is_test = #{isTest}
+                and ad.is_test = #{isTest}
             </when>
         </choose>
-        ORDER BY app_id desc
+        <choose>
+            <when test="bizId != null and bizId > 0">
+                and ab.id = #{bizId}
+            </when>
+        </choose>
+        GROUP BY ad.app_id
+        ORDER BY ad.app_id desc
         <choose>
         	<when test="page != null">
         		<choose>
@@ -217,11 +271,66 @@
     	update app_desc set app_key=#{appKey} where app_id=#{appId}
     </update>
 
+    <update id="updateAppPwd">
+        update app_desc set password=#{pkey} where app_id=#{appId}
+    </update>
+
+    <update id="updateAppPersistenceType">
+    	update app_desc set persistence_type=#{persistenceType} where app_id=#{appId}
+    </update>
+
+    <update id="updateAppMaxmemoryPolicy">
+        update app_desc set maxmemory_policy=#{maxmemoryPolicy} where app_id=#{appId}
+    </update>
+
     <select id="getAppDescByIds" resultType="AppDesc" parameterType="java.util.List">
         select * from app_desc where app_id in
         <foreach collection="appIds" index="index" item="appId" open="(" separator="," close=")">
             #{appId}
         </foreach>
+    </select>
+
+    <select id="getMonitorStatistics" resultType="com.sohu.cache.entity.AppMonitorStatisticsResult" parameterType="com.sohu.cache.entity.AppStatisticsSearch">
+        select
+            sum(acsg.conn_exp_count) conn_exp_count,
+            sum(acsg.cmd_exp_count) cmd_exp_count,
+            sum(acsg.slow_log_count) slow_log_count,
+            sum(acsg.latency_count) latency_count,
+            sum(acsg.cmd_count) cmd_count,
+            acsg.gather_time
+        from app_desc ad
+        <if test="isAdmin != null and !isAdmin">
+            left join app_to_user atu
+                on ad.app_id = atu.app_id
+        </if>
+        left join app_client_statistic_gather acsg
+            on ad.app_id = acsg.app_id
+        where
+            ad.status = 2
+        <if test="isAdmin != null and !isAdmin">
+            and atu.user_id =  #{userId}
+        </if>
+        and gather_time &lt;= #{endTime}
+        and gather_time > #{startTime}
+        group by gather_time
+    </select>
+
+    <select id="getCapacityStatistics" resultType="com.sohu.cache.entity.AppCapacityStatisticsResult" parameterType="com.sohu.cache.entity.AppStatisticsSearch">
+        select
+            ad.app_id, ad.version_id, acm.cur_mem,
+            acm.mem_used, acm.sharding_master_num
+        from app_desc ad
+        <if test="isAdmin != null and !isAdmin">
+            left join app_to_user atu
+            on ad.app_id = atu.app_id
+        </if>
+        left join app_capacity_monitor acm
+            on ad.app_id = acm.app_id
+        where
+            ad.status = 2
+        <if test="isAdmin != null and !isAdmin">
+            and atu.user_id = #{userId}
+        </if>
     </select>
 
 </mapper>

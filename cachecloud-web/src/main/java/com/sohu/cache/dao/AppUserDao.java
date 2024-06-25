@@ -2,6 +2,7 @@ package com.sohu.cache.dao;
 
 import java.util.List;
 
+import com.sohu.cache.web.vo.AppUserVo;
 import org.apache.ibatis.annotations.Param;
 
 import com.sohu.cache.entity.AppUser;
@@ -28,6 +29,8 @@ public interface AppUserDao {
 	AppUser getByEmail(@Param("email") String email);
 
     public List<AppUser> getUserList(@Param("chName") String chName);
+
+    public List<AppUserVo> getUserWithBizList(@Param("chName") String chName, @Param("bizName") String bizName);
 
 	List<AppUser> getAdminList();
 

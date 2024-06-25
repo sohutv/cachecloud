@@ -1,0 +1,170 @@
+<script type="text/javascript">
+  function appDataMigrateApply() {
+
+    var source = $('#sourceDataType option:selected').val();
+    var source_appId = $('#source_appId').selectpicker('val');
+    if(source == 1){
+      if ( source_appId == null || source_appId == '') {
+        alert("请选择源应用");
+        $('#source_appId').focus();
+        return false;
+      }
+    }
+
+    var othersource_info = document.getElementById("othersource_info");
+    if (source ==0){
+      if(othersource_info.value == "") {
+        alert("请填入实例信息");
+        $('#othersource_info').focus();
+        return false;
+      }
+    }
+
+    var target_appId = $('#target_appId').selectpicker('val');
+    if (target_appId == null || target_appId == '') {
+      alert("请选择目标应用");
+      $('#target_appId').focus();
+      return false;
+    }
+
+
+
+    var reason = document.getElementById("appOfflineReason");
+    if (reason.value == "") {
+      alert("请填写原因!");
+      reason.focus();
+      return false;
+    }
+
+    if (!confirm("确认提交应用数据迁移申请？")) {
+      return;
+    }
+
+    var btn = document.getElementById("appDataMigrateBtn");
+    btn.disabled = true;
+
+    $.post(
+            '${request.contextPath}/admin/app/job/submit',
+            {
+              jobType: 11,
+              appId: source_appId,
+              reason: reason.value+othersource_info.value,
+              param: '源应用：' + source_appId + ' 迁移到目标应用：' + target_appId
+            },
+            function (data) {
+              if (data == 1) {
+                $("#appMigrateInfo").html("<div class='alert alert-error' ><font color='green'><strong>Success!</strong>应用数据迁移申请提交成功，即将跳转工单列表！</font><button class='btn-close' data-bs-dismiss='alert'></button></div>");
+                setTimeout("location.href = '${request.contextPath}/admin/app/jobs'", 1000);
+              } else {
+                btn.disabled = false;
+                $("#appMigrateInfo").html("<div class='alert alert-error' ><font color='red'><strong>Error!</strong>更新失败！<font><button class='btn-close' data-bs-dismiss='alert'></button></div>");
+              }
+            }
+    );
+  }
+
+  function changeDataType( choose) {
+    var dataType = choose.options[choose.selectedIndex].value;
+    if (dataType == 1) {
+      $("#cc-source").attr("style","display:display");
+      $("#other-source").attr("style","display:none");
+    } else if (dataType == 0) {
+      $("#cc-source").attr("style","display:none");
+      $("#other-source").attr("style","display:display");
+    }
+  }
+</script>
+
+<div class="card-header">
+  <h4 class="card-title border-bottom">
+    应用数据迁移
+  </h4>
+</div>
+
+<div class="card-body">
+  <div class="row">
+    <div class="form-group row">
+      <label class="col-form-label col-md-2 offset-md-1">来源:</label>
+      <div class="col-md-5">
+        <select id="sourceDataType" name="sourceDataType"
+                class="form-select"
+                onchange="changeDataType(this)">
+          <option value="1" selected="selected">
+            cachecloud
+          </option>
+          <option value="0" <#if (sourceDataType?? && sourceDataType==0)>selected="selected"</#if> >
+          非cachecloud
+          </option>
+        </select>
+    </div>
+  </div>
+
+  <div class="form-group row">
+    <label class="col-form-label col-md-2 offset-md-1">源应用<font color='red'>(*)</font></label>
+    <div class="col-md-5">
+      <select id="source_appId" name="appId" class="selectpicker col-md-12 border rounded"
+              data-live-search="true" title="选择应用">
+        <option value="">选择应用</option>
+        <#list appDescMap?keys as key>
+          <#assign appDesc = appDescMap?api.get(key)>
+          <#if (appDesc.status==2)>
+            <option value="${appDesc.appId}" title="${appDesc.appId} ${appDesc.name}">
+              【${appDesc.appId}】&nbsp;名称：${appDesc.name}&nbsp;类型：${appDesc.typeDesc}&nbsp;版本：${appDesc.versionName}
+            </option>
+          </#if>
+        </#list>
+      </select>
+    </div>
+  </div>
+
+  <!-- 其他来源 -->
+  <div class="form-group row" id="other-source" style="display:none;">
+    <label class="col-form-label col-md-2 offset-md-1">实例信息：<font color='red'>(*)</font></label>
+    <div class="col-md-5">
+     <textarea rows="6" name="othersource_info" id="othersource_info" placeholder="类型：集群/主从/单机&#13;&#10;内存大小:?G,比如2G&#13;&#10;密码：*****&#13;&#10;实例信息：masterip1:slaveip1;masterip2:slaveip2&#13;&#10;迁移其他说明:"
+               class="form-control"></textarea>
+    </div>
+  </div>
+
+  <div class="form-group row">
+    <label class="col-form-label col-md-2 offset-md-1">目标应用<font color='red'>(*)</font></label>
+    <div class="col-md-5">
+      <select id="target_appId" name="appId" class="selectpicker col-md-12 border rounded"
+              data-live-search="true" title="选择应用">
+        <option value="">选择应用</option>
+        <#list appDescMap?keys as key>
+          <#assign appDesc = appDescMap?api.get(key)>
+          <#if (appDesc.status==2)>
+          <option value="${appDesc.appId}" title="${appDesc.appId} ${appDesc.name}">
+            【${appDesc.appId}】&nbsp;名称：${appDesc.name}&nbsp;类型：${appDesc.typeDesc}&nbsp;版本：${appDesc.versionName}
+          </option>
+          </#if>
+        </#list>
+      </select>
+    </div>
+  </div>
+
+  <div class="form-group row">
+    <label class="col-form-label col-md-2 offset-md-1">申请原因<font color='red'>(*)</font></label>
+    <div class="col-md-5">
+        <textarea rows="5" name="appOfflineReason" id="appOfflineReason" placeholder="申请原因"
+                  class="form-control"></textarea>
+    </div>
+  </div>
+
+  <div class="form-group row">
+    <div class="text-center">
+      <button id="appDataMigrateBtn" class="btn btn-info" onclick="appDataMigrateApply()">
+        <i class="bi bi-check"></i>
+        提交数据迁移申请
+      </button>
+    </div>
+  </div>
+
+  <div class="form-group row">
+    <div id="appMigrateInfo" class="offset-md-3 col-md-9"></div>
+  </div>
+
+</div>
+
+</div>

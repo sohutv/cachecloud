@@ -17,7 +17,9 @@
 		used_memory_rss,
 		max_cpu_sys,
 		max_cpu_user,
-		topology_exam_result
+		topology_exam_result,
+        used_disk,
+        server_cmd_count
 	</sql>
 
     <insert id="batchSave">
@@ -177,10 +179,10 @@
 
     <insert id="batchSaveAppStats" parameterType="list">
         insert into app_client_statistic_gather
-        (app_id,gather_time,object_size,used_memory,used_memory_rss,avg_mem_frag_ratio,max_cpu_sys,max_cpu_user)
+        (app_id,gather_time,object_size,used_memory,used_memory_rss,avg_mem_frag_ratio,max_cpu_sys,max_cpu_user,used_disk)
         values
         <foreach collection="list" item="stat" separator=",">
-            (#{stat.appId},#{stat.gatherTime},#{stat.objectSize},#{stat.usedMemory},#{stat.usedMemoryRss},#{stat.avgMemFragRatio},#{stat.maxCpuSys},#{stat.maxCpuUser})
+            (#{stat.appId},#{stat.gatherTime},#{stat.objectSize},#{stat.usedMemory},#{stat.usedMemoryRss},#{stat.avgMemFragRatio},#{stat.maxCpuSys},#{stat.maxCpuUser},#{stat.usedDisk})
         </foreach>
         ON DUPLICATE KEY UPDATE
         app_id=values(app_id),
@@ -190,7 +192,21 @@
         used_memory_rss=values(used_memory_rss),
         avg_mem_frag_ratio=values(avg_mem_frag_ratio),
         max_cpu_sys=GREATEST(max_cpu_sys,values(max_cpu_sys)),
-        max_cpu_user=GREATEST(max_cpu_user,values(max_cpu_user))
+        max_cpu_user=GREATEST(max_cpu_user,values(max_cpu_user)),
+        used_disk=values(used_disk)
+    </insert>
+
+    <insert id="batchAddAppServerCmdCount" parameterType="list">
+        insert into app_client_statistic_gather
+        (app_id,gather_time,server_cmd_count)
+        values
+        <foreach collection="list" item="stat" separator=",">
+            (#{stat.appId},#{stat.gatherTime},#{stat.serverCmdCount})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        app_id=values(app_id),
+        gather_time=values(gather_time),
+        server_cmd_count=server_cmd_count+values(server_cmd_count)
     </insert>
 
 
@@ -231,6 +247,14 @@
                 and app_id = #{appId}
             </when>
         </choose>
+    </select>
+
+    <select id="getTopologyExamFailedByGatherTime" resultType="com.sohu.cache.entity.AppClientStatisticGather">
+        select
+        <include refid="columns"/>
+        from app_client_statistic_gather
+        where gather_time = #{gatherTime}
+        and topology_exam_result != 0
     </select>
 
     <select id="getExpAppStatisticByGatherTime" resultType="hashmap">

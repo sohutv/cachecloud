@@ -111,6 +111,7 @@
                 <prop key="org.quartz.jobStore.class">org.springframework.scheduling.quartz.LocalDataSourceJobStore</prop>
                 <prop key="org.quartz.scheduler.batchTriggerAcquisitionMaxCount">200</prop>
                 <prop key="org.quartz.jobStore.driverDelegateClass">org.quartz.impl.jdbcjobstore.StdJDBCDelegate</prop>
+                <prop key="org.quartz.jobStore.acquireTriggersWithinLock">true</prop>
                 <!-- 表名前缀 -->
                 <prop key="org.quartz.jobStore.tablePrefix">QRTZ_</prop>
                 <prop key="org.quartz.jobStore.isClustered">true</prop>
@@ -136,6 +137,7 @@
                 <ref bean="hostInspectorTrigger"/>
                 <ref bean="appInspectorTrigger"/>
                 <ref bean="appDailyTrigger"/>
+                <ref bean="appCapacityMonitorJobTrigger"/>
                 <ref bean="expAppsDailyTrigger"/>
                 <ref bean="instanceAlertValueTrigger"/>
 
@@ -145,15 +147,18 @@
                 <ref bean="cleanupDayDimensionalityTrigger"/>
                 <ref bean="cleanupMinuteDimensionalityTrigger"/>
                 <ref bean="gatherAppClientStatisticsTrigger"/>
+                <ref bean="gatherAppClientStatisticsServerCmdCountTrigger"/>
                 <ref bean="reviseAppClientStatisGatherTrigger"/>
                 <ref bean="cleanupDayAppClientStatTrigger"/>
                 <ref bean="instanceStateTrigger"/>
+                <ref bean="appPersistenceCheckTrigger"/>
             </array>
         </property>
         <property name="jobDetails">
             <array>
                 <ref bean="inspectorJobDetail"/>
                 <ref bean="appDailyJobDetail"/>
+                <ref bean="appCapacityMonitorJobDetail"/>
                 <ref bean="expAppsDailyJobDetail"/>
                 <ref bean="instanceAlertValueJobDetail"/>
 
@@ -163,9 +168,11 @@
                 <ref bean="cleanupDayDimensionalityJobDetail"/>
                 <ref bean="cleanupMinuteDimensionalityJobDetail"/>
                 <ref bean="gatherAppClientStatisticsJobDetail"/>
+                <ref bean="gatherAppClientStatisticsServerCmdCountJobDetail"/>
                 <ref bean="reviseAppClientStatisGatherJobDetail"/>
                 <ref bean="cleanupDayAppClientStatJobDetail"/>
                 <ref bean="instanceStateJobDetail"/>
+                <ref bean="appPersistenceCheckJobDetail"/>
             </array>
         </property>
 
@@ -213,6 +220,21 @@
         <property name="jobDetail" ref="gatherAppClientStatisticsJobDetail"/>
         <!-- 每5分钟执行一次 -->
         <property name="cronExpression" value="0 0/5 * ? * *"/>
+    </bean>
+
+    <bean id="gatherAppClientStatisticsServerCmdCountJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="name" value="gatherAppClientStatisticsServerCmdCountJobDetail"></property>
+        <property name="group" value="gatherAppClientStatisticsServerCmdCountGroup"></property>
+        <property name="jobClass" value="com.sohu.cache.schedule.jobs.GatherAppClientStatisticsServerCmdCountJob"></property>
+        <property name="durability" value="true"/>
+    </bean>
+
+    <bean id="gatherAppClientStatisticsServerCmdCountTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="name" value="gatherAppClientStatisticsServerCmdCountTrigger"/>
+        <property name="group" value="gatherAppClientStatisticsServerCmdCountGroup"/>
+        <property name="jobDetail" ref="gatherAppClientStatisticsServerCmdCountJobDetail"/>
+        <!-- 每1小时的第5分钟执行一次 -->
+        <property name="cronExpression" value="0 5 0/1 ? * *"/>
     </bean>
 
     <bean id="reviseAppClientStatisGatherJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
@@ -286,7 +308,7 @@
         <property name="group" value="inspector"/>
         <property name="jobDetail" ref="inspectorJobDetail"/>
         <!-- 20分钟执行一次 -->
-        <property name="cronExpression" value="0 0/20 * ? * *"/>
+        <property name="cronExpression" value="0 0/10 * ? * *"/>
         <property name="jobDataAsMap">
             <map>
                 <entry key="inspectorType" value="app"/>
@@ -322,6 +344,20 @@
         <property name="group" value="appDaily"/>
         <property name="jobDetail" ref="appDailyJobDetail"/>
         <property name="cronExpression" value="0 0 10 * * ?"/>
+    </bean>
+
+    <bean id="appCapacityMonitorJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="name" value="appCapacityMonitorJob"></property>
+        <property name="group" value="appCapacityMonitor"></property>
+        <property name="jobClass" value="com.sohu.cache.schedule.jobs.AppCapacityMonitorJob"></property>
+        <property name="durability" value="true"/>
+    </bean>
+
+    <bean id="appCapacityMonitorJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="name" value="appCapacityMonitorJob"/>
+        <property name="group" value="appCapacityMonitor"/>
+        <property name="jobDetail" ref="appCapacityMonitorJobDetail"/>
+        <property name="cronExpression" value="0 4 0 * * ?"/>
     </bean>
 
     <bean id="expAppsDailyJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
@@ -366,4 +402,19 @@
         <property name="jobDetail" ref="instanceStateJobDetail"/>
         <property name="cronExpression" value="0 0/10 * ? * *"/>
     </bean>
+
+    <bean id="appPersistenceCheckJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="name" value="appPersistenceCheckJobDetail"></property>
+        <property name="group" value="appPersistenceCheckJobGroup"></property>
+        <property name="jobClass" value="com.sohu.cache.schedule.jobs.AppPersistenceCheckJob"></property>
+        <property name="durability" value="true"/>
+    </bean>
+
+    <bean id="appPersistenceCheckTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="name" value="appPersistenceCheckTrigger"/>
+        <property name="group" value="appPersistenceCheckJobGroup"/>
+        <property name="jobDetail" ref="appPersistenceCheckJobDetail"/>
+        <property name="cronExpression" value="15 0/2 * ? * *"/>
+    </bean>
+
 </beans>

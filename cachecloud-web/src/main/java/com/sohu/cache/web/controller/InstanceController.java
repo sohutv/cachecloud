@@ -126,12 +126,28 @@ public class InstanceController {
 
         String startDateParam = request.getParameter("startDate");
         String endDateParam = request.getParameter("endDate");
+        String formatStartDate = null;
+        String formatEndDate = null;
 
         if (StringUtils.isBlank(startDateParam) || StringUtils.isBlank(endDateParam)) {
             Date endDate = new Date();
             Date startDate = DateUtils.addDays(endDate, -1);
             startDateParam = DateUtil.formatDate(startDate, "yyyyMMdd");
             endDateParam = DateUtil.formatDate(endDate, "yyyyMMdd");
+            formatStartDate = startDateParam;
+            formatEndDate = endDateParam;
+        }else{
+            if(startDateParam.contains("-") && endDateParam.contains("-")){
+                try{
+                    formatStartDate = DateUtil.formatDate(DateUtil.parseYYYY_MM_dd(startDateParam), "yyyyMMdd");
+                    formatEndDate = DateUtil.formatDate(DateUtil.parseYYYY_MM_dd(endDateParam), "yyyyMMdd");
+                }catch (Exception e){
+                    logger.error("date format error", e);
+                }
+            }else{
+                formatStartDate = startDateParam;
+                formatEndDate = endDateParam;
+            }
         }
         model.addAttribute("startDate", startDateParam);
         model.addAttribute("endDate", endDateParam);
@@ -141,7 +157,7 @@ public class InstanceController {
             InstanceInfo instanceInfo = instanceStatsCenter.getInstanceInfo(instanceId);
             model.addAttribute("instanceInfo", instanceInfo);
             model.addAttribute("appId", instanceInfo.getAppId());
-            List<AppCommandStats> topLimitAppCommandStatsList = appStatsCenter.getTopLimitAppCommandStatsList(instanceInfo.getAppId(), Long.parseLong(startDateParam) * 10000, Long.parseLong(endDateParam) * 10000, 5);
+            List<AppCommandStats> topLimitAppCommandStatsList = appStatsCenter.getTopLimitAppCommandStatsList(instanceInfo.getAppId(), Long.parseLong(formatStartDate) * 10000, Long.parseLong(formatEndDate) * 10000, 5);
             model.addAttribute("appCommandStats", topLimitAppCommandStatsList);
         } else {
 

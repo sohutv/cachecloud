@@ -17,13 +17,13 @@ public class AppClientParams {
     private List<InstanceInfo> cacheInstanceInfos;
     private String cacheMaxVersion;
 
-    private final int type;
+    private final Integer type;
 
     private final String appClientIp;
 
     private final String clientVersion;
 
-    public AppClientParams(long appId, int type, String appClientIp, String clientVersion) {
+    public AppClientParams(long appId, Integer type, String appClientIp, String clientVersion) {
         this.appId = appId;
         this.type = type;
         this.appClientIp = appClientIp;
@@ -34,7 +34,7 @@ public class AppClientParams {
         return appId;
     }
 
-    public int getType() {
+    public Integer getType() {
         return type;
     }
 

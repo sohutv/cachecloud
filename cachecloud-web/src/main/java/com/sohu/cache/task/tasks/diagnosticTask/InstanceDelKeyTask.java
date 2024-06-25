@@ -1,6 +1,7 @@
 package com.sohu.cache.task.tasks.diagnosticTask;
 
 import com.sohu.cache.constant.DiagnosticTypeEnum;
+import com.sohu.cache.constant.SymbolConstant;
 import com.sohu.cache.entity.DiagnosticTaskRecord;
 import com.sohu.cache.task.BaseTask;
 import com.sohu.cache.task.constant.TaskConstants;
@@ -40,6 +41,11 @@ public class InstanceDelKeyTask extends BaseTask {
     private long appId;
 
     private String pattern;
+
+    /**
+     * 支持多个pattern，将pattern按照逗号分隔
+     */
+    private List<String> patterns;
 
     private long auditId;
 
@@ -92,8 +98,15 @@ public class InstanceDelKeyTask extends BaseTask {
         }
 
         pattern = MapUtils.getString(paramMap, "pattern");
+        patterns = new ArrayList<>();
         if (StringUtils.isBlank(pattern)) {
             logger.info(marker, "task {} pattern is empty", taskId);
+        } else {
+            if(pattern.contains(SymbolConstant.COMMA)){
+                patterns = Arrays.asList(pattern.split(","));
+            }else{
+                patterns.add(pattern);
+            }
         }
 
         parentTaskId = MapUtils.getLongValue(paramMap, "parentTaskId");
@@ -125,7 +138,7 @@ public class InstanceDelKeyTask extends BaseTask {
         record.setAuditId(auditId);
         String hostPost = host + ":" + port;
         record.setNode(hostPost);
-        record.setDiagnosticCondition(MessageFormat.format(CONDITION_TEMPLATE, pattern));
+        record.setDiagnosticCondition(MessageFormat.format(CONDITION_TEMPLATE, patterns));
         record.setTaskId(taskId);
         record.setParentTaskId(parentTaskId);
         record.setType(DiagnosticTypeEnum.DEL_KEY.getType());
@@ -138,7 +151,7 @@ public class InstanceDelKeyTask extends BaseTask {
         long startTime = System.currentTimeMillis();
         Jedis jedis = null;
         try {
-            jedis = redisCenter.getJedis(appId, host, port);
+            jedis = redisCenter.getAdminJedis(appId, host, port);
             long dbSize = jedis.dbSize();
             if (dbSize == 0) {
                 logger.info(marker, "{} {}:{} dbsize is {}", appId, host, port, dbSize);
@@ -149,44 +162,53 @@ public class InstanceDelKeyTask extends BaseTask {
 
             // scan参数
             byte[] cursor = "0".getBytes(Charset.forName("UTF-8"));
-            ScanParams scanParams = StringUtil.isBlank(pattern) ?
-                    new ScanParams().count(SCAN_COUNT) :
-                    new ScanParams().match(pattern).count(SCAN_COUNT);
 
             long count = 0;
             int totalSplit = 10;
             int curSplit = 1;
 
-            while (true) {
-                try {
-                    ScanResult<byte[]> scanResult = jedis.scan(cursor, scanParams);
-                    cursor = scanResult.getCursorAsBytes();
-                    List<byte[]> keyList = scanResult.getResult();
-
-
-                    //pipeline unlink
-                    Pipeline pipeline = jedis.pipelined();
-                    keyList.stream().forEach(key -> pipeline.unlink(key));
-                    List<Object> unlinkList;
+            int needScanTimes = 1;
+            if(patterns.size() > 0){
+                needScanTimes = patterns.size();
+            }
+            for(int i = 0; i < needScanTimes; i++){
+                String curPattern = null;
+                if(patterns.size() > 0){
+                    curPattern = patterns.get(i);
+                }
+                ScanParams scanParams = StringUtil.isBlank(curPattern) ?
+                        new ScanParams().count(SCAN_COUNT) :
+                        new ScanParams().match(curPattern).count(SCAN_COUNT);
+                while (true) {
                     try {
-                        unlinkList = pipeline.syncAndReturnAll();
-                    } catch (JedisRedirectionException e) {
-                        continue;// ignoreu
-                    }
+                        ScanResult<byte[]> scanResult = jedis.scan(cursor, scanParams);
+                        cursor = scanResult.getCursorAsBytes();
+                        List<byte[]> keyList = scanResult.getResult();
 
-                    count += keyList.size();
-                    if (count > dbSize / totalSplit * curSplit) {
-                        logger.info(marker, "{} {}:{} has already delete {}% {} key ", appId, host, port, curSplit * 10, count);
-                        curSplit++;
-                    }
-                    // @TODO暂时写死
-                    TimeUnit.MILLISECONDS.sleep(10);
-                } catch (Exception e) {
-                    logger.error(marker, e.getMessage(), e);
-                } finally {
-                    //防止无限循环
-                    if (Arrays.equals("0".getBytes(Charset.forName("UTF-8")), cursor)) {
-                        break;
+                        //pipeline unlink
+                        Pipeline pipeline = jedis.pipelined();
+                        keyList.stream().forEach(key -> pipeline.unlink(key));
+                        List<Object> unlinkList;
+                        try {
+                            unlinkList = pipeline.syncAndReturnAll();
+                        } catch (JedisRedirectionException e) {
+                            continue;// ignoreu
+                        }
+
+                        count += keyList.size();
+                        if (count > dbSize / totalSplit * curSplit) {
+                            logger.info(marker, "{} {}:{} has already delete {}% {} key ", appId, host, port, curSplit * 10, count);
+                            curSplit++;
+                        }
+                        // @TODO暂时写死
+                        TimeUnit.MILLISECONDS.sleep(10);
+                    } catch (Exception e) {
+                        logger.error(marker, e.getMessage(), e);
+                    } finally {
+                        //防止无限循环
+                        if (Arrays.equals("0".getBytes(Charset.forName("UTF-8")), cursor)) {
+                            break;
+                        }
                     }
                 }
             }

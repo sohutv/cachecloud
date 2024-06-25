@@ -4,7 +4,7 @@
 <mapper namespace="com.sohu.cache.dao.MachineStatsDao">
 
     <sql id="machine_statistics_columns">
-        ip,host_id,cpu_usage,`load`,traffic,max_memory,machine_memory,instance_count,memory_usage_ratio,memory_free,memory_total,modify_time
+        ip,host_id,cpu_usage,`load`,traffic,max_memory,machine_memory,instance_count,memory_usage_ratio,memory_free,memory_total,modify_time,disk_available,disk_total,disk_usage_ratio
     </sql>
 
     <sql id="instance_info_columns">
@@ -16,7 +16,7 @@
         insert into machine_statistics
           (<include refid="machine_statistics_columns"/>)
         values
-          (#{ip},#{hostId},#{cpuUsage},#{load},#{traffic},#{maxMemory},#{machineMemory},#{instanceCount},#{memoryUsageRatio},#{memoryFree},#{memoryTotal},#{modifyTime})
+          (#{ip},#{hostId},#{cpuUsage},#{load},#{traffic},#{maxMemory},#{machineMemory},#{instanceCount},#{memoryUsageRatio},#{memoryFree},#{memoryTotal},#{modifyTime},#{diskAvailable},#{diskTotal},#{diskUsageRatio})
         on duplicate key update
            host_id = #{hostId},
            cpu_usage = #{cpuUsage},
@@ -28,7 +28,10 @@
            max_memory = #{maxMemory},
            instance_count = #{instanceCount},
            machine_memory = #{machineMemory},
-           modify_time = #{modifyTime}
+           modify_time = #{modifyTime},
+           disk_available = #{diskAvailable},
+           disk_total = #{diskTotal},
+           disk_usage_ratio = #{diskUsageRatio}
     </insert>
 
     <!--查询机器下的所有实例的静态信息-->

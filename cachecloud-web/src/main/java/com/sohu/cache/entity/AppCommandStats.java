@@ -50,6 +50,9 @@ public class AppCommandStats implements Comparable<AppCommandStats> {
     }
 
     public Date getCreateTime() {
+        if(createTime == null){
+            return createTime;
+        }
         return (Date) createTime.clone();
     }
 
@@ -58,6 +61,9 @@ public class AppCommandStats implements Comparable<AppCommandStats> {
     }
 
     public Date getModifyTime() {
+        if(modifyTime == null){
+            return modifyTime;
+        }
         return (Date) modifyTime.clone();
     }
 

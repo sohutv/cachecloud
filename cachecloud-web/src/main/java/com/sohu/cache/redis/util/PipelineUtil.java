@@ -32,6 +32,10 @@ public class PipelineUtil {
         return pipeline.sendCommand(Command.DEBUG, params.getCommand());
     }
 
+    public static Response<Object> objectIdletime(Pipeline pipeline, String key) {
+        return pipeline.sendCommand(Command.OBJECT, Keyword.IDLETIME.raw, SafeEncoder.encode(key));
+    }
+
     public static Response<Object> memoryUsage(Pipeline pipeline, String key){
         return pipeline.sendCommand(Command.MEMORY, Keyword.USAGE.raw, SafeEncoder.encode(key));
     }

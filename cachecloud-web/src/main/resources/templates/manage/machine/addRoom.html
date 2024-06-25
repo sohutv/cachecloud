@@ -1,0 +1,113 @@
+<#if record??>
+  <#assign roomId = record.id>
+<#else>
+  <#assign roomId = ''>
+</#if>
+<div id="addRoomModal${roomId!}" class="modal fade" tabindex="-1" data-width="400">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">管理机房</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+      </div>
+
+      <form class="form-horizontal form-bordered form-row-stripped">
+        <div class="modal-body">
+          <div class="row">
+            <!-- 控件开始 -->
+            <div class="col-md-12">
+              <!-- form-body开始 -->
+              <div class="form-body">
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    机房名称:
+                  </label>
+                  <div class="col-md-7">
+                    <#if record??>
+                      <#assign nameValue = record.name!>
+                    <#else>
+                      <#assign nameValue = ''>
+                    </#if>
+                  <input type="text" name="name" id="name${roomId!}"
+                         value="${nameValue!}" placeholder="机房名称"
+                         class="form-control" />
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    机房状态:
+                  </label>
+                  <div class="col-md-7">
+                    <select name="status" id="status${roomId!}" class="form-select select2_category">
+                      <option value="1" <#if record?? && (record.status == 1)>selected</#if>>有效</option>
+                      <option value="0" <#if record?? && (record.status == 0)>selected</#if>>无效</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    描述:
+                  </label>
+                  <div class="col-md-7">
+                    <#if record??>
+                      <#assign descValue = record.desc!>
+                    <#else>
+                      <#assign descValue = ''>
+                    </#if>
+                    <input type="text" name="desc" id="desc${roomId!}"
+                           value="${descValue!}" placeholder="描述"
+                           class="form-control" />
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    网段:
+                  </label>
+                  <div class="col-md-7">
+                    <#if record??>
+                      <#assign ipNetworkValue = record.ipNetwork!>
+                    <#else>
+                      <#assign ipNetworkValue = ''>
+                    </#if>
+                    <input type="text" name="ipNetwork" id="ipNetwork${roomId!}"
+                           value="${ipNetworkValue!}" placeholder="网段示例:xx.xx.*.*"
+                           class="form-control" />
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    运营商:
+                  </label>
+                  <div class="col-md-7">
+                    <#if record??>
+                      <#assign operatorValue = record.operator!>
+                    <#else>
+                      <#assign operatorValue = ''>
+                    </#if>
+                    <input type="text" name="operator" id="operator${roomId!}"
+                           value="${operatorValue!}" placeholder="运营商"
+                           class="form-control" />
+                  </div>
+                </div>
+
+              <input type="hidden" id="roomId${roomId!}" name="roomId" value="${roomId!}"/>
+              </div>
+              <!-- form-body 结束 -->
+            </div>
+            <div id="machineRoom${roomId!}"></div>
+            <!-- 控件结束 -->
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" data-bs-dismiss="modal" class="btn btn-secondary" >Close</button>
+          <button type="button" id="addRoomBtn${roomId!}" class="btn btn-danger" onclick="saveOrUpdateRoom('${roomId!}', '${request.contextPath}')">Ok</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

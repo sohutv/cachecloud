@@ -1,0 +1,69 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          定时任务管理
+        </h3>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <form class="row justify-content-end" action="${request.contextPath}/manage/quartz/list" method="post" role="form">
+            <label class="col-form-label col-auto">
+              查询:
+            </label>
+            <div class="col-auto">
+              <input type="text" name="query" class="form-control" id="ipLike" value="${query!}" placeholder=""/>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm col-auto">查询</button>
+          </form>
+        </div>
+
+        <div class="row mt-3 table-responsive">
+          <table class="table table-striped table-bordered table-hover table-sm" id="tableDataList" style="white-space: nowrap">
+            <thead>
+            <tr>
+              <th scope="col">triggerName</th>
+              <th scope="col">triggerGroup</th>
+              <th scope="col">cron</th>
+              <th scope="col">nextFireDate</th>
+              <th scope="col">prevFireDate</th>
+              <th scope="col">startDate</th>
+              <th scope="col">triggerState</th>
+              <th scope="col">操作(s)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <#list triggerList as t>
+              <tr>
+                <td>${t.triggerName!}</td>
+                <td>${t.triggerGroup!}</td>
+                <td>${t.cron!}</td>
+                <td>${t.nextFireDate!}</td>
+                <td>${t.prevFireDate!}</td>
+                <td>${t.startDate!}</td>
+                <td>${t.triggerState!}</td>
+                <td>
+                  <#if (t.triggerState == 'PAUSED')>
+                    <a onclick="if(window.confirm('确认恢复吗?!')){return true;}else{return false;}"
+                       href="${request.contextPath}/manage/quartz/resume?name=${t.triggerName!}&group=${t.triggerGroup!}">[恢复]
+                    </a>
+                  </#if>
+                  <#if (t.triggerState != 'PAUSED')>
+                    <a onclick="if(window.confirm('确认暂停吗?!')){return true;}else{return false;}"
+                       href="${request.contextPath}/manage/quartz/pause?name=${t.triggerName!}&group=${t.triggerGroup!}">[暂停]
+                    </a>
+                  </#if>
+                  <a onclick="if(window.confirm('确认删除吗?!')){return true;}else{return false;}"
+                     href="${request.contextPath}/manage/quartz/remove?name=${t.triggerName!}&group=${t.triggerGroup!}">[删除]
+                  </a>
+                </td>
+              </tr>
+            </#list>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

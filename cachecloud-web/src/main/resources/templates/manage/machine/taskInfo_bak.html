@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>迁移信息</title>
+  <#include '/inc/frontResources.html'>
+</head>
+<body role="document dashboard">
+<div class="container">
+  <#include '/inc/head.html'>
+  <div id="systemAlert">
+  </div>
+  <main id="main" class="main px-5 ms-0">
+    <div class="page-content">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            迁移信息
+          </h3>
+        </div>
+
+        <div class="form">
+          <div class="form-body">
+            <div class="card-body">
+              <div class="form-group row">
+                <div class="col-md-12">
+
+                  <h3 class="card-title">
+                    待迁移pod——部署实例数
+                  </h3>
+                  <table class="table table-striped table-bordered table-hover table-sm" style="white-space: nowrap">
+                    <thead>
+                      <tr>
+                        <th scope="col">ip</th>
+                        <th scope="col">实例数</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <#if podInstancesMap?? && podInstancesMap?keys??>
+                        <#list podInstancesMap?keys as podIp>
+                        <tr>
+                          <td>${podIp}</td>
+                          <td>${podInstancesMap[podIp]}</td>
+                        </tr>
+                        </#list>
+                      </#if>
+                    </tbody>
+                  </table>
+                  <br/>
+
+                  <h3 class="card-title">
+                    待迁移pod——不可迁移实例信息
+                  </h3>
+                  <table class="table table-striped table-bordered table-hover table-sm" style="white-space: nowrap">
+                    <thead>
+                    <tr>
+                      <th scope="col">ip</th>
+                      <th scope="col">实例</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <#if podNoMigrateInstanceMap?? && podNoMigrateInstanceMap?keys??>
+                      <#list podNoMigrateInstanceMap?keys as podIp>
+                        <tr>
+                          <td>${podIp!}</td>
+                          <td>
+                            <#assign podInstances = podNoMigrateInstanceMap[podIp]>
+                            <#if podInstances??>
+                              <#list podInstances as instance>
+                                ${instance!}<br/>
+                              </#list>
+                            </#if>
+                          </td>
+                        </tr>
+                      </#list>
+                    </#if>
+                    </tbody>
+                  </table>
+                  <br/>
+
+                  <h3 class="card-title">
+                    待迁移应用——需迁移实例数
+                  </h3>
+                  <table class="table table-striped table-bordered table-hover table-sm" style="white-space: nowrap">
+                    <thead>
+                    <tr>
+                      <th scope="col">appId</th>
+                      <th scope="col">实例数</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <#if appInstancesMap??>
+                      <#list appInstancesMap?keys as appId>
+                      <tr>
+                        <td>${appId!}</td>
+                        <td>${appInstancesMap[appId]}</td>
+                      </tr>
+                      </#list>
+                    </#if>
+                    </tbody>
+                  </table>
+                  <br/>
+
+                  <h3 class="card-title">
+                    待迁移应用——待添加从节点信息及结果（结果会随页面刷新而刷新）
+                  </h3>
+                  <table class="table table-striped table-bordered table-hover table-sm" style="white-space: nowrap">
+                    <thead>
+                    <tr>
+                      <th scope="col">appId</th>
+                      <th scope="col">主节点</th>
+                      <th scope="col">待添加从ip</th>
+                      <th scope="col">结果</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <#if toAddInstancesMap??>
+                      <#list toAddInstancesMap?keys as appId>
+                      <tr>
+                        <td>${appId!}</td>
+                        <#assign addInstance = toAddInstancesMap[appId]>
+                        <#if addInstance??>
+                          <td>${addInstance?api.getLeft()!}</td>
+                          <#if addInstance?api.getMiddle()??>
+                            <td>${addInstance?api.getMiddle()}</td>
+                          <#else>
+                            <td>未分配到从节点，请关注</td>
+                          </#if>
+                          <td>${addInstance?api.getRight()!}</td>
+                        <#else>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                        </#if>
+                      </tr>
+                      </#list>
+                    </#if>
+                    </tbody>
+                  </table>
+                  <br/>
+
+                  <h3 class="card-title">
+                    新分配pod——实例部署信息与结果
+                  </h3>
+                  <table class="table table-striped table-bordered table-hover table-sm" style="white-space: nowrap">
+                    <thead>
+                    <tr>
+                      <th scope="col">podIp</th>
+                      <th scope="col">需补充实例数</th>
+                      <th scope="col">已完成实例数</th>
+                      <th scope="col">未完成实例数</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <#if newPodInstancesMap??>
+                      <#list newPodInstancesMap?keys as podIp>
+                      <tr>
+                        <td>${podIp!}</td>
+                        <#assign todoCount = newPodInstancesMap[podIp]>
+                        <#if newPodAddedInstancesMap??>
+                          <#assign addCount = newPodAddedInstancesMap[podIp]>
+                        <#else>
+                          <#assign addCount = 0>
+                        </#if>
+                        <td>${todoCount}</td>
+                        <td>${addCount}</td>
+                        <td>${todoCount - addCount}</td>
+                      </tr>
+                      </#list>
+                    </#if>
+                    </tbody>
+                  </table>
+                  <br/>
+
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

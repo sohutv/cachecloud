@@ -10,6 +10,7 @@ import com.sohu.cache.ssh.SSHTemplate;
 import com.sohu.cache.ssh.SSHUtil;
 import com.sohu.cache.task.constant.PushEnum;
 import com.sohu.cache.task.constant.ResourceEnum;
+import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.enums.SuccessEnum;
 import com.sohu.cache.web.service.ResourceService;
 import com.sohu.cache.web.util.DateUtil;
@@ -21,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +31,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 /**
@@ -43,6 +47,12 @@ public class ResourceServiceImpl implements ResourceService {
     ResourceDao resourceDao;
     @Autowired
     SSHService sshService;
+
+    @PostConstruct
+    public void init() {
+        List<SystemResource> resourceList = this.getResourceList(ResourceEnum.REDIS.getValue());
+        ConstUtils.REDIS_RESOURCE = resourceList.stream().collect(Collectors.toMap(res -> Integer.valueOf(res.getId()), Function.identity()));
+    }
 
     public SuccessEnum saveResource(SystemResource systemResouce) {
         try {
@@ -166,8 +176,8 @@ public class ResourceServiceImpl implements ResourceService {
             if (repository != null && resource != null) {
                 // 1.推送目录
                 SSHTemplate.Result result = sshService.executeWithResult(repository.getName(), String.format("mkdir -p %s", repository.getDir() + resource.getName()));
-                if(!result.isSuccess()){
-                    logger.error("pushDir resource repositoryId:{} resourceId:{} result:{}", repositoryId, resourceId,result);
+                if (!result.isSuccess()) {
+                    logger.error("pushDir resource repositoryId:{} resourceId:{} result:{}", repositoryId, resourceId, result);
                     return SuccessEnum.FAIL;
                 }
                 // 2.update push status
@@ -268,4 +278,69 @@ public class ResourceServiceImpl implements ResourceService {
         }
         return resultMap;
     }
+
+    @Override
+    public SystemResource getRedisResourceByCache(Integer repositoryId) {
+        SystemResource resource = null;
+        try {
+            Map<Integer, SystemResource> resourceMap = ConstUtils.REDIS_RESOURCE;
+            if (MapUtils.isNotEmpty(resourceMap)) {
+                resource = resourceMap.get(repositoryId);
+            }
+
+            if (resource == null) {
+                resource = this.getResourceById(repositoryId);
+                if (resource != null) {
+                    ConstUtils.REDIS_RESOURCE.put(Integer.valueOf(resource.getId()), resource);
+                }
+            }
+            return resource;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    @Override
+    public String getRedisVersion(Integer repositoryId) {
+        String version = null;
+        SystemResource redisResource = this.getRedisResourceByCache(repositoryId);
+        if (redisResource != null) {
+            String name = redisResource.getName();
+            if (name.contains("-")) {
+                String[] nameArr = name.split("-");
+                if (nameArr != null && nameArr.length == 2) {
+                    String[] versionArr = nameArr[1].split("\\.");
+                    if (versionArr != null && versionArr.length == 3) {
+                        version = nameArr[1];
+                    }
+                }
+            }
+        }
+        return version;
+    }
+
+    @Override
+    public boolean checkRedisVersionGreater(Integer repositoryId, int[] versions) {
+        SystemResource redisResource = this.getRedisResourceByCache(repositoryId);
+        if (redisResource != null) {
+            String name = redisResource.getName();
+            if (name.contains("-")) {
+                String[] nameArr = name.split("-");
+                if (nameArr != null && nameArr.length == 2) {
+                    String[] versionArr = nameArr[1].split("\\.");
+                    if (versionArr != null && versionArr.length == 3) {
+                        for (int i = 0; i < versions.length; i++) {
+                            if (Integer.valueOf(versionArr[i]) < versions[i]) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 }

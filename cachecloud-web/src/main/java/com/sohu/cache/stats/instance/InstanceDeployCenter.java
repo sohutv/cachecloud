@@ -83,5 +83,4 @@ public interface InstanceDeployCenter {
      */
     List<InstanceAlertValueResult> checkAndStartExceptionInstance(String ip, Boolean isAlert);
 
-
 }

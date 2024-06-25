@@ -220,7 +220,7 @@ public class AppRedisCommandCheckServiceImpl implements AppRedisCommandCheckServ
         Jedis jedis = null;
         long start = 0L;
         try {
-            jedis = redisCenter.getJedis(appId, host, port);
+            jedis = redisCenter.getAdminJedis(appId, host, port);
             start = System.currentTimeMillis();
             String info = jedis.bgrewriteaof();
             log.info("实例appId：{}, ip:{}, port:{}，bgrewriteaof结果：{}", appId, host, port, info);
@@ -248,7 +248,7 @@ public class AppRedisCommandCheckServiceImpl implements AppRedisCommandCheckServ
         Jedis jedis = null;
         long start = 0L;
         try {
-            jedis = redisCenter.getJedis(appId, host, port);
+            jedis = redisCenter.getAdminJedis(appId, host, port);
             start = System.currentTimeMillis();
             String info = jedis.bgsave();
             log.info("实例appId：{}, ip:{}, port:{}，bgrewriteaof结果：{}", appId, host, port, info);
@@ -286,7 +286,7 @@ public class AppRedisCommandCheckServiceImpl implements AppRedisCommandCheckServ
         boolean reConfirmFlag = true;
         long costTime = 0L;
         try {
-            jedis = redisCenter.getJedis(appId, host, port);
+            jedis = redisCenter.getAdminJedis(appId, host, port);
             int retryTimes = 1;
             long sleepTime = 500L;
             boolean printMemory = true;
@@ -401,7 +401,7 @@ public class AppRedisCommandCheckServiceImpl implements AppRedisCommandCheckServ
         boolean reConfirmFlag = true;
         long costTime = 0L;
         try {
-            jedis = redisCenter.getJedis(appId, host, port);
+            jedis = redisCenter.getAdminJedis(appId, host, port);
             int retryTimes = 1;
             long sleepTime = 500L;
             boolean printMemory = true;

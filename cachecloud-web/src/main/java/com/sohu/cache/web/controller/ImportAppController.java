@@ -203,7 +203,7 @@ public class ImportAppController extends BaseController {
                 AsyncThreadPoolFactory.DEFAULT_ASYNC_THREAD_POOL.execute(new Runnable() {
                     @Override
                     public void run() {
-                        Jedis jedis = redisCenter.getJedis(appId, host, port);
+                        Jedis jedis = redisCenter.getAdminJedis(appId, host, port);
                         jedis.getClient().setConnectionTimeout(1000);
                         jedis.getClient().setSoTimeout(60000);
                         try {

@@ -1,0 +1,35 @@
+<div class="col-md-12">
+  <div class="card-header">
+    <h3 class="card-title">
+      实例故障情况
+    </h3>
+  </div>
+  <div class="card-body table-responsive">
+    <!-- table begin -->
+    <table class="table table-striped">
+      <thead>
+        <th scope="col">应用ID</td>
+        <th scope="col">实例ip:port</td>
+        <th scope="col">实例状态</td>
+        <th scope="col">类型</td>
+        <th scope="col">触发时间</td>
+      </thead>
+      <tbody>
+      <#list list as instance>
+        <tr>
+          <td>
+            <a href="${request.contextPath}/admin/app/index?appId=${instance.appId}" target="_blank">${instance.appId}</a>
+          </td>
+          <td>
+            <a href="${request.contextPath}/admin/instance/index?instanceId=${instance.instId}" target="_blank">${instance.ip}:${instance.port}</a>
+          </td>
+          <td>${instance.statusDesc}</td>
+          <td>${instance.typeDesc}</td>
+          <td>${instance.createTime?string("yyyy-MM-dd HH:mm:ss")}</td>
+        </tr>
+      </#list>
+      </tbody>
+    </table>
+    <!-- End Table with stripped rows -->
+  </div>
+</div>

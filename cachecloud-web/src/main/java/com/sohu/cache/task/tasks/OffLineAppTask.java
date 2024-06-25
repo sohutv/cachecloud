@@ -115,6 +115,7 @@ public class OffLineAppTask extends BaseTask {
         List<Boolean> isShutDownList = Lists.newArrayList();
         if (instanceInfos != null) {
             isShutDownList = instanceInfos.parallelStream()
+                    .filter(instanceInfo -> !instanceInfo.isOffline())
                     .map(instanceInfo -> instanceOffline(instanceInfo, type))
                     .collect(Collectors.toList());
         }

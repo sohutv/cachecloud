@@ -21,7 +21,7 @@ public enum Command implements ProtocolCommand {
     PFADD, PFCOUNT, PFMERGE, READONLY, GEOADD, GEODIST, GEOHASH, GEOPOS, GEORADIUS, GEORADIUS_RO,
     GEORADIUSBYMEMBER, GEORADIUSBYMEMBER_RO, MODULE, BITFIELD, HSTRLEN, TOUCH, SWAPDB, MEMORY,
     XADD, XLEN, XDEL, XTRIM, XRANGE, XREVRANGE, XREAD, XACK, XGROUP, XREADGROUP, XPENDING, XCLAIM, LATENCY,
-    ACL, XINFO, BITFIELD_RO;
+    ACL, XINFO, BITFIELD_RO, COMMAND;
 
     private final byte[] raw;
 
@@ -47,6 +47,7 @@ public enum Command implements ProtocolCommand {
         AGGREGATE("FT.AGGREGATE"),
         CURSOR("FT.CURSOR"),
         CONFIG("FT.CONFIG"),
+        CLUSTER_CONFIG("_FT.CONFIG"),
         ALIASADD("FT.ALIASADD"),
         ALIASUPDATE("FT.ALIASUPDATE"),
         ALIASDEL("FT.ALIASDEL"),
@@ -62,6 +63,23 @@ public enum Command implements ProtocolCommand {
         private final byte[] raw;
 
         private SearchCommand(String alt) {
+            raw = SafeEncoder.encode(alt);
+        }
+
+        @Override
+        public byte[] getRaw() {
+            return raw;
+        }
+    }
+
+    public enum JSONCommand implements ProtocolCommand {
+
+        OBJLEN("JSON.OBJLEN"),
+        JSONGET("JSON.GET");
+
+        private final byte[] raw;
+
+        private JSONCommand(String alt) {
             raw = SafeEncoder.encode(alt);
         }
 

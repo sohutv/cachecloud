@@ -63,7 +63,6 @@ public class SSHClient {
 
     private void setAuthByKey(SshClient client) throws GeneralSecurityException, IOException {
         KeyPairResourceLoader loader = SecurityUtils.getKeyPairResourceParser();
-
         Collection<KeyPair> keys = loader.loadKeyPairs(null, Paths.get(privateKeyPath), null);
         client.setKeyIdentityProvider(KeyIdentityProvider.wrapKeyPairs(keys));
     }

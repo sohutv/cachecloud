@@ -9,6 +9,7 @@ import com.sohu.cache.entity.InstanceInfo;
 import com.sohu.cache.entity.InstanceReshardProcess;
 import com.sohu.cache.entity.SystemResource;
 import com.sohu.cache.util.IdempotentConfirmer;
+import com.sohu.cache.util.TypeUtil;
 import com.sohu.cache.web.enums.BooleanEnum;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -19,6 +20,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Protocol;
 import redis.clients.jedis.exceptions.JedisException;
 import redis.clients.jedis.params.MigrateParams;
+import redis.clients.jedis.util.SafeEncoder;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -87,63 +89,76 @@ public class RedisClusterReshard {
      * 加入主从分片
      */
     public boolean joinCluster(long appId, String masterHost, int masterPort, final String slaveHost, final int slavePort) {
-        //1. 确认主从节点是否正常
-        final Jedis masterJedis = redisCenter.getJedis(appId, masterHost, masterPort, defaultTimeout, defaultTimeout);
-        boolean isRun = redisCenter.isRun(appId, masterHost, masterPort);
-        if (!isRun) {
-            logger.error(String.format("joinCluster: master host=%s,port=%s is not run", masterHost, masterPort));
-            return false;
-        }
-        boolean hasSlave = StringUtils.isNotBlank(slaveHost) && slavePort > 0;
-        final Jedis slaveJedis = hasSlave ? redisCenter.getJedis(appId, slaveHost, slavePort, defaultTimeout, defaultTimeout) : null;
-        if (hasSlave) {
-            isRun = redisCenter.isRun(appId, slaveHost, slavePort);
+        Jedis mJedis = null;
+        Jedis sJedis = null;
+        try{
+            //1. 确认主从节点是否正常
+            mJedis = redisCenter.getAdminJedis(appId, masterHost, masterPort, defaultTimeout, defaultTimeout);
+            final Jedis masterJedis = mJedis;
+            boolean isRun = redisCenter.isRun(appId, masterHost, masterPort);
             if (!isRun) {
-                logger.error(String.format("joinCluster: slave host=%s,port=%s is not run", slaveHost, slavePort));
+                logger.error(String.format("joinCluster: master host=%s,port=%s is not run", masterHost, masterPort));
                 return false;
             }
-        }
-
-        //2. 对主从节点进行meet操作
-        //获取所有主节点
-        List<HostAndPort> masterHostAndPostList = getMasterNodeList(appId);
-        //meet master
-        boolean isClusterMeet = clusterMeet(appId, masterHostAndPostList, masterHost, masterPort);
-        if (!isClusterMeet) {
-            logger.error("master isClusterMeet failed {}:{}", masterHost, masterPort);
-            return false;
-        }
-        if (hasSlave) {
-            isClusterMeet = clusterMeet(appId, masterHostAndPostList, slaveHost, slavePort);
-            if (!isClusterMeet) {
-                logger.error("slave isClusterMeet failed {}:{}", slaveHost, slavePort);
-                return false;
-            }
-        }
-
-        //3.复制
-        if (hasSlave) {
-            final String masterNodeId = getNodeId(appId, masterJedis);
-            if (masterNodeId == null) {
-                logger.error(String.format("joinCluster:host=%s,port=%s nodeId is null", masterHost, masterPort));
-                return false;
-            }
-            return new IdempotentConfirmer() {
-                @Override
-                public boolean execute() {
-                    try {
-                        //等待广播节点
-                        TimeUnit.SECONDS.sleep(2);
-                    } catch (Exception e) {
-                        logger.error(e.getMessage(), e);
-                    }
-                    String response = slaveJedis.clusterReplicate(masterNodeId);
-                    logger.info("clusterReplicate-{}:{}={}", slaveHost, slavePort, response);
-                    return response != null && response.equalsIgnoreCase("OK");
+            boolean hasSlave = StringUtils.isNotBlank(slaveHost) && slavePort > 0;
+            sJedis = hasSlave ? redisCenter.getAdminJedis(appId, slaveHost, slavePort, defaultTimeout, defaultTimeout) : null;
+            final Jedis slaveJedis = sJedis;
+            if (hasSlave) {
+                isRun = redisCenter.isRun(appId, slaveHost, slavePort);
+                if (!isRun) {
+                    logger.error(String.format("joinCluster: slave host=%s,port=%s is not run", slaveHost, slavePort));
+                    return false;
                 }
-            }.run();
-        } else {
-            return true;
+            }
+
+            //2. 对主从节点进行meet操作
+            //获取所有主节点
+            List<HostAndPort> masterHostAndPostList = getMasterNodeList(appId);
+            //meet master
+            boolean isClusterMeet = clusterMeet(appId, masterHostAndPostList, masterHost, masterPort);
+            if (!isClusterMeet) {
+                logger.error("master isClusterMeet failed {}:{}", masterHost, masterPort);
+                return false;
+            }
+            if (hasSlave) {
+                isClusterMeet = clusterMeet(appId, masterHostAndPostList, slaveHost, slavePort);
+                if (!isClusterMeet) {
+                    logger.error("slave isClusterMeet failed {}:{}", slaveHost, slavePort);
+                    return false;
+                }
+            }
+
+            //3.复制
+            if (hasSlave) {
+                final String masterNodeId = getNodeId(appId, masterJedis);
+                if (masterNodeId == null) {
+                    logger.error(String.format("joinCluster:host=%s,port=%s nodeId is null", masterHost, masterPort));
+                    return false;
+                }
+                return new IdempotentConfirmer() {
+                    @Override
+                    public boolean execute() {
+                        try {
+                            //等待广播节点
+                            TimeUnit.SECONDS.sleep(2);
+                        } catch (Exception e) {
+                            logger.error(e.getMessage(), e);
+                        }
+                        String response = slaveJedis.clusterReplicate(masterNodeId);
+                        logger.info("clusterReplicate-{}:{}={}", slaveHost, slavePort, response);
+                        return response != null && response.equalsIgnoreCase("OK");
+                    }
+                }.run();
+            } else {
+                return true;
+            }
+        }finally {
+            if(mJedis != null){
+                mJedis.close();
+            }
+            if(sJedis != null){
+                sJedis.close();
+            }
         }
     }
 
@@ -206,7 +221,7 @@ public class RedisClusterReshard {
         for (HostAndPort hostAndPort : masterHostAndPostList) {
             String clusterHost = hostAndPort.getHost();
             int clusterPort = hostAndPort.getPort();
-            final Jedis jedis = redisCenter.getJedis(appId, clusterHost, clusterPort, defaultTimeout, defaultTimeout);
+            final Jedis jedis = redisCenter.getAdminJedis(appId, clusterHost, clusterPort, defaultTimeout, defaultTimeout);
             //logger.info("jedis {}:{} meet singlenode",clusterHost,clusterPort);
             try {
                 boolean isClusterMeet = new IdempotentConfirmer() {
@@ -238,7 +253,8 @@ public class RedisClusterReshard {
         AppDesc appDesc = appDao.getAppDescById(appId);
         String password = null;
         List<Integer> versionList = new ArrayList<>();
-        if(appDesc != null){
+        boolean isRedisType = TypeUtil.isRedisType(appDesc.getType());
+        if(appDesc != null && isRedisType){
             password = appDesc.getPasswordMd5();
             // Redis版本信息
             SystemResource resource = resourceDao.getResourceById(appDesc.getVersionId());
@@ -258,36 +274,41 @@ public class RedisClusterReshard {
         InstanceInfo targetInstanceInfo = instanceReshardProcess.getTargetInstanceInfo();
 
         long startTime = System.currentTimeMillis();
+
         //源和目标Jedis
-        Jedis sourceJedis = redisCenter.getJedis(appId, sourceInstanceInfo.getIp(), sourceInstanceInfo.getPort(), defaultTimeout, defaultTimeout);
-        Jedis targetJedis = redisCenter.getJedis(appId, targetInstanceInfo.getIp(), targetInstanceInfo.getPort(), defaultTimeout, defaultTimeout);
-        //逐个slot迁移
-        boolean hasError = false;
-        for (int slot = migratingSlot; slot <= endSlot; slot++) {
-            long slotStartTime = System.currentTimeMillis();
-            try {
-                instanceReshardProcessDao.updateMigratingSlot(instanceReshardProcess.getId(), slot);
-                //num是迁移key的总数
-                int num = migrateSlotData(appId, sourceJedis, targetJedis, slot, isPipeline, password, versionList);
-                instanceReshardProcessDao.increaseFinishSlotNum(instanceReshardProcess.getId());
-                logger.warn("clusterReshard:{}->{}, slot={}, keys={}, costTime={} ms", sourceInstanceInfo.getHostPort(),
-                        targetInstanceInfo.getHostPort(), slot, num, (System.currentTimeMillis() - slotStartTime));
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-                hasError = true;
-                break;
+        try(Jedis sourceJedis = redisCenter.getAdminJedis(appId, sourceInstanceInfo.getIp(), sourceInstanceInfo.getPort(), defaultTimeout, defaultTimeout);
+            Jedis targetJedis = redisCenter.getAdminJedis(appId, targetInstanceInfo.getIp(), targetInstanceInfo.getPort(), defaultTimeout, defaultTimeout);){
+            //逐个slot迁移
+            boolean hasError = false;
+            for (int slot = migratingSlot; slot <= endSlot; slot++) {
+                long slotStartTime = System.currentTimeMillis();
+                try {
+                    instanceReshardProcessDao.updateMigratingSlot(instanceReshardProcess.getId(), slot);
+                    //num是迁移key的总数
+                    int num = 0;
+                    if(isRedisType){
+                        num = migrateSlotData(appId, sourceJedis, targetJedis, slot, isPipeline, password, versionList);
+                    }
+                    instanceReshardProcessDao.increaseFinishSlotNum(instanceReshardProcess.getId());
+                    logger.warn("clusterReshard:{}->{}, slot={}, keys={}, costTime={} ms", sourceInstanceInfo.getHostPort(),
+                            targetInstanceInfo.getHostPort(), slot, num, (System.currentTimeMillis() - slotStartTime));
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
+                    hasError = true;
+                    break;
+                }
             }
-        }
-        long endTime = System.currentTimeMillis();
-        logger.warn("clusterReshard:{}->{}, slot:{}->{}, costTime={} ms", sourceInstanceInfo.getHostPort(),
-                targetInstanceInfo.getHostPort(), migratingSlot, endSlot, (endTime - startTime));
-        if (hasError) {
-            instanceReshardProcessDao.updateStatus(instanceReshardProcess.getId(), ReshardStatusEnum.ERROR.getValue());
-            return false;
-        } else {
-            instanceReshardProcessDao.updateStatus(instanceReshardProcess.getId(), ReshardStatusEnum.FINISH.getValue());
-            instanceReshardProcessDao.updateEndTime(instanceReshardProcess.getId(), new Date());
-            return true;
+            long endTime = System.currentTimeMillis();
+            logger.warn("clusterReshard:{}->{}, slot:{}->{}, costTime={} ms", sourceInstanceInfo.getHostPort(),
+                    targetInstanceInfo.getHostPort(), migratingSlot, endSlot, (endTime - startTime));
+            if (hasError) {
+                instanceReshardProcessDao.updateStatus(instanceReshardProcess.getId(), ReshardStatusEnum.ERROR.getValue());
+                return false;
+            } else {
+                instanceReshardProcessDao.updateStatus(instanceReshardProcess.getId(), ReshardStatusEnum.FINISH.getValue());
+                instanceReshardProcessDao.updateEndTime(instanceReshardProcess.getId(), new Date());
+                return true;
+            }
         }
     }
 
@@ -358,10 +379,19 @@ public class RedisClusterReshard {
             public boolean execute() {
                 boolean isOk = false;
                 List<HostAndPort> masterNodesList = getMasterNodeList(appId);
+                // 增加cluster SETSLOT slot NODE node-id sequence
+                // target, source, and optional other master nodes
+                HostAndPort targetHostPort = new HostAndPort(target.getClient().getHost(), target.getClient().getPort());
+                HostAndPort sourceHostPort = new HostAndPort(source.getClient().getHost(), source.getClient().getPort());
+                masterNodesList = masterNodesList.stream().
+                        filter(hostAndPort -> !hostAndPort.equals(targetHostPort) && !hostAndPort.equals(sourceHostPort))
+                        .collect(Collectors.toList());
+                masterNodesList.add(0, targetHostPort);
+                masterNodesList.add(1, sourceHostPort);
                 for (HostAndPort hostAndPort : masterNodesList) {
                     Jedis jedis = null;
                     try {
-                        jedis = redisCenter.getJedis(appId, hostAndPort.getHost(), hostAndPort.getPort());
+                        jedis = redisCenter.getAdminJedis(appId, hostAndPort.getHost(), hostAndPort.getPort());
                         String response = jedis.clusterSetSlotNode(slot, targetNodeId);
                         isOk = response != null && response.equalsIgnoreCase("OK");
                         if (!isOk) {

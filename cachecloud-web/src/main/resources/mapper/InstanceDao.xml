@@ -167,6 +167,56 @@
         update instance_info set status=#{status},update_time = now() where app_id=#{appId} and ip=#{ip} and port=#{port}
     </update>
 
+    <sql id="instance_info_ii_columns">
+        ii.id, ii.app_id, ii.host_id, ii.ip, ii.port, ii.status, ii.mem, ii.conn, ii.cmd, ii.type, ii.update_time
+    </sql>
+
+    <select id="getInstancesByCondition" parameterType="com.sohu.cache.entity.InstanceInfo" resultType="com.sohu.cache.entity.InstanceInfo">
+        select  <include refid="instance_info_ii_columns"/>
+        from instance_info ii
+            <if test="status != null and status == 2">
+                left join app_desc ad on ii.app_id = ad.app_id
+            </if>
+        <where>
+            <if test="appId != null and appId > 0">
+                and ii.app_id = #{appId}
+            </if>
+            <if test="type != null and type > 0">
+                and ii.type = #{type}
+            </if>
+            <if test="status != null and status == 2">
+                and ad.status != 3
+                and ii.status = 2
+            </if>
+            <if test="status != null and status !=2 and status > 0">
+                and ii.status = #{status}
+            </if>
+            <if test="ip != null and ip != ''">
+                and ii.ip = #{ip}
+            </if>
+        </where>
+    </select>
+
+    <select id="getOfflineInstByAppIdAndHostport" resultType="com.sohu.cache.entity.InstanceInfo">
+        select
+            app_id, ip, port
+        from (
+            select
+                app_id, ip, port, concat(ip,":",port) hostport
+            from instance_info
+            where
+                app_id in
+                <foreach collection="appIds" item="appId" separator="," open="(" close=")">
+                    #{appId}
+                </foreach>
+                and status = 2
+        ) t
+        where hostport in
+            <foreach collection="hostports" item="hostport" separator="," open="(" close=")">
+                #{hostport}
+            </foreach>
+    </select>
+
 </mapper>
 
 

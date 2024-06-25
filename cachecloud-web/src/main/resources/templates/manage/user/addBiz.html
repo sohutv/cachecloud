@@ -1,0 +1,74 @@
+<div class="">
+  <div class="">
+    <#if biz??>
+      <#assign bizId = biz.id!>
+    <#else>
+      <#assign bizId = ''>
+    </#if>
+    <div id="addBizModal${bizId!}" class="modal fade" tabindex="-1" data-width="400">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">管理业务组</h4>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+          </div>
+
+          <form class="form-horizontal form-bordered form-row-stripped">
+            <div class="modal-body">
+              <div class="row">
+                <!-- 控件开始 -->
+                <div class="col-md-12">
+                  <!-- form-body开始 -->
+                  <div class="form-body">
+                    <div class="form-group row">
+                      <label class="col-form-label col-md-3 text-end">
+                        名称:
+                      </label>
+                      <div class="col-md-7">
+                        <#if biz??>
+                          <#assign nameValue = biz.name!>
+                        <#else>
+                          <#assign nameValue = ''>
+                        </#if>
+                        <input type="text" name="name" id="biz_name${bizId!}"
+                               value="${nameValue!}" placeholder="业务组名"
+                               class="form-control" />
+                      </div>
+                    </div>
+
+                    <div class="form-group row">
+                      <label class="col-form-label col-md-3 text-end">
+                        描述:
+                      </label>
+                      <div class="col-md-7">
+                        <#if biz??>
+                          <#assign bizDescValue = biz.bizDesc!>
+                        <#else>
+                          <#assign bizDescValue = ''>
+                        </#if>
+                        <input type="text" name="desc" id="biz_desc${bizId!}"
+                               value="${bizDescValue!}" placeholder="业务组描述"
+                               class="form-control" />
+                      </div>
+                    </div>
+
+                    <input type="hidden" id="bizId${bizId!}" name="bizId" value="${bizId!}"/>
+                  </div>
+                  <!-- form-body 结束 -->
+                </div>
+                <div id="info{bizId!}"></div>
+                <!-- 控件结束 -->
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" data-bs-dismiss="modal" class="btn btn-secondary" >Close</button>
+              <button type="button" id="bizBtn${bizId!}" class="btn btn-danger" onclick="saveOrUpdateBiz('${bizId!}', '${request.contextPath}')">Ok</button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

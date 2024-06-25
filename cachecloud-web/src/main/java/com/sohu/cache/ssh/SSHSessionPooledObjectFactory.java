@@ -56,7 +56,7 @@ public class SSHSessionPooledObjectFactory implements KeyedPooledObjectFactory<S
             session.addPublicKeyIdentity(keys.iterator().next());
         }
         session.auth().verify(ConstUtils.SSH_CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS);
-        logger.info("create object, key:{}", sshMachineInfo);
+        logger.info("create object, key:{}", sshMachineInfo.getIp());
         return new DefaultPooledObject<>(session);
     }
 
@@ -67,17 +67,17 @@ public class SSHSessionPooledObjectFactory implements KeyedPooledObjectFactory<S
             try {
                 clientSession.close();
             } catch (Exception e) {
-                logger.warn("close err, key:{}", sshMachineInfo, e);
+                logger.warn("close err, key:{}", sshMachineInfo.getIp(), e);
             }
         }
-        logger.info("destroy object {}", sshMachineInfo);
+        logger.info("destroy object {}", sshMachineInfo.getIp());
     }
 
     @Override
     public boolean validateObject(SSHMachineInfo sshMachineInfo, PooledObject<ClientSession> pooledObject) {
         boolean closed = pooledObject.getObject().isClosed();
         if (closed) {
-            logger.warn("{} session closed", sshMachineInfo);
+            logger.warn("{} session closed", sshMachineInfo.getIp());
             return false;
         }
         return true;

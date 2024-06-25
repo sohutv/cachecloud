@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>客户端命令超时统计</title>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <#include '/inc/frontResources.html'>
+</head>
+<body class="hold-transition sidebar-mini layout-navbar-fixed">
+  <div class="wrapper">
+    <!-- Header End -->
+    <#include "/inc/head.html">
+    <div class="content-wrapper ml-0">
+      <div class="content">
+        <div class="container">
+          <div class="row">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-body">
+                  <div class="">
+                    <form method="get" action="${request.contextPath}/client/show/exceptionStatistics/client" id="clientCommandStatisticsForm">
+                      <div class="row">
+                        <div class="d-flex justify-content-end">
+                          <label class="col-form-label col-auto" style="font-weight:bold;text-align:left;">
+                            &nbsp;查询日期:&nbsp;&nbsp;
+                          </label>
+                          <div class="col-auto">
+                            <input class="form-control" type="date" name="searchDate" id="searchDate" value="${searchDate!}">
+                          </div>
+                          <label>&nbsp;<input type="submit" class="btn btn-info col-auto" value="查询"/></label>
+                        </div>
+                      </div>
+                      <div class="row page-header">
+                        <h4>&nbsp;&nbsp;应用：<label class="label label-success">${appId!}</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                          查询时间：<label class="label label-success">${searchDate!}</label>
+                        </h4>
+                      </div>
+                      <div class="dropdown-divider"></div>
+                      <div class="row">
+                        <div class="d-flex justify-content-start">
+                          <#assign client_needSelect="0">
+                          <label class="col-auto">
+                            &nbsp;&nbsp;客户端: &nbsp;&nbsp;
+                          </label>
+                          <#list clientConfigMap?keys as key>
+                            <#assign item = key >
+                            <#if (key_index < 5)>
+                              <div class="form-check">
+                                <input type="radio" name="client_optionsRadios" value="${item!}"
+                                <#if firstClient?? && (firstClient == item)>checked="checked"</#if>
+                                onchange="changeClientChart(this.value)"/>
+                                ${item!}&nbsp;
+                              </div>
+                            <#else>
+                              <#assign client_needSelect="1">
+                            </#if>
+                          </#list>
+                          <#if (client_needSelect?number == 1)>
+                            <label class="col-auto">
+                              &nbsp;&nbsp;&nbsp;其他:
+                            </label>
+                            <div class="col-auto">
+                              <select name="optionsRadios" onchange="changeClientChart(this.value)">
+                                <option>请选择</option>
+                                <#list clientConfigMap?keys as key>
+                                  <#assign item = key >
+                                  <#if (key_index >= 5)>
+                                    <label>
+                                      <option value="${item!}" <#if firstClient?? && (firstClient == item)>selected</#if>>
+                                      ${item!}
+                                      </option>
+                                    </label>
+                                  </#if>
+                                </#list>
+                              </select>
+                            </div>
+                          </#if>
+                        </div>
+                      </div>
+
+                      <input type="hidden" name="appId" value="${appId!}">
+                      <input type="hidden" id="firstClient" name="firstClient" value="${firstClient!}">
+                      <input type="hidden" id="exceptionType" name="exceptionType" value=1>
+
+                      <div class="dropdown-divider"></div>
+
+                      <div class="row">
+                        <label class="col-auto">
+                          &nbsp;&nbsp;Jedis配置：
+                        </label>
+                        <#if clientConfigMap?? && firstClient?? && clientConfigMap[firstClient]??>
+                          <#assign configs = clientConfigMap[firstClient]>
+                        </#if>
+                        <div class="col-auto">
+                          <select class="label label-info w-100" style="border: 0;">
+                            <#list configs! as item>
+                              <option>${item!}</option>
+                            </#list>
+                          </select>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+
+                  <script type="text/javascript">
+                    var appId = '${appId!}';
+                    var searchDate = '${searchDate!}';
+                    //应用下某客户端某命令的统计情况
+                    var appClientExceptionStatisticsMap = '${appClientExceptionStatisticsJson!}';
+                    var appClientExceptionStatisticsJson = eval("(" + appClientExceptionStatisticsMap + ")");
+
+                    Highcharts.setOptions({
+                      global: {
+                        useUTC: false
+                      }
+                    });
+                    Highcharts.setOptions({
+                      colors: ['#2f7ed8', '#E3170D', '#0d233a', '#8bbc21', '#1aadce',
+                        '#492970', '#804000', '#f28f43', '#77a1e5',
+                        '#c42525', '#a6c96a']
+                    });
+
+                    function changeClientChart(value) {
+                      document.getElementById("firstClient").value = value;
+                      document.getElementById("clientCommandStatisticsForm").submit();
+                    }
+
+                    $(document).ready(
+                            function () {
+                              var data = appClientExceptionStatisticsJson;
+
+                              var count_unit = "次数";
+                              var count_appTotalOptions = getOption("countContainer", "<b>" + "命令超时次数</b>", count_unit);
+                              count_appTotalOptions.series = getClientStatisticsByType(data, 'count', count_unit, searchDate, 1);
+                              var count_appTotalchart = new Highcharts.Chart(count_appTotalOptions);
+
+                              //cost
+                              var cost_unit = "毫秒";
+                              var cost_appTotalOptions = getOption("costContainer", "<b>" + "命令超时耗时</b>", cost_unit);
+                              cost_appTotalOptions.series = getClientStatisticsByType(data, 'cost', cost_unit, searchDate, 1);
+                              var cost_appTotalchart = new Highcharts.Chart(cost_appTotalOptions);
+                            });
+                  </script>
+                  <div class="alert alert-warning alert-dismissable">
+                    提示：点击图中点查看超时命令详情！
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-hidden="true"></button>
+                  </div>
+                  <br/>
+                  <div id="countContainer" style="max-width: 100%; min-width: 310px; height: 350px; margin: 0 auto"></div>
+                  <br/>
+                  <div id="costContainer" style="max-width: 100%; min-width: 310px; height: 350px; margin: 0 auto"></div>
+                  <br/>
+                  <div class="page-header">
+                    <h4>
+                      redis节点命令超时统计表
+                    </h4>
+                  </div>
+                  <table id="instanceDetailTable" class="table table-striped table-hover table-bordered" style="margin-top: 0px">
+                    <thead>
+                    <tr>
+                      <td>序号</td>
+                      <td>redis实例</td>
+                      <td>超时总次数</td>
+                      <td>平均耗时(单位:毫秒)</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <#list appNodeExceptionStatisticsList as item>
+                      <tr>
+                        <td>${item_index}</td>
+                        <td>${item.node!}</td>
+                        <td>${item.count!}</td>
+                        <td>${item.cost!}</td>
+                      </tr>
+                    </#list>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <#include "/inc/footer.html">
+  </div>
+  <script type="text/javascript">
+    $(function () {
+      $("div[name='nodeCmdDetail-modal']").on('shown.bs.modal', function () {
+        var nodeCmdDetail_id = $(this).attr('id');
+        var nodeFormat = nodeCmdDetail_id.split('_')[1] + "_" + nodeCmdDetail_id.split('_')[2];
+        var host = nodeCmdDetail_id.split('_')[1].replace(/-/g, ".");
+        var port = nodeCmdDetail_id.split('_')[2];
+        var node = host + ":" + port;
+        var header = "<h4>&nbsp;&nbsp;redis实例：" + node + "</h4>";
+        $('#header_' + nodeFormat).html(header);
+
+        var searchDate = $('#searchDate').val();
+        var clientIp = $('#firstClient').val();
+        $('#modal-body-tbody-' + nodeFormat).html('');
+        $.post(
+                '${request.contextPath}/client/show/latencyCommandDetail/node',
+                {
+                  client: clientIp,
+                  node: node,
+                  searchDate: searchDate
+                },
+                function (data) {
+                  var result = data.result;
+                  var latencyCommandDetailList = data.latencyCommandDetailList;
+                  if (result != 'success') {
+                  } else {
+                    var tbody = "";
+                    $.each(latencyCommandDetailList, function (n, value) {
+                      var trs = "";
+                      trs += "<tr>"
+                              + "<td>" + value.id + " </td>"
+                              + "<td>" + value.create_time + " </td>"
+                              + "<td>" + value.command + "</td >"
+                              + "<td>" + value.args + "</td >"
+                              + "<td>" + value.size + "</td >"
+                              + " </tr>";
+                      tbody += trs;
+                    });
+                    $('#modal-body-tbody-' + nodeFormat).append(tbody);
+                  }
+                }
+        );
+      });
+    })
+  </script>
+</body>
+</html>

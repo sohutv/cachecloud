@@ -1,0 +1,757 @@
+<script type="text/javascript">
+
+    //查看实例是否存在
+    function checkInstanceExist(){
+        var instanceHostPort = document.getElementById("instanceHostPort").value;
+        if (instanceHostPort == null || instanceHostPort == ""){
+            alert("请填写实例ip:port");
+            instanceHostPort.focus();
+            return false;
+        }
+        if(instanceHostPort != ''){
+            $.post(
+                '${request.contextPath}/manage/instanceAlert/checkInstanceHostPort.json',
+                {
+                    instanceHostPort: instanceHostPort,
+                },
+                function(data){
+                    var success = data.status;
+                    if(success==0){
+                        alert(data.message);
+                        document.getElementById("instanceHostPort").focus();
+                    }
+                }
+            );
+        }
+    }
+
+    function removeAlertConfig(id) {
+        $.get(
+            '${request.contextPath}/manage/instanceAlert/remove.json',
+            {
+                id: id
+            },
+            function(data){
+                var status = data.status;
+                if (status == 1) {
+                    alert("删除成功!");
+                } else {
+                    alert("删除失败, msg: " + result.message);
+                }
+                window.location.reload();
+            }
+        );
+    }
+
+    function changeAlertConfig(id) {
+        var alertValue = document.getElementById("alertValue" + id);
+        var checkCycle = document.getElementById("checkCycle" + id);
+        var compareType = document.getElementById("compareType" + id);
+        var importantLevel = document.getElementById("importantLevel" + id);
+        $.get(
+            '${request.contextPath}/manage/instanceAlert/update.json',
+            {
+                id: id,
+                alertValue: alertValue.value,
+                checkCycle: checkCycle.value,
+                compareType: compareType.value,
+                importantLevel: importantLevel.value
+            },
+            function(data){
+                var status = data.status;
+                if (status == 1) {
+                    alert("修改成功！");
+                    window.location.reload();
+                } else {
+                    alert("修改失败！" + data.message);
+                }
+
+            }
+        );
+    }
+
+    function saveInstanceAlertConfig() {
+        var alertConfig = document.getElementById("alertConfig");
+        var alertValue = document.getElementById("alertValue");
+        if (alertValue.value == ""){
+            alert("请填写阈值");
+            alertValue.focus();
+            return false;
+        }
+        var compareType = document.getElementById("compareType");
+        var checkCycle = document.getElementById("checkCycle");
+        var instanceHostPort = document.getElementById("instanceHostPort");
+        if (instanceHostPort.value == null || instanceHostPort.value == ""){
+            alert("请填写实例ip:port");
+            instanceHostPort.focus();
+            return false;
+        }
+        var type = 1;
+        if (instanceHostPort.value != null && instanceHostPort.value != '') {
+            type = 2;
+        }
+        $.get(
+            '${request.contextPath}/manage/instanceAlert/add.json',
+            {
+                alertConfig: alertConfig.value,
+                alertValue: alertValue.value,
+                configInfo: alertConfig.options[alertConfig.selectedIndex].text,
+                compareType: compareType.value,
+                checkCycle: checkCycle.value,
+                instanceHostPort: instanceHostPort.value,
+                appType: 0,
+                type: type
+            },
+            function(data){
+                var status = data.status;
+                if (status == 1) {
+                    alert("添加成功！");
+                } else {
+                    alert("添加失败！" + data.message);
+                }
+                window.location.reload();
+            }
+        );
+    }
+
+    //保存全局实例
+    function saveGlobalInstanceAlertConfig() {
+        var alertConfig = document.getElementById("alertConfigGlobal");
+        if (alertConfig.value == ""){
+            alert("请填写配置名");
+            alertConfig.focus();
+            return false;
+        }
+        var alertValue = document.getElementById("alertValueGlobal");
+        if (alertValue.value == ""){
+            alert("请填写阈值");
+            alertValue.focus();
+            return false;
+        }
+        var configInfo = document.getElementById("configInfoGlobal");
+        if (configInfo.value == ""){
+            alert("请填写配置说明");
+            configInfo.focus();
+            return false;
+        }
+        var compareType = document.getElementById("compareTypeGlobal");
+        var checkCycle = document.getElementById("checkCycleGlobal");
+        var importantLevel = document.getElementById("importantLevel");
+        var type = 1;
+        $.get(
+            '${request.contextPath}/manage/instanceAlert/add.json',
+            {
+                alertConfig: alertConfig.value,
+                configInfo: configInfo.value,
+                alertValue: alertValue.value,
+                compareType: compareType.value,
+                checkCycle: checkCycle.value,
+                importantLevel: importantLevel.value,
+                appType: 0,
+                type: type
+            },
+            function(data){
+                var status = data.status;
+                if (status == 1) {
+                    alert("添加成功！");
+                } else {
+                    alert("添加失败！" + data.message);
+                }
+                window.location.reload();
+            }
+        );
+    }
+
+    // 应用添加报警
+    function saveAppAlertConfig() {
+        var alertConfig = document.getElementById("alertAppConfig");
+        var alertValue = document.getElementById("alertAppValue");
+        if (alertValue.value == ""){
+            alert("请填写阈值");
+            alertValue.focus();
+            return false;
+        }
+        var compareType = document.getElementById("compareAppType");
+        var checkCycle = document.getElementById("checkAppCycle");
+        var appid = document.getElementById("appid");
+        if (appid.value == ""){
+            alert("请填写appid");
+            appid.focus();
+            return false;
+        }
+
+        $.get(
+            '${request.contextPath}/manage/instanceAlert/addApp.json',
+            {
+                alertConfig: alertConfig.value,
+                alertValue: alertValue.value,
+                configInfo: alertConfig.options[alertConfig.selectedIndex].text,
+                compareType: compareType.value,
+                checkCycle: checkCycle.value,
+                appType: 0,
+                appid: appid.value
+            },
+            function(data){
+                var status = data.status;
+                if (status == 1) {
+                    alert("添加成功！");
+                } else {
+                    alert("添加失败！" + data.message);
+                }
+                window.location.reload();
+            }
+        );
+    }
+</script>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h3 class="card-title">
+                            <i class="bi bi-globe"></i>
+                            全局实例报警项:
+                        </h3>
+                    </div>
+                    <div class="col-md-8 text-end">
+                        <button type="button" class="btn btn-success" style="margin-top: 0px" data-bs-target="#addGlobalInstanceAlertModal" data-bs-toggle="modal" href="#">添加全局报警项</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover" id="tableDataList">
+                        <thead>
+                        <tr>
+                            <th>id</th>
+                            <th>配置名</th>
+                            <th>配置说明</th>
+                            <th>关系</th>
+                            <th>阀值</th>
+                            <th>周期</th>
+                            <th>重要程度</th>
+                            <th>最近检测时间</th>
+                            <th style="white-space: nowrap">操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <#list instanceAlertAllList as config>
+                            <tr>
+                                <td>
+                                    ${config.id!}
+                                </td>
+                                <td>
+                                    ${config.alertConfig!}
+                                </td>
+                                <td>
+                                    ${config.configInfo!}
+                                </td>
+                                <td>
+                                    <#list instanceAlertCompareTypeEnumList as instanceAlertCompareTypeEnum>
+                                        <#if (config.compareType == instanceAlertCompareTypeEnum.value)>${instanceAlertCompareTypeEnum.info!}</#if>
+                                    </#list>
+                                </td>
+                                <td>
+                                    ${config.alertValue!}
+                                </td>
+                                <td>
+                                    <#list instanceAlertCheckCycleEnumList as instanceAlertCheckCycleEnum>
+                                        <#if (config.checkCycle == instanceAlertCheckCycleEnum.value)>${instanceAlertCheckCycleEnum.info!}</#if>
+                                    </#list>
+                                </td>
+
+                                <td>
+                                    <#if (config.importantLevel == 0)>一般</#if>
+                                    <#if (config.importantLevel == 1)>重要</#if>
+                                    <#if (config.importantLevel == 2)>紧急</#if>
+                                </td>
+
+                                <td>
+                                    ${config.lastCheckTime!?string("yyyy-MM-dd HH:mm:ss")}
+                                </td>
+                                <td style="white-space: nowrap">
+                                    <button type="button" class="btn btn-info" data-bs-target="#changeInstanceAlertModal${config.id!}" data-bs-toggle="modal" href="#">修改</button>
+                                    <button type="button" class="btn btn-info" onclick="if(window.confirm('确认要清除id=${config.id!}的配置?!')){removeAlertConfig('${config.id!}');return true;}else{return false;}">删除</button>
+                                </td>
+                            </tr>
+                        </#list>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="card">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h3 class="card-title">
+                            <i class="bi bi-globe"></i>
+                            特殊实例报警:
+                        </h3>
+                    </div>
+                    <div class="col-md-8 text-end">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-success" style="margin-top: 0px" data-bs-target="#addAppAlertModal" data-bs-toggle="modal" href="#">添加应用报警项</button>
+                        </div>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-success" style="margin-top: 0px" data-bs-target="#addInstanceAlertModal" data-bs-toggle="modal" href="#">添加新实例报警项</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                <!-- END TABLE PORTLET-->
+            <div class="card-body">
+                <div class="row">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered table-hover" id="tableDataList">
+                            <thead>
+                            <tr>
+                                <th>id</th>
+                                <th>实例信息</th>
+                                <th>配置名</th>
+                                <th>配置说明</th>
+                                <th>关系</th>
+                                <th>阀值</th>
+                                <th>周期</th>
+                                <th>最近检测时间</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <#list instanceAlertSpecialList as config>
+                                <tr>
+                                    <td>
+                                        ${config.id!}
+                                    </td>
+                                    <#assign instanceId = config.instanceId>
+                                    <td>
+                                        <#if (config.type == 2)>
+                                            ${config.instanceInfo.hostPort!}
+                                            <a target="_blank" href="${request.contextPath}/admin/app/index?appId=${config.instanceInfo.appId!}">(${config.instanceInfo.appId!})</a>
+                                        </#if>
+                                        <#if (config.type == 3)>
+                                            <a target="_blank" href="${request.contextPath}/admin/app/index?appId=${config.instanceId!}">${config.instanceId!}</a>
+                                        </#if>
+                                    </td>
+                                    <td>
+                                        ${config.alertConfig!}
+                                    </td>
+                                    <td>
+                                        ${config.configInfo!}
+                                    </td>
+                                    <td>
+                                        <#list instanceAlertCompareTypeEnumList as instanceAlertCompareTypeEnum>
+                                            <#if (config.compareType == instanceAlertCompareTypeEnum.value)>${instanceAlertCompareTypeEnum.info!}</#if>
+                                        </#list>
+                                    </td>
+                                    <td>
+                                        ${config.alertValue!}
+                                    </td>
+                                    <td>
+                                        <#list instanceAlertCheckCycleEnumList as instanceAlertCheckCycleEnum>
+                                            <#if (config.checkCycle == instanceAlertCheckCycleEnum.value)>${instanceAlertCheckCycleEnum.info!}</#if>
+                                        </#list>
+                                    </td>
+                                    <td>
+                                        ${config.lastCheckTime!?string("yyyy-MM-dd HH:mm:ss")}
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-info" data-bs-target="#changeInstanceAlertModal${config.id!}" data-bs-toggle="modal" href="#">修改</button>
+                                        <button type="button" class="btn btn-info" onclick="if(window.confirm('确认要清除id=${config.id!}的配置?!')){removeAlertConfig('${config.id!}');return true;}else{return false;}">删除</button>
+                                    </td>
+                                </tr>
+                            </#list>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- 单实例报警项 -->
+<div id="addInstanceAlertModal" class="modal fade" tabindex="-1" data-width="400">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h4 class="modal-title">添加实例报警项</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+            </div>
+
+            <form class="form-horizontal form-bordered form-row-stripped">
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- 控件开始 -->
+                        <div class="col-md-12">
+                            <!-- form-body开始 -->
+                            <div class="form-body">
+                                <div class="form-group row">
+                                    <label class="col-form-label col-md-3 text-end">
+                                        配置名:
+                                    </label>
+                                    <div class="col-md-7">
+                                        <select name="alertConfig" id="alertConfig" class="form-select select2_category">
+                                            <#list redisUsedGlobalAlertConfigList as redisAlertConfig>
+                                                <option value="${redisAlertConfig.value!}">
+                                                    ${redisAlertConfig.info!}
+                                                </option>
+                                            </#list>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-form-label col-md-3 text-end">
+                                        比较:
+                                    </label>
+                                    <div class="col-md-7">
+                                        <select name="compareType" id="compareType" class="form-select select2_category">
+                                            <#list instanceAlertCompareTypeEnumList as instanceAlertCompareTypeEnum>
+                                                <option value="${instanceAlertCompareTypeEnum.value!}">
+                                                    ${instanceAlertCompareTypeEnum.info!}
+                                                </option>
+                                            </#list>
+                                        </select>
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group row">
+                                    <label class="col-form-label col-md-3 text-end">
+                                        阀值:
+                                    </label>
+                                    <div class="col-md-7">
+                                        <input type="text" name="alertValue" id="alertValue"
+                                               class="form-control" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-form-label col-md-3 text-end">
+                                        实例:
+                                    </label>
+                                    <div class="col-md-7">
+                                        <input type="text" name="instanceHostPort" id="instanceHostPort"
+                                               class="form-control" placeholder="单个实例ip:port" onchange="checkInstanceExist()"/>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-form-label col-md-3 text-end">
+                                        周期:
+                                    </label>
+                                    <div class="col-md-7">
+                                        <select name="checkCycle" id="checkCycle" class="form-select select2_category">
+                                            <#list instanceAlertCheckCycleEnumList as instanceAlertCheckCycleEnum>
+                                                <option value="${instanceAlertCheckCycleEnum.value!}">
+                                                    ${instanceAlertCheckCycleEnum.info!}
+                                                </option>
+                                            </#list>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- form-body 结束 -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" data-bs-dismiss="modal" class="btn btn-secondary" >Close</button>
+                    <button type="button" id="configBtn" class="btn btn-danger" onclick="saveInstanceAlertConfig()">Ok</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 全局实例报警项 -->
+<div id="addGlobalInstanceAlertModal" class="modal fade" tabindex="-1" data-width="400">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h4 class="modal-title">添加全局实例报警项</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+            </div>
+
+            <form class="form-horizontal form-bordered form-row-stripped">
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- 控件开始 -->
+                        <div class="col-md-12">
+                            <!-- form-body开始 -->
+                            <div class="form-body">
+                                <div class="form-group row">
+                                    <label class="col-form-label col-md-3 text-end">
+                                        配置名:
+                                    </label>
+                                    <div class="col-md-7">
+                                        <input type="text" name="alertConfig" id="alertConfigGlobal"
+                                               class="form-control" placeholder="参照redis info中的字段名"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-form-label col-md-3 text-end">
+                                        配置说明:
+                                    </label>
+                                    <div class="col-md-7">
+                                        <input type="text" name="configInfo" id="configInfoGlobal"
+                                               class="form-control" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-form-label col-md-3 text-end">
+                                        比较:
+                                    </label>
+                                    <div class="col-md-7">
+                                        <select name="compareType" id="compareTypeGlobal" class="form-select select2_category">
+                                            <#list instanceAlertCompareTypeEnumList as instanceAlertCompareTypeEnum>
+                                                <option value="${instanceAlertCompareTypeEnum.value!}">
+                                                    ${instanceAlertCompareTypeEnum.info!}
+                                                </option>
+                                            </#list>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-form-label col-md-3 text-end">
+                                        阀值:
+                                    </label>
+                                    <div class="col-md-7">
+                                        <input type="text" name="alertValue" id="alertValueGlobal"
+                                               class="form-control" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-form-label col-md-3 text-end">
+                                        周期:
+                                    </label>
+                                    <div class="col-md-7">
+                                        <select name="checkCycle" id="checkCycleGlobal" class="form-select select2_category">
+                                            <#list instanceAlertCheckCycleEnumList as instanceAlertCheckCycleEnum>
+                                                <option value="${instanceAlertCheckCycleEnum.value!}">
+                                                    ${instanceAlertCheckCycleEnum.info!}
+                                                </option>
+                                            </#list>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-form-label col-md-3 text-end">
+                                        重要程度:
+                                    </label>
+                                    <div class="col-md-7">
+                                        <select name="importantLevel" id="importantLevel" class="form-select select2_category">
+                                            <option value="0" selected>一般</option>
+                                            <option value="1">重要</option>
+                                            <option value="2">紧急</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- form-body 结束 -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" data-bs-dismiss="modal" class="btn btn-secondary" >Close</button>
+                    <button type="button" id="configBtnGlobal" class="btn btn-danger" onclick="saveGlobalInstanceAlertConfig()">Ok</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 应用报警项 -->
+<div id="addAppAlertModal" class="modal fade" tabindex="-1" data-width="400">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h4 class="modal-title">添加应用报警项</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+            </div>
+
+            <form class="form-horizontal form-bordered form-row-stripped">
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- 控件开始 -->
+                        <div class="col-md-12">
+                            <!-- form-body开始 -->
+                            <div class="form-body">
+                                <div class="form-group row">
+                                    <label class="col-form-label col-md-3 text-end">
+                                        配置名:
+                                    </label>
+                                    <div class="col-md-7">
+                                        <select name="alertConfig" id="alertAppConfig" class="form-select select2_category">
+                                            <#list redisUsedGlobalAlertConfigList as redisAlertConfig>
+                                                <option value="${redisAlertConfig.value!}">
+                                                    ${redisAlertConfig.info!}
+                                                </option>
+                                            </#list>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-form-label col-md-3 text-end">
+                                        比较:
+                                    </label>
+                                    <div class="col-md-7">
+                                        <select name="compareType" id="compareAppType" class="form-select select2_category">
+                                            <#list instanceAlertCompareTypeEnumList as instanceAlertCompareTypeEnum>
+                                                <option value="${instanceAlertCompareTypeEnum.value!}">
+                                                    ${instanceAlertCompareTypeEnum.info!}
+                                                </option>
+                                            </#list>
+                                        </select>
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group row">
+                                    <label class="col-form-label col-md-3 text-end">
+                                        阀值:
+                                    </label>
+                                    <div class="col-md-7">
+                                        <input type="text" name="alertValue" id="alertAppValue"
+                                               class="form-control" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-form-label col-md-3 text-end">
+                                        应用appid:
+                                    </label>
+                                    <div class="col-md-7">
+                                        <input type="text" name="appid" id="appid"
+                                               class="form-control" placeholder="应用appid" onchange="checkAppExist()"/>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-form-label col-md-3 text-end">
+                                        周期:
+                                    </label>
+                                    <div class="col-md-7">
+                                        <select name="checkCycle" id="checkAppCycle" class="form-select select2_category">
+                                            <#list instanceAlertCheckCycleEnumList as instanceAlertCheckCycleEnum>
+                                                <option value="${instanceAlertCheckCycleEnum.value!}">
+                                                    ${instanceAlertCheckCycleEnum.info!}
+                                                </option>
+                                            </#list>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- form-body 结束 -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" data-bs-dismiss="modal" class="btn btn-secondary" >Close</button>
+                    <button type="button" id="configAppBtn" class="btn btn-danger" onclick="saveAppAlertConfig()">Ok</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<#list instanceAlertList as config>
+    <div id="changeInstanceAlertModal${config.id!}" class="modal fade" tabindex="-1" data-width="400">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h4 class="modal-title">修改实例报警项</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+                </div>
+
+                <form class="form-horizontal form-bordered form-row-stripped">
+                    <div class="modal-body">
+                        <div class="row">
+                            <!-- 控件开始 -->
+                            <div class="col-md-12">
+                                <!-- form-body开始 -->
+                                <div class="form-body">
+                                    <div class="form-group row">
+                                        <label class="col-form-label col-md-3 text-end">
+                                            比较:
+                                        </label>
+                                        <div class="col-md-7">
+                                            <select name="compareType${config.id!}" id="compareType${config.id!}" class="form-select select2_category">
+                                                <#list instanceAlertCompareTypeEnumList as instanceAlertCompareTypeEnum>
+                                                    <option value="${instanceAlertCompareTypeEnum.value!}" <#if (config.compareType == instanceAlertCompareTypeEnum.value)>selected</#if>>
+                                                    ${instanceAlertCompareTypeEnum.info!}
+                                                    </option>
+                                                </#list>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-form-label col-md-3 text-end">
+                                            阀值:
+                                        </label>
+                                        <div class="col-md-7">
+                                            <input type="text" name="alertValue${config.id!}" id="alertValue${config.id!}" value="${config.alertValue!}"
+                                                   class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-form-label col-md-3 text-end">
+                                            周期:
+                                        </label>
+                                        <div class="col-md-7">
+                                            <select name="checkCycle${config.id!}" id="checkCycle${config.id!}" class="form-select select2_category">
+                                                <#list instanceAlertCheckCycleEnumList as instanceAlertCheckCycleEnum>
+                                                    <option value="${instanceAlertCheckCycleEnum.value!}" <#if (config.checkCycle == instanceAlertCheckCycleEnum.value)>selected</#if>>
+                                                    ${instanceAlertCheckCycleEnum.info!}
+                                                    </option>
+                                                </#list>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row" <#if (config.type != 1)>hidden</#if>>
+                                    <label class="col-form-label col-md-3 text-end">
+                                        重要程度:
+                                    </label>
+                                    <div class="col-md-7">
+                                        <select name="importantLevel${config.id!}" id="importantLevel${config.id!}" class="form-select select2_category">
+                                            <option value="0" <#if (config.importantLevel == 0)>selected</#if>>一般</option>
+                                            <option value="1" <#if (config.importantLevel == 1)>selected</#if>>重要</option>
+                                            <option value="2" <#if (config.importantLevel == 2)>selected</#if>>紧急</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- form-body 结束 -->
+                        </div>
+                    </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" data-bs-dismiss="modal" class="btn btn-secondary" >Close</button>
+                <button type="button" id="configBtn${config.id!}" class="btn btn-danger" onclick="changeAlertConfig('${config.id!}')">Ok</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+</#list>

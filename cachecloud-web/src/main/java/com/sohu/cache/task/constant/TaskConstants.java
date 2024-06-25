@@ -67,7 +67,6 @@ public class TaskConstants {
     public final static String HOST_KEY = "host";
     public final static String PORT_KEY = "port";
     public final static String VERSION_KEY = "db_version";
-    public final static String MODULE_KEY = "moduleVersions";
     public final static String IS_CLUSTER_KEY = "is_cluster";
 
     public final static String MASTER_HOST_KEY = "master_host";
@@ -176,7 +175,6 @@ public class TaskConstants {
     public final static String SOURCE_APP_ID_KEY = "sourceAppId";
     public final static String TARGET_APP_ID_KEY = "targetAppId";
 
-
     /**
      * redis server安装超时时间
      */
@@ -282,27 +280,27 @@ public class TaskConstants {
     /**
      * redis server idle key分析超时时间
      */
-    public final static int REDIS_SERVER_IDLE_KEY_ANALYSIS_TIMEOUT = 1800;
+    public final static int REDIS_SERVER_IDLE_KEY_ANALYSIS_TIMEOUT = 3600;
 
     /**
      * redis server key type分析超时时间
      */
-    public final static int REDIS_SERVER_KEY_TYPE_ANALYSIS_TIMEOUT = 1800;
+    public final static int REDIS_SERVER_KEY_TYPE_ANALYSIS_TIMEOUT = 3600;
 
     /**
      * redis server key ttl分析超时时间
      */
-    public final static int REDIS_SERVER_KEY_TTL_ANALYSIS_TIMEOUT = 1800;
+    public final static int REDIS_SERVER_KEY_TTL_ANALYSIS_TIMEOUT = 3600;
 
     /**
      * redis server key value size分析超时时间
      */
-    public final static int REDIS_SERVER_KEY_VALUE_SIZE_ANALYSIS_TIMEOUT = 1800;
+    public final static int REDIS_SERVER_KEY_VALUE_SIZE_ANALYSIS_TIMEOUT = 10800;
 
     /**
      * redis server big key分析超时时间
      */
-    public final static int REDIS_SERVER_BIG_KEY_ANALYSIS_TIMEOUT = 1800;
+    public final static int REDIS_SERVER_BIG_KEY_ANALYSIS_TIMEOUT = 3600;
 
     /**
      * single rmt max used memory
@@ -319,7 +317,7 @@ public class TaskConstants {
     /**
      * redis server big key分析超时时间
      */
-    public final static int REDIS_SERVER_DIAGNOSTIC_TIMEOUT = 1800;
+    public final static int REDIS_SERVER_DIAGNOSTIC_TIMEOUT = 3600;
 
 //	/**
 //	 * pika实例安装class name

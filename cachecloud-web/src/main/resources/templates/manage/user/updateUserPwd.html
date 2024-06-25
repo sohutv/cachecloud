@@ -1,0 +1,79 @@
+<div class="">
+  <div class="">
+    <#if user??>
+      <#assign userId = user.id!>
+    <#else>
+      <#assign userId = ''>
+    </#if>
+    <div id="updateUserPwdModal${userId!}" class="modal fade" tabindex="-1" data-width="400">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">管理用户</h4>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+          </div>
+
+          <form class="form-horizontal form-bordered form-row-stripped">
+            <div class="modal-body">
+              <div class="row">
+                <!-- 控件开始 -->
+                <div class="col-md-12">
+                  <!-- form-body开始 -->
+                  <div class="form-body">
+                    <div class="form-group row">
+                      <label class="col-form-label col-md-3 text-end">
+                        域账户名:
+                      </label>
+                      <div class="col-md-5">
+                        <#if user??>
+                          <#assign nameValue = user.name!>
+                        <#else>
+                          <#assign nameValue = ''>
+                        </#if>
+                      <input type="text" name="name" id="updateUserPwdName${userId!}"
+                             value="${nameValue}" placeholder="域账户名(邮箱前缀)"
+                             class="form-control" disabled/>
+                      </div>
+                    </div>
+
+                    <div class="form-group row">
+                      <label class="col-form-label col-md-3 text-end">
+                        密码:
+                      </label>
+                      <div class="col-md-5">
+                        <input type="password" name="password" id="updateUserPwdPassword${userId!}" placeholder="输入密码"
+                               class="form-control" onchange="checkPassword('${userId!}')"/>
+                        <span class="help-block">密码中必须包含字母、数字，至少8个字符</span>
+                      </div>
+                    </div>
+
+                    <div class="form-group row">
+                      <label class="col-form-label col-md-3 text-end">
+                        确认密码:
+                      </label>
+                      <div class="col-md-5">
+                        <input type="password" name="password0" id="updateUserPwdPassword0${userId!}" placeholder="再次输入密码"
+                               class="form-control" onchange="checkConfirmPassword('${userId!}')"/>
+                      </div>
+                    </div>
+
+                    <input type="hidden" id="updateUserPwdUserId{userId!}" name="userId" value="${userId!}"/>
+                  </div>
+                  <!-- form-body 结束 -->
+                </div>
+                <div id="updateUserPwdInfo{userId!}"></div>
+                <!-- 控件结束 -->
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">Close</button>
+              <button type="button" id="updateUserPwdBtn${userId!}" class="btn btn-danger" onclick="updateUserPwd('${userId!}', '${request.contextPath}')">Ok</button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

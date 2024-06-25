@@ -37,5 +37,10 @@ public interface ResourceService {
 
     Map<Integer, Integer> getAppUseRedis();
 
+    SystemResource getRedisResourceByCache(Integer repositoryId);
+
+    String getRedisVersion(Integer repositoryId);
+
+    boolean checkRedisVersionGreater(Integer repositoryId, int[] versions);
 }
 

@@ -6,7 +6,7 @@
 		app_id,client_ip,instance_host,instance_port,instance_id,day
 	</sql>
 	
-	<insert id="save" parameterType="AppInstanceClientRelation" keyProperty="id" useGeneratedKeys="true">
+	<insert id="save" parameterType="AppInstanceClientRelation">
 		insert ignore into app_client_instance(<include refid="columns"/>)
 		values(#{appId},#{clientIp},#{instanceHost},#{instancePort},#{instanceId},#{day})
 	</insert>

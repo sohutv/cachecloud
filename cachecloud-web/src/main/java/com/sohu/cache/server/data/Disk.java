@@ -78,16 +78,11 @@ public class Disk implements LineParser{
 				String mount = tp[tp.length - 1];
 				for(Usage usage : list) {
 					if(usage.getName().equals(mount)) {
-						List<Usage> spaceList = diskMap.get(DiskUsageType.space);
-						if(spaceList == null) {
-							spaceList = new ArrayList<Usage>();
-							diskMap.put(DiskUsageType.space, spaceList);
-						}
 						Usage spaceUsage = new Usage();
 						spaceUsage.setDiskUsageTyp(DiskUsageType.space);
 						spaceUsage.setName(usage.getName());
 						spaceUsage.setValue(NumberUtils.toFloat(item[4].split("%")[0]));
-						spaceList.add(spaceUsage);
+						diskMap.computeIfAbsent(DiskUsageType.space, k -> new ArrayList<>()).add(spaceUsage);
 					}
 				}
 			}

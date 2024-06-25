@@ -12,8 +12,8 @@
 
     <context:component-scan base-package="com.sohu.cache.client.heartbeat,com.sohu.cache.web.controller"/>
 
-    <mvc:resources mapping="/resources/**" location="/WEB-INF/resources/"/>
-    <mvc:resources mapping="/assets/flash/**" location="/WEB-INF/resources/assets/flash/"/>
+    <mvc:resources mapping="/assets/**" location="classpath:assets/"/>
+    <mvc:resources mapping="/img/**" location="classpath:static/img/"/>
 
     <mvc:interceptors>
         <!-- 前台验证 -->
@@ -38,7 +38,7 @@
             <mvc:mapping path="/manage/notice/*"/>
             <mvc:mapping path="/import/app/*"/>
             <mvc:mapping path="/manage/config/*"/>
-            <mvc:mapping path="/data/migrate/*"/>
+            <mvc:mapping path="/data/migrate/**"/>
             <mvc:mapping path="/manage/redisConfig/*"/>
             <mvc:mapping path="/manage/instanceAlert/*"/>
             <mvc:mapping path="/manage/redis/upgrade/*"/>
@@ -75,24 +75,4 @@
         </property>
     </bean>
 
-    <bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
-        <property name="templateLoaderPath" value="classpath:/templates/"/>
-        <property name="defaultEncoding" value="UTF-8"/>
-        <property name="freemarkerSettings">
-            <props>
-                <prop key="tag_syntax">auto_detect</prop>
-                <prop key="url_escaping_charset">UTF-8</prop>
-                <prop key="default_encoding">UTF-8</prop>
-                <prop key="output_encoding">UTF-8</prop>
-                <prop key="locale">zh_CN</prop>
-                <prop key="boolean_format">true,false</prop>
-                <prop key="datetime_format">yyyy-MM-dd HH:mm:ss</prop>
-                <prop key="date_format">yyyy-MM-dd</prop>
-                <prop key="time_format">HH:mm:ss</prop>
-                <prop key="number_format">0.##</prop>
-                <prop key="whitespace_stripping">true</prop>
-                <prop key="object_wrapper">freemarker.ext.beans.BeansWrapper</prop>
-            </props>
-        </property>
-    </bean>
 </beans>

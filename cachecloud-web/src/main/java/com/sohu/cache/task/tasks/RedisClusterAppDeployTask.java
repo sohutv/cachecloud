@@ -3,8 +3,6 @@ package com.sohu.cache.task.tasks;
 import com.alibaba.fastjson.JSONArray;
 import com.sohu.cache.constant.AppCheckEnum;
 import com.sohu.cache.constant.RedisConstant;
-import com.sohu.cache.entity.MachineInfo;
-import com.sohu.cache.entity.MachineStats;
 import com.sohu.cache.redis.util.JedisUtil;
 import com.sohu.cache.task.BaseTask;
 import com.sohu.cache.task.constant.InstanceInfoEnum.InstanceStatusEnum;
@@ -13,11 +11,9 @@ import com.sohu.cache.task.constant.TaskConstants;
 import com.sohu.cache.task.constant.TaskStepFlowEnum.TaskFlowStatusEnum;
 import com.sohu.cache.task.entity.RedisServerNode;
 import com.sohu.cache.util.EnvUtil;
-import com.sohu.cache.web.enums.SuccessEnum;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
@@ -50,12 +46,10 @@ public class RedisClusterAppDeployTask extends BaseTask {
      */
     private long auditId;
 
-
     /**
      * redis server部署实例列表
      */
     private List<String> appDeployInfoList;
-
 
     /**
      * redis server机器列表
@@ -84,11 +78,6 @@ public class RedisClusterAppDeployTask extends BaseTask {
      */
     private Map<Jedis, Jedis> clusterMap = new LinkedHashMap<Jedis, Jedis>();
 
-    /**
-     * Redis模块信息
-     */
-    private String moduleInfo;
-
     @Override
     public List<String> getTaskSteps() {
         List<String> taskStepList = new ArrayList<String>();
@@ -108,20 +97,21 @@ public class RedisClusterAppDeployTask extends BaseTask {
         taskStepList.add("createRedisServerTask");
         //8. 等待redis server job完成
         taskStepList.add("waitRedisServerFinish");
-        //9. 创建redis cluster job
+        /*
+            9. 设置密码已放到实例配置文件中，启动后自动带有密码，
+            此步骤是设置app_desc表的密码字段，避免后续访问操作失败
+         */
+        taskStepList.add("setPasswd");
+        //10. 创建redis cluster job
         taskStepList.add("startRedisCluster");
-        //10. 等待redis cluster job完成
+        //11. 等待redis cluster job完成
         taskStepList.add("waitRedisClusterFinish");
         //12. 更改实例状态
         taskStepList.add("updateInstanceStatus");
         //13. 开始收集部署
         taskStepList.add("deployCollection");
-        //14. 设置密码
-        taskStepList.add("setPasswd");
         //14. rdb
         taskStepList.add("checkFullSync");
-        //14. 装载组件
-        taskStepList.add("loadModule");
         //14. 审核
         taskStepList.add("updateAudit");
         //15. 更新机器分配状态
@@ -194,8 +184,6 @@ public class RedisClusterAppDeployTask extends BaseTask {
         }
         // redis版本
         version = MapUtils.getString(paramMap, TaskConstants.VERSION_KEY);
-        // 模块安装
-        moduleInfo = MapUtils.getString(paramMap, TaskConstants.MODULE_KEY);
         return TaskFlowStatusEnum.SUCCESS;
     }
 
@@ -208,50 +196,18 @@ public class RedisClusterAppDeployTask extends BaseTask {
         if (EnvUtil.isLocal(environment)) {
             return TaskFlowStatusEnum.SUCCESS;
         }
-        // 容量和代理
-        for (String redisServerIp : redisServerMachineList) {
-            MachineStats machineStats = machineStatsDao.getMachineStatsByIp(redisServerIp);
-            if (machineStats == null) {
-                logger.error(marker, "{} redis server machineStats is null", redisServerIp);
-                return TaskFlowStatusEnum.ABORT;
-            }
-            MachineInfo machineInfo = machineDao.getMachineInfoByIp(redisServerIp);
-            // 机器是否分配 isAllocate
-            /*if (machineInfo == null || machineInfo.getIsAllocating() == 1) {
-                logger.error(marker, "redis server machine info {} {} allocating is 1", machineInfo.getIp(), redisServerIp);
-                return TaskFlowStatusEnum.ABORT;
-            }*/
-            if (!checkMachineStatIsUpdate(machineStats)) {
-                logger.error(marker, "redis server machine stats {} update_time is {}, may be not updated recently", machineInfo.getIp(), machineStats.getUpdateTimeFormat());
-                return TaskFlowStatusEnum.ABORT;
-            }
-            //兆
-            long memoryFree = NumberUtils.toLong(machineStats.getMemoryFree()) / 1024 / 1024;
-            long memoryNeed = 0L;
-            if (masterPerMachine == 0) {
-                memoryNeed = maxMemory;
-            } else {
-                memoryNeed = Long.valueOf(masterPerMachine) * maxMemory;
-            }
-            if (memoryNeed > memoryFree * 0.85) {
-                logger.error(marker, "{} need {} MB, but memoryFree is {} MB", redisServerIp, memoryNeed, memoryFree);
-                return TaskFlowStatusEnum.ABORT;
-            }
+        long memoryNeed = 0L;
+        if (masterPerMachine == 0) {
+            memoryNeed = maxMemory;
+        } else {
+            memoryNeed = Long.valueOf(masterPerMachine) * maxMemory;
         }
-
-        return TaskFlowStatusEnum.SUCCESS;
+        return checkResourceAllow(redisServerMachineList, memoryNeed);
     }
 
     public TaskFlowStatusEnum checkMachineConnect() {
         // redis server
-        for (String redisServerIp : redisServerMachineList) {
-            boolean isConnected = checkMachineIsConnect(redisServerIp);
-            if (!isConnected) {
-                logger.error(marker, "cluster: redisServer {} is not connected", redisServerIp);
-                return TaskFlowStatusEnum.ABORT;
-            }
-        }
-        return TaskFlowStatusEnum.SUCCESS;
+        return checkMachineConnect(redisServerMachineList, "cluster: redisServer {} is not connected");
     }
 
     /**
@@ -261,7 +217,7 @@ public class RedisClusterAppDeployTask extends BaseTask {
      */
     public TaskFlowStatusEnum generateInstanceNodes() {
 
-        redisServerNodes = instancePortService.generateRedisServerNodeListWithDeployInfo(appId, appDeployInfoList,  masterPerMachine, maxMemory);
+        redisServerNodes = instancePortService.generateRedisServerNodeListWithDeployInfo(appId, appDeployInfoList, masterPerMachine, maxMemory);
         if (CollectionUtils.isEmpty(redisServerNodes)) {
             logger.warn(marker, "redisServerNodes is empty, appId is {}, redisServerMachineList is {}, masterPerMachine is {}, maxMemory is {}",
                     appId, redisServerMachineList, masterPerMachine, maxMemory);
@@ -444,7 +400,7 @@ public class RedisClusterAppDeployTask extends BaseTask {
         try {
             if (appId > 0) {
                 // 设置密码
-                redisDeployCenter.fixPassword(appId, null, null, true);
+                appService.updateAppPwd(appId, String.valueOf(appId));
                 // 密码校验逻辑
                 boolean checkFlag = redisDeployCenter.checkAuths(appId);
                 logger.info(marker, "check app clutser passwd:{}", checkFlag);
@@ -478,7 +434,7 @@ public class RedisClusterAppDeployTask extends BaseTask {
                     syncFlag = false;
                     Jedis jedis = null;
                     try {
-                        jedis = redisCenter.getJedis(appId, entry.getKey().getIp(), entry.getKey().getPort());
+                        jedis = redisCenter.getAdminJedis(appId, entry.getKey().getIp(), entry.getKey().getPort());
                         String statsInfo = jedis.info(RedisConstant.Stats.getValue());
                         if(StringUtils.isNotBlank(statsInfo)){
                             String[] split = statsInfo.split("\r\n");
@@ -535,7 +491,7 @@ public class RedisClusterAppDeployTask extends BaseTask {
                     loadingFlag = false;
                     Jedis jedis = null;
                     try {
-                        jedis = redisCenter.getJedis(appId, entry.getKey().getIp(), entry.getKey().getPort());
+                        jedis = redisCenter.getAdminJedis(appId, entry.getKey().getIp(), entry.getKey().getPort());
                         String statsInfo = jedis.info(RedisConstant.Replication.getValue());
                         if (StringUtils.isNotBlank(statsInfo)) {
                             String[] split = statsInfo.split("\r\n");
@@ -574,24 +530,6 @@ public class RedisClusterAppDeployTask extends BaseTask {
             totalSeconds += (costTime / 1000);
             if (totalSeconds > TaskConstants.REDIS_SERVER_INSTALL_TIMEOUT) {
                 return TaskFlowStatusEnum.ABORT;
-            }
-        }
-        return TaskFlowStatusEnum.SUCCESS;
-    }
-
-    public TaskFlowStatusEnum loadModule(){
-        if (!StringUtils.isEmpty(moduleInfo)) {
-            for (String versionId : moduleInfo.split(";")) {
-                if (!StringUtils.isEmpty(versionId)) {
-                    Map map = redisCenter.loadModule(appId, Integer.parseInt(versionId));
-                    Integer status = MapUtils.getInteger(map, "status");
-                    String message = MapUtils.getString(map, "message");
-                    String so_name = MapUtils.getString(map, "so_name");
-                    logger.info(marker, "{} module load info status:{} message:{}",so_name,status, message);
-                    if (status != SuccessEnum.SUCCESS.value()) {
-                        return TaskFlowStatusEnum.ABORT;
-                    }
-                }
             }
         }
         return TaskFlowStatusEnum.SUCCESS;

@@ -170,6 +170,16 @@ public class AppDailyData {
     private long maxObjectSize;
 
     /**
+     * 平均磁盘使用量
+     */
+    private long avgUsedDisk;
+
+    /**
+     * 最大磁盘使用量
+     */
+    private long maxUsedDisk;
+
+    /**
      * 值分布
      */
     private Map<String, Long> valueSizeDistributeCountMap;

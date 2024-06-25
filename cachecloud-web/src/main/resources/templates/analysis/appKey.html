@@ -1,0 +1,48 @@
+<div class="col-md-12">
+  <div class="card-header">
+    <h3 class="card-title">
+      集群键值分析
+      <a target="_blank" href="${request.contextPath}/admin/app/appKeyAnalysis?appId=${appDesc.appId}" class="btn btn-info" role="button">键值分析</a>
+    </h3>
+  </div>
+  <div class="card-body table-responsive">
+    <!-- table begin -->
+    <table class="table table-striped">
+      <thead>
+      <th scope="col">审批ID</td>
+      <th scope="col">申请时间</td>
+      <th scope="col">申请人</td>
+      <th scope="col">审批状态</td>
+      <th scope="col">申请描述</td>
+      <th scope="col">详情</td>
+      </thead>
+      <tbody>
+        <#list appAuditList as appAudit>
+          <tr>
+            <td>${appAudit.id}</td>
+            <td>
+              ${appAudit.createTime?string("yyyy-MM-dd HH:mm:ss")}
+            </td>
+            <td>${appAudit.userName}</td>
+            <td>
+              <#if (appAudit.status == 0)>待审
+              <#elseif (appAudit.status == 1)>通过
+              <#elseif (appAudit.status == 2)>审核已处理
+              <#elseif (appAudit.status == -1)>驳回
+              </#if>
+            </td>
+            <td>${appAudit.info}</td>
+            <td>
+              <#if (appAudit.status == 1)>
+                <a href="${request.contextPath}/admin/app/keyAnalysisResult?appId=${appDesc.appId}&auditId=${appAudit.id}">[查看结果]</a>
+              <#else>
+                [分析中]
+              </#if>
+            </td>
+          </tr>
+        </#list>
+      </tbody>
+    </table>
+  <!-- End Table with stripped rows -->
+  </div>
+</div>

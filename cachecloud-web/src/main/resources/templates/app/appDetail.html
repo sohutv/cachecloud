@@ -1,0 +1,731 @@
+<script type="text/javascript">
+  $(function () {
+    $('.selectpicker').selectpicker({
+      noneSelectedText: '选择用户',
+    });
+
+    var td_officer = "";
+    for (var i = 0; i < $("#officer_select").find("option:selected").length; i++) {
+      if (i == 0) {
+        td_officer = $("#officer_select").find("option:selected")[i].innerText;
+      } else {
+        td_officer = td_officer + ',' + $("#officer_select").find("option:selected")[i].innerText;
+      }
+    }
+    $('#td_officer').html(td_officer);
+  })
+</script>
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">
+          应用详情&nbsp;&nbsp;&nbsp;
+          <#if hasAuth>
+            <button type="button" class="btn btn-primary" data-bs-target="#updateAppDetailModal"
+                    data-bs-toggle="modal">修改应用信息
+            </button>
+          </#if>
+        </h4>
+      </div>
+      <#assign officer_arr=(appDetail.appDesc.officer)?split(",")>
+      <input id="officer_input" value="${appDetail.appDesc.officer!}" hidden/>
+      <div class="card-body table-responsive">
+        <!-- table begin -->
+        <table class="table table-striped table-sm">
+          <tbody>
+            <tr>
+              <th style="white-space: nowrap">应用id</th>
+              <td>${appDetail.appDesc.appId!}</td>
+              <th style="white-space: nowrap">应用名称</th>
+              <td>${appDetail.appDesc.name!}</td>
+            </tr>
+            <tr>
+              <th style="white-space: nowrap">申请人</th>
+              <#assign appUserId = -1>
+              <#if appDetail.appDesc.userId??>
+                <#assign appUserId = (appDetail.appDesc.userId)>
+              </#if>
+
+              <#if userMap?? && (appUserId != -1) && userMap?api.get(appUserId)??>
+                <td title="${userMap?api.get(appUserId).email!}">${userMap?api.get(appUserId).chName!}</td>
+              <#else>
+                <td>${appUserId!}</td>
+              </#if>
+              <th style="white-space: nowrap">应用类型</th>
+              <td>${appDetail.appDesc.typeDesc!}</td>
+            </tr>
+            <tr>
+              <th style="white-space: nowrap">报警用户</th>
+              <td>
+                <#if appDetail.alertUsers??>
+                  <#list appDetail.alertUsers as appUser>
+                    <#if (appUser_index != 0)>,</#if>${appUser.chName!}(${appUser.name!})
+                  </#list>
+                </#if>
+              </td>
+              <th style="white-space: nowrap">负责人</th>
+              <td id="td_officer"></td>
+            </tr>
+            <tr>
+              <th style="white-space: nowrap">存储空间</th>
+              <td>${(appDetail.mem / 1024 * 1.0)?string('#.##')}G</td>
+              <th style="white-space: nowrap">分布机器数</th>
+              <td>${appDetail.machineNum!}</td>
+            </tr>
+            <tr>
+              <th style="white-space: nowrap">主节点数</th>
+              <td>${appDetail.masterNum!}</td>
+              <th style="white-space: nowrap">从节点数</th>
+              <td>${appDetail.slaveNum!}</td>
+            </tr>
+            <tr>
+              <th style="white-space: nowrap">appKey</th>
+              <td>
+                <#if ((!(appDetail.appDesc.appKey??)) || (appDetail.appDesc.appKey == ''))>
+                  暂无
+                <#else>
+                  ${appDetail.appDesc.appKey!}
+                </#if>
+              </td>
+              <th style="white-space: nowrap">redis密码</th>
+              <td>
+                <#if (appDetail.appDesc.customPassword??)>
+                  ${appDetail.appDesc.customPassword!}
+                <#elseif (appDetail.appDesc.pkey??)>
+                  ${password!}
+                <#else>
+                  无
+                </#if>
+
+                <#if acluser??>
+                  <br>
+                  <font color="red" style="text-decoration: underline;">以下为只读用户，仅供查询使用</font>
+                  <br>
+                  只读用户：${acluser!} <br>
+                  只读密码：${aclpassword!}
+                </#if>
+                <#if userInfo.type == 0>
+                  <#if adminUser??>
+                    <br>
+                    <font color="red" style="text-decoration: underline;">管理员用户/密码</font>
+                    <br>
+                    ${adminUser!}/${adminPassword!}
+                  </#if>
+                </#if>
+              </td>
+            </tr>
+            <tr>
+              <th style="white-space: nowrap">应用描述</th>
+              <td>${appDetail.appDesc.intro!}</td>
+              <th style="white-space: nowrap">淘汰策略</th>
+              <td>
+                <#if (appDetail.appDesc.maxmemoryPolicyDesc??)>
+                  ${appDetail.appDesc.maxmemoryPolicyDesc!}
+                </#if>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title ms-3">
+          报警指标
+          <a target="_blank" href="${request.contextPath}/admin/app/appAlterConfig?appId=${appDetail.appDesc.appId!}" class="btn btn-danger" role="button">应用报警配置</a>
+        </h3>
+      </div>
+      <div class="card-body table-responsive">
+        <!-- table begin -->
+        <table class="table table-striped table-hover">
+          <thead>
+          <tr>
+            <th scope="col">id</th>
+            <th scope="col">报警key</td>
+            <th scope="col">阀值</td>
+            <th scope="col">周期</td>
+          </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>空间使用率大于</td>
+              <td>${appDetail.appDesc.memAlertValue!}%</td>
+              <td>每20分钟</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>客户端连接数大于</td>
+              <td>${appDetail.appDesc.clientConnAlertValue!}</td>
+              <td>每20分钟</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>应用平均命中率小于</td>
+              <td>${appDetail.appDesc.hitPrecentAlertValue!}%</td>
+              <#if (appDetail.appDesc.hitPrecentAlertValue > 0)>
+                  <td>每20分钟</td>
+              <#else>
+                  <td>监控关闭</td>
+              </#if>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>全局报警项邮件通知</td>
+              <td></td>
+              <#if (appDetail.appDesc.isAccessMonitor == 0)>
+                <td>监控关闭</td>
+              <#else>
+                <td>监控开启</td>
+              </#if>
+            </tr>
+            </tbody>
+          </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<#if (appDetail.appDesc.isAccessMonitor ==1)>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="card-title">
+            应用全局报警项:
+            <button type="button" class="btn btn-danger" data-bs-target="#updateWholeAlertConfigModal"
+                    data-bs-toggle="modal">报警项修改申请
+            </button>
+          </h4>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-striped table-bordered table-hover" id="tableDataList">
+              <thead>
+              <tr>
+                <th scope="col">id</th>
+                <th scope="col">配置名</th>
+                <th scope="col">配置说明</th>
+                <th scope="col">关系</th>
+                <th scope="col">阀值</th>
+                <th scope="col">周期</th>
+                <th scope="col">最近检测时间</th>
+              </tr>
+              </thead>
+              <tbody>
+                <#list instanceAlertAllList as config>
+                  <tr>
+                    <td>
+                      ${config.id!}
+                    </td>
+                    <td>
+                      ${config.alertConfig!}
+                    </td>
+                    <td>
+                      ${config.configInfo!}
+                    </td>
+                    <td>
+                      <#list instanceAlertCompareTypeEnumList as instanceAlertCompareTypeEnum>
+                        <#if (config.compareType == instanceAlertCompareTypeEnum.value)>${instanceAlertCompareTypeEnum.info!}</#if>
+                      </#list>
+                    </td>
+                    <td>
+                      ${config.alertValue!}
+                    </td>
+                    <td>
+                      <#list instanceAlertCheckCycleEnumList as instanceAlertCheckCycleEnum>
+                        <#if (config.checkCycle == instanceAlertCheckCycleEnum.value)>${instanceAlertCheckCycleEnum.info!}</#if>
+                      </#list>
+                    </td>
+                    <td>
+                      ${config.lastCheckTime?string('yyyy-MM-dd HH:mm:ss')}
+                    </td>
+                  </tr>
+                </#list>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- END TABLE PORTLET-->
+    </div>
+  </div>
+</#if>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">
+          用户管理&nbsp;&nbsp;&nbsp;
+          <#if hasAuth>
+            <button type="button" class="btn btn-success" data-bs-target="#appAddUserModal" data-bs-toggle="modal">
+              添加用户
+            </button>
+          </#if>
+        </h4>
+      </div>
+      <div class="card-body table-responsive">
+        <table class="table table-striped table-hover">
+          <thead>
+            <th scope="col">id</th>
+            <th scope="col">域账户</td>
+            <th scope="col">中文名</td>
+            <th scope="col">邮箱</td>
+            <th scope="col">手机</td>
+            <th scope="col">微信</td>
+            <th scope="col">是否报警</td>
+            <th scope="col">业务组</td>
+            <#if hasAuth>
+              <th scope="col">操作</td>
+            </#if>
+          </thead>
+          <tbody>
+          <#if appDetail.appUsers?? && (appDetail.appUsers?size gt 0)>
+            <#list appDetail.appUsers as appDetailUser>
+              <tr>
+                <td>${appDetailUser.id!}</td>
+                <td>${appDetailUser.name!}</td>
+                <td>${appDetailUser.chName!}</td>
+                <td>${appDetailUser.email!}</td>
+                <td>${appDetailUser.mobile!}</td>
+                <td>${appDetailUser.weChat!}</td>
+                <td>
+                  <#if (appDetailUser.isAlert==0)>否</#if>
+                  <#if (appDetailUser.isAlert==1)>是</#if>
+                </td>
+                <td>
+                  <#list bizList as bizInfo>
+                    <#if appDetailUser.bizId?? && (appDetailUser.bizId == bizInfo.id)>${bizInfo.name!}</#if>
+                  </#list>
+                </td>
+                <#if hasAuth>
+                  <td>
+                    <a href="javascript;" data-bs-target="#addUserModal${appDetailUser.id!}" data-bs-toggle="modal">[修改]</a>
+                    <a href="javascript:void(0);"
+                       onclick="deleteAppUser('${appDetailUser.id!}','${appDetail.appDesc.appId!}', '${request.contextPath}')">[删除]</a>
+                  </td>
+                </#if>
+              </tr>
+            </#list>
+          </#if>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="appAddUserModal" class="modal fade" tabindex="-1" data-width="400" aria-labelledby="appAddUserModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="appAddUserModalLabel">添加用户</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="container-fluid">
+          <div class="row">
+            <!-- 控件开始 -->
+            <div class="col-lg-12">
+              <!-- form-body开始 -->
+              <div class="form-group row">
+                  <label class="col-form-label col-lg-3">
+                    用户名:
+                  </label>
+                  <div class="col-lg-7">
+                    <select id="addAppToUser" class="selectpicker border rounded w-100" multiple
+                            data-live-search="true" style="height: 40px;width: 150px;border-radius: 5px;border: 1px solid #ced4da; text-align: center;margin-left:5px;">
+                      <#list userMap?keys as key>
+                        <#assign toAddUser = userMap?api.get(key)>
+                        <option value="${toAddUser.id!}">${toAddUser.chName!}(${toAddUser.name!})</option>
+                      </#list>
+                    </select>
+                  </div>
+                </div>
+              <!-- form-body 结束 -->
+            </div>
+            <div id="appAddUserInfo"></div>
+            <!-- 控件结束 -->
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">Close</button>
+        <button type="button" id="appAddUserBtn" class="btn btn-danger"
+                onclick="appAddUser('${appDetail.appDesc.appId!}', '${request.contextPath}')">Ok
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="appAlertConfigModal" class="modal fade" tabindex="-1" data-width="400">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h4 class="modal-title">应用报警修改</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+      </div>
+
+      <form class="form-horizontal form-bordered form-row-stripped">
+        <div class="modal-body">
+          <div class="row">
+            <!-- 控件开始 -->
+            <div class="col-lg-12">
+              <!-- form-body开始 -->
+              <div class="form-body">
+                <div class="form-group row">
+                  <label class="col-form-label col-lg-3">空间报警阀值:</label>
+                  <div class="col-lg-7">
+                    <input type="text" name="memAlertValue"
+                           value="${appDetail.appDesc.memAlertValue!}" id="memAlertValue"
+                           placeholder="空间报警阀值" class="form-control" onchange="testisNum(this.id)">
+                    <span class="help-block">例如:如果想空间使用率超过90%报警，填写90<br/><font color="red">(如果不需要报警请填写100以上的数字)</font></span>
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-lg-3">客户端连接数报警阀值:</label>
+                  <div class="col-lg-7">
+                    <input type="text" name="clientConnAlertValue"
+                           value="${appDetail.appDesc.clientConnAlertValue!}"
+                           id="clientConnAlertValue" placeholder="客户端连接数报警阀值" class="form-control"
+                           onchange="testisNum(this.id)">
+                    <span class="help-block">例如:如果想客户端连接数率超过2000报警，填写2000</span>
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-lg-3">应用平均命中率报警阀值:</label>
+                  <div class="col-lg-7">
+                    <input type="text" name="hitPrecentAlertValue"
+                           value="${appDetail.appDesc.hitPrecentAlertValue!}"
+                           id="hitPrecentAlertValue" placeholder="平均命中率报警阀值" class="form-control"
+                           onchange="testisNum(this.id)">
+                    <span class="help-block">例如:如果应用平均命中率低于80%报警，填写80</span>
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-lg-3">开启应用全局报警:</label>
+                  <div class="col-lg-7">
+                    <select id="isAccessMonitor" name="isAccessMonitor" class="form-control">
+                      <option value="0"
+                      <#if (appDetail.appDesc.isAccessMonitor?? || appDetail.appDesc.isAccessMonitor == 0)>selected</#if>>
+                      否
+                      </option>
+                      <option value="1"
+                      <#if (appDetail.appDesc.isAccessMonitor == 1)>selected</#if>>
+                      是
+                      </option>
+                    </select>
+                    <span class="help-block">是:接收到全局报警指标报警邮件 否:反之则不接收</span>
+                  </div>
+                </div>
+
+              </div>
+              <!-- form-body 结束 -->
+            </div>
+            <div id="appConfigChangeInfo"></div>
+            <!-- 控件结束 -->
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">Close</button>
+          <button type="button" id="appConfigChangeBtn" class="btn btn-danger"
+                  onclick="appAlertConfigChange('${appDetail.appDesc.appId!}', '${request.contextPath}')">Ok
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<div id="updateWholeAlertConfigModal" class="modal fade" tabindex="-1" data-width="400">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h4 class="modal-title">全局报警项配置修改</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+      </div>
+
+      <form class="form-horizontal form-bordered form-row-stripped">
+        <div class="modal-body">
+          <div class="row">
+            <!-- 控件开始 -->
+            <div class="col-lg-12">
+              <!-- form-body开始 -->
+              <div class="form-body">
+
+                <div class="form-group row">
+                  <label class="col-form-label col-lg-3">配置项:</label>
+                  <div class="col-lg-8">
+                    <input type="text" name="appConfigKey" id="appMonitorConfigKey" value=""
+                           placeholder="例如:aof_current_size" class="form-control"/>
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-lg-3">配置值:</label>
+                  <div class="col-lg-8">
+                    <input type="text" name="appConfigValue" id="appMonitorConfigValue" value=""
+                           placeholder="例如:10000" class="form-control">
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-lg-3">修改原因:</label>
+                  <div class="col-lg-8">
+                                        <textarea name="appConfigReason" id="appMonitorConfigReason" value=""
+                                                  placeholder="例如：修改原因:aof实例内存较大。" class="form-control"></textarea>
+                  </div>
+                </div>
+
+              </div>
+              <!-- form-body 结束 -->
+            </div>
+            <div id="updateConfigChangeInfo"></div>
+            <!-- 控件结束 -->
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">Close</button>
+          <button type="button" id="updateConfigChangeBtn" class="btn btn-danger"
+                  onclick="updateWholeAlertConfigChange('${appDetail.appDesc.appId!}', '${request.contextPath}')">Ok
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div id="updateAppDetailModal" class="modal fade" tabindex="-1" data-width="400">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h4 class="modal-title">应用信息修改</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+      </div>
+
+        <div class="modal-body">
+          <div class="container-fluid">
+            <div class="row">
+              <!-- 控件开始 -->
+              <div class="col-lg-12">
+                <!-- form-body开始 -->
+                <div class="form-group row">
+                  <label class="col-form-label col-lg-3">应用名:</label>
+                  <div class="col-lg-7">
+                    <input type="text" name="appDescName" value="${appDetail.appDesc.name!}"
+                           id="appDescName" class="form-control">
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-lg-3">应用描述:</label>
+                  <div class="col-lg-7">
+                                        <textarea class="form-control" name="appDescIntro" rows="3" id="appDescIntro"
+                                                  placeholder="应用描述">${appDetail.appDesc.intro!}</textarea>
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-lg-3">项目负责人:</label>
+                  <input type="text" name="officer" value="${appDetail.appDesc.officer!}" id="officer" hidden/>
+                  <div class="col-lg-7">
+                    <select id="officer_select"
+                            class="selectpicker border rounded w-100" multiple
+                            data-live-search="true" >
+                      <#assign officerList = []>
+                      <#if appDetail.appDesc.officer??>
+                        <#assign officerList = appDetail.appDesc.officer?split(',')>
+                      </#if>
+                      <#list userMap?keys as key>
+                        <#assign updateAppUser = userMap?api.get(key)>
+                        <option value="${updateAppUser.id!}" <#if officerList?seq_contains("${updateAppUser.id!}")>selected="selected"</#if>>${updateAppUser.chName!}(${updateAppUser.name!})</option>
+                      </#list>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div id="updateAppDetailInfo"></div>
+              <!-- 控件结束 -->
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">Close</button>
+          <button type="button" id="updateAppDetailBtn" class="btn btn-danger"
+                  onclick="updateAppDetailChange('${appDetail.appDesc.appId!}', '${request.contextPath}')">Ok
+          </button>
+        </div>
+
+    </div>
+  </div>
+</div>
+
+
+<#if appDetail.appUsers?? && (appDetail.appUsers?size gt 0)>
+  <#list appDetail.appUsers as appDetailUser>
+    <div id="addUserModal${appDetailUser.id!}" class="modal fade" tabindex="-1" data-width="400">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <div class="modal-header">
+            <h4 class="modal-title">管理用户</h4>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+          </div>
+
+          <div class="modal-body">
+            <div class="container-fluid">
+              <div class="row">
+                <!-- 控件开始 -->
+                <div class="col-lg-12">
+                  <!-- form-body开始 -->
+                  <div class="form-group row">
+                    <label class="col-form-label col-lg-3">
+                      域账户名:
+                    </label>
+                    <div class="col-lg-8">
+                      <input type="text" name="name" id="name${appDetailUser.id!}"
+                             value="${appDetailUser.name!}" placeholder="域账户名(邮箱前缀)"
+                             class="form-control"/>
+                    </div>
+                  </div>
+
+                  <div class="form-group row">
+                    <label class="col-form-label col-lg-3">
+                      中文名:
+                    </label>
+                    <div class="col-lg-8">
+                      <input type="text" name="chName" id="chName${appDetailUser.id!}"
+                             value="${appDetailUser.chName!}" placeholder="中文名"
+                             class="form-control"/>
+                    </div>
+                  </div>
+
+                  <div class="form-group row">
+                    <label class="col-form-label col-lg-3">
+                      邮箱:
+                    </label>
+                    <div class="col-lg-8">
+                      <input type="text" name="email" id="email${appDetailUser.id!}"
+                             value="${appDetailUser.email!}" placeholder="邮箱"
+                             class="form-control"/>
+                    </div>
+                  </div>
+
+                  <div class="form-group row">
+                    <label class="col-form-label col-lg-3">
+                      手机:
+                    </label>
+                    <div class="col-lg-8">
+                      <input type="text" name="mobile" id="mobile${appDetailUser.id!}"
+                             value="${appDetailUser.mobile!}" placeholder="手机"
+                             class="form-control"/>
+                    </div>
+                  </div>
+
+                  <div class="form-group row">
+                    <label class="col-form-label col-lg-3">
+                      微信:
+                    </label>
+                    <div class="col-lg-8">
+                      <input type="text" name="weChat" id="weChat${appDetailUser.id!}"
+                             value="${appDetailUser.weChat!}" placeholder="微信"
+                             class="form-control"/>
+                    </div>
+                  </div>
+
+                  <div class="form-group row">
+                    <label class="col-form-label col-lg-3">
+                      是否收报警:
+                    </label>
+                    <div class="col-lg-8">
+                      <select name="isAlert" id="isAlert${appDetailUser.id!}"
+                              class="form-select">
+                        <option value="1" <#if (appDetailUser.isAlert == 1)>selected</#if>>
+                        是
+                        </option>
+                        <option value="0" <#if (appDetailUser.isAlert == 0)>selected</#if>>
+                        否
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <#if openswitch??>
+                    <div class="form-group row">
+                      <label class="col-form-label col-lg-3">
+                        公司名称:
+                      </label>
+                      <div class="col-lg-8">
+                        <input type="text" name="company" id="company${appDetailUser.id!}"
+                               value="${appDetailUser.company!}" placeholder="公司名称"
+                               class="form-control"/>
+                      </div>
+                    </div>
+
+                    <div class="form-group row">
+                      <label class="col-form-label col-lg-3">
+                        使用目的:
+                      </label>
+                      <div class="col-lg-8">
+                        <input type="text" name="purpose" id="purpose${appDetailUser.id!}"
+                               value="${appDetailUser.purpose!}" placeholder="使用目的"
+                               class="form-control"/>
+                      </div>
+                    </div>
+                  </#if>
+
+                  <div class="form-group row">
+                    <label class="col-form-label col-lg-3">
+                      所属业务组:
+                    </label>
+                    <div class="col-lg-8">
+                      <select id="bizId${appDetailUser.id!}" name="bizId" class="form-select">
+                        <option value="">业务组</option>
+                        <#list bizList as biz>
+                          <option value="${biz.id!}" <#if appDetailUser.bizId?? && (biz.id == appDetailUser.bizId)>selected</#if>>${biz.name!}</option>
+                        </#list>
+                      </select>
+                    </div>
+                  </div>
+
+                  <input type="hidden" id="type${appDetailUser.id!}" value="${appDetailUser.type!}">
+                  <input type="hidden" id="userId${appDetailUser.id!}" name="userId" value="${appDetailUser.id!}"/>
+                </div>
+                <div id="info${appDetailUser.id!}"></div>
+                <!-- 控件结束 -->
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">Close</button>
+            <button type="button" class="btn btn-danger"
+                    onclick="saveOrUpdateUser('${appDetailUser.id!}','${appDetail.appDesc.appId!}', '${request.contextPath}')">Ok
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </#list>
+</#if>

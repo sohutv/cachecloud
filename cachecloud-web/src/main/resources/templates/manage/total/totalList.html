@@ -1,0 +1,626 @@
+
+<link href="${request.contextPath}/assets/css/common.css" rel="stylesheet">
+<link href="${request.contextPath}/assets/vendor/toastr/toastr.min.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="${request.contextPath}/assets/vendor/toastr/toastr.min.js"></script>
+
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">应用运维</h3>
+            </div>
+            <div class="card-body">
+                <div class="col-md-12">
+                    <div class="float-end">
+                        <form class="row justify-content-end" role="form" action="${request.contextPath}/manage/total/list" method="get" id="pageForm">
+                            <div class="col-md-4">
+                                <input type="text" id="appParam" name="appParam" value="${appParam!}" class="form-control"
+                                       placeholder="应用ID/应用名">
+                            </div>
+                            <label class="col-form-label col-auto">
+                                持久化类型:
+                            </label>
+                            <div class="col-md-4">
+                                <select name="persistenceType" id="persistenceType" class="form-select">
+                                    <option value="" <#if !(persistenceType??)>selected="selected"</#if>>
+                                    所有
+                                    </option>
+                                    <option value="0" <#if persistenceType?? && (persistenceType == 0)>selected="selected"</#if>>
+                                    常规型
+                                    </option>
+                                    <option value="1" <#if persistenceType?? && (persistenceType == 1)>selected="selected"</#if>>
+                                    性能优化型
+                                    </option>
+                                    <option value="2" <#if persistenceType?? && (persistenceType == 2)>selected="selected"</#if>>
+                                    性能增强型
+                                    </option>
+                                    <option value="3" <#if persistenceType?? && (persistenceType == 3)>selected="selected"</#if>>
+                                    不持久化
+                                    </option>
+                                </select>
+                            </div>
+                            <input type="hidden" name="pageNo" id="pageNo">
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-info">查询</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">应用列表</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover" id="tableDataList" name="tableDataList" style="white-space: nowrap">
+                        <thead>
+                        <tr>
+                            <th scope="col">应用ID</th>
+                            <th scope="col">应用名</td>
+                            <th scope="col">版本</td>
+                            <th scope="col">应用类型</td>
+                            <th scope="col">内存详情</td>
+                            <th scope="col">空间详情</td>
+                            <th scope="col">最大碎片率</td>
+                            <th scope="col">命中率</td>
+                            <th scope="col">天数</td>
+                            <th scope="col">申请状态</td>
+                            <th scope="col">持久化</td>
+                            <th scope="col">淘汰策略</td>
+                            <th scope="col">操作</td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <#list appDetailList as appDetail>
+                            <tr>
+                                <td>
+
+                                    <#if (appDetail.appDesc.status == 0) || (appDetail.appDesc.status == 1)>
+                                        ${appDetail.appDesc.appId!}
+                                    <#elseif (appDetail.appDesc.status == 2) || (appDetail.appDesc.status == 3) || (appDetail.appDesc.status == 4)>
+                                        <a target="_blank"
+                                           href="${request.contextPath}/manage/app/index?appId=${appDetail.appDesc.appId!}">${appDetail.appDesc.appId!}</a>
+                                    </#if>
+
+                                </td>
+
+                                <td>
+
+                                    <#if (appDetail.appDesc.status == 0) || (appDetail.appDesc.status == 1)>
+                                        ${appDetail.appDesc.name!}
+                                    <#elseif (appDetail.appDesc.status == 2) || (appDetail.appDesc.status == 3) || (appDetail.appDesc.status == 4)>
+                                        <a target="_blank"
+                                           href="${request.contextPath}/admin/app/index?appId=${appDetail.appDesc.appId!}"
+                                           title="${appDetail.appDesc.name!}">
+                                            <#if (appDetail.appDesc.name?length < 20)>
+                                                ${appDetail.appDesc.name!}
+                                            <#else>
+                                                ${appDetail.appDesc.name?substring(0,20)}...
+                                            </#if>
+                                        </a>
+                                    </#if>
+                                </td>
+                                <td>${appDetail.appDesc.versionName!}</td>
+                                <td>
+                                    ${appDetail.appDesc.typeDesc!}
+                                </td>
+                                <td>
+                                    <span style="display:none">${(appDetail.memUsePercent / 100)?string("0.00")}</span>
+                                    <div class="progress progress-fs-1">
+
+                                        <#if (appDetail.memUsePercent >= 80)>
+                                            <#assign progressBarStatus ="bg-danger">
+                                        <#else>
+                                            <#assign progressBarStatus="bg-success">
+                                        </#if>
+
+                                        <div class="progress-bar ${progressBarStatus!}"
+                                             role="progressbar" aria-valuenow="${appDetail.memUsePercent!}"
+                                             aria-valuemax="100"
+                                             aria-valuemin="0" style="width: ${appDetail.memUsePercent!}%; overflow: visible;">
+                                            <span style="color: #000000; margin-bottom: 0">
+                                                ${(appDetail.currentMem / 1024)?string("0.00")}G&nbsp;&nbsp;Used
+                                                /${(appDetail.mem / 1024 * 1.0)?string("0.00")}G&nbsp;&nbsp;Total
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="progress progress-fs-1">
+                                        <div class="progress-bar bg-success"
+                                             role="progressbar" aria-valuenow="0"
+                                             aria-valuemax="100"
+                                             aria-valuemin="0" style="width: 0%; overflow: visible;">
+                                                <span style="color: #000000; margin-bottom: 0">
+                                                    无数据
+                                                </span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a target="_blank"
+                                       href="${request.contextPath}/admin/instance/index?instanceId=${appDetail.instIdWithHighestMemFragRatio!}">${appDetail.highestMemFragRatio!}</a>
+                                </td>
+
+                                <td>
+                                    <span style="display:none">${(appDetail.hitPercent / 100)?string("0.00")}</span>
+                                    <#if (appDetail.hitPercent <= 0)>
+                                        无
+                                    <#elseif (appDetail.hitPercent <= 30)>
+                                        <label class="label label-danger">${appDetail.hitPercent!}%</label>
+                                    <#elseif (appDetail.hitPercent >= 30) && (appDetail.hitPercent < 50)>
+                                        <label class="label label-warning">${appDetail.hitPercent!}%</label>
+                                    <#elseif (appDetail.hitPercent >= 50) && (appDetail.hitPercent < 90)>
+                                        <label class="label label-info">${appDetail.hitPercent!}%</label>
+                                    <#else>
+                                        <label class="label label-success">${appDetail.hitPercent!}%</label>
+                                    </#if>
+                                </td>
+                                <td>${appDetail.appDesc.appRunDays!}</td>
+                                <td>
+
+                                    <#if (appDetail.appDesc.status == 0)>
+                                        <font color="red">未申请</font>
+                                    <#elseif (appDetail.appDesc.status == 1)>
+                                        <font color="red">申请中</font>
+                                    <#elseif (appDetail.appDesc.status == 2)>
+                                        运行中
+                                    <#elseif (appDetail.appDesc.status == 3)>
+                                        <font color="red">已下线</font>
+                                    <#elseif (appDetail.appDesc.status == 4)>
+                                        <font color="red">驳回</font>
+                                    </#if>
+
+                                </td>
+                                <td>
+
+                                    <#if (appDetail.appDesc.persistenceType == 0)>
+
+                                        <#if (appDetail.appDesc.type == 2) || (appDetail.appDesc.type == 5)>
+                                            <button type="button" class="btn btn-sm btn-info" style="width: 100px;" data-bs-toggle="modal" data-bs-target="#updatePersisModal" onclick='values("${appDetail.appDesc.appId!}", "${appDetail.appDesc.name!}", "${appDetail.appDesc.persistenceType!}")'>常规型</button>
+                                        <#else>
+                                            <button type="button" class="btn btn-sm btn-info" style="width: 100px;background:#CCCCCC" disabled="disabled">常规型</button>
+                                        </#if>
+
+                                    <#elseif (appDetail.appDesc.persistenceType == 1)>
+
+                                        <#if (appDetail.appDesc.type == 2) || (appDetail.appDesc.type == 5)>
+                                            <button type="button" class="btn btn-sm btn-success" style="width: 100px;" data-bs-toggle="modal" data-bs-target="#updatePersisModal" onclick='values("${appDetail.appDesc.appId!}", "${appDetail.appDesc.name!}", "${appDetail.appDesc.persistenceType!}")'>性能优化型</button>
+                                        <#else>
+                                            <button type="button" class="btn btn-sm btn-info" style="width: 100px;background:#CCCCCC" disabled="disabled">性能优化型</button>
+                                        </#if>
+
+                                    <#elseif (appDetail.appDesc.persistenceType == 2)>
+
+                                        <#if (appDetail.appDesc.type == 2) || (appDetail.appDesc.type == 5)>
+                                            <button type="button" class="btn btn-sm btn-primary" style="width: 100px;" data-bs-toggle="modal" data-bs-target="#updatePersisModal" onclick='values("${appDetail.appDesc.appId!}", "${appDetail.appDesc.name!}", "${appDetail.appDesc.persistenceType!}")'>性能增强型</button>
+                                        <#else>
+                                            <button type="button" class="btn btn-sm btn-info" style="width: 100px;background:#CCCCCC" disabled="disabled">性能增强型</button>
+                                        </#if>
+
+                                    <#elseif (appDetail.appDesc.persistenceType == 3)>
+
+                                        <#if (appDetail.appDesc.type == 2) || (appDetail.appDesc.type == 5)>
+                                            <button type="button" class="btn btn-sm btn-danger" style="width: 100px;" data-bs-toggle="modal" data-bs-target="#updatePersisModal" onclick='values("${appDetail.appDesc.appId!}", "${appDetail.appDesc.name!}", "${appDetail.appDesc.persistenceType!}")'>不持久化</button>
+                                        <#else>
+                                            <button type="button" class="btn btn-sm btn-info" style="width: 100px;background:#CCCCCC" disabled="disabled">不持久化</button>
+                                        </#if>
+
+                                    </#if>
+
+                                </td>
+                                <td>
+
+                                    <#if !(appDetail.appDesc.maxmemoryPolicyDesc??)>
+                                        默认
+                                    <#else>
+                                        ${appDetail.appDesc.maxmemoryPolicyDesc!}
+                                    </#if>
+
+                                </td>
+                                <td>
+
+                                    <div class="d-inline-flex">
+                                        <#if (appDetail.appDesc.status == 2)>
+                                            <a target="_blank" type="button" class="btn btn-sm btn-success"
+                                               href="${request.contextPath}/manage/app/index?appId=${appDetail.appDesc.appId!}">应用运维</a>
+
+                                            <a target="_blank" type="button" class="btn btn-sm btn-info"
+                                               href="${request.contextPath}/manage/app/migrate/init?appId=${appDetail.appDesc.appId!}">应用迁移</a>
+
+                                            <button type="button" class="btn btn-sm btn-danger"
+                                                    id="offline${appDetail.appDesc.appId!}"
+                                                    onclick="offLine(${appDetail.appDesc.appId!})">应用下线
+                                            </button>
+                                            <#if (appDetail.appDesc.isVersionUpgrade==0)>
+                                                <button type="button" id="install" class="btn btn-sm btn-info" data-bs-toggle="modal"
+                                                        disabled="disabled" style="background:#CCCCCC">
+                                                    最新版本
+                                                </button>
+                                            </#if>
+                                            <#if (appDetail.appDesc.isVersionUpgrade==1)>
+                                                <button type="button" class="btn btn-sm btn-primary"
+                                                        data-bs-target="#upgradeRedisVersionModal${appDetail.appDesc.appId!}"
+                                                        data-bs-toggle="modal">
+                                                    Redis版本升级
+                                                </button>
+                                            </#if>
+
+                                        </#if>
+                                    </div>
+
+                                </td>
+                            </tr>
+                        </#list>
+                        </tbody>
+                    </table>
+                    <div style="margin-top: 10px;">
+                        <span>
+                            <div id="pageDetail"
+                                 style="float:left;padding-top:7px;color:#4A64A4;">
+                                <#if page??>
+                                    共${page.totalPages!}页,${page.totalCount!}条
+                                </#if>
+                            </div>
+                            <nav id='ccPagenitor' aria-label="Page navigation example" class="d-inline-flex float-end">
+                            </nav>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="updatePersisModal" name="updatePersis-modal" class="modal fade" tabindex="-1"
+     data-width="400"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">修改持久化配置</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+            </div>
+            <div class="modal-header">
+                <h5 id="updatePersisAppInfo">【应用】</h5>
+            </div>
+
+            <form class="form-horizontal form-bordered form-row-stripped">
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- 控件开始 -->
+                        <div class="col-md-12">
+                            <!-- form-body开始 -->
+                            <div class="form-body">
+                                <div class="form-group row">
+                                    <label class="col-form-label col-md-3">
+                                        持久化类型:
+                                    </label>
+                                    <div class="col-md-8">
+                                        <select name="updatePersisPersistenceType" id="updatePersisPersistenceType" class="form-select">
+                                            <option value="" selected="selected">
+                                                所有
+                                            </option>
+                                            <option value="0">
+                                                常规型
+                                            </option>
+                                            <option value="1">
+                                                性能优化型
+                                            </option>
+                                            <option value="2">
+                                                性能增强型
+                                            </option>
+                                            <option value="3">
+                                                不持久化
+                                            </option>
+                                        </select>
+                                        <input type="hidden" name="updatePersisAppId" id="updatePersisAppId">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-bs-dismiss="modal" class="btn btn-secondary" >Close</button>
+                    <button type="button" id="updatePersisBtn" class="btn btn-danger"
+                            onclick="updatePersis()">
+                        Ok
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<#list appDetailList as appDetail>
+    <#if appDetail.appDesc.isVersionUpgrade == 1 || appDetail.appDesc.type == 12>
+        <#include '/manage/total/upgradeRedis.html'>
+    </#if>
+</#list>
+
+<#include "/manage/inc/page.html">
+
+<script type="text/javascript">
+    function offLine(appId,appAuditId) {
+        if (confirm("确认要下线该应用？应用id=" + appId)) {
+            $.ajax({
+                type: "get",
+                url: "${request.contextPath}/manage/app/offLine.json",
+                data: {appId: appId,appAuditId: appAuditId,},
+                success: function (result) {
+                    alert(result.message);
+                    setTimeout("reloadPage(" + result.taskId + ");", 0);
+                }
+            });
+        }
+    }
+
+    function reloadPage(taskid) {
+        location.href = "${request.contextPath}/manage/task/flow?taskId=" + taskid;
+    }
+
+</script>
+
+<script>
+    // 配置预览
+    function configPreview(appId) {
+        window.open("${request.contextPath}/manage/redisConfig/init?versionid=" + $('#versionSelect' + appId + " option:selected").attr('versionid'));
+    }
+
+    // 升级配置对比
+    function configContrast(currentVerisonId, appId) {
+        window.open("${request.contextPath}/manage/redisConfig/contrast?currentVersionId=" + currentVerisonId + "&upgradeVersionId=" + $('#versionSelect' + appId + " option:selected").attr('versionid'));
+    }
+</script>
+
+<script>
+    var installId = "";
+    var method = "";
+
+    /**
+     * 一键执行
+     */
+    function install(appId) {
+        $('#upgradeRedisVersionModal'+installId).modal("show");
+        installId = appId;
+        if (!$('#versionSelect' + installId).val()) {
+            alert("请先选择升级版本");
+            return;
+        }
+        if ($('#install' + installId).html() == "继续") {
+            // step forward
+            setTimeout(method + '()', 1000);
+        } else if ($('#install' + installId).html() == "升级完成") {
+            // step complete
+            window.location.reload();
+        } else {
+            instanceCheck(appId);
+        }
+    }
+
+    /**
+     * 继续 step forward
+     */
+    function goOn(m) {
+        $('#upgradeRedisVersionModal'+installId).modal("show");
+        $("#install" + installId).html("继续");
+        method = m;
+    }
+
+    /**
+     * 1.实例检查
+     */
+    function instanceCheck() {
+        $('#upgradeRedisVersionModal'+installId).modal("show");
+        var instanceId = "instanceCheck" + installId;
+        active(instanceId);
+        $("#install" + installId).html("配置检查中...");
+        $("#versionSelect" + installId).attr("disabled", "disabled");//不能修改版本
+        $.post('${request.contextPath}/manage/redis/upgrade/check/instance',
+            {
+                "appId": installId,
+                "upgradeVersionId": $('#versionSelect' + installId + " option:selected").attr('versionid'),
+                "upgradeVersionName": $('#versionSelect' + installId + " option:selected").val()
+            },
+            function (data) {
+                if (data.status == 1) {
+                    $("#instanceInfo" + installId).html(data.instanceInfo);
+                    if (data.machineInstallInfo != "") {
+                        toastr.success(data.machineInstallInfo);
+                    }
+                    $("#div" + installId).removeAttr("hidden");
+                    complete(instanceId);
+                    // Slave更新配置&重启
+                    goOn("slaveUpdate");
+                } else if (data.status == -1) {
+                    $("#instanceInfo" + installId).html(data.instanceInfo);
+                    $("#div" + installId).removeAttr("hidden");
+                    toastr.error("异常信息：" + data.message);
+                    warn(instanceId);
+                    goOn("instanceCheck");
+                } else {
+                    toastr.error("操作失败,请查看日志!");
+                    warn(instanceId);
+                    goOn("instanceCheck");
+                }
+            }
+        );
+    }
+
+    /**
+     * 2.Slave配置替换重启
+     */
+    function slaveUpdate() {
+        $('#upgradeRedisVersionModal'+installId).modal("show");
+        var slaveUpdateId = "slaveUpdate" + installId;
+        active(slaveUpdateId);
+        $("#install" + installId).html("配置更新中...");
+        $.post('${request.contextPath}/manage/redis/upgrade/slave/update/config',
+            {
+                "appId": installId,
+                "upgradeVersionId": $('#versionSelect' + installId + " option:selected").attr('versionid'),
+                "upgradeVersionName": $('#versionSelect' + installId + " option:selected").val()
+            },
+            function (data) {
+                if (data.status == 1) {
+                    $("#instanceInfo" + installId).html(data.instanceInfo);
+                    $("#instanceLog" + installId).html(data.instanceLog);
+                    complete(slaveUpdateId);
+                    // 下一步主从failover
+                    goOn("msFailover");
+                } else if (data.status == -1) {
+                    toastr.error("异常信息：" + data.message);
+                    warn(slaveUpdateId);
+                    goOn("slaveUpdate");
+                } else {
+                    toastr.error("操作失败,请查看日志!");
+                    warn(slaveUpdateId);
+                    goOn("slaveUpdate");
+                }
+            });
+    }
+
+    /**
+     * 3.主从Failover
+     */
+    function msFailover() {
+        $('#upgradeRedisVersionModal'+installId).modal("show");
+        var failoverId = "msFailover" + installId;
+        active(failoverId);
+        $("#install" + installId).html("主从切换中...");
+        $.post('${request.contextPath}/manage/redis/upgrade/slave/failover',
+            {
+                "appId": installId,
+                "upgradeVersionId": $('#versionSelect' + installId + " option:selected").attr('versionid')
+            },
+            function (data) {
+                if (data.status == 1) {
+                    $("#instanceInfo" + installId).html(data.instanceInfo);
+                    $("#instanceLog" + installId).html(data.instanceLog);
+                    complete(failoverId);
+                    // 下一步新的从节点替换配置
+                    goOn("newSlaveUpdate");
+                } else if (data.status == -1) {
+                    toastr.error("异常信息：" + data.message);
+                    warn(failoverId);
+                    goOn("msFailover");
+                } else {
+                    toastr.error("操作失败,请查看日志!");
+                    warn(failoverId);
+                    goOn("msFailover");
+                }
+            });
+    }
+
+    /**
+     * 4.new Slave配置替换重启
+     */
+    function newSlaveUpdate() {
+        $('#upgradeRedisVersionModal'+installId).modal("show");
+        var newSlaveUpdateId = "newSlaveUpdate" + installId;
+        active(newSlaveUpdateId);
+        $("#install" + installId).html("配置更新中...");
+        $.post('${request.contextPath}/manage/redis/upgrade/slave/update/config',
+            {
+                "appId": installId,
+                "upgradeVersionId": $('#versionSelect' + installId + " option:selected").attr('versionid'),
+                "upgradeVersionName": $('#versionSelect' + installId + " option:selected").val()
+            },
+            function (data) {
+                if (data.status == 1) {
+                    $("#instanceInfo" + installId).html(data.instanceInfo);
+                    $("#instanceLog" + installId).html(data.instanceLog);
+                    complete(newSlaveUpdateId);
+                    goOn("upgradeComplete");
+                } else if (data.status == -1) {
+                    toastr.error("异常信息：" + data.message);
+                    warn(newSlaveUpdateId);
+                    goOn("newSlaveUpdate");
+                } else {
+                    toastr.error("操作失败,请查看日志!");
+                    warn(newSlaveUpdateId);
+                    goOn("newSlaveUpdate");
+                }
+            });
+    }
+
+    /**
+     * 5.升级完成
+     */
+    function upgradeComplete() {
+        $('#upgradeRedisVersionModal'+installId).modal("show");
+        var upgradeCompleteId = "upgradeComplete" + installId;
+        $.post('${request.contextPath}/manage/redis/upgrade/complete/check',
+            {
+                "appId": installId,
+                "upgradeVersionId": $('#versionSelect' + installId + " option:selected").attr('versionid')
+            },
+            function (data) {
+                if (data.status == 1) {
+                    $("#instanceInfo" + installId).html(data.instanceInfo);
+                    $("#instanceLog" + installId).html(data.instanceLog);
+                    active(upgradeCompleteId);
+                    $("#install" + installId).html("升级完成");
+                } else if (data.status == -1) {
+                    toastr.error("异常信息：" + data.message);
+                    warn(upgradeCompleteId);
+                } else {
+                    toastr.error("操作失败,请查看日志!");
+                    warn(upgradeCompleteId);
+                }
+            });
+    }
+
+    function warn(id) {
+        $("#" + id).addClass("warn");
+    }
+
+    function disable(id) {
+        $("#" + id).removeClass("active").addClass("disabled");
+    }
+
+    function active(id) {
+        $("#" + id).removeClass("disabled").removeClass("warn").addClass("active");
+    }
+
+    function complete(id) {
+        $("#" + id).removeClass("active").removeClass("warn").addClass("complete");
+    }
+</script>
+
+<script>
+    $(function(){
+        $('#updatePersisModal').modal("hide");
+    });
+
+    function values(appId, appName, persistenceType){
+        $("#updatePersisAppInfo").html("【应用】" + appId + ":" + appName);
+        $("#updatePersisPersistenceType").val(persistenceType);
+        $("#updatePersisAppId").val(appId);
+    }
+
+    function updatePersis() {
+        var persistenceType = $("#updatePersisPersistenceType").val();
+        var appId = $("#updatePersisAppId").val();
+        $.post('${request.contextPath}/manage/app/updateAppPersistenceType',
+            {
+                "appId": appId,
+                "persistenceType":persistenceType
+            },
+            function (data) {
+                if (data == 1) {
+                    alert("操作成功");
+                    window.location.reload();
+                } else {
+                    alert("操作失败，请确认");
+                }
+            });
+    }
+
+</script>

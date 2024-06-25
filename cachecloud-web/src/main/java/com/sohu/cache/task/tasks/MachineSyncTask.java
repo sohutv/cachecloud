@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
@@ -166,6 +167,9 @@ public class MachineSyncTask extends BaseTask {
         String delDir_command = "rm -rf " + baseConfDir.concat(containerIp) + " " + baseDataDir.concat(containerIp) + " " + baseLogDir.concat(containerIp);
 
         try {
+            // 等待镜像启动
+            TimeUnit.SECONDS.sleep(30);
+
             // 1.检查用户是否存在
             Result checkResult = sshService.executeWithResult(targetIp, checkUser_command);
             if (checkResult.isSuccess() && checkResult.getResult().indexOf("cachecloud") > -1) {
@@ -192,6 +196,8 @@ public class MachineSyncTask extends BaseTask {
             }
         } catch (SSHException e) {
             logger.error(marker, "sourceMachine ip :{} check env error message:{}", sourceIp, e.getMessage(),e);
+            return TaskFlowStatusEnum.ABORT;
+        } catch (InterruptedException e) {
             return TaskFlowStatusEnum.ABORT;
         }
         return TaskFlowStatusEnum.SUCCESS;

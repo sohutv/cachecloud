@@ -80,6 +80,9 @@ public class InstanceStats {
      */
     private Map<String,Object> infoMap;
 
+    /* 实例当前已用的磁盘空间，单位：byte */
+    private long usedDisk;
+
     public double getMemUsePercent() {
         if(maxMemory<=0){
             return 0.0D;

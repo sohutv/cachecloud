@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>CacheCloud wiki</title>
+<link href="${request.contextPath}/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<link href="${request.contextPath}/assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+
+<!-- Google Font: Source Sans Pro -->
+<link rel="stylesheet" href="${request.contextPath}/assets/vendor/fonts/fonts-googleapis-source-sans-pro.css">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="${request.contextPath}/assets/plugins/fontawesome-free/css/all.min.css">
+<!-- Theme style -->
+<link rel="stylesheet" href="${request.contextPath}/assets/dist/css/adminlte.min.css">
+<!-- overlayScrollbars -->
+<link rel="stylesheet" href="${request.contextPath}/assets/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
+
+<link href="${request.contextPath}/assets/vendor/bootstrap-select/bootstrap-select.css" rel="stylesheet" />
+<!--<link href="${request.contextPath}/resources/prettify/prettify.css" rel="stylesheet">-->
+<link href="${request.contextPath}/assets/css/githubmd.css" rel="stylesheet">
+<link href="${request.contextPath}/assets/css/common.css" rel="stylesheet" type="text/css"/>
+
+<script src="${request.contextPath}/assets/vendor/jquery/jquery-3.7.0.min.js"></script>
+<script src="${request.contextPath}/assets/vendor/apexcharts/apexcharts.min.js"></script>
+<script src="${request.contextPath}/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="${request.contextPath}/assets/vendor/chart.js/chart.umd.js"></script>
+<script src="${request.contextPath}/assets/vendor/echarts/echarts.min.js"></script>
+<script src="${request.contextPath}/assets/vendor/quill/quill.min.js"></script>
+<script src="${request.contextPath}/assets/js/custom/appDetail.js"></script>
+<script src="${request.contextPath}/assets/vendor/tinymce/tinymce.min.js"></script>
+<script src="${request.contextPath}/assets/vendor/bootstrap-select/bootstrap-select.js"></script>
+<script src="${request.contextPath}/assets/vendor/highchart/highcharts.js"></script>
+<script src="${request.contextPath}/assets/js/myhighchart.js"></script>
+<!-- 滚动插件 -->
+<!--  <script src="/resources/nicescroll/jquery.nicescroll.min.js"></script>-->
+<script type="text/javascript" src="${request.contextPath}/assets/plugins/overlayScrollbars/js/OverlayScrollbars.min.js"></script>
+<!--<script type="text/javascript" src="${request.contextPath}/resources/prettify/prettify.js"></script>-->
+<head>
+  <title>CacheCloud</title>
+</head>
+<body>
+  <div class="card">
+    <div class="card-body">
+      ${response}
+    </div>
+  </div>
+</body>
+<script>
+  $(function(){
+    // $("body").niceScroll({
+    //   cursorcolor:"#ddd",
+    //   cursorwidth:"12px",
+    //   cursorminheight: 64,
+    //   horizrailenabled : false
+    // });
+    $('pre').each(function(i, pre) {
+      $(pre).addClass("prettyprint");
+    });
+    PR.prettyPrint();
+    if(window.location.hash && $(window.location.hash).offset()){
+      $("html,body").animate({scrollTop: $(window.location.hash).offset().top - 52}, 500);
+    }
+    $("#introLi").addClass("active");
+  });
+</script>
+</html>

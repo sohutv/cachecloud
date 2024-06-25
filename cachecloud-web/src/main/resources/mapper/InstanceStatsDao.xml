@@ -4,14 +4,14 @@
 <mapper namespace="com.sohu.cache.dao.InstanceStatsDao">
 
     <sql id="instance_statistics_columns">
-        inst_id,app_id,host_id,ip,port,role,max_memory,used_memory,curr_items,curr_connections,misses,hits,modify_time,mem_fragmentation_ratio,aof_delayed_fsync
+        inst_id,app_id,host_id,ip,port,role,max_memory,used_memory,curr_items,curr_connections,misses,hits,modify_time,mem_fragmentation_ratio,aof_delayed_fsync,used_disk
     </sql>
 
     <insert id="updateInstanceStats" parameterType="InstanceStats">
         INSERT INTO instance_statistics
           (<include refid="instance_statistics_columns"/>)
         VALUES (#{instId},#{appId},#{hostId},#{ip},#{port},#{role},#{maxMemory},#{usedMemory},#{currItems},#{currConnections},#{misses},#{hits},
-                  #{modifyTime},#{memFragmentationRatio},#{aofDelayedFsync})
+                  #{modifyTime},#{memFragmentationRatio},#{aofDelayedFsync},#{usedDisk})
         ON DUPLICATE KEY UPDATE
           inst_id = #{instId},
           host_id = #{hostId},
@@ -24,7 +24,8 @@
           hits = #{hits},
           modify_time = #{modifyTime},
           mem_fragmentation_ratio = #{memFragmentationRatio},
-          aof_delayed_fsync = #{aofDelayedFsync}
+          aof_delayed_fsync = #{aofDelayedFsync},
+          used_disk = #{usedDisk}
     </insert>
 
     <select id="getInstanceStatsByHost" resultType="InstanceStats">
@@ -58,7 +59,8 @@
 
     <select id="getMachineMemByIp" resultType="java.util.Map">
         SELECT count(statistic.id) instanceNum, sum(statistic.max_memory) applyMem, sum(statistic.used_memory) usedMem,
-        sum(statistic.mem_fragmentation_ratio*statistic.used_memory) usedMemRss
+        sum(statistic.mem_fragmentation_ratio*statistic.used_memory) usedMemRss, sum(statistic.used_disk) usedDisk,
+        sum(info.mem) applyDisk
         FROM instance_statistics statistic, instance_info info
         WHERE statistic.inst_id = info.id
         AND info.status = 1
@@ -78,7 +80,8 @@
     </select>
 
     <select id="getMachineInstanceStatList" resultType="MachineInstanceStat">
-        SELECT stat.ip,sum(stat.max_memory) as max_memory,sum(stat.used_memory) as used_memory
+        SELECT stat.ip,sum(stat.max_memory) as max_memory,sum(stat.used_memory) as used_memory,
+               sum(stat.used_disk) as used_disk, sum(info.mem) as apply_disk
         from instance_statistics stat,instance_info info
         where stat.inst_id = info.id and info.status=1 group by stat.ip;
     </select>

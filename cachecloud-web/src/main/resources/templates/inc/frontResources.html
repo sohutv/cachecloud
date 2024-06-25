@@ -1,0 +1,61 @@
+<!-- Vendor CSS Files -->
+<link href="${request.contextPath}/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<link href="${request.contextPath}/assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+<link href="${request.contextPath}/assets/vendor/bootstrap-select/bootstrap-select.css" rel="stylesheet" />
+<link href="${request.contextPath}/assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+<link href="${request.contextPath}/assets/vendor/quill/quill.snow.css" rel="stylesheet">
+<link href="${request.contextPath}/assets/vendor/quill/quill.bubble.css" rel="stylesheet">
+<link href="${request.contextPath}/assets/vendor/remixicon/remixicon.css" rel="stylesheet">
+<link href="${request.contextPath}/assets/vendor/simple-datatables/style.css" rel="stylesheet">
+<!-- Customized Bootstrap Stylesheet -->
+
+<!-- Google Font: Source Sans Pro -->
+<link rel="stylesheet" href="${request.contextPath}/assets/vendor/fonts/fonts-googleapis-source-sans-pro.css">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="${request.contextPath}/assets/plugins/fontawesome-free/css/all.min.css">
+<!-- Theme style -->
+<link rel="stylesheet" href="${request.contextPath}/assets/dist/css/adminlte.min.css">
+<!-- overlayScrollbars -->
+<link rel="stylesheet" href="${request.contextPath}/assets/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
+<link rel="stylesheet" href="${request.contextPath}/assets/css/custom.css">
+
+<script src="${request.contextPath}/assets/vendor/jquery/jquery-3.7.0.min.js"></script>
+<script src="${request.contextPath}/assets/vendor/apexcharts/apexcharts.min.js"></script>
+<script src="${request.contextPath}/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="${request.contextPath}/assets/vendor/bootstrap-select/bootstrap-select.js"></script>
+<script src="${request.contextPath}/assets/vendor/chart.js/chart.umd.js"></script>
+<script src="${request.contextPath}/assets/vendor/echarts/echarts.min.js"></script>
+<script src="${request.contextPath}/assets/vendor/highchart/highcharts.js"></script>
+<script src="${request.contextPath}/assets/vendor/quill/quill.min.js"></script>
+<script src="${request.contextPath}/assets/vendor/simple-datatables/simple-datatables.js"></script>
+<script src="${request.contextPath}/assets/vendor/tinymce/tinymce.min.js"></script>
+<script src="${request.contextPath}/assets/vendor/php-email-form/validate.js"></script>
+<script src="${request.contextPath}/assets/js/myhighchart.js"></script>
+<script src="${request.contextPath}/assets/js/custom/appDetail.js"></script>
+<script src="${request.contextPath}/assets/js/custom/appInit.js"></script>
+<script src="${request.contextPath}/assets/dist/js/adminlte.js"></script>
+<script type="text/javascript">
+    $(function () {
+        if (typeof (alert) != 'undefined') {
+            if (alert.isAlert == 0) {
+                return;
+            }
+            var url = '${request.contextPath}/manage/notice/get.json';
+            $.get(url, {}, function (data) {
+                console.log(data);
+                if (data.status == 1) {
+                    var alertDiv = $('<div class="alert alert-warning alert-dismissable"></div>');
+                    $('<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>').appendTo(alertDiv);
+                    $('<p><strong>系统提醒：</strong></p>').appendTo(alertDiv);
+                    var i = 0;
+                    list = data.data;
+                    for (var value in list) {
+                        i++;
+                        $('<p>' + list[value] + '</p>').appendTo(alertDiv);
+                    }
+                    alertDiv.appendTo($('#systemAlert'));
+                }
+            });
+        }
+    });
+</script>

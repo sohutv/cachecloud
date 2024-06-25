@@ -30,5 +30,8 @@ public class BaseConstant {
 
     public static final String SYSTEM_PROPERTY_CONFIG_FILE_PATH = "configFilePath";
 
+    public static final int ONE = 1;
+
+    public static final int ZERO = 0;
 
 }

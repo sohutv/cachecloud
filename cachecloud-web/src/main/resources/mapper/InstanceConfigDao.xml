@@ -3,7 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sohu.cache.dao.InstanceConfigDao">
     <sql id="columns">
-    	config_key, config_value, info, update_time, type, status,version_id
+    	config_key, config_value, info, update_time, type, status,version_id, refresh, value_type
     </sql>
 
     <select id="getByType" resultType="com.sohu.cache.entity.InstanceConfig">
@@ -36,10 +36,10 @@
 
     <insert id="saveOrUpdate">
 		insert into instance_config(<include refid="columns" />)
-		values(#{configKey},#{configValue},#{info},now(),#{type},#{status},#{versionId})
+		values(#{configKey},#{configValue},#{info},now(),#{type},#{status},#{versionId}, #{refresh}, #{valueType})
 	    on duplicate key update
 	    config_value = #{configValue}, info = #{info}, 
-	    update_time = now(),status = #{status} ,version_id=#{versionId}
+	    update_time = now(),status = #{status} ,version_id=#{versionId}, refresh = #{refresh}, value_type = #{valueType}
 	</insert>
 	
 	<update id="updateStatus">

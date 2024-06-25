@@ -2,7 +2,10 @@ spring:
   application:
     name: cloud.cachecloud-web.open.test
     import: classpath:spring/spring.xml
-
+  freemarker:
+    cache: false
+    settings:
+      template_update_delay: 0
 server:
   port: 8080
   domain: 127.0.0.1:8080
@@ -14,7 +17,8 @@ cachecloud:
     password: cachecloud-open
     initialPoolSize: 3
     maxPoolSize: 20
-  redis:
+  redis: #配置cachecloud-web需要的redis，用户存储任务流log
+    enable: true #if config redis, suggest config true
     main:
       host: 127.0.0.1
       port: 6379

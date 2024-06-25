@@ -1,5 +1,6 @@
 package com.sohu.cache.web.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.sohu.cache.constant.AppAuditType;
 import com.sohu.cache.dao.AppAuditDao;
 import com.sohu.cache.dao.InstanceBigKeyDao;
@@ -16,7 +17,6 @@ import com.sohu.cache.task.entity.InstanceBigKey;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.enums.SuccessEnum;
 import com.sohu.cache.web.util.AppEmailUtil;
-import net.sf.json.JSONArray;
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -104,7 +104,7 @@ public class AnalysisController extends BaseController {
             idleKeyParamCountList.add(paramCount);
         }
         model.addAttribute("idleKeyParamCountList", idleKeyParamCountList);
-        model.addAttribute("idleKeyDistri", JSONArray.fromObject(idleKeyParamCountList));
+        model.addAttribute("idleKeyDistri", JSONObject.toJSONString(idleKeyParamCountList));
 
         //type
         String keyTypeResultKey = ConstUtils.getRedisServerTypeKey(appId, auditId);
@@ -115,7 +115,7 @@ public class AnalysisController extends BaseController {
             keyTypeParamCountList.add(paramCount);
         }
         model.addAttribute("keyTypeParamCountList", keyTypeParamCountList);
-        model.addAttribute("keyTypeDistri", JSONArray.fromObject(keyTypeParamCountList));
+        model.addAttribute("keyTypeDistri", JSONObject.toJSONString(keyTypeParamCountList));
 
         //ttl
         String keyTtlResultKey = ConstUtils.getRedisServerTtlKey(appId, auditId);
@@ -128,7 +128,7 @@ public class AnalysisController extends BaseController {
             keyTtlParamCountList.add(paramCount);
         }
         model.addAttribute("keyTtlParamCountList", keyTtlParamCountList);
-        model.addAttribute("keyTtlDistri", JSONArray.fromObject(keyTtlParamCountList));
+        model.addAttribute("keyTtlDistri", JSONObject.toJSONString(keyTtlParamCountList));
 
         //key value size
         String keyValueSizeResultKey = ConstUtils.getRedisServerValueSizeKey(appId, auditId);
@@ -141,7 +141,7 @@ public class AnalysisController extends BaseController {
             keyValueSizeParamCountList.add(paramCount);
         }
         model.addAttribute("keyValueSizeParamCountList", keyValueSizeParamCountList);
-        model.addAttribute("keyValueSizeDistri", JSONArray.fromObject(keyValueSizeParamCountList));
+        model.addAttribute("keyValueSizeDistri", JSONObject.toJSONString(keyValueSizeParamCountList));
 
         //big
         List<InstanceBigKey> instanceBigKeyList = instanceBigKeyDao.getAppBigKeyList(appId, auditId, null);

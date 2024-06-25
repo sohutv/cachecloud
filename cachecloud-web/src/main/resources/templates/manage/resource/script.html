@@ -1,0 +1,185 @@
+<script type="text/javascript">
+  $('#modal-script').on('shown.bs.modal', function (e) {
+    $('#editor2').html('');
+    var resourceName = $(e.relatedTarget).data('resource_name');
+    var resourceId = $(e.relatedTarget).data('resource_id');
+    var respoitoryId = $('#repositoryId').html();
+    $('#resource_id').html(resourceId);
+    $('#resource_name').html(resourceName);
+
+    $.post(
+            '${request.contextPath}/manage/app/resource/script/load',
+            {
+              resourceId: resourceId,
+              respositoryId:respoitoryId
+            },
+            function (data) {
+              if(data.status == 1){
+                $('#editor2').html(data.content);
+                if(data.source == 1){
+                  $('#file_source').html("<span style=color:red>(临时保存)</span>");
+                }else if(data.source == 2){
+                  $('#file_source').html("<span style=color:green>(最新文件)</span>");
+                }
+              }
+            }
+    );
+  });
+
+  function pushResource(resourceId){
+    var resource_id = (typeof resourceId == 'undefined') ? $('#resource_id').html() : resourceId;
+    $.post(
+            '${request.contextPath}/manage/app/resource/push.json',
+            {
+              repositoryId: $('#repositoryId').html(),
+              resourceId: resource_id,
+              content: $('#editor2').val()
+            },
+            function (data) {
+              var status = data.status;
+              if (status == 1) {
+                alert("推送成功");
+              } else {
+                alert("推送失败！" + data.message);
+              }
+              window.location.reload();
+            }
+    );
+  }
+
+  function temporarySave(){
+    $.post(
+            '${request.contextPath}/manage/app/resource/temporarySave.json',
+            {
+              resourceId: $('#resource_id').html(),
+              content: $('#editor2').val()
+            },
+            function (data) {
+              var status = data.status;
+              if (status == 1) {
+                alert("保存成功");
+              } else {
+                alert("保存失败！" + data.message);
+              }
+              window.location.reload();
+            }
+    );
+  }
+</script>
+
+<div class="card">
+  <div class="card-body">
+    <div class="row">
+      <div id="respo-div" class="col-md-12">
+        <button id="redis_version" class="btn btn-success btn-sm col-auto" data-bs-target="#addResourceModal" data-bs-toggle="modal" >
+          <i class="bi bi-plus"></i>新建脚本
+        </button>
+        <form class="row align-items-center float-end" role="form" method="post" action="${request.contextPath}/manage/app/resource/index?tab=script"
+              id="appList" name="ec">
+          <label id="repositoryId" class="col-form-label col-auto" style="display:none">${repository.id!}</label>
+          <div class="col-auto">
+            <input type="text" class="form-control" id="searchName" name="searchName"
+                   value="${searchName!}" placeholder="脚本名称">
+          </div>
+          <button type="submit" class="btn btn-success btn-sm col-auto">查询</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="row mt-3">
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered table-hover" id="tableDataList">
+          <thead>
+          <tr>
+            <th scope="col">序号</th>
+            <th scope="col">脚本名称</th>
+            <th scope="col">脚本说明</th>
+            <th scope="col">目录</th>
+            <th scope="col">最后更新时间</th>
+            <th scope="col">操作人</th>
+            <th scope="col">状态</th>
+            <th scope="col">操作</th>
+          </tr>
+          </thead>
+          <tbody>
+          <#list resourceList as resource>
+            <tr>
+              <td>${resource.id!}</td>
+              <td>
+                <a target="_blank" href="${repository.url!}${resource.dir!}/${resource.name!}">${resource.name!}</a>
+              </td>
+              <td>
+                ${resource.intro!}
+              </td>
+              <td>
+                ${resource.dir!}
+              </td>
+              <td>
+                ${resource.lastmodify?string("yyyy-MM-dd HH:mm:ss")}
+              </td>
+              <td>
+                ${resource.username!}
+              </td>
+              <td>
+                <#if (resource.ispush==1)><span style="color:green">已推送</span></#if>
+                <#if (resource.ispush==3)><span style="color:green">已推送</span><span style="color:red">(有新修改)</span></#if>
+                <#if (resource.ispush==2)>未推送<span style="color:red">(有新修改)</span></#if>
+                <#if (resource.ispush==0)>未推送</#if>
+
+
+                <#if (resource.ispush == 0)>未推送</#if>
+                <#if (resource.ispush == 1)><span style="color:green">已推送</span></#if>
+              </td>
+              <td>
+                <button type="button" class="btn btn-info" data-bs-target="#addResourceModal" data-bs-toggle="modal"
+                        data-resource_id="${resource.id!}" >
+                  修改
+                </button>
+                <button type="button" class="btn btn-info" data-bs-target="#modal-script" data-bs-toggle="modal"
+                        data-resource_id="${resource.id!}" data-resource_name="${resource.name!}" >
+                  编辑内容
+                </button>
+                <#if (resource.ispush == 0)>
+                  <button id="resource" class="btn btn-success" onclick="pushResource('${resource.id!}')" data-bs-toggle="modal">推送</button>
+                </#if>
+              </td>
+            </tr>
+          </#list>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modal-script" class="modal fade" tabindex="-1">
+  <div class="modal-dialog modal-xl" style="width:800px;">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h4 class="modal-title">
+          <label id="resource_name"></label>脚本内容:
+          <label id="file_source"></label>
+          <small><label id="modal-title" style="color: #00BE67"></label></small>
+        </h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+      </div>
+
+      <form class="form-horizontal form-bordered form-row-stripped">
+        <div class="modal-body" style="width:800px;height:400px; overflow:scroll;">
+          <label id="resource_id" style="display:none"></label>
+          <!-- 控件开始 -->
+          <textarea rows="20"  name="editor2" id="editor2" placeholder="" class="form-control"></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-info" onclick="pushResource()" data-bs-toggle="modal">推送</button>
+          <button class="btn btn-info" onclick="temporarySave()" data-bs-toggle="modal">临时保存</button>
+          <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">关闭</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<#include "addScript.html">

@@ -58,6 +58,13 @@ public interface MachineDao {
     List<MachineMemStatInfo> getMachineMemStatInfoByIpList(@Param("list") List list);
 
     /**
+     * 通过ip列表查询机器信息
+     * @param list
+     * @return
+     */
+    List<MachineInfo> getMachineInfoByIpList(@Param("list") List list);
+
+    /**
      * 通过ip模糊查询机器信息
      *
      * @param ipLike
@@ -151,5 +158,17 @@ public interface MachineDao {
      * @param status
      */
     public void updateMachineAllocate(@Param("ip") String ip, @Param("status") int status);
+
+    /**
+     * 获取机器配置信息及已分布redis实例（数量、申请内存、使用内存、使用内存rss等）
+     */
+    public List<MachineMemStatInfo> getMachineInfoAndUsedInfo(@Param("room") String room, @Param("type") Integer type, @Param("useType") Integer useType, @Param("disType") Integer disType, @Param("ip") String ip);
+
+    /**
+     * 通过realIp查找机器
+     * @param realIp
+     * @return
+     */
+    public List<MachineInfo> getMachineListByRealIp(@Param("realIp") String realIp);
 
 }

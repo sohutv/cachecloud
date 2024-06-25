@@ -182,6 +182,21 @@ public class BaseController {
         return new TimeBetween(beginTime, endTime, startDate, endDate);
     }
 
+    protected TimeBetween getTimeBetweenOneDay(HttpServletRequest request, String startDateAtr) throws ParseException {
+        String startDateParam = request.getParameter(startDateAtr);
+        Date startDate;
+        Date endDate;
+        if (StringUtils.isBlank(startDateParam)) {
+            startDate = new Date();
+        } else {
+            startDate = DateUtil.parseYYYY_MM_dd(startDateParam);
+        }
+        endDate = DateUtils.addDays(startDate, 1);
+        long beginTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(startDate));
+        long endTime = NumberUtils.toLong(DateUtil.formatYYYYMMddHHMM(endDate));
+        return new TimeBetween(beginTime, endTime, startDate, endDate);
+    }
+
     /**
      * 返回用户基本信息
      *
@@ -225,6 +240,7 @@ public class BaseController {
     protected void write(HttpServletResponse response, String result) {
         try {
             response.setContentType("text/javascript");
+            response.setCharacterEncoding("UTF-8");
             response.getWriter().print(result);
             response.getWriter().flush();
         } catch (Exception e) {

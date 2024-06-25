@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CacheCloud系统</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link href="${request.contextPath}/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="${request.contextPath}/assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <script src="${request.contextPath}/assets/vendor/jquery/jquery-3.7.0.min.js"></script>
+    <script src="${request.contextPath}/assets/vendor/jquery/jquery.md5.js" type="text/javascript"></script>
+    <script type="text/javascript">
+      function loginIn(pwdFlag) {
+        var userName = document.getElementById("userName");
+        var password = document.getElementById("password");
+        var redirectUrl = document.getElementById("redirectUrl").value;
+        if(userName.value == ""){
+          alert("用户名不能为空!");
+          userName.focus();
+          return false;
+        }
+        if(password.value == ""){
+          alert("密码不能为空!");
+          password.focus();
+          return false;
+        }
+        var realPwd = password.value;
+        if(pwdFlag){
+          realPwd = $.md5(password.value);
+        }
+        $.post(
+                '${request.contextPath}/manage/loginIn.json',
+                {
+                  userName: userName.value,
+                  password: realPwd,
+                  isAdmin: false
+                },
+                function(data){
+                  var success = data.success;
+                  var admin = data.admin;
+                  if(success==1){
+                    if (redirectUrl != "") {
+                      window.location = redirectUrl;
+                    } else {
+                      if(admin == 1){
+                        window.location = "${request.contextPath}/manage/total/list";
+                      }else{
+                        window.location = "${request.contextPath}/admin/app/list";
+                      }
+                    }
+                  }else if(success == 0){
+                    alert("用户名或者密码错误，请重新输入!");
+                  }else if(success == -1){
+                    alert("系统不存在该用户名，请确认该用户申请了cachecloud权限!");
+                  }else if(success == -2){
+                    alert("您不是超级管理员!");
+                  }
+                }
+        );
+      }
+    </script>
+  </head>
+
+  <body>
+  <div class="card">
+    <img src="${request.contextPath}/assets/img/bg.png" class="card-img" style="position: fixed; top: 0; left: 0; bottom: 0; right: 0; z-index: -1; height: 100%">
+      <div class="container card-img-overlay">
+        <div class="row justify-content-center">
+          <div style="width: 495px; height: 150px; margin-top: 100px;" class="align-items-center">
+            <img class="img-fluid" src="${request.contextPath}/assets/img/logo.png">
+          </div>
+        </div>
+
+        <div class="info">
+          <form method="post" name="login" autocomplete="off">
+            <div class="row justify-content-center mb-3">
+              <div class="col-md-4">
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-person-circle"></i></span>
+                  <div class="form-floating">
+                    <input type="text" class="form-control" id="userName" name="userName" autocomplete="off"placeholder="用户名">
+                    <label for="userName">用户名</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row justify-content-center mb-3">
+              <div class="col-md-4">
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-file-lock2"></i></span>
+                  <div class="form-floating">
+                    <input type="text" class="form-control" id="password" name="password" autocomplete="off" placeholder="密码">
+                    <label for="password">密码</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <input type="hidden" value="${redirectUrl!}" id="redirectUrl" name="redirectUrl">
+            <div class="row justify-content-center mb-2">
+              <div class="col-md-4">
+                <div class="input-group">
+                  <input type="button" class="btn btn-danger rounded w-100" value="登 录" onclick="loginIn(${pwdswitch?c})">
+                </div>
+              </div>
+            </div>
+
+          </form>
+          <div class="row mb-2">
+            <div class="text-center">
+              <a class="register" href="${request.contextPath}/user/register" c>新用户注册</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

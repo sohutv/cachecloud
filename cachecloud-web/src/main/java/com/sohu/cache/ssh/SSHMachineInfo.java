@@ -47,4 +47,12 @@ public class SSHMachineInfo {
     public int hashCode() {
         return Objects.hash(ip, username, authType, password);
     }
+
+    @Override
+    public String toString() {
+        return "SSHMachineInfo{" +
+                "ip='" + ip + '\'' +
+                ", authType=" + authType +
+                '}';
+    }
 }

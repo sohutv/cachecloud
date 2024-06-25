@@ -1,5 +1,6 @@
 package com.sohu.cache.web.chart.model;
 
+import com.sohu.cache.entity.AppDailyData;
 import com.sohu.cache.entity.AppStats;
 import com.sohu.cache.web.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -95,6 +96,24 @@ public class HighchartDoublePoint {
 
         return new HighchartDoublePoint(collectDate.getTime(), count, date);
     }
+
+
+    public static HighchartDoublePoint getFromAppDailyDatas(AppDailyData appDailyData, String statName) throws ParseException {
+        Date collectDate = appDailyData.getDate();
+        //显示用的时间
+        String date = DateUtil.formatDate(collectDate, "yyyy-MM-dd");
+        // y坐标
+        double count = 0D;
+        if ("avg_hit_ratio".equals(statName)) {
+            count = appDailyData.getAvgHitRatio();
+        } else if ("min_minute_hit_ratio".equals(statName)) {
+            count = appDailyData.getMinMinuteHitRatio();
+        } else if ("max_minute_hit_ratio".equals(statName)) {
+            count = appDailyData.getMaxMinuteHitRatio();
+        }
+        return new HighchartDoublePoint(collectDate.getTime(), count, date);
+    }
+
 
     private static Date getDateTime(long collectTime) throws ParseException {
         try {

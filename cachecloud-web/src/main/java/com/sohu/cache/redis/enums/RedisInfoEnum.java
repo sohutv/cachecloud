@@ -29,7 +29,7 @@ public enum RedisInfoEnum {
     keyspace_misses(RedisConstant.Stats, "keyspace_misses", "键未命中数", true),
     evicted_keys(RedisConstant.Stats, "evicted_keys", "键剔除数", true),
     expired_keys(RedisConstant.Stats, "expired_keys", "键过期数", true),
-    connected_clients(RedisConstant.Stats, "connected_clients", "客户端连接数", false),
+    connected_clients(RedisConstant.Clients, "connected_clients", "客户端连接数", false),
 
     /**
      * Persistence
@@ -39,6 +39,11 @@ public enum RedisInfoEnum {
     aof_delayed_fsync(RedisConstant.Persistence, "aof_delayed_fsync", "aof阻塞次数", true),
     latest_fork_usec(RedisConstant.Persistence, "latest_fork_usec", "上次fork所用时间(单位：微秒)", false),
     rdb_last_bgsave_status(RedisConstant.Persistence, "rdb_last_bgsave_status", "上一次bgsave状态", false),
+    rdb_bgsave_in_progress(RedisConstant.Persistence, "rdb_bgsave_in_progress", "是否正在进行bgsave", false),
+    rdb_last_save_time(RedisConstant.Persistence, "rdb_last_save_time", "上一次bgsave时间", false),
+    rdb_last_bgsave_time_sec(RedisConstant.Persistence, "rdb_last_bgsave_time_sec", "上一次bgsave花费时间", false),
+    loading(RedisConstant.Persistence, "loading", "指示是否正在进行dump(rdb/aof)文件加载", false),
+    loading_eta_seconds(RedisConstant.Persistence, "loading_eta_seconds", "dump加载完成预计完成时间（秒）", false),
 
     /**
      * CPU
@@ -63,7 +68,9 @@ public enum RedisInfoEnum {
     master_port(RedisConstant.Replication, "master_port", "主节点端口", false),
     connected_slaves(RedisConstant.Replication, "connected_slaves", "从节点数量", false),
     master_repl_offset(RedisConstant.Replication, "master_repl_offset", "主节点偏移量", false),
-    master_link_status(RedisConstant.Replication, "master_link_status", "主节点连接状态", false)
+    master_link_status(RedisConstant.Replication, "master_link_status", "主节点连接状态", false),
+    slave_repl_offset(RedisConstant.Replication, "slave_repl_offset", "从节点偏移量", false),
+    master_sync_in_progress(RedisConstant.Replication, "master_sync_in_progress", "从节点是否正在同步主节点", false)
 
     ;
     

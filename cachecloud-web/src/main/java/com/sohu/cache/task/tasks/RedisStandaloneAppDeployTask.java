@@ -2,8 +2,6 @@ package com.sohu.cache.task.tasks;
 
 import com.alibaba.fastjson.JSONArray;
 import com.sohu.cache.constant.AppCheckEnum;
-import com.sohu.cache.entity.MachineInfo;
-import com.sohu.cache.entity.MachineStats;
 import com.sohu.cache.task.BaseTask;
 import com.sohu.cache.task.constant.InstanceInfoEnum.InstanceStatusEnum;
 import com.sohu.cache.task.constant.InstanceInfoEnum.InstanceTypeEnum;
@@ -11,11 +9,9 @@ import com.sohu.cache.task.constant.TaskConstants;
 import com.sohu.cache.task.constant.TaskStepFlowEnum.TaskFlowStatusEnum;
 import com.sohu.cache.task.entity.RedisServerNode;
 import com.sohu.cache.util.EnvUtil;
-import com.sohu.cache.web.enums.SuccessEnum;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -67,11 +63,6 @@ public class RedisStandaloneAppDeployTask extends BaseTask {
      */
     private String version;
 
-    /**
-     * Redis模块信息
-     */
-    private String moduleInfo;
-
     @Override
     public List<String> getTaskSteps() {
         List<String> taskStepList = new ArrayList<String>();
@@ -91,14 +82,15 @@ public class RedisStandaloneAppDeployTask extends BaseTask {
         taskStepList.add("createRedisServerTask");
         //8. 等待redis server job完成
         taskStepList.add("waitRedisServerFinish");
-        //9. 更改实例状态
-        taskStepList.add("updateInstanceStatus");
-        //10. 开始收集部署
-        taskStepList.add("deployCollection");
-        //11. 设置密码
+        /*
+            9. 设置密码已放到实例配置文件中，启动后自动带有密码，
+            此步骤是设置app_desc表的密码字段，避免后续访问操作失败
+         */
         taskStepList.add("setPasswd");
-        //12. 装载组件
-        taskStepList.add("loadModule");
+        //10. 更改实例状态
+        taskStepList.add("updateInstanceStatus");
+        //11. 开始收集部署
+        taskStepList.add("deployCollection");
         //12. 审核
         taskStepList.add("updateAudit");
         //13. 更新机器分配状态
@@ -158,9 +150,6 @@ public class RedisStandaloneAppDeployTask extends BaseTask {
         // redis版本
         version = MapUtils.getString(paramMap, TaskConstants.VERSION_KEY);
 
-        // 模块安装
-        moduleInfo = MapUtils.getString(paramMap, TaskConstants.MODULE_KEY);
-
         return TaskFlowStatusEnum.SUCCESS;
     }
 
@@ -174,43 +163,13 @@ public class RedisStandaloneAppDeployTask extends BaseTask {
             return TaskFlowStatusEnum.SUCCESS;
         }
         // 容量和代理
-        for (String redisServerIp : redisServerMachineList) {
-            MachineStats machineStats = machineStatsDao.getMachineStatsByIp(redisServerIp);
-            if (machineStats == null) {
-                logger.error(marker, "{} redis server machineStats is null", redisServerIp);
-                return TaskFlowStatusEnum.ABORT;
-            }
-            MachineInfo machineInfo = machineDao.getMachineInfoByIp(redisServerIp);
-            // 机器是否分配 isAllocate
-            /*if (machineInfo == null || machineInfo.getIsAllocating() == 1) {
-                logger.error(marker, "redis server machine info {} {} allocating is 1", machineInfo.getIp(), redisServerIp);
-                return TaskFlowStatusEnum.ABORT;
-            }*/
-            if (!checkMachineStatIsUpdate(machineStats)) {
-                logger.error(marker, "redis server machine stats {} update_time is {}, may be not updated recently", machineInfo.getIp(), machineStats.getUpdateTimeFormat());
-                return TaskFlowStatusEnum.ABORT;
-            }
-            long memoryFree = NumberUtils.toLong(machineStats.getMemoryFree()) / 1024 / 1024;
-            long memoryNeed = Long.valueOf(masterPerMachine) * maxMemory;
-            if (memoryNeed > memoryFree * 0.85) {
-                logger.error(marker, "standalone : {} need {} MB, but memoryFree is {} MB", redisServerIp, memoryNeed, memoryFree);
-                return TaskFlowStatusEnum.ABORT;
-            }
-        }
-
-        return TaskFlowStatusEnum.SUCCESS;
+        long memoryNeed = Long.valueOf(masterPerMachine) * maxMemory;
+        return checkResourceAllow(redisServerMachineList, memoryNeed);
     }
 
     public TaskFlowStatusEnum checkMachineConnect() {
         // redis server
-        for (String redisServerIp : redisServerMachineList) {
-            boolean isConnected = checkMachineIsConnect(redisServerIp);
-            if (!isConnected) {
-                logger.error(marker, "standalone: redisServer {} is not connected", redisServerIp);
-                return TaskFlowStatusEnum.ABORT;
-            }
-        }
-        return TaskFlowStatusEnum.SUCCESS;
+        return checkMachineConnect(redisServerMachineList, "standalone: redisServer {} is not connected");
     }
 
     /**
@@ -350,7 +309,7 @@ public class RedisStandaloneAppDeployTask extends BaseTask {
         try {
             if (appId > 0) {
                 // 设置密码
-                redisDeployCenter.fixPassword(appId, null, null, true);
+                appService.updateAppPwd(appId, String.valueOf(appId));
                 // 密码校验逻辑
                 boolean checkFlag = redisDeployCenter.checkAuths(appId);
                 logger.info(marker, "check app standalone passwd:{}", checkFlag);
@@ -362,23 +321,6 @@ public class RedisStandaloneAppDeployTask extends BaseTask {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return TaskFlowStatusEnum.ABORT;
-        }
-        return TaskFlowStatusEnum.SUCCESS;
-    }
-
-    public TaskFlowStatusEnum loadModule(){
-        if (!StringUtils.isEmpty(moduleInfo)) {
-            for (String versionId : moduleInfo.split(";")) {
-                if (!StringUtils.isEmpty(versionId)) {
-                    Map map = redisCenter.loadModule(appId, Integer.parseInt(versionId));
-                    Integer status = MapUtils.getInteger(map, "status");
-                    String message = MapUtils.getString(map, "message");
-                    logger.info(marker, "module load info status:{} message:{}",status, message);
-                    if (status != SuccessEnum.SUCCESS.value()) {
-                        return TaskFlowStatusEnum.ABORT;
-                    }
-                }
-            }
         }
         return TaskFlowStatusEnum.SUCCESS;
     }

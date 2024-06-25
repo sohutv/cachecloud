@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>迁移日志</title>
+  <meta http-equiv="refresh" content="5">
+</head>
+<body STYLE="BACKGROUND-COLOR:#000;color:#FFF">
+  <#if logList?? && (logList?size > 0)>
+    <#list logList as line>
+      <font color="white">${line!}</font><br/>
+    </#list>
+  </#if>
+</body>
+</html>

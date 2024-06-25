@@ -51,8 +51,6 @@ public class MachineStats{
 
     private MachineMemInfo machineMemInfo;
 
-    private Map<String,Object> moduleInfo;
-
     private String versionInfo;
 
     private Map<String/**挂载点*/, String/**使用百分比*/> diskUsageMap;
@@ -78,6 +76,12 @@ public class MachineStats{
      * Redis是否全部安装成功 0:未全部安装  1:全部安装成功
      */
     private int isInstall;
+
+    private String diskTotal;
+
+    private String diskAvailable;
+
+    private String diskUsageRatio;
 
     /**
      * 时间格式化

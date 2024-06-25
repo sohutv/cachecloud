@@ -1,0 +1,132 @@
+<div class="col-md-12">
+  <script type="text/javascript">
+    var firstCommand = '${firstCommand}';
+    var startDate = '${startDate}';
+    var endDate = '${endDate}';
+    var yesterDate = '${yesterDay}';
+    var betweenOneDay = '${betweenOneDay}';
+    var appId = '${appId}';
+    var chartParams = "&startDate="+startDate+"&endDate="+endDate;
+    var chartParamsCompare = "&startDate="+yesterDate+"&endDate="+startDate;
+    var betweenParams = "&startDate="+yesterDate+"&endDate="+endDate;
+    Highcharts.setOptions({
+      global : {
+        useUTC : false
+      }
+    });
+    Highcharts.setOptions({
+      colors : ['#2f7ed8', '#E3170D', '#0d233a', '#8bbc21', '#1aadce',
+        '#492970', '#804000', '#f28f43', '#77a1e5',
+        '#c42525', '#a6c96a']
+    });
+
+    function changeCommandChart(value){
+      document.getElementById("firstCommand").value = value;
+      document.getElementById("formSingCommand").submit();
+    }
+  </script>
+
+  <form method="post" action="${request.contextPath}/admin/app/index?appId=${appDetail.appDesc.appId}&tabTag=app_command_analysis" id="formSingCommand">
+    <div class="row justify-content-end">
+    <label class="col-auto col-form-label" style="font-weight:bold;">
+        开始日期:&nbsp;&nbsp;
+      </label>
+      <div class="col-auto">
+        <input type="date" class="form-control" size="21" name="startDate" id="startDate" value="${startDate}"/>
+      </div>
+      <label class="col-auto col-form-label" style="font-weight:bold;">
+        结束日期:&nbsp;&nbsp;
+      </label>
+      <div class="col-auto">
+        <input type="date" class="form-control" size="20" name="endDate" id="endDate" value="${endDate}"/>
+        <input type="hidden" id="firstCommand" name="firstCommand" value="${firstCommand}">
+      </div>
+      <input type="submit" class="btn btn-primary col-auto" value="查询"/>
+    </div>
+    <div class="row">
+      <div class="d-flex justify-content-start">
+        <#assign needSelect = "0">
+        &nbsp;&nbsp;Top5命令:&nbsp;&nbsp;
+        <#list allCommands as item>
+          <#if (item_index < 5)>
+              <div class="form-check">
+                <input type="radio" class="form-check-input" name="optionsRadios" value="${item.commandName}"
+                <#if (firstCommand == item.commandName)>checked="checked"</#if>
+                onchange="changeCommandChart(this.value)" />
+                ${item.commandName}&nbsp;&nbsp;
+              </div>
+          <#else>
+            <#assign needSelect = "1">
+          </#if>
+        </#list>
+        <div class="col-auto">
+          <#if (needSelect == "1")>
+            <div class="row">
+              <label class="col-auto">
+                &nbsp;其余命令:
+              </label>
+              <div class="col-auto">
+                <select name="optionsRadios" class="form-select w-100 mb-2" onchange="changeCommandChart(this.value)">
+                  <option>请选择</option>
+                  <#list allCommands as item>
+                    <#if (item_index >= 5)>
+                        <label>
+                          <option value="${item.commandName}" <#if (firstCommand == item.commandName)>selected</#if>>
+                          ${item.commandName}
+                          </option>
+                        </label>
+                    </#if>
+                  </#list>
+                </select>
+              </div>
+            </div>
+          </#if>
+        </div>
+      </div>
+    </div>
+  </form>
+  <script type="text/javascript">
+    var title = "<b>"+firstCommand+"命令</b>";
+    if(betweenOneDay == 1){
+      $(document).ready(
+              function() {
+                var options = getOption("containerSingleCommand", "<b>全命令统计</b>", "次数");
+                var commandsUrl = "${request.contextPath}/admin/app/getMutiDatesCommandStats.json?appId=" + appId + "&commandName=" + firstCommand + betweenParams;
+                $.ajax({
+                  type : "get",
+                  url : commandsUrl,
+                  async : true,
+                  success : function(data) {
+                    var dates = new Array();
+                    dates.push(startDate);
+                    dates.push(yesterDate);
+                    pushOptionSeries(options, data, dates, "命令趋势图");
+                    new Highcharts.Chart(options);
+                  }
+                });
+              });
+    }else{
+      $(document).ready(
+              function() {
+                var options = getOption("containerSingleCommand", title, "次数");
+                var commandsUrl = "${request.contextPath}/admin/app/getCommandStats?appId=" + appId + "&commandName=" + firstCommand + chartParams;
+                $.ajax({
+                  type : "get",
+                  url : commandsUrl,
+                  async : true,
+                  success : function(data) {
+                    var nameLegend = firstCommand + "命令趋势图";
+                    var finalPoints = getSeriesPoints(data, nameLegend);
+                    options.series.push(finalPoints);
+                    new Highcharts.Chart(options);
+                  }
+                });
+              });
+    }
+  </script>
+
+
+  <div id="containerSingleCommand"
+       style="max-width: 100%; min-width: 310px; height: 350px; margin: 0 auto"></div>
+
+</div>

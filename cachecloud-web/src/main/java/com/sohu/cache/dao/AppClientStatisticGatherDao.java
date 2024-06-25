@@ -12,6 +12,7 @@ import java.util.Map;
  */
 @Repository
 public interface AppClientStatisticGatherDao {
+    @Deprecated
     int batchSave();
 
     int batchSaveCmdStats(List<AppClientStatisticGather> list);
@@ -31,14 +32,17 @@ public interface AppClientStatisticGatherDao {
     int batchSaveLatencyCount(List<AppClientStatisticGather> list);
     int batchAddLatencyCount(List<AppClientStatisticGather> list);
 
-
     int batchSaveAppStats(List<AppClientStatisticGather> list);
+
+    int batchAddAppServerCmdCount(List<AppClientStatisticGather> list);
 
     int batchSaveConnClients(List<AppClientStatisticGather> list);
 
     int batchSaveTopologyExam(List<AppClientStatisticGather> list);
 
     List<Map<String, Object>> getAppClientStatisticByGatherTime(@Param("appId") long appId, @Param("gatherTime") String gatherTime);
+
+    List<AppClientStatisticGather> getTopologyExamFailedByGatherTime(@Param("gatherTime") String gatherTime);
 
     List<Map<String, Object>> getExpAppStatisticByGatherTime(@Param("gatherTime") String gatherTime);
 }

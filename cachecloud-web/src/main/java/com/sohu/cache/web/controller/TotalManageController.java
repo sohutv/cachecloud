@@ -1,5 +1,6 @@
 package com.sohu.cache.web.controller;
 
+import com.sohu.cache.constant.MachineInfoEnum;
 import com.sohu.cache.dao.QuartzDao;
 import com.sohu.cache.dao.TaskQueueDao;
 import com.sohu.cache.entity.*;
@@ -86,6 +87,7 @@ public class TotalManageController extends BaseController {
         if (apps != null && apps.size() > 0) {
             for (AppDesc appDesc : apps) {
                 AppDetailVO appDetail = appStatsCenter.getAppDetail(appDesc.getAppId());
+                appDetail.getAppDesc().setBackupType(appDesc.getBackupType());
                 appDetailList.add(appDetail);
             }
         } else {
@@ -98,6 +100,8 @@ public class TotalManageController extends BaseController {
         model.addAttribute("appOperateActive", SuccessEnum.SUCCESS.value());
         model.addAttribute("appParam", appParam);
         model.addAttribute("page", page);
+        model.addAttribute("persistenceType", appSearch.getPersistenceType());
+        model.addAttribute("backupType", appSearch.getBackupType());
         model.addAttribute("redisVersionList", redisVersionList);
 
         return new ModelAndView("manage/total/list");
@@ -108,7 +112,7 @@ public class TotalManageController extends BaseController {
      */
     @RequestMapping(value = "/statlist")
     public ModelAndView doStatList(HttpServletRequest request,
-                                    HttpServletResponse response, Model model) {
+                                   HttpServletResponse response, Model model) {
 
         // 一.应用及内存统计
         Map<String, Object> appTotalStat = appStatsCenter.getAppTotalStat();
@@ -121,7 +125,10 @@ public class TotalManageController extends BaseController {
         model.addAttribute("maxMemoryDistributeList", MapUtils.getString(appTotalStat, StatEnum.MACHINE_MAXMEMORY_DISTRIBUTE.value()));
         model.addAttribute("roomDistributeList", MapUtils.getString(appTotalStat, StatEnum.MACHIEN_ROOM_DISTRIBUTE.value()));
         List<MachineStatsVo> machineStatsVoList = machineCenter.getmachineStatsVoList();
+        int redisToolNum = machineCenter.getMachineNum(MachineInfoEnum.TypeEnum.REDIS_MIGRATE_TOOL.getType());
         model.addAttribute("machineStatsVoList", machineStatsVoList);
+        model.addAttribute("machineRedisCount", MapUtils.getInteger(appTotalStat, StatEnum.TOTAL_MACHINE_NUM.value(), 0)-redisToolNum);
+        model.addAttribute("machineRedisToolCount", redisToolNum);
 
         //二、quartz相关
         int triggerWaitingCount = quartzDao.getTriggerStateCount(TriggerStateEnum.WAITING.getState());

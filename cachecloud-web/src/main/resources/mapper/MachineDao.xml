@@ -144,6 +144,16 @@
         </foreach>
     </select>
 
+    <select id="getMachineInfoByIpList" resultType="MachineInfo" parameterType="java.util.List">
+        select
+        id, <include refid="machine_info_columns"/>
+        from machine_info where available = 1
+        and ip IN
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
     <!--保存机器信息-->
     <insert id="saveMachineInfo" parameterType="MachineInfo">
         insert into machine_info
@@ -190,5 +200,59 @@
     <update id="updateMachineAllocate">
     	update machine_info set is_allocating = #{status} where ip = #{ip}
     </update>
+
+    <select id="getMachineInfoAndUsedInfo" resultType="com.sohu.cache.entity.MachineMemStatInfo">
+       select
+            mi.id, mi.ip, mi.room, mi.mem, mi.cpu, mi.real_ip, mi.available, mi.use_type, mi.k8s_type, mi.rack, mi.dis_type, mi.disk, mi.type,
+            count(is2.id) instanceNum,
+            sum(is2.max_memory) applyMem,
+            sum(is2.used_memory) usedMem,
+            sum(is2.mem_fragmentation_ratio*is2.used_memory) usedMemRss,
+            sum(is2.used_disk) usedDisk
+        from machine_info mi
+        left join
+        (
+            select
+                ist.id, ist.ip, ist.max_memory, ist.used_memory, ist.mem_fragmentation_ratio, ist.used_disk
+            from instance_statistics ist
+            left join instance_info ii on ist.inst_id = ii.id
+            where ist.modify_time > current_date() and ii.status != 2
+        ) is2 on mi.ip = is2.ip
+        where mi.available = 1
+            <if test="room != null and room != ''">
+                and instr(room, #{room}) > 0
+            </if>
+            <if test="type != null and type != ''">
+                and type = #{type}
+            </if>
+            <if test="type != null and type == 0">
+                and type = #{type}
+            </if>
+            <if test="useType != null and useType != ''">
+                and use_type = #{useType}
+            </if>
+            <if test="useType != null and useType == 0">
+                and use_type = #{useType}
+            </if>
+            <if test="disType != null and disType != ''">
+                and dis_type = #{disType}
+            </if>
+            <if test="disType != null and disType == 0">
+                and dis_type = #{disType}
+            </if>
+            <if test="ip != null and ip != ''">
+                and mi.ip = #{ip}
+            </if>
+        group by mi.ip
+    </select>
+
+    <!--通过realIp查找机器-->
+    <select id="getMachineListByRealIp" resultType="MachineInfo">
+        select
+            id, modify_time, <include refid="machine_info_columns"/>
+        from machine_info
+        where available = 1
+            and real_ip = #{realIp}
+    </select>
 
 </mapper>

@@ -1,0 +1,98 @@
+<script type="text/javascript">
+  function pushResource(resourceId){
+    var resource_id = (typeof resourceId == 'undefined') ? $('#resource_id').html() : resourceId;
+    $.post(
+            '${request.contextPath}/manage/app/resource/push.json',
+            {
+              repositoryId: $('#repositoryId').html(),
+              resourceId: resource_id
+            },
+            function (data) {
+              var status = data.status;
+              if (status == 1) {
+                alert("推送成功");
+              } else {
+                alert("推送失败！" + data.message);
+              }
+              window.location.reload();
+            }
+    );
+  }
+</script>
+
+<div class="card">
+  <div class="card-body">
+    <div class="row">
+      <div id="respo-div" class="col-md-12">
+        <button id="redis_version" class="btn btn-success btn-sm col-auto" data-bs-target="#addResourceModal" data-bs-toggle="modal" >
+          <i class="bi bi-plus"></i>新建目录
+        </button>
+
+        <form class="row align-items-center float-end" role="form" method="post" action="${request.contextPath}/manage/app/resource/index?tab=dir"
+              id="appList" name="ec">
+          <label id="repositoryId" class="col-form-label col-auto" style="display:none">${repository.id!}</label>
+          <div class="col-auto">
+            <input type="text" class="form-control" id="searchName" name="searchName"
+                   value="${searchName!}" placeholder="脚本名称">
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-success btn-sm">查询</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="row mt-3">
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered table-hover" id="tableDataList">
+          <thead>
+          <tr>
+            <th scope="col">序号</th>
+            <th scope="col">目录名称</th>
+            <th scope="col">说明</th>
+            <th scope="col">最后更新时间</th>
+            <th scope="col">操作人</th>
+            <th scope="col">状态</th>
+            <th scope="col">操作</th>
+          </tr>
+          </thead>
+          <tbody>
+          <#list resourceList as resource>
+            <tr>
+              <td>${resource.id!}</td>
+              <td>
+                <#if (resource.ispush == 0)>${resource.name!}</#if>
+                <#if (resource.ispush == 1)><a target="_blank" href="${repository.url!}${resource.name!}">${resource.name!}</a></#if>
+              </td>
+              <td>
+                ${resource.intro!}
+              </td>
+              <td>
+                ${resource.lastmodify?string("yyyy-MM-dd HH:mm:ss")}
+              </td>
+              <td>
+                ${resource.username!}
+              </td>
+              <td>
+                <#if (resource.ispush == 0)>未推送</#if>
+                <#if (resource.ispush == 1)><span style="color:green">已推送</span></#if>
+              </td>
+              <td>
+                <button type="button" class="btn btn-info" data-bs-target="#addResourceModal" data-bs-toggle="modal"
+                        data-resource_id="${resource.id!}" >
+                  修改
+                </button>
+                <#if (resource.ispush == 0)>
+                  <button id="resource" class="btn btn-success" onclick="pushResource('${resource.id!}')" data-bs-toggle="modal">推送</button>
+                </#if>
+              </td>
+            </tr>
+          </#list>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<#include "addDir.html">

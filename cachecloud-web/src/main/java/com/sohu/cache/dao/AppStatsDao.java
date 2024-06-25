@@ -54,6 +54,24 @@ public interface AppStatsDao {
      */
     public List<AppStats> getAppStatsByMinute(@Param("appId") long appId, @Param("beginTime") long beginTime, @Param("endTime") long endTime);
 
+    /**
+     * 按照分钟查询应用历史最大使用内存
+     * @param appId
+     * @param beginTime
+     * @param endTime
+     * @return
+     */
+    public Long getUsedMemoryMaxByTimeBetween(@Param("appId") long appId, @Param("beginTime") long beginTime, @Param("endTime") long endTime);
+
+    /**
+     * 按照分钟查询应用统计
+     * @param appId
+     * @param beginTime
+     * @param endTime
+     * @return
+     */
+    public AppStats getOneAppStatsByMinute(@Param("appId") long appId, @Param("beginTime") long beginTime, @Param("endTime") long endTime);
+
 
     List<AppClientStatisticGather> gatherAppsStats(@Param("startTime") long startTime, @Param("endTime") long endTime);
 
@@ -65,6 +83,14 @@ public interface AppStatsDao {
      * @return
      */
     public List<AppStats> getAppStatsByHour(@Param("appId") long appId, @Param("beginTime") long beginTime, @Param("endTime") long endTime);
+
+    /**
+     * 按照小时查询应用统计
+     * @param beginTime
+     * @param endTime
+     * @return
+     */
+    public List<AppStats> getAppHourStatsByTime(@Param("beginTime") long beginTime, @Param("endTime") long endTime);
 
     /**
      * 按时间查询应用命令统计
@@ -165,6 +191,10 @@ public interface AppStatsDao {
      * @return
      */
     public List<AppCommandGroup> getAppCommandGroup(@Param("appId") long appId, @Param("td") TimeDimensionality td);
+
+
+    public Long getAppCommandCount(@Param("appId") long appId, @Param("beginTime") long beginTime, @Param("endTime") long endTime);
+
 
     /**
      * 应用分钟统计

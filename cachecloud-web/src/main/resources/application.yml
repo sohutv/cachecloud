@@ -1,43 +1,52 @@
 spring:
   profiles:
-    active: local
+    active: local-sohu
   main:
     allow-bean-definition-overriding: true
   mvc:
     servlet:
       load-on-startup: 1
-    view:
-      prefix: /WEB-INF/jsp/
-      suffix: .jsp
-    freemarker:
-      expose-request-attributes: true
-      request-context-attribute: request
-      suffix: .jsp
-      settings:
-        number_format: computer
+#      path: /
+    static-path-pattern: /assets/**, /img/**
     log-resolved-exception: true
     contentnegotiation:
       favor-path-extension: true
     pathmatch:
+      matching-strategy: ant-path-matcher
       use-suffix-pattern: true
       use-registered-suffix-pattern: true
+  web:
+    resources:
+      static-locations: classpath:assets/,classpath:static/img/
+  freemarker:
+    enabled: true
+    cache: false
+    content-type: text/html
+    charset: UTF-8
+    suffix: .html
+    order: 1
+    expose-request-attributes: false
+    prefer-file-system-access: true
+    # 千位数 逗号分隔问题修复
+    settings:
+      number_format: 0.##
+      apiBuiltinEnabled: true
+      template_update_delay: 0
+    request-context-attribute: request
   http:
     encoding:
       charset: UTF-8
       enabled: true
       force: true
 cachecloud:
-  jdbc:
+  primary:
     driver: com.mysql.cj.jdbc.Driver
     validationQuery: select 1 from dual
+    connectionTimeout: 60000
+    idleTimeout: 600000
 management:
   server:
     port: 8888
-  endpoints:
-    web:
-      exposure:
-        include: '*'
-    enabled-by-default: true
   endpoint:
     prometheus:
       enabled: true

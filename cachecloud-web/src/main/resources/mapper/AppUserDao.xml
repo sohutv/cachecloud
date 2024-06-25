@@ -14,39 +14,39 @@
             table_schema = 'cache-cloud' and table_name = @tn;
 	-->
 	<sql id="user_column">
-		id,name,ch_name,email,mobile,weChat,type,isAlert,password,company,purpose,register_time
+		id,name,ch_name,email,mobile,weChat,type,isAlert,password,company,purpose,register_time,biz_id
     </sql>
 
     <sql id="user_insert_column">
-		id,name,ch_name,email,mobile,weChat,type,isAlert,password,company,purpose
+		id,name,ch_name,email,mobile,weChat,type,isAlert,password,company,purpose, biz_id
     </sql>
 
-    <select id="get" resultType="AppUser" parameterType="long">
+    <select id="get" resultType="com.sohu.cache.entity.AppUser" parameterType="long">
         select           
         	<include refid="user_column"/>
         from app_user
         where id = #{id};
     </select>
     
-    <select id="getByName" resultType="AppUser" parameterType="string">
+    <select id="getByName" resultType="com.sohu.cache.entity.AppUser" parameterType="string">
         select           
         	<include refid="user_column"/>
         from app_user
         where binary name = #{name};
     </select>
 
-    <select id="getByEmail" resultType="AppUser" parameterType="string">
+    <select id="getByEmail" resultType="com.sohu.cache.entity.AppUser" parameterType="string">
         select
         <include refid="user_column"/>
         from app_user
         where email = #{email};
     </select>
     
-    <insert id="save" parameterType="AppUser" keyProperty="id" useGeneratedKeys="true">
+    <insert id="save" parameterType="com.sohu.cache.entity.AppUser" keyProperty="id" useGeneratedKeys="true">
     	insert into app_user
     		(<include refid="user_insert_column"/>)
 		values
-			(#{id},#{name},#{chName},#{email},#{mobile},#{weChat},#{type},#{isAlert},#{password},#{company},#{purpose})
+			(#{id},#{name},#{chName},#{email},#{mobile},#{weChat},#{type},#{isAlert},#{password},#{company},#{purpose},#{bizId})
     </insert>
     
     <delete id="delete" parameterType="long">
@@ -59,13 +59,13 @@
     	where id=#{id}
     </update>
 
-    <update id="update" parameterType="AppUser">
+    <update id="update" parameterType="com.sohu.cache.entity.AppUser">
     	update app_user 
-    		set name=#{name}, ch_name=#{chName}, email=#{email}, mobile=#{mobile}, weChat=#{weChat}, type=#{type}, isAlert=#{isAlert}, company=#{company}, purpose=#{purpose}
+    		set name=#{name}, ch_name=#{chName}, email=#{email}, mobile=#{mobile}, weChat=#{weChat}, type=#{type}, isAlert=#{isAlert}, company=#{company}, purpose=#{purpose}, biz_id=#{bizId}
     	where id=#{id}
     </update>
     
-    <select id="getUserList" resultType="AppUser" parameterType="string">
+    <select id="getUserList" resultType="com.sohu.cache.entity.AppUser" parameterType="string">
     	select           
         	<include refid="user_column"/>
         from app_user where 1=1
@@ -76,13 +76,35 @@
         </choose>
     </select>
 
-    <select id="getAllUser" resultType="AppUser">
+    <select id="getUserWithBizList" resultType="com.sohu.cache.web.vo.AppUserVo">
+        select
+            au.id, au.name, au.ch_name, au.email, au.mobile, au.weChat, au.type,
+            au.isAlert, au.password, au.company, au.purpose, au.register_time, au.biz_id,
+            ab.name bizName, ab.biz_desc
+        from app_user au
+        left join app_biz ab
+            on au.biz_id = ab.id
+        <where>
+            <choose>
+                <when test="chName != '' and chName != null">
+                    and au.ch_name=#{chName}
+                </when>
+            </choose>
+            <choose>
+                <when test="bizName != '' and bizName != null">
+                    and ab.name=#{bizName}
+                </when>
+            </choose>
+        </where>
+    </select>
+
+    <select id="getAllUser" resultType="com.sohu.cache.entity.AppUser">
         select
         <include refid="user_column"/>
         from app_user where type >= 0
     </select>
 
-    <select id="getAdminList" resultType="AppUser">
+    <select id="getAdminList" resultType="com.sohu.cache.entity.AppUser">
         select
         <include refid="user_column"/>
         from app_user where type = 0

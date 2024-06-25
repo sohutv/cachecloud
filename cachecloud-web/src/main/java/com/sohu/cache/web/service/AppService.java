@@ -4,7 +4,6 @@ import com.sohu.cache.constant.AppAuditType;
 import com.sohu.cache.entity.*;
 import com.sohu.cache.task.constant.InstanceInfoEnum.InstanceTypeEnum;
 import com.sohu.cache.web.enums.SuccessEnum;
-import com.sohu.cache.web.vo.ModuleVersionDetailVo;
 
 import java.util.Date;
 import java.util.List;
@@ -68,11 +67,26 @@ public interface AppService {
     int update(AppDesc appDesc);
 
     /**
+     * 更新应用 pwd
+     * @param appId
+     * @param appPwd
+     * @return
+     */
+    int updateAppPwd(long appId, String appPwd);
+
+    /**
      * 获取应用下实例的基本信息
      * @param appId
      * @return
      */
     List<InstanceInfo> getAppBasicInstanceInfo(Long appId);
+
+    /**
+     * 获取应用下实例基本信息，并按照主从分组
+     * @param appId
+     * @return
+     */
+    Map<InstanceInfo, List<InstanceInfo>> getAppInstanceInfoGroup(Long appId);
 
         /**
          * 获取应用的实例
@@ -96,38 +110,6 @@ public interface AppService {
      * @return
      */
     boolean saveAppToUser(Long appId, Long userId);
-
-    /**
-     * 保存应用与模块关系
-     *
-     * @param appToModuleList
-     * @return
-     */
-    int saveAppToModule(List<AppToModule> appToModuleList);
-
-    /**
-     * 获取应用安装模块信息
-     *
-     * @param appId
-     * @return
-     */
-    List<ModuleVersion> getAppToModuleList(Long appId);
-
-    /**
-     * 获取应用是否安装模块
-     *
-     * @param appId
-     * @return
-     */
-    boolean isInstallModule(Long appId);
-
-    /**
-     * 获取应用安装模块详细信息
-     *
-     * @param appId
-     * @return
-     */
-    List<ModuleVersionDetailVo> getAppModuleList(Long appId);
 
     /**
      * 更新审核状态
@@ -414,4 +396,64 @@ public interface AppService {
     Map<Long, Map<String, Object>> getAppClientStatGather(long appId, String gatherTime);
 
     Map<String, List<Map<String, Object>>> getFilterAppClientStatGather(long appId, String gatherTime);
+
+    /**
+     * 检查应用持久化配置并修复
+     * @param appId
+     * @param masterConfigMap
+     * @param slaveConfigMap
+     * @return 执行失败信息
+     */
+    String checkAppPersistenceConfigAndFix(long appId, Map<String, String> masterConfigMap, Map<String, String> slaveConfigMap);
+
+
+    /**
+     * 更新持久化类型
+     * @param appId
+     * @param persistenceType
+     */
+    boolean updateAppPersistenceType(long appId, int persistenceType);
+
+    /**
+     * 更新内存策略
+     * @param appId
+     * @param maxmemoryPolicy
+     * @return
+     */
+    boolean updateAppMaxmemoryPolicy(long appId, int maxmemoryPolicy);
+
+    /**
+     * 获取用户所属应用的内存统计信息（包含版本）
+     * @param userId
+     * @param isAdmin
+     * @return
+     */
+    List<AppCapacityStatisticsResult> getAppCapacityStatistics(Long userId, Boolean isAdmin);
+
+    Map<String, Object> getAppCapacityStats(Long userId, Boolean isAdmin);
+
+    /**
+     * 获取用户所属应用的监控统计信息
+     * @param userId
+     * @param isAdmin
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    List<AppMonitorStatisticsResult> getAppMonitorStatistics(Long userId, Boolean isAdmin, String startTime, String endTime);
+
+    /**
+     * 更新应用拓扑检测结果
+     * @param topologyExam
+     * @return
+     */
+    int saveAppTopologyExam(AppClientStatisticGather topologyExam);
+
+    /**
+     * 获取拓扑检测失败的应用
+     * @param gatherTime
+     * @return
+     */
+    List<AppClientStatisticGather> getTopologyExamFailedByGatherTime(String gatherTime);
+
 }

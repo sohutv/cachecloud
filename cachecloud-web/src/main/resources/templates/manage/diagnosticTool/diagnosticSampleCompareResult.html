@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>采样校验源数据和目标数据</title>
+  <#include '/inc/frontResources.html'>
+</head>
+<body STYLE="BACKGROUND-COLOR:#000;color:#FFF">
+  校验程序已启动，结果如下：<br/>
+  <#if diagnosticResultList?? && (diagnosticResultList?size > 0)>
+    <#list diagnosticResultList as line>
+      <font color="white">${line!}</font><br/>
+    </#list>
+  </#if>
+  <br/>
+</body>
+</html>

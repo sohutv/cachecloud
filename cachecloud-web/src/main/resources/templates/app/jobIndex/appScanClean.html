@@ -1,0 +1,158 @@
+<script type="text/javascript">
+  function appDataScanCleanApply() {
+    var appId = $('#appDel_appId').selectpicker('val');
+    if (appId == null || appId == '') {
+      alert("请选择应用");
+      $('#appDel_appId').focus();
+      return false;
+    }
+    var isClean = $('input[name="isClean"]:checked').val();
+
+    var nodeInfos = $('#instance-select').selectpicker('val');
+    var condition = document.getElementById("condition");
+    if (condition.value == "") {
+      alert("需要填写分析清理条件!");
+      condition.focus();
+      return false;
+    }
+    var reason = document.getElementById("appDelReason");
+    if (reason.value == "") {
+      alert("请填写分析清理原因!");
+      reason.focus();
+      return false;
+    }
+
+    if (!confirm("确认提交数据分析清理申请？")) {
+      return;
+    }
+
+    var btn = document.getElementById("appDelBtn");
+    btn.disabled = true;
+
+    var cleanTypeDesc = isClean == 0 ? "分析数据" : (isClean == 1 ? "删除数据" : "重置ttl");
+    $.post(
+            '${request.contextPath}/admin/app/job/submit',
+            {
+              jobType: 13,
+              appId: appId,
+              nodeInfos: nodeInfos == null ? "" : nodeInfos.toString(),
+              param: '分析清理类型: ' + cleanTypeDesc + '，条件: ' + condition.value,
+              reason: reason.value
+            },
+            function (data) {
+              if (data == 1) {
+                $("#appDelApplyInfo").html("<div class='alert alert-error' ><font color='green'><strong>Success!</strong>数据分析清理申请提交成功，即将跳转工单列表！</font><button class='btn-close' data-bs-dismiss='alert'></button></div>");
+                setTimeout("location.href = '${request.contextPath}/admin/app/jobs'", 1000);
+              } else {
+                btn.disabled = false;
+                $("#appDelApplyInfo").html("<div class='alert alert-error' ><font color='red'><strong>Error!</strong>数据分析清理申请失败！<font><button class='btn-close' data-bs-dismiss='alert'></button></div>");
+              }
+            }
+    );
+  }
+</script>
+
+<div class="card-header">
+  <h4 class="card-title">
+    数据分析清理
+  </h4>
+</div>
+
+<div class="card-body">
+    <div class="row">
+      <div class="form-group row">
+        <label class="col-form-label col-md-2 offset-md-1">应用<font color='red'>(*)</font></label>
+        <div class="col-md-5">
+          <select id="appDel_appId" name="appId" class="selectpicker show-tick col-md-12 border rounded"
+                  data-live-search="true" title="选择应用" onchange="changeAppIdSelect(this.value,'instance-select', '${request.contextPath}')">
+            <option value="">选择应用</option>
+            <#list appDescMap?keys as key>
+              <#assign appDesc = appDescMap?api.get(key)>
+              <#if (appDesc.status==2)>
+                <option value="${appDesc.appId}" title="${appDesc.appId} ${appDesc.name}">
+                    【${appDesc.appId}】&nbsp;名称：${appDesc.name}&nbsp;类型：${appDesc.typeDesc}&nbsp;版本：${appDesc.versionName}
+                </option>
+              </#if>
+            </#list>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="form-check-label col-md-2 offset-md-1">分析清理类型<font color='red'>(*)</font></label>
+        <div class="col-md-5">
+          <div class="form-check form-check-inline">
+            <label class="form-check-label">
+              <input type="radio" class="form-check-input" name="isClean" value="0" checked> 分析
+            </label>
+          </div>
+          <div class="form-check form-check-inline">
+            <label class="form-check-label">
+              <input type="radio" class="form-check-input" name="isClean" value="1"> 清理
+            </label>
+          </div>
+          <div class="form-check form-check-inline">
+            <label class="form-check-label">
+              <input type="radio" class="form-check-input" name="isClean" value="2"> 重置ttl
+            </label>
+          </div>
+          <div class="row">
+            <span class="help-block" style="color: red">
+                如生产集群申请该操作，请发送邮件，给相关同事和领导
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-form-label col-md-2 offset-md-1">实例</label>
+        <div class="col-md-5">
+          <select id="instance-select" name="nodes"
+                  class="selectpicker col-md-12 border rounded" multiple
+                  data-live-search="true" title="选择实例 (默认全部) "data-size="8">
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-form-label col-md-2 offset-md-1">分析清理条件<font color='red'>(*)</font></label>
+        <div class="col-md-5">
+            <textarea rows="8" class="form-control" name="condition" id="condition" placeholder="键匹配，对key进行过滤。
+1.（必填）匹配模式：abc_*
+2.（可选）如需筛选key中某部分大于或小于指定值，在匹配串中添加 @Less{指定值}Less@ ，如为大于，将Less替换为More
+3.（可选）重置ttl时间大于（1000）小于（3000）
+4.（可选）筛选ttl剩余时间小于（3600）/大于（7000）"></textarea>
+          <span class="help-block" style="color: green">
+                                  如，abc开头、包含、结尾的键：abc*、*abc*、*abc,<br>
+                                  如，abc_{数字开头}的键：abc_[0-9]*<br>
+                                  如，abc_{数字开头和结尾}的键：abc_[0-9]*[0-9]<br>
+                                  如，abc_{数字}大于2000的键：abc_@More{2000}More@<br>
+                                  如，重置键ttl时间：重置ttl时间大于（1000）小于（3000）<br>
+                                  如，根据ttl剩余时间过滤键，ttl小于（3600）/大于（7000）。
+                              </span>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-form-label col-md-2 offset-md-1">申请原因<font color='red'>(*)</font></label>
+        <div class="col-md-5">
+                <textarea rows="3" name="appDelReason" id="appDelReason" placeholder="申请数据分析清理原因"
+                          class="form-control"></textarea>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <div class="text-center">
+          <button id="appConfigChangeBtn" class="btn btn-danger" onclick="appDataScanCleanApply()">
+            <i class="bi bi-check"></i>
+            提交申请
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <div id="appDelApplyInfo" class="offset-md-3 col-md-9"></div>
+      </div>
+    </div>
+
+</div>

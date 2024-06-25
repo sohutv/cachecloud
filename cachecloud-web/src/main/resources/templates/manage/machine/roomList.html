@@ -1,0 +1,54 @@
+<script src="${request.contextPath}/assets/js/custom/machineManage.js"></script>
+
+<div class="card">
+  <div class="card-body">
+    <div class="row mb-2">
+      <button class="btn btn-success btn-sm col-auto" type="button" data-bs-target="#addRoomModal" data-bs-toggle="modal">
+        添加机房 <i class="bi bi-plus"></i>
+      </button>
+    </div>
+
+    <div class="row">
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered table-hover table-sm" id="tableDataList">
+          <thead>
+          <tr>
+            <th scope="col">序号</th>
+            <th scope="col">机房名称</th>
+            <th scope="col">可用状态</th>
+            <th scope="col">描述</th>
+            <th scope="col">网段</th>
+            <th scope="col">运营商</th>
+            <th scope="col">操作</th>
+          </tr>
+          </thead>
+          <tbody>
+          <#list roomList as record>
+            <tr>
+              <td>${record_index + 1}</td>
+              <td>${record.name!}</td>
+              <td>
+                <#if (record.status==0)>无效</#if>
+                <#if (record.status==1)>有效</#if>
+              </td>
+              <td>${record.desc!}</td>
+              <td>${record.ipNetwork!}</td>
+              <td>${record.operator!}</td>
+              <td>
+                <#include "addRoom.html">
+                <a href="javascript:void(0);" data-bs-target="#addRoomModal${record.id!}"
+                   class="btn btn-sm btn-info" data-bs-toggle="modal">修改</a>
+                <button id="removeBtn${record.id!}" type="button" class="btn btn-sm btn-info"
+                        onclick="removeRoom(this.id,'${record.id!}', '${request.contextPath}')">删除
+                </button>
+              </td>
+            </tr>
+          </#list>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<#include "addRoom.html">

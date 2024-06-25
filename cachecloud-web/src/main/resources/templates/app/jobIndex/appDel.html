@@ -1,0 +1,160 @@
+<script type="text/javascript">
+  $(function () {
+    $("input[name='cleanType']").change(function () {
+      if ($(this).val() == "0") {
+        $("#instance-div").hide();
+        $("#pattern-div").hide();
+      } else {
+        $("#instance-div").show();
+        $("#pattern-div").show();
+      }
+    });
+  });
+
+  function appDataCleanApply() {
+    var appId = $('#appDel_appId').selectpicker('val');
+    if (appId == null || appId == '') {
+      alert("请选择应用");
+      $('#appDel_appId').focus();
+      return false;
+    }
+    var cleanType = $('input[name="cleanType"]:checked').val();
+
+    var nodeInfos = $('#instance-select').selectpicker('val');
+    var pattern = document.getElementById("delPattern");
+    if (cleanType==1){
+      if (pattern.value == "") {
+        alert("删除数据需要填写键匹配的格式!");
+        pattern.focus();
+        return false;
+      }
+    }
+    var reason = document.getElementById("appDelReason");
+    if (reason.value == "") {
+      alert("请填写数据清理原因!");
+      reason.focus();
+      return false;
+    }
+
+    if (!confirm("确认提交数据清理申请？")) {
+      return;
+    }
+
+    var btn = document.getElementById("appDelBtn");
+    btn.disabled = true;
+
+    var cleanTypeDesc = cleanType == 0 ? "清理全库" : "删除数据";
+    $.post(
+            '${request.contextPath}/admin/app/job/submit',
+            {
+              jobType: 7,
+              appId: appId,
+              nodeInfos: nodeInfos == null ? "" : nodeInfos.toString(),
+              param: '数据清理类型: ' + cleanTypeDesc + '，key格式: ' + pattern.value,
+              reason: reason.value
+            },
+            function (data) {
+              if (data == 1) {
+                $("#appDelApplyInfo").html("<div class='alert alert-error' ><font color='green'><strong>Success!</strong>应用诊断申请提交成功，即将跳转工单列表！</font><button class='btn-close' data-bs-dismiss='alert'></button></div>");
+                setTimeout("location.href = '${request.contextPath}/admin/app/jobs'", 1000);
+              } else {
+                btn.disabled = false;
+                $("#appDelApplyInfo").html("<div class='alert alert-error' ><font color='red'><strong>Error!</strong>更新失败！<font><button class='btn-close' data-bs-dismiss='alert'></button></div>");
+              }
+            }
+    );
+  }
+</script>
+
+<div class="card-header">
+  <h4 class="card-title">
+    数据清理
+  </h4>
+</div>
+
+<div class="card-body">
+    <div class="row">
+      <div class="form-group row">
+        <label class="col-form-label col-md-2 offset-md-1">应用<font color='red'>(*)</font></label>
+        <div class="col-md-5">
+          <select id="appDel_appId" name="appId" class="selectpicker show-tick col-md-12 border rounded"
+                  data-live-search="true" title="选择应用"
+                  onchange="changeAppIdSelect(this.value,'instance-select', '${request.contextPath}')">
+            <option value="">选择应用</option>
+            <#list appDescMap?keys as key>
+              <#assign appDesc = appDescMap?api.get(key)>
+              <#if (appDesc.status==2)>
+                <option value="${appDesc.appId}" title="${appDesc.appId} ${appDesc.name}">
+                  【${appDesc.appId}】&nbsp;名称：${appDesc.name}&nbsp;类型：${appDesc.typeDesc}&nbsp;版本：${appDesc.versionName}
+                </option>
+              </#if>
+            </#list>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-form-label col-md-2 offset-md-1">数据清理类型<font color='red'>(*)</font></label>
+        <div class="col-md-5">
+          <div class="form-check form-check-inline">
+            <label class="form-check-label">
+              <input type="radio" class="form-check-input" name="cleanType" value="0" checked> 清理全库
+            </label>
+          </div>
+          <div class="form-check form-check-inline">
+            <label class="form-check-label">
+              <input type="radio" class="form-check-input" name="cleanType" value="1"> 删除数据
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group row" id="instance-div" style="display:none;">
+        <label class="col-form-label col-md-2 offset-md-1">实例</label>
+        <div class="col-md-5">
+          <select id="instance-select" name="nodes"
+                  class="selectpicker col-md-12 border rounded" multiple
+                  data-live-search="true" title="选择实例 (默认全部)" data-size="8">
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group row" id="pattern-div" style="display:none;">
+        <label class="col-form-label col-md-2 offset-md-1">key格式<font color='red'>(*)</font></label>
+        <div class="col-md-5">
+                        <textarea rows="5" class="form-control" name="delPattern" id="delPattern" placeholder="键匹配格式，*表示通配符，多个用英文逗号分隔，如：
+abc*,
+*abc,
+ab*c"></textarea>
+          <span class="help-block" style="color: green">
+                            如，清理以abc开头的键：abc*,
+                            清理包含abc的键：*abc*,
+                            清理以abc结尾的键：*abc
+                        </span>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-form-label col-md-2 offset-md-1">申请原因<font color='red'>(*)</font></label>
+        <div class="col-md-5">
+                        <textarea rows="3" name="appDelReason" id="appDelReason" placeholder="申请数据清理原因"
+                                  class="form-control"></textarea>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <div class="text-center">
+          <button id="appDelBtn" class="btn btn-danger" onclick="appDataCleanApply()">
+            <i class="bi bi-check"></i>
+            提交申请
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <div id="appDelApplyInfo" class="offset-md-3 col-md-9"></div>
+      </div>
+
+    </div>
+
+</div>

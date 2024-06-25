@@ -56,6 +56,9 @@ public class TaskStepMeta {
     private Date updateTime;
 
     public Date getCreateTime() {
+        if(createTime == null){
+            return createTime;
+        }
         return (Date) createTime.clone();
     }
 
@@ -64,6 +67,9 @@ public class TaskStepMeta {
     }
 
     public Date getUpdateTime() {
+        if(updateTime == null){
+            return updateTime;
+        }
         return (Date) updateTime.clone();
     }
 

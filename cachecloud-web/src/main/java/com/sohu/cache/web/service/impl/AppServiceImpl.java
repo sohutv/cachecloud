@@ -9,18 +9,21 @@ import com.sohu.cache.machine.MachineCenter;
 import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.stats.app.AppStatsCenter;
 import com.sohu.cache.task.constant.InstanceInfoEnum.InstanceTypeEnum;
+import com.sohu.cache.task.constant.InstanceRoleEnum;
 import com.sohu.cache.util.AppKeyUtil;
 import com.sohu.cache.util.ConstUtils;
+import com.sohu.cache.util.Pair;
 import com.sohu.cache.util.TypeUtil;
 import com.sohu.cache.web.enums.BooleanEnum;
 import com.sohu.cache.web.enums.DeployInfoEnum;
 import com.sohu.cache.web.enums.SuccessEnum;
 import com.sohu.cache.web.enums.UseTypeEnum;
+import com.sohu.cache.web.service.AppScrollRestartService;
 import com.sohu.cache.web.service.AppService;
 import com.sohu.cache.web.vo.AppDetailVO;
-import com.sohu.cache.web.vo.ModuleVersionDetailVo;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.assertj.core.util.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +32,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import redis.clients.jedis.HostAndPort;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.Module;
-import redis.clients.jedis.exceptions.JedisDataException;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
@@ -70,15 +70,6 @@ public class AppServiceImpl implements AppService {
     private AppToUserDao appToUserDao;
 
     /**
-     * 应用模块关系相关dao
-     */
-    @Autowired
-    private AppToModuleDao appToModuleDao;
-
-    @Autowired
-    ModuleDao moduleDao;
-
-    /**
      * 应用申请相关dao
      */
     @Autowired
@@ -88,6 +79,11 @@ public class AppServiceImpl implements AppService {
      */
     @Autowired
     private AppUserDao appUserDao;
+    /**
+     * 业务组信息dao
+     */
+    @Autowired
+    private AppBizDao appBizDao;
     /**
      * 应用统计dao
      */
@@ -113,6 +109,8 @@ public class AppServiceImpl implements AppService {
     private AppClientStatisticGatherDao appClientStatisticGatherDao;
     @Autowired
     private AppStatsCenter appStatsCenter;
+    @Autowired
+    private AppScrollRestartService appScrollRestartService;
 
     @PostConstruct
     public void init() {
@@ -177,6 +175,17 @@ public class AppServiceImpl implements AppService {
         return appDao.update(appDesc);
     }
 
+    /**
+     * 更新应用 pwd
+     * @param appId
+     * @param appPwd
+     * @return
+     */
+    @Override
+    public int updateAppPwd(long appId, String appPwd){
+        return appDao.updateAppPwd(appId, appPwd);
+    }
+
     @Override
     public int updateWithCustomPwd(AppDesc appDesc) {
         return appDao.updateWithCustomPwd(appDesc);
@@ -200,61 +209,6 @@ public class AppServiceImpl implements AppService {
             logger.error(e.getMessage(), e);
             return false;
         }
-    }
-
-    /**
-     * 保存应用与模块关系
-     *
-     * @param appToModuleList
-     * @return
-     */
-    @Override
-    public int saveAppToModule(List<AppToModule> appToModuleList){
-        int result = 0;
-        if(CollectionUtils.isNotEmpty(appToModuleList)){
-            appToModuleDao.saveAll(appToModuleList);
-        }
-        return result;
-    }
-
-    /**
-     * 获取应用安装模块信息
-     *
-     * @param appId
-     * @return
-     */
-    public List<ModuleVersion> getAppToModuleList(Long appId){
-        List<ModuleVersion> moduleVersions = new ArrayList<>();
-        List<AppToModule> appToModules = appToModuleDao.getByAppId(appId);
-        appToModules.forEach(appToModule -> moduleVersions.add(moduleDao.getVersion(appToModule.getModuleVersionId())));
-        return moduleVersions;
-    }
-
-    /**
-     * 获取应用是否安装模块
-     *
-     * @param appId
-     * @return
-     */
-    public boolean isInstallModule(Long appId){
-        List<AppToModule> appToModules = appToModuleDao.getByAppId(appId);
-        if(CollectionUtils.isEmpty(appToModules)){
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * 获取应用安装模块详细信息
-     *
-     * @param appId
-     * @return
-     */
-    public List<ModuleVersionDetailVo> getAppModuleList(Long appId){
-        List<ModuleVersionDetailVo> moduleInfos = new ArrayList<>();
-        List<AppToModule> appToModules = appToModuleDao.getByAppId(appId);
-        appToModules.forEach(appToModule -> moduleInfos.add(moduleDao.getModuleDetail(appToModule.getModuleVersionId())));
-        return moduleInfos;
     }
 
     @Override
@@ -312,6 +266,75 @@ public class AppServiceImpl implements AppService {
         return instanceDao.getInstListByAppId(appId);
     }
 
+    /**
+     * 获取应用下实例基本信息，并按照主从分组
+     * @param appId
+     * @return
+     */
+    @Override
+    public Map<InstanceInfo, List<InstanceInfo>> getAppInstanceInfoGroup(Long appId){
+        AppDesc appDesc = appDao.getAppDescById(appId);
+        if(appDesc == null){
+            return Collections.EMPTY_MAP;
+        }
+        List<InstanceInfo> instanceInfoList = instanceDao.getInstListByAppId(appId);
+        instanceInfoList = instanceInfoList.stream()
+                .filter(instanceInfo -> instanceInfo.getStatus() == InstanceStatusEnum.GOOD_STATUS.getStatus()
+                        && TypeUtil.isRedisDataType(instanceInfo.getType()))
+                .collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(instanceInfoList)) {
+            for (InstanceInfo instanceInfo : instanceInfoList) {
+                int type = instanceInfo.getType();
+                if (instanceInfo.getStatus() != InstanceStatusEnum.GOOD_STATUS.getStatus()) {
+                    continue;
+                }
+                if (TypeUtil.isRedisType(type)) {
+                    if (TypeUtil.isRedisSentinel(type)) {
+                        continue;
+                    }
+                    String host = instanceInfo.getIp();
+                    int port = instanceInfo.getPort();
+                    // 幂等操作
+                    BooleanEnum isMaster = redisCenter.isMaster(appId, host, port);
+                    instanceInfo.setRoleDesc(isMaster);
+                    if (BooleanEnum.FALSE == isMaster) {
+                        HostAndPort hap = redisCenter.getMaster(host, port, appDesc.getAppPassword());
+                        if (hap != null) {
+                            instanceInfo.setMasterHost(hap.getHost());
+                            instanceInfo.setMasterPort(hap.getPort());
+                            for (InstanceInfo innerInfo : instanceInfoList) {
+                                if (innerInfo.getIp().equals(hap.getHost())
+                                        && innerInfo.getPort() == hap.getPort()) {
+                                    instanceInfo.setMasterInstanceId(innerInfo.getId());
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Map<InstanceInfo, List<InstanceInfo>> resultMap = new HashMap<InstanceInfo, List<InstanceInfo>>();
+        for (InstanceInfo info : instanceInfoList) {
+            String roleDesc = info.getRoleDesc();
+            if (roleDesc != null && roleDesc.equals("master")) {
+                List<InstanceInfo> list = (ArrayList<InstanceInfo>) MapUtils.getObject(resultMap, info, new ArrayList<InstanceInfo>());
+                resultMap.put(info, list);
+            } else if (roleDesc != null && roleDesc.equals("slave")) {
+                int masterInstanceId = info.getMasterInstanceId();
+                Optional<InstanceInfo> masterInstanceOptional = instanceInfoList.stream().filter(instance -> instance.getId() == masterInstanceId).findFirst();
+                if(masterInstanceOptional.isPresent()){
+                    InstanceInfo masterInstance = masterInstanceOptional.get();
+                    List<InstanceInfo> list = (ArrayList<InstanceInfo>) MapUtils.getObject(resultMap, masterInstance, new ArrayList<InstanceInfo>());
+                    list.add(info);
+                    resultMap.put(masterInstance, list);
+                }
+            }
+        }
+        return resultMap;
+    }
+
     @Override
     public List<InstanceInfo> getAppInstanceInfo(Long appId) {
         AppDesc appDesc = appDao.getAppDescById(appId);
@@ -361,29 +384,6 @@ public class AppServiceImpl implements AppService {
                             }
                         }
                     }
-                    // 设置模块信息
-                    Jedis jedis = null;
-                    try {
-                        if (type == ConstUtils.CACHE_REDIS_STANDALONE || type == ConstUtils.CACHE_TYPE_REDIS_CLUSTER) {
-                            jedis = redisCenter.getJedis(appId, host, port);
-                            List<Module> modules = jedis.moduleList();
-                            modules = modules.stream().sorted(Comparator.comparing(Module::getName)).collect(Collectors.toList());
-                            instanceInfo.setModules(modules);
-                        }
-                    }catch (JedisDataException e){
-                        if("ERR unknown command 'MODULE'".equals(e.getMessage())){
-                            logger.info("checkInstanceModule {}:{} error , message:{}", host, port, e.getMessage());
-                        }else {
-                            logger.error("checkInstanceModule {}:{} error , message:{}", host, port, e.getMessage(), e);
-                        }
-                    } catch (Exception e) {
-                        logger.error("checkInstanceModule {}:{} error , message:{}", host, port, e.getMessage(), e);
-                    } finally {
-                        if (jedis != null) {
-                            jedis.close();
-                        }
-                    }
-
                 }
             }
         }
@@ -659,8 +659,10 @@ public class AppServiceImpl implements AppService {
         if (CollectionUtils.isNotEmpty(appAudits)) {
             for (AppAudit appAudit : appAudits) {
                 Long appAuditId = appAudit.getId();
-                AppAuditLog log = appAuditLogDao.getAuditByType(appAuditId, AppAuditLogTypeEnum.APP_CHECK.value());
-                if (log != null) {
+                List<AppAuditLog> logList = appAuditLogDao.getAuditByType(appAuditId, AppAuditLogTypeEnum.APP_CHECK.value());
+                AppAuditLog log = null;
+                if (CollectionUtils.isNotEmpty(logList)) {
+                    log = logList.get(0);
                     log.setAppUser(appUserDao.get(log.getUserId()));
                 }
                 appAudit.setAppAuditLog(log);
@@ -684,6 +686,12 @@ public class AppServiceImpl implements AppService {
         }
         if(!StringUtils.isEmpty(appUser.getPurpose())){
             info.append(",使用目的:" + appUser.getPurpose());
+        }
+        if(!StringUtils.isEmpty(appUser.getBizId())){
+            AppBiz appBiz = appBizDao.get(appUser.getBizId());
+            if(appBiz != null && !StringUtils.isEmpty(appBiz.getName())){
+                info.append(",归属业务组:" + appBiz.getName());
+            }
         }
         appAudit.setInfo(info.toString());
         appAudit.setStatus(AppCheckEnum.APP_WATING_CHECK.value());
@@ -1073,8 +1081,8 @@ public class AppServiceImpl implements AppService {
 
                     double format_mem = mem / 1024.0;
                     double format_used_memory = MapUtils.getLongValue(appClientGatherMap, "used_memory", 0l) / 1024 / 1024 / 1024.0;
-                    double mem_used_ratio = format_mem == 0 ? 0.0 : (format_used_memory / format_mem) * 100;
                     double format_used_memory_rss = MapUtils.getLongValue(appClientGatherMap, "used_memory_rss", 0l) / 1024 / 1024 / 1024.0;
+                    double mem_used_ratio = format_mem == 0 ? 0.0 : (format_used_memory / format_mem) * 100;
 
                     int topology_exam_result = MapUtils.getIntValue(appClientGatherMap, "topology_exam_result", -1);
                     if (exp_count > 0) {
@@ -1228,6 +1236,271 @@ public class AppServiceImpl implements AppService {
         }
 
         return resultList;
+    }
+
+    @Override
+    public String checkAppPersistenceConfigAndFix(long appId, Map<String, String> masterConfigMap, Map<String, String> slaveConfigMap) {
+        AppDesc appDesc = appDao.getAppDescById(appId);
+        List<InstanceInfo> instanceInfoList = this.getInstanceInfoListWithRole(appId);
+        Map<Integer, List<InstanceInfo>> groupMap = this.groupInstanceByMaster(instanceInfoList);
+        boolean masterSlavePair = this.checkIsMasterSlavePair(groupMap);
+        if(!masterSlavePair){
+            if(appScrollRestartService.isAppOnScrollRestart(appId)){
+                logger.error("checkAppPersistenceConfigAndFix, the app is on scroll restart, checkIsMasterSlavePair failed and will ignore this time, appId:{}", appId);
+                return null;
+            }
+            logger.error("checkAppPersistenceConfigAndFix checkIsMasterSlavePair failed, appId:{}", appId);
+            return "checkIsMasterSlavePair failed";
+        }
+        StringBuilder sb = new StringBuilder();
+        groupMap.forEach((masterId, instanceInfoS) -> {
+            List<InstanceInfo> oneGroupList = new ArrayList<>();
+            //check
+            instanceInfoS.forEach(instanceInfo -> {
+                if(instanceInfo.getRoleDesc().equals(InstanceRoleEnum.MASTER.getInfo())){
+                    masterConfigMap.forEach((configKey, expectConfigValue) -> {
+                        String configValue = redisCenter.configGet(appId, instanceInfo.getIp(), instanceInfo.getPort(), configKey);
+                        if(StringUtils.isEmpty(expectConfigValue) && StringUtils.isEmpty(configValue) || expectConfigValue.equals(configValue)){
+                            return;
+                        }else{
+                            oneGroupList.add(instanceInfo);
+                        }
+                    });
+                }else if(instanceInfo.getRoleDesc().equals(InstanceRoleEnum.SLAVE.getInfo())){
+                    slaveConfigMap.forEach((configKey, expectConfigValue) -> {
+                        String configValue = redisCenter.configGet(appId, instanceInfo.getIp(), instanceInfo.getPort(), configKey);
+                        if (StringUtils.isEmpty(expectConfigValue) && StringUtils.isEmpty(configValue) || expectConfigValue.equals(configValue)) {
+                            return;
+                        } else {
+                            oneGroupList.add(0, instanceInfo);
+                        }
+                    });
+                }
+            });
+
+            oneGroupList.forEach(instanceInfo -> {
+                if(instanceInfo.getRoleDesc().equals(InstanceRoleEnum.MASTER.getInfo())){
+                    masterConfigMap.forEach((configKey, expectConfigValue) -> {
+                        String configValue = redisCenter.configGet(appId, instanceInfo.getIp(), instanceInfo.getPort(), configKey);
+                        if(StringUtils.isEmpty(expectConfigValue) && StringUtils.isEmpty(configValue) || expectConfigValue.equals(configValue)){
+                            return;
+                        }else{
+                            logger.info("checkAppPersistenceConfigAndFix configSetAndRewrite success, appId:{} host:{} port:{} key:{} value:{}", appId, instanceInfo.getIp(), instanceInfo.getPort(), configKey, expectConfigValue);
+                            boolean configSetAndRewrite = redisCenter.configSetAndRewrite(appId, instanceInfo.getIp(), instanceInfo.getPort(), configKey, expectConfigValue);
+                            if(!configSetAndRewrite){
+                                logger.error("checkAppPersistenceConfigAndFix configSetAndRewrite failed, appId:{} host:{} port:{} key:{} value:{}", appId, instanceInfo.getIp(), instanceInfo.getPort(), configKey, expectConfigValue);
+                                sb.append(String.format("configSetAndRewrite master failed, appId:%s host:%s port:%s key:%s value:%s", appId, instanceInfo.getIp(), instanceInfo.getPort(), configKey, expectConfigValue));
+                            }
+                        }
+                    });
+                }else if(instanceInfo.getRoleDesc().equals(InstanceRoleEnum.SLAVE.getInfo())){
+                    slaveConfigMap.forEach((configKey, expectConfigValue) -> {
+                        String configValue = redisCenter.configGet(appId, instanceInfo.getIp(), instanceInfo.getPort(), configKey);
+                        if (StringUtils.isEmpty(expectConfigValue) && StringUtils.isEmpty(configValue) || expectConfigValue.equals(configValue)) {
+                            return;
+                        } else {
+                            logger.info("checkAppPersistenceConfigAndFix configSetAndRewrite success, appId:{} host:{} port:{} key:{} value:{}", appId, instanceInfo.getIp(), instanceInfo.getPort(), configKey, expectConfigValue);
+                            boolean configSetAndRewrite = redisCenter.configSetAndRewrite(appId, instanceInfo.getIp(), instanceInfo.getPort(), configKey, expectConfigValue);
+                            if(!configSetAndRewrite){
+                                logger.error("checkAppPersistenceConfigAndFix configSetAndRewrite failed, appId:{} host:{} port:{} key:{} value:{}", appId, instanceInfo.getIp(), instanceInfo.getPort(), configKey, expectConfigValue);
+                                sb.append(String.format("configSetAndRewrite slave failed, appId:%s host:%s port:%s key:%s value:%s", appId, instanceInfo.getIp(), instanceInfo.getPort(), configKey, expectConfigValue));
+                            }
+                        }
+                    });
+                }
+            });
+        });
+        if(sb.length() > 0){
+            return sb.toString();
+        }
+        return null;
+    }
+
+    public List<InstanceInfo> getInstanceInfoListWithRole(Long appId) {
+        AppDesc appDesc = appDao.getAppDescById(appId);
+        return this.getInstanceInfoListWithRole(appId, appDesc);
+    }
+
+    public List<InstanceInfo> getInstanceInfoListWithRole(Long appId, AppDesc appDesc) {
+        List<InstanceInfo> resultList = instanceDao.getInstListByAppId(appId);
+        String password = appDesc.getAppPassword();
+        resultList.forEach(instanceInfo -> {
+            int type = instanceInfo.getType();
+            if (instanceInfo.getStatus() != InstanceStatusEnum.GOOD_STATUS.getStatus()) {
+                return;
+            }
+            if (TypeUtil.isRedisType(type)) {
+                if (TypeUtil.isRedisSentinel(type)) {
+                    return;
+                }
+                String host = instanceInfo.getIp();
+                int port = instanceInfo.getPort();
+                // 幂等操作
+                BooleanEnum isMaster = redisCenter.isMaster(appId, host, port);
+                instanceInfo.setRoleDesc(isMaster);
+                if (BooleanEnum.FALSE == isMaster) {
+                    HostAndPort hap = redisCenter.getMaster(host, port, password);
+                    if (hap != null) {
+                        instanceInfo.setMasterHost(hap.getHost());
+                        instanceInfo.setMasterPort(hap.getPort());
+                        for (InstanceInfo innerInfo : resultList) {
+                            if (innerInfo.getIp().equals(hap.getHost())
+                                    && innerInfo.getPort() == hap.getPort()) {
+                                instanceInfo.setMasterInstanceId(innerInfo.getId());
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        return resultList;
+    }
+
+    public Map<Integer, List<InstanceInfo>> groupInstanceByMaster(List<InstanceInfo> instanceInfoWithRoleList) {
+        Map<Integer, List<InstanceInfo>> resultMap = new HashMap<Integer, List<InstanceInfo>>();
+        instanceInfoWithRoleList.forEach(info -> {
+            String roleDesc = info.getRoleDesc();
+            if (roleDesc != null && roleDesc.equals("master")) {
+                List<InstanceInfo> list = (ArrayList<InstanceInfo>) MapUtils.getObject(resultMap, info.getId(), new ArrayList<InstanceInfo>());
+                list.add(info);
+                resultMap.put(info.getId(), list);
+            } else if (roleDesc != null && roleDesc.equals("slave")) {
+                List<InstanceInfo> list = (ArrayList<InstanceInfo>) MapUtils.getObject(resultMap, info.getMasterInstanceId(), new ArrayList<InstanceInfo>());
+                list.add(info);
+                resultMap.put(info.getMasterInstanceId(), list);
+            }
+        });
+        return resultMap;
+    }
+
+    /**
+     * 校验相关的实例是否为主从备份
+     * @param groupMap 已根据主从进行分组
+     * @return false:不满足主从，true满足
+     */
+    private boolean checkIsMasterSlavePair(Map<Integer, List<InstanceInfo>> groupMap){
+        //校验是否均为主从备份
+        Set<Map.Entry<Integer, List<InstanceInfo>>> entries = groupMap.entrySet();
+        for (Map.Entry<Integer, List<InstanceInfo>> entry : entries){
+            List<InstanceInfo> instanceInfos = entry.getValue();
+            if(instanceInfos.size() < 2){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean updateAppPersistenceType(long appId, int persistenceType) {
+        int execNum = appDao.updateAppPersistenceType(appId, persistenceType);
+        if(execNum > 0){
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean updateAppMaxmemoryPolicy(long appId, int maxmemoryPolicy) {
+        int execNum = appDao.updateAppMaxmemoryPolicy(appId, maxmemoryPolicy);
+        if(execNum > 0){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 获取用户所属应用的内存统计信息（包含版本）
+     * @param userId
+     * @param isAdmin
+     * @return
+     */
+    @Override
+    public List<AppCapacityStatisticsResult> getAppCapacityStatistics(Long userId, Boolean isAdmin){
+        AppStatisticsSearch search = AppStatisticsSearch.builder().userId(userId).isAdmin(isAdmin).build();
+        return appDao.getCapacityStatistics(search);
+    }
+
+    @Override
+    public Map<String, Object> getAppCapacityStats(Long userId, Boolean isAdmin){
+        Map<String, Object> resultMap = new HashMap<>();
+        List<AppCapacityStatisticsResult> capacityStatistics = this.getAppCapacityStatistics(userId, isAdmin);
+        Map<Integer, Integer> versionMap = new HashMap<>();
+        long totalApplyMem = 0L;
+        long totalUsedMem = 0L;
+        long totalMasterCount = 0L;
+        for (AppCapacityStatisticsResult result : capacityStatistics) {
+            totalUsedMem += result.getMemUsed() == null ? 0 :result.getMemUsed();
+            totalApplyMem += result.getCurMem() == null ? 0 :result.getCurMem();
+            totalMasterCount += result.getShardingMasterNum() == null ? 0 :result.getShardingMasterNum();
+            Integer versionId = result.getVersionId();
+            if(versionMap.containsKey(versionId)){
+                versionMap.put(versionId, (versionMap.get(versionId) + 1));
+            }else{
+                versionMap.put(versionId, 1);
+            }
+        }
+        Map<Integer, SystemResource> resourceMap = ConstUtils.REDIS_RESOURCE;
+        List<Pair<String, Integer>> versionList = new ArrayList<>();
+        versionMap.keySet().forEach(versionId -> {
+            SystemResource systemResource = resourceMap.get(versionId);
+            if(systemResource != null){
+                versionList.add(new Pair<>(systemResource.getName(), versionMap.get(versionId)));
+            }
+        });
+
+        resultMap.put("appCount", capacityStatistics.size());
+        resultMap.put("applyMem", totalApplyMem);
+        resultMap.put("usedMem", totalUsedMem);
+        resultMap.put("notUsedMem", totalApplyMem - totalUsedMem);
+        resultMap.put("masterCount", totalMasterCount);
+        resultMap.put("versionList", versionList);
+
+        List<Pair<Long, Double>> capacityAuditList = new ArrayList<>();
+        capacityStatistics.sort(Comparator.comparingDouble(AppCapacityStatisticsResult :: getMemUsedRatio));
+        if(capacityStatistics != null){
+            int limit = capacityStatistics.size() > 5 ? 5 : capacityStatistics.size();
+            for(int i = 0; i < limit; i++){
+                AppCapacityStatisticsResult statisticsResult = capacityStatistics.get(i);
+                capacityAuditList.add(new Pair<>(statisticsResult.getAppId(), statisticsResult.getMemUsedRatio()));
+            }
+        }
+        resultMap.put("auditList", capacityAuditList);
+        return resultMap;
+    }
+
+    /**
+     * 获取用户所属应用的监控统计信息
+     * @param userId
+     * @param isAdmin
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @Override
+    public List<AppMonitorStatisticsResult> getAppMonitorStatistics(Long userId, Boolean isAdmin, String startTime, String endTime){
+        AppStatisticsSearch search = AppStatisticsSearch.builder().userId(userId).isAdmin(isAdmin).startTime(startTime).endTime(endTime).build();
+        return appDao.getMonitorStatistics(search);
+    }
+
+    /**
+     * 更新应用拓扑检测结果
+     * @param topologyExam
+     * @return
+     */
+    @Override
+    public int saveAppTopologyExam(AppClientStatisticGather topologyExam){
+        return appClientStatisticGatherDao.batchSaveTopologyExam(Lists.newArrayList(topologyExam));
+    }
+
+    /**
+     * 获取拓扑检测失败的应用
+     * @param gatherTime
+     * @return
+     */
+    @Override
+    public List<AppClientStatisticGather> getTopologyExamFailedByGatherTime(String gatherTime){
+        return appClientStatisticGatherDao.getTopologyExamFailedByGatherTime(gatherTime);
     }
 
 }

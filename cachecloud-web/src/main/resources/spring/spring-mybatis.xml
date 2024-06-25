@@ -7,17 +7,6 @@
                      http://www.springframework.org/schema/context
                      http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <bean id="cacheCloudDB" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
-        <property name="driverClassName" value="${cachecloud.jdbc.driver}" />
-        <property name="jdbcUrl" value="${cachecloud.primary.url}" />
-        <property name="username" value="${cachecloud.primary.user}" />
-        <property name="password" value="${cachecloud.primary.password}" />
-        <property name="maximumPoolSize" value="${cachecloud.primary.maxPoolSize}" />
-        <property name="minimumIdle" value="${cachecloud.primary.initialPoolSize}" />
-        <property name="connectionTimeout" value="60000" />
-        <property name="idleTimeout" value="600000" />
-    </bean>
-
     <bean id="mysqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean" primary="true">
         <property name="dataSource" ref="cacheCloudDB"/>
         <!-- mybatis配置文件的位置 -->

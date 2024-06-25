@@ -1,0 +1,62 @@
+<script>
+  var instance_advancedAnalysis_c_cu = {
+  <#list appCommandStats as appCommand>${appCommand.commandName}:
+    '${request.contextPath}/admin/instance/getCommandStatsV2.json?instanceId=${instanceInfo.id}&commandName=${appCommand.commandName}&startDate=${startDate}&endDate=${endDate}'<#if ((appCommand_index + 1) != appCommandStats?size)>,
+    </#if>
+  </#list>
+  }
+  var instance_advancedAnalysis_c_o = {
+  <#list appCommandStats as appCommand>${appCommand.commandName}:
+    {
+      plotOptions: {
+      area:{
+      marker: {
+      enabled: false,
+      symbol: 'circle',
+      radius: 0,
+      states:{
+      hover: {
+      enabled: true
+    }
+    }
+    }
+    }
+    }
+    }
+    <#if ((appCommand_index + 1) != appCommandStats?size)>,</#if></#list>
+  }
+</script>
+
+<div class="col-md-12">
+  <div class="card">
+    <div class="card-body table-responsive mt-2 d-flex justify-content-end">
+      <form method="get" action="${request.contextPath}/admin/instance/index" id="ec" name="ec">
+        <label class="col-form-label" style="font-weight:bold;text-align:left;">
+          开始日期:&nbsp;&nbsp;
+        </label>
+        <input type="date" size="21" name="startDate" id="startDate" value="${startDate}">
+        <label class="col-form-label" style="font-weight:bold;text-align:left;">
+          结束日期:
+        </label>
+        <input type="date" size="20" name="endDate" id="endDate" value="${endDate}">
+        <input type="hidden" name="instanceId" value="${instanceInfo.id}">
+        <input type="hidden" name="tabTag" value="instance_advancedAnalysis">
+        <label>&nbsp;<input type="submit" class="btn btn-info" value="查询"/></label>
+      </form>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">
+        TOP的命令执行趋势比较
+      </h3>
+    </div>
+    <div class="card-body table-responsive">
+      <#list appCommandStats as appCommand>
+        <div id="${appCommand.commandName}" class="page-body">
+        </div>
+        <br/>
+      </#list>
+    </div>
+  </div>
+</div>

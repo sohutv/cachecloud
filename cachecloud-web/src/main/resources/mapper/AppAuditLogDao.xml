@@ -18,6 +18,7 @@
         select id,<include refid="app_audit_log_column"/>
         from app_audit_log
         where app_audit_id=#{appAuditId} and type=#{type}
+        order by create_time desc
     </select>
     
 </mapper>

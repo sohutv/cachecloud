@@ -1,0 +1,339 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">资源总览</h3>
+            </div>
+            <div class="card-body table-responsive">
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr>
+                            <th scope="row"><span style="font-weight:bold">在线应用数</span></th>
+                            <td><a target="_blank" href="${request.contextPath}/admin/app/list">${totalRunningApps}</a></td>
+                            <th scope="row"><span style="font-weight:bold">在线实例数</span></th>
+                            <td>${totalRunningInstance}</td>
+                            <th scope="row"><span style="font-weight:bold">Redis版本数量</span></th>
+                            <td><a target="_blank" href="${request.contextPath}/manage/app/resource/index?tab=redis">${redisTypeCount}</a></td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><span style="font-weight:bold">在线机器数量</span></th>
+                            <td><a target="_blank" href="${request.contextPath}/manage/machine/index?tabTag=machine">${totalMachineCount}</a></td>
+                            <th scope="row"><span style="font-weight:bold">Redis机器数量</span></th>
+                            <td><a target="_blank" href="${request.contextPath}/manage/machine/index?tabTag=machine&type=0">${machineRedisCount}</a></td>
+                            <th scope="row"><span style="font-weight:bold">RedisTool机器数量</span></th>
+                            <td><a target="_blank" href="${request.contextPath}/manage/machine/index?tabTag=machine&type=2">${machineRedisToolCount}</a></td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><span style="font-weight:bold">机器总内存空间</span></th>
+                            <#list machineStatsVoList as statsVo>
+                                <#if statsVo_index == 0>
+                                    <td>${(statsVo.totalMachineMem/1024)?string('#.#')}G</td>
+                                    <th scope="row"><span style="font-weight:bold">总分配内存(机器/实例)</span></th>
+                                    <td>${((statsVo.totalMachineMem-statsVo.totalMachineFreeMem)/1024)?string('#.#')}G
+                                        /${(statsVo.totalInstanceMaxMem/1024/1024/1024)?string('#.#')}G
+                                    </td>
+                                    <th scope="row"><span style="font-weight:bold">实例总使用内存</span></th>
+                                    <td>${(statsVo.totalInstanceUsedMem/1024/1024/1024)?string('#.#')}G</td>
+                                </#if>
+                            </#list>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">分布统计</h3>
+            </div>
+            <div class="card-body">
+                <div class="col-12">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div id="redisDistributeContainer" class="echart p-4" style="min-height: 400px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div id="roomDistributeContainer" class="echart p-4" style="min-height: 400px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div id="machineMemoryDistributeContainer"class="echart p-4"  style="min-height: 400px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div id="maxMemoryDistributeContainer"class="echart p-4"  style="min-height: 400px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">内存统计</h3>
+            </div>
+            <div class="card-body table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th scope="col">机房</th>
+                        <th scope="col">机器内存(分配内存/总内存)</th>
+                        <th scope="col">实例内存(使用内存/分配内存)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <#list machineStatsVoList as machineStatsVo>
+                        <tr>
+                            <th scope="row">${machineStatsVo.machineRoom}</th>
+                            <td>
+                                <div class="progress progress-fs-1">
+                                    <#if (machineStatsVo.machineMemUsedRatio >= 70.00 && machineStatsVo.machineMemUsedRatio <= 90.00)>
+                                        <#assign memUsedProgressBarStatus = 'bg-warning'>
+                                    <#elseif (machineStatsVo.machineMemUsedRatio >= 90.00)>
+                                        <#assign memUsedProgressBarStatus = 'bg-danger'>
+                                    <#else>
+                                        <#assign memUsedProgressBarStatus = 'bg-success'>
+                                    </#if>
+                                    <div class="progress-bar ${memUsedProgressBarStatus}"
+                                         role="progressbar" aria-valuenow="${machineStatsVo.machineMemUsedRatio}" aria-valuemax="100"
+                                         aria-valuemin="0" style="width: ${machineStatsVo.machineMemUsedRatio}%;overflow: visible;">
+                                        <span style="color: #000000; margin-bottom: 0">
+                                            ${((machineStatsVo.totalMachineMem-machineStatsVo.totalMachineFreeMem)/1024)?string('#.##')}G&nbsp;&nbsp;Used/${(machineStatsVo.totalMachineMem/1024)?string('#.##')}G&nbsp;&nbsp;Total
+                                        </span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="progress progress-fs-1">
+                                    <#if machineStatsVo.instanceMemUsedRatio?? && (machineStatsVo.instanceMemUsedRatio >= 70.00 && machineStatsVo.instanceMemUsedRatio <= 90.00)>
+                                        <#assign memUsedProgressBarStatus = 'bg-warning'>
+                                    <#elseif machineStatsVo.instanceMemUsedRatio?? && (machineStatsVo.instanceMemUsedRatio >= 90.00)>
+                                        <#assign memUsedProgressBarStatus = 'bg-danger'>
+                                    <#else>
+                                        <#assign memUsedProgressBarStatus = 'bg-success'>
+                                    </#if>
+                                    <div class="progress-bar ${memUsedProgressBarStatus}"
+                                         role="progressbar" aria-valuenow="${machineStatsVo.instanceMemUsedRatio}" aria-valuemax="100"
+                                         aria-valuemin="0" style="width: ${machineStatsVo.instanceMemUsedRatio}%;overflow: visible;">
+                                        <span style="color: #000000; margin-bottom: 0">
+                                            ${(machineStatsVo.totalInstanceUsedMem/1024/1024/1024)?string('#.##')}G&nbsp;&nbsp;Used/${(machineStatsVo.totalInstanceMaxMem/1024/1024/1024)?string('#.##')}G&nbsp;&nbsp;Total
+                                        </span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        </#list>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">调度统计</h3>
+            </div>
+            <div class="card-body table-responsive">
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr>
+                            <th scope="row">trigger总数:</th>
+                            <td>
+                                <#if (triggerTotalCount > 0)>
+                                    <a target="_blank" href="${request.contextPath}/manage/quartz/list">${triggerTotalCount}</a>
+                                <#else>
+                                    0
+                                </#if>
+                            </td>
+                            <th scope="row">waiting个数:</td>
+                            <td>
+                                <#if (triggerWaitingCount > 0)>
+                                    <a target="_blank" href="${request.contextPath}/manage/quartz/list?triggerState=WAITING">${triggerWaitingCount}</a>
+                                <#else>
+                                    0
+                                </#if>
+                            </td>
+                            <th scope="row">error个数:</td>
+                            <td>
+                                <#if (triggerErrorCount > 0)>
+                                    <a target="_blank" href="${request.contextPath}/manage/quartz/list?triggerState=ERROR">${triggerErrorCount}</a>
+                                <#else>
+                                    0
+                                </#if>
+                            </td>
+                            <th scope="row">paused个数:</td>
+                            <td>
+                                <#if (triggerPausedCount > 0)>
+                                    <a target="_blank" href="${request.contextPath}/manage/quartz/list?triggerState=PAUSED">${triggerPausedCount}</a>
+                                <#else>
+                                    0
+                                </#if>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">acquired个数:</td>
+                            <td>
+                                <#if (triggerAcquiredCount > 0)>
+                                    <a target="_blank" href="${request.contextPath}/manage/quartz/list?triggerState=ACQUIRED">${triggerAcquiredCount}</a>
+                                <#else>
+                                    0
+                                </#if>
+                            </td>
+                            <th scope="row">blocked个数</td>
+                            <td>
+                                <#if (triggerBlockedCount > 0)>
+                                    <a target="_blank" href="${request.contextPath}/manage/quartz/list?triggerState=BLOCKED">${triggerBlockedCount}</a>
+                                <#else>
+                                    0
+                                </#if>
+                            </td>
+                            <th scope="row">misfireCount个数:</td>
+                            <td>
+                                <#if (misfireCount > 0)>
+                                    <a target="_blank" href="${request.contextPath}/manage/quartz/list?misFireState=1">${misfireCount}</a>
+                                <#else>
+                                    0
+                                </#if>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">任务统计</h3>
+            </div>
+            <div class="card-body table-responsive">
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr>
+                            <th scope="row">任务总数:</td>
+                            <td>
+                                <#if (totalTaskCount > 0)>
+                                    <a target="_blank" href="${request.contextPath}/manage/task/list">${totalTaskCount}</a>
+                                <#else>
+                                    0
+                                </#if>
+                            </td>
+                            <th scope="row">新任务数:</td>
+                            <td>
+                                <#if (newTaskCount > 0)>
+                                    <a target="_blank" href="${request.contextPath}/manage/task/list?status=0">${newTaskCount}</a>
+                                <#else>
+                                    0
+                                </#if>
+                            </td>
+                            <th scope="row">运行中任务数:</td>
+                            <td>
+                                <#if (runningTaskCount > 0)>
+                                    <a target="_blank" href="${request.contextPath}/manage/task/list?status=1">${runningTaskCount}</a>
+                                <#else>
+                                    0
+                                </#if>
+                            </td>
+                            <th scope="row">中断任务数:</td>
+                            <td>
+                                <#if (abortTaskCount > 0)>
+                                    <a target="_blank" href="${request.contextPath}/manage/task/list?status=2">${abortTaskCount}</a>
+                                <#else>
+                                    0
+                                </#if>
+                            </td>
+                            <th scope="row">成功任务数:</td>
+                            <td>
+                                <#if (successTaskCount > 0)>
+                                    <a target="_blank" href="${request.contextPath}/manage/task/list?status=4">${successTaskCount}</a>
+                                <#else>
+                                    0
+                                </#if>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function setFigureOption(title, dataArr){
+        var length = dataArr.length;
+        var series = [];
+        var labels = [];
+        var dataSeries = [];
+        for (var i = 0; i < length; i++) {
+            var data = dataArr[i];
+            labels.push(data.param);
+            series.push(data.count);
+            var dataPoint = {
+                name: data.param + " : " + data.count,
+                value: data.count,
+            };
+            dataSeries.push(dataPoint);
+        }
+        var options = {
+            title: {
+                text: title,
+                left: 'center'
+            },
+            tooltip: {
+                trigger: 'item'
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'right'
+            },
+            series: [{
+                type: 'pie',
+                radius: '65%',
+                data: dataSeries,
+                emphasis: {
+                    itemStyle: {
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                }
+            }]
+        };
+        return options;
+    }
+
+    function initFigure(id, title, dataArr){
+        echarts.init(document.querySelector("#" + id)).setOption(setFigureOption(title, dataArr));
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {initFigure('machineMemoryDistributeContainer', '机器内存使用率', ${machineMemoryDistributeList})});
+    document.addEventListener("DOMContentLoaded", () => {initFigure('maxMemoryDistributeContainer','机器内存分配率',${maxMemoryDistributeList})});
+    document.addEventListener("DOMContentLoaded", () => {initFigure('redisDistributeContainer','应用Redis版本分布', ${redisDistributeList})});
+    document.addEventListener("DOMContentLoaded", () => {initFigure('roomDistributeContainer', '机房机器分布',${roomDistributeList})});
+
+</script>

@@ -143,4 +143,20 @@ public interface InstanceDao {
      * @param status
      */
     public void updateStatus(@Param("appId") long appId,@Param("ip") String ip,@Param("port") int port,@Param("status") int status);
+
+    /**
+     * 根据条件查询实例列表
+     * @param instanceInfo
+     * @return
+     */
+    public List<InstanceInfo> getInstancesByCondition(InstanceInfo instanceInfo);
+
+    /**
+     * 根据条件(应用ids, 实例ip:port)查询已下线实例列表
+     * @param appIds
+     * @param hostports
+     * @return
+     */
+    public List<InstanceInfo> getOfflineInstByAppIdAndHostport(@Param("appIds") List<Long> appIds, @Param("hostports") List<String> hostports);
+
 }

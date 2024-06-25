@@ -296,6 +296,7 @@ public class MachineManageController extends BaseController {
             }
             MachineStats ms = machineCenter.getMachineMemoryDetail(ip);
             machineCanUseMem.put(ip, ms.getMachineMemInfo().getLockedMem());
+            machineStatsMap.get(ip).setMachineMemInfo(ms.getMachineMemInfo());
         }
         model.addAttribute("appInfoMap", appInfoMap);
 

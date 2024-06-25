@@ -1,0 +1,121 @@
+<script type="text/javascript">
+  function setConfig(){
+    $.post(
+            '${request.contextPath}/manage/app/resource/add.json',
+            {
+              resourceId: $('#resourceId').html(),
+              resourceName: $('#resourceName').val(),
+              resourceDir: $('#resourceDir').val(),
+              resourceUrl: $('#resourceUrl').val(),
+              resourceType:   1,
+              resourceStatus: 1
+            },
+            function (data) {
+              var status = data.status;
+              if (status == 1 || status == 2) {
+                alert("设置成功");
+              } else {
+                alert("设置异常！");
+              }
+              window.location.reload();
+            }
+    );
+  }
+
+  function check(){
+    $.post(
+            '${request.contextPath}/manage/app/resource/add.json',
+            {
+              resourceId: $('#resourceId').html(),
+              resourceName: $('#resourceName').val(),
+              resourceDir: $('#resourceDir').val(),
+              resourceUrl: $('#resourceUrl').val()
+            },
+            function (data) {
+              var status = data.status;
+              if (status == 1) {
+                alert("设置成功");
+              } else {
+                alert("设置异常！");
+              }
+              window.location.reload();
+            }
+    );
+  }
+</script>
+
+<div class="card">
+  <div class="card-body">
+    <div class="row">
+      <div id="respo-div" class="col-md-12">
+        <form class="row align-items-center" role="form" name="ec">
+          <div class="form-group row">
+            <label id="resourceId" class="col-form-label col-auto" style="display:none">${repository.id!}</label>
+            <div class="form-group col-auto">
+              <label id="respo">远程仓库地址：</label>
+            </div>
+            <label class="col-auto">ip:</label>
+            <div class="col-md-3">
+              <input id="resourceName" type="text"
+                        value="${repository.name!}" class="form-control" name="pattern" placeholder="仓库ip">
+            </div>
+            <label class="col-auto">根目录：</label>
+            <div class="col-md-4">
+              <input id="resourceDir" type="text"
+                            value="${repository.dir!}" class="form-control" name="pattern" placeholder="路径">
+            </div>
+            <div class="form-group col-auto">
+              <button type="button" class="form-control btn btn-success" onclick="setConfig()">设置</button>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-auto">资源下载地址：</label>
+            <div class="col-md-9">
+              <input id="resourceUrl" style="width: 70%" type="text"
+                     value="${repository.url!}" class="form-control" name="pattern" placeholder="域名地址">
+            </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="row mt-3">
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered table-hover" id="tableDataList">
+          <thead>
+          <tr>
+            <th scope="col">目录</th>
+            <th scope="col">资源名</th>
+            <th scope="col">资源说明</th>
+            <th scope="col">状态</th>
+          </tr>
+          </thead>
+          <tbody>
+          <#list resourceList as resource>
+            <#if (resource.type != 1) && (resource.type != 6)>
+              <tr>
+                <td>
+                  <a target="_blank" href="${repository.url!}${resource.dir!}">${resource.dir!}</a>
+                </td>
+                <td>
+                  <#if (resource.ispush==1) || (resource.ispush==3)><a target="_blank" href="${repository.url!}${resource.dir!}/${resource.name!}">${resource.name!}</a></#if>
+                  <#if (resource.ispush==0) || (resource.ispush==2) || (resource.ispush==4)>${resource.name!}</#if>
+                </td>
+                <td>
+                  ${resource.intro!}
+                </td>
+                <td>
+                  <#if (resource.ispush==1)><span style="color:green">已推送</span></#if>
+                  <#if (resource.ispush==3)><span style="color:green">已推送</span><span style="color:red">(有新修改)</span></#if>
+                  <#if (resource.ispush==2)>未推送<span style="color:red">(有新修改)</span></#if>
+                  <#if (resource.ispush==0)>未推送</#if>
+                  <#if (resource.ispush==4)><span style="color:orange">编译中...</span></#if>
+                </td>
+              </tr>
+            </#if>
+          </#list>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

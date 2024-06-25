@@ -27,6 +27,8 @@ import java.util.regex.Pattern;
 import static com.sohu.cache.constant.BaseConstant.WORD_SEPARATOR;
 import static com.sohu.cache.constant.EmptyObjectConstant.EMPTY_STRING;
 import static com.sohu.cache.constant.SymbolConstant.COMMA;
+import static com.sohu.cache.constant.SymbolConstant.PERCENT;
+import static com.sohu.cache.constant.SymbolConstant.SPACE;
 
 /**
  * Created by yijunzhang on 14-6-20.
@@ -40,12 +42,16 @@ public class SSHUtil {
     private final static String LOAD_AVERAGE_STRING = "load average: ";
     private final static String COMMAND_MEM = "cat /proc/meminfo | grep -E -w 'MemTotal|MemFree|Buffers|Cached'";
 
-    private final static String COMMAND_CPU_MEM_DF = "(top -b -n 1 | head -5) && (cat /proc/meminfo | grep -E -w 'MemTotal|MemFree|Buffers|Cached') && (df -h)";
+    private final static String COMMAND_CPU_MEM_DF = "(top -b -n 1 | head -5) && (cat /proc/meminfo | grep -E -w 'MemTotal|MemFree|Buffers|Cached') && ((mount | grep '/opt/cachecloud/data');(df -aBM | grep -v '-'))";
 
     private final static String MEM_TOTAL = "MemTotal";
     private final static String MEM_FREE = "MemFree";
     private final static String MEM_BUFFERS = "Buffers";
     private final static String MEM_CACHED = "Cached";
+
+    private final static String MOUNT_CACHECLOUD_PATH = "/opt/cachecloud/data";
+
+    private final static String M_SIZE = "M";
 
     @Autowired
     private SSHTemplate sshTemplate;
@@ -88,6 +94,11 @@ public class SSHUtil {
                 private String freeMem;
                 private String buffersMem;
                 private String cachedMem;
+
+                private String totalDisk;
+                private String availableDisk;
+                private String usedDiskRatio;
+                private String mountDisk;
                 private Map<String, String> diskUsageMap = Maps.newHashMap();
 
                 public void process(String line, int lineNum) throws Exception {
@@ -121,6 +132,15 @@ public class SSHUtil {
                             cachedMem = matchMemLineNumber(line).trim();
                         }
                     } else if (lineNum >= 10) {
+                        if(lineNum == 10){
+                            if(line.contains(MOUNT_CACHECLOUD_PATH)){
+                                String[] mountArray = line.split(SPACE);
+                                if(mountArray != null && mountArray.length > 1){
+                                    mountDisk = mountArray[0];
+                                }
+                                return;
+                            }
+                        }
                         /**
                          * 内容通常是这样： Filesystem 容量 已用 可用 已用% 挂载点 /dev/xvda2 5.8G 3.2G 2.4G
                          * 57% / /dev/xvda1 99M 8.0M 86M 9% /boot none 769M 0 769M 0%
@@ -133,6 +153,23 @@ public class SSHUtil {
                             String diskUsage = lineArray[4];
                             String mountedOn = lineArray[5];
                             diskUsageMap.put(mountedOn, diskUsage);
+                            if(StringUtils.isNotEmpty(mountDisk) && totalDisk == null){
+                                String fileDisk = lineArray[0];
+                                if(mountDisk.equals(fileDisk)){
+                                    totalDisk = lineArray[1];
+                                    if(totalDisk != null){
+                                        totalDisk = totalDisk.replace(M_SIZE, EMPTY_STRING);
+                                    }
+                                    availableDisk = lineArray[3];
+                                    if(availableDisk != null){
+                                        availableDisk = availableDisk.replace(M_SIZE, EMPTY_STRING);
+                                    }
+                                    usedDiskRatio = lineArray[4];
+                                    if(usedDiskRatio != null){
+                                        usedDiskRatio = usedDiskRatio.replace(PERCENT, EMPTY_STRING);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -150,6 +187,9 @@ public class SSHUtil {
                         machineStats.setMemoryFree(String.valueOf(usedMemFree));
                         DecimalFormat df = new DecimalFormat("0.00");
                         machineStats.setMemoryUsageRatio(df.format(memoryUsage * 100));
+                        machineStats.setDiskTotal(totalDisk);
+                        machineStats.setDiskAvailable(availableDisk);
+                        machineStats.setDiskUsageRatio(usedDiskRatio);
                     }
                     machineStats.setDiskUsageMap(diskUsageMap);
                 }

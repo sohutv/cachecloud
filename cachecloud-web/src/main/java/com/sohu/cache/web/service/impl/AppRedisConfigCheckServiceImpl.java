@@ -165,7 +165,7 @@ public class AppRedisConfigCheckServiceImpl implements AppRedisConfigCheckServic
     private String getConfigByCommand(AppDesc appDesc, InstanceInfo instanceInfo, String configName){
         String configValue = null;
         // 1.获取连接
-        final Jedis jedis = redisCenter.getJedis(appDesc.getAppId(), instanceInfo.getIp(), instanceInfo.getPort(), 5000, 5000);
+        final Jedis jedis = redisCenter.getAdminJedis(appDesc.getAppId(), instanceInfo.getIp(), instanceInfo.getPort(), 5000, 5000);
         try {
             List<String> strings = jedis.configGet(configName);
             if(strings != null && strings.size() > 1){

@@ -1,0 +1,211 @@
+<script type="text/javascript">
+  var TableManaged = function () {
+    return {
+      //main function to initiate the module
+      init: function () {
+        if (!jQuery().dataTable) {
+          return;
+        }
+        $('#job_tableDataList').dataTable({
+          "searching": true,
+          // "scrollX": true,
+          // "autoWidth": true,
+          "ordering": false,
+          "lengthChange": false,
+          "pageLength": 15,
+          "language": {
+            "paginate": {
+              "first": "<<",
+              "previous": "<",
+              "next": ">",
+              "last": ">>"
+            },
+            "lengthMenu": "每页显示 _MENU_条",
+            "zeroRecords": "没有找到符合条件的数据",
+            "info": "共_PAGES_页,_TOTAL_条",
+            "infoFiltered": "",
+            "infoEmpty":"共0页,0条",
+          }
+        });
+      }
+    };
+  }();
+
+  $(function () {
+    TableManaged.init();
+  });
+</script>
+
+<div class="card-header">
+  <h3 class="card-title">
+    我的工单
+  </h3>
+</div>
+
+<div class="card-body table-responsive">
+  <table class="table table-striped table-bordered table-hover">
+    <tr>
+      <td><span style="font-weight:bold">工单总数</span></td>
+      <td>${jobList?size}</td>
+      <td><span style="font-weight:bold">完成工单数</span></td>
+      <td>
+        <#if statusStatisMap['1']??>
+          ${statusStatisMap['1']!}
+        <#else>
+          0
+        </#if>
+      </td>
+      <td style="color:orange;"><span style="font-weight:bold">待处理工单数</span></td>
+      <td style="color:orange;">
+        <#if (statusStatisMap['0']?? && statusStatisMap['2']??)>
+          ${statusStatisMap['0'] + statusStatisMap['2']}
+        <#else>
+        0
+        </#if>
+      </td>
+      <td><span style="font-weight:bold">被驳回工单数</span></td>
+      <td>
+        <#if statusStatisMap['-1']??>
+          ${statusStatisMap['-1']!}
+        <#else>
+          0
+        </#if>
+      </td>
+    </tr>
+    <tr>
+      <td><span style="font-weight:bold">申请应用</span></td>
+      <td>
+        <#if typeStatisMap['0']??>
+          ${typeStatisMap['0']!}
+        <#else>
+          0
+        </#if>
+      </td>
+      <td><span style="font-weight:bold">下线应用</span></td>
+      <td>
+        <#if typeStatisMap['10']??>
+          ${typeStatisMap['10']!}
+        <#else>
+          0
+        </#if>
+      </td>
+      <td><span style="font-weight:bold">键值分析</span></td>
+      <td>
+        <#if typeStatisMap['6']??>
+          ${typeStatisMap['6']!}
+        <#else>
+          0
+        </#if>
+      </td>
+      <td><span style="font-weight:bold">诊断应用</span></td>
+      <td>
+        <#if typeStatisMap['8']??>
+          ${typeStatisMap['8']!}
+        <#else>
+          0
+        </#if>
+      </td>
+    </tr>
+    <tr>
+      <td><span style="font-weight:bold">容量变更</span></td>
+      <td>
+        <#if typeStatisMap['1']??>
+          ${typeStatisMap['1']!}
+        <#else>
+          0
+        </#if>
+      </td>
+      <td><span style="font-weight:bold">配置修改</span></td>
+      <td>
+        <#if (typeStatisMap['4']?? && typeStatisMap['2']??)>
+          ${typeStatisMap['4']+typeStatisMap['2']}
+        <#else>
+          0
+        </#if>
+      </td>
+      <td><span style="font-weight:bold">用户注册</span></td>
+      <td>
+        <#if typeStatisMap['3']??>
+          ${typeStatisMap['3']!}
+        <#else>
+          0
+        </#if>
+      </td>
+      <td><span style="font-weight:bold">应用数据迁移</span></td>
+      <td>
+        <#if typeStatisMap['11']??>
+          ${typeStatisMap['11']!}
+        <#else>
+          0
+        </#if>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<div class="card-body table-responsive">
+  <table class="table table-bordered table-hover table-sm" id="job_tableDataList">
+    <thead>
+    <tr>
+      <th>序号</th>
+      <th>应用ID</th>
+      <th>应用名</th>
+      <th>申请人</th>
+      <th>申请类型</th>
+      <th>申请描述</th>
+      <th>申请时间</th>
+      <th>审批状态</th>
+      <th>处理人</th>
+      <th>完成时间</th>
+      <th>结果</th>
+    </tr>
+    </thead>
+    <tbody>
+    <#list jobList as item>
+      <tr>
+        <td>${item_index + 1}</td>
+        <td>
+          <#if (item.type == 3)>
+            无
+          <#else>
+            <a target="_blank" href="${request.contextPath}/admin/app/index?appId=${item.appId!}">${item.appId!}</a>
+          </#if>
+        </td>
+        <td>
+          <#if (item.type == 3)>
+              无
+          <#else>
+            <#if item.appDesc?? && item.appDesc.name??>
+              ${item.appDesc.name!}
+            </#if>
+          </#if>
+        </td>
+        <td>${item.userName!}</td>
+        <td>${(appAuditTypeMap?api.get(item.type)).info!}</td>
+        <td>${item.info!}</td>
+        <td>${item.createTime?string("yyyy-MM-dd HH:mm:ss")}</td>
+        <td>
+          <#if (item.status == 0)><font style="color: orange;">待审</font>
+          <#elseif (item.status == 1)><font style="color: green;">通过</font>
+          <#elseif (item.status == 2)><font style="color: cornflowerblue;">已受理</font>
+          <#elseif (item.status == -1)><font style="color: darkred;">驳回</font>
+          </#if>
+        </td>
+        <td>
+          <#if adminMap?? && item.operateId?? && (adminMap?api.get(item.operateId))??>
+            ${(adminMap?api.get(item.operateId)).chName!}
+          </#if>
+        </td>
+        <td>
+          <#if (item.status == 1 || item.status == -1)>${item.modifyTime?string("yyyy-MM-dd HH:mm:ss")}</#if>
+        </td>
+        <td>
+          <#if (item.status == 1) && (item.type == 6)><a target="_blank" href="${request.contextPath}/admin/app/keyAnalysisResult?appId=${item.appId!}&auditId=${item.id!}">[查看结果]</a>
+          <#elseif (item.status == -1)>${item.refuseReason!}
+          </#if>
+        </td>
+      </tr>
+    </#list>
+    </tbody>
+  </table>
+</div>

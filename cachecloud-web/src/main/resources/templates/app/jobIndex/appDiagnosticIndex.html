@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>CacheCloud</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+
+  <!-- Template Main CSS File -->
+  <link href="${request.contextPath}/assets/css/jobindex.css" rel="stylesheet">
+  <#include '/inc/frontResources.html'>
+  <script src="${request.contextPath}/assets/js/custom/getInstancesByAppId.js"></script>
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed">
+
+  <div class="wrapper">
+
+    <#include "/app/jobIndex/head.html">
+    <#include "/app/jobIndex/nav.html">
+
+    <div class="content-wrapper">
+      <!-- Main content -->
+      <section class="content pt-3">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-12">
+              <div class="card">
+                <#include "/app/jobIndex/appDiagnostic.html">
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+<#include "/manage/inc/footer.html">
+
+</body>
+<script>
+  $(function () {
+    $("#newJobTab").addClass("active");
+    $("#appDiagnosticTab").addClass("active");
+  });
+</script>
+</html>

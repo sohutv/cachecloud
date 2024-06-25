@@ -22,10 +22,12 @@ public interface InstanceAlertConfigDao {
     List<InstanceAlertConfig> getAll();
     
     List<InstanceAlertConfig> getByType(@Param("type") int type);
-    
+
+    List<InstanceAlertConfig> getByTypeAndAppType(@Param("type") int type, @Param("appType") int appType);
+
     List<InstanceAlertConfig> getByAlertConfig(@Param("alertConfig") String alertConfig);
 
-    List<InstanceAlertConfig> getByAlertConfigAndType(@Param("alertConfig") String alertConfig, @Param("type") int type);
+    List<InstanceAlertConfig> getByAlertConfigAndType(@Param("alertConfig") String alertConfig, @Param("type") int type, @Param("appType") Integer appType);
 
     InstanceAlertConfig get(@Param("id") int id);
 
@@ -33,7 +35,7 @@ public interface InstanceAlertConfigDao {
     
     void update(@Param("id") long id, @Param("alertValue") String alertValue, @Param("checkCycle") int checkCycle,  @Param("compareType") int compareType, @Param("importantLevel") int importantLevel);
 
-    void updateImportantLevel(@Param("alertConfig") String alertConfig, @Param("compareType") int compareType, @Param("importantLevel") int importantLevel);
+    void updateImportantLevel(@Param("alertConfig") String alertConfig, @Param("compareType") int compareType, @Param("importantLevel") int importantLevel, @Param("appType") int appType);
 
     void updateLastCheckTime(@Param("id") long id, @Param("lastCheckTime") Date lastCheckTime);
     

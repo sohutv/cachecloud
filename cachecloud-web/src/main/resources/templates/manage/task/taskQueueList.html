@@ -1,0 +1,152 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          任务管理
+        </h3>
+      </div>
+      <div class="card-body">
+        <form id="pageForm" class="row align-items-center" action="${request.contextPath}/manage/task/list" method="get" role="form">
+          <label class="col-form-label col-auto">
+            任务id:
+          </label>
+          <div class="col-md-2">
+            <input type="text" name="searchTaskId" class="form-control" id="searchTaskId" value="${searchTaskId!}" placeholder="" onchange="testisNum(this.id)"/>
+          </div>
+          <label class="col-form-label col-auto">
+            appId:
+          </label>
+          <div class="col-md-2">
+            <input type="text" name="appId" id="appId" class="form-control"  value="${taskSearch.appId!}" placeholder="" onchange="testisNum(this.id)"/>
+          </div>
+          <label class="col-form-label col-auto">
+            类名:
+          </label>
+          <div class="col-md-2">
+            <input type="text" name="className" class="form-control"  id="className" value="${taskSearch.className!}" placeholder="" />
+          </div>
+          <label class="col-form-label col-auto">
+            状态:
+          </label>
+          <div class="col-auto">
+            <select name="status" class="form-select">
+              <option value="-1">
+                全部
+              </option>
+              <option value="0" <#if (taskSearch.status == 0)>selected="selected"</#if>>
+              新任务
+              </option>
+              <option value="1" <#if (taskSearch.status == 1)>selected="selected"</#if>>
+              运行中
+              </option>
+              <option value="2" <#if (taskSearch.status == 2)>selected="selected"</#if>>
+              中断
+              </option>
+              <option value="4" <#if (taskSearch.status == 4)>selected="selected"</#if>>
+              成功
+              </option>
+              <option value="5" <#if (taskSearch.status == 5)>selected="selected"</#if>>
+              准备
+              </option>
+            </select>
+          </div>
+          <input type="hidden" name="pageNo" id="pageNo">
+          &nbsp;<button type="submit" class="btn btn-primary btn-sm col-auto">查询</button>
+        </form>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body table-responsive">
+        <table class="table table-striped table-bordered table-hover table-sm" id="tableDataList" style="white-space: nowrap">
+          <thead>
+          <tr>
+            <th scope="col">任务id</th>
+            <th scope="col">集群id</th>
+            <th scope="col">类名</th>
+            <th scope="col">信息</th>
+            <th scope="col">状态</th>
+            <th scope="col">进度</th>
+            <th scope="col">父任务id</th>
+            <th scope="col">耗时(s)</th>
+            <th scope="col">开始时间</th>
+            <th scope="col">结束时间</th>
+            <th scope="col">创建时间</th>
+            <th scope="col">备注</th>
+            <th scope="col">操作</th>
+          </tr>
+          </thead>
+          <tbody>
+          <#list taskQueueList as taskQueue>
+            <tr>
+              <td>
+                <#if (taskQueue.className == 'MachineDownAndAppFixTask')>
+                  <a target="_blank" href="${request.contextPath}/manage/machine/taskInfo?taskId=${taskQueue.id!}">${taskQueue.id!}</a>
+                <#else>
+                  ${taskQueue.id!}
+                </#if>
+              </td>
+              <td>${taskQueue.appId!}</td>
+              <td>${taskQueue.className!}</td>
+              <td>
+                <#if (taskQueue.className == 'TwemproxyToTwemproxyTaskV2')>
+                  <a target="_blank" href="${request.contextPath}/manage/migrate/list">${taskQueue.importantInfo!}</a>
+                <#else>
+                  ${taskQueue.importantInfo!}
+                </#if>
+              </td>
+              <td>
+                <#if (taskQueue.status == 2)>
+                  <font color='red'>${taskQueue.statusDesc!}</font>
+                <#else>
+                  ${taskQueue.statusDesc!}
+                </#if>
+              </td>
+              <td>${taskQueue.progress!}</td>
+              <td>
+                <#if (taskQueue.parentTaskId != 0)>
+                  ${taskQueue.parentTaskId!}
+                </#if>
+              </td>
+              <td>${taskQueue.costSeconds!}</td>
+              <td>
+                <#if (taskQueue.status != 0)>
+                  ${taskQueue.startTime!?string("yyyy-MM-dd HH:mm:ss")}
+                </#if>
+              </td>
+              <td>
+                <#if (taskQueue.status == 4)>
+                  ${taskQueue.endTime!?string("yyyy-MM-dd HH:mm:ss")}
+                </#if>
+              </td>
+              <td>
+                ${taskQueue.createTime!?string("yyyy-MM-dd HH:mm:ss")}
+              </td>
+              <td>${taskQueue.taskNote!}</td>
+              <td>
+                <a href="${request.contextPath}/manage/task/flow?taskId=${taskQueue.id!}">[执行步骤]</a>
+                <#if (taskQueue.status == 2)>
+                  <a href="${request.contextPath}/manage/task/execute?taskId=${taskQueue.id!}">[重试任务]</a>
+                </#if>
+              </td>
+            </tr>
+          </#list>
+          </tbody>
+        </table>
+        <div style="margin-top: 10px;">
+          <span>
+              <div id="pageDetail" style="float:left;padding-top:7px;color:#4A64A4;">
+                  <#if page??>
+                      共${page.totalPages!}页,${page.totalCount!}条
+                  </#if>
+              </div>
+              <nav id='ccPagenitor' aria-label="Page navigation example" class="d-inline-flex float-end">
+              </nav>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<#include "/manage/inc/page.html">

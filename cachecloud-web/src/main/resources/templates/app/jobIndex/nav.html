@@ -1,0 +1,116 @@
+<!-- ======= Sidebar ======= -->
+<aside id="sidebar" class="main-sidebar sidebar-dark-primary elevation-4">
+    <div class="sidebar">
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false" id="sidebar-nav">
+                <li class="nav-item">
+                    <a id="myjobTab" class="nav-link" href="${request.contextPath}/admin/app/jobs">
+                        <i class="bi bi-layout-text-window-reverse"></i>
+                        <p>我的工单</p>
+                    </a>
+                </li>
+
+                <li class="nav-item menu-is-opening menu-open">
+                    <a id="newJobTab" class="nav-link collapsed" data-bs-target="#tables-nav" data-bs-toggle="collapse" href="#">
+                        <i class="bi bi-plus-lg"></i>
+                        <p>
+                            创建工单
+                            <i class="right bi bi-chevron-left"></i>
+                        </p>
+                    </a>
+
+                    <ul id="tables-nav" class="nav nav-treeview" style="display: block;">
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="${request.contextPath}/admin/app/init" id="appInitTab">
+                                <i class="bi bi-cloud-fill"></i>
+                                <p>申请应用</p>
+                            </a>
+                        </li>
+
+                        <#if trailswitch?? && trailswitch>
+                            <li class="nav-item">
+                                <a class="nav-link" href="${request.contextPath}/admin/app/trail/init" id="appTrailInitTab">
+                                    <i class="bi bi-arrow-down-right-square"></i>
+                                    <p>申请试用集群</p>
+                                </a>
+                            </li>
+                        </#if>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="${request.contextPath}/admin/app/import" id="appImportTab">
+                                <i class="bi bi-arrow-down-right-circle"></i>
+                                <p>导入应用</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="${request.contextPath}/admin/app/appDel" id="appCleanTab">
+                                <i class="bi bi-trash3"></i>
+                                <p>数据清理</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="${request.contextPath}/admin/app/appOffline" id="appOfflineTab">
+                                <i class="bi bi-x-octagon"></i>
+                                <p>下线应用</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="${request.contextPath}/admin/app/appDataMigrate" id="appDataMigrateTab">
+                                <i class="bi bi-repeat"></i>
+                                <p>数据迁移</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="${request.contextPath}/admin/app/appDiagnostic" id="appDiagnosticTab">
+                                <i class="bi bi-shield-plus"></i>
+                                <p>诊断应用</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="${request.contextPath}/admin/app/appKeyAnalysis?appId=${appId!}" id="appKeyAnslysisTab">
+                                <i class="bi bi-clipboard-data"></i>
+                                <p>键值分析</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="${request.contextPath}/admin/app/appScale?appId=${appId!}" id="appScaleTab">
+                                <i class="bi bi-plus-slash-minus"></i>
+                                <p>扩容/缩容</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="${request.contextPath}/admin/app/appConfig?appId=${appId!}&instanceId=${instanceId!}" id="appConfigTab">
+                                <i class="bi bi-pencil-square"></i>
+                                <p>修改应用配置</p>
+                            </a>
+                        </li>
+
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="${request.contextPath}/admin/app/appAlterConfig?appId=${appId!}" id="appAlertTab">
+                                <i class="bi bi-bell-fill"></i>
+                                <p>修改报警</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="${request.contextPath}/admin/app/appScanClean" id="appScanCleanTab">
+                                <i class="bi bi-clipboard-plus"></i>
+                                <p>数据分析清理</p>
+                            </a>
+                        </li>
+
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</aside><!-- End Sidebar-->

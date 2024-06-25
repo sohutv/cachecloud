@@ -87,7 +87,7 @@ public class RedisMigrateToolCenterImpl implements RedisMigrateToolCenter {
      * @param migrateMachineIp
      * @return
      */
-    private AppDataMigrateResult checkMigrateMachine(String migrateMachineIp,SystemResource resource) {
+    private AppDataMigrateResult checkMigrateMachine(String migrateMachineIp, SystemResource resource) {
         if (StringUtils.isBlank(migrateMachineIp)) {
             return AppDataMigrateResult.fail("redis-migrate-tool所在机器的IP不能为空");
         }
@@ -191,8 +191,8 @@ public class RedisMigrateToolCenterImpl implements RedisMigrateToolCenter {
 
     @Override
     public AppDataMigrateStatus migrate(String migrateMachineIp, AppDataMigrateEnum sourceRedisMigrateEnum, String sourceServers,
-                           AppDataMigrateEnum targetRedisMigrateEnum, String targetServers, long sourceAppId, long targetAppId,
-                           String redisSourcePass, String redisTargetPass, long userId, SystemResource resource) {
+                                        AppDataMigrateEnum targetRedisMigrateEnum, String targetServers, long sourceAppId, long targetAppId,
+                                        String redisSourcePass, String redisTargetPass, long userId, SystemResource resource) {
         // 1. 生成配置
         int migrateMachinePort = ConstUtils.REDIS_MIGRATE_TOOL_PORT;
         String configContent = generateConfig(migrateMachinePort, sourceRedisMigrateEnum, sourceServers, targetRedisMigrateEnum,

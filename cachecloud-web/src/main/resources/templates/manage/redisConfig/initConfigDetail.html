@@ -1,0 +1,352 @@
+<script type="text/javascript">
+  <!-- add redis config -->
+  function removeConfig(id, configKey) {
+    if (confirm("确认要删除key="+configKey+"配置?")) {
+      $.get(
+              '${request.contextPath}/manage/redisConfig/remove.json',
+              {
+                id: id,
+                versionName:$('#currentVersionName').val()
+              },
+              function(data){
+                var status = data.status;
+                if (status == 1) {
+                  alert("删除成功!");
+                } else {
+                  alert("删除失败, msg: " + result.message);
+                }
+                window.location.reload();
+              }
+      );
+    }
+  }
+
+  function changeConfig(id, configKey) {
+    var configValue = document.getElementById("configValue" + id);
+    var info = document.getElementById("info" + id);
+    var status = document.getElementById("status" + id);
+    var valueType = document.getElementById("valueType" + id);
+    $.get(
+            '${request.contextPath}/manage/redisConfig/update.json',
+            {
+              id: id,
+              configKey: configKey,
+              configValue: configValue.value,
+              info: info.value,
+              status: status.value,
+              versionName:$('#currentVersionName').val(),
+              valueType: valueType.value
+            },
+            function(data){
+              var status = data.status;
+              if (status == 1) {
+                alert("修改成功！");
+                window.location.reload();
+              } else {
+                alert("修改失败！" + data.message);
+              }
+
+            }
+    );
+  }
+
+  function saveRedisConfig() {
+    var configKey = document.getElementById("configKey");
+    if (configKey.value == ""){
+      alert("请填写配置名");
+      configKey.focus();
+      return false;
+    }
+    var configValue = document.getElementById("configValue");
+    var info = document.getElementById("info");
+    if (info.value == "") {
+      alert("请填写配置说明");
+      info.focus();
+      return false;
+    }
+    var type = document.getElementById("type");
+    var valueType = document.getElementById("valueType");
+    $.get(
+            '${request.contextPath}/manage/redisConfig/add.json',
+            {
+              configKey: configKey.value,
+              configValue: configValue.value,
+              info: info.value,
+              type: type.value,
+              versionid: $('#version option:selected').attr("versionid"),
+              versionName:$('#currentVersionName').val(),
+              valueType: valueType.value
+            },
+            function(data){
+              var status = data.status;
+              if (status == 1) {
+                alert("添加成功！");
+              } else {
+                alert("添加失败！" + data.message);
+              }
+              window.location.reload();
+            }
+    );
+  }
+</script>
+
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <nav class="nav">
+          <ul class="nav nav-tabs d-flex align-items-center" id="app_tabs">
+            <#list resourceList as resource>
+              <li class="nav-item" data-url="${request.contextPath}/manage/redisConfig/init?versionid=${resource.id!}">
+                <a class="nav-link d-flex <#if currentVersion?? && currentVersion.id?? && (resource.id == currentVersion.id)>active</#if>" href="?versionid=${resource.id!}">${resource.name!}</a>
+              </li>
+            </#list>
+          </ul>
+        </nav>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="row">
+          <div class="col-md-6">
+            <h3 class="card-title">
+              <#if currentVersion??>
+                ${currentVersion.name!}
+              </#if>
+              <#if type?? && (type==6)>普通配置
+              <#elseif type?? && (type==2)>Cluster
+              <#elseif type?? && (type==5)>Sentinel
+              </#if>
+              <a target="_blank" href="${request.contextPath}/manage/redisConfig/preview?type=${type!}&versionId=${versionid!}" class="btn btn-info" role="button">配置模板 预览</a>
+              <button id="sample_editable_1_new" class="btn btn-info" data-bs-target="#addRedisConfigModal" data-bs-toggle="modal">
+                添加配置项 <i class="bi bi-plus"></i>
+              </button>
+            </h3>
+          </div>
+          <div class="offset-md-1 col-md-5 float-end">
+            <form class="row align-items-center" action="${request.contextPath}/manage/redisConfig/init" method="post">
+              <input name="versionid" id="versionid" value="${versionid!}" type="hidden"/>
+              <label class="col-form-label col-auto">
+                Redis类型:
+              </label>
+              <div class="col-auto">
+                <select name="type" class="form-select">
+                  <option value="2" <#if type?? && (type == 2)>selected</#if>>
+                    Redis-Cluster
+                  </option>
+                  <option value="5" <#if type?? && (type == 5)>selected</#if>>
+                    Redis-Sentinel
+                  </option>
+                  <option value="6" <#if type?? && (type == 6)>selected</#if>>
+                    Redis-Standalone
+                  </option>
+                  </select>
+              </div>
+              <button id="search" type="submit" class="btn btn-success btn-sm col-auto">查询</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="alert alert-warning" role="alert">
+              1. 此功能是Redis全局配置模板(每次开启应用时用到)，请谨慎修改.<br/>
+              2. 配置中的%d,%s代表Cachecloud会动态配置，最好不要修改.<br/>
+              3. 使用方法详见<a target="_blank" href='http://cachecloud.github.io/2016/07/13/1.2.%20Redis%E9%85%8D%E7%BD%AE%E6%A8%A1%E6%9D%BF%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/'>Redis配置模板使用方法</a><br/>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="bi bi-globe"></i>
+          填写配置:(配置项数:${redisConfigList?size})
+        </h3>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-12">
+            <#list redisConfigList as config>
+              <div class="form">
+                <form class="border-top border-bottom" role="form">
+                  <div class="form-body">
+                    <div class="row my-2">
+                      <label class="col-form-label col-md-2 text-end">
+                        <#if (config.status == 0)>
+                          <font color='red'>（无效配置）</font>
+                        </#if>
+                        ${config.configKey!}:
+                      </label>
+                      <div class="col-md-2">
+                        <input id="configValue${config.id!}" type="text" name="configValue" class="form-control" value="${config.configValue!}" />
+                      </div>
+                      <div class="col-md-2">
+                        <input id="info${config.id!}" type="text" name="info" class="form-control" value="${config.info!}" />
+                      </div>
+                      <div class="col-md-2">
+                        <select id="status${config.id!}" name="status" class="form-select">
+                          <option value="1" <#if (config.status == 1)>selected</#if>>
+                          有效
+                          </option>
+                          <option value="0" <#if (config.status == 0)>selected</#if>>
+                          无效
+                          </option>
+                        </select>
+                      </div>
+                      <div class="col-md-2">
+                        <select id="valueType${config.id!}" name="valueType" class="form-select">
+                          <option value="1" <#if (config.valueType == 1)>selected</#if>>
+                            取值：优先从已有节点拷贝
+                          </option>
+                          <option value="0" <#if (config.valueType == 0)>selected</#if>>
+                            取值：默认值
+                          </option>
+                        </select>
+                      </div>
+                      <div class="col-md-2">
+                        <button type="button" class="btn btn-sm btn-info" onclick="changeConfig('${config.id!}','${config.configKey!}')">
+                          修改
+                        </button>
+                        <button type="button" class="btn btn-sm btn-warning" onclick="removeConfig('${config.id!}','${config.configKey!}')">
+                          删除
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <#if currentVersion?? && (currentVersion.name??)>
+                    <#assign currentVersionNameValue = currentVersion.name>
+                  <#else>
+                    <#assign currentVersionNameValue = "">
+                  </#if>
+                  <input type="hidden" id="currentVersionName" value="${currentVersionNameValue!}">
+                  <input type="hidden" name="configKey" value="${config.configKey!}">
+                  <input type="hidden" name="id" value="${config.id!}">
+                </form>
+                <!-- END FORM-->
+              </div>
+            </#list>
+            <!-- END TABLE PORTLET-->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 添加redis配置 -->
+<div id="addRedisConfigModal" class="modal fade" tabindex="-1" data-width="400">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h4 class="modal-title">添加Redis配置</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+      </div>
+
+      <form class="form-horizontal form-bordered form-row-stripped">
+        <div class="modal-body">
+          <div class="row">
+            <!-- 控件开始 -->
+            <div class="col-md-12">
+              <!-- form-body开始 -->
+              <div class="form-body">
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    配置名:
+                  </label>
+                  <div class="col-md-7">
+                    <input type="text" name="configKey" id="configKey"
+                           class="form-control" />
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    配置值:
+                  </label>
+                  <div class="col-md-7">
+                    <input type="text" name="configValue" id="configValue"
+                           class="form-control" />
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    配置说明:
+                  </label>
+                  <div class="col-md-7">
+                    <input type="text" name="info" id="info"
+                           class="form-control" />
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    redis版本:
+                  </label>
+                  <div class="col-md-7">
+                    <select name="type" id="version" class="form-select">
+                      <#list resourceList as resource>
+                        <option <#if (currentVersion?? && currentVersion.id?? && (resource.id == currentVersion.id))>selected</#if> versionid="${resource.id!}">${resource.name!}</option>
+                      </#list>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    类型:
+                  </label>
+                  <div class="col-md-7">
+                    <select name="type" id="type" class="form-select">
+                      <option value="6" <#if type?? && (type == 6)>selected</#if> >
+                      Redis普通配置
+                      </option>
+                      <option value="2" <#if type?? && (type == 2)>selected</#if> >
+                      Redis Cluster配置
+                      </option>
+                      <option value="5" <#if type?? && (type == 5)>selected</#if> >
+                      Redis Sentinel配置
+                      </option>
+
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    取值类型:
+                  </label>
+                  <div class="col-md-7">
+                    <select name="valueType" id="valueType" class="form-select">
+                      <option value="0" <#if valueType?? && (valueType == 0)>selected</#if> >
+                        默认值
+                      </option>
+                      <option value="1" <#if valueType?? && (valueType == 1)>selected</#if> >
+                        优先从已有节点拷贝
+                      </option>
+                    </select>
+                  </div>
+                </div>
+
+              </div>
+              <!-- form-body 结束 -->
+            </div>
+            <div id="info"></div>
+            <!-- 控件结束 -->
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" data-bs-dismiss="modal" class="btn btn-secondary" >Close</button>
+          <button type="button" id="configBtn" class="btn btn-danger" onclick="saveRedisConfig()">Ok</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>

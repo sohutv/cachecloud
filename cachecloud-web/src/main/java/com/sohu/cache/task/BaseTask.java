@@ -1,6 +1,7 @@
 package com.sohu.cache.task;
 
 import com.google.common.collect.Lists;
+import com.sohu.cache.async.AsyncService;
 import com.sohu.cache.dao.*;
 import com.sohu.cache.entity.*;
 import com.sohu.cache.machine.MachineCenter;
@@ -23,15 +24,17 @@ import com.sohu.cache.task.entity.RedisSentinelNode;
 import com.sohu.cache.task.entity.RedisServerNode;
 import com.sohu.cache.task.entity.TaskQueue;
 import com.sohu.cache.task.util.AppWechatUtil;
+import com.sohu.cache.web.service.AppScrollRestartService;
 import com.sohu.cache.web.service.AppService;
 import com.sohu.cache.web.service.InstancePortService;
-import com.sohu.cache.web.service.ModuleService;
 import com.sohu.cache.web.service.ResourceService;
+import com.sohu.cache.web.service.ToolService;
 import com.sohu.cache.web.util.AppEmailUtil;
 import com.sohu.cache.web.util.SimpleFileUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
@@ -142,7 +145,13 @@ public abstract class BaseTask {
     protected ResourceDao resourceDao;
 
     @Autowired
-    protected ModuleService moduleService;
+    protected ToolService toolService;
+
+    @Autowired
+    protected AppScrollRestartService appScrollRestartService;
+
+    @Autowired
+    protected AsyncService asyncService;
 
     /**
      * 任务id
@@ -649,6 +658,37 @@ public abstract class BaseTask {
         //return updateTime.getTime() > DateUtils.addHours(new Date(), -5).getTime();
     }
 
+    protected TaskFlowStatusEnum checkResourceAllow(List<String> redisServerMachineList, long memoryNeed){
+        for (String redisServerIp : redisServerMachineList) {
+            MachineStats machineStats = machineStatsDao.getMachineStatsByIp(redisServerIp);
+            if (machineStats == null) {
+                logger.error(marker, "{} redis server machineStats is null", redisServerIp);
+                return TaskFlowStatusEnum.ABORT;
+            }
+            MachineInfo machineInfo = machineDao.getMachineInfoByIp(redisServerIp);
+            if (machineInfo == null) {
+                logger.error(marker, "redis server machine info is null");
+                return TaskFlowStatusEnum.ABORT;
+            }
+            // 机器是否分配 isAllocate
+            if (machineInfo.getIsAllocating() == 1) {
+                logger.error(marker, "redis server machine info {} {} allocating is 1", machineInfo.getIp(), redisServerIp);
+                return TaskFlowStatusEnum.ABORT;
+            }
+            if (!checkMachineStatIsUpdate(machineStats)) {
+                logger.error(marker, "redis server machine stats {} update_time is {}, may be not updated recently", machineInfo.getIp(), machineStats.getUpdateTimeFormat());
+                return TaskFlowStatusEnum.ABORT;
+            }
+            //兆
+            long memoryFree = NumberUtils.toLong(machineStats.getMemoryFree()) / 1024 / 1024;
+            if (memoryNeed > memoryFree * 0.85) {
+                logger.error(marker, "{} need {} MB, but memoryFree is {} MB", redisServerIp, memoryNeed, memoryFree);
+                return TaskFlowStatusEnum.ABORT;
+            }
+        }
+        return TaskFlowStatusEnum.SUCCESS;
+    }
+
     /**
      * 计算quorum
      *
@@ -680,6 +720,17 @@ public abstract class BaseTask {
             e.printStackTrace();
         }
         return false;
+    }
+
+    protected TaskFlowStatusEnum checkMachineConnect(List<String> ipList, String errorTip) {
+        for (String redisServerIp : ipList) {
+            boolean isConnected = checkMachineIsConnect(redisServerIp);
+            if (!isConnected) {
+                logger.error(marker, errorTip, redisServerIp);
+                return TaskFlowStatusEnum.ABORT;
+            }
+        }
+        return TaskFlowStatusEnum.SUCCESS;
     }
 
     /**

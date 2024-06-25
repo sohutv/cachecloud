@@ -30,6 +30,11 @@ public class AsyncServiceImpl implements AsyncService {
     }
 
     @Override
+    public Future<?> submitFutureWithRst(KeyCallable<?> callable) {
+        return submitFuture((Callable)callable);
+    }
+
+    @Override
     public boolean submitFuture(String threadPoolKey, KeyCallable<?> callable) {
         try {
             ExecutorService executorService = threadPoolMap.get(threadPoolKey);
@@ -42,6 +47,22 @@ public class AsyncServiceImpl implements AsyncService {
         } catch (Exception e) {
             logger.error(callable.getKey(), e);
             return false;
+        }
+    }
+
+    @Override
+    public Future<?> submitFutureWithRst(String threadPoolKey, KeyCallable<?> callable) {
+        try {
+            ExecutorService executorService = threadPoolMap.get(threadPoolKey);
+            if (executorService == null) {
+                logger.warn("threadPoolKey={} not found , used defaultThreadPool", threadPoolKey);
+                executorService = defaultThreadPool;
+            }
+            Future<?> future = executorService.submit(callable);
+            return future;
+        } catch (Exception e) {
+            logger.error(callable.getKey(), e);
+            return null;
         }
     }
 

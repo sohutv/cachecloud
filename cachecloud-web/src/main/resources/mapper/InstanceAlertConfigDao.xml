@@ -5,13 +5,13 @@
 
     <sql id="instance_alert_config_column">
     	alert_config,alert_value,config_info,type,important_level,instance_id,status,compare_type,
-    	check_cycle,update_time,last_check_time
+    	check_cycle,update_time,last_check_time,app_type
     </sql>
     
     <insert id="save" parameterType="InstanceAlertConfig"  keyProperty="id" useGeneratedKeys="true">
 		insert into instance_alert_configs(<include refid="instance_alert_config_column" />)
 		values(#{alertConfig},#{alertValue},#{configInfo},#{type},#{importantLevel},#{instanceId},#{status},#{compareType},
-		#{checkCycle},#{updateTime},#{lastCheckTime})
+		#{checkCycle},#{updateTime},#{lastCheckTime},#{appType})
 		on duplicate key update 
 		alert_value = #{alertValue},check_cycle = #{checkCycle}, update_time = now(),status = #{status},last_check_time=now()      	
 	</insert>
@@ -21,7 +21,7 @@
         values
         <foreach collection="list" item="instance" separator="," >
             (#{instance.alertConfig},#{instance.alertValue},#{instance.configInfo},#{instance.type},#{instance.importantLevel},#{instance.instanceId},#{instance.status},#{instance.compareType},
-            #{instance.checkCycle},#{instance.updateTime},#{instance.lastCheckTime})
+            #{instance.checkCycle},#{instance.updateTime},#{instance.lastCheckTime},#{instance.appType})
         </foreach>
         on duplicate key update
         alert_value = VALUES(alert_value),
@@ -47,13 +47,29 @@
 	<select id="getByType" resultType="InstanceAlertConfig">
         select id,<include refid="instance_alert_config_column"/> from instance_alert_configs where type = #{type} order by id
     </select>
-    
+
+    <select id="getByTypeAndAppType" resultType="InstanceAlertConfig">
+        select id,<include refid="instance_alert_config_column"/> from instance_alert_configs
+       where
+           type = #{type}
+            <if test="appType != null and (appType == 0 or appType == 1)">
+                and app_type = #{appType}
+            </if>
+       order by id
+    </select>
+
     <select id="getByAlertConfig" resultType="InstanceAlertConfig">
         select id,<include refid="instance_alert_config_column"/> from instance_alert_configs where alert_config = #{alertConfig}
     </select>
 
     <select id="getByAlertConfigAndType" resultType="InstanceAlertConfig">
-        select id,<include refid="instance_alert_config_column"/> from instance_alert_configs where alert_config = #{alertConfig} and type = #{type}
+        select
+            id,<include refid="instance_alert_config_column"/>
+        from instance_alert_configs
+        where alert_config = #{alertConfig} and type = #{type}
+        <if test="appType != null and (appType == 0 or appType == 1)">
+            and app_type = #{appType}
+        </if>
     </select>
 
     <update id="update">
@@ -61,7 +77,7 @@
     </update>
 
     <update id="updateImportantLevel">
-    		update instance_alert_configs set important_level = #{importantLevel} where alert_config = #{alertConfig} and compare_type = #{compareType}
+    		update instance_alert_configs set important_level = #{importantLevel} where alert_config = #{alertConfig} and compare_type = #{compareType} and app_type = #{appType}
     </update>
 
     <update id="updateLastCheckTime">

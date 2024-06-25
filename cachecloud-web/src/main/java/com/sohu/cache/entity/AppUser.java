@@ -90,6 +90,12 @@ public class AppUser implements Serializable {
     @ApiModelProperty(value = "注册时间")
     private Date registerTime;
 
+    /**
+     * 所属业务组id
+     */
+    @ApiModelProperty(value = "所属业务组id")
+    private Long bizId;
+
     public static AppUser buildFrom(Long userId, String name, String chName, String email, String mobile, String weChat,
             Integer type) {
         AppUser appUser = new AppUser();
@@ -118,7 +124,7 @@ public class AppUser implements Serializable {
     }
 
     public static AppUser buildFrom(Long userId, String name, String chName, String email, String mobile, String weChat,
-                                    Integer type,Integer isAlert, String company, String purpose) {
+                                    Integer type,Integer isAlert, String company, String purpose, Long bizId) {
         AppUser appUser = new AppUser();
         appUser.setId(userId);
         appUser.setName(name);
@@ -130,11 +136,12 @@ public class AppUser implements Serializable {
         appUser.setIsAlert(isAlert);
         appUser.setCompany(company);
         appUser.setPurpose(purpose);
+        appUser.setBizId(bizId);
         return appUser;
     }
 
     public static AppUser buildFrom(Long userId, String name, String chName, String email, String mobile, String weChat,
-                                    Integer type,Integer isAlert, String password, String company, String purpose) {
+                                    Integer type,Integer isAlert, String password, String company, String purpose, Long bizId) {
         AppUser appUser = new AppUser();
         appUser.setId(userId);
         appUser.setName(name);
@@ -147,6 +154,7 @@ public class AppUser implements Serializable {
         appUser.setPassword(password);
         appUser.setCompany(company);
         appUser.setPurpose(purpose);
+        appUser.setBizId(bizId);
         return appUser;
     }
 

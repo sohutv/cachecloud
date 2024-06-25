@@ -23,6 +23,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +85,7 @@ public class RedisConfigTemplateController extends BaseController {
         String configValue = request.getParameter("configValue");
         String info = request.getParameter("info");
         int status = NumberUtils.toInt(request.getParameter("status"), -1);
+        int valueType = NumberUtils.toInt(request.getParameter("valueType"), 0);
         if (StringUtils.isBlank(id) || !NumberUtils.isDigits(id) || StringUtils.isBlank(configKey) || status > 1
                 || status < 0) {
             model.addAttribute("status", SuccessEnum.FAIL.value());
@@ -100,6 +102,7 @@ public class RedisConfigTemplateController extends BaseController {
             instanceConfig.setConfigValue(configValue);
             instanceConfig.setInfo(info);
             instanceConfig.setStatus(status);
+            instanceConfig.setValueType(valueType);
             redisConfigTemplateService.saveOrUpdate(instanceConfig);
             successEnum = SuccessEnum.SUCCESS;
         } catch (Exception e) {
@@ -258,7 +261,7 @@ public class RedisConfigTemplateController extends BaseController {
         if (ConstUtils.CACHE_REDIS_STANDALONE == type) {
             configList = redisConfigTemplateService.handleCommonConfig(host, port, maxMemory, null, versionId);
         } else if (ConstUtils.CACHE_REDIS_SENTINEL == type) {
-            configList = redisConfigTemplateService.handleSentinelConfig(masterName, host, port, host, sentinelPort, versionId);
+            configList = redisConfigTemplateService.handleSentinelConfig(masterName, host, port, host, sentinelPort, versionId, null);
         } else if (ConstUtils.CACHE_TYPE_REDIS_CLUSTER == type) {
             configList = redisConfigTemplateService.handleClusterConfig(port, versionId);
         }
@@ -283,13 +286,16 @@ public class RedisConfigTemplateController extends BaseController {
         String info = request.getParameter("info");
         String type = request.getParameter("type");
         String versionid = request.getParameter("versionid");
+        int valueType = NumberUtils.toInt(request.getParameter("valueType"), 0);
         InstanceConfig instanceConfig = new InstanceConfig();
         instanceConfig.setConfigKey(configKey);
         instanceConfig.setConfigValue(configValue);
         instanceConfig.setInfo(info);
         instanceConfig.setType(NumberUtils.toInt(type));
+        instanceConfig.setUpdateTime(new Date());
         instanceConfig.setStatus(1);
         instanceConfig.setVersionId(NumberUtils.toInt(versionid));
+        instanceConfig.setValueType(valueType);
 
         return instanceConfig;
     }

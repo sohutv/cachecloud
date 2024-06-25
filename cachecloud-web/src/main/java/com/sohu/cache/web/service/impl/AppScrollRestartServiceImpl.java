@@ -1,6 +1,7 @@
 package com.sohu.cache.web.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sohu.cache.constant.AppDescEnum;
 import com.sohu.cache.constant.InstanceStatusEnum;
 import com.sohu.cache.dao.ConfigRestartRecordDao;
 import com.sohu.cache.dao.InstanceConfigDao;
@@ -12,9 +13,11 @@ import com.sohu.cache.redis.AssistRedisService;
 import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.redis.RedisDeployCenter;
 import com.sohu.cache.redis.enums.DirEnum;
+import com.sohu.cache.redis.enums.RedisConfigEnum;
 import com.sohu.cache.ssh.SSHUtil;
 import com.sohu.cache.stats.instance.InstanceDeployCenter;
 import com.sohu.cache.task.constant.InstanceRoleEnum;
+import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.IdempotentConfirmer;
 import com.sohu.cache.util.StringUtil;
 import com.sohu.cache.util.TypeUtil;
@@ -48,6 +51,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * @Author: zengyizhao
@@ -170,13 +174,15 @@ public class AppScrollRestartServiceImpl implements AppScrollRestartService {
     }
 
     @Override
-    public long generateAndSaveConfigRestartRecord(AppUser appUser, AppDesc appDesc, AppRedisConfigVo appRedisConfigVo, Integer opertateType, List<InstanceInfo> instanceInfoList){
+    public long generateAndSaveConfigRestartRecord(AppUser appUser, AppDesc appDesc, Object paramObject, Integer opertateType, List<InstanceInfo> instanceInfoList){
         ConfigRestartRecord configRestartRecord = new ConfigRestartRecord();
         configRestartRecord.setAppId(appDesc.getAppId());
         configRestartRecord.setAppName(appDesc.getName());
-        configRestartRecord.setParam(JSONObject.toJSONString(appRedisConfigVo));
+        configRestartRecord.setParam(JSONObject.toJSONString(paramObject));
         if(opertateType == null){
-            configRestartRecord.setOperateType(appRedisConfigVo.isConfigFlag() == true ? 1 : 0);
+            if(paramObject instanceof AppRedisConfigVo){
+                configRestartRecord.setOperateType(((AppRedisConfigVo)paramObject).isConfigFlag() == true ? 1 : 0);
+            }
         }else{
             configRestartRecord.setOperateType(opertateType);
         }
@@ -377,8 +383,9 @@ public class AppScrollRestartServiceImpl implements AppScrollRestartService {
         //校验配置项合法性
         boolean isSupport = this.checkConfigIsSupport(appDesc, redisConfigMap);
         if(!isSupport){
-            map.put("errorInfo", String.format("配置模板中无此配置项：%s", redisConfigMap));
-            return map;
+//            map.put("errorInfo", String.format("配置模板中无此配置项：%s", redisConfigMap));
+//            return map;
+            log.error(String.format("配置模板中无此配置项：%s", redisConfigMap));
         }
         //筛选出需要处理的实例
         List<Integer> instanceIdList = appRedisConfigVo.getInstanceList();
@@ -436,6 +443,17 @@ public class AppScrollRestartServiceImpl implements AppScrollRestartService {
             map.put("errorInfo", errorInfo);
             if(StringUtil.isBlank(errorInfo)){
                 this.updateConfigRestartRecord(recordId, RestartStatusEnum.SUCCESS, this.generateLog("修改配置 >>>> 结束"));
+                // 增加特殊逻辑，判断是否为修改maxMemory-policy，对应修改appDesc表设置
+                if (redisConfigMap.containsKey(RedisConfigEnum.MAXMEMORY_POLICY.getKey())) {
+                    Set<String> maxMemoryPolicys = redisConfigMap.get(RedisConfigEnum.MAXMEMORY_POLICY.getKey());
+                    if (org.apache.commons.collections.CollectionUtils.isNotEmpty(maxMemoryPolicys)) {
+                        String maxMemoryPolicy = maxMemoryPolicys.iterator().next();
+                        AppDescEnum.MaxmemoryPolicyType maxmemoryPolicyType = AppDescEnum.MaxmemoryPolicyType.getByName(maxMemoryPolicy);
+                        if(maxmemoryPolicyType != null){
+                            appService.updateAppMaxmemoryPolicy(appDesc.getAppId(), maxmemoryPolicyType.getType());
+                        }
+                    }
+                }
             }else{
                 this.updateConfigRestartRecord(recordId, RestartStatusEnum.FAIL, this.generateLog(errorInfo));
             }
@@ -471,6 +489,17 @@ public class AppScrollRestartServiceImpl implements AppScrollRestartService {
         errorInfo = this.handleConfigByGroup(appDesc, appRedisConfigVo, pointedInstanceList, groupMap, redisConfigMap);
         map.put("errorInfo", errorInfo);
         return map;
+    }
+
+    @Override
+    public boolean isAppOnScrollRestart(long appId) {
+        ConfigRestartRecord configRestartRecord = new ConfigRestartRecord();
+        configRestartRecord.setAppId(appId);
+        List<ConfigRestartRecord> restartList = configRestartRecordDao.getListByCondition(configRestartRecord);
+        Optional<ConfigRestartRecord> restartRecordOptional = restartList.stream().filter(restartRecord ->
+                restartRecord.getStatus() == RestartStatusEnum.RUNNING.getValue()
+                || restartRecord.getStatus() == RestartStatusEnum.RESTART_AFTER_CONFIG.getValue()).findFirst();
+        return restartRecordOptional.isPresent();
     }
 
     /**
@@ -626,6 +655,7 @@ public class AppScrollRestartServiceImpl implements AppScrollRestartService {
             ExecuteResult executeResult =  new ExecuteResult();
             executeResult.setSuccess(false);
             boolean transferFlag = appRedisConfigVo.isTransferFlag();
+            boolean quickFinishFlag = appRedisConfigVo.isQuickFinishFlag();
             Set<Map.Entry<Integer, List<InstanceInfo>>> entries = groupMap.entrySet();
             //------------------------
             int groupCount = 0;
@@ -664,7 +694,7 @@ public class AppScrollRestartServiceImpl implements AppScrollRestartService {
                 }
                 this.saveConfigRestartLog(recordId, this.generateLog("处理第%s个主从分组开始，主节点信息：%s，从节点信息：%s，主从存在标志：%s", runGroup, oneGroupMaster.getHostPort(), slaveStrList, masterSlaveExistEnum.getInfo()));
                 long startTime = System.currentTimeMillis();
-                executeResult = this.restartOneGroup(recordId, runGroup, appDesc, oneGroupMaster, oneGroupSlave, masterSlaveExistEnum, transferFlag);
+                executeResult = this.restartOneGroup(recordId, runGroup, appDesc, oneGroupMaster, oneGroupSlave, masterSlaveExistEnum, transferFlag, quickFinishFlag);
                 long endTime = System.currentTimeMillis();
                 this.saveConfigRestartLog(recordId,
                         this.generateLog("处理第%s个主从分组结束。结果为：%s，耗时：%s", runGroup,
@@ -837,7 +867,7 @@ public class AppScrollRestartServiceImpl implements AppScrollRestartService {
      * @param transferFlag
      * @return
      */
-    private ExecuteResult restartOneGroup(long recordId, int runGroup, AppDesc appDesc, InstanceInfo master, List<InstanceInfo> slaveList, MasterSlaveExistEnum masterSlaveFlag , boolean transferFlag){
+    private ExecuteResult restartOneGroup(long recordId, int runGroup, AppDesc appDesc, InstanceInfo master, List<InstanceInfo> slaveList, MasterSlaveExistEnum masterSlaveFlag , boolean transferFlag, boolean quickFinishFlag){
         ExecuteResult executeResult = ExecuteResult.error();
         log.info(String.format("restart by group one group, recordId: %s, master: %s, slaveList: %s, masterSlaveFlag: %s", recordId, master.getHostPort(), slaveList.stream().map(slaveInfo -> slaveInfo.getHostPort()).collect(Collectors.joining(",")), masterSlaveFlag));
         if(this.existsStopRestartFlag(appDesc.getAppId())){
@@ -848,6 +878,24 @@ public class AppScrollRestartServiceImpl implements AppScrollRestartService {
             executeResult = this.restartSlaveNodes(recordId, appDesc, slaveList, master);
             if (!executeResult.isSuccess()) {
                 return executeResult;
+            }
+            //判断是否与主节点完成同步
+            boolean slaveReady = this.checkSlaveReadyFinish(slaveList.get(0));
+            if(!slaveReady){
+                return ExecuteResult.error(String.format("判定从节点是否完成与主节点同步失败，slave ：%s", slaveList.get(0)));
+            }
+            if(quickFinishFlag){
+                //重启节点后，休息3s
+                try {
+                    TimeUnit.SECONDS.sleep(3);
+                } catch (InterruptedException e) {
+                }
+            }else {
+                //重启节点后，休息30s
+                try {
+                    TimeUnit.SECONDS.sleep(30);
+                } catch (InterruptedException e) {
+                }
             }
         }
 
@@ -860,10 +908,17 @@ public class AppScrollRestartServiceImpl implements AppScrollRestartService {
             if (failOverResult.isPresent()) {
                 return ExecuteResult.error(String.format("对从节点执行failover失败，信息如下：%s", failOverResult.get()));
             }
-            //failover后，休息30s
-            try {
-                TimeUnit.SECONDS.sleep(10);
-            } catch (InterruptedException e) {
+            //failover后，休息120s
+            if(quickFinishFlag){
+                try {
+                    TimeUnit.SECONDS.sleep(3);
+                } catch (InterruptedException e) {
+                }
+            }else{
+                try {
+                    TimeUnit.SECONDS.sleep(120);
+                } catch (InterruptedException e) {
+                }
             }
 
             if(this.existsStopRestartFlag(appDesc.getAppId())){
@@ -878,11 +933,22 @@ public class AppScrollRestartServiceImpl implements AppScrollRestartService {
                 if(this.existsStopRestartFlag(appDesc.getAppId())){
                     return ExecuteResult.error(String.format("从节点重启后，从节点failover后，主节点重启后，主节点failover未开始时%s，请注意是否允许主从切换，并人工处理。", INTERRUPT_STOP));
                 }
-                //重启后，failover前，休息30s
+                //判断是否与主节点完成同步
+                boolean slaveReady = this.checkSlaveReadyFinish(master);
+                if(!slaveReady){
+                    return ExecuteResult.error(String.format("判定从节点是否完成与主节点同步失败，slave ：%s", slaveList.get(0)));
+                }
                 //对原主节点进行failover
                 failOverResult = this.clusterFailoverSlaveInstanceAndCheck(recordId, master, slaveList.get(0), appDesc);
                 if (failOverResult.isPresent()) {
                     return ExecuteResult.error(String.format("对原主节点执行failover失败，信息如下：%s", failOverResult.get()));
+                }
+                //failover后，休息120s
+                if(!quickFinishFlag){
+                    try {
+                        TimeUnit.SECONDS.sleep(120);
+                    } catch (InterruptedException e) {
+                    }
                 }
             }
         }
@@ -1011,6 +1077,10 @@ public class AppScrollRestartServiceImpl implements AppScrollRestartService {
         if(!executeFlag){
             return Optional.of(String.format("重启从节点，关闭从节点后，重启从节点失败，节点信息：%s", instanceInfo.getHostPort()));
         }
+        executeFlag = this.checkLoadFinish(instanceInfo);
+        if(!executeFlag){
+            log.error(String.format("重启从节点，关闭从节点后，重启从节点，加载dump文件失败，任务继续。如有需要，请管理员确认，节点信息：%s", instanceInfo.getHostPort()));
+        }
         return Optional.empty();
     }
 
@@ -1118,6 +1188,11 @@ public class AppScrollRestartServiceImpl implements AppScrollRestartService {
             }
             log.info(String.format("restart slave node, failoverAndCheckIdempotent, start, recordId: %s, slaveInstance: %s, currentMaster: %s", recordId, slaveInstance.getHostPort(), currentMaster.getHostPort()));
             boolean isFailover = this.failoverAndCheckIdempotent(3, recordId, slaveInstance, currentMaster, appDesc);
+            //failover后，检测是否完成主从同步
+            if(isFailover){
+                this.checkSlaveReadyFinish(currentMaster);
+                log.info(String.format("restart slave node, failoverAndCheckIdempotent success and check new slave ready, recordId: %s, new slaveInstance: %s, currentMaster: %s, result: %s", recordId, currentMaster.getHostPort(), slaveInstance.getHostPort(), isFailover));
+            }
             log.info(String.format("restart slave node, failoverAndCheckIdempotent, end, recordId: %s, slaveInstance: %s, currentMaster: %s, result: %s", recordId, slaveInstance.getHostPort(), currentMaster.getHostPort(), isFailover));
             if(!isFailover){
                 return Optional.of(String.format("执行failover and check失败，从节点信息：%s，主节点信息：%s", slaveInstance.getHostPort(), currentMaster.getHostPort()));
@@ -1178,6 +1253,110 @@ public class AppScrollRestartServiceImpl implements AppScrollRestartService {
     }
 
     /**
+     * 执行failover并检查
+     * @param slaveInstance 必须包括masterHost & masterPort
+     * @param appDesc
+     * @return
+     */
+    public Optional<String> clusterFailoverAndCheck(InstanceInfo slaveInstance, AppDesc appDesc){
+        InstanceInfo currentMaster = new InstanceInfo();
+        currentMaster.setAppId(slaveInstance.getAppId());
+        currentMaster.setType(slaveInstance.getType());
+        currentMaster.setIp(slaveInstance.getMasterHost());
+        currentMaster.setPort(slaveInstance.getMasterPort());
+        try{
+            // 先判断slave是否已load完成并ready,
+            this.checkLoadFinish(slaveInstance);
+            this.checkSlaveReadyFinish(slaveInstance);
+            //判断当前实例是否为从节点，且存在主节点，且master_link_status  up
+            BooleanEnum slaveAndMasterUp = BooleanEnum.FALSE;
+            int tryTimes = 300;
+            while (tryTimes-- > 0) {
+                try {
+                    BooleanEnum result = redisCenter.isSlaveAndPointedMasterUp(appDesc, slaveInstance, currentMaster);
+                    if (BooleanEnum.TRUE.equals(result)){
+                        slaveAndMasterUp = result;
+                        break;
+                    }
+                    TimeUnit.SECONDS.sleep(2L);
+                } catch (Exception e) {
+                    log.error("clusterFailoverAndCheck is Slave and master is pointed master error: ", e);
+                    continue;
+                }
+            }
+            log.info(String.format("failover pre check, isSlaveAndPointedMasterUp, slaveInstance: %s, currentMaster: %s, result: %s", slaveInstance.getHostPort(), currentMaster.getHostPort(), slaveAndMasterUp));
+
+            if(BooleanEnum.FALSE.equals(slaveAndMasterUp)){
+                return Optional.of(String.format("执行failover and check， 检验为从节点及与主节点连接正常，失败，从节点信息：%s，主节点信息：%s", slaveInstance.getHostPort(), currentMaster.getHostPort()));
+            }
+            log.info(String.format("failoverAndCheckIdempotent, start, slaveInstance: %s, currentMaster: %s", slaveInstance.getHostPort(), currentMaster.getHostPort()));
+            boolean isFailover = this.failoverAndCheckIdempotent(3, slaveInstance, appDesc);
+            //failover后，检测是否完成主从同步
+            if(isFailover){
+                this.checkSlaveReadyFinish(currentMaster);
+                log.info(String.format("failoverAndCheckIdempotent success and check slave ready, new slaveInstance: %s, currentMaster: %s, result: %s", currentMaster.getHostPort(), slaveInstance.getHostPort(), isFailover));
+            }
+            log.info(String.format("failoverAndCheckIdempotent, end, slaveInstance: %s, currentMaster: %s, result: %s", slaveInstance.getHostPort(), currentMaster.getHostPort(), isFailover));
+            if(!isFailover){
+                return Optional.of(String.format("执行failover and check失败，从节点信息：%s，主节点信息：%s", slaveInstance.getHostPort(), currentMaster.getHostPort()));
+            }
+            return Optional.empty();
+        }catch (Exception e){
+            log.error("clusterFailoverSlaveInstanceAndCheck is Slave and master is pointed master error: ", e);
+            return Optional.of(String.format("执行failover and check，出现异常，异常信息：%s，从节点信息：%s，主节点信息：%s", e.getMessage(), slaveInstance.getHostPort(), currentMaster.getHostPort()));
+        }
+    }
+
+    /**
+     * 关闭实例，幂等操作，目前最大支持3次
+     * @return
+     */
+    @Override
+    public boolean failoverAndCheckIdempotent(int retryTime, InstanceInfo slaveInstance, AppDesc appDesc){
+        long beginShutdown = System.currentTimeMillis();
+        boolean executeFlag = false;
+        try{
+            if(AppTypeEnum.REDIS_CLUSTER.getType() == appDesc.getType()){
+                executeFlag = redisDeployCenter.clusterFailover(slaveInstance.getAppId(), slaveInstance.getId(), null);
+            }
+        }catch (Exception e){
+            log.error("cluster failover异常，异常信息：", e);
+        }
+        log.info(String.format("clusterFailover, slaveInstance: %s, currentMaster: %s, result: %s", slaveInstance.getHostPort(), (slaveInstance.getMasterHost() + ":" + slaveInstance.getMasterPort()), executeFlag));
+        if (!executeFlag) {
+            return executeFlag;
+        }
+        int tryTimes = 200;
+        long sleepTime = 2L;
+        while(tryTimes-- > 0){
+            try{
+                if(TypeUtil.isRedisType(appDesc.getType())){
+                    executeFlag = redisCenter.getRedisReplicationStatus(slaveInstance.getAppId(), slaveInstance.getIp(), slaveInstance.getPort());
+                }
+                if (executeFlag) {
+                    break;
+                }
+                TimeUnit.SECONDS.sleep(sleepTime);
+                if(TypeUtil.isRedisType(appDesc.getType())){
+                    if(tryTimes % 5 == 0){
+                        boolean shutdownFailFlag = this.checkByLog(slaveInstance, "Manual failover timed out", beginShutdown);
+                        log.info(String.format("clusterFailover fail and retry check, slaveInstance: %s, currentMaster: %s, result: %s", slaveInstance.getHostPort(), (slaveInstance.getMasterHost() + ":" + slaveInstance.getMasterPort()), shutdownFailFlag));
+                        if(shutdownFailFlag && retryTime-- > 0){
+                            log.info(String.format("clusterFailover fail and retry, slaveInstance: %s, currentMaster: %s", slaveInstance.getHostPort(), (slaveInstance.getMasterHost() + ":" + slaveInstance.getMasterPort())));
+                            TimeUnit.SECONDS.sleep(20 * (3 - retryTime) > 40 ? 40 : 20 * (3 - retryTime));
+                            return this.failoverAndCheckIdempotent(retryTime, slaveInstance, appDesc);
+                        }
+                    }
+                }
+            }catch (Exception e){
+                log.error("failover and check error: ", e);
+                continue;
+            }
+        }
+        return executeFlag;
+    }
+
+    /**
      * 下线实例
      * @param instanceInfo
      * @return
@@ -1215,6 +1394,63 @@ public class AppScrollRestartServiceImpl implements AppScrollRestartService {
     }
 
     /**
+     * 判断实例是否完成加载dump文件
+     * @param instanceInfo
+     */
+    public boolean checkLoadFinish(InstanceInfo instanceInfo) {
+        boolean loadFinish = false;
+        if (instanceInfo != null) {
+            int retry = 3;
+            while (retry-- > 0) {
+                // 1.获取连接
+                try (Jedis jedis = redisCenter.getAdminJedis(instanceInfo.getAppId(), instanceInfo.getIp(), instanceInfo.getPort(), 5000, 5000);) {
+                    if(TypeUtil.isRedisType(instanceInfo.getType())){
+                        loadFinish = redisCenter.checkLoadFinish(jedis, 5);
+                    }
+                    log.info("checkLoadFinish instance, appId:${}, instance:${}, result:${}", instanceInfo.getAppId(), instanceInfo.getHostPort(), loadFinish);
+                    if(loadFinish){
+                        break;
+                    }
+                } catch (Exception e) {
+                    log.error("restart slave node, start instance, error, appId: " + instanceInfo.getAppId() + ", instance:" + instanceInfo.getHostPort() + ",异常：", e);
+                }
+            }
+        }
+        return loadFinish;
+    }
+
+    /**
+     * 判断实例是否准备完成
+     * @param instanceInfo
+     */
+    public boolean checkSlaveReadyFinish(InstanceInfo instanceInfo) {
+        boolean slaveReady = false;
+        if (instanceInfo != null) {
+            try {
+                int checkTimes = 100;
+                while (checkTimes-- > 0){
+                    // 1.获取连接
+                    try (Jedis jedis = redisCenter.getAdminJedis(instanceInfo.getAppId(), instanceInfo.getIp(), instanceInfo.getPort(), 5000, 5000);){
+                        if(TypeUtil.isRedisType(instanceInfo.getType())){
+                            slaveReady = redisCenter.checkSlaveReady(jedis, null);
+                        }
+                        log.info("checkSlaveReadyFinish instance, appId:${}, instance:${}, result:${}", instanceInfo.getAppId(), instanceInfo.getHostPort(), slaveReady);
+                        if(slaveReady){
+                            break;
+                        }
+                        TimeUnit.SECONDS.sleep(5);
+                    } catch (Exception e) {
+                        log.error("checkSlaveReadyFinish, instance, error, appId: " + instanceInfo.getAppId() +", instance:" + instanceInfo.getHostPort() + ",异常：", e);
+                    }
+                }
+            } catch (Exception e) {
+                log.error("{}:{} checkSlaveReadyFinish failed {}", instanceInfo.getIp(), instanceInfo.getPort(), e.getMessage(), e);
+            }
+        }
+        return slaveReady;
+    }
+
+    /**
      * check whether config set is ok with this to updated config name
      * just support check one config name, if more than one, update this logic code
      * @param instanceInfo
@@ -1223,7 +1459,7 @@ public class AppScrollRestartServiceImpl implements AppScrollRestartService {
     private int checkConfigSetAvailable(AppDesc appDesc, InstanceInfo instanceInfo, Map<String, Set<String>> redisConfigMap) {
         int checkResult = 0;
         // 1.获取连接
-        final Jedis jedis = redisCenter.getJedis(appDesc.getAppId(), instanceInfo.getIp(), instanceInfo.getPort(), 5000, 5000);
+        final Jedis jedis = redisCenter.getAdminJedis(appDesc.getAppId(), instanceInfo.getIp(), instanceInfo.getPort(), 5000, 5000);
         try {
             int retry = 3;
             while (retry-- > 0) {
@@ -1278,7 +1514,7 @@ public class AppScrollRestartServiceImpl implements AppScrollRestartService {
      */
     private boolean configSetAndRewrite(AppDesc appDesc, InstanceInfo instanceInfo, Map<String, Set<String>> redisConfigMap) {
         // 1.获取连接
-        final Jedis jedis = redisCenter.getJedis(appDesc.getAppId(), instanceInfo.getIp(), instanceInfo.getPort(), 5000, 5000);
+        final Jedis jedis = redisCenter.getAdminJedis(appDesc.getAppId(), instanceInfo.getIp(), instanceInfo.getPort(), 5000, 5000);
         try {
             boolean isConfig = new IdempotentConfirmer() {
                 @Override
@@ -1337,7 +1573,7 @@ public class AppScrollRestartServiceImpl implements AppScrollRestartService {
         if(configNameSet.size() > 0) {
             String configValue = null;
             // 1.获取连接
-            final Jedis jedis = redisCenter.getJedis(appDesc.getAppId(), instanceInfo.getIp(), instanceInfo.getPort(), 5000, 5000);
+            final Jedis jedis = redisCenter.getAdminJedis(appDesc.getAppId(), instanceInfo.getIp(), instanceInfo.getPort(), 5000, 5000);
             try {
                 for (String configName : configNameSet) {
                     try {

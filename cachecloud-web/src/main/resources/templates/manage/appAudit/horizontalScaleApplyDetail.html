@@ -1,0 +1,113 @@
+<script type="text/javascript">
+  function checkNodes(){
+    var masterSizeSlave = document.getElementById("masterSizeSlave");
+    if(masterSizeSlave.value == ""){
+      alert("节点信息不能为空");
+      masterSizeSlave.focus();
+      return false;
+    }
+    var appAuditId = document.getElementById("appAuditId");
+    $.get(
+            '${request.contextPath}/manage/app/checkHorizontalNodes.json',
+            {
+              appAuditId: appAuditId.value,
+              masterSizeSlave: masterSizeSlave.value
+            },
+            function(data){
+              var status = data.status;
+              alert(data.message);
+              if (status == 1) {
+                var nodeDeployBtn = document.getElementById("nodeDeployBtn");
+                nodeDeployBtn.disabled = false;
+
+                var nodeCheckBtn = document.getElementById("nodeCheckBtn");
+                nodeCheckBtn.disabled = true;
+
+                masterSizeSlave.disabled = true;
+              } else {
+                masterSizeSlave.focus();
+              }
+            }
+    );
+  }
+
+  function deployNodes(){
+    var masterSizeSlave = document.getElementById("masterSizeSlave");
+    var appAuditId = document.getElementById("appAuditId");
+    var nodeDeployBtn = document.getElementById("nodeDeployBtn");
+    nodeDeployBtn.disabled = true;
+    $.get(
+            '${request.contextPath}/manage/app/addHorizontalNodes.json',
+            {
+              appAuditId: appAuditId.value,
+              masterSizeSlave: masterSizeSlave.value
+            },
+            function(data){
+              var status = data.status;
+              if (status == 1) {
+                alert("添加部署成功,确认后将跳转到ReShard页面!");
+                window.location.href="${request.contextPath}/manage/app/handleHorizontalScale?appAuditId=" + appAuditId.value;
+              } else {
+                alert("节点部署失败,请查看系统日志确认相关原因!");
+              }
+            }
+    );
+  }
+</script>
+
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">添加新的节点(不分配slot，只meet到集群)</h3>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <h4 class="card-title">
+            <i class="bi bi-globe"></i>填写扩容配置:
+          </h4>
+        </div>
+          <!-- BEGIN FORM-->
+          <form class="form-horizontal form-bordered form-row-stripped">
+            <div class="form-body">
+              <div class="form-group row">
+                <label class="col-form-label col-md-3 text-end">
+                  主从分片配置:
+                </label>
+                <div class="col-md-5">
+                  <textarea id="masterSizeSlave" name="masterSizeSlave" type="text" rows="5" placeholder="materIp:memSize:slaveIp" class="form-control"></textarea>
+                </div>
+              </div>
+
+              <div class="form-group row">
+                <label class="col-form-label col-md-3 text-end">添加多实例规则如下:<br/><br/><br/></label>
+                &nbsp;&nbsp;&nbsp;&nbsp;masterIp1:memSize(M):slaveIp1<br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;masterIp2:memSize(M):slaveIp2<br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;masterIp3:memSize(M):slaveIp3<br/>
+              </div>
+
+              <input type="hidden" id="appAuditId" name="appAuditId" value="${appAudit.id!}">
+
+              <div class="form-group row">
+                <div class="offset-md-3 col-md-6">
+                  <button disabled="disabled" id="nodeDeployBtn" type="button" class="btn btn-success" onclick="deployNodes()">
+                    <i class="bi bi-check"></i>
+                    部署节点
+                  </button>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  <button type="button" id="nodeCheckBtn" class="btn btn-success" onclick="checkNodes()">
+                    <i class="bi bi-check"></i>
+                    验证格式
+                  </button>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  <a target="_blank" class="btn btn-success" href="${request.contextPath}/manage/app/handleHorizontalScale?appAuditId=${appAudit.id!}">ReShard页面</a>
+                </div>
+              </div>
+            </div>
+          </form>
+          <!-- END FORM-->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

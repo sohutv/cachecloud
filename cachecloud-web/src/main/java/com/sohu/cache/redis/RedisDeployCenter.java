@@ -28,6 +28,10 @@ public interface RedisDeployCenter {
 
     public boolean startCluster(final long appId, Map<Jedis, Jedis> clusterMap);
 
+    public boolean startClusterMaster(final long appId, Map<Jedis, Jedis> clusterMap);
+
+    public boolean startClusterSlave(final long appId, Map<Jedis, Jedis> clusterMap);
+
     /**
      * 部署redis sentinel实例 实例组
      *
@@ -75,6 +79,17 @@ public interface RedisDeployCenter {
     public boolean modifyInstanceConfig(long appId, String host, int port, String parameter, String value);
 
     /**
+     * 获取实例配置
+     * @param appId
+     * @param host
+     * @param port
+     * @param parameter
+     * @return
+     */
+    public String getInstanceConfig(final long appId, final String host, final int port, final String parameter);
+
+
+    /**
      * 为应用appId添加sentinel服务器
      *
      * @param appId
@@ -92,6 +107,18 @@ public interface RedisDeployCenter {
      * @return
      */
     public boolean addSlave(long appId, int masterInstanceId, String slaveHost) throws Exception;
+
+    /**
+     * 为主节点添加从节点
+     *
+     * @param appDesc
+     * @param masterHost
+     * @param masterPort
+     * @param mem 单位Mb
+     * @param slaveInstance 配置有slaveHost，添加成功，将设置slavePort
+     * @return
+     */
+    public boolean addSlave(AppDesc appDesc, String masterHost, int masterPort, int mem, InstanceInfo slaveInstance) throws Exception;
 
     String genSlaveIp(long appId, int instanceId) throws Exception;
 
@@ -149,7 +176,7 @@ public interface RedisDeployCenter {
      * @version 1.0
      * @date 2018/9/12
      */
-    public boolean bornConfigAndRunNode(AppDesc appDesc, InstanceInfo instanceInfo, String host, Integer port, int maxMemory, boolean isCluster,boolean isInstallModule,String moduleCommand);
+    public boolean bornConfigAndRunNode(AppDesc appDesc, InstanceInfo instanceInfo, String host, Integer port, int maxMemory, boolean isCluster);
 
     /**
      * sentinel类型应用执行Failover,主从切换
@@ -244,7 +271,7 @@ public interface RedisDeployCenter {
     public boolean checkAuths(Long appId);
 
     /**
-     * slaveof
+     * slaveof 用管理员
      *
      * @param appId
      * @param masterHost
@@ -256,5 +283,29 @@ public interface RedisDeployCenter {
     public boolean slaveOf(final long appId, final String masterHost, final int masterPort, final String slaveHost,
                            final int slavePort);
 
+    /**
+     * 用默认用户slaveof
+     * @param appId
+     * @param masterHost
+     * @param masterPort
+     * @param slaveHost
+     * @param slavePort
+     * @return
+     */
+    public boolean slaveOfByDefaultUser(final long appId, final String masterHost, final int masterPort, final String slaveHost,
+                           final int slavePort);
 
+    /**
+     * 添加实例，是否可以指定rdb，及slots
+     * @param appId
+     * @param newInstHost
+     * @param newInstPort
+     * @param pointedRdb 是否已在目录下导入了rdb
+     * @param mem        实例最大内存（与runInstId 必须至少一个不为空）
+     * @param runInstId  运行实例信息
+     * @param slots
+     * @return
+     */
+    public boolean addInstanceToUnhealthyApp(long appId, final String newInstHost, final Integer newInstPort,
+                                             final boolean pointedRdb, Integer mem, final int[] slots, Integer runInstId);
 }

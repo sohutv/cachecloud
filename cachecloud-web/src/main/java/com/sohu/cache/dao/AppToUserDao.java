@@ -25,4 +25,6 @@ public interface AppToUserDao {
 
     void deleteAppToUser(@Param("appId") long appId, @Param("userId") long userId);
 
+    void takeOverAppToUser(@Param("appId") long appId, @Param("originUserId") long originUserId, @Param("newUserId") long newUserId);
+
 }

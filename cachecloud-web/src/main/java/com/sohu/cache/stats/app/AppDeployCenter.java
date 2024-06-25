@@ -19,7 +19,7 @@ public interface AppDeployCenter {
      * @param appUser
      * @param memSize
      */
-    public boolean createApp(AppDesc appDesc, AppUser appUser, String memSize,String isInstall, String moduleInfo);
+    public boolean createApp(AppDesc appDesc, AppUser appUser, String memSize);
 
     /**
      * 为应用分配资源

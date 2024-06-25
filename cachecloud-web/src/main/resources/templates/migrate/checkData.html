@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>采样校验源数据和目标数据</title>
+  <#include '/inc/frontResources.html'>
+</head>
+<body STYLE="BACKGROUND-COLOR:#000;color:#FFF">
+  校验程序已启动<br/>
+  <#if checkDataResultList?? && (checkDataResultList?size > 0)>
+    <#list checkDataResultList as line>
+      <font color="white">${line!}</font><br/>
+    </#list>
+  </#if>
+  <br/>
+  <#if checkDataCommand??>
+    如果发现不一致的情况，可以在查看校验日志或在目标机器执行<br/>
+    ${checkDataCommand!}<br/>
+    来看一下详细的key不一致情况
+  </#if>
+</body>
+</html>

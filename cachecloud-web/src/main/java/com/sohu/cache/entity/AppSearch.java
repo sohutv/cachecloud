@@ -54,6 +54,21 @@ public class AppSearch {
     private long userId;
 
     /**
+     * 相关业务组id
+     */
+    private long bizId;
+
+    /**
+     * 持久化类型
+     */
+    private Integer persistenceType;
+
+    /**
+     * 是否备份
+     */
+    private Integer backupType;
+
+    /**
      * 分页
      */
     private Page page;

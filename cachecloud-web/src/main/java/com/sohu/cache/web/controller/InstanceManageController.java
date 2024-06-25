@@ -14,15 +14,18 @@ import com.sohu.cache.task.constant.InstanceRoleEnum;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.StringUtil;
 import com.sohu.cache.web.enums.SuccessEnum;
+import com.sohu.cache.web.service.MigrateService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import redis.clients.jedis.HostAndPort;
 
@@ -56,6 +59,9 @@ public class InstanceManageController extends BaseController {
 
     @Resource
     SSHService sshService;
+
+    @Autowired
+    private MigrateService migrateService;
 
     /**
      * 上线(和下线分开)
@@ -179,14 +185,22 @@ public class InstanceManageController extends BaseController {
     }
 
     @RequestMapping("/migrate")
-    public ModelAndView doMigrateInstance(HttpServletResponse response, String sourceIp, String targetIp, String instanceIds) {
+    public ModelAndView doMigrateInstance(HttpServletResponse response,
+                                          String sourceIp, String targetIp, String instanceIds,
+                                          @RequestParam(value = "forceFlag", required = false, defaultValue = "false") boolean forceFlag) {
 
         Map<String, Object> resultMap = new HashedMap();
         String key = "migrate-instance-" + sourceIp + "-" + targetIp;
         asyncService.submitFuture(AsyncThreadPoolFactory.MACHINE_POOL, new KeyCallable<Boolean>(key) {
             public Boolean execute() {
                 try {
-                    migrate(sourceIp, targetIp, instanceIds);
+                    if (!forceFlag) {
+                        //一键迁移
+                        migrate(sourceIp, targetIp, instanceIds);
+                    } else {
+                        //一键强制迁移
+                            migrateService.forceMigrate(sourceIp, targetIp);
+                    }
                     return true;
                 } catch (Exception e) {
                     logger.error("doMigrateInstance ", e.getMessage(), e);
@@ -234,9 +248,12 @@ public class InstanceManageController extends BaseController {
         // 4.开始迁移
         if (!CollectionUtils.isEmpty(instanceList)) {
             for (InstanceInfo instanceInfo : instanceList) {
-                if (instanceInfo.isOnline() && instanceInfo.getType() == ConstUtils.CACHE_TYPE_REDIS_CLUSTER) {
+                if (instanceInfo.isOnline() && (instanceInfo.getType() == ConstUtils.CACHE_TYPE_REDIS_CLUSTER)) {
+                    //每次重新获取实例 slave/master角色，可能会发生变化
+                    String role = redisCenter.getInstanceRole(instanceInfo.getAppId(), instanceInfo.getIp(), instanceInfo.getPort());
+                    logger.info("instanceInfo:{} {} role:{} start migrate", instanceInfo.getIp(), instanceInfo.getPort(),role);
                     // a)当前为master节点
-                    if (InstanceRoleEnum.MASTER.getInfo().equals(instanceInfo.getRoleDesc())) {
+                    if (InstanceRoleEnum.MASTER.getInfo().equals(role)) {
                         try {
                             //a.1)获取master节点slave0
                             AppDesc appdesc = appService.getByAppId(instanceInfo.getAppId());
@@ -282,20 +299,21 @@ public class InstanceManageController extends BaseController {
                                     break;
                                 }
                             }
-
                             //a.4) 下线节点
                             boolean isOffline = instanceDeployCenter.shutdownExistInstance(instanceInfo.getAppId(), instanceInfo.getId());
                             logger.info("MigrateInstance appid:{} offline node master:{} {}， add new slave :{} {}", instanceInfo.getAppId(), instanceInfo.getHostPort(), isOffline, targetIp, isSuccess);
-
-
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
                     // b).当前为slave节点
-                    if (InstanceRoleEnum.SLAVE.getInfo().equals(instanceInfo.getRoleDesc())) {
+                    if (InstanceRoleEnum.SLAVE.getInfo().equals(role)) {
                         AppDesc appdesc = appService.getByAppId(instanceInfo.getAppId());
                         HostAndPort masterInfo = redisCenter.getMaster(instanceInfo.getIp(), instanceInfo.getPort(), appdesc.getAppPassword());
+                        if (masterInfo == null) {
+                            logger.error("migrate get master info fail,slave instanceInfo:{} {}", instanceInfo.getIp(), instanceInfo.getPort());
+                            continue;
+                        }
                         if (!StringUtils.isEmpty(masterInfo.getHost()) && masterInfo.getPort() > 0) {
                             try {
                                 InstanceInfo masterInst = instanceDao.getInstByIpAndPort(masterInfo.getHost(), masterInfo.getPort());
@@ -397,7 +415,7 @@ public class InstanceManageController extends BaseController {
             JSONObject json = new JSONObject();
             json.put("result", isModify ? 1 : 0);
             sendMessage(response, json.toString());
-            return new ModelAndView("");
+            return null;
         }
     }
 

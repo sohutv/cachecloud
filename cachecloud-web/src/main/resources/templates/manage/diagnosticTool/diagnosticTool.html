@@ -1,0 +1,143 @@
+<script type="text/javascript" src="${request.contextPath}/assets/js/custom/jquery-console.js"></script>
+<script type="text/javascript">
+  var container = $('#console');
+  $(function () {
+    $('.selectpicker').selectpicker({
+      'selectedText': 'cat',
+      'size': 8,
+      'dropupAuto': false
+    });
+    $('.dropdown-toggle').on('click', function () {
+      $('.dropdown-toggle').dropdown();
+    });
+
+    var controller = container.console({
+      promptLabel: 'redis-cli > ',
+      commandValidate: function (line) {
+        if (line == "") return false;
+        else return true;
+      },
+      commandHandle: function (line, report) {
+        var appId = $('#cli-select').selectpicker('val');
+        if (appId == null || appId == '') {
+          alert("请选择应用");
+          return false;
+        }
+
+        var node = $('#cli_instance-select').selectpicker('val');
+        if (node == null || node == '') {
+          alert("请选择实例");
+          return false;
+        }
+
+        var timeout = $('#timeout').val();
+
+
+        $.post('${request.contextPath}/manage/app/tool/commandExecute',
+                {
+                  appId: appId,
+                  node: node,
+                  command: line,
+                  timeout: timeout
+                },
+                function (data) {
+                  report([
+                    {msg: data.result, className: "jquery-console-message-value"}
+                  ]);
+                }
+        );
+      },
+      autofocus: true,
+      animateScroll: true,
+      promptHistory: true
+    });
+  });
+
+  function changeAppIdSelect(appId, instance_select) {
+    console.log('instance_select:' + instance_select);
+    console.log(appId);
+
+    document.getElementById(instance_select).options.length = 0;
+    $('#' + instance_select).selectpicker('destroy');
+    $('#' + instance_select).selectpicker();
+
+    $.post('${request.contextPath}/manage/app/tool/diagnostic/appInstances',
+            {
+              appId: appId,
+            },
+            function (data) {
+              var status = data.status;
+              if (status == 1) {
+                $('#' + instance_select).selectpicker('destroy');
+                var appInstanceList = data.appInstanceList;
+                for (var i = 0; i < appInstanceList.length; i++) {
+                  var val = appInstanceList[i].hostPort;
+                  var term = appInstanceList[i].hostPort + '（角色：' + appInstanceList[i].roleDesc + '）'
+                  $('#' + instance_select).append("<option value='" + val + "'>" + term + "</option>");
+                }
+                $('#' + instance_select).selectpicker();
+              } else {
+                console.log('data.status:' + status);
+              }
+            }
+    );
+  }
+
+  function testisNum(id) {
+    var value = document.getElementById(id).value;
+    if (value != "" && isNaN(value)) {
+      alert("超时时间请填入整数，单位为ms");
+      document.getElementById(id).value = "";
+      document.getElementById(id).focus();
+    }
+  }
+</script>
+
+<link href="${request.contextPath}/assets/css/mem-cloud.css" rel="stylesheet" />
+<div class="card">
+  <div class="card-body">
+    <div id="scan-div" class="col-md-12">
+      <form class="row align-items-center" role="form" name="ec">
+        <label for="cli-select" class="col-auto">应用</label>
+        <div class="col-md-3">
+          <select id="cli-select" name="appId" class="selectpicker border rounded"
+                  data-live-search="true" title="选择应用" onchange="changeAppIdSelect(this.value,'cli_instance-select')">
+            <option value="">选择应用</option>
+            <#list appDescMap?keys as key>
+              <#assign appDesc = appDescMap?api.get(key)>
+              <option value="${appDesc.appId}" title="${appDesc.appId} ${appDesc.name}">
+                【${appDesc.appId}】&nbsp;名称：${appDesc.name}&nbsp;类型：${appDesc.typeDesc}&nbsp;版本：${appDesc.versionName}
+              </option>
+            </#list>
+          </select>
+        </div>
+        <label for="cli_instance-select" class="col-auto">实例</label>
+        <div class="col-md-3">
+          <select id="cli_instance-select" name="nodes"
+                  class="selectpicker show-tick border rounded"
+                  data-live-search="true" title="选择实例" data-size="8">
+          </select>
+        </div>
+        <label class="bi bi-question-circle-fill col-auto" aria-hidden="true" title="超时时间，单位ms，默认30000ms"></label>
+        <div class="col-md-3">
+          <input id="timeout" type="text" class="form-control" name="timeout"
+                 placeholder="超时时间（默认30000ms）" onchange="testisNum(this.id)">
+        </div>
+      </form>
+
+      <br/>
+      <div class="col-md-12">
+        <a class="bi bi-file-earmark-text-fill">
+          输入 --help 查看可用命令
+        </a>
+
+      </div>
+      <br/>
+      <div class="col-md-12">
+        <form role="form">
+          <div id="console" class="console"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

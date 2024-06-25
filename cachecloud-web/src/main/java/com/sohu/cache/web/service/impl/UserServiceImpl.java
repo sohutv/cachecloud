@@ -1,15 +1,18 @@
 package com.sohu.cache.web.service.impl;
 
 import com.sohu.cache.constant.AppUserAlertEnum;
+import com.sohu.cache.dao.AppBizDao;
 import com.sohu.cache.dao.AppDao;
 import com.sohu.cache.dao.AppToUserDao;
 import com.sohu.cache.dao.AppUserDao;
+import com.sohu.cache.entity.AppBiz;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.AppToUser;
 import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.enums.SuccessEnum;
 import com.sohu.cache.web.service.UserService;
+import com.sohu.cache.web.vo.AppUserVo;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -23,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -43,6 +47,12 @@ public class UserServiceImpl implements UserService {
     private AppUserDao appUserDao;
 
     /**
+     * 业务组dao
+     */
+    @Autowired
+    private AppBizDao appBizDao;
+
+    /**
      * 用户应用关系dao
      */
     @Autowired
@@ -58,6 +68,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<AppUser> getUserList(String chName) {
         return appUserDao.getUserList(chName);
+    }
+
+    /**
+     * 通过中文名和业务组名获取用户
+     * @param chName
+     * @param bizName
+     * @return
+     */
+    @Override
+    public List<AppUserVo> getUserWithBizList(String chName, String bizName) {
+        return appUserDao.getUserWithBizList(chName, bizName);
     }
 
     @Override
@@ -216,6 +237,78 @@ public class UserServiceImpl implements UserService {
                     .map(userId -> get(NumberUtils.toLong(userId))).filter(appUser -> appUser != null).collect(Collectors.toList());
         }
         return officerList;
+    }
+
+    /**
+     * 接手用户
+     * @param toRemoveUser
+     * @param toChargeUser
+     * @return
+     */
+    public SuccessEnum takeoverUser(AppUser toRemoveUser, AppUser toChargeUser){
+        try{
+            if(toRemoveUser != null && toChargeUser != null && toRemoveUser != toChargeUser){
+                List<AppToUser> removeList = appToUserDao.getByUserId(toRemoveUser.getId());
+                Set<Long> handleAppList = removeList.stream().map(appToUser -> appToUser.getAppId()).collect(Collectors.toSet());
+                List<AppToUser> chargeList = appToUserDao.getByUserId(toChargeUser.getId());
+                Set<Long> existAppList = chargeList.stream().map(appToUser -> appToUser.getAppId()).collect(Collectors.toSet());
+                handleAppList.forEach(appId ->{
+                    if(existAppList.contains(appId)){
+                        appToUserDao.deleteAppToUser(appId, toRemoveUser.getId());
+                    }else{
+                        appToUserDao.takeOverAppToUser(appId, toRemoveUser.getId(), toChargeUser.getId());
+                    }
+                });
+                return SuccessEnum.SUCCESS;
+            }
+            return SuccessEnum.FAIL;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return SuccessEnum.FAIL;
+        }
+    }
+
+    @Override
+    public AppBiz getBiz(Long bizId) {
+        return appBizDao.get(bizId);
+    }
+
+    @Override
+    public List<AppBiz> getBizList() {
+        return appBizDao.getBizList();
+    }
+
+    @Override
+    public SuccessEnum saveBiz(AppBiz appBiz) {
+        try {
+            appBizDao.save(appBiz);
+            return SuccessEnum.SUCCESS;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return SuccessEnum.FAIL;
+        }
+    }
+
+    @Override
+    public SuccessEnum updateBiz(AppBiz appBiz) {
+        try {
+            appBizDao.update(appBiz);
+            return SuccessEnum.SUCCESS;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return SuccessEnum.FAIL;
+        }
+    }
+
+    @Override
+    public SuccessEnum deleteBiz(Long bizId) {
+        try {
+            appBizDao.delete(bizId);
+            return SuccessEnum.SUCCESS;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return SuccessEnum.FAIL;
+        }
     }
 
 }

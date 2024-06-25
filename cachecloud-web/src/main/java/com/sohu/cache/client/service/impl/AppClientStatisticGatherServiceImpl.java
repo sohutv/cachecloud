@@ -3,6 +3,7 @@ package com.sohu.cache.client.service.impl;
 import com.sohu.cache.client.service.AppClientStatisticGatherService;
 import com.sohu.cache.dao.*;
 import com.sohu.cache.entity.AppClientStatisticGather;
+import com.sohu.cache.entity.AppStats;
 import com.sohu.cache.entity.TimeBetween;
 import com.sohu.cache.stats.app.AppStatsCenter;
 import com.sohu.cache.task.tasks.daily.TopologyExamTask;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -180,6 +182,43 @@ public class AppClientStatisticGatherServiceImpl implements AppClientStatisticGa
             log.error(e.getMessage(), e);
         }
 
+    }
+
+    @Override
+    public void bathAddServerCmdCount(long startTime, long endTime) {
+        //添加server端统计的命令调用次数
+        //每小时执行一次
+        try {
+            String gatherTimePre = null;
+            if(startTime == endTime){
+                gatherTimePre = DateUtil.formatYYYY_MM_dd(DateUtil.parseYYYYMMddHH(String.valueOf(startTime)));
+            }
+            String gatherTime = gatherTimePre;
+            List<AppStats> appStatsList = appStatsDao.getAppHourStatsByTime(startTime, endTime);
+            List<AppClientStatisticGather> gatherList = new ArrayList<>(appStatsList.size());
+            appStatsList.forEach(appStats -> {
+                AppClientStatisticGather appClientStatisticGather = new AppClientStatisticGather();
+                appClientStatisticGather.setAppId(appStats.getAppId());
+                appClientStatisticGather.setServerCmdCount(appStats.getCommandCount());
+                if(gatherTime != null){
+                    appClientStatisticGather.setGatherTime(gatherTime);
+                } else {
+                    try {
+                        String gatherTimeOne = DateUtil.formatYYYY_MM_dd(DateUtil.parseYYYYMMddHH(String.valueOf(appStats.getCollectTime())));
+                        appClientStatisticGather.setGatherTime(gatherTimeOne);
+                    } catch (Exception e) {
+                        log.error(e.getMessage(), e);
+                        return;
+                    }
+                }
+                gatherList.add(appClientStatisticGather);
+            });
+            if (CollectionUtils.isNotEmpty(appStatsList)) {
+                appClientStatisticGatherDao.batchAddAppServerCmdCount(gatherList);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     private TimeBetween fillWithDateFormat(long startTime) throws Exception {

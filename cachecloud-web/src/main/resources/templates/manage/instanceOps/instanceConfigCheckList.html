@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>CacheCloud实例运维</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+  <#include "/manage/inc/backendResources.html">
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+
+<#include "/manage/inc/head.html">
+<#include "/manage/inc/left.html">
+
+  <div class="content-wrapper">
+    <section class="content pt-3">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <i class="bi bi-globe"></i>实例redis配置检测结果
+              </h3>
+            </div>
+            <div class="card-body">
+              <table class="table table-striped table-bordered table-hover" name="checkResultList">
+                <thead>
+                <tr>
+                  <th>实例id</th>
+                  <th>实例</th>
+                  <th>版本</th>
+                  <th>所属应用id</th>
+                  <th>所属应用名称</th>
+                  <th>检测时间</th>
+                  <th>检测条件</th>
+                  <th>异常信息</th>
+                  <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <#if checkResult?? && checkResult.instanceCheckList??>
+                  <#list checkResult.instanceCheckList as instanceCheck>
+                    <#if !(instanceCheck.success)>
+                      <tr>
+                        <td>
+                          <a href="${request.contextPath}/admin/instance/index?instanceId=${instanceCheck.instanceInfo.id!}"
+                             target="_blank">${instanceCheck.instanceInfo.id!}</a>
+                        </td>
+                        <td>
+                          ${instanceCheck.instanceInfo.ip!}:${instanceCheck.instanceInfo.port!}
+                        </td>
+                        <td>
+                          <#list redisVersionList as redisVersion>
+                            <#if checkResult.appDesc?? && checkResult.appDesc.versionId?? && (redisVersion.id==checkResult.appDesc.versionId)>
+                              ${redisVersion.name!}
+                            </#if>
+                          </#list>
+                        </td>
+                        <td>
+                          <a href="${request.contextPath}/manage/app/index?appId=${checkResult.appDesc.appId!}"
+                             target="_blank">${checkResult.appDesc.appId!}</a>
+                        </td>
+                        <td>
+                          <a href="${request.contextPath}/manage/app/index?appId=${checkResult.appDesc.appId!}"
+                             target="_blank">${checkResult.appDesc.name!}</a>
+                        </td>
+                        <td>
+                          ${checkResult.createTimeStr!}
+                        </td>
+                        <td>
+                          ${checkResult.configName!}
+                        </td>
+                        <td>
+                          <#if (instanceCheck.success)>否</#if>
+                          <#if !(instanceCheck.success)>
+
+                            期望值：
+                            <#list compareTypeList as compareTypeEnum>
+                              <#if (checkResult.compareType == compareTypeEnum.type)>
+                                ${compareTypeEnum.info!}
+                              </#if>
+                            </#list>
+                            ${checkResult.expectValue!}
+                            <br>
+                            实际值：
+                            ${instanceCheck.realValue!}
+                          </#if>
+                        </td>
+                        <td>
+                          <#if instanceCheck.success></#if>
+                          <#if !(instanceCheck.success)>
+                            <button class="btn btn-warning btn-sm" style="float: right;">
+                              <a href="${request.contextPath}/manage/app/index?appId=${checkResult.appDesc.appId!}&configName=${checkResult.configName!}&&expectValue=${checkResult.expectValue!}&instanceIds=${instanceCheck.instanceInfo.id!}"
+                                 target="_blank"><font style="color: white">查看修复</font></a>
+                            </button>
+                          </#if>
+                        </td>
+                      </tr>
+                    </#if>
+                  </#list>
+                </#if>
+            </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div><!-- End #main -->
+
+  <#include "/manage/inc/footer.html">
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+</div><!-- End #main -->
+</body>
+<#include "/manage/inc/backendEndResources.html">
+</html>

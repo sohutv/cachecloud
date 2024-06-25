@@ -1,0 +1,52 @@
+<div id="overUserModal" class="modal fade" tabindex="-1" data-width="400">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">接手用户应用权限</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+      </div>
+
+      <form class="form-horizontal form-bordered form-row-stripped">
+        <div class="modal-body">
+          <div class="row">
+            <!-- 控件开始 -->
+            <div class="col-md-12">
+              <!-- form-body开始 -->
+              <div class="form-body">
+                <div class="form-group row">
+                  <label class="col-form-label col-md-4 text-end">
+                    待移交用户:
+                  </label>
+                  <div class="col-md-7">
+                    <input type="text" name="toRemoveUser" id="toRemoveUser"
+                           placeholder="域账户名(邮箱前缀)"
+                           class="form-control" />
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-md-4 text-end">
+                    接手用户:
+                  </label>
+                  <div class="col-md-7">
+                    <input type="text" name="toChargeUser" id="toChargeUser"
+                           placeholder="域账户名(邮箱前缀)"
+                           class="form-control" />
+                  </div>
+                </div>
+              </div>
+              <!-- form-body 结束 -->
+            </div>
+            <div id="takeoverInfo"></div>
+            <!-- 控件结束 -->
+          </div>
+        </div>
+      </form>
+
+      <div class="modal-footer">
+        <button type="button" data-bs-dismiss="modal" class="btn btn-secondary" >Close</button>
+        <button type="button" id="overUserBtn" class="btn btn-danger" onclick="takeOverUser('${request.contextPath}')">Ok</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -12,6 +12,7 @@ import com.sohu.cache.stats.instance.InstanceStatsCenter;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.util.TypeUtil;
 import com.sohu.cache.web.enums.AlertTypeEnum;
+import com.sohu.cache.web.service.AppAutoCapacityService;
 import com.sohu.cache.web.vo.AppDetailVO;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -19,6 +20,7 @@ import org.apache.commons.collections.MapUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +43,11 @@ public class AppMemInspector extends BaseAlertService implements Inspector {
      * 实例统计相关
      */
     private InstanceStatsCenter instanceStatsCenter;
+
+    /**
+     * 自动扩容
+     */
+    private AppAutoCapacityService appAutoCapacityService;
 
     @Override
     public boolean inspect(Map<InspectParamEnum, Object> paramMap) {
@@ -65,13 +72,33 @@ public class AppMemInspector extends BaseAlertService implements Inspector {
                 continue;
             }
             double appMemUsePercent = appDetailVO.getMemUsePercent();
+            double appDiskUsePercent = appDetailVO.getDiskUsePercent();
             int appUseSetMemAlertValue = appDesc.getMemAlertValue();
+
+            Map<InstanceInfo, InstanceStats> instanceStatsMap = new HashMap<>();
+            List<InstanceInfo> appInstanceInfoList = (List<InstanceInfo>) paramMap.get(InspectParamEnum.INSTANCE_LIST);
+            if (CollectionUtils.isNotEmpty(appInstanceInfoList)) {
+                for (InstanceInfo instanceInfo : appInstanceInfoList) {
+                    if (instanceInfo == null) {
+                        continue;
+                    }
+                    if (!TypeUtil.isRedisType(instanceInfo.getType())) {
+                        continue;
+                    }
+                    // 忽略sentinel观察者
+                    if (TypeUtil.isRedisSentinel(instanceInfo.getType())) {
+                        continue;
+                    }
+                    long instanceId = instanceInfo.getId();
+                    InstanceStats instanceStats = instanceStatsCenter.getInstanceStats(instanceId);
+                    instanceStatsMap.put(instanceInfo, instanceStats);
+                }
+            }
             // 先检查应用的内存使用率是否超过阀值，如果没有再检查分片
             if (appMemUsePercent > appUseSetMemAlertValue) {
                 // 报警
                 alertAppMemUse(appDetailVO);
             } else {
-                List<InstanceInfo> appInstanceInfoList = (List<InstanceInfo>) paramMap.get(InspectParamEnum.INSTANCE_LIST);
                 if (CollectionUtils.isNotEmpty(appInstanceInfoList)) {
                     for (InstanceInfo instanceInfo : appInstanceInfoList) {
                         if (instanceInfo == null) {
@@ -85,7 +112,7 @@ public class AppMemInspector extends BaseAlertService implements Inspector {
                             continue;
                         }
                         long instanceId = instanceInfo.getId();
-                        InstanceStats instanceStats = instanceStatsCenter.getInstanceStats(instanceId);
+                        InstanceStats instanceStats = instanceStatsMap.get(instanceInfo);
                         if(instanceStats == null){
                             continue;
                         }
@@ -97,6 +124,7 @@ public class AppMemInspector extends BaseAlertService implements Inspector {
                     }
                 }
             }
+            appAutoCapacityService.checkAndExpandCapacity(appDesc, Double.valueOf(appMemUsePercent).intValue(), instanceStatsMap);
         }
         return true;
     }

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <#include "inc/include.html">
+        <#include "inc/meta.html">
+    </head>
+    <body>
+        <#include "inc/header.html">
+        <main>
+            <#include "index/column.html">
+            <div id="cover"></div>
+            <div class="container" id="columnContent">
+                <#include "${view}.html">
+            </div>
+        </main>
+        <#include "inc/footer.html">
+    </body>
+</html>

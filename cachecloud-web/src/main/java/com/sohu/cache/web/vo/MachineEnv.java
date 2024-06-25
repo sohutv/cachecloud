@@ -38,6 +38,7 @@ public class MachineEnv {
     //tcp连接队列数:512
     private String somaxconn;
     private final static String somaxconn_warnning = "511";
+    private final static int somaxconn_less_warnning = 511;
     //redis fsync slow log
     private int fsync_delay_times;
     private final static int fsync_delay_times_warnning = 10;

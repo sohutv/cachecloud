@@ -1,0 +1,434 @@
+<script type="text/javascript">
+  var TableManaged = function () {
+    return {
+      //main function to initiate the module
+      init: function () {
+        $('#tableDataList').dataTable({
+          "searching": true,
+          "lengthChange": false,
+          "pageLength": 15,
+          "language": {
+            "lengthMenu": "Display _MENU_ records",
+            "paginate": {
+              "previous": "<",
+              "next": ">"
+            },
+            "info": "共_PAGES_页,_TOTAL_条",
+            "infoFiltered": "",
+            "infoEmpty":"共0页,0条",
+            "zeroRecords": "没有找到符合条件的数据",
+          }
+        });
+        $('#tableDataList_wrapper>div:first-child').css("display", "none");
+      }
+    };
+  }();
+
+  $(function () {
+    $('.selectpicker').selectpicker({
+      'selectedText': 'cat',
+      'size': 8,
+      'dropupAuto': false
+    });
+    TableManaged.init();
+  });
+
+  $('#modal-diagnosticResult').on('shown.bs.modal', function (e) {
+    $('#modal-title').html('');
+    $('#diagnosticResultCount').html('');
+    $('#diagnosticResultTable').html('');
+
+    var redisKey = $(e.relatedTarget).data('rediskey');
+    var title = $(e.relatedTarget).data('title');
+    $('#modal-title').html(title);
+    $.get(
+            '${request.contextPath}/manage/app/tool/diagnostic/data.json',
+            {
+              redisKey: redisKey,
+              type: 6
+            },
+            function (data) {
+              /*$('#diagnosticResultCount').append(
+                  '<tr>' +
+                  '<td>key (共计' + data.count + '个）</td>' +
+                  '</tr>'
+              );*/
+              var diagnosticResultList = data.result;
+              diagnosticResultList.forEach(function (diagnosticResult, index) {
+                $('#diagnosticResultTable').append(
+                        '<tr>' +
+                        '<td>' + diagnosticResult + '</td>' +
+                        '</tr>'
+                );
+              })
+            }
+    );
+
+  });
+
+  function changeAppIdSelect(appId, instance_select) {
+    console.log('instance_select:' + instance_select);
+    console.log(appId);
+
+    document.getElementById(instance_select).options.length = 0;
+    $('#' + instance_select).selectpicker('destroy');
+    $('#' + instance_select).selectpicker();
+
+    $.post('${request.contextPath}/manage/app/tool/diagnostic/appInstances',
+            {
+              appId: appId,
+            },
+            function (data) {
+              var status = data.status;
+              if (status == 1) {
+                $('#' + instance_select).selectpicker('destroy');
+                var appInstanceList = data.appInstanceList;
+                $('#' + instance_select).append("<option value='allMaster'>所有主节点</option>");
+                $('#' + instance_select).append("<option value='allSlave'>所有从节点</option>");
+                for (var i = 0; i < appInstanceList.length; i++) {
+                  var val = appInstanceList[i].hostPort;
+                  var term = appInstanceList[i].hostPort + '（角色：' + appInstanceList[i].roleDesc + '）'
+                  $('#' + instance_select).append("<option value='" + val + "'>" + term + "</option>");
+                }
+                $('#' + instance_select).selectpicker();
+              } else {
+                console.log('data.status:' + status);
+              }
+            }
+    );
+  }
+
+  function changeTtlResetShow() {
+    var operateType = $('#scan_clean').selectpicker('val');
+    if(operateType == 0 || operateType == 1){
+      $('#resetTtl').css("display", "none");
+    }else{
+      $('#resetTtl').css("display", "block");
+    }
+  }
+
+  function submitDiagnostic() {
+    var appId;
+    var nodes;
+    var paramMap = new Map();
+    appId = $('#scan-select').selectpicker('val');
+    if (appId == null || appId == '') {
+      alert("请选择应用");
+      return;
+    }
+    nodes = $('#scan_instance-select').selectpicker('val');
+    if (nodes == null || nodes == ''
+            || nodes.toString() == null || nodes.toString() ==  '') {
+      alert("请选择实例");
+      return;
+    }
+
+    var pattern = $('#scan-pattern').val();
+    if (pattern == null || pattern == '') {
+      alert("请填写键匹配字符串");
+      return;
+    }
+
+    var ttlResetLess = null;
+    var ttlResetMore = null;
+    var operateType = $('#scan_clean').selectpicker('val');
+    if (operateType == 2) {
+      ttlResetLess = $('#ttl-reset-less').val();
+      ttlResetMore = $('#ttl-reset-more').val();
+      if (ttlResetLess == null || ttlResetLess == ''
+              || ttlResetMore == null || ttlResetMore == ''
+              || ttlResetLess <= ttlResetMore) {
+        alert("请填写ttl重置时间范围，且不能为同一时间，尽量分开，避免集中过期");
+        return;
+      }
+    }
+    paramMap.set("nodes", nodes.toString());
+    paramMap.set("operateType", operateType);
+    paramMap.set("pattern", pattern);
+    paramMap.set("ttlLess", $('#ttl-value-less').val());
+    paramMap.set("ttlMore", $('#ttl-value-more').val());
+    paramMap.set("ttlResetLess", ttlResetLess);
+    paramMap.set("ttlResetMore", ttlResetMore);
+    paramMap.set("perCount", $('#per_count').val());
+
+    $.post(
+            '${request.contextPath}/manage/app/tool/diagnostic/submit.json',
+            {
+              type: 6,
+              appId: appId,
+              params: mapToJson(paramMap)
+            },
+            function (data) {
+              var status = data.status;
+              if (status == 'success') {
+                alert("检测任务提交成功，任务id：" + data.taskId);
+                location.href = "${request.contextPath}/manage/app/tool/index?tabTag=scanClean";
+              } else {
+                toastr.error("检测任务提交失败,请查看系统日志确认相关原因!");
+              }
+            }
+    );
+  }
+
+  function mapToJson(map) {
+    var str = '{';
+    var i = 1;
+    for (var [key, value] of map.entries()) {
+      if (i == map.size) {
+        str += '"' + key + '":"'+ value + '"';
+      }else{
+        str += '"' + key + '":"'+ value + '",';
+      }
+      i++;
+    }
+    str += '}';
+    return str;
+  }
+
+</script>
+
+<div class="card">
+  <div class="card-body">
+    <div id="scan-div">
+      <form class="row align-items-center" role="form" name="ec">
+        <div class="row mb-2">
+          <div class="col-md-3">
+            <select id="scan-select" name="appId" class="selectpicker show-tick w-100 border rounded"
+                    data-live-search="true" title="选择应用"
+                    onchange="changeAppIdSelect(this.value,'scan_instance-select')">
+              <option value="">选择应用</option>
+              <#list appDescMap?keys as key>
+                <#assign appDesc = appDescMap?api.get(key)>
+                <option value="${appDesc.appId!}" title="${appDesc.appId!} ${appDesc.name!}">
+                  【${appDesc.appId!}】&nbsp;名称：${appDesc.name!}&nbsp;类型：${appDesc.typeDesc!}&nbsp;版本：${appDesc.versionName!}
+                </option>
+              </#list>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <select id="scan_instance-select" name="nodes"
+                    class="selectpicker show-tick w-100 border rounded" multiple
+                    data-live-search="true" title="选择实例">
+            </select>
+          </div>
+        </div>
+        <div  id="patternDiv" class="margin-top-10">
+          <div class="row mb-2">
+            <label for="scan-pattern" class="col-form-label col-auto">键匹配</label>
+            <div class="col-md-3">
+              <input id="scan-pattern" type="text" class="form-control" name="scan-pattern"
+                     placeholder="支持通配符*和数字[0-9]匹配">
+            </div>
+            <div class="col-md-8">
+              <label><font style="font-weight: lighter; color: yellowgreen">如需筛选key中某部分小于指定值，在匹配串中添加<font style="font-weight: bold">@Less{指定值}Less@</font>，大于时，将Less替换为More</font></label>
+            </div>
+          </div>
+
+          <div class="row mb-2">
+            <label for="per_count" class="col-form-label col-auto">扫描数量</label>
+            <div class="col-md-3">
+              <input id="per_count" name="per_count" type="text" class="form-control" placeholder="每次获取数量">
+            </div>
+
+            <label for="scan_clean" class="col-form-label col-auto">操作类型</label>
+            <div class="col-md-3">
+              <select id="scan_clean" name="scan_clean" class="selectpicker border rounded" data-live-search="false" title="操作类型" onchange="changeTtlResetShow()">
+                <option value="0">
+                  仅扫描分析
+                </option>
+                <option value="1">
+                  分析清理
+                </option>
+                <option value="2">
+                  分析重置ttl
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div id = "resetTtl" class="row" style="display: none">
+          <div class="row mb-2">
+            <label for="ttl-reset-more" class="col-form-label col-auto col-form-label">重置ttl时间 ttl > </label>
+            <div class="col-md-3">
+              <input id="ttl-reset-more" type="text" class="form-control" name="ttl-reset-more"
+                     placeholder="最小过期时间">
+            </div>
+            <label for="ttl-reset-less" class="col-form-label col-auto col-form-label"> and ttl <</label>
+            <div class="col-md-3">
+              <input id="ttl-reset-less" type="text" class="form-control" name="ttl-reset-less"
+                     placeholder="最大过期时间">
+            </div>
+          </div>
+        </div>
+
+        <div id="filterDiv" class="row mb-2">
+          <label class="row"><font color="orange">过滤匹配：提供键包含、键关键字段值、ttl过滤</font></label>
+          <div class="row mb-2">
+            <label for="ttl-value-more" class="col-form-label col-auto"> 剩余时间 ttl > </label>
+            <div class="col-md-3">
+              <input id="ttl-value-more" type="text" class="form-control" name="ttl-value-more"
+                     placeholder="最小剩余时间">
+            </div>
+            <label for="ttl-value-less" class="col-form-label col-auto"> and ttl < </label>
+            <div class="col-md-3">
+              <input id="ttl-value-less" type="text" class="form-control" name="ttl-value-less"
+                     placeholder="最大剩余时间">
+            </div>
+            <button type="button" class="btn btn-success offset-md-1 col-auto" onclick="submitDiagnostic()">执行任务</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card-header">
+    <h3 class="card-title">分析清理任务列表</h3>
+  </div>
+
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-12">
+        <div>
+          <form class="row align-items-center" role="form" method="post" action="${request.contextPath}/manage/app/tool/index?tabTag=scanClean" id="appList" name="ec">
+            <div class="col-md-2">
+              <input type="text" class="form-control" id="appId" name="appId"
+                     value="${appId!}" placeholder="应用id">
+            </div>
+            <div class="col-md-2">
+              <input type="text" class="form-control" id="parentTaskId" name="parentTaskId"
+                     value="${parentTaskId!}" placeholder="任务id">
+            </div>
+            <div class="col-md-2">
+              <input type="text" class="form-control" id="auditId" name="auditId"
+                     value="${auditId!}" placeholder="审批id">
+            </div>
+            <button type="submit" class="btn btn-success col-auto">查询</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <br/>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="portlet box light-grey table-responsive" id="clientIndex">
+
+          <table class="table table-striped table-bordered table-hover" id="tableDataList" style="white-space: nowrap">
+            <thead>
+            <tr>
+              <td>序号</td>
+              <th>appId</th>
+              <th>应用名称</th>
+              <th>诊断类型</th>
+              <th>任务id</th>
+              <th>子任务id</th>
+              <th>审批id</th>
+              <th>节点</th>
+              <th width="20%" style="word-break: break-word">诊断条件</th>
+
+              <th>创建时间</th>
+              <th>诊断状态</th>
+              <th>诊断耗时</th>
+              <th>诊断结果</th>
+            </tr>
+            </thead>
+            <tbody>
+            <#list diagnosticTaskRecordList as record>
+              <#assign app_id = record.appId>
+              <tr>
+                <td>${record_index + 1}</td>
+                <td>
+                  <a target="_blank" href="${request.contextPath}/manage/app/index?appId=${app_id!}">${app_id!}</a>
+                </td>
+                <td>
+                  <a target="_blank"
+                     href="${request.contextPath}/admin/app/index?appId=${app_id!}"><#if app_id?? && appDescMap?? && appDescMap?api.get(app_id)??>${appDescMap?api.get(app_id).name!}</#if></a>
+                </td>
+                <td>
+                  分析清理
+                </td>
+                <td>
+                  <a target="_blank" href="${request.contextPath}/manage/task/flow?taskId=${record.parentTaskId!}">
+                    ${record.parentTaskId!}
+                  </a>
+                </td>
+                <td>
+                  <a target="_blank" href="${request.contextPath}/manage/task/flow?taskId=${record.taskId!}">
+                    ${record.taskId!}
+                  </a>
+                </td>
+                <td>
+                  <a target="_blank"
+                     href="${request.contextPath}/manage/app/auditList?auditId=${record.auditId!}">
+                    ${record.auditId!}
+                  </a>
+                </td>
+                <td>
+                  ${record.node!}
+                </td>
+                <td width="20%" style="word-wrap:break-word;word-break:break-all;">
+                  ${record.diagnosticCondition!}
+                </td>
+                <td>
+                  ${record.createTime!?string("yyyy-MM-dd HH:mm:ss")}
+                </td>
+                <td>
+                  <#if (record.status==0)>诊断中</#if>
+                  <#if (record.status==1)>诊断完成</#if>
+                  <#if (record.status==2)>诊断异常</#if>
+                </td>
+                <td>
+                  <#if (record.status==1)>${record.formatCostTime!}</#if>
+                </td>
+                <td>
+                  <#if (record.status==1) && (record.type!=4)>
+                    <button type="button" class="btn btn-sm btn-info"
+                            data-bs-target="#modal-diagnosticResult" data-bs-toggle="modal"
+                            data-rediskey="${record.redisKey!}"
+                            data-title="应用${app_id!} 节点${record.node!}">
+                      查看结果
+                    </button>
+                  </#if>
+                </td>
+              </tr>
+            </#list>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modal-diagnosticResult" class="modal fade" tabindex="-1">
+  <div class="modal-dialog" style="width: 100%">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h4 class="modal-title">
+          诊断结果
+          <small><label id="modal-title" style="color: #00BE67"></label></small>
+        </h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+      </div>
+
+      <form class="form-horizontal form-bordered form-row-stripped">
+        <div class="modal-body" style="height:500px; overflow:scroll;">
+          <div class="row">
+            <!-- 控件开始 -->
+            <div class="col-md-12">
+              <table class="table table-bordered table-striped table-hover">
+                <thead id="diagnosticResultCount"></thead>
+                <tbody id="diagnosticResultTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">Close</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

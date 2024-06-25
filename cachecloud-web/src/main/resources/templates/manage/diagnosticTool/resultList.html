@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>CacheCloud管理后台</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+  <#include "/manage/inc/backendResources.html">
+</head>
+
+<body>
+
+  <#include "/manage/inc/head.html">
+  <#include "/manage/inc/left.html">
+
+  <main id="main" class="main">
+    <section class="section dashboard">
+      <div class="row">
+        <#include "diagnosticResult.html">
+      </div>
+    </section>
+
+  </main><!-- End #main -->
+
+  <!-- ======= Footer ======= -->
+  <footer id="footer" class="footer">
+    <div class="copyright">
+      &copy; Copyright <strong><span>Cachecloud</span></strong>. All Rights Reserved
+    </div>
+  </footer><!-- End Footer -->
+
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <script>
+    var TableManaged = function () {
+      return {
+        //main function to initiate the module
+        init: function () {
+
+          if (!jQuery().dataTable) {
+            return;
+          }
+
+          $('#tableDataList').dataTable({
+            "searching": true,
+            "lengthChange": false,
+            "pageLength": 20,
+            "language": {
+              "lengthMenu": "Display _MENU_ records",
+              "paginate": {
+                "previous": "<",
+                "next": ">"
+              },
+              "info": "共_PAGES_页,_TOTAL_条",
+              "infoFiltered": "",
+              "infoEmpty":"共0页,0条",
+              "zeroRecords": "没有找到符合条件的数据",
+            }
+          });
+
+          jQuery('#tableDataList_wrapper>div:first-child').css("display","none");
+        }
+      };
+    }();
+
+    jQuery(document).ready(function() {
+      TableManaged.init();
+    });
+
+    $('#modal-diagnosticResult').on('shown.bs.modal', function (e) {
+      $('#modal-title').html('');
+      $('#diagnosticResultCount').html('');
+      $('#diagnosticResultTable').html('');
+
+      var redisKey = $(e.relatedTarget).data('rediskey');
+      var title = $(e.relatedTarget).data('title');
+      $('#modal-title').html(title);
+      $.get(
+              '${request.contextPath}/manage/app/tool/diagnostic/data.json',
+              {
+                redisKey: redisKey
+              },
+              function (data) {
+                $('#diagnosticResultCount').append(
+                        '<tr>' +
+                        '<td>key (共计' + data.count + '个）</td>' +
+                        '</tr>'
+                );
+                var diagnosticResultList = data.result;
+                diagnosticResultList.forEach(function (diagnosticResult, index) {
+                  $('#diagnosticResultTable').append(
+                          '<tr>' +
+                          '<td>' + diagnosticResult + '</td>' +
+                          '</tr>'
+                  );
+                })
+              }
+      );
+
+    });
+
+  </script>
+</body>
+<#include "/manage/inc/backendEndResources.html">
+</html>

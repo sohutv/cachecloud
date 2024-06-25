@@ -110,7 +110,7 @@ public class DiagnosticToolServiceImpl implements DiagnosticToolService {
         long startTime = System.currentTimeMillis();
         Jedis jedis = null;
         try {
-            jedis = redisCenter.getJedis(appId, host, port);
+            jedis = redisCenter.getAdminJedis(appId, host, port);
 
             long dbSize = jedis.dbSize();
             if (dbSize == 0) {

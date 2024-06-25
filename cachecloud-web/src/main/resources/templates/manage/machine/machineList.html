@@ -1,0 +1,469 @@
+<script src="${request.contextPath}/assets/js/custom/machineManage.js"></script>
+<script type="text/javascript">
+  var TableManaged = function () {
+    return {
+      //main function to initiate the module
+      init: function () {
+        $('#tableDataList').dataTable({
+          "searching": true,
+          "lengthChange": false,
+          "pageLength": 15,
+          "language": {
+            "lengthMenu": "Display _MENU_ records",
+            "paginate": {
+              "previous": "<",
+              "next": ">"
+            },
+            "info": "共_PAGES_页,_TOTAL_条",
+            "infoFiltered": "",
+            "infoEmpty":"共0页,0条",
+            "zeroRecords": "没有找到符合条件的数据",
+          }
+        });
+        $('#tableDataList_wrapper>div:first-child').css("display", "none");
+      }
+    };
+  }();
+
+  $(function () {
+    $('.selectpicker').selectpicker({
+      'selectedText': 'cat',
+      'size': 8,
+      'dropupAuto': false
+    });
+    $('.selectpicker').selectpicker('refresh');
+
+    TableManaged.init();
+  });
+
+  $('#modal-diagnosticResult').on('shown.bs.modal', function (e) {
+    $('#modal-title').html('');
+    $('#diagnosticResultCount').html('');
+    $('#diagnosticResultTable').html('');
+
+    var redisKey = $(e.relatedTarget).data('rediskey');
+    var title = $(e.relatedTarget).data('title');
+    $('#modal-title').html(title);
+    $.get(
+            '${request.contextPath}/manage/app/tool/diagnostic/data.json',
+            {
+              redisKey: redisKey,
+              type: 0
+            },
+            function (data) {
+              $('#diagnosticResultCount').append(
+                      '<tr>' +
+                      '<td>key (共计' + data.count + '个）</td>' +
+                      '</tr>'
+              );
+              var diagnosticResultList = data.result;
+              diagnosticResultList.forEach(function (diagnosticResult, index) {
+                $('#diagnosticResultTable').append(
+                        '<tr>' +
+                        '<td>' + diagnosticResult + '</td>' +
+                        '</tr>'
+                );
+              })
+            }
+    );
+  });
+
+  function changeAppIdSelect(appId, instance_select) {
+    document.getElementById(instance_select).options.length = 0;
+    $('#' + instance_select).selectpicker('destroy');
+    $('#' + instance_select).selectpicker();
+    $.post('${request.contextPath}/manage/app/tool/diagnostic/appInstances',
+            {
+              appId: appId,
+            },
+            function (data) {
+              var status = data.status;
+              if (status == 1) {
+                $('#' + instance_select).selectpicker('destroy');
+                var appInstanceList = data.appInstanceList;
+                $('#' + instance_select).append("<option value=''>所有主节点</option>");
+                for (var i = 0; i < appInstanceList.length; i++) {
+                  var val = appInstanceList[i].hostPort;
+                  var term = appInstanceList[i].hostPort + '（角色：' + appInstanceList[i].roleDesc + '）'
+                  $('#' + instance_select).append("<option value='" + val + "'>" + term + "</option>");
+                }
+                $('#' + instance_select).selectpicker();
+              } else {
+                console.log('data.status:' + status);
+              }
+            }
+    );
+  }
+
+  function submitDiagnostic(type) {
+    var appId;
+    var size;
+    var nodes;
+    var params = [];
+    if (type == 0) {
+      appId = $('#scan-select').selectpicker('val');
+      if (appId == null || appId == '') {
+        alert("请选择应用");
+        return;
+      }
+
+      nodes = $('#scan_instance-select').selectpicker('val');
+      size = $('#scan_size-select').selectpicker('val');
+      params.push($('#scan-pattern').val());
+      params.push(size);
+    }
+    $.post(
+            '${request.contextPath}/manage/app/tool/diagnostic/submit.json',
+            {
+              type: type,
+              appId: appId,
+              nodes: nodes == null ? "" : nodes.toString(),
+              params: params.toString()
+            },
+            function (data) {
+              var status = data.status;
+              if (status == 'success') {
+                alert("检测任务提交成功，任务id：" + data.taskId);
+                location.href = "${request.contextPath}/manage/app/tool/index?tabTag=scan";
+              } else {
+                toastr.error("检测任务提交失败,请查看系统日志确认相关原因!");
+              }
+            }
+    );
+  }
+</script>
+
+<div class="card">
+  <div class="card-body">
+    <div class="row">
+      <div class="">
+        <form class="row align-items-center" action="${request.contextPath}/manage/machine/index?tabTag=machine" method="post" role="form" name="ec">
+          <div class="col-md-2">
+            <input type="text" name="ipLike" class="form-control" id="ipLike" value="${ipLike!}" placeholder="机器ip"/>
+          </div>
+          <div class="col-md-2">
+            <input type="text" name="realip" class="form-control" id="realip" value="${realip!}" placeholder="宿主机ip"/>
+          </div>
+          <div class="col-md-2">
+            <select name="useType" id="useType" class="form-select">
+              <option value="-1">使用类型</option>
+              <option value="0" <#if useType?? && (useType == 0)>selected</#if>>Redis专用机器</option>
+              <option value="1" <#if useType?? && (useType == 1)>selected</#if>>Redis测试机器</option>
+              <option value="2" <#if useType?? && (useType == 2)>selected</#if>>混合部署机器</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <select name="type" id="type" class="form-select">
+              <option value="-1">机器类型</option>
+              <option value="0" <#if type?? && (type == 0)>selected</#if>>Redis机器</option>
+              <option value="3" <#if type?? && (type == 3)>selected</#if>>Sentinel机器</option>
+              <option value="2" <#if type?? && (type == 2)>selected</#if>>Redis迁移工具</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <select name="k8sType" id="k8sType" class="form-select">
+              <option value="-1">容器类型</option>
+              <option value="0" <#if k8sType?? && (k8sType == 0)>selected</#if>>普通容器</option>
+              <option value="1" <#if k8sType?? && (k8sType == 1)>selected</#if>>k8s容器</option>
+              <option value="2" <#if k8sType?? && (k8sType == 2)>selected</#if>>物理机</option>
+              <option value="3" <#if k8sType?? && (k8sType == 3)>selected</#if>>虚拟机</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm col-auto">查询</button>
+        </form>
+      </div>
+    </div>
+    <div class="row ml-2 mt-2">
+      <button id="sample_editable_1_new" class="btn btn-success btn-sm col-auto mr-3" type="button" data-bs-target="#addMachineModal" data-bs-toggle="modal">
+        添加新机器 <i class="bi bi-plus"></i>
+      </button>
+      <button id="down_crash_machine_modal" class="btn btn-danger btn-sm col-auto mr-3" type="button" data-bs-target="#downCrashMachineModal" data-bs-toggle="modal">
+        物理机迁移 <i class="bi bi-plus"></i>
+      </button>
+    </div>
+
+    <div class="row">
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered table-hover table-sm" id="tableDataList" style="white-space: nowrap">
+          <thead>
+          <tr>
+            <th scope="col">ip</th>
+            <th scope="col">宿主机ip</th>
+            <th scope="col">机器类型</th>
+            <th scope="col">实例数/核数</th>
+            <th scope="col">内存使用率</th>
+            <th scope="col">rss内存使用</th>
+            <th scope="col">已分配内存</th>
+            <th scope="col">实例SSD使用率</th>
+            <th scope="col">机器SSD使用率</th>
+            <th scope="col">CPU使用率</th>
+            <th scope="col">机器负载</th>
+            <th scope="col">最后统计时间</th>
+            <th scope="col">机房</th>
+<!--            <th scope="col">使用类型</th>-->
+            <th scope="col">操作系统</th>
+            <th scope="col">额外说明</th>
+            <th scope="col">状态收集</th>
+            <th scope="col">操作</th>
+          </tr>
+          </thead>
+          <tbody>
+          <#list list as machine>
+            <tr>
+              <td>
+                <a target="_blank" href="${request.contextPath}/manage/machine/machineInstances?ip=${machine.info.ip!}">${machine.info.ip!}</a>
+                <#if (machine.info.k8sType==1)>(<a target="_blank" href="${request.contextPath}/manage/machine/pod/changelist?ip=${machine.info.ip!}" title="查看pod变更记录">k8s</a>)</#if>
+                <#if podMonitor?? && machine.info.extraDesc??>
+                  <#assign extraDesc = (machine.info.extraDesc?replace('k8s container:', ''))>
+                  &nbsp;&nbsp;
+                  <a target="_blank" href="${podMonitor?replace('@pod@', extraDesc)}" title="查看pod监控"><i class="text-danger bi bi-graph-up"></i></a>
+                </#if>
+              </td>
+              <td>
+                ${machine.info.realIp!}
+                <#if machineMonitor?? && machine.info.realIp??>
+                  &nbsp;&nbsp;
+                  <a target="_blank" href="${machineMonitor?replace('@machine@', machine.info.realIp)}" title="查看物理机监控"><i class="text-danger bi bi-graph-up"></i></a>
+                </#if>
+              </td>
+              <td>
+                <#if (machine.info.type==0)><span class="btn btn-primary">Redis</span></#if>
+                <#if (machine.info.type==3)><span class="btn btn-secondary">sentinel</span></#if>
+                <#if (machine.info.type==2)><span class="btn btn-warning">RedisTool</span></#if>
+              </td>
+              <td>
+                <#if machineInstanceCountMap?? && machine.info.ip?? && machineInstanceCountMap?api.get(machine.info.ip)??>
+                  <#assign v1 = (machineInstanceCountMap!?api.get(machine.info.ip!)?string("0.00")!?number)>
+                <#else>
+                  <#assign v1 = 0>
+                </#if>
+                <#assign v2 = ((machine.info.cpu)!?string("0.00")!?number)>
+                <#if (v1/v2*100.0 > 100)>
+                  <#assign fmtInstanceCpuRatio = 100>
+                </#if>
+                <#if (v1/v2*100.0 <= 100)>
+                  <#assign fmtInstanceCpuRatio = ((v1/v2*100.0)!?string("0.00")!?number)>
+                </#if>
+                <span style="display:none">${(fmtInstanceCpuRatio / 100)?string("0.00")}></span>
+                <div class="progress progress-fs-1">
+                  <#if (v1/v2*100.0>100)>
+                    <#assign instanceCpuProgressBarStatus = "bg-danger">
+                  <#elseif (fmtInstanceCpuRatio >= 80.00)>
+                    <#assign instanceCpuProgressBarStatus = "bg-warning">
+                  <#else>
+                    <#assign instanceCpuProgressBarStatus = "bg-success">
+                  </#if>
+                  <#if (fmtInstanceCpuRatio == 0.00)>
+                      <#assign instanceCount = "0">
+                  <#else>
+                    <#if machineInstanceCountMap?? && machine.info.ip??>
+                      <#assign instanceCount=(machineInstanceCountMap[machine.info.ip])>
+                    <#else>
+                      <#assign instanceCount = 0>
+                    </#if>
+                  </#if>
+                  <div class="progress-bar ${instanceCpuProgressBarStatus!}"
+                       role="progressbar" aria-valuenow="${fmtInstanceCpuRatio!}" aria-valuemax="100"
+                       aria-valuemin="0" style="width: ${fmtInstanceCpuRatio!}%; overflow: visible;">
+                    <span style="color: #000000; margin-bottom: 0; text-align: center;">
+                      ${instanceCount!}&nbsp;&nbsp;/${machine.info.cpu!}&nbsp;&nbsp;
+                    </span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <#assign usedMem = (((machine.machineMemInfo.usedMem)/1024/1024/1024)?string("0.00")!?number)>
+                <#assign mem = ((machine.info.mem)?string("0.00")!?number)>
+                <#assign fmtMemoryUsageRatio = ((usedMem/mem*100.0)?string("0.00")!?number)>
+                <div class="progress progress-fs-1">
+                  <#if (fmtMemoryUsageRatio >= 80.00)>
+                    <#assign memUsedProgressBarStatus = "bg-danger">
+                  <#elseif (fmtMemoryUsageRatio >= 60.00)>
+                    <#assign memUsedProgressBarStatus = "bg-warning">
+                  <#else>
+                    <#assign memUsedProgressBarStatus = "bg-success">
+                  </#if>
+                  <div class="progress-bar ${memUsedProgressBarStatus!}"
+                       role="progressbar" aria-valuenow="${fmtMemoryUsageRatio!}" aria-valuemax="100"
+                       aria-valuemin="0" style="width: ${fmtMemoryUsageRatio!}%; overflow: visible;">
+                    <span style="color: #000000; margin-bottom: 0">
+                      ${usedMem!}G&nbsp;&nbsp;Used/
+                      ${mem!}G&nbsp;&nbsp;Total
+                    </span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <#assign usedMemRss = (((machine.machineMemInfo.usedMemRss)/1024/1024/1024)?string("0.00")!?number)>
+                <#assign mem = (machine.info.mem?string("0.00")!?number)>
+                <#assign fmtMemoryUsageRssRatio = (((usedMemRss)/(mem)*100.0)?string("0.00")!?number)>
+                <div class="progress progress-fs-1">
+                  <#if (fmtMemoryUsageRssRatio >= 80.00)>
+                    <#assign memUsedRssProgressBarStatus = "bg-danger">
+                  <#elseif (fmtMemoryUsageRssRatio >= 70.00)>
+                    <#assign memUsedRssProgressBarStatus = "bg-warning">
+                  <#else>
+                    <#assign memUsedRssProgressBarStatus = "bg-success">
+                  </#if>
+                  <div class="progress-bar ${memUsedRssProgressBarStatus!}"
+                       role="progressbar" aria-valuenow="${fmtMemoryUsageRssRatio!}" aria-valuemax="100"
+                       aria-valuemin="0" style="width: ${fmtMemoryUsageRatio!}%; overflow: visible;">
+                    <span style="color: #000000; margin-bottom: 0">
+                      ${usedMemRss!}G&nbsp;&nbsp;Used/
+                      ${mem!}G&nbsp;&nbsp;Total
+                    </span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <#assign applyMem = (((machine.machineMemInfo.applyMem)/1024/1024/1024)?string("0.00")?number)>
+                <#assign mem = (machine.info.mem?string("0.00")?number)>
+                <#if (applyMem/mem*100.0>100)>
+                  <#assign fmtMemoryAllocatedRatio = 100>
+                </#if>
+                <#if (applyMem/mem*100.0<=100)>
+                  <#assign fmtMemoryAllocatedRatio = ((applyMem/mem*100.0)?string("0.00")!?number)>
+                </#if>
+                <div class="progress progress-fs-1">
+                  <#if (applyMem/mem*100.0 > 100.00)>
+                    <#assign memAllocateProgressBarStatus = "bg-danger">
+                  <#elseif (fmtMemoryAllocatedRatio >= 80.00)>
+                    <#assign memAllocateProgressBarStatus = "bg-warning">
+                  <#else>
+                    <#assign memAllocateProgressBarStatus = "bg-success">
+                  </#if>
+                  <div class="progress-bar ${memAllocateProgressBarStatus!}"
+                       role="progressbar" aria-valuenow="${fmtMemoryAllocatedRatio!}" aria-valuemax="100"
+                       aria-valuemin="0" style="width: ${fmtMemoryAllocatedRatio!}%; overflow: visible;">
+                    <span style="color: #000000; margin-bottom: 0">
+                      ${applyMem!}G&nbsp;&nbsp;Used/
+                      ${mem!}G&nbsp;&nbsp;Total
+                    </span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <!--实例-->
+                <#assign usedDisk = (((machine.machineMemInfo.usedDisk)/1024/1024/1024)?string("0.00")!?number)>
+                <#assign totalDisk = ((machine.info.disk)?string("0.00")!?number)>
+                <#if (totalDisk == 0)>
+                <#assign fmtDiskUsageRatio = 0>
+                <#else>
+                <#assign fmtDiskUsageRatio = ((usedDisk/totalDisk*100.0)?string("0.00")!?number)>
+              </#if>
+                <!-- 实例使用率-->
+                <div class="progress progress-fs-1">
+                    <#if (fmtDiskUsageRatio >= 80.00)>
+                    <#assign diskUsedProgressBarStatus = "bg-danger">
+                    <#elseif (fmtDiskUsageRatio >= 60.00)>
+                    <#assign diskUsedProgressBarStatus = "bg-warning">
+                    <#else>
+                    <#assign diskUsedProgressBarStatus = "bg-success">
+                  </#if>
+                  <div class="progress-bar ${diskUsedProgressBarStatus!}"
+                       role="progressbar" aria-valuenow="${fmtDiskUsageRatio!}" aria-valuemax="100"
+                       aria-valuemin="0" style="width: ${fmtDiskUsageRatio!}%; overflow: visible;">
+                              <span style="color: #000000; margin-bottom: 0">
+                                ${usedDisk!}G&nbsp;&nbsp;Used/${totalDisk}G Total
+                              </span>
+                  </div>
+                </div>
+              </td>
+
+              <td>
+                <!--机器-->
+                <#if machine.diskTotal??>
+                  <#assign machineTotalDisk = (((machine.diskTotal?number)/1024)?string("0"))>
+                <#else>
+                    <#assign machineTotalDisk = "0">
+                </#if>
+                <#if machine.diskTotal?? && machine.diskAvailable??>
+                    <#assign machineUsedDisk = (((machine.diskTotal?number)/1024 - (machine.diskAvailable?number)/1024)?string("0"))>
+                <#else>
+                    <#assign machineUsedDisk = "0">
+                </#if>
+                <#if machine.diskUsageRatio??>
+                    <#assign diskUsageRatio = (machine.diskUsageRatio!?number)>
+                <#else>
+                    <#assign diskUsageRatio = 0>
+                </#if>
+                <div class="progress progress-fs-1">
+                  <#if (diskUsageRatio >= 80.00)>
+                    <#assign machineDiskUsedProgressBarStatus = "bg-danger">
+                    <#elseif (diskUsageRatio >= 60.00)>
+                    <#assign machineDiskUsedProgressBarStatus = "bg-warning">
+                    <#else>
+                    <#assign machineDiskUsedProgressBarStatus = "bg-success">
+                  </#if>
+                  <div class="progress-bar ${machineDiskUsedProgressBarStatus!}"
+                       role="progressbar" aria-valuenow="${diskUsageRatio!}" aria-valuemax="100"
+                       aria-valuemin="0" style="width: ${diskUsageRatio!}%; overflow: visible;">
+                            <span style="color: #000000; margin-bottom: 0">
+                              ${machineUsedDisk}G&nbsp;Used/
+                              ${machineTotalDisk}G&nbsp;Total
+                              &nbsp;(${diskUsageRatio}%)
+                            </span>
+                  </div>
+                </div>
+              </td>
+
+              <td>
+                <#if !(machine.cpuUsage??) || (machine.cpuUsage?? && (machine.cpuUsage == ''))>
+                  收集中..${collectAlert!}
+                <#else>
+                  ${machine.cpuUsage!}
+                </#if>
+              </td>
+              <td>
+                <#if !(machine.load??) || (machine.load?? && (machine.load == ''))>
+                  收集中..${collectAlert!}
+                <#else>
+                  ${machine.load!}
+                </#if>
+              </td>
+              <td>
+                <#if machine.modifyTime??>
+                  ${machine.modifyTime?string("yyyy-MM-dd HH:mm")}
+                </#if>
+              </td>
+              <td>${machine.info.room!}</td>
+              <td>
+                <#if machine.info.disType == 0>
+                    <span class="badge badge-primary">Centos</span>
+                <#elseif machine.info.disType == 1>
+                    <span class="badge badge-secondary">Ubuntu</span>
+                </#if>
+
+              </td>
+              <td>
+                ${machine.info.extraDesc!}
+                <#if (machine.info.type == 2)>
+                  <font color='red'>(迁移工具机器)</font>
+                </#if>
+              </td>
+              <#if (machine.info.collect == 1)>
+                <td>开启</td>
+              <#else>
+                <td>关闭</td>
+              </#if>
+              <td>
+                <a href="${request.contextPath}/server/index?ip=${machine.info.ip!}" class="btn btn-info btn-sm" target="_blank">监控</a>
+                &nbsp;
+                <a href="javascript:void(0);" data-bs-target="#addMachineModal${machine.info.id!}" class="btn btn-warning btn-sm" data-bs-toggle="modal">修改</a>
+                &nbsp;
+                <button id="removeMachineBtn${machine.info.id!}" onclick="removeMachine(this.id,'${machine.info.ip!}', '${request.contextPath}')" type="button" class="btn btn-danger btn-sm">删除</button>
+              </td>
+            </tr>
+          </#list>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<#list list as machine>
+  <#include "addMachine.html">
+</#list>
+<#include "addMachine.html">
+<#include "downCrashMachine.html">

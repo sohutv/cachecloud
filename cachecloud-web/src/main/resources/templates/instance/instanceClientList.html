@@ -1,0 +1,125 @@
+<div class="col-md-12">
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">
+        客户端连接统计
+      </h3>
+    </div>
+    <div class="card-body table-responsive">
+      <h5>
+        <form method="post" action="${request.contextPath}/admin/instance/index?instanceId=${instanceId}&tabTag=instance_clientList" id="conditionFrom">
+          <input type="radio" value="0" <#if (condition == 0)>checked="checked"</#if>
+          onchange="changeCondition(this.value)"/> 应用客户端
+          <input type="radio" value="1" <#if (condition == 1)>checked="checked"</#if>
+          onchange="changeCondition(this.value)"/> cc客户端
+          <input type="radio" value="2" <#if (condition == 2)>checked="checked"</#if>
+          onchange="changeCondition(this.value)"/> redis客户端
+          <input type="radio" value="3" <#if (condition == 3)>checked="checked"</#if>
+          onchange="changeCondition(this.value)"/> 所有客户端
+          <input type="hidden" id="condition" name="condition" value="${condition}">
+        </form>
+      </h5>
+
+      <!-- table begin -->
+      <table class="table table-striped">
+        <thead>
+        <th scope="col">序号</td>
+        <th scope="col">客户端ip</td>
+        <th scope="col">客户端类型</td>
+        <th scope="col">连接数</td>
+        <th scope="col">连接信息</td>
+        </thead>
+        <tbody>
+        <#list clientMapList as clientMap>
+          <tr>
+            <td>${clientMap_index + 1}</td>
+            <td>${clientMap['addr']}</td>
+            <td>
+              <#list clientMap['clientTypeSet'] as clientType>
+                ${clientType}
+                <br/>
+              </#list>
+            </td>
+            <td>${clientMap['count']}</td>
+            <td>
+              <button type="button" class="btn btn-success" data-bs-target="#modal-${clientMap_index}"
+                      data-bs-toggle="modal">
+                查看连接信息
+              </button>
+              <div id="modal-${clientMap_index}" class="modal fade" tabindex="-1">
+                <div class="modal-dialog" style="width: 100%">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h4 class="modal-title">连接信息</h4>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal"
+                              aria-hidden="true"></button>
+                    </div>
+
+                    <div class="modal-body">
+                      <div class="row">
+                        <!-- 控件开始 -->
+                        <div class="col-md-12 table-responsive">
+                          <table class="table table-bordered table-striped table-hover">
+                            <thead>
+                            <tr>
+                              <td>客户端类型</td>
+                              <td>执行命令</td>
+                              <td>连接</td>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <#list clientMap['clientInfoList'] as client>
+                            <tr>
+                              <td>${client['flags']!}</td>
+                              <td>${client['cmd']!}</td>
+                              <td>${client?api.toString()}</td>
+                            </tr>
+                            </#list>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="modal-footer">
+                      <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">Close</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </#list>
+      </tbody>
+  </table>
+  <!-- End Table with stripped rows -->
+</div>
+</div>
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">
+      客户端连接信息
+    </h3>
+  </div>
+  <div class="card-body table-responsive">
+    <table class="table table-bordered table-striped table-hover">
+      <tbody>
+      <#list clientList as client>
+        <tr>
+          <td>${client_index + 1}</td>
+          <td>${client}</td>
+        </tr>
+      </#list>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<script type="text/javascript">
+  function changeCondition(value) {
+    console.log('radio:'+value);
+    $('#condition').val(value);
+    $('#conditionFrom').submit();
+  }
+</script>

@@ -2,6 +2,7 @@ package com.sohu.cache.redis;
 
 import com.sohu.cache.entity.InstanceConfig;
 import com.sohu.cache.entity.SystemResource;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 import java.util.Map;
@@ -101,9 +102,10 @@ public interface RedisConfigTemplateService {
      * @param sentinelHost sentinel host
      * @param sentinelPort sentinel port
      * @param versionId
+     * @param customConfigs 自定义配置
      * @return
      */
-    List<String> handleSentinelConfig(String masterName, String host, int port,String sentinelHost, int sentinelPort, int versionId);
+    List<String> handleSentinelConfig(String masterName, String host, int port,String sentinelHost, int sentinelPort, int versionId, List<Pair<String, String>> customConfigs);
 
     /**
      * cluster节点配置
@@ -114,13 +116,13 @@ public interface RedisConfigTemplateService {
     List<String> handleClusterConfig(int port, int versionId);
     
     
-    /**
-     * 普通节点默认配置
-     * @param port
-     * @param maxMemory
-     * @return
-     */
-    List<String> handleCommonDefaultConfig(int port, int maxMemory);
+//    /**
+//     * 普通节点默认配置
+//     * @param port
+//     * @param maxMemory
+//     * @return
+//     */
+//    List<String> handleCommonDefaultConfig(int port, int maxMemory);
 
     /**
      * sentinel节点默认配置
@@ -132,12 +134,12 @@ public interface RedisConfigTemplateService {
      */
     List<String> handleSentinelDefaultConfig(String masterName, String host, int port, int sentinelPort);
     
-    /**
-     * cluster节点默认配置
-     * @param port
-     * @return
-     */
-    List<String> handleClusterDefaultConfig(int port);
+//    /**
+//     * cluster节点默认配置
+//     * @param port
+//     * @return
+//     */
+//    List<String> handleClusterDefaultConfig(int port);
 
 
     /**
@@ -174,4 +176,7 @@ public interface RedisConfigTemplateService {
      * 检查slave psync是否成功
      */
     public Boolean slaveIsPsync(long appId,String ip,int port);
+
+    List<String> handleRedisConfig(String host, int port, int versionId, int maxMemory, String maxMemoryPolicy, boolean isCluster, List<Pair<String, String>> customConfigs, Map<String, String> copyFromConfigMap);
+
 }

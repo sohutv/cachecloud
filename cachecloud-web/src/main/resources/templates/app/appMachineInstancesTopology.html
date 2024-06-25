@@ -1,0 +1,55 @@
+<div class="col-md-12">
+  <div class="card">
+    <div class="card-body mt-3 table-responsive">
+      <div class="page-header">
+        <a target="_blank" data-container="body" class='button button-caution button-square button-small'> </a>
+        <label>代表master节点</label>
+        <a target="_blank" data-container="body" class='button button-caution button-square button-small button-border'> </a>
+        <label>代表slave节点</label>
+        <#if (appDesc.type == 5)>
+          <a target="_blank" data-container="body" class='button button-action button-square button-small'> </a>
+          <label>代表Sentinel节点</label>
+        </#if>
+      </div>
+
+      <!-- table begin -->
+      <table class="table table-striped table-hover">
+        <thead>
+        <tr>
+          <th scope="col" style='vertical-align: middle;text-align: center;'>机器</th>
+          <#list 1..instancePairCount as instanceIndex>
+            <th scope="col" style='vertical-align: middle;text-align: center;'>实例对${instanceIndex}</th>
+          </#list>
+        </tr>
+        </thead>
+        <tbody>
+        <#list machineInstanceMap?keys as key>
+          <tr>
+            <td  style='vertical-align: middle;text-align: center;'>${key}</td>
+            <#list 1..instancePairCount as instanceIndex>
+              <td style='vertical-align: middle;text-align: center;'>
+                <#list machineInstanceMap[key] as instance>
+                  <#assign instanceNodeTypeStyle="button-caution">
+                  <#if (instance.type == 5)>
+                    <#assign instanceNodeTypeStyle="button-action">
+                  </#if>
+                  <#if (instance.groupId == instanceIndex)>
+                    <a target="_blank" data-container="body" data-bs-toggle="popover" data-bs-placement="top" data-bs-content="<a target='_blank' href='${request.contextPath}/admin/instance/index?instanceId=${instance.id}'>${instance.ip}:${instance.port}</a>" href="${request.contextPath}/admin/instance/index?instanceId=${instance.id}" class='button ${instanceNodeTypeStyle} button-square button-small <#if (instance.masterInstanceId > 0)>button-border</#if> '>${instance.groupId}</a>
+                    <#if (instance.status == 0)>
+                      (心跳停止)
+                    </#if>
+                  </#if>
+
+                </#list>
+              </td>
+            </#list>
+          </tr>
+        </#list>
+        </tbody>
+      </table>
+  <!-- End Table with stripped rows -->
+    </div>
+  </div>
+</div>
+<link href="${request.contextPath}/assets/css/buttons.css" rel="stylesheet" />
+<script type="text/javascript" src="${request.contextPath}/assets/js/custom/myPopover.js"></script>

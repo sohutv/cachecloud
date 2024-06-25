@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 /**
  * 邮件通知应用的申请流程(方法内是具体的文案)
@@ -71,10 +72,63 @@ public class AppEmailUtil {
         String mailContent = FreemakerUtils.createText("appAudit.ftl", configuration, context);
         AppUser appUser = userService.get(appDesc.getUserId());
         List<String> receiveEmailList = new ArrayList<>();
+        userService.getOfficerUserByUserIds(officerIds).forEach(user -> receiveEmailList.add(user.getEmail()));
+        if(CollectionUtils.isEmpty(receiveEmailList) && appUser != null) {
+            receiveEmailList.add(appUser.getEmail());
+        }
+        emailComponent.sendMail("【CacheCloud】状态通知", mailContent, receiveEmailList, ccEmailList);
+    }
+
+    /**
+     * 应用状态通知
+     *
+     * @param applyUser
+     * @param appDesc
+     * @param appAudit
+     */
+    public void noticeAppResultWithApplyUser(AppUser applyUser, AppDesc appDesc, AppAudit appAudit) {
+        if (EnvUtil.isDev(environment)) {
+            return;
+        }
+        List<String> ccEmailList = getCCEmailList(appDesc, appAudit);
+        String officerIds = appDesc.getOfficer();
+        appDesc.setOfficer(userService.getOfficerName(officerIds));
+        Map<String, Object> context = new HashMap<>();
+        context.put("appDesc", appDesc);
+        context.put("appAudit", appAudit);
+        context.put("appDailyData", new AppDailyData());
+        context.put("instanceAlertValueResultList", new ArrayList<InstanceAlertValueResult>());
+        String mailContent = FreemakerUtils.createText("appAudit.ftl", configuration, context);
+        AppUser appUser = userService.get(appDesc.getUserId());
+        List<String> receiveEmailList = new ArrayList<>();
+        userService.getOfficerUserByUserIds(officerIds).forEach(user -> receiveEmailList.add(user.getEmail()));
+        if(CollectionUtils.isEmpty(receiveEmailList) && appUser != null) {
+            receiveEmailList.add(appUser.getEmail());
+        }
+        receiveEmailList.add(applyUser.getEmail());
+        List<String> appOfficeList = receiveEmailList.stream().distinct().collect(Collectors.toList());
+        emailComponent.sendMail("【CacheCloud】状态通知", mailContent, appOfficeList, ccEmailList);
+    }
+
+    /**
+     * 应用状态通知
+     *
+     * @param appUser
+     * @param appAudit
+     */
+    public void noticeAuditResult(AppUser appUser, AppAudit appAudit) {
+        if (EnvUtil.isDev(environment)) {
+            return;
+        }
+        List<String> ccEmailList = Arrays.asList(emailComponent.getAdminEmail().split(ConstUtils.COMMA));
+        Map<String, Object> context = new HashMap<>();
+        context.put("appAudit", appAudit);
+        context.put("appDailyData", new AppDailyData());
+        context.put("instanceAlertValueResultList", new ArrayList<InstanceAlertValueResult>());
+        String mailContent = FreemakerUtils.createText("appAudit.ftl", configuration, context);
+        List<String> receiveEmailList = new ArrayList<>();
         if(appUser != null){
             receiveEmailList.add(appUser.getEmail());
-        }else{
-            userService.getOfficerUserByUserIds(officerIds).forEach(user -> receiveEmailList.add(user.getEmail()));
         }
         emailComponent.sendMail("【CacheCloud】状态通知", mailContent, receiveEmailList, ccEmailList);
     }

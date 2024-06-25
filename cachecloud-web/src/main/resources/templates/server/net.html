@@ -1,0 +1,42 @@
+<div class="col-md-12">
+  <div class="row">
+    <#if !(net??)>
+      no data
+    </#if>
+    <#if net?? && (net?size > 0)>
+      <#list net as item>
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <div id="container${item.name!}"
+                   style="max-width: 100%; min-width: 310px; height: 400px; margin: 0 auto">
+              </div>
+            </div>
+          </div>
+        </div>
+      </#list>
+    </#if>
+  </div>
+</div>
+
+<script type="text/javascript">
+  $(document).ready(function() {
+    initSubNetChart();
+  });
+
+  function initSubNetChart(){
+    <#if net?? && (net?size > 0)>
+      <#list net as item>
+        var options = getOptions("${item.name!}", "container${item.name!}");
+        options.subtitle.text = "max in:${item.maxIn!}k/s out:${item.maxOut!}k/s avg in:${item.avgIn!}k/s out:${item.avgOut!}k/s";
+        <#if item.inSeries??>
+          options.series.push(${item.inSeries.toJson()});
+        </#if>
+        <#if item.outSeries??>
+          options.series.push(${item.outSeries.toJson()});
+        </#if>
+        new Highcharts.Chart(options);
+      </#list>
+    </#if>
+  }
+</script>

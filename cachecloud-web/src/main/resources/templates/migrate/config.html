@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>迁移配置</title>
+</head>
+<body STYLE="BACKGROUND-COLOR:#000;color:#FFF">
+<#if configList?? && (configList?size > 0)>
+<#list configList as line>
+<font color="white">${line!}</font><br/>
+</#list>
+</#if>
+</body>
+</html>

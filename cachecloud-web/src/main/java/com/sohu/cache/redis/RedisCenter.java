@@ -1,9 +1,9 @@
 package com.sohu.cache.redis;
 
-import com.sohu.cache.constant.RedisConstant;
 import com.sohu.cache.entity.*;
 import com.sohu.cache.web.enums.BooleanEnum;
 import com.sohu.cache.web.vo.RedisSlowLog;
+import org.apache.commons.lang3.tuple.Pair;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisSentinelPool;
@@ -28,8 +28,8 @@ public interface RedisCenter {
      * @param port
      * @return
      */
-    public Map<RedisConstant, Map<String, Object>> collectRedisInfo(long appId, long collectTime, String host,
-                                                                    int port);
+    public Map<Object, Map<String, Object>> collectRedisInfo(long appId, long collectTime, String host,
+                                                             int port);
 
     /**
      * 收集redis统计信息
@@ -38,7 +38,7 @@ public interface RedisCenter {
      * @param port
      * @return
      */
-    public Map<RedisConstant, Map<String, Object>> getInfoStats(long appId, String host, int port);
+    public Map<Object, Map<String, Object>> getInfoStats(long appId, String host, int port);
 
     /**
      * 节点cluster info信息
@@ -70,6 +70,7 @@ public interface RedisCenter {
 
     /**
      * 判断实例是否为从节点，并且与主节点连接有效
+     *
      * @param appDesc
      * @param slaveInstance
      * @param masterInstance
@@ -78,14 +79,14 @@ public interface RedisCenter {
     public BooleanEnum isSlaveAndPointedMasterUp(AppDesc appDesc, InstanceInfo slaveInstance, InstanceInfo masterInstance);
 
 
-        /**
-         * 获取行数
-         *
-         * @param appId
-         * @param ip
-         * @param port
-         * @return
-         */
+    /**
+     * 获取行数
+     *
+     * @param appId
+     * @param ip
+     * @param port
+     * @return
+     */
     long getDbSize(long appId, String ip, int port);
 
 
@@ -242,6 +243,7 @@ public interface RedisCenter {
 
     /**
      * 执行redis命令，无白名单限制，仅供管理员使用
+     *
      * @param appDesc
      * @param command
      * @param args
@@ -250,19 +252,21 @@ public interface RedisCenter {
     Object executeAdminCommand(AppDesc appDesc, ProtocolCommand command, String... args);
 
 
-        /**
-         * 实例执行redis命令，无白名单限制，仅供管理员使用
-         * @param appId
-         * @param host
-         * @param port
-         * @param command
-         * @param timeout
-         * @return
-         */
-    String executeAdminCommand(long appId, String host, int port, String command,Integer timeout);
+    /**
+     * 实例执行redis命令，无白名单限制，仅供管理员使用
+     *
+     * @param appId
+     * @param host
+     * @param port
+     * @param command
+     * @param timeout
+     * @return
+     */
+    String executeAdminCommand(long appId, String host, int port, String command, Integer timeout);
 
     /**
      * 执行redis命令， 无黑白名单限制，仅供管理员使用
+     *
      * @param jedis
      * @param command
      * @param args
@@ -270,12 +274,12 @@ public interface RedisCenter {
      */
     Object executeAdminRedisCommandByJedis(Jedis jedis, ProtocolCommand command, String... args);
 
-        /**
-         * 获取jedisSentinelPool实例,必须是sentinel类型应用
-         *
-         * @param appDesc
-         * @return
-         */
+    /**
+     * 获取jedisSentinelPool实例,必须是sentinel类型应用
+     *
+     * @param appDesc
+     * @return
+     */
     public JedisSentinelPool getJedisSentinelPool(AppDesc appDesc);
 
     /**
@@ -285,6 +289,20 @@ public interface RedisCenter {
      * @return
      */
     public Map<String, String> getRedisConfigList(int instanceId);
+
+    /**
+     * 获取redis 命令列表
+     * @param instanceId
+     * @return
+     */
+    public List<String> getRedisCommand(int instanceId);
+
+    /**
+     * 获取重命名命令列表
+     * @param instanceId
+     * @return
+     */
+    List<Pair<String, String>> getConfigsInConfigFile(int instanceId, String configName);
 
     /**
      * 获取redis实例慢查询
@@ -312,6 +330,14 @@ public interface RedisCenter {
      * @return
      */
     public boolean configRewrite(final long appId, final String host, final int port);
+
+    /**
+     * 配置重写
+     *
+     * @param jedis
+     * @return
+     */
+    public boolean configRewrite(Jedis jedis);
 
     /**
      * 获取maxmemory配置
@@ -352,12 +378,21 @@ public interface RedisCenter {
 
     /**
      * 获取集群中失联的slots
-     *
      * @param appId
-     * @param host
-     * @param port
+     * @param instanceInfo
      * @return
      */
+    public Map<String, String> getClusterLossSlots(long appId, InstanceInfo instanceInfo);
+
+
+        /**
+         * 获取集群中失联的slots
+         *
+         * @param appId
+         * @param host
+         * @param port
+         * @return
+         */
     public List<Integer> getClusterLossSlots(long appId, String host, int port);
 
     /**
@@ -448,6 +483,17 @@ public interface RedisCenter {
      */
     Map<String, InstanceSlotModel> getClusterSlotsMap(long appId);
 
+
+    /**
+     * 获取集群slot分布
+     * <K,V> -> <slot start-slot end, List<IP:PORT>>
+     *
+     * @param appId
+     * @param instanceInfo
+     * @return
+     */
+    Map<String, List<HostAndPort>> getClusterSlotMap(long appId, InstanceInfo instanceInfo);
+
     /**
      * 获取Redis版本
      *
@@ -472,6 +518,27 @@ public interface RedisCenter {
     public Boolean getRedisReplicationStatus(long appId, String ip, int port);
 
     /**
+     * @param appId
+     * @param ip
+     * @param port
+     * @return
+     */
+    public Map<String, String> getRedisRoleAndMasterStatus(long appId, String ip, int port);
+
+    /**
+     * <p>
+     * Description: 获取redis failover之后状态，判断是否failover完成
+     * </p>
+     *
+     * @param ip   当前failover slave ip
+     * @param port 当前failover slave port
+     * @return false:定时轮询检测 true:检测完毕
+     * @version 1.0
+     * @date 2023/2/28
+     */
+    public Boolean getRedisFailoverForceStatus(long appId, String ip, int port);
+
+    /**
      * 获取nodeId
      *
      * @param appId
@@ -483,11 +550,17 @@ public interface RedisCenter {
 
     Jedis getJedis(String host, int port, String password);
 
+    Jedis getAdminJedis(String host, int port, String password);
+
     Jedis getJedis(String host, int port);
 
     Jedis getJedis(long appId, String host, int port);
 
+    Jedis getAdminJedis(long appId, String host, int port);
+
     Jedis getJedis(long appId, String host, int port, int connectionTimeout, int soTimeout);
+
+    Jedis getAdminJedis(long appId, String host, int port, int connectionTimeout, int soTimeout);
 
     Jedis getJedis(String host, int port, String password, int connectionTimeout, int soTimeout);
 
@@ -510,24 +583,29 @@ public interface RedisCenter {
      */
     public List<InstanceInfo> checkNutCrackerHashIsSame(long appId, boolean isDelete);
 
-    /**
-     * 检查实例安装插件情况
-     * @param appId
-     */
-    public List<InstanceInfo> checkInstanceModule(long appId);
+    String configGet(long appId, String host, int port, String key);
 
-    public Map loadModule(long appId, int versionId);
+    boolean configSetAndRewrite(long appId, String host, int port, String key, String value);
 
-    //获取模块默认配置并返回 配置文件中的模块格式
-    List<String> getLoadModuleDefaultConfig(long appId, List<ModuleVersion> moduleList);
+    //检测从节点是否准备OK
+    boolean checkSlaveReady(long appId, String ip, int port, long offset);
 
-    public Map unloadModule(long appId, String moduleName);
+    //检测从节点是否准备OK
+    boolean checkSlaveReady(Jedis jedis, Long offset);
 
-    // 校验是否存在并自动下载so
-    void checkAndDownloadModule(String ip, List<ModuleVersion> moduleList);
+    //获取节点角色描述
+    String getInstanceRole(Jedis jedis);
 
-    /**
-     * 检查是否有redis插件
-     */
-    public boolean checkAndLoadModule(long appId, String host, int port);
+    //获取节点角色描述
+    String getInstanceRole(long appId, String ip, int port);
+
+    //检测bgsave是否完成
+    boolean checkBgsaveFinish(Jedis jedis, int checkTimes);
+
+    //检测load rdb是否完成
+    boolean checkLoadFinish(Jedis jedis, int checkTimes);
+
+    //获取rdb文件名
+    String getRdbFileName(Jedis jedis);
+
 }

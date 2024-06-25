@@ -115,7 +115,7 @@ public class RedisServerBigKeyAnalysisTask extends BaseTask {
 
         Jedis jedis = null;
         try {
-            jedis = redisCenter.getJedis(appId, host, port);
+            jedis = redisCenter.getAdminJedis(appId, host, port);
             jedis.readonly();
 
             long dbSize = jedis.dbSize();

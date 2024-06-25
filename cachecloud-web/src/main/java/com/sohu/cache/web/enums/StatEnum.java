@@ -22,6 +22,7 @@ public enum StatEnum {
     TOTAL_EFFETIVE_APP("effetiveAppCount"),
     TOTAL_INSTANCE_NUM("totalInstanceCount"),
     TOTAL_MACHINE_NUM("totalMachineCount"),
+    TOTAL_PHYSICAL_MACHINE_NUM("totalPhysicalMachineCount"),
     REDIS_VERSION_COUNT("redisTypeCount"),
     /**
      * 分布统计：

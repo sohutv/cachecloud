@@ -1,0 +1,347 @@
+<script type="text/javascript">
+  function checkAppImportFormat() {
+    var res = saveAppDesc();
+    if (res == false) {
+      return
+    }
+    var password = document.getElementById("password");
+    var type = document.getElementById("type")
+    $.post(
+            '${request.contextPath}/import/app/check.json',
+            {
+              type: type.value,
+              password: password.value,
+              appInstanceInfo: appInstanceInfo.value
+            },
+            function (data) {
+              var status = data.status;
+              alert(data.message);
+              if (status == 1) {
+                var submitButton = document.getElementById("submitButton");
+                submitButton.disabled = false;
+
+                var checkButton = document.getElementById("checkButton");
+                checkButton.disabled = true;
+              }
+            }
+    );
+  }
+</script>
+
+<div class="card-header">
+  <h3 class="card-title">
+      应用导入申请
+      <font color='red' size="4">
+        <#if success?? && (success == 1)>(更新成功)</#if>
+      </font>
+    </h3>
+</div>
+
+<div class="card-body">
+  <form action="${request.contextPath}/admin/app/import/submit" method="post"
+        class="form-horizontal">
+    <!-- 源信息 -->
+    <div class="card-header">
+      <h4 class="card-title">
+        源：Redis实例信息
+      </h4>
+    </div>
+    <div class="row">
+      <div class="form-group row mt-3">
+        <label class="col-form-label col-md-2">
+          存储类型:
+        </label>
+        <div class="col-md-5">
+          <select id="sourceType" name="sourceType" class="form-select">
+            <option value="5">
+              Redis-Standalone
+            </option>
+            <option value="6">
+              Redis-Sentinel
+            </option>
+            <option value="7" selected="selected">
+              Redis-Cluster
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group row flex-sm-nowrap">
+        <label class="col-form-label col-md-2">
+          实例详情:<font color='red'>(*)</font>:
+        </label>
+        <div class="col-md-5">
+                                    <textarea rows="13" name="appInstanceInfo" id="appInstanceInfo"
+                                              placeholder="节点详情，样例：&#10;1. standalone类型：&#10;127.0.0.1:6379&#10;2. sentinel类型：&#10;mymastername:master&#10;127.0.0.1:6379&#10;127.0.0.1:6380&#10;127.0.0.1:6381&#10;3. cluster类型：&#10;127.0.0.1:6379&#10;127.0.0.1:6380&#10;127.0.0.1:6381
+                                        " class="form-control"></textarea>
+
+        </div>
+        <div class="col-md-5 d-flex justify-content-center">
+                                    <span class="help-block">
+                                        <strong>实例格式说明</strong><br/>
+                                        每行格式都是:&nbsp;&nbsp;ip:port(例如：10.10.xx.xx:6379)<br/>
+                                        1. standalone类型：<span style="color: #00BE67" title="standalone模式下，需要填写单个redis节点的地址" class="bi bi-question-circle-fill"></span><br/>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;masterIp:masterPort<br/>
+                                        2. sentinel类型：<span style="color: #00BE67" title="sentinel模式下，需要填写sentinel_master_name:master_or_slave&#10;和多个sentinel_cluster_address。sentinel_master_name表示sentinel配置下master的名字，master_or_slave表示从sentinel中选择的redis是master还是slave，sentinel_cluster_address表示sentinel的单节点或者集群地址。例如：&#10;mymaster:master&#10;127.0.0.1:26379&#10;127.0.0.1:26380" class="bi bi-question-circle-fill"></span><br/>
+                                        &nbsp;&nbsp;&nbsp;master_name:master<br/>
+                                        &nbsp;&nbsp;&nbsp;sentinelIp1:sentinelPort1<br/>
+                                        &nbsp;&nbsp;&nbsp;sentinelIp2:sentinelPort2<br/>
+                                        &nbsp;&nbsp;&nbsp;sentinelIp3:sentinelPort3<br/>
+                                        3. cluster类型：<span style="color: #00BE67" title="cluster模式下，需要填写集群地址" class="bi bi-question-circle-fill"></span><br/>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;masterIp1:masterPort1<br/>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;masterIp2:masterPort2<br/>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;masterIp3:masterPort3<br/>
+                                    </span>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-form-label col-md-2">
+          redis密码:
+        </label>
+        <div class="col-md-5">
+          <input type="text" name="password" id="password" placeholder="redis密码"
+                 class="form-control"/>
+          <span class="help-block">
+                                        redis密码，如果没有则为空
+                                    </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 目标信息 -->
+    <div class="card-header">
+      <h4 class="card-title">
+        目标：应用信息
+      </h4>
+    </div>
+    <div class="row">
+      <div class="form-group row">
+        <label class="col-form-label col-md-3">
+          应用名称<font color='red'>(*)</font>:
+        </label>
+        <div class="col-md-5">
+          <input type="text" name="name" id="appName"
+                <#noparse>placeholder="${服务名}-${机房:js/tc}-${环境:online/test}"</#noparse>
+                 class="form-control" onchange="checkAppNameExist('${request.contextPath}')"/>
+          <span class="help-block">
+                                            如：cachecloud-js-online，全局唯一
+                                        </span>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-form-label col-md-3">
+          应用描述<font color='red'>(*)</font>:
+        </label>
+        <div class="col-md-5">
+                                        <textarea class="form-control" name="intro"
+                                                  rows="3" id="appIntro" placeholder="应用描述"></textarea>
+          <span class="help-block">
+                                            不超过128个字符，可以包含中文
+                                        </span>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-form-label col-md-3">
+          项目负责人<font color='red'>(*)</font>:
+        </label>
+        <div class="col-md-5">
+          <select id="officer" name="officer"
+                  class="selectpicker col-md-12 border rounded" multiple
+                  data-live-search="true" title="请选择">
+            <#list userList as user>
+              <option data-icon="bi bi-person-fill"
+                      value="${user.id}">${user.chName}【${user.email}】
+              </option>
+            </#list>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-form-label col-md-3">
+          存储种类:
+        </label>
+        <div class="col-md-2">
+          <select id="type" name="type" class="form-select">
+            <option value="2">
+              Redis-Cluster
+            </option>
+            <option value="5">
+              Redis-Sentinel
+            </option>
+            <option value="6">
+              Redis-Standalone
+            </option>
+          </select>
+        </div>
+
+        <label class="col-form-label col-md-2">
+          内存总量<font color='red'>(*)</font>:
+        </label>
+        <div class="col-md-2">
+          <input type="text" name="memSize" id="memSize" placeholder="填整数,单位G"
+                 class="form-control"/>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-form-label col-md-3">
+          Redis部署版本:
+        </label>
+        <div class="col-md-2">
+          <select id="versionId" name="versionId" class="form-select">
+            <option value="-1">自定义</option>
+            <#list versionList as version>
+              <option value="${version.id}">${version.name}</option>
+            </#list>
+          </select>
+        </div>
+        <label class="col-form-label col-md-2">
+          其他:
+        </label>
+        <div class="col-md-2">
+          <input type="text" id="versionName" name="versionName"
+                 placeholder="格式：redis-x.x.x" class="form-control"/>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-form-label col-md-3">
+          测试:
+        </label>
+        <div class="col-md-2">
+          <select id="isTest" name="isTest" class="form-select">
+            <option value="0">
+              否
+            </option>
+            <option value="1">
+              是
+            </option>
+          </select>
+        </div>
+        <label class="col-form-label col-md-2">
+          是否有数据备份:
+        </label>
+        <div class="col-md-2">
+          <select id="hasBackStore" name="hasBackStore" class="form-select">
+            <option value="1">
+              是
+            </option>
+            <option value="0">
+              否
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-form-label col-md-3">
+          是否需要持久化:
+        </label>
+        <div class="col-md-2">
+          <select id="needPersistence" name="needPersistence" class="form-select">
+            <option value="1">
+              是
+            </option>
+            <option value="0">
+              否
+            </option>
+          </select>
+        </div>
+        <label class="col-form-label col-md-2">
+          是否需要slave:
+        </label>
+        <div class="col-md-2">
+          <select id="needHotBackUp" name="needHotBackUp" class="form-select">
+            <option value="1">
+              是
+            </option>
+            <option value="0">
+              否
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-form-label col-md-3">
+          预估QPS<font color='red'>(*)</font>:
+        </label>
+        <div class="col-md-2">
+          <input type="text" name="forecaseQps" id="forecaseQps" value="800"
+                 class="form-control" onchange="testisNum(this.id)"/>
+        </div>
+        <label class="col-form-label col-md-2">
+          预估条目数量:<font color='red'>(*)</font>:
+        </label>
+        <div class="col-md-2">
+          <input type="text" name="forecastObjNum" id="forecastObjNum" value="100000"
+                 class="form-control" onchange="testisNum(this.id)"/>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-form-label col-md-3">
+          客户端机房:<font color='red'>(*)</font>:
+        </label>
+        <div class="col-md-5">
+          <select name="clientMachineRoom" id="clientMachineRoom"
+                  class="form-select">
+            <#list roomList as room>
+              <option value="${room.name}">${room.name} (${room.ipNetwork})</option>
+            </#list>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-form-label col-md-3">
+          内存报警阀值<font color='red'>(*)</font>:
+        </label>
+        <div class="col-md-5">
+          <input type="text" name="memAlertValue" id="memAlertValue" value="90"
+                 class="form-control" onchange="testisNum(this.id)"/>
+          <span class="help-block">
+                                            例如：内存使用率超过90%报警，请填写90（<font color="red">大于100以上则不报警</font>）
+                                        </span>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-form-label col-md-3">
+          客户端连接数报警阀值<font color='red'>(*)</font>:
+        </label>
+        <div class="col-md-5">
+          <input type="text" name="clientConnAlertValue" id="clientConnAlertValue"
+                 value="2000" class="form-control" onchange="testisNum(this.id)"/>
+          <span class="help-block">
+                                            例如：如客户端连接数超过2000报警，填写2000
+                                        </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 提交按钮 -->
+    <div class="row">
+      <input name="userId" id="userId" value="${userInfo.id}" type="hidden"/>
+      <input id="appExist" value="0" type="hidden"/>
+
+      <div class="d-flex justify-content-center">
+        <button id="checkButton" type="button" class="btn btn-info"
+                onclick="checkAppImportFormat()">
+          <i class="bi bi-check"></i>
+          检查格式
+        </button>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <button id="submitButton" type="submit" class="btn btn-info"
+                disabled="disabled">
+          <i class="bi bi-check"></i>
+          提交申请
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

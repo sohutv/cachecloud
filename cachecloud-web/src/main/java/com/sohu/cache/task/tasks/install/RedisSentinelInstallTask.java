@@ -13,12 +13,14 @@ import com.sohu.cache.util.ConstUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
@@ -177,7 +179,9 @@ public class RedisSentinelInstallTask extends BaseTask {
         // 获取masterName
         if (masterRedisServerNodes.size() == 1) {
             RedisServerNode redisServerNode = masterRedisServerNodes.get(0);
-            masterSentinelConfigs = handleSentinelConfig(redisServerNode.getMasterName(), redisServerNode.getIp(), redisServerNode.getPort(), host, port, appDesc.getVersionId());
+            List<Pair<String, String>> customConfigs = new ArrayList<>();
+            customConfigs.add(Pair.of("sentinel auth-pass " + redisServerNode.getMasterName() + ConstUtils.SPACE, appDesc.getAppPassword()));
+            masterSentinelConfigs = this.handleSentinelConfig(redisServerNode.getMasterName(), redisServerNode.getIp(), redisServerNode.getPort(), host, port, appDesc.getVersionId(), customConfigs);
             logger.info("sentinel configs :" + masterSentinelConfigs);
         } else {
             logger.error(marker, "appId {} masterRedisServerNodes {} is empty", appId, masterRedisServerNodes);
@@ -233,6 +237,12 @@ public class RedisSentinelInstallTask extends BaseTask {
      * @return
      */
     public TaskFlowStatusEnum checkIsRun() {
+        //检测是否启动成功前，先休息3秒，否则可能会服务未启动完成，出现不能正确创建socket连接异常
+        try {
+            TimeUnit.SECONDS.sleep(3);
+        } catch (InterruptedException e) {
+            logger.error(e.getMessage(), e);
+        }
         if (!redisCenter.isRun(host, port)) {
             logger.error(marker, "sentinel {}:{} is not run", host, port);
             return TaskFlowStatusEnum.ABORT;
@@ -251,10 +261,10 @@ public class RedisSentinelInstallTask extends BaseTask {
      * @version 1.0
      * @date 2019/1/11
      */
-    private List<String> handleSentinelConfig(String masterName, String host, int port, String sentinelHost, int sentinelPort, int versionId) {
+    private List<String> handleSentinelConfig(String masterName, String host, int port, String sentinelHost, int sentinelPort, int versionId, List<Pair<String, String>> customConfigs) {
         try {
             // todo  masterHost
-            return redisConfigTemplateService.handleSentinelConfig(masterName, host, port, sentinelHost, sentinelPort, versionId);
+            return redisConfigTemplateService.handleSentinelConfig(masterName, host, port, sentinelHost, sentinelPort, versionId, customConfigs);
         } catch (Exception e) {
             logger.error(marker, e.getMessage(), e);
             return Collections.emptyList();

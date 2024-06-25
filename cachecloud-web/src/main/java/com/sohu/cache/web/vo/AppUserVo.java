@@ -1,0 +1,1 @@
+package com.sohu.cache.web.vo;import com.sohu.cache.entity.AppUser;import lombok.Data;/** * 用户及所属业务组 * @author zengyizhao * @Time 2023年1月17日 */@Datapublic class AppUserVo extends AppUser{    /**     * 业务组名称     */    private String bizName;    /**     * 业务组描述     */    private String bizDesc;}

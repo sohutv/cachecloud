@@ -1,0 +1,197 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">迁移任务列表</h3>
+                <span type="button" class="btn btn-sm btn-warning" onclick="refeshMigrate('${migrate_id}')">更新状态</span>
+            </div>
+            <div class="card-body">
+            </div>
+        </div>
+
+<div class="card">
+    <div class="card-body table-responsive">
+        <table class="table table-striped table-bordered table-hover table-sm">
+            <thead>
+            <tr>
+                <th scope="col">任务ID</th>
+                <th scope="col">迁移ID</th>
+                <th scope="col">类型</th>
+                <th scope="col">迁移机器</th>
+                <th scope="col">源数据</th>
+                <th scope="col">目标数据</th>
+                <th scope="col">开始/结束时间</th>
+                <th scope="col">状态</th>
+                <th scope="col">查看</th>
+                <th scope="col">操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <#list taskList as appDataMigrateStatus>
+            <tr>
+                <td>
+                    ${appDataMigrateStatus.id!}
+                    <input type="hidden" id="id" value="${appDataMigrateStatus.id!}"/>
+                </td>
+                <td>
+                    ${appDataMigrateStatus.migrateId!}<br/>
+                </td>
+                <td>
+                    <#if (appDataMigrateStatus.sourceMigrateType == 9)>
+                        <span class="btn btn-sm btn-warning">predixy</span>
+                    <#else>
+                        <span class="btn btn-sm btn-success">shake</span>
+                    </#if>
+                </td>
+                <td>
+                    ${appDataMigrateStatus.migrateMachineIp!}:${appDataMigrateStatus.migrateMachinePort!}
+                </td>
+                <td>
+                    数据源：
+                <#if (appDataMigrateStatus.sourceAppId <= 0)>
+                    非cachecloud
+                    <br/>
+                    ${appDataMigrateStatus.sourceServers!}
+                <#else>
+                    cachecloud:<a target="_blank" href="${request.contextPath}/admin/app/index?appId=${appDataMigrateStatus.sourceAppId!}">${appDataMigrateStatus.sourceAppId!}</a>
+                </#if>
+                <br/>
+                <#if appDataMigrateStatus.configPath?? && appDataMigrateStatus.sourceMigrateType == 8>
+                    <#assign splitList = appDataMigrateStatus.configPath?split("-")>
+                同步实例：<span class="text-success">${splitList[splitList?size-1]?replace(".toml","")}</span> <br/>
+                </#if>
+                redis版本：${appDataMigrateStatus.redisSourceVersion!}<br/>
+
+            </td>
+            <td>
+                数据源：
+                <#if (appDataMigrateStatus.targetAppId <= 0)>
+                非cachecloud
+                <br/>
+                ${appDataMigrateStatus.targetServers!}
+                <#else>
+                cachecloud:<a target="_blank" href="${request.contextPath}/admin/app/index?appId=${appDataMigrateStatus.targetAppId!}">${appDataMigrateStatus.targetAppId!}</a>
+            </#if>
+            <br/>
+            redis版本：${appDataMigrateStatus.redisTargetVersion!}
+            </td>
+            <td>
+                ${appDataMigrateStatus.startTimeFormat!}
+                <br/>
+                ${appDataMigrateStatus.endTimeFormat!}
+            </td>
+            <td>${appDataMigrateStatus.statusDesc!}</td>
+            <td>
+                <a target="_blank" href="${request.contextPath}/data/migrate/log?id=${appDataMigrateStatus.id!}">日志</a><br/><br/>
+                <a target="_blank"
+                   href="${request.contextPath}/data/migrate/config?id=${appDataMigrateStatus.id!}">配置</a><br/><br/>
+                <#if (appDataMigrateStatus.status == 0)>
+                <#if (appDataMigrateStatus.migrateTool == 1)>
+                <a target="_blank"
+                   href="${request.contextPath}/data/migrate/process?id=${appDataMigrateStatus.id!}&migrateTool=${appDataMigrateStatus.migrateTool!}">进度</a>
+            </#if>
+            <#if (appDataMigrateStatus.migrateTool == 0)>
+            <a data-bs-toggle="modal" data-target="#processModal">进度</a>
+            </#if>
+        </#if>
+        <div class="modal fade" id="processModal" tabindex="-1" role="dialog"
+             aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myModalLabel">
+                            迁移进度
+                        </h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+                    </div>
+                    <div class="modal-body" id="processModal_body">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭
+                        </button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal -->
+        </div>
+        </td>
+        <td>
+            <button onclick="resyncMigrate(${appDataMigrateStatus.migrateId!},${appDataMigrateStatus.id!})" type="button"
+                    class="btn btn-sm btn-info">重新同步
+            </button>
+    </button>
+    </td>
+    </tr>
+</#list>
+</tbody>
+</table>
+<div style="margin-bottom: 10px;">
+                    <span>
+                        <div id="pageDetail"
+                             style="float:left;padding-top:7px;color:#4A64A4;">
+                            <#if page??>
+                                共${page.totalPages!}页,${page.totalCount!}条
+                            </#if>
+</div>
+<nav id='ccPagenitor' aria-label="Page navigation example" class="d-inline-flex float-end">
+</nav>
+</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<script type="text/javascript">
+
+    function stopMigrate(id,migrate_id) {
+        if (window.confirm("确认要停掉id=" + id + "的迁移任务吗?")) {
+            $.get(
+                '${request.contextPath}/data/migrate/stop.json',
+                {
+                    id: id,
+                    migrate_id: migrate_id
+                },
+                function (data) {
+                    var status = data.status;
+                    alert(data.message);
+                    location.href = "${request.contextPath}/data/migrate/index";
+                }
+            );
+        }
+    }
+
+
+    function refeshMigrate(migrate_id) {
+        $.get(
+            '${request.contextPath}/data/migrate/refresh.json',
+            {
+                migrate_id: migrate_id
+            },
+            function (data) {
+                alert(data.message);
+                location.href = "${request.contextPath}/data/migrate/index";
+                window.location.reload(2000);
+            }
+        );
+    }
+
+    function resyncMigrate(migrate_id,task_id) {
+        if (window.confirm("确认重新同步id=" + task_id + "的迁移任务吗?")) {
+            $.get(
+                '${request.contextPath}/data/migrate/resync.json',
+                {
+                    task_id: task_id,
+                    migrate_id: migrate_id
+                },
+                function (data) {
+                    alert(data.message);
+                    window.location.reload(1000);
+                }
+            );
+        }
+    }
+
+
+</script>
+<#include "/manage/inc/page.html">

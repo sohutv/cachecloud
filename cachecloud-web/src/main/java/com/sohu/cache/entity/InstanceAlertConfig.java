@@ -81,6 +81,11 @@ public class InstanceAlertConfig {
      */
     private Integer importantLevel;
 
+    /**
+     * 应用类型（0：redis;)
+     */
+    private Integer appType;
+
     public Date getUpdateTime() {
         return (Date) updateTime.clone();
     }

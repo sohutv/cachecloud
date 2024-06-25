@@ -3,10 +3,15 @@ package com.sohu.cache.web.controller;
 import com.sohu.cache.constant.AppCheckEnum;
 import com.sohu.cache.constant.AppUserTypeEnum;
 import com.sohu.cache.entity.AppAudit;
+import com.sohu.cache.entity.AppBiz;
 import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.util.ConstUtils;
+import com.sohu.cache.utils.EnvCustomUtil;
 import com.sohu.cache.web.enums.SuccessEnum;
 import com.sohu.cache.web.util.AppEmailUtil;
+import com.sohu.cache.web.vo.AppUserVo;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -62,9 +67,9 @@ public class UserManageController extends BaseController {
     @RequestMapping(value = "/add")
     public ModelAndView doAddUser(HttpServletRequest request,
                                   HttpServletResponse response, Model model, String name, String chName, String email, String mobile, String weChat,
-                                  Integer type, Long userId, Integer isAlert, String company, String purpose) {
+                                  Integer type, Long userId, Integer isAlert, String company, String purpose, Long bizId) {
         // 后台暂时不对参数进行验证
-        AppUser appUser = AppUser.buildFrom(userId, name, chName, email, mobile, weChat, type, isAlert, company, purpose);
+        AppUser appUser = AppUser.buildFrom(userId, name, chName, email, mobile, weChat, type, isAlert, company, purpose, bizId);
         try {
             if (userId == null) {
                 appUser.setPassword(ConstUtils.DEFAULT_USER_PASSWORD);
@@ -132,11 +137,23 @@ public class UserManageController extends BaseController {
      */
     @RequestMapping(value = "/list")
     public ModelAndView doUserList(HttpServletRequest request,
-                                   HttpServletResponse response, Model model, String searchChName) {
-        List<AppUser> users = userService.getUserList(searchChName);
-        model.addAttribute("users", users);
-        model.addAttribute("searchChName", searchChName);
+                                   HttpServletResponse response, Model model, String searchChName, String searchBizName) {
+        //获取tab
+        int tabId = NumberUtils.toInt(request.getParameter("tabId"), 1);
+        model.addAttribute("tabId", tabId);
+        if(tabId == 1){
+            List<AppUserVo> users = userService.getUserWithBizList(searchChName, searchBizName);
+            model.addAttribute("users", users);
+            model.addAttribute("searchChName", searchChName);
+            model.addAttribute("searchBizName", searchBizName);
+        }
+
+        List<AppBiz> bizList = userService.getBizList();
+        model.addAttribute("bizList", bizList);
+        if(tabId == 2){
+        }
         model.addAttribute("userActive", SuccessEnum.SUCCESS.value());
+        model.addAttribute("pwdswitch", EnvCustomUtil.pwdswitch);
         return new ModelAndView("manage/user/list");
     }
 
@@ -171,6 +188,77 @@ public class UserManageController extends BaseController {
         }
 
         write(response, String.valueOf(SuccessEnum.SUCCESS.value()));
+        return null;
+    }
+
+    /**
+     * 更新业务组
+     *
+     * @param toRemoverUserName
+     * @param toChargeUserName
+     * @return
+     */
+    @RequestMapping(value = "/takeover")
+    public void doTakeover(HttpServletRequest request,
+                                 HttpServletResponse response, String toRemoverUserName, String toChargeUserName) {
+        if(StringUtils.isNotBlank(toRemoverUserName) && StringUtils.isNotBlank(toChargeUserName)
+            && !toRemoverUserName.equals(toChargeUserName)){
+            try {
+                AppUser toRemoverUser = userService.getByName(toRemoverUserName);
+                AppUser toChargeUser = userService.getByName(toChargeUserName);
+                if(toRemoverUser != null && toChargeUser != null && toRemoverUser != toChargeUser){
+                    SuccessEnum successEnum = userService.takeoverUser(toRemoverUser, toChargeUser);
+                    if(successEnum.equals(SuccessEnum.SUCCESS)){
+                        write(response, String.valueOf(SuccessEnum.SUCCESS.value()));
+                        return;
+                    }
+                }
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+        write(response, String.valueOf(SuccessEnum.FAIL.value()));
+    }
+
+    /**
+     * 根据id删除业务组
+     *
+     * @return
+     */
+    @RequestMapping(value = "/biz/delete")
+    public ModelAndView doUserBizList(HttpServletRequest request,
+                                   HttpServletResponse response, Model model, Long bizId, Integer tabId) {
+        userService.deleteBiz(bizId);
+        if(tabId == null){
+            tabId = 1;
+        }
+        return new ModelAndView("redirect:/manage/user/list?tabId=" + tabId);
+    }
+
+    /**
+     * 更新业务组
+     *
+     * @param name
+     * @param bizDesc
+     * @return
+     */
+    @RequestMapping(value = "/biz/add")
+    public ModelAndView doAddBiz(HttpServletRequest request,
+                                  HttpServletResponse response, Model model, String name, String bizDesc, Long bizId) {
+        // 后台暂时不对参数进行验证
+        AppBiz appBiz = AppBiz.of(name, bizDesc);
+        try {
+            if (bizId == null) {
+                userService.saveBiz(appBiz);
+            } else {
+                appBiz.setId(bizId);
+                userService.updateBiz(appBiz);
+            }
+            write(response, String.valueOf(SuccessEnum.SUCCESS.value()));
+        } catch (Exception e) {
+            write(response, String.valueOf(SuccessEnum.FAIL.value()));
+            logger.error(e.getMessage(), e);
+        }
         return null;
     }
 

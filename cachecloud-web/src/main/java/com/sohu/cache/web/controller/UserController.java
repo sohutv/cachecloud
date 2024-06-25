@@ -3,6 +3,9 @@ package com.sohu.cache.web.controller;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.sohu.cache.entity.AppBiz;
+import com.sohu.cache.utils.EnvCustomUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +15,8 @@ import com.sohu.cache.entity.AppAudit;
 import com.sohu.cache.entity.AppUser;
 import com.sohu.cache.web.enums.SuccessEnum;
 import com.sohu.cache.web.util.AppEmailUtil;
+
+import java.util.List;
 
 /**
  * 注册用户管理(页面没有权限限制)
@@ -33,7 +38,10 @@ public class UserController extends BaseController{
     @RequestMapping(value = "/register")
     public ModelAndView userRegister(HttpServletRequest request,
             HttpServletResponse response, Model model, Integer success) {
+        List<AppBiz> bizList = userService.getBizList();
         model.addAttribute("success", success);
+        model.addAttribute("bizList", bizList);
+        model.addAttribute("pwdswitch", EnvCustomUtil.pwdswitch);
         return new ModelAndView("user/userRegister");
     }
     
@@ -43,11 +51,11 @@ public class UserController extends BaseController{
     @RequestMapping(value = "/apply")
     public ModelAndView doAddUser(HttpServletRequest request,
             HttpServletResponse response, Model model, String name, String chName, String email, String mobile, String weChat,
-            Integer type, Long userId, Integer isAlert, String password, String company, String purpose) {
+            Integer type, Long userId, Integer isAlert, String password, String company, String purpose, Long bizId) {
         SuccessEnum success = SuccessEnum.SUCCESS;
         try {
             //保存用户(type=-1为无效用户,需要审批)
-            AppUser appUser = AppUser.buildFrom(userId, name, chName, email, mobile, weChat, type, isAlert, password, company, purpose);
+            AppUser appUser = AppUser.buildFrom(userId, name, chName, email, mobile, weChat, type, isAlert, password, company, purpose, bizId);
             userService.save(appUser);
             //提交审批
             AppAudit appAudit = appService.saveRegisterUserApply(appUser,AppAuditType.REGISTER_USER_APPLY);

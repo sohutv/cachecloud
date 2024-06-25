@@ -44,6 +44,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.exceptions.JedisDataException;
 
 import java.util.*;
@@ -112,11 +113,6 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
         if (!installStatus) {
             logger.info("{} is install :{}", host, redisResource.getName());
             return false;
-        }
-        //校验是否需要推送module
-        if(TypeUtil.isRedisDataType(type)){
-            List<ModuleVersion> appToModuleList = appService.getAppToModuleList(appId);
-            redisCenter.checkAndDownloadModule(host, appToModuleList);
         }
         boolean isRun;
         if (TypeUtil.isRedisType(type)) {
@@ -530,15 +526,16 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
                     continue;
                 }
                 // 2.2 异常实例恢复
-                startExistInstance(appId, instanceId);
                 // 2.3 检测异常实例启动成功 & 加载完成数据 & 启动下一个实例
                 Jedis jedis = null;
                 int retry = 1;//重试次数
                 try {
+                    startExistInstance(appId, instanceId);
+                    TimeUnit.SECONDS.sleep(5);//等待实例启动
                     if (TypeUtil.isRedisSentinel(type)) {
                         jedis = redisCenter.getJedis(host, port);
                     } else {
-                        jedis = redisCenter.getJedis(appId, host, port);
+                        jedis = redisCenter.getAdminJedis(appId, host, port);
                     }
                     while (true) {
                         // 等待节点加载数据 & PONG
@@ -552,6 +549,9 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
                                 logger.warn("scroll restart {}:{} waiting loading data ,sleep 2s", host, port);
                                 TimeUnit.SECONDS.sleep(2);
                             }
+                        } catch (JedisConnectionException e){
+                            logger.error("scroll restart {}:{} ping connect exception :{} ", host, port, e.getMessage(), e);
+                            break; //启动异常兼容
                         } catch (Exception e) {
                             logger.error("scroll restart {}:{} ping exception sleep 200ms :{} ", host, port, e.getMessage(), e);
                             TimeUnit.MILLISECONDS.sleep(200);
@@ -592,4 +592,5 @@ public class InstanceDeployCenterImpl implements InstanceDeployCenter {
         }
         return recoverInstInfo;
     }
+
 }

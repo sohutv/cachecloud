@@ -200,6 +200,7 @@ public interface MachineCenter {
      */
     public Map<MachineMemoryDistriEnum, Integer> getUsedMemoryDistribute();
 
+    public int getMachineNum(int type);
     /**
      * 获取机器性能统计分布
      * @return
@@ -240,12 +241,18 @@ public interface MachineCenter {
      */
     public String getFirstMachineIp();
 
-    public  List<MachineStats>  checkMachineModule(List<MachineStats> machineStatsList);
-
     /**
      * 检查机器内存是否充足 容器内存*0.85
      * @param ip 检测机器
      * true: 内存充足  false:内存使用率>85%
      */
     public boolean checkMachineMemory(String ip);
+
+    public List<MachineInfo> getMachineListByRealIp(String realIp);
+
+    /**
+     * 获取机器配置信息及已分布redis实例（数量、申请内存、使用内存、使用内存rss等）
+     */
+    public List<MachineMemStatInfo> getMachineInfoAndUsedInfo(String room, Integer type, Integer useType, Integer disType, String ip);
+
 }

@@ -22,7 +22,10 @@ public enum AlertTypeEnum {
     APP_SHARD_CLENT_CONNECTION(10, "应用实例-分片客户端连接数报警", 0, 2),
     APP_HIT_RATIO(11, "应用平均命中率报警", 0, 2),
     APP_MEM_USED_RATIO(12, "应用内存使用率报警", 0, 2),
-    APP_SHARD_MEM_USED_RATIO(13, "分片内存使用率报警", 0, 2);
+    APP_SHARD_MEM_USED_RATIO(13, "分片内存使用率报警", 0, 2),
+    MACHINE_DISK_OVER_PRESET(14, "机器磁盘报警", 1, 2),
+    APP_DISK_USED_RATIO(15, "应用磁盘使用率报警", 0, 2),
+    APP_SHARD_DISK_USED_RATIO(16, "分片磁盘使用率报警", 0, 2);
 
     private int type;//邮件类型
 

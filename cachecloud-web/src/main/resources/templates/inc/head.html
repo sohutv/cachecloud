@@ -1,0 +1,76 @@
+<!-- ======= Header ======= -->
+<header id="header" class="header fixed-top">
+    <!-- Navbar -->
+    <nav class="main-header navbar navbar-expand-md ml-0 bg-gradient-light">
+        <div class="container">
+            <a href="${request.contextPath}/" class="navbar-brand text-primary">
+                <img src="${request.contextPath}/assets/img/logo_new.png" alt="Cachecloud Logo" class="brand-image img-lg img-rounded elevation-0 w-auto" style="opacity: .8; height: 33px;">
+            </a>
+
+            <div class="collapse navbar-collapse order-3" id="navbarCollapse">
+                <!-- Left navbar links -->
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a href="${request.contextPath}/" class="nav-link text-primary fs-6"><strong><font color="#000BFF">Home</font></strong></a>
+                    </li>
+                    <li class="nav-item">
+                        <a target="_blank" href="https://github.com/sohutv/cachecloud" class="nav-link fs-6"><strong><font color="#000BFF">Github</font></strong></a>
+                    </li>
+                    <li class="nav-item">
+                        <a target="_blank" href="${request.contextPath}/wiki/quickstart/index" class="nav-link text-primary fs-6"><strong><font color="#000BFF">Docs</font></strong></a>
+                    </li>
+                    <li class="nav-item">
+                        <a target="_blank" href="${request.contextPath}/web/resource/inc/daily" class="nav-link text-primary fs-6"><strong><font color="#000BFF">Contact</font></strong></a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Right navbar links -->
+            <ul class="order-1 order-md-3 navbar-nav navbar-no-expand ml-auto">
+                <!-- Dropdown Menu -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link text-primary" data-bs-toggle="dropdown" href="#">
+                        <strong>
+                            <i class="bi bi-gear"></i>
+                            <span class="dropdown-toggle ps-2 fs-6">
+                                <font color="#000BFF">
+                                <#if userInfo??>
+                                    ${userInfo.chName!}
+                                <#else>
+                                </#if>
+                                </font>
+                            </span>
+                        </strong>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                        <#if (userInfo?? && (userInfo.type == 0))>
+                            <a target="_blank" href="${request.contextPath}/manage/total/statlist" class="dropdown-item">
+                                <i class="bi bi-grid-fill"></i>&nbsp;&nbsp;&nbsp;&nbsp;<span>管理后台</span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                        </#if>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="${request.contextPath}/admin/app/list">
+                            <i class="bi bi-card-list"></i>&nbsp;&nbsp;&nbsp;&nbsp;<span>应用列表</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a target="_blank" href="${request.contextPath}/admin/app/jobs" class="dropdown-item">
+                            <i class="bi bi-list-task"></i>&nbsp;&nbsp;&nbsp;&nbsp;<span>我的申请</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="${request.contextPath}/manage/logout" class="dropdown-item">
+                            <i class="bi bi-box-arrow-right"></i>&nbsp;&nbsp;&nbsp;&nbsp;<span>注销</span>
+                        </a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-primary" data-widget="fullscreen" href="#" role="button">
+                        <i class="fas fa-expand-arrows-alt"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <!-- /.navbar -->
+</header>
+<!-- Navbar End -->

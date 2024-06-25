@@ -49,6 +49,23 @@ public class InstanceConfig {
      */
     private int versionId;
 
+    /**
+     * 是否可重置：0不可，1可重置 (默认值：1)
+     */
+    private int refresh = 1;
+
+    /**
+     * 取值类型（0：默认值 config_value；1：从主节点拷贝），默认0
+     */
+    private int valueType;
+
+    public InstanceConfig() {
+    }
+
+    public InstanceConfig(String configKey, String configValue){
+        this.configKey = configKey;
+        this.configValue = configValue;
+    }
 
     public String getStatusDesc() {
         if (1 == status) {

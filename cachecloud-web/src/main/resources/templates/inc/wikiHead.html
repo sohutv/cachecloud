@@ -1,0 +1,75 @@
+<!-- Navbar -->
+<nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <!-- Left navbar links -->
+    <ul class="navbar-nav">
+        <li class="nav-item">
+            <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+        </li>
+
+        <li class="nav-item">
+            <a href="${request.contextPath}/" class="nav-link text-primary fs-6"><strong><font color="#000BFF">Home</font></strong></a>
+        </li>
+        <li class="nav-item">
+            <a target="_blank" href="https://github.com/sohutv/cachecloud" class="nav-link fs-6"><strong><font color="#000BFF">Github</font></strong></a>
+        </li>
+        <li class="nav-item">
+            <a target="_blank" href="${request.contextPath}/wiki/quickstart/index" class="nav-link text-primary fs-6"><strong><font color="#000BFF">Docs</font></strong></a>
+        </li>
+        <li class="nav-item">
+            <a target="_blank" href="${request.contextPath}/web/resource/inc/daily" class="nav-link text-primary fs-6"><strong><font color="#000BFF">Contact</font></strong></a>
+        </li>
+    </ul>
+
+    <!-- Right navbar links -->
+    <ul class="navbar-nav ml-auto">
+        <!-- Dropdown Menu -->
+        <li class="nav-item dropdown">
+            <a class="nav-link text-primary" data-bs-toggle="dropdown" href="#">
+                <strong>
+                    <i class="bi bi-gear"></i>
+                    <span class="dropdown-toggle ps-2 fs-6">
+                        <font color="#000BFF">
+                        <#if userInfo??>
+                            ${userInfo.chName!}
+                        <#else>
+                        </#if>
+                        </font>
+                    </span>
+                </strong>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                <#if (userInfo?? && (userInfo.type == 0))>
+                    <li>
+                        <a target="_blank" href="${request.contextPath}/manage/total/statlist" class="dropdown-item d-flex align-items-center">
+                            <i class="bi bi-grid-fill"></i> <span>管理后台</span>
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                </#if>
+                <li>
+                    <a class="dropdown-item d-flex align-items-center" href="${request.contextPath}/admin/app/list">
+                        <i class="bi bi-card-list"></i><span>应用列表</span>
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a target="_blank" href="${request.contextPath}/admin/app/jobs" class="dropdown-item d-flex align-items-center">
+                        <i class="bi bi-list-task"></i><span>我的申请</span>
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a href="${request.contextPath}/manage/logout" class="dropdown-item d-flex align-items-center">
+                        <i class="bi bi-box-arrow-right"></i><span>注销</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-primary" data-widget="fullscreen" href="#" role="button">
+                <i class="fas fa-expand-arrows-alt"></i>
+            </a>
+        </li>
+    </ul>
+</nav>
+<!-- Navbar End -->

@@ -146,13 +146,14 @@ public class AppToolController extends BaseController {
                                          Long auditId, Long appId, String nodes, String params) {
 
 
-        if (auditId == null) {
+        if (auditId == null && appId != null && appId != -1L) {
             AppUser appUser = getUserInfo(request);
             AppDesc appDesc = appService.getByAppId(appId);
             AppAudit appAudit = appService.saveAppDiagnostic(appDesc, appUser, "应用诊断任务:" + DiagnosticTypeEnum.getKeyDesc(type));
             auditId = appAudit.getId();
         }
-        appAuditDao.updateAppAuditUser(auditId, AppCheckEnum.APP_ALLOCATE_RESOURCE.value(), getUserInfo(request).getId());
+        AppUser appUser = getUserInfo(request);
+        appAuditDao.updateAppAuditUser(auditId, AppCheckEnum.APP_ALLOCATE_RESOURCE.value(), appUser.getId());
 
         long taskId = -1l;
         if (type == DiagnosticTypeEnum.SCAN_KEY.getType()) {
@@ -248,7 +249,7 @@ public class AppToolController extends BaseController {
             } else if (type == DiagnosticTypeEnum.HOT_KEY.getType()) {
                 String result = diagnosticToolService.getHotkeyDiagnosticData(redisKey);
                 json.put("result", result == null ? "" : result.replaceAll("(\\r\\n|\\n|\\n\\r)", "<br/>"));
-            } else if (type == DiagnosticTypeEnum.SCAN_CLEAN.getType()){
+            } else if (type == DiagnosticTypeEnum.SCAN_CLEAN.getType()) {
                 List<String> result = diagnosticToolService.getScanCleanDiagnosticData(redisKey);
                 json.put("result", result);
             }
@@ -256,6 +257,21 @@ public class AppToolController extends BaseController {
         json.put("status", String.valueOf(SuccessEnum.SUCCESS.value()));
         sendMessage(response, json.toString());
         return null;
+    }
+
+    @RequestMapping(value = "/diagnostic/sampleCompareData")
+    public ModelAndView diagnosticSampleCompareResult(HttpServletRequest request,
+                                         HttpServletResponse response, Model model, String redisKey) {
+        List<String> result = new ArrayList<>();
+        try {
+            if (!StringUtil.isBlank(redisKey)) {
+                result = diagnosticToolService.getScanCleanDiagnosticData(redisKey);
+            }
+            model.addAttribute("diagnosticResultList", result);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        return new ModelAndView("manage/diagnosticTool/diagnosticSampleCompareResult");
     }
 
     @RequestMapping("/commandExecute")

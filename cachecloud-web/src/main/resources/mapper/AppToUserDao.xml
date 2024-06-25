@@ -36,7 +36,13 @@
     <select id="deleteAppToUser" parameterType="AppToUser">
         delete from app_to_user where app_id=#{appId} and user_id=#{userId}
     </select>
-    
+
+    <update id="takeOverAppToUser">
+        update app_to_user
+            set user_id = #{newUserId}
+        where app_id=#{appId} and user_id = #{originUserId}
+    </update>
+
 </mapper>
 
 

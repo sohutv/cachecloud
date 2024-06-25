@@ -43,6 +43,12 @@ public class AppRedisConfigVo {
      */
     private List<RedisConfigVo> configList;
 
+    /**
+     * 是否快速完成滚动重启（修改配置，滚动重启）
+     * 如果为是，则在操作每个主从分组中，不再sleep等待（等待的目的是：客户端刷新集群拓扑）
+     */
+    private boolean quickFinishFlag;
+
     public List<Integer> getInstanceList() {
         if(CollectionUtils.isEmpty(instanceList)){
             return null;

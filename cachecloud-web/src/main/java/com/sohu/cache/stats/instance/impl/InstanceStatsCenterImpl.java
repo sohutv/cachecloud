@@ -74,11 +74,11 @@ public class InstanceStatsCenterImpl implements InstanceStatsCenter {
     }
 
     private Map<String, Object> getInfoMap(long appId, int type, String ip, int port) {
-        Map<RedisConstant, Map<String, Object>> infoMap = redisCenter.getInfoStats(appId, ip, port);
+        Map<Object, Map<String, Object>> infoMap = redisCenter.getInfoStats(appId, ip, port);
         Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
         if (infoMap != null) {
-            for (Map.Entry<RedisConstant, Map<String, Object>> entry : infoMap.entrySet()) {
-                resultMap.put(entry.getKey().getValue(), entry.getValue());
+            for (Map.Entry<Object, Map<String, Object>> entry : infoMap.entrySet()) {
+                resultMap.put(((RedisConstant) entry.getKey()).getValue(), entry.getValue());
             }
         }
         return resultMap;

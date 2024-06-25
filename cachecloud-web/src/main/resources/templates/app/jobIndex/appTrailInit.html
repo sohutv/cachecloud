@@ -1,0 +1,126 @@
+<script type="text/javascript">
+  function checkParam(){
+
+    //应用名
+    var appName = document.getElementById("appName");
+    if(appName.value == ""){
+      alert("应用名不能为空");
+      appName.focus();
+      return false;
+    }
+
+    //应用描述
+    var appIntro = document.getElementById("appIntro");
+    if(appIntro.value == ""){
+      alert("应用描述不能为空");
+      appIntro.focus();
+      return false;
+    }
+  }
+</script>
+
+<div class="row">
+  <h4 class="card-title border-bottom">
+    申请试用集群<label style="color:red">(每个用户只能申请1个)</label>
+  </h4>
+
+    <div class="row">
+      <!-- BEGIN FORM-->
+      <form action="${request.contextPath}/admin/app/trail/add" method="post"
+            class="form-horizontal form-bordered form-row-stripped" onsubmit="return checkParam()">
+        <div class="form-group row">
+          <label class="col-form-label col-md-3">
+            应用名称<font color='red'>(*)</font>:
+          </label>
+          <div class="col-md-5">
+            <input type="text" name="name" id="appName" <#noparse>placeholder="${服务名}-${机房:js/tc}-${环境:online/test}"</#noparse>
+                   class="form-control" onchange="checkAppNameExist('${request.contextPath}')"/>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label class="col-form-label col-md-3">
+            应用描述<font color='red'>(*)</font>:
+          </label>
+          <div class="col-md-5">
+            <textarea class="form-control" name="intro"
+                      rows="3" id="appIntro" placeholder="应用描述,不超过128个字符"></textarea>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label class="col-form-label col-md-3">
+            集群类型:
+          </label>
+          <div class="col-md-5">
+            <select name="type" class="form-select">
+              <option value="2">
+                Redis集群
+              </option>
+              <option value="5">
+                Redis哨兵
+              </option>
+              <option value="6">
+                Redis单点
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label class="col-form-label col-md-3">
+            内存总量<font color='red'>(*)</font>:
+          </label>
+          <label class="col-form-label col-md-1">
+            50MB
+          </label>
+        </div>
+
+        <div class="form-group row">
+          <label class="col-form-label col-md-3">
+            Redis部署版本:
+          </label>
+          <div class="col-md-5">
+            <select id="versionId" name="versionId" class="form-select">
+              <#list versionList as version>
+                <option value="${version.id}">${version.name}</option>
+              </#list>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label class="col-form-label col-md-3">
+            试用期限:
+          </label>
+          <label class="col-form-label col-md-1" style="color:orange">
+            1个月
+          </label>
+        </div>
+
+        <input name="userId" id="userId" value="${userInfo.id}" type="hidden" />
+        <input id="appExist" value="0" type="hidden" />
+
+        <div class="form-actions fluid">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="offset-md-3 col-md-9">
+                <#if (trailSize ==  0  || userInfo.type == 0)>
+                  <button type="submit" class="btn btn-info">
+                    <i class="bi bi-check"></i>
+                    申请开通
+                  </button>
+                <#else>
+                  <button  class="btn btn-info" disabled="disabled">
+                    <i class="bi bi-check"></i>
+                    暂不能申请
+                  </button> <label style="color:red">(已开通过试用集群${trailSize}个)</label>
+                </#if>
+              </div>
+            </div>
+          </div>
+        </div>
+    </form>
+  </div>
+
+</div>

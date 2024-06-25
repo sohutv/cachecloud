@@ -1,0 +1,342 @@
+<!-- ======= Sidebar ======= -->
+<aside id="leftBox" class="main-sidebar sidebar-dark-primary elevation-4">
+
+	<!-- Brand Logo -->
+	<a href="${request.contextPath}/" class="brand-link">
+		<img src="${request.contextPath}/assets/img/logo_new.png" alt="Cachecloud" class="brand-image img-rounded elevation-0" style="opacity: .8">
+		<span class="brand-text font-weight-light">Cachecloud</span>
+	</a>
+
+	<div class="sidebar">
+
+		<!-- Sidebar Menu -->
+		<nav class="mt-2">
+			<ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false" id="sidebar-nav">
+				<li id="quickstart_index" class="nav-item">
+					<a class="nav-link py-0" href="${request.contextPath}/wiki/quickstart/index">
+						<i class="bi bi-play-circle"></i>
+						<p>快速接入</p>
+					</a>
+				</li>
+
+				<li class="nav-item menu-is-opening menu-open">
+					<a id="intro_index" class="nav-item nav-link py-0" href="${request.contextPath}/wiki/intro/index">
+						<i class="bi bi-tag"></i>
+						<p>系统介绍</p>
+					</a>
+					<ul class="nav nav-treeview">
+						<li id="intro_redisVersion" class="nav-item ml-4">
+							<a class="nav-link py-0" href="${request.contextPath}/wiki/intro/redisVersion">
+								Redis版本说明
+							</a>
+						</li>
+						<li id="intro_releaseNote" class="nav-item ml-4">
+							<a class="nav-link py-0" href="${request.contextPath}/wiki/intro/releaseNote">
+								CC客户端版本说明
+							</a>
+						</li>
+					</ul>
+				</li>
+
+
+				<li class="nav-item menu-is-opening menu-open">
+					<a id="architecture_index"  class="nav-link py-0" href="${request.contextPath}/wiki/architecture/index">
+						<i class="bi bi-boxes"></i>
+						<p>系统架构</p>
+					</a>
+					<ul class="nav nav-treeview">
+						<li id="architecture_service" class="nav-item ml-4">
+							<a class="nav-link py-0" href="${request.contextPath}/wiki/architecture/service">
+								服务架构
+							</a>
+						</li>
+						<li id="architecture_tech" class="nav-item ml-4">
+							<a class="nav-link py-0" href="${request.contextPath}/wiki/architecture/tech">
+								技术架构
+							</a>
+						</li>
+					</ul>
+				</li>
+
+				<li class="nav-item menu-is-opening menu-open">
+					<a id="access_index" class="nav-link py-0" href="${request.contextPath}/wiki/access/index">
+						<i class="bi bi-arrow-down-right-circle"></i>
+						<p>系统接入</p>
+					</a>
+					<ul class="nav nav-treeview">
+						<li id="access_init" class="nav-item ml-4">
+							<a class="nav-link py-0" href="${request.contextPath}/wiki/access/init">
+								系统初始化
+							</a>
+						</li>
+						<li id="access_config" class="nav-item ml-4">
+							<a class="nav-link py-0" href="${request.contextPath}/wiki/access/config">
+								系统配置说明
+							</a>
+						</li>
+						<li id="access_resource" class="nav-item ml-4">
+							<a class="nav-link py-0" href="${request.contextPath}/wiki/access/resource">
+								系统资源管理
+							</a>
+						</li>
+						<li id="access_client" class="nav-item ml-4">
+							<a class="nav-link py-0" href="${request.contextPath}/wiki/access/client">
+								客户端接入
+							</a>
+						</li>
+					</ul>
+				</li>
+
+
+				<li class="nav-item menu-is-opening menu-open">
+					<a id="function_index" class="nav-link py-0" href="${request.contextPath}/wiki/function/index">
+						<i class="bi bi-list"></i>
+						<p>系统功能</p>
+					</a>
+					<ul class="nav nav-treeview">
+						<li class="nav-item ml-4 menu-is-opening menu-open">
+							<a id="function_client" class="nav-link py-0" href="${request.contextPath}/wiki/function/client">
+								客户端功能
+							</a>
+							<ul class="nav nav-treeview">
+								<li id="function_client-register" class="nav-item ml-4">
+									<a class="nav-link py-0" href="${request.contextPath}/wiki/function/client-register">
+										账户申请
+									</a>
+								</li>
+								<li class="nav-item dropdown ml-4">
+									<a class="nav-link py-0 dropdown-toggle" data-bs-toggle="dropdown">
+										应用管理
+									</a>
+									<ul class="dark-mode dropdown-menu text-center">
+										<li id="function_client-appStats"><a href="${request.contextPath}/wiki/function/client-appStats">统计信息</a></li>
+										<li id="function_client-desc"><a href="${request.contextPath}/wiki/function/client-desc">应用详情</a></li>
+										<li id="function_client-instances"><a href="${request.contextPath}/wiki/function/client-instances">实例列表&应用拓扑</a></li>
+										<li id="function_client-conn"><a href="${request.contextPath}/wiki/function/client-conn">连接信息</a></li>
+										<li id="function_client-cmd"><a href="${request.contextPath}/wiki/function/client-cmd">命令曲线</a></li>
+										<li id="function_client-latency"><a href="${request.contextPath}/wiki/function/client-latency">延迟监控</a></li>
+										<li id="function_client-daily"><a href="${request.contextPath}/wiki/function/client-daily">日报统计</a></li>
+										<li id="function_client-cmdexe"><a href="${request.contextPath}/wiki/function/client-cmdexe">命令执行</a></li>
+										<li id="function_client-analysis"><a href="${request.contextPath}/wiki/function/client-analysis">键值分析</a></li>
+									</ul>
+								</li>
+								<li id="function_job-register" class="nav-item ml-4">
+									<a class="nav-link py-0" href="${request.contextPath}/wiki/function/job">
+										我的申请
+									</a>
+								</li>
+							</ul>
+						</li>
+
+						<li class="nav-item ml-4 menu-is-opening menu-open">
+							<a id="function_operations" class="nav-link py-0" href="${request.contextPath}/wiki/function/operations">
+								运维端功能
+							</a>
+							<ul class="nav nav-treeview">
+								<li class="nav-item dropdown ml-4">
+									<a class="nav-link py-0 dropdown-toggle" data-bs-toggle="dropdown">
+										数据统计
+									</a>
+									<ul class="dark-mode dropdown-menu text-center">
+										<li id="function_statistics"><a href="${request.contextPath}/wiki/function/statistics">全局统计</a></li>
+										<li id="function_client-statistic"><a href="${request.contextPath}/wiki/function/client-statistic">client统计</a></li>
+										<li id="function_server-statistic"><a href="${request.contextPath}/wiki/function/server-statistic">server统计</a></li>
+									</ul>
+								</li>
+								<li class="nav-item dropdown ml-4">
+									<a class="nav-link py-0 dropdown-toggle" data-bs-toggle="dropdown">
+										运维功能
+									</a>
+									<ul class="dark-mode dropdown-menu text-center">
+										<li id="function_operation-job"><a href="${request.contextPath}/wiki/function/operation-job">工单审批</a></li>
+										<li id="function_operation-app"><a href="${request.contextPath}/wiki/function/operation-app">应用运维</a></li>
+										<li id="function_operation-instance"><a href="${request.contextPath}/wiki/function/operation-instance">实例运维</a></li>
+										<li id="function_operation-import"><a href="${request.contextPath}/wiki/function/operation-import">应用导入</a></li>
+										<li id="function_operation-migrate"><a href="${request.contextPath}/wiki/function/operation-migrate">数据迁移</a></li>
+										<li id="function_operation-diagnostic"><a href="${request.contextPath}/wiki/function/operation-diagnostic">诊断工具</a></li>
+										<li id="function_operation-machine"><a href="${request.contextPath}/wiki/function/operation-machine">机器管理</a></li>
+									</ul>
+								</li>
+								<li class="nav-item dropdown ml-4">
+									<a class="nav-link py-0 dropdown-toggle" data-bs-toggle="dropdown">
+										配置管理
+									</a>
+									<ul class="dark-mode dropdown-menu text-center">
+										<li id="function_operation-alert"><a href="${request.contextPath}/wiki/function/operation-alert">报警配置</a></li>
+										<li id="function_operation-systemalert"><a href="${request.contextPath}/wiki/function/operation-systemalert">系统配置</a></li>
+										<li id="function_operation-resource"><a href="${request.contextPath}/wiki/function/operation-resource">源管理</a></li>
+										<li id="function_operation-template"><a href="${request.contextPath}/wiki/function/operation-template">模板配置</a></li>
+									</ul>
+								</li>
+								<li class="nav-item dropdown ml-4">
+									<a class="nav-link py-0 dropdown-toggle" data-bs-toggle="dropdown">
+										任务管理
+									</a>
+									<ul class="dark-mode dropdown-menu text-center">
+										<li id="function_operation-task"><a href="${request.contextPath}/wiki/function/operation-task">任务流</a></li>
+										<li id="function_operation-schedule"><a href="${request.contextPath}/wiki/function/operation-schedule">调度任务</a></li>
+									</ul>
+								</li>
+								<li id="function_operation-user" class="nav-item ml-4">
+									<a class="nav-link py-0" href="${request.contextPath}/wiki/function/operation-user">
+										用户管理
+									</a>
+								</li>
+								<li id="function_system-alert" class="nav-item ml-4">
+									<a class="nav-link py-0" href="${request.contextPath}/wiki/function/system-alert">
+										系统通知
+									</a>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</li>
+
+
+				<li class="nav-item menu-is-opening menu-open">
+					<a id="operate_index" class="nav-link py-0" href="${request.contextPath}/wiki/operate/index">
+						<i class="bi bi-book"></i>
+						<p>运维手册</p>
+					</a>
+					<ul class="nav nav-treeview">
+						<li id="operate_baseConcept" class="nav-item ml-4">
+							<a class="nav-link py-0" href="${request.contextPath}/wiki/operate/baseConcept">
+								基础概念
+							</a>
+						</li>
+						<li id="operate_baseOperate" class="nav-item ml-4">
+							<a class="nav-link py-0" href="${request.contextPath}/wiki/operate/baseOperate">
+								基础运维
+							</a>
+						</li>
+						<li id="operate_appDeploy" class="nav-item ml-4">
+							<a class="nav-link py-0" href="${request.contextPath}/wiki/operate/appDeploy">
+								应用部署
+							</a>
+						</li>
+						<li id="operate_appUpgrade" class="nav-item ml-4">
+							<a class="nav-link py-0" href="${request.contextPath}/wiki/operate/appUpgrade">
+								应用升级
+							</a>
+						</li>
+						<li id="operate_appAlert" class="nav-item ml-4">
+							<a class="nav-link py-0" href="${request.contextPath}/wiki/operate/appAlert">
+								应用报警
+							</a>
+						</li>
+						<li id="operate_ssh" class="nav-item ml-4">
+							<a class="nav-link py-0" href="${request.contextPath}/wiki/operate/ssh">
+								Redis机器授权
+							</a>
+						</li>
+						<li id="operate_baseOptimize" class="nav-item ml-4">
+							<a class="nav-link py-0" href="${request.contextPath}/wiki/operate/baseOptimize">
+								系统运维优化
+							</a>
+						</li>
+					</ul>
+				</li>
+
+				<li class="nav-item menu-is-opening menu-open">
+					<a id="troubleshooting_index" class="nav-link py-0" href="${request.contextPath}/wiki/operate/index">
+						<i class="bi bi-question-circle"></i>
+						<p>FAQ常见问题</p>
+					</a>
+					<ul class="nav nav-treeview">
+						<li id="troubleshooting_cachecloud" class="nav-item ml-4">
+							<a class="nav-link py-0" href="${request.contextPath}/wiki/troubleshooting/cachecloud">
+								关于Cachecloud平台
+							</a>
+						</li>
+						<li class="nav-item dropdown ml-4">
+							<a class="nav-link py-0 dropdown-toggle" data-bs-toggle="dropdown">
+								关于Redis使用
+							</a>
+							<ul class="dark-mode dropdown-menu text-center">
+								<li id="troubleshooting_exception"><a href="${request.contextPath}/wiki/troubleshooting/exception">常见Jedis异常类</a></li>
+								<li id="troubleshooting_jedispoolconfig"><a href="${request.contextPath}/wiki/troubleshooting/jedispoolconfig">JedisPool优化</a></li>
+								<li id="troubleshooting_bigkey"><a href="${request.contextPath}/wiki/troubleshooting/bigkey">bigkey的寻找和优化</a></li>
+								<li id="troubleshooting_hotkey"><a href="${request.contextPath}/wiki/troubleshooting/hotkey">hotkey的寻找和优化</a></li>
+								<li id="troubleshooting_memory"><a href="${request.contextPath}/wiki/troubleshooting/memory">Redis内存优化</a></li>
+								<li id="troubleshooting_liunx"><a href="${request.contextPath}/wiki/troubleshooting/liunx">Liunx系统优化</a></li>
+								<li id="troubleshooting_activefrag"><a href="${request.contextPath}/wiki/troubleshooting/activefrag">Activefrag引起redis周期性延迟</a></li>
+							</ul>
+						</li>
+					</ul>
+				</li>
+			</ul>
+		</nav>
+	</div>
+
+</aside><!-- End Sidebar-->
+
+<script type="text/javascript">
+	$(function(){
+		var id = window.location.pathname.substring(6).replace(/\//g,"_");
+		console.log("id:"+id);
+		$("#"+id).addClass("active");
+		$(".right-side-bar a").each(function(){
+			$(this).click(function(){
+				$("html,body").animate({scrollTop: $($(this).attr('href')).offset().top - 52}, 500);
+				return false;
+			});
+		});
+		$(".right-side-bar a:first").addClass("active");
+		//浏览器滚动条滚动触发的事件
+	    $(window).scroll(function() {
+	        //获取当前滚动条的高度
+	        var scrollTop = $(window).scrollTop();
+	        if(scrollTop <= 0) {
+	        	$(".right-side-bar a").removeClass("active");
+	        	$(".right-side-bar a:first").addClass("active");
+	        	return;
+	        }
+	        var top = scrollTop + $(window).height() - 100;
+	        //遍历所有的div
+	        $(".markdown-body h2 > span").each(function(index) {
+	            var thisTop = $(this).offset().top;
+	            if (top >= thisTop) {
+	                $(".right-side-bar a").removeClass("active");
+	                $(".right-side-bar a[href='#"+$(this).attr("id")+"']").addClass("active");
+	            }
+	        });
+	    });
+		
+	    var page = window.location.pathname.substr(6);
+	    page = page.replace(/\//g, "_");
+	    if(page && $("#"+page).offset()){
+	    	if($("#"+page).offset().top > 510){
+				$("#leftBox").animate({scrollTop: $("#"+page).offset().top - 81}, 1000);
+	    	}
+		}
+
+	    doJustThis();
+	});
+
+	function doJustThis(){
+		var btn = document.getElementById('intro_index');
+		stopBtnPropagation(btn);
+		btn = document.getElementById('architecture_index');
+		stopBtnPropagation(btn);
+		btn = document.getElementById('access_index');
+		stopBtnPropagation(btn);
+		btn = document.getElementById('function_index');
+		stopBtnPropagation(btn);
+		btn = document.getElementById('operate_index');
+		stopBtnPropagation(btn);
+		btn = document.getElementById('troubleshooting_index');
+		stopBtnPropagation(btn);
+		btn = document.getElementById('function_client');
+		stopBtnPropagation(btn);
+		btn = document.getElementById('function_operations');
+		stopBtnPropagation(btn);
+	}
+
+	function stopBtnPropagation(btn){
+		btn.addEventListener('click', function(event) {
+			event.stopPropagation();
+			let attribute = btnEle.getAttribute("href");
+			window.location.href = attribute;
+		});
+	}
+</script>

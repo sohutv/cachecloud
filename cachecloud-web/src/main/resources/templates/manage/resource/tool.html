@@ -1,0 +1,125 @@
+<script type="text/javascript">
+  // 编译&推送
+  function compile(resourceId,repositoryId,ispush){
+    if(ispush == 1 && !window.confirm("资源已推送，确认覆盖？")){
+      return ;
+    }
+    $.post(
+            '${request.contextPath}/manage/app/resource/compile.json',
+            {
+              repositoryId: repositoryId,
+              resourceId: resourceId
+            },
+            function (data) {
+              var status = data.status;
+              if (status == 1) {
+                alert("编译成功");
+              } else {
+                alert("编译失败！" + data.message);
+              }
+              window.location.reload();
+            }
+    );
+  }
+
+  function search(){
+    $.post(
+            '${request.contextPath}/manage/app/resource/redis/tool',
+            {
+              searchName: $("#searchName").val()
+            },
+            function (data) {
+              var status = data.status;
+              if (status == 1) {
+                alert("编译成功");
+              } else {
+                alert("编译失败！" + data.message);
+              }
+              window.location.reload();
+            }
+    );
+  }
+</script>
+
+<div class="card">
+  <div class="card-body">
+    <div class="row">
+      <div id="respo-div" class="col-md-12">
+        <button id="redis_version" class="btn btn-success btn-sm col-auto" type="button" data-bs-target="#addResourceModal" data-bs-toggle="modal">
+          <i class="bi bi-plus"></i>新建迁移工具
+        </button>
+        <form class="row align-items-center float-end" role="form" method="post" action="${request.contextPath}/manage/app/resource/index?tab=tool" id="appList" name="ec">
+          <div class="col-auto">
+            <input type="text" class="form-control" id="searchName" name="searchName"
+                   value="${searchName!}" placeholder="资源名称">
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-success btn-sm" onclick="search()">查询</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="row mt-3">
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered table-hover" id="tableDataList" style="white-space: nowrap">
+          <thead>
+          <tr>
+            <th scope="col">资源id</th>
+            <th scope="col">资源名</th>
+            <th scope="col">说明</th>
+            <th scope="col">目录</th>
+            <th scope="col">源地址</th>
+            <th scope="col">最后修改时间</th>
+            <th scope="col">操作人</th>
+            <th scope="col">状态</th>
+            <th scope="col">操作</th>
+          </tr>
+          </thead>
+          <tbody>
+          <#list resourceList as resource>
+            <tr>
+              <td>${resource.id!}</td>
+              <td>
+                <#if (resource.ispush==1) || (resource.ispush==3)><a target="_blank" href="${repository.url!}${resource.dir!}">${resource.name!}</a></#if>
+                <#if (resource.ispush==0) || (resource.ispush==2) || (resource.ispush==4)>${resource.name!}</#if>
+              </td>
+              <td>
+                ${resource.intro!}
+              </td>
+              <td>
+                ${resource.dir!}
+              </td>
+              <td>
+                <#if resource.url?? && resource.url != ''>
+                  <a target="_blank" href="${resource.url!}" title="${resource.url!}">[下载]</a>
+                </#if>
+              </td>
+              <td>
+                ${resource.lastmodify?string("yyyy-MM-dd HH:mm:ss")}
+              </td>
+              <td>
+                ${resource.username!}
+              </td>
+              <td>
+                <#if (resource.ispush == 0)>未推送</#if>
+                <#if (resource.ispush == 1)><span style="color:green"><a href="${request.contextPath}/manage/task/flow?taskId=${resource.taskId!}" target="_blank">已推送</a></span></#if>
+                <#if (resource.ispush == 4)><span style="color:orange">编译中<a href="${request.contextPath}/manage/task/flow?taskId=${resource.taskId!}" target="_blank">[查看任务]</a></span></#if>
+              </td>
+              <td>
+                <button type="button" class="btn btn-info btn-sm" data-bs-target="#addResourceModal" data-bs-toggle="modal"
+                        data-resource_id="${resource.id!}" >
+                  修改
+                </button>
+                <button type="button" class="btn btn-success btn-sm" onclick="compile('${resource.id!}','${repository.id!}')" data-bs-toggle="modal">推送</button>
+              </td>
+            </tr>
+          </#list>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<#include "addTool.html">

@@ -120,7 +120,7 @@ public class InstancePortServiceImpl implements InstancePortService {
      */
     @Override
     public List<RedisServerNode> generateRedisServerNodeListWithDeployInfo(long appId, List<String> appDeployInfoList,
-                                                             int masterPerMachine, int maxMemory) {
+                                                                           int masterPerMachine, int maxMemory) {
 
         // 最终结果
         List<RedisServerNode> redisServerNodeList = new ArrayList<RedisServerNode>();

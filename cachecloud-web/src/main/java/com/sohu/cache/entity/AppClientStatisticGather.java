@@ -109,4 +109,14 @@ public class AppClientStatisticGather {
      */
     private int topologyExamResult;
 
+    /**
+     * 磁盘使用量 byte
+     */
+    private long usedDisk;
+
+    /**
+     * server端统计的命令调用次数
+     */
+    private long serverCmdCount;
+
 }

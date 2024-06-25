@@ -85,6 +85,18 @@
         where app_id=#{appId} and type=#{type}
     </select>
 
+    <select id="getAppAuditByTypeAndTimeRange" resultType="com.sohu.cache.entity.AppAudit">
+        select id,<include refid="columns"/>,create_time,refuse_reason
+        from app_audit
+        where app_id=#{appId}
+            and type=#{type}
+            <choose>
+                <when test="startTime != null and endTime != null">
+                    and modify_time between #{startTime} and #{endTime}
+                </when>
+            </choose>
+            order by modify_time desc
+    </select>
 
     <update id="updateTaskId">
         update app_audit set task_id = #{taskId}, modify_time = now() where id=#{id}

@@ -60,8 +60,46 @@ public class AppDescEnum {
 
 
     }
-    
-    
+
+    /**
+     * 应用aof持久化刷盘策略
+     */
+    public static enum AppPersistenceType {
+        GENERAL(0, "主从均aof每秒刷盘"),
+        PERFORMANCE_DATASAFE_UNITY(1, "主aof系统自动刷盘，从每秒刷盘"),
+        PERFORMANCE_BEST(2, "主aof关闭，从每秒刷盘"),
+        NO_PERSISTENCE(3, "不持久化");
+
+        private int value;
+
+        private String info;
+
+        private AppPersistenceType(int value, String info) {
+            this.value = value;
+            this.info = info;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public String getInfo() {
+            return info;
+        }
+
+        public static AppPersistenceType getByType(Integer persisType){
+            if(persisType == null){
+                return null;
+            }
+            AppPersistenceType[] values = AppPersistenceType.values();
+            Optional<AppPersistenceType> typeOptional = Arrays.asList(values).stream().filter(type -> type.getValue() == persisType).findFirst();
+            if(typeOptional.isPresent()){
+                return typeOptional.get();
+            }
+            return null;
+        }
+    }
+
     /**
      * 应用内存淘汰策略
      */
@@ -101,6 +139,14 @@ public class AppDescEnum {
 
         public static MaxmemoryPolicyType getByType(int type){
             Optional<MaxmemoryPolicyType> policyTypeOptional = Arrays.asList(MaxmemoryPolicyType.values()).stream().filter(maxmemoryPolicyType -> maxmemoryPolicyType.type == type).findFirst();
+            if(policyTypeOptional.isPresent()){
+                return policyTypeOptional.get();
+            }
+            return null;
+        }
+
+        public static MaxmemoryPolicyType getByName(String maxmemoryPolicyName){
+            Optional<MaxmemoryPolicyType> policyTypeOptional = Arrays.asList(MaxmemoryPolicyType.values()).stream().filter(maxmemoryPolicyType -> maxmemoryPolicyType.name.equals(maxmemoryPolicyName)).findFirst();
             if(policyTypeOptional.isPresent()){
                 return policyTypeOptional.get();
             }

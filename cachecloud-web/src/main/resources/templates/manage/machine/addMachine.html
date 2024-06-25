@@ -1,0 +1,293 @@
+<#if machine?? && machine.info??>
+  <#assign machineInfoId = machine.info.id>
+<#else>
+  <#assign machineInfoId = ''>
+</#if>
+<div id="addMachineModal${machineInfoId!}" class="modal fade" tabindex="-1" data-width="400">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">管理机器</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+      </div>
+
+      <form class="form-horizontal form-bordered form-row-stripped">
+        <div class="modal-body">
+          <div class="row">
+            <!-- 控件开始 -->
+            <div class="col-md-12">
+              <!-- form-body开始 -->
+              <div class="form-body">
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    机器ip:
+                  </label>
+                  <div class="col-md-5">
+                    <#if machine?? && machine.info??>
+                      <#assign ipValue = machine.info.ip!>
+                    <#else>
+                      <#assign ipValue = ''>
+                    </#if>
+                    <input type="text" name="ip" id="ip${machineInfoId!}"
+                           value="${ipValue!}" placeholder="机器ip，多台机器,分隔"
+                           class="form-control" />
+                  </div>
+                  <label class="col-form-label col-md-4">
+                    注:多台机器用,分隔
+                  </label>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    机房:
+                  </label>
+                  <div class="col-md-7">
+                    <select name="machineoom" id="machineRoom${machineInfoId!}" class="form-select select2_category w-100">
+                      <option value="默认">默认机房</option>
+                      <#list roomList as room>
+                        <option value="${room.name!}" <#if machine?? && machine.info?? && (room.name == (machine.info.room!))>selected</#if>>${room.name!} (${room.ipNetwork!})</option>
+                      </#list>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    内存:
+                  </label>
+                  <div class="col-md-5">
+                    <#if machine?? && machine.info??>
+                      <#assign memValue = machine.info.mem!>
+                    <#else>
+                      <#assign memValue = ''>
+                    </#if>
+                    <input type="text" name="mem" id="mem${machineInfoId!}"
+                           value="${memValue!}" placeholder="机器内存（单位G）"
+                           class="form-control" />
+                  </div>
+                  <label class="col-form-label col-md-1">
+                    G
+                  </label>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    cpu:
+                  </label>
+                  <div class="col-md-5">
+                    <#if machine?? && machine.info??>
+                      <#assign cpuValue = machine.info.cpu!>
+                    <#else>
+                      <#assign cpuValue = ''>
+                    </#if>
+                    <input type="text" name="cpu" id="cpu${machineInfoId!}"
+                           value="${cpuValue!}" placeholder="机器CPU核数"
+                           class="form-control" />
+                  </div>
+                  <label class="col-form-label col-md-1">
+                    核
+                  </label>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    disk:
+                  </label>
+                  <div class="col-md-5">
+                    <#if machine?? && machine.info??>
+                      <#assign diskValue = machine.info.disk!>
+                    <#else>
+                      <#assign diskValue = ''>
+                    </#if>
+                    <input type="text" name="disk" id="disk${machineInfoId!}"
+                           value="${diskValue!}" placeholder="机器磁盘空间:G"
+                           class="form-control" />
+                  </div>
+                  <label class="col-form-label col-md-1">
+                    G
+                  </label>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    是否虚机:
+                  </label>
+                  <div class="col-md-7">
+                    <select name="virtual" id="virtual${machineInfoId!}" class="form-select select2_category w-100">
+                      <option value="0" <#if machine?? && machine.info?? && (machine.info.virtual == 0)>selected="selected"</#if>>
+                      否
+                      </option>
+                      <option value="1" <#if machine?? && machine.info?? && (machine.info.virtual == 1)>selected="selected"</#if>>
+                      是
+                      </option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    操作系统:
+                  </label>
+                  <div class="col-md-7">
+                    <select name="disType" id="disType${machineInfoId!}" class="form-select select2_category w-100">
+                      <option value="0" <#if machine?? && machine.info?? && (machine.info.disType == 0)>selected="selected"</#if>>
+                      centos
+                      </option>
+                      <option value="1" <#if machine?? && machine.info?? && (machine.info.disType == 1)>selected="selected"</#if>>
+                      ubuntu
+                      </option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    宿主机ip:
+                  </label>
+                  <div class="col-md-5">
+                    <#if machine?? && machine.info??>
+                      <#assign realIpValue = machine.info.realIp!>
+                    <#else>
+                      <#assign realIpValue = ''>
+                    </#if>
+                    <input type="text" name="realIp" id="realIp${machineInfoId!}"
+                           value="${realIpValue!}" placeholder="宿主机ip,多台机器,分隔"
+                           class="form-control" />
+                  </div>
+                  <label class="col-form-label col-md-4">
+                    注:多台机器用,分隔
+                  </label>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    机架信息:
+                  </label>
+                  <div class="col-md-7">
+                    <#if machine?? && machine.info??>
+                      <#assign rackValue = machine.info.rack!>
+                    <#else>
+                      <#assign rackValue = ''>
+                    </#if>
+                    <input type="text" name="rack" id="rack${machineInfoId!}"
+                           value="${rackValue!}" placeholder="机器信息"
+                           class="form-control" />
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    机器类型:
+                  </label>
+                  <div class="col-md-7">
+                    <select name="machineType" id="machineType${machineInfoId!}" class="form-select select2_category w-100">
+                      <option value="0" <#if machine?? && machine.info?? && (machine.info.type == 0)>selected="selected"</#if>>
+                      Redis机器(默认)
+                      </option>
+                      <option value="3" <#if machine?? && machine.info?? && (machine.info.type == 3)>selected="selected"</#if>>
+                      Sentinel机器
+                      </option>
+                      <option value="2" <#if machine?? && machine.info?? && (machine.info.type == 2)>selected="selected"</#if>>
+                      Redis迁移工具机器
+                      </option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    部署类型:
+                  </label>
+                  <div class="col-md-7">
+                    <select name="useType" id="useType1${machineInfoId!}" class="form-select select2_category w-100">
+                      <option value="2" <#if machine?? && machine.info?? && (machine.info.useType == 2)>selected="selected"</#if>>
+                      混合部署
+                      </option>
+                      <option value="0" <#if machine?? && machine.info?? && (machine.info.useType == 0)>selected="selected"</#if>>
+                      专用服务部署
+                      </option>
+                      <option value="1" <#if machine?? && machine.info?? && (machine.info.useType == 1)>selected="selected"</#if>>
+                      测试服务部署
+                      </option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    容器类型:
+                  </label>
+                  <div class="col-md-7">
+                    <select name="k8sType" id="k8sType${machineInfoId!}" class="form-select select2_category w-100">
+                      <option value="0" <#if machine?? && machine.info?? && (machine.info.k8sType == 0)>selected="selected"</#if>>
+                      普通容器
+                      </option>
+                      <option value="1" <#if machine?? && machine.info?? && (machine.info.k8sType == 1)> selected="selected"</#if>>
+                      k8s容器
+                      </option>
+                      <option value="2" <#if machine?? && machine.info?? && (machine.info.k8sType == 2)> selected="selected"</#if>>
+                      物理机
+                      </option>
+                      <option value="3" <#if machine?? && machine.info?? && (machine.info.k8sType == 3)> selected="selected"</#if>>
+                      虚拟机
+                      </option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    机器说明:
+                  </label>
+                  <div class="col-md-7">
+                    <#if machine?? && machine.info??>
+                      <#assign extraDescValue = machine.info.extraDesc!>
+                    <#else>
+                      <#assign extraDescValue = ''>
+                    </#if>
+                    <input type="text" name="extraDesc" id="extraDesc${machineInfoId!}"
+                           value="${extraDescValue!}" placeholder="描述说明(所属服务、相关人员)"
+                           class="form-control" />
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-form-label col-md-3 text-end">
+                    状态收集:
+                  </label>
+                  <div class="col-md-7">
+                    <select name="collect" id="collect${machineInfoId!}" class="form-select select2_category w-100">
+                      <option value="0" <#if machine?? && machine.info?? && (machine.info.collect == 0)>selected="selected"</#if>>
+                      关闭
+                      </option>
+                      <option value="1" <#if machine?? && machine.info?? && (machine.info.collect == 1) || (machineInfoId?? && (machineInfoId == ''))>selected="selected"</#if>>
+                      开启
+                      </option>
+                    </select>
+                  </div>
+                </div>
+
+                <input type="hidden" id="machineId${machineInfoId!}" name="machineId" value="${machineInfoId!}"/>
+                <#if machine?? && machine.info??>
+                  <#assign versionInstallValue = machine.info.versionInstall!>
+                <#else>
+                  <#assign versionInstallValue = ''>
+                </#if>
+                <input type="hidden" id="versionInfo${machineInfoId!}" name="versionInfo" value="${versionInstallValue!}"/>
+              </div>
+              <!-- form-body 结束 -->
+            </div>
+            <div id="machineInfo${machineInfoId!}"></div>
+            <!-- 控件结束 -->
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" data-bs-dismiss="modal" class="btn btn-secondary" >Close</button>
+          <button type="button" id="addMachineBtn${machineInfoId!}" class="btn btn-danger" onclick="saveOrUpdateMachine('${machineInfoId!}', '${request.contextPath}')">Ok</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>

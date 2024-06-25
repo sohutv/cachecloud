@@ -8,6 +8,7 @@ import com.sohu.cache.dao.InstanceAlertConfigDao;
 import com.sohu.cache.dao.InstanceDao;
 import com.sohu.cache.dao.StandardStatsDao;
 import com.sohu.cache.entity.*;
+import com.sohu.cache.redis.enums.AppTypeToAlertTypeEnum;
 import com.sohu.cache.redis.enums.InstanceAlertStatusEnum;
 import com.sohu.cache.redis.enums.InstanceAlertTypeEnum;
 import com.sohu.cache.redis.enums.RedisAlertConfigEnum;
@@ -151,21 +152,31 @@ public class InstanceAlertConfigServiceImpl implements InstanceAlertConfigServic
     }
 
     @Override
-    public int getImportantLevelByAlertConfigAndCompareType(String alertConfig, int compareType) {
+    public List<InstanceAlertConfig> getByTypeAndAppType(int type, int appType) {
         try {
-            List<InstanceAlertConfig> configList = instanceAlertConfigDao.getByAlertConfigAndType(alertConfig, InstanceAlertTypeEnum.ALL_ALERT.getValue());
+            return instanceAlertConfigDao.getByTypeAndAppType(type, appType);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public InstanceAlertConfig getGlobalAlertConfigByCondition(String alertConfig, int compareType, Integer appType) {
+        try {
+            List<InstanceAlertConfig> configList = instanceAlertConfigDao.getByAlertConfigAndType(alertConfig, InstanceAlertTypeEnum.ALL_ALERT.getValue(), appType);
             for (InstanceAlertConfig instanceAlertConfig : configList) {
                 if(instanceAlertConfig.getStatus() == InstanceAlertStatusEnum.YES.getValue() && compareType == instanceAlertConfig.getCompareType()){
-                    return instanceAlertConfig.getImportantLevel();
+                    return instanceAlertConfig;
                 }
             }
             if(CollectionUtils.isNotEmpty(configList)){
-                return configList.get(0).getImportantLevel();
+                return configList.get(0);
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
-        return 0;
+        return null;
     }
 
     @Override
@@ -174,8 +185,11 @@ public class InstanceAlertConfigServiceImpl implements InstanceAlertConfigServic
     }
 
     @Override
-    public void updateImportantLevel(String alertConfig, int compareType, int importantLevel) {
-        instanceAlertConfigDao.updateImportantLevel(alertConfig, compareType, importantLevel);
+    public void updateImportantLevel(String alertConfig, int compareType, int importantLevel, Integer appType) {
+        if(appType == null){
+            appType = AppTypeToAlertTypeEnum.REDIS_ALERT.getType();
+        }
+        instanceAlertConfigDao.updateImportantLevel(alertConfig, compareType, importantLevel, appType);
     }
 
     @Override

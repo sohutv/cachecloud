@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <title>CacheCloud管理后台</title>
+    <meta content="" name="description">
+    <meta content="" name="keywords">
+    <#include "/manage/inc/backendResources.html">
+    <link href="${request.contextPath}/assets/css/common.css" rel="stylesheet">
+</head>
+<script type="text/javascript">
+    $(window).on('load', function () {
+        $('.selectpicker').selectpicker({
+            'selectedText': 'cat'
+        });
+    });
+</script>
+
+<body>
+    <div class="card">
+        <div class="modal" tabindex="-1" style="display: block;">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">应用导入流程</h4>
+                    </div>
+
+                    <form class="form-horizontal form-bordered form-row-stripped align-items-center">
+                        <div class="modal-body">
+                            <div class="row bs-wizard" style="border-bottom:0;">
+                                <div id="appInfo" class="col-sm-2 offset-sm-1 bs-wizard-step">
+                                    <div class="text-center bs-wizard-stepnum">1.确认导入配置</div>
+                                    <div class="progress">
+                                        <div class="progress-bar"></div>
+                                    </div>
+                                    <a href="#" class="bs-wizard-dot"></a>
+                                    <div class="bs-wizard-info text-center">导入前准备</div>
+                                </div>
+
+                                <div id="createVersion" class="col-sm-2 bs-wizard-step disabled">
+                                    <div class="text-center bs-wizard-stepnum">2.创建Redis版本</div>
+                                    <div class="progress">
+                                        <div class="progress-bar"></div>
+                                    </div>
+                                    <a href="#" class="bs-wizard-dot"></a>
+                                    <div class="bs-wizard-info text-center">为应用创建版本</div>
+                                </div>
+
+                                <div id="build" class="col-sm-2 bs-wizard-step disabled">
+                                    <div class="text-center bs-wizard-stepnum">3.新建应用</div>
+                                    <div class="progress">
+                                        <div class="progress-bar"></div>
+                                    </div>
+                                    <a href="#" class="bs-wizard-dot"></a>
+                                    <div class="bs-wizard-info text-center">部署应用</div>
+                                </div>
+
+                                <div id="appMigrate" class="col-sm-2 bs-wizard-step disabled">
+                                    <div class="text-center bs-wizard-stepnum">4.数据迁移</div>
+                                    <div class="progress">
+                                        <div class="progress-bar"></div>
+                                    </div>
+                                    <a href="#" class="bs-wizard-dot"></a>
+                                    <div class="bs-wizard-info text-center">新老实例redis数据迁移</div>
+                                </div>
+
+                                <div id="importDone" class="col-sm-2 bs-wizard-step disabled">
+                                    <div class="text-center bs-wizard-stepnum">5.应用导入完成</div>
+                                    <div class="progress">
+                                        <div class="progress-bar"></div>
+                                    </div>
+                                    <a href="#" class="bs-wizard-dot"></a>
+                                    <div class="bs-wizard-info text-center">导入完成</div>
+                                </div>
+                            </div>
+
+                            <br/>
+                            <div class="row d-none" id="pre">
+                                <form class="form-horizontal form-bordered form-row-stripped">
+                                    <div class="form-body">
+                                        <div class="row">
+                                            <div class="page-header row offset-md-1 col-md-11">
+                                                <h4 class="card-title">源：Redis信息</h4>
+                                            </div>
+                                            <div class="row offset-md-1">
+                                                <div class="row offset-md-1">
+                                                    <label class="col-form-label col-md-2 text-end">
+                                                        存储类型:
+                                                    </label>
+                                                    <div class="col-md-5">
+                                                        <select id="sourceType" name="sourceType" class="form-select w-100" disabled>
+                                                            <option value="5" <#if (appImport.sourceType==5)>selected="selected"</#if> >
+                                                            Redis-Standalone
+                                                            </option>
+                                                            <option value="6" <#if (appImport.sourceType==6)>selected="selected"</#if> >
+                                                            Redis-Sentinel
+                                                            </option>
+                                                            <option value="7" <#if (appImport.sourceType==7)>selected="selected"</#if> >
+                                                            Redis-Cluster
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="row offset-md-1" id="instanceSourceDiv">
+                                                    <label class="col-form-label col-md-2 text-end">源实例信息: </label>
+                                                    <div class="col-md-5">
+                                                        <textarea id="instanceSourceInfo" type="text" rows="10" class="form-text w-100"
+                                                                  readonly>${appImport.instanceInfo!}</textarea>
+                                                    </div>
+                                                    <label id="instanceSourceLog" class="col-form-label"></label>
+                                                </div>
+
+                                                <div class="row offset-md-1">
+                                                    <label class="col-form-label col-md-2 text-end"> 密码: </label>
+                                                    <div class="col-md-5">
+                                                        <input id="password" type="text" name="password" class="form-control"
+                                                               readonly value="${appImport.redisPassword!}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="page-header row offset-md-1 col-md-11">
+                                                <h4 class="card-title">目标：应用信息</h4>
+                                            </div>
+                                            <div class="row offset-md-1">
+                                                <label class="col-form-label col-md-2 text-end"> 应用名称: </label>
+                                                <div class="col-md-3">
+                                                    <input id="appName" type="text" name="appName" class="form-control"
+                                                           readonly value=""
+                                                        <#if appDesc?? && appDesc.name??>
+                                                            ${appDesc.name!}
+                                                        </#if>
+                                                    ">
+                                                </div>
+                                                <label class="col-form-label col-md-2 text-end"> Redis类型: </label>
+                                                <div class="col-md-3">
+                                                    <input id="type" type="text" name="type" class="form-control" readonly value="
+                                                        <#if appDesc?? && (appDesc.type==2)>Cluster</#if>
+                                                        <#if appDesc?? && (appDesc.type==5)>Sentinel</#if>
+                                                        <#if appDesc?? && (appDesc.type==6)>Standalone</#if>
+                                                    ">
+                                                </div>
+                                            </div>
+
+                                             <div class="row offset-md-1">
+                                                <label class="col-form-label col-md-2 text-end"> 应用描述: </label>
+                                                <div class="col-md-3">
+                                                    <input id="appIntro" type="text" name="appIntro" class="form-control"
+                                                           readonly value="
+                                                        <#if appDesc?? && appDesc.intro??>
+                                                            ${appDesc.intro!}
+                                                        </#if>
+                                                    ">
+                                                </div>
+                                                <label class="col-form-label col-md-2 text-end"> Redis版本: </label>
+                                                <div class="col-md-3">
+                                                    <input id="version" type="text" name="type" class="form-control"
+                                                           readonly value="${appImport.redisVersionName!}">
+                                                </div>
+                                            </div>
+
+                                            <div class="row offset-md-1">
+                                                <label class="col-form-label col-md-2 text-end"> 应用总内存: </label>
+                                                <div class="col-md-3">
+                                                    <input id="appMem" type="text" name="appMem" class="form-control"
+                                                           readonly value="${appImport.memSize!} G">
+                                                </div>
+
+                                                <label class="col-form-label col-md-2 text-end"> 是否测试: </label>
+                                                <div class="col-md-3">
+                                                    <input id="isTest" type="text" name="isTest" class="form-control" readonly
+                                                           value="
+                                                        <#if appDesc?? && (appDesc.isTest==0)>正式</#if>
+                                                        <#if appDesc?? && (appDesc.isTest==1)>测试</#if>
+                                                    ">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="row d-none" id="redisVersion" style="text-align: center">
+                                <form class="form-horizontal form-bordered form-row-stripped">
+                                    <div class="row offset-md-1 col-md-11">
+                                        <label> redis版本状态: </label>
+                                        <#if hasRedisVersion?? && (hasRedisVersion==0)>
+                                            <label> ${appImport.redisVersionName!} 不存在
+                                                <a target="_blank"
+                                                   href="${request.contextPath}/manage/app/resource/index?tab=redis">【创建版本】</a>
+                                            </label>
+                                        </#if>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="row display" id="appBuild" style="text-align: center">
+                                <form class="form-horizontal form-bordered form-row-stripped">
+                                    <div class="row offset-md-1">
+                                        <label class="col-form-label col-md-2 text-end"> 应用创建状态: </label>
+                                        <#if (appImport.status==21)>
+                                            <label class="col-form-label col-md-7" style="text-align: left">
+                                                请部署应用：${appImport.appId!}
+                                                <a target="_blank"
+                                                   href="${request.contextPath}/manage/app/initAppDeploy?appId=${appImport.appId!}&importId=${appImport.id!}">【部署应用】</a>
+                                            </label>
+                                        </#if>
+                                        <#if (appImport.status==22)>
+                                            <label class="col-form-label col-md-7"
+                                                   style="text-align: left"> ${appImport.appId!} 应用部署中，请稍等...
+                                                <a target="_blank"
+                                                   href="${request.contextPath}/manage/task/flow?taskId=${appImport.appBuildTaskId!}">【查看部署任务】</a>
+                                            </label>
+                                        </#if>
+                                        <#if (appImport.status==23)>
+                                            <label class="col-form-label col-md-7"
+                                                   style="text-align: left;color: red"> ${appImport.appId!}应用部署异常，请
+                                                <a target="_blank"
+                                                   href="${request.contextPath}/manage/task/flow?taskId=${appImport.appBuildTaskId!}">【修复】</a>
+                                                或
+                                                <a target="_blank"
+                                                   href="${request.contextPath}/manage/app/initAppDeploy?appId=${appImport.appId!}&importId=${appImport.id!}"
+                                                   onclick="return preRebuildApp(${appImport.id!},${appImport.appId!})">【重新部署】</a>
+                                            </label>
+                                        </#if>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="row d-none" id="migrate" style="text-align: center">
+                                <form class="form-horizontal form-bordered form-row-stripped">
+                                    <div class="row offset-md-1">
+                                        <label class="col-form-label col-md-2 offset-md-3"> 数据迁移状态: </label>
+                                        <#if (appImport.status==30)>
+                                            <label class="col-form-label col-md-7" style="text-align: left"> 暂无数据迁移任务，请
+                                                <a target="_blank"
+                                                   href="${request.contextPath}/data/migrate/init?importId=${appImport.id!}">【进行数据迁移】</a>
+                                            </label>
+                                        </#if>
+                                        <#if (appImport.status==32)>
+                                            <label class="col-form-label col-md-7" style="text-align: left"> 数据迁移中，请稍等...
+                                                <a target="_blank"
+                                                   href="${request.contextPath}/data/migrate/index?migrateId=${appImport.migrateId!}&status=-2">【查看迁移任务】</a>
+                                            </label>
+                                        </#if>
+                                        <#if (appImport.status==33)>
+                                            <label class="col-form-label col-md-7" style="text-align: left;color: red">
+                                                数据迁移异常，请
+                                                <a target="_blank"
+                                                   href="${request.contextPath}/data/migrate/index?migrateId=${appImport.migrateId!}&status=-2">【修复】</a>
+                                                或
+                                                <a target="_blank"
+                                                   href="${request.contextPath}/data/migrate/init?importId=${appImport.id!}"
+                                                   onclick="if(window.confirm('确认 应用${appImport.appId!} 数据已经清空 或 允许重写?')){return true;}else{return false;}">
+                                                    【重新迁移】
+                                                </a>
+                                            </label>
+                                        </#if>
+
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="row d-none" id="done" style="text-align: center">
+                                <form class="form-horizontal form-bordered form-row-stripped">
+                                    <div class="row offset-md-1">
+                                        <label style="color: #00BE67; font: bold;">
+                                            恭喜您，应用导入成功！
+                                            <a target="_blank" href="${request.contextPath}/admin/app/index?appId=${appImport.appId!}">【查看应用】</a>
+                                        </label>
+                                    </div>
+                                </form>
+                            </div>
+
+                        </div>
+
+                        <div class="modal-footer">
+                            <button id="import" type="button" class="btn btn-primary"
+                                    onclick="importApp(${appImport.id!},11,0,0)">
+                                开始导入
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="status" name="status" value="${appImport.status!}">
+
+<script>
+    var navs = ["appInfo", "createVersion", "build", "appMigrate", "importDone"];
+    var divs = ["pre", "redisVersion", "appBuild", "migrate", "done"];
+    $(function () {
+        var status = document.getElementById("status").value;
+        console.log("status: " + status);
+        if (status == 0) {
+            $("#import").html("开始导入");
+            active("appInfo");
+            show("pre");
+        } else if (status >= 10 && status < 20) {
+            hidden("import");
+            complete("appInfo");
+            active("createVersion");
+            show("redisVersion");
+        } else if (status >= 20 && status < 30) {
+            hidden("import");
+            complete("appInfo");
+            complete("createVersion");
+            active("build");
+            show("appBuild");
+        } else if (status >= 30 && status < 40) {
+            hidden("import");
+            complete("appInfo");
+            complete("createVersion");
+            complete("build");
+            active("appMigrate");
+            show("migrate");
+        } else if (status == 3) {
+            $("#import").html("导入完成");
+            display("import");
+            disable("import");
+            complete("appInfo");
+            complete("createVersion");
+            complete("build");
+            complete("appMigrate");
+            active("importDone");
+            show("done");
+        }
+    });
+
+    function importApp(importId, status, appBuildTaskId, migrateId) {
+        $.get(
+            '/import/app/goOn.json',
+            {
+                importId: importId,
+                status: status,
+                appBuildTaskId: appBuildTaskId,
+                migrateId: migrateId
+            },
+            function (data) {
+                var success = data.success;
+                if (success == 1) {
+                    console.log("success: " + success);
+                    window.location.reload();
+                }
+            }
+        );
+    }
+
+    function updateMigrate(importId) {
+        var migrateId = document.getElementById("migrateId");
+        if (migrateId.value == '') {
+            migrateId.focus();
+            return false;
+        } else if (migrateId.value > 0) {
+            importApp(importId, 0, 0, migrateId.value);
+        }
+    }
+
+    function updateAppBuild(importId) {
+        var appBuildTaskId = document.getElementById("appBuildTaskId");
+        if (appBuildTaskId.value == '') {
+            appBuildTaskId.focus();
+            return false;
+        } else if (appBuildTaskId.value > 0) {
+            importApp(importId, 0, appBuildTaskId.value, 0);
+        }
+    }
+
+    function preRebuildApp(importId, appId) {
+        $.get(
+            '/import/app/preRebuildApp.json',
+            {
+                importId: importId,
+                appId: appId
+            },
+            function (data) {
+                var success = data.success;
+                if (success == 1) {
+                    console.log("preRebuildApp success");
+                    return true;
+                } else {
+                    alert("应用部署回退异常！");
+                    return false;
+                }
+            }
+        );
+    }
+
+    function show(id) {
+        display(id)
+        for (var i = 0; i < divs.length; i++) {
+            if (divs[i] != id) {
+                hidden(divs[i]);
+            }
+        }
+    }
+
+    function warn(id) {
+        $("#" + id).addClass("warn");
+    }
+
+    function disable(id) {
+        $("#" + id).removeClass("active").addClass("disabled");
+    }
+
+    function active(id) {
+        $("#" + id).removeClass("disabled").removeClass("warn").addClass("active");
+    }
+
+    function complete(id) {
+        $("#" + id).removeClass("disabled").removeClass("active").removeClass("warn").addClass("complete");
+    }
+
+    function hidden(id) {
+        $("#" + id).removeClass("display").addClass("d-none");
+    }
+
+    function display(id) {
+        $("#" + id).removeClass("d-none").addClass("display");
+    }
+</script>
+</body>
+</html>

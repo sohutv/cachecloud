@@ -1,7 +1,10 @@
 package com.sohu.cache.dao;
 
+import com.sohu.cache.entity.AppCapacityStatisticsResult;
 import com.sohu.cache.entity.AppDesc;
+import com.sohu.cache.entity.AppMonitorStatisticsResult;
 import com.sohu.cache.entity.AppSearch;
+import com.sohu.cache.entity.AppStatisticsSearch;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
@@ -66,6 +69,13 @@ public interface AppDao {
      */
     public int update(AppDesc appDesc);
 
+    /**
+     * 更新appPwd
+     * @param appId
+     * @param appPwd
+     * @return
+     */
+    int updateAppPwd(@Param("appId") long appId, @Param("pkey") String appPwd);
 
     /**
      * 更新app,包含自定义密码
@@ -134,6 +144,22 @@ public interface AppDao {
     public void updateAppKey(@Param("appId") long appId, @Param("appKey") String appKey);
 
     /**
+     * 更新持久化类型
+     *
+     * @param appId
+     * @param persistenceType
+     */
+    public int updateAppPersistenceType(@Param("appId") long appId, @Param("persistenceType") int persistenceType);
+
+    /**
+     * 更新内存策略
+     *
+     * @param appId
+     * @param maxmemoryPolicy
+     */
+    public int updateAppMaxmemoryPolicy(@Param("appId") long appId, @Param("maxmemoryPolicy") int maxmemoryPolicy);
+
+    /**
      * 获取app安装不同版本的数量
      */
     @Select("SELECT version_id,count(version_id) as num from app_desc where status=2 GROUP BY version_id")
@@ -141,5 +167,8 @@ public interface AppDao {
 
     public List<AppDesc> getAppDescByIds(@Param("appIds") List<String> appIds);
 
+    public List<AppMonitorStatisticsResult> getMonitorStatistics(AppStatisticsSearch search);
+
+    public List<AppCapacityStatisticsResult> getCapacityStatistics(AppStatisticsSearch search);
 
 }

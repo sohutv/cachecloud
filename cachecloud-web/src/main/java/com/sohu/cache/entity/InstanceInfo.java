@@ -4,12 +4,10 @@ import com.sohu.cache.task.constant.InstanceInfoEnum;
 import com.sohu.cache.util.ConstUtils;
 import com.sohu.cache.web.enums.BooleanEnum;
 import lombok.Data;
-import redis.clients.jedis.Module;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 /**
  * 实例信息
@@ -62,8 +60,6 @@ public class InstanceInfo implements Serializable {
     private String roleDesc;
     private int groupId;
     private Date updateTime;
-
-    private List<Module> modules;
 
     public String getTypeDesc() {
         if (type <= 0) {
@@ -155,4 +151,28 @@ public class InstanceInfo implements Serializable {
     public void setUpdateTime(Date updateTime) {
         this.updateTime = (Date) updateTime.clone();
     }
+
+    @Override
+    public String toString() {
+        return "InstanceInfo{" +
+                "id=" + id +
+                ", appId=" + appId +
+                ", hostId=" + hostId +
+                ", ip='" + ip + '\'' +
+                ", port=" + port +
+                ", status=" + status +
+                ", mem=" + mem +
+                ", conn=" + conn +
+                ", cmd='" + cmd + '\'' +
+                ", type=" + type +
+                ", typeDesc='" + typeDesc + '\'' +
+                ", masterInstanceId=" + masterInstanceId +
+                ", masterHost='" + masterHost + '\'' +
+                ", masterPort=" + masterPort +
+                ", roleDesc='" + roleDesc + '\'' +
+                ", groupId=" + groupId +
+                ", updateTime=" + updateTime +
+                '}';
+    }
+
 }

@@ -19,6 +19,13 @@ public interface AsyncService {
     public boolean submitFuture(KeyCallable<?> callable);
 
     /**
+     * 提交任务并可拿到返回结果
+     * @param callable
+     * @return
+     */
+    public Future<?> submitFutureWithRst(KeyCallable<?> callable);
+
+    /**
      * 提交任务
      *
      * @param threadPoolKey
@@ -26,6 +33,15 @@ public interface AsyncService {
      * @return 返回是否提交成功
      */
     public boolean submitFuture(String threadPoolKey, KeyCallable<?> callable);
+
+    /**
+     * 提交任务
+     *
+     * @param threadPoolKey
+     * @param callable
+     * @return 返回任务结果
+     */
+    public Future<?> submitFutureWithRst(String threadPoolKey, KeyCallable<?> callable);
 
     /**
      * 提交任务

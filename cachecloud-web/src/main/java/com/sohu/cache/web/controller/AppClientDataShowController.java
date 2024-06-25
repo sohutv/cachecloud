@@ -41,13 +41,10 @@ public class AppClientDataShowController extends BaseController {
      * 收集数据时间format
      */
     private final static String COLLECT_TIME_FORMAT = "yyyyMMddHHmmss";
-    /**
-     * 客户端耗时服务
-     */
-    @Resource(name = "clientReportCostDistriService")
-    private ClientReportCostDistriService clientReportCostDistriService;
+
     @Autowired
     private AppClientReportCommandService appClientReportCommandService;
+
     @Autowired
     private AppClientReportExceptionService appClientReportExceptionService;
     /**
@@ -55,11 +52,7 @@ public class AppClientDataShowController extends BaseController {
      */
     @Resource(name = "clientReportExceptionService")
     private ClientReportExceptionService clientReportExceptionService;
-    /**
-     * 客户端值分布服务
-     */
-    @Resource(name = "clientReportValueDistriService")
-    private ClientReportValueDistriService clientReportValueDistriService;
+
     /**
      * 应用基本服务
      */
@@ -70,11 +63,7 @@ public class AppClientDataShowController extends BaseController {
      */
     @Resource(name = "instanceStatsCenter")
     private InstanceStatsCenter instanceStatsCenter;
-    /**
-     * 应用下节点和客户端关系服务
-     */
-    @Resource(name = "appInstanceClientRelationService")
-    private AppInstanceClientRelationService appInstanceClientRelationService;
+
     @Autowired
     private AppClientStatisticGatherDao appClientStatisticGatherDao;
 
@@ -183,218 +172,6 @@ public class AppClientDataShowController extends BaseController {
         long endTime = NumberUtils.toLong(DateUtil.formatDate(endDate, COLLECT_TIME_FORMAT));
         return new TimeBetween(startTime, endTime, startDate, endDate);
     }
-
-    /**
-     * 应用客户端耗时统计
-     */
-    @RequestMapping("/costDistribute")
-    public ModelAndView doCostDistribute(HttpServletRequest request, HttpServletResponse response, Model model) {
-        // 1.应用信息
-        Long appId = NumberUtils.toLong(request.getParameter("appId"));
-        if (appId <= 0) {
-            return new ModelAndView("");
-        }
-        AppDesc appDesc = appService.getByAppId(appId);
-        model.addAttribute("appDesc", appDesc);
-        model.addAttribute("appId", appId);
-
-        // 2.获取时间区间
-        TimeBetween timeBetween = new TimeBetween();
-        try {
-            timeBetween = fillWithCostDateFormat(request, model);
-        } catch (ParseException e) {
-            logger.error(e.getMessage(), e);
-        }
-        long startTime = timeBetween.getStartTime();
-        long endTime = timeBetween.getEndTime();
-        Date startDate = timeBetween.getStartDate();
-
-        // 3.所有命令和第一个命令
-        List<String> allCommands = clientReportCostDistriService.getAppDistinctCommand(appId, startTime, endTime);
-        model.addAttribute("allCommands", allCommands);
-
-        // 4.所有客户端和实例对应关系
-        List<AppInstanceClientRelation> appInstanceClientRelationList = appInstanceClientRelationService.getAppInstanceClientRelationList(appId, startDate);
-        model.addAttribute("appInstanceClientRelationList", appInstanceClientRelationList);
-
-        String firstCommand = request.getParameter("firstCommand");
-        if (StringUtils.isBlank(firstCommand) && CollectionUtils.isNotEmpty(allCommands)) {
-            firstCommand = allCommands.get(0);
-            model.addAttribute("firstCommand", firstCommand);
-        } else {
-            model.addAttribute("firstCommand", firstCommand);
-        }
-
-        // 5.1 应用下客户端和实例的全局耗时统计列表
-        List<AppClientCostTimeTotalStat> appChartStatList = clientReportCostDistriService.getAppClientCommandTotalStat(appId, firstCommand, startTime, endTime);
-        Map<String, Object> resultMap = new HashMap<String, Object>();
-
-        // 5.2 简化字段
-        List<Map<String, Object>> app = new ArrayList<Map<String, Object>>();
-        for (AppClientCostTimeTotalStat appClientCostTimeTotalStat : appChartStatList) {
-            Map<String, Object> map = new HashMap<String, Object>();
-            map.put("timeStamp", appClientCostTimeTotalStat.getTimeStamp());
-            map.put("count", appClientCostTimeTotalStat.getTotalCount());
-            map.put("mean", appClientCostTimeTotalStat.getMean());
-            map.put("median", appClientCostTimeTotalStat.getMedian());
-            map.put("max90", appClientCostTimeTotalStat.getNinetyPercentMax());
-            map.put("max99", appClientCostTimeTotalStat.getNinetyNinePercentMax());
-            map.put("max100", appClientCostTimeTotalStat.getHundredMax());
-            map.put("maxInst", appClientCostTimeTotalStat.getMaxInstanceHost() + ":" + appClientCostTimeTotalStat.getMaxInstancePort());
-            map.put("maxClient", appClientCostTimeTotalStat.getMaxClientIp());
-            app.add(map);
-        }
-
-        resultMap.put("app", app);
-        model.addAttribute("appChartStatListJson", JSONObject.toJSONString(resultMap));
-
-        return new ModelAndView("client/clientCostDistribute");
-    }
-
-    /**
-     * 获取耗时时间区间
-     *
-     * @throws ParseException
-     */
-    private TimeBetween fillWithCostDateFormat(HttpServletRequest request, Model model) throws ParseException {
-
-        final String costDistriDateFormat = "yyyy-MM-dd";
-        String costDistriStartDateParam = request.getParameter("costDistriStartDate");
-        String costDistriEndDateParam = request.getParameter("costDistriEndDate");
-        Date startDate;
-        Date endDate;
-        if (StringUtils.isBlank(costDistriStartDateParam) || StringUtils.isBlank(costDistriEndDateParam)) {
-            // 如果为空默认取昨天和今天
-            SimpleDateFormat sdf = new SimpleDateFormat(costDistriDateFormat);
-            startDate = sdf.parse(sdf.format(new Date()));
-            endDate = DateUtils.addDays(startDate, 1);
-            costDistriStartDateParam = DateUtil.formatDate(startDate, costDistriDateFormat);
-            costDistriEndDateParam = DateUtil.formatDate(endDate, costDistriDateFormat);
-        } else {
-            endDate = DateUtil.parse(costDistriEndDateParam, costDistriDateFormat);
-            startDate = DateUtil.parse(costDistriStartDateParam, costDistriDateFormat);
-            //限制不能超过1天
-            if (endDate.getTime() - startDate.getTime() > TimeUnit.DAYS.toMillis(1)) {
-                startDate = DateUtils.addDays(endDate, -1);
-            }
-        }
-        // 前端需要
-        model.addAttribute("costDistriStartDate", costDistriStartDateParam);
-        model.addAttribute("costDistriEndDate", costDistriEndDateParam);
-        // 查询后台需要
-        long startTime = NumberUtils.toLong(DateUtil.formatDate(startDate, COLLECT_TIME_FORMAT));
-        long endTime = NumberUtils.toLong(DateUtil.formatDate(endDate, COLLECT_TIME_FORMAT));
-        return new TimeBetween(startTime, endTime, startDate, endDate);
-    }
-
-    /**
-     * 获取指定时间内某个命令某个客户端和实例的统计数据
-     */
-    @RequestMapping("/getAppClientInstanceCommandCost")
-    public ModelAndView doGetAppClientInstanceCommandCost(HttpServletRequest request, HttpServletResponse response, Model model) throws ParseException {
-        final String costDistriDateFormat = "yyyy-MM-dd";
-        long appId = NumberUtils.toLong(request.getParameter("appId"));
-        //时间转换
-        String costDistriStartDate = request.getParameter("costDistriStartDate");
-        String costDistriEndDate = request.getParameter("costDistriEndDate");
-        Date startDate = DateUtil.parse(costDistriStartDate, costDistriDateFormat);
-        Date endDate = DateUtil.parse(costDistriEndDate, costDistriDateFormat);
-        long startTime = NumberUtils.toLong(DateUtil.formatDate(startDate, COLLECT_TIME_FORMAT));
-        long endTime = NumberUtils.toLong(DateUtil.formatDate(endDate, COLLECT_TIME_FORMAT));
-
-        String firstCommand = request.getParameter("firstCommand");
-        long instanceId = NumberUtils.toLong(request.getParameter("instanceId"));
-        String clientIp = request.getParameter("clientIp");
-
-        //客户端和实例统计
-        List<AppClientCostTimeStat> clientInstanceChartStatList = clientReportCostDistriService.getAppCommandClientToInstanceStat(appId, firstCommand, instanceId, clientIp, startTime, endTime);
-        //缩减字段
-        List<Map<String, Object>> clientInstanceStat = new ArrayList<Map<String, Object>>();
-        for (AppClientCostTimeStat appClientCostTimeStat : clientInstanceChartStatList) {
-            Map<String, Object> map = new HashMap<String, Object>();
-            map.put("timeStamp", appClientCostTimeStat.getTimeStamp());
-            map.put("count", appClientCostTimeStat.getCount());
-            map.put("mean", appClientCostTimeStat.getMean());
-            map.put("median", appClientCostTimeStat.getMedian());
-            map.put("max90", appClientCostTimeStat.getNinetyPercentMax());
-            map.put("max99", appClientCostTimeStat.getNinetyNinePercentMax());
-            map.put("max100", appClientCostTimeStat.getHundredMax());
-            clientInstanceStat.add(map);
-        }
-        //生成数据map json
-        Map<String, Object> resultMap = new HashMap<String, Object>();
-        resultMap.put("clientInstanceStat", clientInstanceStat);
-        sendMessage(response, JSONObject.toJSONString(resultMap));
-        return null;
-    }
-
-    /**
-     * 应用客户端值分布相关
-     */
-    @RequestMapping("/valueDistribute")
-    public ModelAndView doValueDistribute(HttpServletRequest request, HttpServletResponse response, Model model)
-            throws ParseException {
-        // 1.1 应用信息
-        Long appId = NumberUtils.toLong(request.getParameter("appId"));
-        if (appId <= 0) {
-            return new ModelAndView("");
-        }
-        AppDesc appDesc = appService.getByAppId(appId);
-        model.addAttribute("appDesc", appDesc);
-
-        // 1.2 时间格式转换
-        TimeBetween timeBetween = new TimeBetween();
-        try {
-            timeBetween = fillWithValueDistriTime(request, model);
-        } catch (ParseException e) {
-            logger.error(e.getMessage(), e);
-        }
-        long startTime = timeBetween.getStartTime();
-        long endTime = timeBetween.getEndTime();
-
-        //值分布列表
-        List<AppClientValueDistriSimple> appClientValueDistriSimpleList = clientReportValueDistriService.getAppValueDistriList(appId, startTime, endTime);
-        model.addAttribute("appClientValueDistriSimpleList", appClientValueDistriSimpleList);
-
-        //值分布json
-        model.addAttribute("appClientValueDistriSimpleListJson", JSONObject.toJSONString(appClientValueDistriSimpleList));
-
-        return new ModelAndView("client/clientValueDistribute");
-    }
-
-    /**
-     * 值分布日期格式
-     */
-    private TimeBetween fillWithValueDistriTime(HttpServletRequest request, Model model) throws ParseException {
-        final String valueDistriDateFormat = "yyyy-MM-dd";
-        String valueDistriStartDateParam = request.getParameter("valueDistriStartDate");
-        String valueDistriEndDateParam = request.getParameter("valueDistriEndDate");
-        Date startDate;
-        Date endDate;
-        if (StringUtils.isBlank(valueDistriStartDateParam) || StringUtils.isBlank(valueDistriEndDateParam)) {
-            // 如果为空默认取昨天和今天
-            SimpleDateFormat sdf = new SimpleDateFormat(valueDistriDateFormat);
-            startDate = sdf.parse(sdf.format(new Date()));
-            endDate = DateUtils.addDays(startDate, 1);
-            valueDistriStartDateParam = DateUtil.formatDate(startDate, valueDistriDateFormat);
-            valueDistriEndDateParam = DateUtil.formatDate(endDate, valueDistriDateFormat);
-        } else {
-            endDate = DateUtil.parse(valueDistriEndDateParam, valueDistriDateFormat);
-            startDate = DateUtil.parse(valueDistriStartDateParam, valueDistriDateFormat);
-            //限制不能超过1天
-            if (endDate.getTime() - startDate.getTime() > TimeUnit.DAYS.toMillis(1)) {
-                startDate = DateUtils.addDays(endDate, -1);
-            }
-        }
-        // 前端需要
-        model.addAttribute("valueDistriStartDate", valueDistriStartDateParam);
-        model.addAttribute("valueDistriEndDate", valueDistriEndDateParam);
-        // 查询后台需要
-        long startTime = NumberUtils.toLong(DateUtil.formatDate(startDate, COLLECT_TIME_FORMAT));
-        long endTime = NumberUtils.toLong(DateUtil.formatDate(endDate, COLLECT_TIME_FORMAT));
-        return new TimeBetween(startTime, endTime, startDate, endDate);
-    }
-
 
     @RequestMapping("/commandStatistics")
     public ModelAndView doCommandStatistics(HttpServletRequest request, HttpServletResponse response, Model model) {

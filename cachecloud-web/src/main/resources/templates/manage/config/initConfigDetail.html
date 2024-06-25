@@ -1,0 +1,70 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="bi bi-globe"></i>配置修改
+                    <#if success?? && (success == "1")>
+                    <font color="red">更新成功</font>
+                    <#elseif success?? && (success == "0")>
+                    <font color="red">更新失败</font>
+                </#if>
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <!-- BEGIN FORM-->
+                        <form action="${request.contextPath}/manage/config/update" method="post" class="form-horizontal bordered form-row-stripped">
+                            <div class="form-body">
+                                <#list configList as config>
+                                    <div class="form-group row">
+                                        <label class="col-form-label offset-md-1 col-md-4 text-end">
+                                            ${config.info}<font color='red'>(*)</font>:
+                                        </label>
+                                        <div class="col-md-6">
+                                            <#if (config.configKey == 'cachecloud.whether.schedule.clean.data')>
+                                                <select name="${config.configKey}" class="form-control">
+                                                    <option value="false" <#if (config.configValue == 'false')>selected</#if>>
+                                                    否
+                                                    </option>
+                                                    <option value="true" <#if (config.configValue == 'true')>selected</#if>>
+                                                    是
+                                                    </option>
+                                                </select>
+                                            <#elseif (config.configKey == 'cachecloud.ssh.auth.type')>
+                                                <select name="${config.configKey}" class="form-control">
+                                                    <option value="1" <#if (config.configValue == '1')>selected</#if>>
+                                                    密码
+                                                    </option>
+                                                    <option value="2" <#if (config.configValue == '2')>selected</#if>>
+                                                    public key
+                                                    </option>
+                                                </select>
+                                            <#else>
+                                                <input type="text" name="${config.configKey!}" class="form-control" value='${config.configValue!}' />
+                                            </#if>
+                                        </div>
+                                    </div>
+                                </#list>
+
+                                <div class="form-actions fluid">
+                                    <div class="form-group row">
+                                        <div class="col-md-12">
+                                            <div class="col-md-12 text-center">
+                                                <button type="submit" class="btn btn-success">
+                                                    <i class="bi bi-check"></i>
+                                                    确认修改
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -4,6 +4,8 @@ import com.sohu.cache.constant.AppDescEnum;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.SystemResource;
 import com.sohu.cache.protocol.RedisProtocol;
+import com.sohu.cache.redis.enums.RedisConfigEnum;
+import com.sohu.cache.redis.util.AuthUtil;
 import com.sohu.cache.task.BaseTask;
 import com.sohu.cache.task.constant.InstanceInfoEnum.InstanceTypeEnum;
 import com.sohu.cache.task.constant.TaskConstants;
@@ -12,12 +14,14 @@ import com.sohu.cache.util.ConstUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
@@ -44,6 +48,11 @@ public class RedisServerInstallTask extends BaseTask {
      * 当前实例类型
      */
     private final InstanceTypeEnum currentInstanceTypeEnum = InstanceTypeEnum.REDIS_SERVER;
+
+    /**
+     * 密码
+     */
+    private String password;
 
 
     @Override
@@ -144,7 +153,12 @@ public class RedisServerInstallTask extends BaseTask {
         //实例基准目录
         String instanceRemoteBasePath = ConstUtils.CACHECLOUD_BASE_DIR;
         AppDesc appDesc = appService.getByAppId(appId);
-        List<String> configList = handleCommonConfig(host, port, maxMemory, appDesc.getMaxmemoryPolicy(), appDesc.getVersionId(), isCluster);
+        password = getAppPwd(appDesc);
+
+        List<Pair<String, String>> customConfigs = new ArrayList<>();
+        customConfigs.add(Pair.of(RedisConfigEnum.REQUIREPASS.getKey(), password));
+        customConfigs.add(Pair.of(RedisConfigEnum.MASTERAUTH.getKey(), password));
+        List<String> configList = handleCommonConfig(host, port, maxMemory, appDesc.getMaxmemoryPolicy(), appDesc.getVersionId(), isCluster, customConfigs);
         if (CollectionUtils.isEmpty(configList)) {
             logger.error(marker, "appId {} port {} maxmemory {} versionId:{} instanceRemoteBasePath {} configList is empty", appId, port, maxMemory, appDesc.getVersionId(), instanceRemoteBasePath);
             return TaskFlowStatusEnum.ABORT;
@@ -162,6 +176,21 @@ public class RedisServerInstallTask extends BaseTask {
             return TaskFlowStatusEnum.ABORT;
         }
         return TaskFlowStatusEnum.SUCCESS;
+    }
+
+    private String getAppPwd(AppDesc appDesc){
+        String newPassword = null;
+        boolean customPwdFlag = appDesc.isSetCustomPassword();
+        if(customPwdFlag){
+            newPassword = appDesc.getCustomPassword();
+        }else{
+            String newPkey = String.valueOf(appId);
+            newPassword = AuthUtil.getAppIdMD5(newPkey);
+        }
+        if(newPassword == null){
+            newPassword = "";
+        }
+        return newPassword;
     }
 
     /**
@@ -215,7 +244,13 @@ public class RedisServerInstallTask extends BaseTask {
     }
 
     public TaskFlowStatusEnum checkIsRun() {
-        if (!redisCenter.isRun(host, port)) {
+        //检测是否启动成功前，先休息3秒，否则可能会服务未启动完成，出现不能正确创建socket连接异常
+        try {
+            TimeUnit.SECONDS.sleep(3);
+        } catch (InterruptedException e) {
+            logger.error(e.getMessage(), e);
+        }
+        if (!redisCenter.isRun(host, port, password)) {
             logger.error(marker, "redis server {}:{} is not run", host, port);
             return TaskFlowStatusEnum.ABORT;
         } else {
@@ -233,7 +268,7 @@ public class RedisServerInstallTask extends BaseTask {
      * @version 1.0
      * @date 2019/1/9
      */
-    private List<String> handleCommonConfig(String host, int port, int maxMemory, Integer maxMemoryPolicyType, int versionId, boolean isCluster) {
+    private List<String> handleCommonConfig(String host, int port, int maxMemory, Integer maxMemoryPolicyType, int versionId, boolean isCluster, List<Pair<String, String>> customConfigs) {
         try {
             String maxMemoryPolicy = null;
             if(maxMemoryPolicyType != null){
@@ -242,11 +277,7 @@ public class RedisServerInstallTask extends BaseTask {
                     maxMemoryPolicy = policyType.getName();
                 }
             }
-            List<String> configs = redisConfigTemplateService.handleCommonConfig(host, port, maxMemory, maxMemoryPolicy, versionId);
-            if (isCluster) {
-                configs.addAll(redisConfigTemplateService.handleClusterConfig(port, versionId));
-            }
-            return configs;
+            return redisConfigTemplateService.handleRedisConfig(host, port, versionId, maxMemory, maxMemoryPolicy, isCluster, customConfigs, Collections.emptyMap());
         } catch (Exception e) {
             logger.error(marker, e.getMessage(), e);
             return Collections.emptyList();

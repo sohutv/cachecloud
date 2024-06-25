@@ -23,7 +23,7 @@ import java.util.Map.Entry;
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
 /**
- * value size分析 debug object是序列化的结果
+ * value size分析 memory usage结果
  *
  * @author fulei
  */
@@ -130,21 +130,21 @@ public class RedisServerKeyValueAnalysisTask extends BaseTask {
                     List<byte[]> keyList = scanResult.getResult();
 
                     for (byte[] key : keyList) {
-                        String debug = null;
+                        Long memoryUsage = null;
                         try {
                             // key 可能不存在,报 ERR no such key
-                            debug = jedis.debug(DebugParams.OBJECT(new String(key, Charset.forName("UTF-8"))));
+                            memoryUsage = jedis.memoryUsage(new String(key, Charset.forName("UTF-8")));
                         } catch (JedisException e) {
-                            logger.warn("debug-object-error: key={}", new String(key, Charset.forName("UTF-8")));
+                            logger.warn("memoryUsage-error: key={}", new String(key, Charset.forName("UTF-8")));
+                            logger.error("memoryUsage-error: ", e);
                             //ignore
                         }
-                        if (StringUtils.isBlank(debug)) {
+                        if (memoryUsage == null) {
                             continue;
                         }
-                        long valueBytes = NumberUtils.toLong(debug.split(" ")[4].split(":")[1]);
-                        ValueSizeDistriEnum valueSizeDistriEnum = ValueSizeDistriEnum.getRightSizeBetween(valueBytes);
+                        ValueSizeDistriEnum valueSizeDistriEnum = ValueSizeDistriEnum.getRightSizeBetween(memoryUsage);
                         if (valueSizeDistriEnum == null) {
-                            logger.warn("key {} valueBytes {} is wrong", key, valueBytes);
+                            logger.warn("key {} valueBytes {} is wrong", key, memoryUsage);
                             continue;
                         }
                         if (valueSizeCountMap.containsKey(valueSizeDistriEnum)) {

@@ -12,8 +12,7 @@ public enum ResourceEnum {
     SSHKEY(4, "sshkey管理"),
     DOCKERFILE(5, "镜像管理"),
     DIR(6, "目录管理"),
-    TOOL(7, "迁移工具管理"),
-    MODULE(8, "Redis模块");
+    TOOL(7, "迁移工具管理");
 
     private int value;
 

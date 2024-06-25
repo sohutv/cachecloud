@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>CacheCloud应用运维</title>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <#include '/manage/inc/backendResources.html'>
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+  <div class="wrapper">
+    <#include "/manage/inc/head.html">
+    <#include "/manage/inc/left.html">
+    <div class="content-wrapper">
+      <section class="content pt-3">
+        <div class="container-fluid">
+          <div class="card">
+            <div class="card-body">
+              <nav class="nav">
+                <ul class="nav nav-tabs d-flex align-items-center" id="app_tabs">
+                  <li id="app_ops_instance" class="nav-item" data-url="${request.contextPath}/manage/app/instance?appId=${appId}">
+                    <a class="nav-link d-flex" href="?appId=${appId}&tabTag=app_ops_instance">应用实例</a>
+                  </li>
+                  <li id="app_ops_machine" class="nav-item" data-url="${request.contextPath}/manage/app/machine?appId=${appId}">
+                    <a class="nav-link d-flex" href="?appId=${appId!}&tabTag=app_ops_machine">应用机器列表</a>
+                  </li>
+                  <li id="app_ops_detail" class="nav-item" data-url="${request.contextPath}/manage/app/detail?appId=${appId}">
+                    <a class="nav-link d-flex" href="?appId=${appId!}&tabTag=app_ops_detail">应用详情和审批列表</a>
+                  </li>
+                  <li id="app_ops_code" class="nav-item" data-url="${request.contextPath}/manage/app/initAppPassword?appId=${appId}">
+                    <a class="nav-link d-flex" href="?appId=${appId!}&tabTag=app_ops_code">应用密码修改</a>
+                  </li>
+                  <li id="app_ops_tool" class="nav-item" data-url="${request.contextPath}/manage/tool/topologyExam?appId=${appId}">
+                    <a class="nav-link d-flex" href="?appId=${appId!}&tabTag=app_ops_tool">应用拓扑诊断</a>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          </div>
+          <div class="tab-content">
+            <div class="tab-pane active" id="app_ops_instanceTab">
+            </div>
+            <div class="tab-pane" id="app_ops_machineTab">
+            </div>
+            <div class="tab-pane" id="app_ops_detailTab">
+            </div>
+            <div class="tab-pane" id="app_ops_codeTab">
+            </div>
+            <div class="tab-pane" id="app_ops_toolTab">
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <#include "/manage/inc/footer.html">
+  </div>
+
+  <script type="text/javascript">
+    function showTab(tab) {
+      $.get($("#" + tab).attr("data-url"), function (result) {
+        $("#" + tab + "Tab").html(result);
+      });
+    }
+
+    function refreshActiveTab() {
+      var tab = getQueryString("tabTag");
+      if (tab) {
+        $("#" + tab + " a").addClass("active");
+        $("#" + tab + "Tab").addClass("active").siblings().removeClass("active");
+      } else {
+        tab = "app_ops_instance";
+        $("#" + tab + " a").addClass("active");
+      }
+      console.log("tab:" + tab)
+      showTab(tab);
+      $("#app_tabs li a").tooltip({placement: "bottom"});
+    }
+
+    function activeLeftAppOpsTab() {
+        $("#appOpsTab").addClass("active");
+    }
+
+    $(function () {
+      refreshActiveTab();
+      activeLeftAppOpsTab();
+    });
+
+    function getQueryString(name) {
+      var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+      console.log("window.location.search: "+ window.location.search);
+      var r = window.location.search.substr(1).match(reg);
+      if (r != null) return unescape(r[2]);
+      return null;
+    }
+  </script>
+</body>
+<#include "/manage/inc/backendEndResources.html">
+</html>

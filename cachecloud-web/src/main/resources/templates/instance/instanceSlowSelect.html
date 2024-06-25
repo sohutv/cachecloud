@@ -1,0 +1,35 @@
+<div class="col-md-12">
+  <div class="card-header">
+    <h3 class="card-title">
+      慢查询列表
+    </h3>
+  </div>
+  <div class="card-body table-responsive">
+    <!-- table begin -->
+    <table class="table table-striped">
+      <thead>
+      <th scope="col">id</td>
+      <th scope="col">时间</td>
+      <th scope="col">执行耗时(微秒)</td>
+      <th scope="col">命令</td>
+      </thead>
+      <tbody>
+      <#list redisSlowLogs as redisSlowLog>
+        <tr>
+          <th scope="row">
+            ${redisSlowLog.id!}
+          </th>
+          <td>${redisSlowLog.timeStamp!}</td>
+          <td>
+            ${redisSlowLog.executionTime?string('#,#00')}
+          </td>
+          <td>
+            ${redisSlowLog.command!}
+          </td>
+        </tr>
+      </#list>
+      </tbody>
+    </table>
+  <!-- End Table with stripped rows -->
+  </div>
+</div>

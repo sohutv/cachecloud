@@ -1,0 +1,171 @@
+<script type="text/javascript">
+  function appAlertConfigChange() {
+    var appId = $('#appAlterConfig_appId').selectpicker('val');
+    if (appId == null || appId == '') {
+      alert("请选择应用");
+      $('#appAlterConfig_appId').focus();
+      return false;
+    }
+
+    var memAlertValue = document.getElementById("memAlertValue");
+    if (memAlertValue.value == "") {
+      alert("空间报警阀值不能为空");
+      memAlertValue.focus();
+      return false;
+    }
+    var clientConnAlertValue = document.getElementById("clientConnAlertValue");
+    if (clientConnAlertValue.value == "") {
+      alert("客户端连接数报警阀值不能为空");
+      clientConnAlertValue.focus();
+      return false;
+    }
+    var hitPrecentAlertValue = document.getElementById("hitPrecentAlertValue");
+    if (hitPrecentAlertValue.value == "") {
+      alert("应用平均命中率报警阀值不能为空");
+      hitPrecentAlertValue.focus();
+      return false;
+    }
+    var isAccessMonitor = jQuery("#isAccessMonitor option:selected");
+    if (isAccessMonitor.attr("value") == "") {
+      alert("应用全局报警不能为空");
+      isAccessMonitor.focus();
+      return false;
+    }
+    if(!confirm("确认提交报警修改申请？")){
+      return ;
+    }
+    var btn = document.getElementById("appAlterConfigChangeBtn");
+    btn.disabled = true;
+    $.post(
+            '${request.contextPath}/admin/app/changeAppAlertConfig',
+            {
+              appId: appId,
+              memAlertValue: memAlertValue.value,
+              clientConnAlertValue: clientConnAlertValue.value,
+              hitPrecentAlertValue: hitPrecentAlertValue.value,
+              isAccessMonitor: isAccessMonitor.attr("value")
+            },
+            function (data) {
+              if (data == 1) {
+                $("#appAlterConfigChangeInfo").html("<div class='alert alert-error' ><font color='green'><strong>Success!</strong>配置修改成功，已生效！</font><button class='btn-close' data-bs-dismiss='alert'></button></div>");
+                setTimeout("location.href = '${request.contextPath}/admin/app/jobs'", 1500);
+              } else {
+                btn.disabled = false;
+                $("#appAlterConfigChangeInfo").html("<div class='alert alert-error' ><font color='red'><strong>Error!</strong>更新失败！<font><button class='btn-close' data-bs-dismiss='alert'></button></div>");
+              }
+            }
+    );
+  }
+  function changeAppId(appId) {
+    $('#memAlertValue').val('');
+    $('#clientConnAlertValue').val('');
+    $('#hitPrecentAlertValue').val('');
+    $.post('${request.contextPath}/admin/app/appDesc',
+            {
+              appId: appId,
+            },
+            function (data) {
+              var status = data.status;
+              if (status == 1) {
+                var appDesc = data.appDesc;
+                $('#memAlertValue').val(appDesc.memAlertValue);
+                $('#clientConnAlertValue').val(appDesc.clientConnAlertValue);
+                $('#hitPrecentAlertValue').val(appDesc.hitPrecentAlertValue);
+              } else {
+                console.log('data.status:' + status);
+              }
+            }
+    );
+  }
+</script>
+
+<div class="card-header">
+  <h4 class="card-title">
+    修改报警
+  </h4>
+</div>
+
+<div class="card-body">
+    <div class="row">
+      <div class="form-group row">
+        <label class="col-form-label col-md-3">应用<font color='red'>(*)</font></label>
+        <div class="col-md-7">
+          <select id="appAlterConfig_appId" name="appId" class="selectpicker show-tick col-md-12 border rounded"
+                  data-live-search="true" title="选择应用"
+                  onchange="changeAppId(this.value)">
+            <option value="">选择应用</option>
+            <#list appDescMap?keys as key>
+              <#assign appDesc = appDescMap?api.get(key)>
+              <#if (appDesc.status==2)>
+                <option value="${appDesc.appId}" title="${appDesc.appId} ${appDesc.name}" <#if (appId?? && appId == appDesc.appId)>selected="selected"</#if>>
+                  【${appDesc.appId}】&nbsp;名称：${appDesc.name}&nbsp;类型：${appDesc.typeDesc}&nbsp;版本：${appDesc.versionName}
+                </option>
+              </#if>
+            </#list>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-form-label col-md-3">空间报警阀值<font color='red'>(*)</font></label>
+        <div class="col-md-7">
+          <input type="text" name="memAlertValue" <#if appId??>value="${appDescMap?api.get(appId).memAlertValue}"</#if>
+                  id="memAlertValue" placeholder="空间报警阀值"
+                 class="form-control" onchange="testisNum(this.id)">
+          <span class="help-block">如果空间使用率超过90%报警，请填90<font color="red">（不需要报警请填100以上)</font></span>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-form-label col-md-3">客户端连接数报警阀值<font color='red'>(*)</font></label>
+        <div class="col-md-7">
+          <input type="text" name="clientConnAlertValue" <#if appId??>value="${appDescMap?api.get(appId).clientConnAlertValue}"</#if>
+                 id="clientConnAlertValue" placeholder="客户端连接数报警阀值" class="form-control"
+                 onchange="testisNum(this.id)">
+          <span class="help-block">如果客户端连接数超过2000报警，请填2000</span>
+        </div>
+      </div>
+
+      <div class="row mb-2" id="instance-div" style="display:none;">
+        <label class="col-form-label col-md-3">>应用平均命中率报警阀值<font color='red'>(*)</font></label>
+        <div class="col-md-7">
+          <input type="text" name="hitPrecentAlertValue" <#if appId??>value="${appDescMap?api.get(appId).hitPrecentAlertValue}"</#if>
+                 id="hitPrecentAlertValue" placeholder="平均命中率报警阀值" class="form-control"
+                 onchange="testisNum(this.id)">
+          <span class="help-block">如果应用平均命中率低于80%报警，请填80</span>
+         </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-form-label col-md-3">开启应用全局报警<font color='red'>(*)</font></label>
+        <div class="col-md-7">
+          <select id="isAccessMonitor" name="isAccessMonitor" class="form-select">
+            <option value="0"
+            <#if (appDetail?? && (!(appDetail.appDesc.isAccessMonitor??) || appDetail.appDesc.isAccessMonitor == 0))>selected</#if>>
+            否
+            </option>
+            <option value="1"
+            <#if (appDetail?? && appDetail.appDesc.isAccessMonitor?? && appDetail.appDesc.isAccessMonitor == 1)>selected</#if>>
+            是
+            </option>
+          </select>
+          <span class="help-block">是否接收全局报警邮件</span>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <div class="text-center">
+          <button id="appAlterConfigChangeBtn" class="btn btn-danger" onclick="appAlertConfigChange()">
+            <i class="bi bi-check"></i>
+            提交申请
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <div id="appAlterConfigChangeInfo" class="offset-md-3 col-md-9"></div>
+      </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,42 @@
+<div class="col-12">
+    <div id="appRefuseModal${item.id!}" class="modal fade" tabindex="-1" data-width="400">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h4 class="modal-title">审批驳回意见</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+                </div>
+
+                <form class="form-horizontal form-bordered form-row-stripped">
+                    <div class="modal-body">
+                        <div class="row">
+                            <!-- 控件开始 -->
+                            <div class="col-md-12">
+                                <!-- form-body开始 -->
+                                <div class="form-body">
+
+                                    <div class="input-group">
+                                        <label class="col-form-label col-md-3">驳回原因:</label>
+                                        <div class="col-md-7">
+                                            <textarea rows="5"  name="refuseReason${item.id!}" id="refuseReason${item.id!}" placeholder="驳回原因 " class="form-control"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- form-body 结束 -->
+                            </div>
+                            <div id="appRefuseInfo${item.id}"></div>
+                            <!-- 控件结束 -->
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" data-bs-dismiss="modal" class="btn btn-secondary" >Close</button>
+                        <button type="button" id="appRefuseBtn${item.id!}" class="btn btn-danger" onclick="appRefuse('${item.id!}', '${item.type!}', '${request.contextPath}')">提交</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

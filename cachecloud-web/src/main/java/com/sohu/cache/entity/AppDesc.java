@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -163,10 +164,27 @@ public class AppDesc implements Serializable {
     private String customPassword;
 
     /**
+     * 持久化类型（0：常规；1：主aof自动刷盘；从常规；2：主关闭aof，从常规）
+     * 见AppDescEnum.AppPersistenceType
+     */
+    private Integer persistenceType;
+
+    /**
      * 最大内存淘汰策略
      * 见AppDescEnum.MaxmemoryPolicyType
      */
     private Integer maxmemoryPolicy;
+
+    /**
+     * 所属业务组，多个之间以，分割
+     */
+    private String bizGroup;
+
+    /**
+     * 是否开启rdb备份
+     */
+    private Integer backupType;
+
     public String getAuthPassword() {
         if(StringUtils.isNotBlank(customPassword)){
             return customPassword;

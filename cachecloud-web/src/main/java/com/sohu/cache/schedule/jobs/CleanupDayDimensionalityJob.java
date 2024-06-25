@@ -1,7 +1,5 @@
 package com.sohu.cache.schedule.jobs;
 
-import com.sohu.cache.client.service.ClientReportCostDistriService;
-import com.sohu.cache.client.service.ClientReportValueDistriService;
 import com.sohu.cache.util.ConstUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang.time.DateUtils;
@@ -87,31 +85,12 @@ public class CleanupDayDimensionalityJob extends CacheBaseJob {
             cleanCount = scrollDelete(CLEAN_INSTANCE_MINUTE_STATS, timeFormat);
             logger.warn("clean_instance_minute_stats timeFormat={} count={} cost={}s", timeFormat, cleanCount, (System.currentTimeMillis() - start) / 1000);
 
-            //注销此逻辑，其操作的表已废弃，待统一删除
-            //清除客户端耗时数据(保存2天)
-//            ClientReportCostDistriService clientReportCostDistriService = applicationContext.getBean(
-//                    "clientReportCostDistriService", ClientReportCostDistriService.class);
-//            calendar.setTime(new Date());
-//            calendar.add(Calendar.DAY_OF_MONTH, -2);
-//            timeFormat = NumberUtils.toLong(new SimpleDateFormat("yyyyMMddHHmm00").format(calendar.getTime()));
-//            cleanCount = clientReportCostDistriService.deleteBeforeCollectTime(timeFormat);
-//            logger.warn("clean_app_client_costtime_minute_stat count={}", cleanCount);
-
             //清除客户端耗时汇总数据(保存14天)
             calendar.setTime(new Date());
             calendar.add(Calendar.DAY_OF_MONTH, -14);
             timeFormat = NumberUtils.toLong(new SimpleDateFormat("yyyyMMddHHmm00").format(calendar.getTime()));
             cleanCount = jdbcTemplate.update(CLEAN_APP_CLIENT_MINUTE_COST_TOTAL, timeFormat);
             logger.warn("clean_app_client_costtime_minute_stat_total count={}", cleanCount);
-
-            //清除客户端值数据(保存2天)
-            ClientReportValueDistriService clientReportValueDistriService = applicationContext.getBean(
-                    "clientReportValueDistriService", ClientReportValueDistriService.class);
-            calendar.setTime(new Date());
-            calendar.add(Calendar.DAY_OF_MONTH, -2);
-            timeFormat = NumberUtils.toLong(new SimpleDateFormat("yyyyMMddHHmm00").format(calendar.getTime()));
-            cleanCount = clientReportValueDistriService.deleteBeforeCollectTime(timeFormat);
-            logger.warn("clean_app_client_value_minute_stats count={}", cleanCount);
 
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

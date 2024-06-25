@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CacheCloud客户端信息</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <#include '/inc/frontResources.html'>
+  </head>
+  <body class="hold-transition sidebar-mini layout-navbar-fixed">
+    <div class="wrapper">
+      <#include '/inc/head.html'>
+      <div class="content-wrapper ml-0">
+        <div class="content">
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-body">
+                    <nav class="nav">
+                      <ul class="nav nav-tabs d-flex align-items-center" id="app_tabs">
+                        <li id="app_client_command_statistics_id" class="nav-item" data-bs-toggle="tab" data-url="${request.contextPath}/client/show/commandStatistics?appId=${appId!}&searchDate=${searchDate!}">
+                          <a class="nav-link d-flex" href="?appId=${appId!}&searchDate=${searchDate!}&tabTag=app_client_command_statistics">命令调用统计&nbsp;<sup><label class="bi bi-star-fill"></label></sup></a>
+                        </li>
+                        <li id="app_client_exception_statistics_id" class="nav-item" data-bs-toggle="tab" data-url="${request.contextPath}/client/show/exceptionStatistics?appId=${appId!}&searchDate=${searchDate!}">
+                          <a class="nav-link d-flex" href="?appId=${appId!}&searchDate=${searchDate!}&tabTag=app_client_exception_statistics">异常情况统计&nbsp;<sup><label class="bi bi-star-fill"></label></sup></a>
+                        </li>
+                        <li class="nav-item">
+                          <a class="nav-link d-flex" href="${request.contextPath}/admin/app/index?appId=${appId!}" target="_blank">返回查看应用&nbsp;<sup><label class="bi bi-arrow-return-left"></label></sup></a>
+                        </li>
+                      </ul>
+                    </nav>
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="card-body">
+                    <div class="tab-content">
+                      <div class="tab-pane active" id="app_client_command_statistics"></div>
+                      <div class="tab-pane" id="app_client_exception_statistics"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <#include "/inc/footer.html">
+    </div>
+    <script type="text/javascript">
+      function showTab(tab) {
+        $.get($("#" + tab + "_id").attr("data-url"), function (result) {
+          $("#" + tab).html(result);
+        });
+      }
+
+      function activeTab(tab) {
+        if (tab) {
+          $("#" + tab + "_id a").addClass("active");
+          $("#" + tab).addClass("active").siblings().removeClass("active");
+        } else {
+          tab = "app_client_command_statistics";
+          $("#" + tab + "_id a").addClass("active");
+        }
+        showTab(tab);
+        $("#app_tabs li a").tooltip({placement: "bottom"});
+      }
+
+      $(function () {
+        var tabTag = "${tabTag!}";
+        activeTab(tabTag);
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,449 @@
+<!-- app deploy -->
+<script src="${request.contextPath}/assets/js/custom/appDeploy.js?<%=System.currentTimeMillis()%>" type="text/javascript"></script>
+<!-- 提示工具-->
+<link href="${request.contextPath}/assets/css/common.css" rel="stylesheet" type="text/css"/>
+<link href="${request.contextPath}/assets/vendor/toastr/toastr.min.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="${request.contextPath}/assets/vendor/toastr/toastr.min.js"></script>
+
+<!--<link href="${request.contextPath}/resources/manage/css/style-metronic.css" rel="stylesheet" type="text/css"/>-->
+
+<script type="text/javascript">
+  $(window).on('load', function () {
+    $('.selectpicker').selectpicker({
+      'selectedText': 'cat'
+    });
+  });
+</script>
+
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">应用部署 ID:${appDesc.appId!}</h3>
+      </div>
+      <div class="card-body">
+        <input type="hidden" id="hiddenAppId" name="hiddenAppId" value="${appId!}">
+        <input type="hidden" id="appAuditId" name="appAuditId" value="${appAuditId!}">
+        <div class="table-responsive">
+          <table class="table table-striped table-bordered table-hover" id="tableDataList">
+            <tr>
+              <th>应用id</th>
+              <td>${appDesc.appId!}</td>
+              <th>应用名称</th>
+              <td>${appDesc.name!}</td>
+            </tr>
+            <tr>
+              <th>存储种类</th>
+              <td>
+                <#if (appDesc.type == 2)>Redis-Cluster
+                <#elseif (appDesc.type == 5)>Redis-Sentinel
+                <#elseif (appDesc.type == 6)>Redis-Standalone
+                </#if>
+              </td>
+              <th>空间申请详情</th>
+              <td><font color="red">${appAudit.info!}</font></td>
+            </tr>
+            <tr>
+              <th>是否需要热备</th>
+              <td>
+                <#if (appDesc.needHotBackUp == 1)>是
+                <#elseif (appDesc.needHotBackUp == 0)>否
+                </#if>
+              </td>
+              <th>是否有后端数据源</th>
+              <td>
+                <#if (appDesc.hasBackStore == 1)>有
+                <#elseif (appDesc.hasBackStore == 0)>无
+                </#if>
+              </td>
+            </tr>
+            <tr>
+              <th>是否测试</th>
+              <td>
+                <#if (appDesc.isTest == 1)>是
+                <#elseif (appDesc.isTest == 0)>否
+                </#if>
+              </td>
+              <th>是否需要持久化</th>
+              <td>
+                <#if (appDesc.needPersistence == 1)>是
+                <#elseif (appDesc.needPersistence == 0)>否
+                  </#if>
+              </td>
+            </tr>
+            <tr>
+              <th>预估QPS</th>
+              <td>${appDesc.forecaseQps!}</td>
+              <th>预估条目数量</th>
+              <td>${appDesc.forecastObjNum!}</td>
+            </tr>
+            <tr>
+              <th>客户端机房信息</th>
+              <td>${appDesc.clientMachineRoom!}</td>
+              <th>部署版本</th>
+              <td>${version.name!}</td>
+            </tr>
+            <tr>
+              <th>淘汰策略</th>
+              <td>${appDesc.maxmemoryPolicyDesc!}</td>
+              <th></th>
+              <td></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="redisVersionDiv">
+      <div class="card-header">
+        <h4 class="card-title"><i class="bi bi-globe"></i>应用基础信息</h4>
+      </div>
+      <div class="card-body">
+        <!-- BEGIN FORM-->
+        <form class="form-horizontal form-bordered form-row-stripped">
+          <div class="row form-group">
+            <label class="col-form-label col-md-3 text-end">
+              应用级别
+            </label>
+            <div class="col-md-5">
+              <select id="importantLevel" name="importantLevel" class="form-select">
+                <option <#if (appDesc.importantLevel == 1)>selected</#if> value="1">
+                  S
+                </option>
+                <option <#if (appDesc.importantLevel == 2)>selected</#if> value="2">
+                  A
+                </option>
+                <option <#if (appDesc.importantLevel == 3)>selected</#if> value="3">
+                  B
+                </option>
+                <option <#if (appDesc.importantLevel == 4)>selected</#if> value="4">
+                  C
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="row form-group">
+            <label class="col-form-label col-md-3 text-end">
+              部署版本:
+            </label>
+            <div class="col-md-5">
+              <select name="type" id="versionId" class="form-select select2_category">
+                <option versionid="-1"> --- 请选择Redis版本 ---</option>
+                <#list versionList as version>
+                  <option <#if (version.id == appDesc.versionId)>selected</#if> versionid="${version.id!}">${version.name!} </option>
+                </#list>
+              </select>
+            </div>
+          </div>
+          <div class="row form-group">
+            <label class="col-form-label col-md-3 text-end">
+              应用密码：
+            </label>
+            <div class="col-md-5">
+              <input type="text" name="md5Password" id="md5Password" class="form-control" value="${md5password!}" readonly/>
+            </div>
+            <div class="col-md-3">
+              <input type="checkbox" id="isSetCustomPwd" name="isSetCustomPwd" class="form-check-input" onchange="changePwd('${md5password!}')"/>设置自定义密码
+            </div>
+          </div>
+        </form>
+        <!-- END FORM-->
+      </div>
+    </div>
+
+    <div class="card" id="appDeployDiv">
+      <div class="card-header">
+        <h4 class="card-title"><i class="bi bi-globe"></i>应用部署信息</h4>
+      </div>
+      <div class="card-body">
+        <!-- BEGIN FORM-->
+        <form id="getDeployInfo" action="${request.contextPath}/manage/app/generateDeployInfo" method="post"
+              class="form-horizontal bordered">
+          <div class="form-body">
+            <div class="row form-group">
+              <label class="col-form-label col-auto">
+                应用类型<font color='red'>*</font>：
+              </label>
+              <div class="col-md-3">
+                <select id="appType" name="type" class="form-select w-100">
+                  <option value="2" <#if (appDesc.type == 2)>selected</#if>>
+                  Redis-Cluster
+                  </option>
+                  <option value="5" <#if (appDesc.type == 5)>selected</#if>>
+                  Redis-Sentinel
+                  </option>
+                  <option value="6" <#if (appDesc.type == 6)>selected</#if>>
+                  Redis-Standalone
+                  </option>
+                </select>
+              </div>
+              <label class="col-form-label col-auto">
+                maxMemory<font color='red'>*</font>：
+              </label>
+              <div class="col-md-3">
+                <input type="text" name="maxMemory" id="maxMemory" placeholder="实例内存(MB)" class="form-control" value=""/>
+                <p id="notenum" style="color: red; display: none">
+                  <i class="ace-icon bi bi-exclamation-triangle"></i>
+                  实例内存(MB)
+                </p>
+              </div>
+            </div>
+
+            <!--sentinelMachines-->
+            <div id="sentinelMachines" class="row form-group">
+              <label class="col-form-label col-auto">
+                Sentinel机器:
+              </label>
+              <div class="col-md-6">
+                <select id="sentinelMachineList" class="selectpicker w-100 border rounded" multiple data-live-search="true">
+                  <#list machineList as machine>
+                    <#if (machine.info.type==3)>
+                      <#if machine.info.ip?? && machineInstanceCountMap[machine.info.ip]??>
+                        <#assign usedCpu = (machineInstanceCountMap[machine.info.ip!])?string("0")?number>
+                      <#else>
+                        <#assign usedCpu = 0>
+                      </#if>
+                      <#assign cpu = machine.info.cpu?string("0")?number>
+                      <#assign cpuUsage = (usedCpu/cpu*100)?string("0")>
+                      <#assign usedMemRss = ((machine.machineMemInfo.usedMemRss?number)/1024/1024/1024)?string("0.0")?number>
+                      <#assign mem = (machine.info.mem)?string("0.0")?number>
+                      <#assign memUsage = (usedMemRss/mem*100)?string("0")>
+                      <option value="${machine.ip!}">${machine.ip!}：${usedCpu!}/${cpu!}核(${cpuUsage!}%) ${usedMemRss!}/${mem!}G(${memUsage!}%) 【${machine.info.realIp!}-${machine.info.rack!}】【sentinel】</option>
+                    </#if>
+                  </#list>
+                  </optgroup>
+                </select>
+                <p id="noteSentinelMachines" style="color: red; display: none">
+                  sentinel机器为奇数个(建议默认:3个）
+                </p>
+              </div>
+              <label class="col-form-label col-auto">
+                部署实例数:
+              </label>
+              <div class="col-auto">
+                <select name="sentinelNum" id="sentinelNum" class="form-select">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                  <option value="7">7</option>
+                  <option value="8">8</option>
+                </select>
+              </div>
+            </div>
+            <div id="twemproxyMachines" class="row form-group">
+              <label class="col-form-label col-auto">
+                Twemproxy机器:
+              </label>
+              <div class="col-md-6">
+                <select id="twemproxyMachineList" class="selectpicker w-100 border rounded" multiple data-live-search="true">
+                  <#list machineList as machine>
+                    <#if (machine.info.type==4)>
+                      <option value="${machine.ip!}">${machine.ip!}【twemproxy】</option>
+                    </#if>
+                  </#list>
+                  </optgroup>
+                </select>
+              </div>
+              <label class="col-form-label col-auto">
+                部署实例数:
+              </label>
+              <div class="col-auto">
+                <select name="twemproxyNum" id="twemproxyNum" class="form-select">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                  <option value="7">7</option>
+                  <option value="8">8</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- redis machines -->
+            <div id="redisMachines" class="row form-group" >
+              <label class="col-form-label col-auto">
+                Redis机器：
+              </label>
+              <div class="col-md-6">
+                <select id="redisMachineList" class="selectpicker w-100 border rounded" multiple data-live-search="true">
+                  <#list machineList as machine>
+                    <#if (machine.info.type==0)>
+                      <#if machine.info.ip?? && machineInstanceCountMap[machine.info.ip]??>
+                        <#assign usedCpu = (machineInstanceCountMap[machine.info.ip!])?string("0")?number>
+                      <#else>
+                        <#assign usedCpu = 0>
+                      </#if>
+                      <#assign cpu = machine.info.cpu?string("0")?number>
+                      <#assign cpuUsage = (usedCpu/cpu*100)?string("0")>
+                      <#assign usedMemRss = ((machine.machineMemInfo.usedMemRss)/1024/1024/1024)?string("0.0")?number>
+                      <#assign mem = (machine.info.mem)?string("0.0")?number>
+                      <#assign memUsage = (usedMemRss/mem*100)?string("0")?number>
+                      <#if (machine.info.useType==0)>
+                        <option value="${machine.ip!}">${machine.ip!}：${usedCpu!}/${cpu!}核(${cpuUsage!}%) ${usedMemRss!}/${mem!}G(${memUsage!}%) 【${machine.info.realIp!}-${machine.info.rack!}】【专用:${machine.info.extraDesc!}】</option>
+                      </#if>
+                      <#if (machine.info.useType==1)>
+                        <option value="${machine.ip!}">${machine.ip!}：${usedCpu!}/${cpu!}核(${cpuUsage!}%) ${usedMemRss!}/${mem!}G(${memUsage!}%) 【${machine.info.realIp!}-${machine.info.rack!}】【测试:${machine.info.extraDesc!}】</option>
+                      </#if>
+                      <#if (machine.info.useType==2)>
+                        <option value="${machine.ip!}">${machine.ip!}：${usedCpu!}/${cpu!}核(${cpuUsage!}%) ${usedMemRss!}/${mem!}G(${memUsage!}%) 【${machine.info.realIp!}-${machine.info.rack!}】【混合:${machine.info.extraDesc!}】</option>
+                      </#if>
+                    </#if>
+                  </#list>
+                  </optgroup>
+                </select>
+              </div>
+              <label class="col-form-label col-auto">
+                实例数:
+              </label>
+              <div class="col-auto">
+                <select name="redisNum" id="redisNum" class="form-select">
+                  <option value="1">1主1从</option>
+                  <option value="0">1个(主/从)</option>
+                  <option value="2">2主2从</option>
+                  <option value="3">3主3从</option>
+                  <option value="4">4主4从</option>
+                  <option value="5">5主5从</option>
+                  <option value="6">6主6从</option>
+                  <option value="7">7主7从</option>
+                  <option value="8">8主8从</option>
+                  <option value="9">9主9从</option>
+                  <option value="10">10主10从</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="pikaMachines" class="row form-group">
+              <label class="col-form-label col-auto">
+                Pika机器:
+              </label>
+              <div class="col-md-6">
+                <select id="pikaMachineList" class="selectpicker w-100 border rounded" multiple data-live-search="true">
+                  <#list machineList as machine>
+                    <#if (machine.info.type==5)>
+                      <option value="${machine.ip!}">${machine.ip!} 【pika】</option>
+                    </#if>
+                  </#list>
+                  </optgroup>
+                </select>
+              </div>
+              <label class="col-form-label col-auto">
+                部署实例数:
+              </label>
+              <div class="col-auto">
+                <select name="pikaNum" id="pikaNum" class="form-select">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                  <option value="7">7</option>
+                  <option value="8">8</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row" style="display:none" id="selectMachineId">
+              <label class="col-form-label col-auto">
+                部署机器信息
+              </label>
+              <div class="col-md-10 table-responsive">
+                <table class="table table-striped bordered table-hover" id="tableList" style="white-space: nowrap">
+                  <thead>
+                  <tr>
+                    <th>ip</th>
+                    <th>实例数/核数</th>
+                    <th>已使用/剩余/总内存</th>
+                    <th>已使用/剩余/总磁盘</th>
+                    <th>master/salve/sentinel</th>
+                    <th>宿主机/机架信息</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="row form-group">
+              <label class="col-form-label col-auto">
+                <br><br><br>部署信息预览:<font color='red'>(*)</font>:
+              </label>
+              <div class="col-md-5">
+                <textarea rows="10" name="appDeployInfo" id="appDeployInfo" placeholder="部署详情" class="form-control" disabled="disabled"></textarea>
+              </div>
+              <div class="col-auto">
+                <br/>
+                <button id="clearInfo" type="button" class="btn btn-info" onclick="clearinfo()" data-bs-toggle="modal" style="background:#CCCCCC;display:none;">清除</button>
+                <br>
+                <button id="manualSwitch" type="button" class="btn btn-info" onclick="manualSwitchFunc()" title="可启用编辑，修改部署信息，将按此信息进行部署"  data-bs-toggle="modal" style="background:#FF0000;display:none;">编辑</button>
+              </div>
+            </div>
+
+            <div class="dropdown-divider"></div>
+            <div class="row float-right">
+              <button type="button" class="btn btn-primary col-auto" onclick="generateDeployInfo('${request.contextPath}')">
+                <span id="deployPreview">生成部署预览</span>
+              </button>
+              <button type="button" id="appDeployBtn" class="btn btn-primary col-auto ms-3" onclick="addAppDeployTask('${request.contextPath}')">
+                <span id="deploy">开始部署</span>
+              </button>
+            </div>
+            <input id="importId" type="hidden" value="${importId!}">
+          </div>
+        </form>
+        <!-- END FORM-->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+  // 初始化应用类型
+  $(function() {
+    appType($('#appType').val());
+  });
+
+  // 根据类型选择机器
+  $('#appType').change(function () {
+    appType($('#appType').val());
+  });
+  // 根据应用类型获取不同资源
+  function appType(type) {
+    if (type == 5) {
+      // sentinel +redis
+      $("#sentinelMachines").show();
+      $("#redisMachines").show();
+      $("#twemproxyMachines").hide();
+      $("#pikaMachines").hide();
+    } else if (type == 7) {
+      // twemproxy+Redis
+      $("#sentinelMachines").show();
+      $("#redisMachines").show();
+      $("#twemproxyMachines").show();
+      $("#pikaMachines").hide();
+    } else if (type == 8) {
+      // sentinel+Pika
+      $("#sentinelMachines").show();
+      $("#redisMachines").hide();
+      $("#twemproxyMachines").hide();
+      $("#pikaMachines").show();
+    } else if (type == 9) {
+      // twemproxy+Pika
+      $("#sentinelMachines").show();
+      $("#redisMachines").hide();
+      $("#twemproxyMachines").show();
+      $("#pikaMachines").show();
+    }else {
+      // standalone | rediscluster
+      $("#redisMachines").show();
+      $("#sentinelMachines").hide();
+      $("#twemproxyMachines").hide();
+      $("#pikaMachines").hide();
+    }
+  }
+</script>

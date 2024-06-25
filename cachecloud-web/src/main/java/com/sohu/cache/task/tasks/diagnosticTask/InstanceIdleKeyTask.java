@@ -139,7 +139,7 @@ public class InstanceIdleKeyTask extends BaseTask {
         long startTime = System.currentTimeMillis();
         Jedis jedis = null;
         try {
-            jedis = redisCenter.getJedis(appId, host, port);
+            jedis = redisCenter.getAdminJedis(appId, host, port);
             long dbSize = jedis.dbSize();
             if (dbSize == 0) {
                 logger.info(marker, "{} {}:{} dbsize is {}", appId, host, port, dbSize);
@@ -166,32 +166,24 @@ public class InstanceIdleKeyTask extends BaseTask {
                     Pipeline pipeline = jedis.pipelined();
                     if (CollectionUtils.isNotEmpty(keyList)) {
                         List<String> keyStrList = keyList.stream().map(byteKey -> new String(byteKey)).collect(Collectors.toList());
-                        keyStrList.stream().forEach(keyStr -> PipelineUtil.debug(pipeline, DebugParams.OBJECT(keyStr)));
-                        List<Object> debugObjectList;
+                        keyStrList.stream().forEach(keyStr -> PipelineUtil.objectIdletime(pipeline, keyStr));
+                        List<Object> idletimeList;
                         try {
-                            debugObjectList = pipeline.syncAndReturnAll();
+                            idletimeList = pipeline.syncAndReturnAll();
                         } catch (JedisRedirectionException e) {
                             continue; // ignore
                         }
 
-                        List<String> debugResList = new ArrayList<>();
-                        if(CollectionUtils.isNotEmpty(debugObjectList)){
-                            debugObjectList.stream().filter(debugObject -> (debugObject instanceof byte[])).forEach(debugObject -> debugResList.add(new String((byte[])debugObject)));
+                        List<Long> idletimeResList = new ArrayList<>();
+                        if(CollectionUtils.isNotEmpty(idletimeList)){
+                            idletimeList.stream().filter(idleTime -> (idleTime instanceof Long)).forEach(idleTime -> idletimeResList.add((Long)idleTime));
                         }
                         Map<String, String> keyIdleMap = new HashMap<>();
                         IntStream.range(0, keyStrList.size())
-                                .filter(i -> debugResList.get(i) != null)
+                                .filter(i -> idletimeResList.get(i) != null)
                                 .forEach(i -> {
-                                    for (String param : (debugResList.get(i)).split(" ")) {
-                                        if (param.startsWith("lru_seconds_idle")) {
-                                            String[] paramArr = param.split(":");
-                                            if (paramArr.length > 1) {
-                                                String lruSecondsIdle = paramArr[1];
-                                                if (Long.parseLong(lruSecondsIdle) > idleTime * 3600 * 24) {
-                                                    keyIdleMap.put(keyStrList.get(i), lruSecondsIdle);
-                                                }
-                                            }
-                                        }
+                                    if(idletimeResList.get(i) > idleTime * 3600 * 24){
+                                        keyIdleMap.put(keyStrList.get(i), String.valueOf(idletimeResList.get(i)));
                                     }
                                 });
                         result.putAll(keyIdleMap);

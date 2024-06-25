@@ -1,6 +1,5 @@
 package com.sohu.cache.client.command;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.netflix.hystrix.*;
 import com.sohu.cache.client.service.ClientVersionService;
@@ -68,11 +67,14 @@ public class AppClientCommand extends HystrixCommand<Map<String, Object>> {
     @Override
     protected Map<String, Object> run() throws Exception {
         Map<String, Object> model = Maps.newHashMap();
-        int type = appClientParams.getType();
+        Integer type = appClientParams.getType();
         long appId = appClientParams.getAppId();
         boolean isCheck = checkRedisApp(model);
         if (!isCheck) {
             return model;
+        }
+        if(type == null){
+            type = appClientParams.getCacheAppDesc().getType();
         }
         if (type == ConstUtils.CACHE_TYPE_REDIS_CLUSTER) {
             model.putAll(getRedisClusterInfo(true));
@@ -81,6 +83,7 @@ public class AppClientCommand extends HystrixCommand<Map<String, Object>> {
         } else if (type == ConstUtils.CACHE_REDIS_STANDALONE) {
             model.putAll(getRedisStandaloneInfo(true));
         }
+        model.put("type", type);
         //每次数据库操作成功，更新缓存
         addAppClient(appId, model);
 
@@ -117,13 +120,18 @@ public class AppClientCommand extends HystrixCommand<Map<String, Object>> {
 
     private boolean checkRedisApp(Map<String, Object> model) {
         long appId = appClientParams.getAppId();
-        int type = appClientParams.getType();
+        Integer type = appClientParams.getType();
         AppDesc appDesc = appDao.getAppDescById(appId);
+        if (type == null && appDesc != null) {
+            if (appDesc.getType() == ConstUtils.CACHE_TYPE_REDIS_CLUSTER) {
+                type = appDesc.getType();
+            }
+        }
         if (appDesc == null) {
             model.put("status", ClientStatusEnum.ERROR.getStatus());
             model.put("message", String.format("appId:%s 不存在", appId));
             return false;
-        } else if (appDesc.getType() != type) {
+        } else if (type == null || appDesc.getType() != type) {
             model.put("status", ClientStatusEnum.ERROR.getStatus());
             model.put("message",
                     String.format("appId:%s 类型不符,期望类型:%s,实际类型%s,请联系管理员!", appId, type, appDesc.getType()));

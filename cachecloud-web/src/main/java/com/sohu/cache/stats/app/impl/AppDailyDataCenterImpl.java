@@ -3,7 +3,6 @@ package com.sohu.cache.stats.app.impl;
 import com.sohu.cache.alert.EmailComponent;
 import com.sohu.cache.alert.utils.AlertUtils;
 import com.sohu.cache.dao.*;
-import com.sohu.cache.entity.AppClientValueDistriSimple;
 import com.sohu.cache.entity.AppDailyData;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.stats.app.AppDailyDataCenter;
@@ -56,8 +55,6 @@ public class AppDailyDataCenterImpl implements AppDailyDataCenter {
     private AppClientExceptionStatDao appClientExceptionStatDao;
     @Autowired
     private AppStatsDao appStatsDao;
-    @Autowired
-    private AppClientValueStatDao appClientValueStatDao;
     @Autowired
     private AppDailyDao appDailyDao;
     @Autowired
@@ -162,7 +159,7 @@ public class AppDailyDataCenterImpl implements AppDailyDataCenter {
         }
 
         // 客户端值分布
-        Map<String, Long> valueSizeDistributeCountMap = getAppClientValueSizeDistributeCountMap(appId, startDate, endDate);
+        Map<String, Long> valueSizeDistributeCountMap = new HashMap<>();
         appDailyData.setValueSizeDistributeCountMap(valueSizeDistributeCountMap);
 
 
@@ -177,6 +174,8 @@ public class AppDailyDataCenterImpl implements AppDailyDataCenter {
         appDailyData.setAvgHitRatio(remainNumberTwoPoint(MapUtils.getDoubleValue(appMinuteStatMap, "avgHitRatio") * 100.0));
         appDailyData.setAvgUsedMemory(MapUtils.getLongValue(appMinuteStatMap, "avgUsedMemory") / 1024 / 1024);
         appDailyData.setMaxUsedMemory(MapUtils.getLongValue(appMinuteStatMap, "maxUsedMemory") / 1024 / 1024);
+        appDailyData.setAvgUsedDisk(MapUtils.getLongValue(appMinuteStatMap, "avgUsedDisk") / 1024 / 1024);
+        appDailyData.setMaxUsedDisk(MapUtils.getLongValue(appMinuteStatMap, "maxUsedDisk") / 1024 / 1024);
         appDailyData.setExpiredKeysCount(MapUtils.getIntValue(appMinuteStatMap, "expiredKeys"));
         appDailyData.setEvictedKeysCount(MapUtils.getIntValue(appMinuteStatMap, "evictedKeys"));
         appDailyData.setAvgMinuteNetOutputByte(remainNumberTwoPoint(MapUtils.getDoubleValue(appMinuteStatMap, "avgNetOutputByte") / 1024.0 / 1024.0));
@@ -198,25 +197,6 @@ public class AppDailyDataCenterImpl implements AppDailyDataCenter {
     private double remainNumberTwoPoint(double num) {
         DecimalFormat df = new DecimalFormat("0.00");
         return NumberUtils.toDouble(df.format(num));
-    }
-
-
-    private Map<String, Long> getAppClientValueSizeDistributeCountMap(long appId, Date startDate, Date endDate) {
-        try {
-            String COLLECT_TIME_FORMAT = "yyyyMMddHHmmss";
-            long startTime = NumberUtils.toLong(DateUtil.formatDate(startDate, COLLECT_TIME_FORMAT));
-            long endTime = NumberUtils.toLong(DateUtil.formatDate(endDate, COLLECT_TIME_FORMAT));
-            List<AppClientValueDistriSimple> appClientValueDistriSimpleList = appClientValueStatDao.getAppValueDistriList(appId, startTime, endTime);
-            Map<String, Long> valueSizeInfoCountMap = new TreeMap<String, Long>();
-            for (AppClientValueDistriSimple appClientValueDistriSimple : appClientValueDistriSimpleList) {
-                valueSizeInfoCountMap.put(appClientValueDistriSimple.getDistributeDesc(),
-                        appClientValueDistriSimple.getCount());
-            }
-            return valueSizeInfoCountMap;
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return Collections.emptyMap();
-        }
     }
 
     /**

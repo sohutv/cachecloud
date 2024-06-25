@@ -1,0 +1,65 @@
+<div id="downCrashMachineModal" class="modal fade" tabindex="-1" data-width="800">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">物理机迁移——当前仅适用自动补全app缺失的slave</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+      </div>
+
+      <form class="form-horizontal form-bordered form-row-stripped">
+        <div class="modal-body">
+          <div class="row">
+            <!-- 控件开始 -->
+            <div class="col-md-12">
+              <!-- form-body开始 -->
+              <div class="form-body">
+                <div class="form-group row">
+                  <label class="col-form-label col-md-2">
+                    物理机ip:
+                  </label>
+                  <div class="col-md-5">
+                    <input type="text" name="ip" id="downMachineIp"
+                           placeholder="物理机ip" class="form-control" />
+                  </div>
+                  <div class="offset-md-2 col-md-3">
+                    <a class="btn btn-info" target="_blank" href="${request.contextPath}/manage/task/list?className=MachineDownAndAppFixTask">查看历史任务</a>
+                  </div>
+                </div>
+              </div>
+              <!-- form-body 结束 -->
+            </div>
+            <!-- 控件结束 -->
+          </div>
+
+          <div class="row">
+            <h5>机器部署详情：</h5>
+            <p id="deployDetailId">
+            </p>
+
+            <div class="form-group row" id="availableMachineId" style="display: none">
+              <div class="col-md-12">
+                <p id="tipId"></p>
+                <p id="selectedResourceId"></p>
+              </div>
+              <label class="col-form-label col-auto">可用pod:</label>
+              <div class="col-md-6" id="availablePodId">
+                <select id="availablePodIp" name="availablePodIp"
+                        class="selectpicker border rounded w-100" data-live-search="true" multiple data-size="8" onchange="availableMachineChange()">
+                </select>
+              </div>
+            </div>
+            <br><br>
+            <div id="downMachineInfo"></div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" data-bs-dismiss="modal" class="btn btn-secondary" >Close</button>
+          <button type="button" class="btn btn-info" onclick="prepareMachinedownResource('${request.contextPath}')">生成备选pod</button>
+          <button type="button" id="downCrashMachineModalBtn" class="btn btn-danger" onclick="downCrashMachineAddSlave('${request.contextPath}')" disabled>Ok</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>

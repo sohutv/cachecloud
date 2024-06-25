@@ -3,12 +3,11 @@ package com.sohu.cache.web.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
-import com.sohu.cache.async.AsyncThreadPoolFactory;
-import com.sohu.cache.async.KeyCallable;
 import com.sohu.cache.constant.*;
 import com.sohu.cache.dao.AppUserDao;
 import com.sohu.cache.entity.*;
 import com.sohu.cache.machine.MachineCenter;
+import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.redis.enums.InstanceAlertCheckCycleEnum;
 import com.sohu.cache.redis.enums.InstanceAlertCompareTypeEnum;
 import com.sohu.cache.redis.enums.InstanceAlertTypeEnum;
@@ -24,20 +23,18 @@ import com.sohu.cache.web.chart.model.HighchartDoublePoint;
 import com.sohu.cache.web.chart.model.HighchartPoint;
 import com.sohu.cache.web.chart.model.SimpleChartData;
 import com.sohu.cache.web.enums.SuccessEnum;
-import com.sohu.cache.web.service.ModuleService;
 import com.sohu.cache.web.service.ResourceService;
 import com.sohu.cache.web.service.UserService;
 import com.sohu.cache.web.util.AppEmailUtil;
 import com.sohu.cache.web.util.DateUtil;
 import com.sohu.cache.web.util.Page;
 import com.sohu.cache.web.vo.AppDetailVO;
-import com.sohu.cache.web.vo.ModuleVersionDetailVo;
-import net.sf.json.JSONArray;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +43,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
+import redis.clients.jedis.commands.ProtocolCommand;
 import redis.clients.jedis.util.SafeEncoder;
 
 import javax.annotation.Resource;
@@ -102,8 +101,9 @@ public class AppController extends BaseController {
     private UserService userService;
     @Autowired
     private AppUserDao appUserDao;
+
     @Autowired
-    private ModuleService moduleService;
+    protected RedisCenter redisCenter;
 
     /**
      * 初始化贡献者页面
@@ -178,10 +178,6 @@ public class AppController extends BaseController {
 
         int conditionInt = StringUtils.isEmpty(condition) ? 0 : Integer.parseInt(condition);
 
-        //查询是否安装有模块
-        boolean installModule = appService.isInstallModule(appId);
-        model.addAttribute("installModuleFlag", installModule);
-
         model.addAttribute("condition", conditionInt);
 
         model.addAttribute("startDate", startDateParam);
@@ -204,6 +200,8 @@ public class AppController extends BaseController {
     @RequestMapping("/stat")
     public ModelAndView appStat(HttpServletRequest request,
                                 HttpServletResponse response, Model model, Long appId) throws ParseException {
+        AppUser appUser = getUserInfo(request);
+
         // 1.获取app的VO
         AppDetailVO appDetail = appStatsCenter.getAppDetail(appId);
         model.addAttribute("appDetail", appDetail);
@@ -221,8 +219,12 @@ public class AppController extends BaseController {
         }
 
         // 4. top5命令
+        // 对于top5 只展示搜索当天的
+        TimeBetween oneDaytimeBetween = getTimeBetweenOneDay(request,"startDate");
+        long top5BeginTime = oneDaytimeBetween.getStartTime();
+        long top5EndTime = oneDaytimeBetween.getEndTime();
         List<AppCommandStats> top5Commands = appStatsCenter
-                .getTopLimitAppCommandStatsList(appId, beginTime, endTime, 5);
+                .getTopLimitAppCommandStatsList(appId, top5BeginTime, top5EndTime, 5);
         model.addAttribute("top5Commands", top5Commands);
 
         // 5.峰值
@@ -230,16 +232,29 @@ public class AppController extends BaseController {
         if (CollectionUtils.isNotEmpty(top5Commands)) {
             for (AppCommandStats appCommandStats : top5Commands) {
                 AppCommandStats temp = appStatsCenter
-                        .getCommandClimax(appId, beginTime, endTime, appCommandStats.getCommandName());
+                        .getCommandClimax(appId, top5BeginTime, top5EndTime, appCommandStats.getCommandName());
                 if (temp != null) {
                     top5ClimaxList.add(temp);
                 }
             }
         }
+        if(CollectionUtils.isNotEmpty(top5ClimaxList)){
+            top5ClimaxList.sort(Comparator.comparingLong(AppCommandStats::getCommandCount).reversed());
+        }
         model.addAttribute("top5ClimaxList", top5ClimaxList);
         if (appDetail != null && StringUtils.isNotBlank(appDetail.getAppDesc().getAppPassword())) {
             model.addAttribute("md5password", appDetail.getAppDesc().getAppPassword());
         }
+        // 7. 当天命令调用总量
+        Long commandCount = appStatsCenter
+                .getAppCommandCount(appId, oneDaytimeBetween.getStartTime(), oneDaytimeBetween.getEndTime());
+        model.addAttribute("commandCount", commandCount);
+        // 8. 是否为管理员
+        boolean isMaster = false;
+        if(appUser != null && AppUserTypeEnum.ADMIN_USER.value().equals(appUser.getType())){
+            isMaster = true;
+        }
+        model.addAttribute("isMaster", isMaster);
 
         model.addAttribute("appId", appId);
         return new ModelAndView("app/appStat");
@@ -356,6 +371,7 @@ public class AppController extends BaseController {
     @RequestMapping("/detail")
     public ModelAndView appDetail(HttpServletRequest request,
                                   HttpServletResponse response, Model model, Long appId) {
+        AppUser appUser = getUserInfo(request);
         // 获取应用vo
         AppDetailVO appDetail = appStatsCenter.getAppDetail(appId);
         model.addAttribute("appDetail", appDetail);
@@ -366,7 +382,7 @@ public class AppController extends BaseController {
                 InstanceAlertCheckCycleEnum.getInstanceAlertCheckCycleEnumList());
         model.addAttribute("instanceAlertCompareTypeEnumList",
                 InstanceAlertCompareTypeEnum.getInstanceAlertCompareTypeEnumList());
-        if (!StringUtils.isEmpty(appDetail.getAppDesc().getAppPassword())) {
+        if (appDetail != null && !StringUtils.isEmpty(appDetail.getAppDesc().getAppPassword())) {
             model.addAttribute("password", appDetail.getAppDesc().getAppPassword());
         } else {
             model.addAttribute("password", "");
@@ -375,7 +391,9 @@ public class AppController extends BaseController {
         List<AppUser> userList = userService.getAllUser();
         Map<Long, AppUser> userMap = userList.stream().collect(Collectors.toMap(AppUser::getId, Function.identity()));
         model.addAttribute("userMap", userMap);
-        AppUser appUser = getUserInfo(request);
+        // 业务组
+        List<AppBiz> bizList = userService.getBizList();
+        model.addAttribute("bizList", bizList);
         Boolean hasAuth = false;
         String officer = appDetail.getAppDesc().getOfficer();
         List<String> officers = new ArrayList<String>();
@@ -534,6 +552,51 @@ public class AppController extends BaseController {
                         TimeDimensionalityEnum.MINUTE);
         String result = assembleMutilDateAppStatsJsonMinute(appStats, statName, timeBetween.getStartDate(),
                 timeBetween.getEndDate());
+        model.addAttribute("data", result);
+        return new ModelAndView("");
+    }
+
+    /**
+     * 跳转到获取命中率分布页面
+     *
+     * @param appId    应用id
+     * @throws ParseException
+     */
+    @RequestMapping("/getAppHitRatioInfo")
+    public ModelAndView getMutiDatesAppHitRatioStats(HttpServletRequest request,
+                                                     HttpServletResponse response, Model model, Long appId) throws ParseException {
+
+        Date yesterDay = DateUtils.addDays(new Date(), -1);
+        model.addAttribute("appId", appId);
+        model.addAttribute("searchDate", DateUtil.formatDate(yesterDay, "yyyy-MM-dd"));
+        return new ModelAndView("app/appHitRatio");
+    }
+
+    /**
+     * 获取命中率分布
+     *
+     * @param appId    应用id
+     * @param statName 统计项(hit,miss等)
+     * @throws ParseException
+     */
+    @RequestMapping("/getMutiDatesAppHitRatioStats")
+    public ModelAndView getMutiDatesAppHitRatioStats(HttpServletRequest request,
+                                             HttpServletResponse response, Model model, Long appId,
+                                             String statName) throws ParseException {
+        String endDateParam = request.getParameter("endDate");
+        String startDateParam = request.getParameter("startDate");
+        Date endDate = DateUtil.parseYYYY_MM_dd(endDateParam);
+        Date startDate = null;
+        if (StringUtils.isBlank(startDateParam)) {
+            startDate = DateUtils.addDays(endDate, -30);
+        } else {
+            startDate = DateUtil.parseYYYY_MM_dd(startDateParam);
+        }
+        long beginTime = NumberUtils.toLong(DateUtil.formatYYYYMMdd(startDate));
+        long endTime = NumberUtils.toLong(DateUtil.formatYYYYMMdd(endDate));
+        List<AppDailyData> appDailyDatas = appStatsCenter
+                .getAppHitRatioList(appId, beginTime, endTime);
+        String result = assembleMutilDateAppHitRatio(appDailyDatas, statName);
         model.addAttribute("data", result);
         return new ModelAndView("");
     }
@@ -911,7 +974,7 @@ public class AppController extends BaseController {
     @RequestMapping("/getTop5Commands")
     public ModelAndView getAppTop5Commands(HttpServletRequest request,
                                            HttpServletResponse response, Model model, Long appId) throws ParseException {
-        TimeBetween timeBetween = getJsonTimeBetween(request);
+        TimeBetween timeBetween = getTimeBetweenOneDay(request,"startDate");
         List<AppCommandStats> appCommandStats = appStatsCenter
                 .getTop5AppCommandStatsList(appId, timeBetween.getStartTime(), timeBetween.getEndTime());
         String result = assembleJson(appCommandStats);
@@ -991,19 +1054,47 @@ public class AppController extends BaseController {
                 totalApplyMem += appDetail.getMem();
                 totalUsedMem += appDetail.getMemUsePercent() * appDetail.getMem() / 100.0;
                 totalApps++;
+                appDetail.getAppDesc().setBizGroup(appDesc.getBizGroup());
             }
         }
 
         List<AppUser> userList = userService.getAllUser();
+        List<AppBiz> bizList = userService.getBizList();
 
         model.addAttribute("userList", userList);
+        model.addAttribute("bizList", bizList);
         model.addAttribute("appParam", appParam);
         model.addAttribute("resourcelist", resourcelist);
         model.addAttribute("totalApps", totalApps);
         model.addAttribute("totalApplyMem", totalApplyMem);
         model.addAttribute("totalUsedMem", totalUsedMem);
-
         return new ModelAndView("app/appList");
+    }
+
+    /**
+     * 应用列表
+     */
+    @RequestMapping(value = "/listStats")
+    @ResponseBody
+    public Map<String, Object> doAppListStats(HttpServletRequest request) {
+        Map<String, Object> resultMap = new HashMap<>();
+        // 1.获取该用户能够读取的应用列表,没有返回申请页面
+        AppUser currentUser = getUserInfo(request);
+        // 4. 全局统计
+        Calendar instance = Calendar.getInstance();
+        Date now = instance.getTime();
+        instance.add(Calendar.DATE, -5);
+        Date startTime = instance.getTime();
+        List<AppMonitorStatisticsResult> monitorStatisticsResultList =
+                appService.getAppMonitorStatistics(currentUser.getId(),
+                        AppUserTypeEnum.ADMIN_USER.value().equals(currentUser.getType()),
+                        DateUtil.formatYYYY_MM_dd(startTime), DateUtil.formatYYYY_MM_dd(now));
+
+        Map<String, Object> capacityMap = appService.getAppCapacityStats(currentUser.getId(),
+                AppUserTypeEnum.ADMIN_USER.value().equals(currentUser.getType()));
+        resultMap.put("monitorList", monitorStatisticsResultList);
+        resultMap.put("capacityMap", capacityMap);
+        return resultMap;
     }
 
     /**
@@ -1015,12 +1106,11 @@ public class AppController extends BaseController {
         List<AppUser> userList = userService.getAllUser();
         List<MachineRoom> roomList = machineCenter.getEffectiveRoom();
         List<SystemResource> versionList = resourceService.getResourceList(ResourceEnum.REDIS.getValue());
+        versionList = versionList.stream().filter(systemResource -> (systemResource.getOrderNum() >= 100)).collect(Collectors.toList());
         //获取插件信息
-        List<ModuleInfo> allModules = moduleService.getAllModules();
         model.addAttribute("userList", userList);
         model.addAttribute("roomList", roomList);
         model.addAttribute("versionList", versionList);
-        model.addAttribute("allModules", allModules);
         model.addAttribute("policyList", AppDescEnum.MaxmemoryPolicyType.getAll());
 
         return new ModelAndView("app/jobIndex/appInitIndex");
@@ -1118,7 +1208,7 @@ public class AppController extends BaseController {
         Map<Long, AppDesc> appDescMap = appDescList.stream().collect(Collectors.toMap(AppDesc::getAppId, Function.identity()));
         model.addAttribute("appDescMap", appDescMap);
 
-        Map<Integer, String> diagnosticTypeMap = new HashMap<>();
+        Map<Integer, String> diagnosticTypeMap = new TreeMap<>();
         for (DiagnosticTypeEnum diagnosticType : DiagnosticTypeEnum.values()) {
             diagnosticTypeMap.put(diagnosticType.getType(), diagnosticType.getDesc() + ": " + diagnosticType.getMore());
         }
@@ -1225,6 +1315,44 @@ public class AppController extends BaseController {
             json.put("status", String.valueOf(SuccessEnum.FAIL.value()));
         } else {
             json.put("redisConfigMap", redisConfigMap);
+            json.put("status", String.valueOf(SuccessEnum.SUCCESS.value()));
+        }
+        sendMessage(response, json.toString());
+        return null;
+    }
+
+    @RequestMapping("/redisCommand")
+    public ModelAndView redisCommand(HttpServletRequest request,
+                                    HttpServletResponse response, Long appId, Integer instanceId, Model model) {
+        JSONObject json = new JSONObject();
+        if (instanceId == null) {
+            List<InstanceInfo> instanceInfos = appService.getAppOnlineInstanceInfo(appId);
+            instanceId = CollectionUtils.isNotEmpty(instanceInfos) && instanceInfos.size() > 0 ? instanceInfos.get(0).getId() : -1;
+        }
+        List<String> commandList = redisCenter.getRedisCommand(instanceId.intValue());
+        if (CollectionUtils.isEmpty(commandList)) {
+            json.put("status", String.valueOf(SuccessEnum.FAIL.value()));
+        } else {
+            json.put("commandList", commandList);
+            json.put("status", String.valueOf(SuccessEnum.SUCCESS.value()));
+        }
+        sendMessage(response, json.toString());
+        return null;
+    }
+
+    @RequestMapping("/redisRenameCommand")
+    public ModelAndView redisRenameCommand(HttpServletRequest request,
+                                     HttpServletResponse response, Long appId, Integer instanceId, Model model) {
+        JSONObject json = new JSONObject();
+        if (instanceId == null) {
+            List<InstanceInfo> instanceInfos = appService.getAppOnlineInstanceInfo(appId);
+            instanceId = CollectionUtils.isNotEmpty(instanceInfos) && instanceInfos.size() > 0 ? instanceInfos.get(0).getId() : -1;
+        }
+        List<Pair<String, String>> configs = redisCenter.getConfigsInConfigFile(instanceId.intValue(), "rename-command");
+        if (CollectionUtils.isEmpty(configs)) {
+            json.put("status", String.valueOf(SuccessEnum.FAIL.value()));
+        } else {
+            json.put("renameCommands", configs);
             json.put("status", String.valueOf(SuccessEnum.SUCCESS.value()));
         }
         sendMessage(response, json.toString());
@@ -1379,9 +1507,8 @@ public class AppController extends BaseController {
      */
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     public ModelAndView doAppAdd(HttpServletRequest request,
-                                 HttpServletResponse response, Model model, AppDesc appDesc, String memSize, String isInstall, String moduleInfo) {
+                                 HttpServletResponse response, Model model, AppDesc appDesc, String memSize) {
         AppUser appUser = getUserInfo(request);
-        logger.info("isInstall:{} moduleInfo:{}", isInstall, moduleInfo);
         if (appDesc != null) {
             Timestamp now = new Timestamp(new Date().getTime());
             appDesc.setCreateTime(now);
@@ -1392,7 +1519,7 @@ public class AppController extends BaseController {
             appDesc.setHitPrecentAlertValue(0);
             // 客户端默认关闭监控
             appDesc.setIsAccessMonitor(AppUserAlertEnum.NO.value());
-            appDeployCenter.createApp(appDesc, appUser, memSize, isInstall, moduleInfo);
+            appDeployCenter.createApp(appDesc, appUser, memSize);
         }
         return new ModelAndView("redirect:/admin/app/jobs");
     }
@@ -1427,133 +1554,6 @@ public class AppController extends BaseController {
             model.addAttribute("appId", appId);
         }
         return new ModelAndView("app/appCommand");
-    }
-
-    /**
-     * 应用模块查询
-     *
-     * @param appId
-     * @return
-     */
-    @RequestMapping("/module")
-    public ModelAndView module(HttpServletRequest request, HttpServletResponse response, Model model, Long appId) {
-        if (appId != null && appId > 0) {
-            List<ModuleVersionDetailVo> moduleList = appService.getAppModuleList(appId);
-            model.addAttribute("moduleList", moduleList);
-            model.addAttribute("appId", appId);
-
-            List<String> indexList = new ArrayList<>();
-            Optional<ModuleVersionDetailVo> redisearchModule = moduleList.stream().filter(moduleVersionDetailVo -> moduleVersionDetailVo.getName().toLowerCase().contains("redisearch")).findFirst();
-            if(redisearchModule.isPresent()){
-                AppDesc appDesc = appService.getByAppId(appId);
-                //执行ft._list, 获取索引信息
-                List<byte[]> indexListResult = (List<byte[]>) redisCenter.executeAdminCommand(appDesc, Command.SearchCommand.LIST);
-                indexListResult.stream().forEach(index -> indexList.add(SafeEncoder.encode((byte[]) index)));
-                model.addAttribute("indexList", indexList);
-            }
-        }
-        return new ModelAndView("app/appModule");
-    }
-
-    /**
-     * 应用模块redisearch 索引查询
-     *
-     * @param appId
-     * @return
-     */
-    @GetMapping("/module/redisearch/list")
-    public ModelAndView moduleRedisearchList(HttpServletRequest request, HttpServletResponse response, Model model, Long appId) {
-        List<String> indexList = new ArrayList<>();
-        if (appId != null && appId > 0) {
-            List<ModuleVersionDetailVo> moduleList = appService.getAppModuleList(appId);
-            Optional<ModuleVersionDetailVo> redisearchModule = moduleList.stream().filter(moduleVersionDetailVo -> moduleVersionDetailVo.getName().toLowerCase().contains("redisearch")).findFirst();
-            if(redisearchModule.isPresent()){
-                AppDesc appDesc = appService.getByAppId(appId);
-                //执行ft._list, 获取索引信息
-                List<byte[]> indexListResult = (List<byte[]>) redisCenter.executeAdminCommand(appDesc, Command.SearchCommand.LIST);
-                indexListResult.stream().forEach(index -> indexList.add(SafeEncoder.encode((byte[]) index)));
-            }
-        }
-        model.addAttribute("appId", appId);
-        model.addAttribute("indexList", indexList);
-        return new ModelAndView("app/appModuleRedisearchInfo");
-    }
-
-    /**
-     * 应用模块redisearch info查询
-     *
-     * @param appId
-     * @return
-     */
-    @GetMapping("/module/redisearch/info")
-    public ModelAndView moduleRedisearchInfo(HttpServletRequest request, HttpServletResponse response, Model model, Long appId, String indexName) {
-        Map<String, Object> infoMap = new HashMap<>();
-        List<String> indexList = new ArrayList<>();
-        if (appId != null && appId > 0) {
-            List<ModuleVersionDetailVo> moduleList = appService.getAppModuleList(appId);
-            Optional<ModuleVersionDetailVo> redisearchModule = moduleList.stream().filter(moduleVersionDetailVo -> moduleVersionDetailVo.getName().toLowerCase().contains("redisearch")).findFirst();
-            if(redisearchModule.isPresent()){
-                AppDesc appDesc = appService.getByAppId(appId);
-                //执行ft._list, 获取索引信息
-                List<byte[]> indexListResult = (List<byte[]>) redisCenter.executeAdminCommand(appDesc, Command.SearchCommand.LIST);
-                indexListResult.stream().forEach(index -> indexList.add(SafeEncoder.encode((byte[]) index)));
-                if(CollectionUtils.isNotEmpty(indexList)){
-                    if(StringUtils.isBlank(indexName)){
-                        indexName = indexList.get(0);
-                    }
-                    //执行ft.info, 获取索引信息
-                    List<Object> list = (List<Object>) redisCenter.executeAdminCommand(appDesc, Command.SearchCommand.INFO, indexName);
-                    Map<String, Object> map = new HashMap<>(list.size() / 2, 1);
-                    Iterator iterator = list.iterator();
-                    while(iterator.hasNext()) {
-                        map.put(SafeEncoder.encode((byte[]) (iterator.next())), SafeEncoder.encodeObject(iterator.next()));
-                    }
-                    map.values().stream().forEach(value -> {
-                        if(value instanceof List){
-
-                        }
-                    });
-                    infoMap = map;
-                }
-            }
-        }
-        model.addAttribute("appId", appId);
-        model.addAttribute("indexName", indexName);
-        model.addAttribute("infoMap", infoMap);
-        model.addAttribute("indexList", indexList);
-        return new ModelAndView("app/appModuleRedisearchInfo");
-    }
-
-    /**
-     * 应用模块redisearch config查询
-     *
-     * @param appId
-     * @return
-     */
-    @GetMapping("/module/redisearch/config")
-    public ModelAndView moduleRedisearchConfig(HttpServletRequest request, HttpServletResponse response, Model model, Long appId) {
-        List<Map<String, Object>> configList = new ArrayList<>();
-        Map configMap = new HashMap();
-        if (appId != null && appId > 0) {
-            List<ModuleVersionDetailVo> moduleList = appService.getAppModuleList(appId);
-            Optional<ModuleVersionDetailVo> redisearchModule = moduleList.stream().filter(moduleVersionDetailVo -> moduleVersionDetailVo.getName().toLowerCase().contains("redisearch")).findFirst();
-            if(redisearchModule.isPresent()){
-                AppDesc appDesc = appService.getByAppId(appId);
-                //执行ft.config, 获取索引信息
-                List<ArrayList> list = (List<ArrayList>)redisCenter.executeAdminCommand(appDesc, Command.SearchCommand.CONFIG, new String[]{"GET", "*"});
-                list.stream().forEach(configItem -> {
-                    Map<String, Object> map = new HashMap<>(configItem.size() / 2, 1);
-                    Iterator iterator = configItem.iterator();
-                    while(iterator.hasNext()) {
-                        map.put(SafeEncoder.encode((byte[]) (iterator.next())), SafeEncoder.encodeObject(iterator.next()));
-                    }
-                    configList.add(map);
-                });
-            }
-        }
-        model.addAttribute("appId", appId);
-        model.addAttribute("configList", configList);
-        return new ModelAndView("app/appModuleRedisearchConfig");
     }
 
     /**
@@ -1622,9 +1622,9 @@ public class AppController extends BaseController {
     public ModelAndView doAddUser(HttpServletRequest request,
                                   HttpServletResponse response, Model model, String name, String chName, String email, String mobile,
                                   String weChat,
-                                  Integer type, Integer isAlert, Long userId, String company, String purpose) {
+                                  Integer type, Integer isAlert, Long userId, String company, String purpose, Long bizId) {
         // 后台暂时不对参数进行验证
-        AppUser appUser = AppUser.buildFrom(userId, name, chName, email, mobile, weChat, type, isAlert, company, purpose);
+        AppUser appUser = AppUser.buildFrom(userId, name, chName, email, mobile, weChat, type, isAlert, company, purpose, bizId);
         try {
             if (userId == null) {
                 appUser.setPassword(ConstUtils.DEFAULT_USER_PASSWORD);
@@ -2001,8 +2001,7 @@ public class AppController extends BaseController {
                     .getFromAppCommandGroup(appCommandGroup);
             list.add(chartData);
         }
-        JSONArray jsonArray = JSONArray.fromObject(list);
-        return jsonArray.toString();
+        return JSONObject.toJSONString(list);
     }
 
     /**
@@ -2021,8 +2020,7 @@ public class AppController extends BaseController {
                 logger.info(e.getMessage(), e);
             }
         }
-        JSONArray jsonArray = JSONArray.fromObject(list);
-        return jsonArray.toString();
+        return JSONObject.toJSONString(list);
     }
 
     private String assembleMutilDateAppCommandJsonMinute(List<AppCommandStats> appCommandStats, Date startDate,
@@ -2051,8 +2049,7 @@ public class AppController extends BaseController {
             currentDate = DateUtils.addDays(currentDate, -1);
             diffDays++;
         }
-        net.sf.json.JSONObject jsonObject = net.sf.json.JSONObject.fromObject(map);
-        return jsonObject.toString();
+        return JSONObject.toJSONString(map);
     }
 
     /**
@@ -2084,8 +2081,7 @@ public class AppController extends BaseController {
             }
             map.put(statName, list);
         }
-        net.sf.json.JSONObject jsonObject = net.sf.json.JSONObject.fromObject(map);
-        return jsonObject.toString();
+        return JSONObject.toJSONString(map);
     }
 
     /**
@@ -2124,8 +2120,34 @@ public class AppController extends BaseController {
             currentDate = DateUtils.addDays(currentDate, -1);
             diffDays++;
         }
-        net.sf.json.JSONObject jsonObject = net.sf.json.JSONObject.fromObject(map);
-        return jsonObject.toString();
+        return JSONObject.toJSONString(map);
+    }
+
+    /**
+     * 多时间组装
+     *
+     * @param appDailyDatas
+     * @param statName
+     * @return
+     */
+    private String assembleMutilDateAppHitRatio(List<AppDailyData> appDailyDatas, String statName) {
+        if (appDailyDatas == null || appDailyDatas.isEmpty()) {
+            return "[]";
+        }
+        List<HighchartDoublePoint> list = new ArrayList<>();
+        for (AppDailyData appDailyData : appDailyDatas) {
+            try {
+                HighchartDoublePoint highchartPoint = HighchartDoublePoint
+                        .getFromAppDailyDatas(appDailyData, statName);
+                if (highchartPoint == null) {
+                    continue;
+                }
+                list.add(highchartPoint);
+            } catch (ParseException e) {
+                logger.info(e.getMessage(), e);
+            }
+        }
+        return JSONObject.toJSONString(list);
     }
 
     /**
@@ -2164,8 +2186,7 @@ public class AppController extends BaseController {
             currentDate = DateUtils.addDays(currentDate, -1);
             diffDays++;
         }
-        net.sf.json.JSONObject jsonObject = net.sf.json.JSONObject.fromObject(map);
-        return jsonObject.toString();
+        return JSONObject.toJSONString(map);
     }
 
     /**
@@ -2189,8 +2210,7 @@ public class AppController extends BaseController {
                 logger.info(e.getMessage(), e);
             }
         }
-        JSONArray jsonArray = JSONArray.fromObject(list);
-        return jsonArray.toString();
+        return JSONObject.toJSONString(list);
     }
 
 }

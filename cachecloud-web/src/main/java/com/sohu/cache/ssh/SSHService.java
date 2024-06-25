@@ -57,7 +57,7 @@ public interface SSHService {
      * @throws SSHException
      */
     SSHTemplate.Result scpFileToRemote(String ip, int port, String username,
-                                           String password, final String localPath, final String remoteDir) throws SSHException;
+            String password, final String localPath, final String remoteDir) throws SSHException;
 
     /**
      * 拷贝文件到远程目录

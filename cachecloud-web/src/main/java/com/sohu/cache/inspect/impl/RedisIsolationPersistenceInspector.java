@@ -28,7 +28,7 @@ public class RedisIsolationPersistenceInspector extends BaseAlertService impleme
     
     private RedisCenter redisCenter;
 
-    @Value("${aof.rewrite.ignore-appIds:null}")
+    @Value("${aof.rewrite.ignore-appIds:#{null}}")
     private String aofRewriteIgnoreAppIds;
 
     @Override
@@ -59,7 +59,7 @@ public class RedisIsolationPersistenceInspector extends BaseAlertService impleme
             }
 
             if (TypeUtil.isRedisDataType(type)) {
-                Jedis jedis = redisCenter.getJedis(appId, host, port, REDIS_DEFAULT_TIME, REDIS_DEFAULT_TIME);
+                Jedis jedis = redisCenter.getAdminJedis(appId, host, port, REDIS_DEFAULT_TIME, REDIS_DEFAULT_TIME);
                 try {
                     Map<String, String> persistenceMap = parseMap(jedis);
                     if (persistenceMap.isEmpty()) {

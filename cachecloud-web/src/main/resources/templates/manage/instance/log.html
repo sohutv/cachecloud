@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>Redis日志</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+</head>
+<body>
+
+<body STYLE="BACKGROUND-COLOR:#000;color:#FFF">
+  <#if instanceLogList?? && instanceLogList?size gt 0>
+    <#list instanceLogList as line>
+      <#assign targetColor = "white">
+      <#if line?contains("#")>
+        <#assign targetColor = "red">
+      </#if>
+      <font color="${targetColor}">${line!}</font><br/>
+    </#list>
+  </#if>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card top-selling overflow-auto">
+            <div class="card-body pb-0">
+                <div class="tabbable-custom">
+                    <nav class="nav">
+                        <ul class="nav nav-tabs d-flex align-items-center" id="app_tabs">
+                            <li id="machine" class="nav-item" data-url="${request.contextPath}/manage/user/list?tabId=1">
+                                <a class="nav-link d-flex <#if tabId?? && (tabId == 1)>active</#if>" href="?tabId=1">用户管理</a>
+                            </li>
+                            <li id="room" class="nav-item" data-url="${request.contextPath}/manage/user/list?tabId=2">
+                                <a class="nav-link d-flex <#if tabId?? && (tabId == 2)>active</#if>" href="?tabId=2">业务组管理</a>
+                            </li>
+                        </ul>
+                    </nav>
+                    <br>
+
+                    <div class="btn-group" style="float:right">
+                        <form class="form-inline" role="form">
+                            <input name="tabId" id="tabId" value="${tabId!}" type="hidden"/>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="portlet box light-grey" id="userIndex">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="portlet-body">
+                                        <div class="table-toolbar">
+                                            <div class="row mb-2">
+                                                <div class="col-md-5">
+                                                    <div class="row col-md-12">
+                                                        <button id="sample_editable_1_new" class="btn btn-success col-auto" data-bs-target="#addUserModal" data-bs-toggle="modal">
+                                                            添加新用户 <i class="bi bi-plus"></i>
+                                                        </button>
+                                                        <button id="over_user_id" class="btn btn-success offset-md-1 col-auto" data-bs-target="#overUserModal" data-bs-toggle="modal">
+                                                            接手用户 <i class="bi bi-hand-index-thumb"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="btn-group offset-md-1 col-md-6 float-end">
+                                                    <form action="${request.contextPath}/manage/user/list" method="post" class="row align-items-center float-end">
+                                                        <label class="col-form-label col-auto">
+                                                            用户名:
+                                                        </label>
+                                                        <div class="col-md-3">
+                                                            <input type="text" name="searchChName" class="form-control" id="searchChName" value="${searchChName!}" placeholder="中文名"/>
+                                                        </div>
+                                                        <label class="col-form-label col-auto">
+                                                            业务组:
+                                                        </label>
+                                                        <div class="col-md-4">
+                                                            <select id="searchBizName" name="searchBizName" class="form-select select2_category">
+                                                                <option value="">业务组</option>
+                                                                <#list bizList as biz>
+                                                                    <option value="${biz.name!}" <#if searchBizName?? && (biz.name == searchBizName)>selected</#if>>${biz.name!}</option>
+                                                                </#list>
+                                                            </select>
+                                                        </div>
+                                                        <button type="submit" class="btn btn-primary col-auto">查询</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-bordered table-hover" id="tableDataList" style="white-space: nowrap">
+                                                <thead>
+                                                <tr>
+                                                    <th>id</th>
+                                                    <th>域账户</th>
+                                                    <th>中文名</th>
+                                                    <th>邮箱</th>
+                                                    <th>手机</th>
+                                                    <th>微信</th>
+                                                    <th>是否报警</th>
+                                                    <th>类型</th>
+                                                    <th>注册时间</th>
+                                                    <th>业务组</th>
+                                                    <th>操作</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <#if users??>
+                                                    <#list users as user>
+                                                        <tr>
+                                                            <td>${user.id!}</td>
+                                                            <td>${user.name!}</td>
+                                                            <td>${user.chName!}</td>
+                                                            <td>${user.email!}</td>
+                                                            <td>${user.mobile!}</td>
+                                                            <td>${user.weChat!}</td>
+                                                            <td>
+                                                                <#if (user.isAlert==0)>否</#if>
+                                                                <#if (user.isAlert==1)>是</#if>
+                                                            </td>
+                                                            <td>
+                                                                <#if (user.type == 0)>管理员
+                                                                <#elseif (user.type == 2)>普通用户
+                                                                </#if>
+                                                            </td>
+                                                            <td>
+                                                                <#if user.registerTime??>
+                                                                    ${user.registerTime?string("yyyy-MM-dd HH:mm:ss")}
+                                                                </#if>
+                                                            </td>
+                                                            <td>${user.bizName!}</td>
+                                                            <td>
+                                                                <a href="javascript:void(0);" data-bs-target="#addUserModal${user.id!}" data-bs-toggle="modal">[修改]</a>
+                                                                <#if pwdswitch?? && pwdswitch>
+                                                                    <a href="javascript:void(0);" data-bs-target="#updateUserPwdModal${user.id!}" data-bs-toggle="modal">[修改密码]</a>
+                                                                </#if>
+                                                                <a onclick="if(window.confirm('确认要删除该用户吗?!')){return true;}else{return false;}" href="${request.contextPath}/manage/user/delete?userId=${user.id!}">[删除]</a>
+                                                            </td>
+                                                        </tr>
+                                                    </#list>
+                                                </#if>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <#if users??>
+                                <#list users as user>
+                                    <#include "addUser.html">
+                                    <#include "updateUserPwd.html">
+                                </#list>
+                            </#if>
+                        </div>
+
+
+                        <div class="portlet box light-grey" id="bizIndex">
+                            <div class="row">
+                                <div class="row mb-2">
+                                    <div class="btn-group col-auto">
+                                        <button id="add_biz_id" class="btn btn-success" data-bs-target="#addBizModal" data-bs-toggle="modal">
+                                            添加业务组 <i class="bi bi-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered table-hover" id="bizTableDataList">
+                                        <thead>
+                                        <tr>
+                                            <th>id</th>
+                                            <th>名称</th>
+                                            <th>描述</th>
+                                            <th>操作</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <#list bizList as biz>
+                                            <tr>
+                                                <td>${biz.id!}</td>
+                                                <td>${biz.name!}</td>
+                                                <td>${biz.bizDesc!}</td>
+                                                <td>
+                                                    <a href="javascript:void(0);" data-bs-target="#addBizModal${biz.id!}" data-bs-toggle="modal">[修改]</a>
+                                                    <a onclick="if(window.confirm('确认要删除该业务组吗?!')){return true;}else{return false;}" href="${request.contextPath}/manage/user/biz/delete?bizId=${biz.id!}&tabId=2">[删除]</a>
+                                                </td>
+                                            </tr>
+                                        </#list>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <#list bizList as biz>
+                                    <#include "addBiz.html">
+                                </#list>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="${request.contextPath}/assets/vendor/jquery/jquery.md5.js"></script>
+<script src="${request.contextPath}/assets/vendor/paginator/bootstrap-paginator.js"></script>
+<script type="text/javascript">
+    var TableManaged = function () {
+        return {
+            //main function to initiate the module
+            init: function () {
+                $('#tableDataList').dataTable({
+                    "searching": true,
+                    "lengthChange": false,
+                    "pageLength": 15,
+                    "language": {
+                        "lengthMenu": "Display _MENU_ records",
+                        "paginate": {
+                            "previous": "<",
+                            "next": ">"
+                        },
+                        "info": "共_PAGES_页,_TOTAL_条",
+                        "infoFiltered": "",
+                        "infoEmpty":"共0页,0条",
+                        "zeroRecords": "没有找到符合条件的数据",
+                    }
+                });
+                $('#tableDataList_wrapper>div:first-child').css("display", "none");
+            }
+        };
+    }();
+
+    $(function () {
+        var tabVal = $('#tabId').val();
+        if (tabVal == 1) {
+            $('#userIndex').removeAttr("hidden");
+            $('#bizIndex').attr("hidden", "hidden");
+        } else if (tabVal == 2) {
+            $('#userIndex').attr("hidden", "hidden");
+            $('#bizIndex').removeAttr("hidden");
+        }
+        TableManaged.init();
+    })
+</script>

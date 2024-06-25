@@ -1,0 +1,985 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <nav class="nav">
+                        <ul class="nav nav-tabs d-flex align-items-center" id="app_tabs">
+                            <li class="nav-item">
+                                <a class="nav-link d-flex <#if (tabId == 1)>active</#if>" href="${request.contextPath}/manage/app/stat/list/server?tabId=1">空间指标</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link d-flex <#if (tabId == 2)>active</#if>" href="${request.contextPath}/manage/app/stat/list/server?tabId=2">碎片率指标</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link d-flex <#if (tabId == 3)>active</#if>" href="${request.contextPath}/manage/app/stat/list/server?tabId=3">应用拓扑诊断</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link d-flex <#if (tabId == 4)>active</#if>" href="${request.contextPath}/manage/app/stat/list/server?tabId=4">容器环境诊断</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link d-flex <#if (tabId == 5)>active</#if>" href="${request.contextPath}/manage/app/stat/list/server?tabId=5">宿主环境诊断</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link d-flex <#if (tabId == 6)>active</#if>" href="${request.contextPath}/manage/app/stat/list/server?tabId=6">内存审计</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="row mt-3">
+                    <form class="row justify-content-end" role="form" method="post" action="${request.contextPath}/manage/app/stat/list/server" id="search_form">
+                        <input name="tabId" id="tabId" value="${tabId!}" type="hidden"/>
+                        <#if tabId?? && (tabId == 6)>
+                        <#else>
+                            <label for="searchDate" class="col-form-label col-auto">&nbsp;查询日期:</label>
+                            <div class="col-auto">
+                                <input type="date" class="form-control" size="15" name="searchDate" id="searchDate" value="${searchDate}"/>
+                            </div>
+                            <button type="submit" class="btn btn-primary col-auto">查询</button> &nbsp;
+                            <button type="button" class="btn btn-primary col-auto" onclick="sendExpAppsStatDataEmail()">发送日报</button>
+                        </#if>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="memIndex">
+            <div class="card-header">
+                <h3 class="card-title">空间使用情况统计</h3>
+            </div>
+            <div class="card-body table-responsive">
+                <!-- 内存指标 -->
+                <table class="table table-striped table-hover table-bordered table-sm" id="tableDataList" name="tableDataList">
+                    <thead>
+                        <tr>
+                            <th scope="col">appId</th>
+                            <th scope="col">应用名称</th>
+                            <th scope="col">是否测试</th>
+                            <th scope="col">应用类型</th>
+                            <th scope="col">分片数*分片空间G</th>
+                            <th scope="col">空间使用</th>
+                            <th scope="col">rss内存使用</th>
+                            <th scope="col">空间使用率%</th>
+                            <th scope="col">空间报警阀值%</th>
+                            <th scope="col">客户端连接数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <#list appDescList! as appDesc>
+                        <#assign app_id = appDesc.appId>
+                        <#assign appDetail = appDetailVOMap?api.get(app_id)>
+                        <tr>
+                            <td>
+                                <a target="_blank"
+                                   href="${request.contextPath}/manage/app/index?appId=${appDesc.appId}">${appDesc.appId}</a>
+                            </td>
+                            <td>
+                                <a target="_blank"
+                                   href="${request.contextPath}/admin/app/index?appId=${appDesc.appId}">${appDesc.name}</a>
+                            </td>
+                            <td>
+                                <#if (appDesc.isTest == 1)>测试
+                                <#else>正式
+                                </#if>
+                            </td>
+                            <td>${appDesc.typeDesc!}</td>
+                            <td>
+                                <#assign master_num = appDetailVOMap?api.get(app_id).masterNum>
+                                <#assign slave_num = appDetailVOMap?api.get(app_id).slaveNum>
+                                <#if !(master_num??)>
+                                    <#assign master_num = 0>
+                                </#if>
+                                ${master_num}&nbsp;*&nbsp;${(appDetailVOMap?api.get(app_id).mem/master_num/1024)?string("##.##")}G
+                            </td>
+
+                            <td>
+                                <#if appClientGatherStatMap?? && (appClientGatherStatMap?api.get(app_id))??>
+                                    <#assign usedMem = ((appClientGatherStatMap?api.get(app_id)['used_memory'])/1024/1024/1024)?string("0.00")?number>
+                                <#else>
+                                    <#assign usedMem = 0>
+                                </#if>
+                                <#assign mem = (appDetail.mem/1024)?string("0.00")?number>
+                                <#assign fmtMemoryUsageRatio = (usedMem/mem*100.0)?string("0.00")?number>
+                                <div class="progress progress-fs-1" role="progressbar" aria-valuenow="${fmtMemoryUsageRatio}"
+                                     aria-valuemax="100"
+                                     aria-valuemin="0" >
+                                    <#if (fmtMemoryUsageRatio >= 80.00)>
+                                        <#assign memUsedProgressBarStatus = 'bg-danger'>
+                                    <#elseif (fmtMemoryUsageRatio >= 60.00)>
+                                        <#assign memUsedProgressBarStatus = 'bg-warning'>
+                                    <#else>
+                                        <#assign memUsedProgressBarStatus = 'bg-success'>
+                                    </#if>
+                                    <div class="progress-bar ${memUsedProgressBarStatus}"
+                                        style="width: ${fmtMemoryUsageRatio}%; overflow: visible;">
+                                        <span style="color: #000000; margin-bottom: 0">
+                                            ${usedMem}G&nbsp;&nbsp;Used/
+                                            ${mem}G&nbsp;&nbsp;Total
+                                        </span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <#if appClientGatherStatMap?? && (appClientGatherStatMap?api.get(app_id))??>
+                                    <#assign usedMemRss = ((appClientGatherStatMap?api.get(app_id)['used_memory_rss'])/1024/1024/1024)?string("0.00")?number>
+                                <#else>
+                                    <#assign usedMemRss = 0>
+                                </#if>
+                                <#assign mem = (appDetail.mem/1024)?string("0.00")?number>
+                                <#assign fmtMemoryUsageRatio = (usedMemRss/mem*100.0)?string("0.00")?number>
+                                <div class="progress progress-fs-1" role="progressbar" aria-valuenow="${fmtMemoryUsageRatio}"
+                                     aria-valuemax="100"
+                                     aria-valuemin="0">
+                                    <#if (fmtMemoryUsageRatio >= 80.00)>
+                                        <#assign memUsedProgressBarStatus = 'bg-danger'>
+                                    <#elseif (fmtMemoryUsageRatio >= 60.00)>
+                                        <#assign memUsedProgressBarStatus = 'bg-warning'>
+                                    <#else>
+                                        <#assign memUsedProgressBarStatus = 'bg-success'>
+                                    </#if>
+                                    <div class="progress-bar ${memUsedProgressBarStatus}"
+                                         style="width: ${fmtMemoryUsageRatio}%; overflow: visible;">
+                                        <span style="color: #000000; margin-bottom: 0">
+                                            ${usedMemRss}G&nbsp;&nbsp;Used
+                                            /${mem}G&nbsp;&nbsp;Total
+                                        </span>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <#assign mem_used_ratio = appDetailVOMap?api.get(app_id).memUsePercent>
+                                <#if !(mem_used_ratio??)>
+                                    <#assign mem_used_ratio = '0'>
+                                </#if>
+                                ${mem_used_ratio}
+                            </td>
+                            <td>
+                                <#assign memUseThreshold = appDetailVOMap?api.get(app_id).appDesc.memAlertValue>
+                                ${memUseThreshold}
+                            </td>
+                            <td>
+                                <#if appClientGatherStatMap?? && (appClientGatherStatMap?api.get(app_id))??>
+                                    <#assign conn = appClientGatherStatMap?api.get(app_id)['connected_clients']>
+                                <#else>
+                                    <#assign conn = 0>
+                                </#if>
+                                <#if !(conn??)>
+                                    <#assign conn = '0'>
+                                </#if>
+                                <button class="btn btn-warning btn-sm w-100">
+                                    <a href="${request.contextPath}/admin/app/index?appId=${app_id}&tabTag=app_clientList"
+                                       target="_blank"><font style="color: white">${conn} 连接</font></a>
+                                </button>
+                            </td>
+                        </tr>
+                    </#list>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card" id="fragRatioIndex">
+            <div class="card-header">
+                <h3 class="card-title">碎片率指标情况统计</h3>
+            </div>
+            <div class="card-body table-responsive">
+                <!-- 碎片率指标 -->
+                <table class="table table-striped table-hover table-bordered table-sm" id="tableDataList" name="tableDataList">
+                    <thead>
+                        <tr>
+                            <th scope="col">appId</th>
+                            <th scope="col">应用名称</th>
+                            <th scope="col">是否测试</th>
+                            <th scope="col">redis版本</th>
+                            <th scope="col">key数量</th>
+                            <th scope="col">内存使用</th>
+                            <th scope="col">rss内存使用</th>
+                            <th scope="col">平均碎片率(%)</th>
+                            <th scope="col">max cpuSys(s)</th>
+                            <th scope="col">max cpuUser(s)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <#list appDescList! as appDesc>
+                        <#assign app_id = appDesc.appId>
+                        <#assign appDetail = appDetailVOMap?api.get(app_id)>
+                        <tr>
+                            <td>
+                                <a target="_blank"
+                                   href="${request.contextPath}/manage/app/index?appId=${app_id}">${app_id}</a>
+                            </td>
+                            <td>
+                                <a target="_blank"
+                                   href="${request.contextPath}/admin/app/index?appId=${app_id}">${appDesc.name}</a>
+                            </td>
+                            <td>
+                                <#if (appDesc.isTest == 1)>测试
+                                <#else>正式
+                                </#if>
+                            </td>
+                            <td>${appDesc.versionName}</td>
+                            <td>
+                                <#if appClientGatherStatMap?? && (appClientGatherStatMap?api.get(app_id))??>
+                                    <#assign object_size = appClientGatherStatMap?api.get(app_id)['object_size']>
+                                <#else>
+                                    <#assign object_size = 0>
+                                </#if>
+                                <#if !(object_size??)>
+                                    <#assign object_size = 0>
+                                </#if>
+                                ${object_size}
+                            </td>
+                            <td>
+                                <#if appClientGatherStatMap?? && (appClientGatherStatMap?api.get(app_id))??>
+                                    <#assign used_memory = ((appClientGatherStatMap?api.get(app_id)['used_memory'])/1024/1024)?string("0.00")?number>
+                                <#else>
+                                    <#assign used_memory = 0>
+                                </#if>
+                                ${used_memory}
+                            </td>
+
+                            <td>
+                                <#if appClientGatherStatMap?? && (appClientGatherStatMap?api.get(app_id))??>
+                                    <#assign used_memory_rss = ((appClientGatherStatMap?api.get(app_id)['used_memory_rss'])/1024/1024)?string("0.00")?number>
+                                <#else>
+                                    <#assign used_memory_rss = 0>
+                                </#if>
+                                ${used_memory_rss}
+                            </td>
+
+                            <td>
+                                <#if appClientGatherStatMap?? && (appClientGatherStatMap?api.get(app_id))?? && (appClientGatherStatMap?api.get(app_id)['avg_mem_frag_ratio'])??>
+                                    <#assign avg_mem_frag_ratio = appClientGatherStatMap?api.get(app_id)['avg_mem_frag_ratio']>
+                                <#else>
+                                    <#assign avg_mem_frag_ratio = '0'>
+                                </#if>
+                                <#if !(avg_mem_frag_ratio??)>
+                                    <#assign avg_mem_frag_ratio = '0'>
+                                </#if>
+                                ${avg_mem_frag_ratio}
+                            </td>
+
+                            <td>
+                                <#if appClientGatherStatMap?? && (appClientGatherStatMap?api.get(app_id))??>
+                                    <#assign max_cpu_sys = appClientGatherStatMap?api.get(app_id)['max_cpu_sys']>
+                                <#else>
+                                    <#assign max_cpu_sys = '0'>
+                                </#if>
+                                <#if !(max_cpu_sys??)>
+                                    <#assign max_cpu_sys = '0'>
+                                </#if>
+                                ${max_cpu_sys}
+                            </td>
+                            <td>
+                                <#if appClientGatherStatMap?? && (appClientGatherStatMap?api.get(app_id))??>
+                                    <#assign max_cpu_user = appClientGatherStatMap?api.get(app_id)['max_cpu_user']>
+                                <#else>
+                                    <#assign max_cpu_user = '0'>
+                                </#if>
+                                <#if !(max_cpu_user??)>
+                                    <#assign max_cpu_user = '0'>
+                                </#if>
+                                ${max_cpu_user}
+                            </td>
+                        </tr>
+                    </#list>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 应用拓扑诊断 -->
+        <div class="card" id="appTopologyIndex">
+            <div class="card-header">
+                <h3 class="card-title">应用拓扑诊断</h3>
+            </div>
+            <div class="card-body table-responsive">
+                <div class="row">
+                    <div class="col-auto">
+                        <button id="autoFixTopology" class="btn btn-danger btn-sm" type="button" data-bs-target="#autoFixTopologyModal" data-bs-toggle="modal">
+                            自动修复拓扑<i class="bi bi-bag-plus"></i>
+                        </button>
+                    </div>
+                </div>
+                <table class="table table-striped table-hover table-bordered table-sm" id="tableDataList" name="tableDataList">
+                    <thead>
+                        <tr>
+                            <th scope="col">appId</th>
+                            <th scope="col">应用名称</th>
+                            <th scope="col">是否测试</th>
+                            <th scope="col">类型</th>
+                            <th scope="col">redis版本</th>
+                            <th scope="col">节点分布</th>
+                            <th scope="col">拓扑诊断
+                                <button class="btn btn-success btn-sm" onclick="topologyUpdate()">诊断更新</button>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <#list appDescList! as appDesc>
+                        <#assign app_id = appDesc.appId>
+                        <#assign appDetail = appDetailVOMap?api.get(app_id)>
+                        <tr>
+                            <td>
+                                <a target="_blank"
+                                   href="${request.contextPath}/manage/app/index?appId=${app_id}">${app_id}</a>
+                            </td>
+                            <td>
+                                <a target="_blank"
+                                   href="${request.contextPath}/admin/app/index?appId=${app_id}">${appDesc.name}</a>
+                            </td>
+                            <td>
+                                <#if (appDesc.isTest == 1)>测试
+                                <#else>正式
+                                </#if>
+                            </td>
+                            <td>${appDesc.typeDesc}</td>
+                            <td>${appDesc.versionName}</td>
+                            <td>
+                                <#assign master_num = appDetailVOMap?api.get(app_id).masterNum>
+                                <#assign slave_num = appDetailVOMap?api.get(app_id).slaveNum>
+                                <#if !(master_num??)>
+                                    <#assign master_num = 0>
+                                </#if>
+                                <#if !(slave_num??)>
+                                    <#assign slave_num = 0>
+                                </#if>
+                                主从节点:
+                                <#if (master_num == slave_num)>${master_num},${slave_num}
+                                <#else><span
+                                            style="color:red">${master_num},${slave_num}</span>
+                                </#if>
+                            </td>
+                            <td>
+                                <#if appClientGatherStatMap?? && (appClientGatherStatMap?api.get(app_id))??
+                                && appClientGatherStatMap?api.get(app_id)['topology_exam_result']??
+                                && (appClientGatherStatMap?api.get(app_id)['topology_exam_result']== 0)>
+                                    <span style="color:green">正常</span>
+                                <#elseif appClientGatherStatMap?? && (appClientGatherStatMap?api.get(app_id))??
+                                && appClientGatherStatMap?api.get(app_id)['topology_exam_result']??
+                                && (appClientGatherStatMap?api.get(app_id)['topology_exam_result']== 1)>
+                                    <span style="color:red">异常</span>
+                                <#else>
+                                    <span style="color:red">未检测</span>
+                                </#if>
+                                [<a target="_blank" href="${request.contextPath}/manage/app/index?appId=${app_id}&tabTag=app_ops_tool">查看诊断</a>]
+                            </td>
+                        </tr>
+                    </#list>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 容器环境诊断 -->
+        <div class="card" id="containerIndex">
+            <div class="card-header">
+                <h3 class="card-title">容器环境诊断</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <label class="col-form-label col-md-3"></label>
+                    <textarea rows="5"  class="form-control" style="color:darkgray;overflow-y:hidden" readonly="readonly">
+    容器环境基准值:
+        1).内存分配策略: 是否为1,内核允许分配所有的物理内存;
+        2).thp大内存页配置: 设置为never,防止fork过程中消耗大内存拷贝导致阻塞;
+        3).内存swap配置: 是否为0关闭swap，避免内存io转换磁盘io导致阻塞;
+        4).容器nproc配置: 获取当前容器的nproc配置;
+                    </textarea>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-bordered table-sm" id="tableDataList" name="tableDataList">
+                        <thead>
+                            <tr>
+                                <th scope="col">容器ip</th>
+                                <th scope="col">overcommit_memory</th>
+                                <th scope="col">swappiness</th>
+                                <th scope="col">thp_enabled</th>
+                                <th scope="col">thp_defrag</th>
+                                <th scope="col">nproc</th>
+                                <th scope="col">类型</th>
+                                <th scope="col">诊断情况</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <#if machineEnvMap?? && machineEnvMap.container?? && machineEnvMap.container?size gt 0>
+                            <#list machineEnvMap.container! as container>
+                                <tr>
+                                    <td>
+                                        ${container.ip}
+                                    </td>
+                                    <td>${container.envs.overcommit_memory}</td>
+                                    <td>${container.envs.swappines}</td>
+                                    <td>${container.envs.transparent_hugepage_enable}</td>
+                                    <td>${container.envs.transparent_hugepage_defrag}</td>
+                                    <td>${container.envs.nproc}</td>
+                                    <td>
+                                        容器
+                                    </td>
+                                    <td>
+                                        <#if (container.status == 1)>
+                                            <span style="color:green">检测一致</span>
+                                        <#elseif (container.status == 2)>
+                                            <span style="color:red">检测不一致</span>
+                                        <#elseif (container.status == 3)>
+                                            <span style="color:red">检测异常</span>
+                                        </#if>
+                                    </td>
+                                </tr>
+                            </#list>
+                        </#if>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 宿主环境诊断 -->
+        <div class="card" id="machineIndex">
+            <div class="card-header">
+                <h3 class="card-title">宿主环境诊断</h3>
+            </div>
+            <div class="card-body">
+                <div>
+                    <label class="col-form-label col-md-3"></label>
+                    <textarea rows="8"  class="form-control"  style="color:darkgray;overflow-y:hidden" readonly="readonly">
+    宿主环境基准值:
+        1).检测cachecloud用户连接的进程数,报警阈值 cachecloud_nprocs>=1024;
+        2).检测宿主机某天的所有实例aof写盘阻塞 ,报警阈值 fsync_slow_times >=10次;
+        3).检测tcp连接队列数: 配置 somaxconn = 511;
+        4).检测sshpass安装: 检测宿主文件拷贝命令支持;
+        5).检测运行redis实例总数;
+        6).检测打开文件数/最大文件数;
+        7).检测磁盘容量使用率 disk used >= 80%;
+                        </textarea>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-bordered table-sm" id="tableDataList" name="tableDataList">
+                        <thead>
+                            <tr>
+                                <th scope="col">宿主ip</th>
+                                <th scope="col">cachecloud_nprocs</th>
+                                <th scope="col">fsync_slow_times</th>
+                                <th scope="col">somaxconn</th>
+                                <th scope="col">sshpass</th>
+                                <th scope="col">redis实例数</th>
+                                <th scope="col">ulimit文件数</th>
+                                <th scope="col">disk used</th>
+                                <th scope="col" style="white-space: nowrap;">nproc</th>
+                                <th scope="col">类型</th>
+                                <th scope="col">诊断情况</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <#if machineEnvMap?? && machineEnvMap.host?? && machineEnvMap.host?size gt 0>
+                                <#list machineEnvMap.host! as machine>
+                                <tr>
+                                    <td>
+                                        ${machine.ip}
+                                    </td>
+                                    <td> ${machine.envs.nproc_threads}</td>
+                                    <td> ${machine.envs.fsync_delay_times}</td>
+                                    <td>${machine.envs.somaxconn}</td>
+                                    <td> ${machine.envs.sshPass}</td>
+                                    <td> ${machine.envs.instanceNum}</td>
+                                    <td>${machine.envs.unlimit}</td>
+                                    <td>${machine.envs.diskUsed}</td>
+                                    <td style="white-space: nowrap;">${machine.envs.nproc!}</td>
+                                    <td>宿主机</td>
+                                    <td>
+                                        <#if (machine.status == 1)>
+                                            <span style="color:green">检测一致</span>
+                                        <#elseif (machine.status == 2)>
+                                            <span style="color:red">检测不一致</span>
+                                        <#elseif (machine.status == 3)>
+                                            <span style="color:red">检测异常</span>
+                                        </#if>
+                                    </td>
+                                </tr>
+                                </#list>
+                            </#if>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 内存审计 -->
+        <div class="card" id="capacityAuditIndex">
+            <div class="card-header">
+                <h3 class="card-title">内存审计</h3>
+            </div>
+            <div class="card-body table-responsive">
+                <table class="table table-striped table-hover table-bordered table-sm" id="tableDataList" name="tableDataList" style="white-space: nowrap">
+                    <thead>
+                        <tr>
+                            <th scope="col">appId</th>
+                            <th scope="col">应用名称</th>
+                            <th scope="col">是否<br>测试</th>
+                            <th scope="col">应用类型</th>
+                            <th scope="col">分片数 * <br>分片内存 G</th>
+                            <th scope="col">初始内存 -> <br>当前内存</th>
+                            <th scope="col">内存使用</th>
+                            <th scope="col">内存使用率%</th>
+                            <th scope="col">分片内存使用</th>
+                            <th scope="col">分片内存使用率%</th>
+                            <th scope="col">自动扩容<br>(是否可扩容)</th>
+                            <th scope="col">自动扩容<br>(内存使用率)</th>
+                            <th scope="col">自动扩容<br>(扩容比率)</th>
+                            <th scope="col">自动扩容<br>(总扩容比率)</th>
+                            <th scope="col">自动扩容<br>(上次扩容时间)</th>
+                            <th scope="col">是否<br>可缩容</th>
+                            <th scope="col">预计缩容时间</th>
+                            <th scope="col">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <#list appCapacityAuditList! as appAudit>
+                        <tr>
+                            <td>
+                                <a target="_blank"
+                                   href="${request.contextPath}/manage/app/index?appId=${appAudit.appDesc.appId}">${appAudit.appDesc.appId}</a>
+                            </td>
+                            <td>
+                                <a target="_blank"
+                                   href="${request.contextPath}/admin/app/index?appId=${appAudit.appDesc.appId}">${appAudit.appDesc.name}</a>
+                            </td>
+                            <td>
+                                <#if (appAudit.appDesc.isTest == 1)>测试
+                                <#else>正式
+                                </#if>
+                            </td>
+                            <td>${appAudit.appDesc.typeDesc!}</td>
+                            <td>
+                                <#assign shardingMem = (appAudit.appCapacityMonitor.curShardingMem / 1024 / 1024 / 1024)?string("0.00")?number>
+                                    ${appAudit.appCapacityMonitor.shardingMasterNum}&nbsp;*&nbsp;${shardingMem}G
+                            </td>
+
+                            <td>
+                                <#assign mem = (appAudit.appCapacityMonitor.mem / 1024 / 1024 / 1024)?string("0.00")?number>
+                                <#assign curMem = (appAudit.appCapacityMonitor.curMem / 1024 / 1024 / 1024)?string("0.00")?number>
+                                <#if (mem != curMem)>
+                                    <span style="color:red">${mem}G -> ${curMem}G</span>
+                                <#else>
+                                    ${mem}G -> ${curMem}G
+                                </#if>
+                            </td>
+
+                            <td>
+                                <#assign memUsed = (appAudit.appCapacityMonitor.memUsed / 1024 / 1024 / 1024)?string("0.00")>
+                                ${memUsed}G
+                            </td>
+
+                            <td>
+                                <#assign memUsedRatio = (appAudit.appCapacityMonitor.memUsed * 100 / appAudit.appCapacityMonitor.curMem)?string("0.00")>
+                                <#if ((appAudit.appCapacityMonitor.memUsed * 100 / appAudit.appCapacityMonitor.curMem) >= appAudit.appCapacityMonitor.expandMemPercent)>
+                                        <span style="color:red">
+                                            ${memUsedRatio} %
+                                        </span>
+                                <#elseif (((appAudit.appCapacityMonitor.memUsed * 100 / appAudit.appCapacityMonitor.curMem) < appAudit.appCapacityMonitor.expandMemPercent) && ((appAudit.appCapacityMonitor.memUsed * 100 / appAudit.appCapacityMonitor.curMem) >= 60))>
+                                        <span style="color:green">
+                                            ${memUsedRatio} %
+                                        </span>
+                                <#elseif ((appAudit.appCapacityMonitor.memUsed * 100 / appAudit.appCapacityMonitor.curMem) < 60)>
+                                        <span style="color:orange">
+                                            ${memUsedRatio} %
+                                        </span>
+                                <#else>
+                                        <span style="color:lightgray">
+                                            ${memUsedRatio} %
+                                        </span>
+                                </#if>
+                            </td>
+
+                            <td>
+                                <#assign shardingMemUsed = (appAudit.appCapacityMonitor.shardingMemUsed / 1024 / 1024 / 1024)?string("0.00")>
+                                ${shardingMemUsed}G
+                            </td>
+
+                            <td>
+                                <#assign shardingMemUsedRatio = (appAudit.appCapacityMonitor.shardingMemUsed * 100 / appAudit.appCapacityMonitor.curShardingMem)?string("0.00")>
+                                <#if ((appAudit.appCapacityMonitor.shardingMemUsed * 100 / appAudit.appCapacityMonitor.curShardingMem) >= appAudit.appCapacityMonitor.expandMemPercent)>
+                                        <span style="color:red">
+                                            ${shardingMemUsedRatio} %
+                                        </span>
+                                <#elseif (((appAudit.appCapacityMonitor.shardingMemUsed * 100 / appAudit.appCapacityMonitor.curShardingMem) < appAudit.appCapacityMonitor.expandMemPercent) && ((appAudit.appCapacityMonitor.shardingMemUsed * 100 / appAudit.appCapacityMonitor.curShardingMem) >= 60))>
+                                        <span style="color:green">
+                                            ${shardingMemUsedRatio} %
+                                        </span>
+                                <#elseif ((appAudit.appCapacityMonitor.shardingMemUsed * 100 / appAudit.appCapacityMonitor.curShardingMem) < 60)>
+                                        <span style="color:orange">
+                                            ${shardingMemUsedRatio} %
+                                        </span>
+                                <#else>
+                                        <span style="color:lightgray">
+                                            ${shardingMemUsedRatio} %
+                                        </span>
+                                </#if>
+                            </td>
+
+                            <td>
+                                <#if appAudit.appCapacityMonitor.isExpand?? && (appAudit.appCapacityMonitor.isExpand == 1)>
+                                    <span style="color:green">是</span>
+                                <#else>
+                                    <span style="color:red">否</span>
+                                </#if>
+                            </td>
+
+                            <td>
+                                ${appAudit.appCapacityMonitor.expandMemPercent}
+                            </td>
+
+                            <td>
+                                ${appAudit.appCapacityMonitor.expandRatio}
+                            </td>
+
+                            <td>
+                                ${appAudit.appCapacityMonitor.expandRatioTotal}
+                            </td>
+
+                            <td>
+                                <#if appAudit.appCapacityMonitor.expandTime??>
+                                    ${appAudit.appCapacityMonitor.expandTime?string("yyyy-MM-dd HH:mm:ss")}
+                                </#if>
+                            </td>
+
+                            <td>
+                                <#if appAudit.appCapacityMonitor.isReduce?? && (appAudit.appCapacityMonitor.isReduce == 1)>
+                                    <span style="color:green">是</span>
+                                <#else>
+                                    <span style="color:red">否</span>
+                                </#if>
+                            </td>
+
+                            <td>
+                                <#if appAudit.appCapacityMonitor.scheduleTime??>
+                                   ${appAudit.appCapacityMonitor.scheduleTime?string("yyyy-MM-dd")}
+                                </#if>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-info btn-sm" data-bs-target="#changeAppCapacityMonitorModal${appAudit.appCapacityMonitor.id}" data-bs-toggle="modal" href="#">修改</button>
+                            </td>
+                        </tr>
+                    </#list>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<#list appCapacityAuditList! as appAudit>
+    <div id="changeAppCapacityMonitorModal${appAudit.appCapacityMonitor.id}" class="modal fade" tabindex="-1" data-width="400">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h4 class="modal-title">修改应用内存审计——自动扩缩容配置</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+                </div>
+
+                <form class="form-horizontal form-bordered form-row-stripped">
+                    <div class="modal-body">
+                        <div class="row">
+                            <!-- 控件开始 -->
+                            <div class="col-md-12">
+                                <!-- form-body开始 -->
+                                <div class="form-body offset-md-1">
+                                    <div class="form-group row">
+                                        <label class="col-form-label col-md-3 text-end">
+                                            是否可扩容:
+                                        </label>
+                                        <div class="col-md-7">
+                                            <select name="isExpand${appAudit.appCapacityMonitor.id}" id="isExpand${appAudit.appCapacityMonitor.id}" class="form-select w-100">
+                                                <option value="0" <#if !(appAudit.appCapacityMonitor.isExpand??) || (appAudit.appCapacityMonitor.isExpand == 0)>selected</#if>>否</option>
+                                                <option value="1" <#if (appAudit.appCapacityMonitor.isExpand == 1)>selected</#if>>是</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-form-label col-md-3  text-end">
+                                            扩容判定内存使用率:
+                                        </label>
+                                        <div class="col-md-7">
+                                            <input type="text" name="expandMemPercent${appAudit.appCapacityMonitor.id}" id="expandMemPercent${appAudit.appCapacityMonitor.id}" value="${appAudit.appCapacityMonitor.expandMemPercent}"
+                                                   class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-form-label col-md-3  text-end">
+                                            每次扩容比率:
+                                        </label>
+                                        <div class="col-md-7">
+                                            <input type="text" name="expandRatio${appAudit.appCapacityMonitor.id}" id="expandRatio${appAudit.appCapacityMonitor.id}" value="${appAudit.appCapacityMonitor.expandRatio}"
+                                                   class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-form-label col-md-3  text-end">
+                                            总扩容比率:
+                                        </label>
+                                        <div class="col-md-7">
+                                            <input type="text" name="expandRatioTotal${appAudit.appCapacityMonitor.id}" id="expandRatioTotal${appAudit.appCapacityMonitor.id}" value="${appAudit.appCapacityMonitor.expandRatioTotal}"
+                                                   class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-form-label col-md-3  text-end">
+                                            是否可缩容:
+                                        </label>
+                                        <div class="col-md-7">
+                                            <select name="isReduce${appAudit.appCapacityMonitor.id}" id="isReduce${appAudit.appCapacityMonitor.id}" class="form-select w-100" onchange="dealScheduleTime('${appAudit.appCapacityMonitor.id}')">
+                                                <option value="0" <#if !(appAudit.appCapacityMonitor.isReduce??) || (appAudit.appCapacityMonitor.isReduce == 0)>selected</#if>>否</option>
+                                                <option value="1" <#if (appAudit.appCapacityMonitor.isReduce == 1)>selected</#if>>是</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-form-label col-md-3  text-end">
+                                            预计缩容时间:
+                                        </label>
+                                        <div class="col-md-7">
+                                            <#if appAudit.appCapacityMonitor.scheduleTime??>
+                                                <#assign scheduleTime = appAudit.appCapacityMonitor.scheduleTime?string("yyyy-MM-dd")>
+                                            <#else>
+                                                <#assign scheduleTime = "">
+                                            </#if>
+                                            <input type="date" name="scheduleTime${appAudit.appCapacityMonitor.id}" id="scheduleTime${appAudit.appCapacityMonitor.id}" value="${scheduleTime}"
+                                                   class="form-control" />
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <!-- form-body 结束 -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" data-bs-dismiss="modal" class="btn btn-secondary" >Close</button>
+                        <button type="button" id="updateCapacityMonitorBtn${appAudit.appCapacityMonitor.id}" class="btn btn-danger" onclick="updateAppCapacityMonitor('${appAudit.appCapacityMonitor.id}')">Ok</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</#list>
+
+<div id="autoFixTopologyModal" class="modal fade" tabindex="-1" data-width="400">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">自动修复拓扑-仅修复主节点分布不均场景</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+            </div>
+
+            <form class="form-horizontal form-bordered form-row-stripped">
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- 控件开始 -->
+                        <div class="col-md-12">
+                            <!-- form-body开始 -->
+                            <div class="form-body">
+                                <div class="form-group row">
+                                    <label class="col-form-label col-md-2 text-end">
+                                        appId:
+                                    </label>
+                                    <div class="col-md-8">
+                                        <input type="text" name="ip" id="fixTopologyAppIds"
+                                               placeholder="不填，修复所有；多个应用id,用,分隔" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- form-body 结束 -->
+                        </div>
+                        <div id="autoFixTopologyInfo"></div>
+                        <!-- 控件结束 -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-bs-dismiss="modal" class="btn btn-secondary" >Close</button>
+                    <button type="button" id="autoFixTopologyModalBtn" class="btn btn-danger" onclick="autoFixTopology()">Ok</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        var tabVal = $('#tabId').val();
+        var searchDate;
+        if(tabVal != 6){
+            searchDate = $('#searchDate').val();
+            if (searchDate == null || searchDate == '') {
+                var time = new Date();
+                var day = ("0" + time.getDate()).slice(-2);
+                var month = ("0" + (time.getMonth() + 1)).slice(-2);
+                var today = time.getFullYear() + "-" + (month) + "-" + (day);
+                $('#searchDate').val(today);
+            }
+        }
+        if (tabVal == 1) {
+            $('#memIndex').removeAttr("hidden");
+            $('#fragRatioIndex').attr("hidden", "hidden");
+            $('#appTopologyIndex').attr("hidden", "hidden");
+            $('#containerIndex').attr("hidden", "hidden");
+            $('#machineIndex').attr("hidden", "hidden");
+            $('#capacityAuditIndex').attr("hidden", "hidden");
+        } else if (tabVal == 2) {
+            $('#memIndex').attr("hidden", "hidden");
+            $('#fragRatioIndex').removeAttr("hidden");
+            $('#appTopologyIndex').attr("hidden", "hidden");
+            $('#containerIndex').attr("hidden", "hidden");
+            $('#machineIndex').attr("hidden", "hidden");
+            $('#capacityAuditIndex').attr("hidden", "hidden");
+        } else if (tabVal == 3) {
+            $('#memIndex').attr("hidden", "hidden");
+            $('#fragRatioIndex').attr("hidden", "hidden");
+            $('#appTopologyIndex').removeAttr("hidden");
+            $('#containerIndex').attr("hidden", "hidden");
+            $('#machineIndex').attr("hidden", "hidden");
+            $('#capacityAuditIndex').attr("hidden", "hidden");
+        } else if (tabVal == 4) {
+            $('#memIndex').attr("hidden", "hidden");
+            $('#fragRatioIndex').attr("hidden", "hidden");
+            $('#appTopologyIndex').attr("hidden", "hidden");
+            $('#containerIndex').removeAttr("hidden");
+            $('#machineIndex').attr("hidden", "hidden");
+            $('#capacityAuditIndex').attr("hidden", "hidden");
+        } else if (tabVal == 5) {
+            $('#memIndex').attr("hidden", "hidden");
+            $('#fragRatioIndex').attr("hidden", "hidden");
+            $('#appTopologyIndex').attr("hidden", "hidden");
+            $('#containerIndex').attr("hidden", "hidden");
+            $('#machineIndex').removeAttr("hidden");
+            $('#capacityAuditIndex').attr("hidden", "hidden");
+        }else if (tabVal == 6) {
+            $('#memIndex').attr("hidden", "hidden");
+            $('#fragRatioIndex').attr("hidden", "hidden");
+            $('#appTopologyIndex').attr("hidden", "hidden");
+            $('#containerIndex').attr("hidden", "hidden");
+            $('#machineIndex').attr("hidden", "hidden");
+            $('#capacityAuditIndex').removeAttr("hidden");
+        }
+
+    })
+
+    //验证是数字
+    function testisNum(id) {
+        var value = document.getElementById(id).value;
+        if (value != "" && isNaN(value)) {
+            alert("请输入数字类型!");
+            document.getElementById(id).value = "";
+            document.getElementById(id).focus();
+        }
+    }
+
+    function sendExpAppsStatDataEmail() {
+        var searchDate = document.getElementById("searchDate").value;
+        $.get('${request.contextPath}/manage/app/tool/sendExpAppsStatDataEmail', {searchDate: searchDate});
+        alert("异常应用日报已发送，请查收")
+    }
+
+    function topologyUpdate() {
+        if(confirm("确认提交拓扑检查更新？确认后请等待，更新完毕页面会自动刷新")){
+            $.get('${request.contextPath}/manage/app/stat/topologyUpdate.json', function (result) {
+                if (result.status == 1) {
+                    location.href = "${request.contextPath}/manage/app/stat/list/server?tabId=3";
+                }else {
+                    alert("拓扑检测更新失败！")
+                }
+            });
+        }
+
+    }
+
+    function dealScheduleTime(id) {
+        var isReduce = $("#isReduce" + id);
+        alert(isReduce.val());
+        if(isReduce.val() == 0){
+            document.getElementById("scheduleTime" + id).value = '';
+        }
+    }
+
+    function updateAppCapacityMonitor(id) {
+
+        var expandMemPercent = document.getElementById("expandMemPercent" + id);
+        var expandRatio = document.getElementById("expandRatio" + id);
+        var expandRatioTotal = document.getElementById("expandRatioTotal" + id);
+        var isExpand = $("#isExpand" + id);
+        var isReduce = $("#isReduce" + id);
+        var scheduleTime = document.getElementById("scheduleTime" + id);
+
+        if (expandMemPercent.value == "") {
+            alert("内存使用率不能为空");
+            memAlertValue.focus();
+            return false;
+        }
+        if (expandRatio.value == "") {
+            alert("扩容比率不能为空");
+            clientConnAlertValue.focus();
+            return false;
+        }
+        if (expandRatioTotal.value == "") {
+            alert("总扩容比率不能为空");
+            hitPrecentAlertValue.focus();
+            return false;
+        }
+        if(!confirm("确认提交内存审计修改？")){
+            return ;
+        }
+        var btn = document.getElementById("updateCapacityMonitorBtn" + id);
+        btn.disabled = true;
+        $.post(
+            '${request.contextPath}/manage/app/updateAppCapacityMonitor',
+            {
+                id: id,
+                expandMemPercent: expandMemPercent.value,
+                expandRatio: expandRatio.value,
+                expandRatioTotal: expandRatioTotal.value,
+                isExpand: isExpand.val(),
+                isReduce: isReduce.val(),
+                scheduleTime: scheduleTime.value
+            },
+            function (data) {
+                if (data == 1) {
+                    alert("修改成功");
+                    setTimeout("location.href = '${request.contextPath}/manage/app/stat/list/server?tabId=6'", 1000);
+                } else {
+                    btn.disabled = false;
+                    alert("修改失败，请确认");
+                }
+            }
+        );
+    }
+
+    function autoFixTopology() {
+        var fixTopologyAppIds = document.getElementById("fixTopologyAppIds");
+        var btn = document.getElementById("autoFixTopologyModalBtn");
+        btn.disabled = true;
+        $.post(
+            '${request.contextPath}/manage/app/autoFixTopology.json',
+            {
+                appIds: fixTopologyAppIds.value,
+            },
+            function (data) {
+                if (data.result) {
+                    $("#autoFixTopologyInfo").html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Success!</strong>创建任务" + data.appCount + "个，涉及应用：" + data.appIds + "</div>");
+                    var targetId = "#autoFixTopologyModal";
+                } else {
+                    btn.disabled = false;
+                    $("#autoFixTopologyInfo").html("<div class='alert alert-error' ><button class='close' data-dismiss='alert'>×</button><strong>Error!</strong>任务创建失败！</div>");
+                }
+            }
+        );
+    }
+</script>

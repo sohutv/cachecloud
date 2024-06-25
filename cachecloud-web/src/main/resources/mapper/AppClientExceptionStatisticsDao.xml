@@ -124,4 +124,5 @@
         from app_client_exception_minute_statistics
         where app_id = #{appId} and type=1 and current_min between #{startTime} and #{endTime}
     </select>
+
 </mapper>

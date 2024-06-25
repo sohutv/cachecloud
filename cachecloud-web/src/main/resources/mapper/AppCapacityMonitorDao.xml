@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sohu.cache.dao.AppCapacityMonitorDao">
+    <sql id="save_fields">
+        app_id, sharding_master_num, mem, cur_mem, mem_used, mem_used_history,
+        sharding_mem, cur_sharding_mem, sharding_mem_used,
+        expand_mem_percent, expand_ratio, expand_ratio_total, is_expand, is_reduce,
+        update_time, expand_time, schedule_status, schedule_time, expand_count
+    </sql>
+
+    <sql id="query_fields">
+        id, app_id, sharding_master_num, mem, cur_mem, mem_used, mem_used_history,
+        sharding_mem, cur_sharding_mem, sharding_mem_used,
+        expand_mem_percent, expand_ratio, expand_ratio_total, is_expand, is_reduce,
+        update_time, expand_time, schedule_status, schedule_time, reduce_ratio_min, reduce_ratio_max, expand_count
+    </sql>
+
+    <insert id="save" parameterType="com.sohu.cache.entity.AppCapacityMonitor" keyProperty="id" useGeneratedKeys="true" >
+    	insert into app_capacity_monitor
+    		(<include refid="save_fields"/>)
+		values
+			(
+            #{appId},#{shardingMasterNum},#{mem},#{curMem},#{memUsed},#{memUsedHistory},
+            #{shardingMem},#{curShardingMem},#{shardingMemUsed},
+            #{expandMemPercent},#{expandRatio},#{expandRatioTotal},#{isExpand},#{isReduce},
+            #{updateTime},#{expandTime},#{scheduleStatus},#{scheduleTime},#{expandCount}
+            )
+    </insert>
+
+    <insert id="batchSave">
+        insert ignore into app_capacity_monitor (<include refid="save_fields"/>)
+        values
+        <foreach collection="list" item="appCapacityMonitor" separator=",">
+            (
+            #{appCapacityMonitor.appId},#{appCapacityMonitor.shardingMasterNum},#{appCapacityMonitor.mem},#{appCapacityMonitor.curMem},#{appCapacityMonitor.memUsed},#{appCapacityMonitor.memUsedHistory},
+            #{appCapacityMonitor.shardingMem},#{appCapacityMonitor.curShardingMem},#{appCapacityMonitor.shardingMemUsed},
+            #{appCapacityMonitor.expandMemPercent},#{appCapacityMonitor.expandRatio},#{appCapacityMonitor.expandRatioTotal},
+            #{appCapacityMonitor.isExpand},#{appCapacityMonitor.isReduce},#{appCapacityMonitor.updateTime},#{appCapacityMonitor.expandTime},
+            #{appCapacityMonitor.scheduleStatus},#{appCapacityMonitor.scheduleTime},#{appCapacityMonitor.expandCount}
+            )
+        </foreach>
+    </insert>
+
+    <update id="update" parameterType="com.sohu.cache.entity.AppCapacityMonitor">
+        update app_capacity_monitor
+            <set>
+                <if test="shardingMasterNum != null">
+                    sharding_master_num = #{shardingMasterNum},
+                </if>
+                <if test="curMem != null and curMem > 0">
+                    cur_mem = #{curMem},
+                </if>
+                <if test="memUsed != null and memUsed > 0">
+                    mem_used = #{memUsed},
+                </if>
+                <if test="memUsedHistory != null and memUsedHistory > 0">
+                    mem_used_history = #{memUsedHistory},
+                </if>
+                <if test="curShardingMem != null and curShardingMem > 0">
+                    cur_sharding_mem = #{curShardingMem},
+                </if>
+                <if test="shardingMemUsed != null and shardingMemUsed > 0">
+                    sharding_mem_used = #{shardingMemUsed},
+                </if>
+                <if test="expandMemPercent != null and expandMemPercent >= 0">
+                    expand_mem_percent = #{expandMemPercent},
+                </if>
+                <if test="expandRatio != null and expandRatio >= 0">
+                    expand_ratio = #{expandRatio},
+                </if>
+                <if test="expandRatioTotal != null and expandRatioTotal >= 0">
+                    expand_ratio_total = #{expandRatioTotal},
+                </if>
+                <if test="isExpand != null">
+                    is_expand = #{isExpand},
+                </if>
+                <if test="isReduce != null">
+                    is_reduce = #{isReduce},
+                </if>
+                <if test="isReduce != null and isReduce == 0">
+                    schedule_time = null,
+                </if>
+                <if test="reduceRatioMin != null and reduceRatioMin > 0">
+                    reduce_ratio_min = #{reduceRatioMin},
+                </if>
+                <if test="reduceRatioMax != null and reduceRatioMax > 0">
+                    reduce_ratio_max = #{reduceRatioMax},
+                </if>
+                    update_time = now(),
+                <if test="expandTime != null">
+                    expand_time = #{expandTime},
+                </if>
+                <if test="scheduleStatus != null">
+                    schedule_status = #{scheduleStatus},
+                </if>
+                <if test="scheduleTime != null">
+                    schedule_time = #{scheduleTime},
+                </if>
+                <if test="expandCount != null and expandCount > 0">
+                    expand_count = #{expandCount},
+                </if>
+            </set>
+        where id = #{id}
+    </update>
+
+    <update id="updateAppCapacityReduceSchedule" parameterType="com.sohu.cache.entity.AppCapacityMonitor">
+        update app_capacity_monitor
+        set
+            update_time = now(),
+            schedule_status = #{scheduleStatus},
+            schedule_time = #{scheduleTime}
+        where id = #{id} and schedule_status != #{scheduleStatus}
+    </update>
+
+    <update id="updateAppUsedMemHistory">
+        update app_capacity_monitor
+        set mem_used_history = #{memUsedHistory}
+        where app_id = #{appId}
+    </update>
+
+    <select id="getAppCapacityMonitorByAppId" resultType="com.sohu.cache.entity.AppCapacityMonitor">
+        select
+            <include refid="query_fields"/>
+        from app_capacity_monitor
+        where app_id = #{appId}
+    </select>
+
+    <select id="getAppCapacityMonitorAll" resultType="com.sohu.cache.entity.AppCapacityMonitor">
+        select
+            acm.id, acm.app_id, acm.sharding_master_num, mem, cur_mem, mem_used, mem_used_history,
+            sharding_mem, cur_sharding_mem, sharding_mem_used,
+            expand_mem_percent, expand_ratio, expand_ratio_total, is_expand, is_reduce,
+            acm.update_time, expand_time, schedule_status, schedule_time, reduce_ratio_min, reduce_ratio_max, expand_count
+        from app_capacity_monitor acm
+        left join app_desc ad
+        on acm.app_id = ad.app_id
+        where ad.status = 2
+    </select>
+
+</mapper>
+
+

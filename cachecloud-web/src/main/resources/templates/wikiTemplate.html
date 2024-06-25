@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>CacheCloud wiki</title>
+
+  <link href="${request.contextPath}/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="${request.contextPath}/assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="${request.contextPath}/assets/vendor/fonts/fonts-googleapis-source-sans-pro.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="${request.contextPath}/assets/plugins/fontawesome-free/css/all.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="${request.contextPath}/assets/dist/css/adminlte.min.css">
+  <!-- overlayScrollbars -->
+  <link rel="stylesheet" href="${request.contextPath}/assets/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
+
+  <link href="${request.contextPath}/assets/vendor/bootstrap-select/bootstrap-select.css" rel="stylesheet" />
+
+  <link href="${request.contextPath}/assets/css/githubmd.css" rel="stylesheet">
+  <link href="${request.contextPath}/assets/css/common.css" rel="stylesheet" type="text/css"/>
+
+  <script src="${request.contextPath}/assets/vendor/jquery/jquery-3.7.0.min.js"></script>
+  <script src="${request.contextPath}/assets/vendor/apexcharts/apexcharts.min.js"></script>
+  <script src="${request.contextPath}/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="${request.contextPath}/assets/vendor/chart.js/chart.umd.js"></script>
+  <script src="${request.contextPath}/assets/vendor/echarts/echarts.min.js"></script>
+  <script src="${request.contextPath}/assets/vendor/quill/quill.min.js"></script>
+  <script src="${request.contextPath}/assets/js/custom/appDetail.js"></script>
+  <script src="${request.contextPath}/assets/vendor/tinymce/tinymce.min.js"></script>
+  <script src="${request.contextPath}/assets/vendor/bootstrap-select/bootstrap-select.js"></script>
+  <script src="${request.contextPath}/assets/vendor/highchart/highcharts.js"></script>
+  <script src="${request.contextPath}/assets/js/myhighchart.js"></script>
+  <!-- 滚动插件 -->
+<!--  <script src="/resources/nicescroll/jquery.nicescroll.min.js"></script>-->
+  <script type="text/javascript" src="${request.contextPath}/assets/plugins/overlayScrollbars/js/OverlayScrollbars.min.js"></script>
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+  <div class="wrapper">
+    <#include '/inc/wikiHead.html'>
+    <#include "/inc/wikiLeft.html">
+
+    <div class="content-wrapper">
+      <section class="content pt-3">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-body">
+                  <div class="row col-sm-12 col-xl-12 col-12 col-md-12">
+                    <#if toc??>
+                      <div class="col-xl-9">
+                    <#else>
+                      <div class="col-md-12">
+                    </#if>
+                      <div class="markdown-body">
+                        ${response!}
+                      </div>
+                    </div>
+                    <#if toc??>
+                      <div class="col-xl-3">
+                        <div class="d-flex flex-column gap-2 justify-content-end" style="position:fixed; z-index: 1030;">${toc!}</div>
+                      </div>
+                    </#if>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+  <#include "/manage/inc/footer.html">
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+</div>
+<script>
+$(function(){
+  OverlayScrollbars($("#leftBox"));
+  $('pre').each(function(i, pre) {
+    $(pre).addClass("prettyprint");
+  });
+  PR.prettyPrint();
+  if(window.location.hash && $(window.location.hash).offset()){
+    $("html,body").animate({scrollTop: $(window.location.hash).offset().top - 52}, 500);
+  }
+  $("#introLi").addClass("active");
+});
+</script>
+</body>
+<#include "/manage/inc/backendEndResources.html">
+</html>

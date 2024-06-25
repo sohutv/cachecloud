@@ -47,17 +47,23 @@ public class InstanceAlertValueController extends BaseController {
      */
     @RequestMapping(value = "/init")
     public ModelAndView init(HttpServletRequest request, HttpServletResponse response, Model model) {
+        int appType = 0;
+//        String appTypeStr = request.getParameter("appType");
+//        if (StringUtils.isNotEmpty(appTypeStr)) {
+//            appType = Integer.parseInt(appTypeStr);
+//        }
+        model.addAttribute("appType", appType);
         model.addAttribute("instanceAlertCheckCycleEnumList", InstanceAlertCheckCycleEnum.getInstanceAlertCheckCycleEnumList());
         model.addAttribute("instanceAlertCompareTypeEnumList", InstanceAlertCompareTypeEnum.getInstanceAlertCompareTypeEnumList());
         model.addAttribute("redisAlertConfigEnumList", RedisAlertConfigEnum.getRedisAlertConfigEnumList());
-        List<InstanceAlertConfig> globalAlertConfigList = instanceAlertConfigService.getByType(InstanceAlertTypeEnum.ALL_ALERT.getValue());
+        List<InstanceAlertConfig> globalAlertConfigList = instanceAlertConfigService.getByTypeAndAppType(InstanceAlertTypeEnum.ALL_ALERT.getValue(), appType);
         model.addAttribute("instanceAlertAllList", globalAlertConfigList);
         model.addAttribute("redisUsedGlobalAlertConfigList", distinctUsedGlobalAlert(globalAlertConfigList));
         model.addAttribute("instanceAlertList", instanceAlertConfigService.getAll());
         model.addAttribute("success", request.getParameter("success"));
-        model.addAttribute("instanceAlertValueActive", SuccessEnum.SUCCESS.value());
-        List<InstanceAlertConfig> instanceAlertSpecialList = instanceAlertConfigService.getByType(InstanceAlertTypeEnum.INSTANCE_ALERT.getValue());
-        List<InstanceAlertConfig> appAlertSpecialList = instanceAlertConfigService.getByType(InstanceAlertTypeEnum.APP_ALERT.getValue());
+        model.addAttribute("redisAlertValueActive", SuccessEnum.SUCCESS.value());
+        List<InstanceAlertConfig> instanceAlertSpecialList = instanceAlertConfigService.getByTypeAndAppType(InstanceAlertTypeEnum.INSTANCE_ALERT.getValue(), appType);
+        List<InstanceAlertConfig> appAlertSpecialList = instanceAlertConfigService.getByTypeAndAppType(InstanceAlertTypeEnum.APP_ALERT.getValue(), appType);
         fillinstanceHostPort(instanceAlertSpecialList);
         List<InstanceAlertConfig> appAndInstanceAlertConfigList = addAppAlertConfigToInstanceSpecialList(appAlertSpecialList, instanceAlertSpecialList);
         model.addAttribute("instanceAlertSpecialList", appAndInstanceAlertConfigList);
@@ -130,8 +136,12 @@ public class InstanceAlertValueController extends BaseController {
         try {
             //如果未传重要程度，则查询已存在的全局配置获取
             if(instanceAlertConfig.getImportantLevel() == null){
-                int globalImportantLevel = instanceAlertConfigService.getImportantLevelByAlertConfigAndCompareType(instanceAlertConfig.getAlertConfig(), instanceAlertConfig.getCompareType());
-                instanceAlertConfig.setImportantLevel(globalImportantLevel);
+                InstanceAlertConfig globalAlertConfig = instanceAlertConfigService.getGlobalAlertConfigByCondition(instanceAlertConfig.getAlertConfig(), instanceAlertConfig.getCompareType(), instanceAlertConfig.getAppType());
+                if(globalAlertConfig != null){
+                    instanceAlertConfig.setImportantLevel(globalAlertConfig.getImportantLevel() == null ? 0 : globalAlertConfig.getImportantLevel());
+                }else{
+                    instanceAlertConfig.setImportantLevel(0);
+                }
             }
             logger.warn("user {} want to add instanceAlertConfig {}", appUser.getName(), instanceAlertConfig);
             instanceAlertConfigService.save(instanceAlertConfig);
@@ -162,8 +172,12 @@ public class InstanceAlertValueController extends BaseController {
                 logger.warn("user {} want to add app instanceAlertConfig, size is {}", appUser.getName(), instancelist.size());
                 //如果未传重要程度，则查询已存在的全局配置获取
                 if(appAlertConfig.getImportantLevel() == null){
-                    int globalImportantLevel = instanceAlertConfigService.getImportantLevelByAlertConfigAndCompareType(appAlertConfig.getAlertConfig(), appAlertConfig.getCompareType());
-                    appAlertConfig.setImportantLevel(globalImportantLevel);
+                    InstanceAlertConfig globalAlertConfig = instanceAlertConfigService.getGlobalAlertConfigByCondition(appAlertConfig.getAlertConfig(), appAlertConfig.getCompareType(), appAlertConfig.getAppType());
+                    if(globalAlertConfig != null){
+                        appAlertConfig.setImportantLevel(globalAlertConfig.getImportantLevel() == null ? 0 : globalAlertConfig.getImportantLevel());
+                    }else{
+                        appAlertConfig.setImportantLevel(0);
+                    }
                 }
                 instanceAlertConfigService.save(appAlertConfig);
                 successEnum = SuccessEnum.SUCCESS;
@@ -235,7 +249,7 @@ public class InstanceAlertValueController extends BaseController {
             //判断是否为更新紧急程度，如是，判断是否为全局报警，如是，则更新所有报警级别为此级别
             if(orgInstAlertConfig != null && importantLevel != orgInstAlertConfig.getImportantLevel()){
                 if(InstanceAlertTypeEnum.ALL_ALERT.getValue() == orgInstAlertConfig.getType()){
-                    instanceAlertConfigService.updateImportantLevel(orgInstAlertConfig.getAlertConfig(), compareType, importantLevel);
+                    instanceAlertConfigService.updateImportantLevel(orgInstAlertConfig.getAlertConfig(), compareType, importantLevel, orgInstAlertConfig.getAppType());
                 }
             }
             successEnum = SuccessEnum.SUCCESS;
@@ -301,6 +315,7 @@ public class InstanceAlertValueController extends BaseController {
         }
         int instanceId = 0;
         int type = NumberUtils.toInt(request.getParameter("type"));
+        int appType = NumberUtils.toInt(request.getParameter("appType"));
         if (InstanceAlertTypeEnum.INSTANCE_ALERT.getValue() == type) {
             String hostPort = request.getParameter("instanceHostPort");
             InstanceInfo instanceInfo = getInstanceInfo(hostPort);
@@ -316,6 +331,7 @@ public class InstanceAlertValueController extends BaseController {
         instanceAlertConfig.setCheckCycle(checkCycle);
         instanceAlertConfig.setLastCheckTime(now);
         instanceAlertConfig.setType(type);
+        instanceAlertConfig.setAppType(appType);
         instanceAlertConfig.setUpdateTime(now);
         instanceAlertConfig.setImportantLevel(importantLevel);
         instanceAlertConfig.setStatus(InstanceAlertStatusEnum.YES.getValue());
@@ -372,6 +388,7 @@ public class InstanceAlertValueController extends BaseController {
         String configInfo = request.getParameter("configInfo");
         int compareType = NumberUtils.toInt(request.getParameter("compareType"));
         int checkCycle = NumberUtils.toInt(request.getParameter("checkCycle"));
+        Integer appType = NumberUtils.toInt(request.getParameter("appType"));
         String importantLevelStr = request.getParameter("importantLevel");
         Integer importantLevel = null;
         if(StringUtils.isNotEmpty(importantLevelStr)){
@@ -387,6 +404,7 @@ public class InstanceAlertValueController extends BaseController {
         instanceAlertConfig.setCheckCycle(checkCycle);
         instanceAlertConfig.setLastCheckTime(now);
         instanceAlertConfig.setType(3);
+        instanceAlertConfig.setAppType(appType);
         instanceAlertConfig.setUpdateTime(now);
         instanceAlertConfig.setStatus(InstanceAlertStatusEnum.YES.getValue());
         instanceAlertConfig.setImportantLevel(importantLevel);

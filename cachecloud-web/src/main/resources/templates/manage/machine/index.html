@@ -1,0 +1,57 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <nav class="nav">
+                    <ul class="nav nav-tabs d-flex align-items-center" id="app_tabs">
+                        <li id="machine" class="nav-item" data-url="${request.contextPath}/manage/machine/list?tabTag=machine&ipLike=${ipLike!}&useType=${useType!}&type=${type!}&versionId=${versionId!}&isInstall=${isInstall!}&k8sType=${k8sType!}&realip=${realip!}">
+                            <a class="nav-link d-flex" href="?tabTag=machine">机器管理</a>
+                        </li>
+                        <li id="room" class="nav-item" data-url="${request.contextPath}/manage/machine/list?tabTag=room">
+                            <a class="nav-link d-flex" href="?tabTag=room">机房管理</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        <div class="tab-content">
+            <div class="tab-pane active" id="machineTab">
+            </div>
+            <div class="tab-pane" id="roomTab">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function showTab(tab) {
+        $.get($("#" + tab).attr("data-url"), function (result) {
+            $("#" + tab + "Tab").html(result);
+        });
+    }
+
+    function refreshActiveTab() {
+        var tab = getQueryString("tabTag");
+        if (tab) {
+            $("#" + tab + " a").addClass("active");
+            $("#" + tab + "Tab").addClass("active").siblings().removeClass("active");
+        } else {
+            tab = "machine";
+            $("#" + tab + " a").addClass("active");
+        }
+        console.log("tab:" + tab)
+        showTab(tab);
+        $("#tabs li a").tooltip({placement: "bottom"});
+    }
+
+    $(function () {
+        refreshActiveTab();
+    });
+
+    function getQueryString(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) return unescape(r[2]);
+        return null;
+    }
+</script>

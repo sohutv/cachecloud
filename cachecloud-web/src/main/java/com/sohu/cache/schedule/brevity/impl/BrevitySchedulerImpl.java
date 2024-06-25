@@ -1,5 +1,6 @@
 package com.sohu.cache.schedule.brevity.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.AtomicLongMap;
 import com.sohu.cache.async.AsyncService;
@@ -7,6 +8,7 @@ import com.sohu.cache.async.AsyncThreadPoolFactory;
 import com.sohu.cache.async.KeyCallable;
 import com.sohu.cache.entity.BrevityScheduleTask;
 import com.sohu.cache.machine.MachineCenter;
+import com.sohu.cache.redis.AssistRedisService;
 import com.sohu.cache.redis.RedisCenter;
 import com.sohu.cache.schedule.brevity.BrevityScheduleType;
 import com.sohu.cache.schedule.brevity.BrevityScheduler;
@@ -17,17 +19,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
- * Created by yijunzhang
+ * Created by zengyizhao
  */
+@ConditionalOnProperty(name = "cachecloud.redis.enable", havingValue = "true")
 @Component
 @Slf4j
 public class BrevitySchedulerImpl implements BrevityScheduler {
@@ -51,7 +57,16 @@ public class BrevitySchedulerImpl implements BrevityScheduler {
     @Autowired
     private ServerStatusCollector serverStatusCollector;
 
+    @Autowired
+    private AssistRedisService assistRedisService;
+
     public static final AtomicLongMap<String> BREVITY_SCHEDULER_MAP = AtomicLongMap.create();
+
+    public static final String REDIS_KEY_PREFIX = "cc:brevity:schedule:";
+
+    public static final String REDIS_LOCK_KEY_PREFIX = "cc:brevity:schedule:lock:";
+
+    public static final int REDIS_LOCK_EXPIRE_SECONDS = 90;
 
     @PostConstruct
     private void init() {
@@ -87,60 +102,56 @@ public class BrevitySchedulerImpl implements BrevityScheduler {
     }
 
     private void maintainMachines(BrevityScheduleType scheduleType) {
-        List<Map<String, Object>> addList = shouldAddMachinesOfType(scheduleType.getType());
+        List<BrevityScheduleTask> originalNodes = this.getOriginalMachinesOfType(scheduleType.getType());
+        List<BrevityScheduleTask> latestNodes = this.getLatestMachinesOfType(scheduleType.getType());
+        List<BrevityScheduleTask> addList = this.shouldAddMachinesOfType(originalNodes, latestNodes);
         if (CollectionUtils.isNotEmpty(addList)) {
-            for (Map<String, Object> map : addList) {
-                BrevityScheduleTask task = BrevityScheduleTask.builder()
-                        .type(scheduleType.getType())
-                        .version(getVersion())
-                        .host(MapUtils.getString(map, "host"))
-                        .port(MapUtils.getIntValue(map, "port", 0))
-                        .createTime(new Date())
-                        .build();
-                int result = insertBrevityScheduler(task);
-                if (result > 0) {
-                    log.warn("shouldAddMachinesOfType: task={}", task);
+            long version = getVersion();
+            Date date = new Date();
+            for (BrevityScheduleTask scheduleTask : addList) {
+                scheduleTask.setType(scheduleType.getType());
+                scheduleTask.setVersion(version);
+                scheduleTask.setCreateTime(date);
+                boolean insertRst = insertBrevityScheduler(scheduleTask);
+                if (insertRst) {
+                    log.warn("shouldAddMachinesOfType: task={}", scheduleTask);
                 }
             }
         }
-        List<Map<String, Object>> removeList = shouldRemoveMachinesOfType(scheduleType.getType());
+        List<BrevityScheduleTask> removeList = this.shouldRemoveMachinesOfType(originalNodes, latestNodes);
         if (CollectionUtils.isNotEmpty(removeList)) {
-            for (Map<String, Object> map : removeList) {
-                int id = MapUtils.getIntValue(map, "id");
-                int result = delBrevityScheduler(id);
-                if (result > 0) {
-                    log.warn("shouldRemoveMachinesOfType: type={} id={}", scheduleType, id);
+            for (BrevityScheduleTask  scheduleTask : removeList) {
+                Long result = delBrevityScheduler(scheduleTask);
+                if (result != null && result > 0) {
+                    log.warn("shouldRemoveMachinesOfType: type={} task={}", scheduleType, scheduleTask);
                 }
             }
         }
-
     }
 
     private void maintainNodes(BrevityScheduleType scheduleType) {
-        List<Map<String, Object>> addList = shouldAddNodesOfType(scheduleType.getType());
+        List<BrevityScheduleTask> originalNodes = this.getOriginalNodesOfType(scheduleType.getType());
+        List<BrevityScheduleTask> latestNodes = this.getLatestNodesOfType(scheduleType.getType());
+        List<BrevityScheduleTask> addList = this.shouldAddNodesOfType(originalNodes, latestNodes);
         if (CollectionUtils.isNotEmpty(addList)) {
-            for (Map<String, Object> map : addList) {
-                BrevityScheduleTask task = BrevityScheduleTask.builder()
-                        .type(scheduleType.getType())
-                        .version(getVersion())
-                        .host(MapUtils.getString(map, "host"))
-                        .port(MapUtils.getIntValue(map, "port"))
-                        .createTime(new Date())
-                        .build();
-                int result = insertBrevityScheduler(task);
-                if (result > 0) {
-                    log.warn("shouldAddNodesOfType: task={}", task);
+            long version = getVersion();
+            Date date = new Date();
+            for (BrevityScheduleTask scheduleTask : addList) {
+                scheduleTask.setType(scheduleType.getType());
+                scheduleTask.setVersion(version);
+                scheduleTask.setCreateTime(date);
+                boolean insertRst = insertBrevityScheduler(scheduleTask);
+                if (insertRst) {
+                    log.warn("shouldAddNodesOfType: task={}", scheduleTask);
                 }
             }
         }
-
-        List<Map<String, Object>> removeList = shouldRemoveNodesOfType(scheduleType.getType());
+        List<BrevityScheduleTask> removeList = this.shouldRemoveNodesOfType(originalNodes, latestNodes);
         if (CollectionUtils.isNotEmpty(removeList)) {
-            for (Map<String, Object> map : removeList) {
-                int id = MapUtils.getIntValue(map, "id");
-                int result = delBrevityScheduler(id);
-                if (result > 0) {
-                    log.warn("shouldRemoveNodesOfType: type={} id={}", scheduleType, id);
+            for (BrevityScheduleTask  scheduleTask : removeList) {
+                Long result = delBrevityScheduler(scheduleTask);
+                if (result != null && result > 0) {
+                    log.warn("shouldRemoveNodesOfType: type={} task={}", scheduleType, scheduleTask);
                 }
             }
         }
@@ -151,63 +162,116 @@ public class BrevitySchedulerImpl implements BrevityScheduler {
         return ScheduleUtil.getLastCollectTime(version);
     }
 
-    private int insertBrevityScheduler(BrevityScheduleTask task) {
-        String sql = "insert into brevity_schedule_resources(type,version,host,port,create_time)"
-                + " values(?,?,?,?,?)";
-        return jdbcTemplate.update(sql, task.getType(), task.getVersion(), task.getHost(),
-                task.getPort(), task.getCreateTime());
+    private boolean insertBrevityScheduler(BrevityScheduleTask task) {
+        return assistRedisService.hset(REDIS_KEY_PREFIX + task.getType(), task.getKeyField(), JSONObject.toJSONString(task));
     }
 
-    private int delBrevityScheduler(int id) {
-        String sql = "delete from  brevity_schedule_resources where id = ?";
-        return jdbcTemplate.update(sql, id);
+    private Long delBrevityScheduler(BrevityScheduleTask  task) {
+        return assistRedisService.hdel(REDIS_KEY_PREFIX + task.getType(), task.getKeyField());
     }
 
-    //查询应该被添加的节点
-    private List<Map<String, Object>> shouldAddNodesOfType(int type) {
-        String sql = "select t1.ip host,t1.port port"
+    //查询原有节点
+    private List<BrevityScheduleTask> getOriginalNodesOfType(int type) {
+        Map<String, String> originalMap = assistRedisService.hgetAll(REDIS_KEY_PREFIX + type);
+        Collection<String> originalNodes = originalMap.values();
+        List<BrevityScheduleTask> originalNodeList = originalNodes.stream()
+                .map(originalNode -> JSONObject.parseObject(originalNode, BrevityScheduleTask.class))
+                .collect(Collectors.toList());
+        return originalNodeList;
+    }
+
+    //查询最新的节点
+    private List<BrevityScheduleTask> getLatestNodesOfType(int type) {
+        String sql = "select t1.ip host,t1.port port, t1.type instanceType"
                 + " from instance_info  t1"
-                + " left join brevity_schedule_resources t2 on (t2.type=? and t1.ip=t2.host and t1.port=t2.port)\n"
-                + " where t1.status != 2 and t1.type in (2,6) and t2.id is null";
-        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql, type);
+                + " where t1.status != 2 and t1.type in (2,6,11,12)";
+        List<BrevityScheduleTask> list = jdbcTemplate.query(sql, BeanPropertyRowMapper.newInstance(BrevityScheduleTask.class));
         return list;
     }
 
+    //查询应该被添加的节点
+    private List<BrevityScheduleTask> shouldAddNodesOfType(List<BrevityScheduleTask> originalNodeList,
+                                                           List<BrevityScheduleTask> latestNodeList) {
+        List<BrevityScheduleTask> shouldAdds = new ArrayList<>();
+        Set<String> originals = originalNodeList.stream()
+                .map(original -> original.getHostPort()).collect(Collectors.toSet());
+        latestNodeList.forEach(latest -> {
+            if(!originals.contains(latest.getHostPort())){
+                shouldAdds.add(latest);
+            }
+        });
+        return shouldAdds;
+    }
+
+
     //查询应该被删除的节点
-    private List<Map<String, Object>> shouldRemoveNodesOfType(int type) {
-        String sql = "select t2.id id"
-                + " from brevity_schedule_resources t2"
-                + " left join instance_info  t1 on (t1.status != 2 and t1.ip=t2.host and t1.port=t2.port)"
-                + " where t2.type=? and t1.ip is null";
-        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql, type);
+    private List<BrevityScheduleTask> shouldRemoveNodesOfType(List<BrevityScheduleTask> originalNodeList,
+                                                              List<BrevityScheduleTask> latestNodeList) {
+        List<BrevityScheduleTask> shouldRemoves = new ArrayList<>();
+        Set<String> latests = latestNodeList.stream()
+                .map(latest -> latest.getHostPort()).collect(Collectors.toSet());
+        originalNodeList.forEach(original -> {
+            if(!latests.contains(original.getHostPort())){
+                shouldRemoves.add(original);
+            }
+        });
+        return shouldRemoves;
+    }
+
+    //查询原有节点
+    private List<BrevityScheduleTask> getOriginalMachinesOfType(int type) {
+        Map<String, String> originalMap = assistRedisService.hgetAll(REDIS_KEY_PREFIX + type);
+        Collection<String> originalMachines = originalMap.values();
+        List<BrevityScheduleTask> originalMachineList = originalMachines.stream()
+                .map(originalMachine -> JSONObject.parseObject(originalMachine, BrevityScheduleTask.class))
+                .collect(Collectors.toList());
+        return originalMachineList;
+    }
+
+    //查询最新的节点
+    private List<BrevityScheduleTask> getLatestMachinesOfType(int type) {
+        String sql = "select t1.ip host"
+                + " from machine_info t1"
+                + " where t1.available = 1";
+        List<BrevityScheduleTask> list = jdbcTemplate.query(sql, BeanPropertyRowMapper.newInstance(BrevityScheduleTask.class));
         return list;
     }
 
     //查询应该被添加的机器
-    private List<Map<String, Object>> shouldAddMachinesOfType(int type) {
-        String sql = "select t1.ip host"
-                + " from machine_info t1"
-                + " left join brevity_schedule_resources t2 on (t2.type=? and t1.ip=t2.host)"
-                + " where t1.available = 1 and t2.id is null";
-        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql, type);
-        return list;
+    private List<BrevityScheduleTask> shouldAddMachinesOfType(
+            List<BrevityScheduleTask> originalMachineList, List<BrevityScheduleTask> latestMachineList) {
+        List<BrevityScheduleTask> shouldAdds = new ArrayList<>();
+        Set<String> originals = originalMachineList.stream()
+                .map(original -> original.getHost()).collect(Collectors.toSet());
+        latestMachineList.forEach(latest -> {
+            if(!originals.contains(latest.getHost())){
+                shouldAdds.add(latest);
+            }
+        });
+        return shouldAdds;
     }
 
     //查询应该被删除的机器
-    private List<Map<String, Object>> shouldRemoveMachinesOfType(int type) {
-        String sql = "select t2.id id"
-                + " from brevity_schedule_resources t2"
-                + " left join machine_info t1 on (t1.available = 1 and t1.ip=t2.host)"
-                + " where t2.type=? and t1.ip is null";
-        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql, type);
-        return list;
+    private List<BrevityScheduleTask> shouldRemoveMachinesOfType(
+            List<BrevityScheduleTask> originalMachineList, List<BrevityScheduleTask> latestMachineList) {
+        List<BrevityScheduleTask> shouldRemoves = new ArrayList<>();
+        Set<String> latests = latestMachineList.stream()
+                .map(latest -> latest.getHost()).collect(Collectors.toSet());
+        originalMachineList.forEach(original -> {
+            if(!latests.contains(original.getHost())){
+                shouldRemoves.add(original);
+            }
+        });
+        return shouldRemoves;
     }
 
-    private List<Integer> getTaskIds(int type, long version) {
-        String sql = "select id from brevity_schedule_resources "
-                + "where type=" + type + " and version < " + version;
-        List<Integer> ids = jdbcTemplate.queryForList(sql, Integer.class);
-        return ids;
+    private List<BrevityScheduleTask> getTasks(int type, long version) {
+        Map<String, String> originalMap = assistRedisService.hgetAll(REDIS_KEY_PREFIX + type);
+        Collection<String> tasks = originalMap.values();
+        List<BrevityScheduleTask> scheduleTasks = tasks.stream().map(task -> JSONObject.parseObject(task, BrevityScheduleTask.class))
+                .filter(brevityScheduleTask -> brevityScheduleTask.getVersion() < version)
+                .collect(Collectors.toList());
+        return scheduleTasks;
     }
 
     private int[] batchUpdate(List<Integer> ids, long version) {
@@ -236,22 +300,22 @@ public class BrevitySchedulerImpl implements BrevityScheduler {
             log.debug("dispatcherTasks: type={} version={}", type, currentVersion);
             // 以minutes作为分段，整除代表可以被执行
             if (currentVersion % minutes == 0) {
-                List<Integer> taskIds = getTaskIds(type, currentVersion);
-                if (CollectionUtils.isEmpty(taskIds)) {
+                List<BrevityScheduleTask> tasks = getTasks(type, currentVersion);
+                if (CollectionUtils.isEmpty(tasks)) {
                     log.info("dispatcherTasks-empty: type={} version={}", type, currentVersion);
                     continue;
                 }
                 //乱序
-                Collections.shuffle(taskIds);
+                Collections.shuffle(tasks);
                 long dispatcherSize = 0;
-                List<Integer> subTaskIds = new ArrayList<>();
-                for (int index = 0; index < taskIds.size(); index++) {
+                List<BrevityScheduleTask> subTasks = new ArrayList<>();
+                for (int index = 0; index < tasks.size(); index++) {
                     if (index > 0 && index % BATCH == 0) {
-                        log.debug("dispatcherTasks-subTaskIds: index={} size={}", index, subTaskIds.size());
+                        log.debug("dispatcherTasks-subTaskIds: index={} size={}", index, subTasks.size());
                         // copy for async
-                        asyncSubTaskIds(Lists.newArrayList(subTaskIds), currentVersion, scheduleType);
-                        dispatcherSize += subTaskIds.size();
-                        subTaskIds.clear();
+                        asyncSubTaskIds(Lists.newArrayList(subTasks), currentVersion, scheduleType);
+                        dispatcherSize += subTasks.size();
+                        subTasks.clear();
                         // if machine collect ,per 100 task sleep serve times
                         if (scheduleType.getType() == BrevityScheduleType.MACHINE_INFO.getType() ||
                                 scheduleType.getType() == BrevityScheduleType.MACHINE_MONITOR.getType() ||
@@ -264,11 +328,11 @@ public class BrevitySchedulerImpl implements BrevityScheduler {
                             }
                         }
                     }
-                    subTaskIds.add(taskIds.get(index));
+                    subTasks.add(tasks.get(index));
                 }
-                if (subTaskIds.size() > 0) {
-                    dispatcherSize += subTaskIds.size();
-                    asyncSubTaskIds(Lists.newArrayList(subTaskIds), currentVersion, scheduleType);
+                if (subTasks.size() > 0) {
+                    dispatcherSize += subTasks.size();
+                    asyncSubTaskIds(Lists.newArrayList(subTasks), currentVersion, scheduleType);
                 }
                 log.warn("dispatcherTasks-dispatched: size={} type={} version={}", dispatcherSize, type,
                         currentVersion);
@@ -276,75 +340,101 @@ public class BrevitySchedulerImpl implements BrevityScheduler {
         }
     }
 
-    public Map<String, Object> getNodeInfoByLockId(int lockId) {
+    public Map<String, Object> getNodeInfoByTask(BrevityScheduleTask task) {
         String sql = "select t2.app_id appId,t2.ip host,t2.port port"
-                + " from brevity_schedule_resources t1"
-                + " inner join instance_info t2 on (t1.host=t2.ip and t1.port=t2.port)"
-                + " where t1.id = " + lockId;
+                + " from instance_info t2 "
+                + " where t2.status != 2 "
+                + " and t2.ip = '" + task.getHost()
+                + "' and t2.port = " + task.getPort();
         return jdbcTemplate.queryForMap(sql);
     }
 
-    public Map<String, Object> getMachineInfoByLockId(int lockId) {
+    public Map<String, Object> getMachineInfoByTask(BrevityScheduleTask task) {
         String sql = "select t2.id hostId,t2.ip host"
-                + " from brevity_schedule_resources t1"
-                + " inner join machine_info t2 on t1.host=t2.ip"
-                + " where t1.id = " + lockId;
+                + " from machine_info t2 "
+                + " where t2.available = 1 "
+                + " and t2.ip = '" + task.getHost()
+                + "'";
         return jdbcTemplate.queryForMap(sql);
     }
 
-    private void asyncSubTaskIds(final List<Integer> subTaskIds, final long currentVersion,
+    private void asyncSubTaskIds(final List<BrevityScheduleTask> subTasks, final long currentVersion,
                                  final BrevityScheduleType scheduleType) {
         asyncService.submitFuture(AsyncThreadPoolFactory.BREVITY_SCHEDULER_POOL,
                 new KeyCallable<Integer>("version:" + currentVersion) {
                     @Override
                     public Integer execute() {
                         //执行分组
-                        int[] batchUpdates = batchUpdate(subTaskIds, currentVersion);
-                        List<Integer> lockIds = Lists.newArrayList();
-                        for (int i = 0; i < subTaskIds.size(); i++) {
-                            int updated = batchUpdates[i];
-                            //获得行锁
-                            if (updated > 0) {
-                                lockIds.add(subTaskIds.get(i));
-                                BREVITY_SCHEDULER_MAP.incrementAndGet(scheduleType.getType() + "-" + currentVersion);
+                        List<BrevityScheduleTask> toUnlockTasks = Lists.newArrayList();
+                        List<BrevityScheduleTask> lockTasks = Lists.newArrayList();
+                        try{
+                            for (int i = 0; i < subTasks.size(); i++) {
+                                boolean updated = assistRedisService
+                                        .setNEX(REDIS_LOCK_KEY_PREFIX + subTasks.get(i).getKeyField(), String.valueOf(subTasks.get(i).getVersion()), REDIS_LOCK_EXPIRE_SECONDS);
+                                //获得行锁
+                                if (updated) {
+                                    toUnlockTasks.add(subTasks.get(i));
+                                    String latestTaskStr = assistRedisService.hget(REDIS_KEY_PREFIX + scheduleType.getType(), subTasks.get(i).getKeyField());
+                                    BrevityScheduleTask brevityScheduleTask = JSONObject.parseObject(latestTaskStr, BrevityScheduleTask.class);
+                                    if (brevityScheduleTask.getVersion() != null && brevityScheduleTask.getVersion() >= currentVersion) {
+                                        continue;
+                                    }
+                                    subTasks.get(i).setVersion(currentVersion);
+                                    boolean hset = assistRedisService.hset(REDIS_KEY_PREFIX + scheduleType.getType(), subTasks.get(i).getKeyField(), JSONObject.toJSONString(subTasks.get(i)));
+                                    if(hset){
+                                        lockTasks.add(subTasks.get(i));
+                                        BREVITY_SCHEDULER_MAP.incrementAndGet(scheduleType.getType() + "-" + currentVersion);
+                                    }
+                                }
                             }
-                        }
-                        for (Integer lockId : lockIds) {
-                            if (scheduleType == BrevityScheduleType.REDIS_INFO) {
-                                Map<String, Object> map = getNodeInfoByLockId(lockId);
-                                long appId = MapUtils.getLong(map, "appId");
-                                String host = MapUtils.getString(map, "host");
-                                int port = MapUtils.getIntValue(map, "port");
-                                redisCenter.collectRedisInfo(appId, currentVersion, host, port);
-                            } else if (scheduleType == BrevityScheduleType.REDIS_SLOWLOG) {
-                                Map<String, Object> map = getNodeInfoByLockId(lockId);
-                                long appId = MapUtils.getLong(map, "appId");
-                                String host = MapUtils.getString(map, "host");
-                                int port = MapUtils.getIntValue(map, "port");
-                                redisCenter.collectRedisSlowLog(appId, currentVersion, host, port);
-                            } else if (scheduleType == BrevityScheduleType.MACHINE_INFO) {
-                                Map<String, Object> map = getMachineInfoByLockId(lockId);
-                                long hostId = MapUtils.getLong(map, "hostId");
-                                String host = MapUtils.getString(map, "host");
-                                machineCenter.asyncCollectMachineInfo(hostId, currentVersion, host);
-                            } else if (scheduleType == BrevityScheduleType.MACHINE_MONITOR) {
-                                Map<String, Object> map = getMachineInfoByLockId(lockId);
-                                long hostId = MapUtils.getLong(map, "hostId");
-                                String host = MapUtils.getString(map, "host");
-                                machineCenter.asyncMonitorMachineStats(hostId, host);
-                            } else if (scheduleType == BrevityScheduleType.MACHINE_NMON) {
-                                Map<String, Object> map = getMachineInfoByLockId(lockId);
-                                String host = MapUtils.getString(map, "host");
-                                serverStatusCollector.asyncFetchServerStatus(host);
-                            } else if (scheduleType == BrevityScheduleType.REDIS_LATENCY) {
-                                Map<String, Object> map = getNodeInfoByLockId(lockId);
-                                long appId = MapUtils.getLong(map, "appId");
-                                String host = MapUtils.getString(map, "host");
-                                int port = MapUtils.getIntValue(map, "port");
-                                redisCenter.collectRedisLatencyInfo(appId, currentVersion, host, port);
+                            for (BrevityScheduleTask task : lockTasks) {
+                                if (scheduleType == BrevityScheduleType.REDIS_INFO) {
+                                    Map<String, Object> map = getNodeInfoByTask(task);
+                                    long appId = MapUtils.getLong(map, "appId");
+                                    String host = MapUtils.getString(map, "host");
+                                    int port = MapUtils.getIntValue(map, "port");
+                                    Integer instanceType = MapUtils.getInteger(map, "instanceType");
+                                    redisCenter.collectRedisInfo(appId, currentVersion, host, port);
+                                } else if (scheduleType == BrevityScheduleType.REDIS_SLOWLOG) {
+                                    Map<String, Object> map = getNodeInfoByTask(task);
+                                    long appId = MapUtils.getLong(map, "appId");
+                                    String host = MapUtils.getString(map, "host");
+                                    int port = MapUtils.getIntValue(map, "port");
+                                    Integer instanceType = MapUtils.getInteger(map, "instanceType");
+                                    redisCenter.collectRedisSlowLog(appId, currentVersion, host, port);
+                                } else if (scheduleType == BrevityScheduleType.MACHINE_INFO) {
+                                    Map<String, Object> map = getMachineInfoByTask(task);
+                                    long hostId = MapUtils.getLong(map, "hostId");
+                                    String host = MapUtils.getString(map, "host");
+                                    machineCenter.asyncCollectMachineInfo(hostId, currentVersion, host);
+                                } else if (scheduleType == BrevityScheduleType.MACHINE_MONITOR) {
+                                    Map<String, Object> map = getMachineInfoByTask(task);
+                                    long hostId = MapUtils.getLong(map, "hostId");
+                                    String host = MapUtils.getString(map, "host");
+                                    machineCenter.asyncMonitorMachineStats(hostId, host);
+                                } else if (scheduleType == BrevityScheduleType.MACHINE_NMON) {
+                                    Map<String, Object> map = getMachineInfoByTask(task);
+                                    String host = MapUtils.getString(map, "host");
+                                    serverStatusCollector.asyncFetchServerStatus(host);
+                                } else if (scheduleType == BrevityScheduleType.REDIS_LATENCY) {
+                                    Map<String, Object> map = getNodeInfoByTask(task);
+                                    long appId = MapUtils.getLong(map, "appId");
+                                    String host = MapUtils.getString(map, "host");
+                                    int port = MapUtils.getIntValue(map, "port");
+                                    Integer instanceType = MapUtils.getInteger(map, "instanceType");
+                                    redisCenter.collectRedisLatencyInfo(appId, currentVersion, host, port);
+                                }
                             }
+
+                        } finally {
+                            List<String> keys = new ArrayList<>();
+                            toUnlockTasks.forEach(task -> keys.add(REDIS_LOCK_KEY_PREFIX + task.getKeyField()));
+                            String[] keyArray = new String[keys.size()];
+                            assistRedisService.delMulti(keys.toArray(keyArray));
                         }
-                        return lockIds.size();
+                        log.warn("dispatcherTasks asyncSubTask this batch end time: {}, scheduleType:{}, provideSize:{}, handleSize:{}"
+                                , System.currentTimeMillis(), scheduleType.getInfo(), subTasks.size(), lockTasks.size());
+                        return lockTasks.size();
                     }
                 });
     }

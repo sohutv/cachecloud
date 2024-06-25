@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CacheCloud命中率</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <#include '/inc/frontResources.html'>
+  </head>
+  <body class="hold-transition sidebar-mini layout-navbar-fixed">
+    <div class="wrapper">
+      <#include '/inc/head.html'>
+      <div class="content-wrapper ml-0">
+        <div class="content">
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="tab-content">
+                      <div class="tab-pane active" id="app_client_command_statistics">
+                        <div class="col-12" id="mainClientCommandContainer">
+                          <br/>
+
+                          <form id="appHitRatiosForm" class="row">
+                            <div class="row justify-content-end">
+                              <label class="col-form-label col-auto" style="font-weight:bold;text-align:left;">
+                                &nbsp;查询日期:&nbsp;&nbsp;
+                              </label>
+                              <div class="col-auto">
+                                <input type="date" class="form-control" size="20" name="endDate" id="endDate" value="${searchDate}"/>
+                              </div>
+                              <input type="hidden" name="appId" id="appId" value="${appId}">
+                              <input type="hidden" name="statName" value="avg_hit_ratio">
+                              <div class="col-auto">
+                                <label><button type="button" class="btn btn-info" onclick="loadAppHitRatio()"/>查询</button></label>
+                              </div>
+                            </div>
+                          </form>
+
+
+                          <script type="text/javascript">
+                            var initialEndDate = '${searchDate}';
+                            var initialAppId = '${appId}';
+                            $(document).ready(
+                              function () {
+                                loadAppHitRatio(initialAppId, initialEndDate);
+                              }
+                            );
+
+                            function loadAppHitRatio(appId, endDate){
+                              if(appId == null || appId == undefined){
+                                appId = $("#appId").val()
+                              }
+                              if(endDate == null || endDate == undefined){
+                                endDate = $("#endDate").val()
+                              }
+
+                              var options = getOption("containerHitRatio", "<b>命中率统计</b>", "%");
+                              var commandsUrl = "${request.contextPath}/admin/app/getMutiDatesAppHitRatioStats.json?appId=" + appId + "&statName=avg_hit_ratio&endDate=" + endDate;
+                              $.ajax({
+                                type: "get",
+                                url: commandsUrl,
+                                async: true,
+                                success: function (data) {
+                                  var dataArr = eval(data.data);
+                                  var dataSeries = [];
+                                  var count;
+                                  for (var i = 0; i < dataArr.length; i++) {
+                                      var dataInfo = dataArr[i];
+                                      count = dataInfo.y;
+                                      var pointName = dataInfo.date + ":  " + count + "%";
+                                      var dataPoint = {
+                                          name: pointName,
+                                          x: dataInfo.x,
+                                          y: count,
+                                      };
+                                      dataSeries.push(dataPoint);
+                                  }
+
+                                  var seriesPoints = {
+                                      name: "命中趋势图",
+                                      data: dataSeries,
+                                      marker: {
+                                          radius: 1,  //曲线点半径，默认是4
+                                      }
+                                  };
+                                  options.series.push(seriesPoints);
+                                  new Highcharts.Chart(options);
+                                }
+                              });
+                            }
+                          </script>
+
+                          <!-- 命中率相关 -->
+                          <div id="containerHitRatio"
+                               style="max-width: 100%; min-width: 310px; height: 350px; margin: 0 auto"></div>
+                          <br/>
+                        </div>
+                        <div>
+
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <#include "/inc/footer.html">
+    </div>
+  </body>
+</html>

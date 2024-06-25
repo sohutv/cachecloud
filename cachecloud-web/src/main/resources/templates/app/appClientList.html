@@ -1,0 +1,107 @@
+<div class="col-md-12">
+    <div class="card-header">
+      <h4 class="card-title">
+        应用连接信息
+      </h4>
+    </div>
+    <h6 class="mt-3 ms-3">
+      <form method="post" action="${request.contextPath}/admin/app/index?appId=${appDesc.appId}&tabTag=app_clientList" id="conditionFrom">
+        <input type="radio" value="0" <#if (condition == 0)>checked="checked"</#if>
+        onchange="changeCondition(this.value)"/> 应用客户端
+        <input type="radio" value="1" <#if (condition == 1)>checked="checked"</#if>
+        onchange="changeCondition(this.value)"/> cc客户端
+        <input type="radio" value="2" <#if (condition == 2)>checked="checked"</#if>
+        onchange="changeCondition(this.value)"/> redis客户端
+        <input type="radio" value="3" <#if (condition == 3)>checked="checked"</#if>
+        onchange="changeCondition(this.value)"/> 所有客户端
+        <input type="hidden" id="condition" name="condition" value="${condition}">
+      </form>
+    </h6>
+    <div class="table-responsive">
+      <!-- table begin -->
+      <table class="table table-striped">
+        <thead>
+        <th scope="col">序号</td>
+        <th scope="col">客户端ip</td>
+        <th scope="col">总连接数</td>
+        <th scope="col">客户端类型</td>
+        <th scope="col">实例详细</td>
+        </thead>
+        <tbody>
+        <#list addrInstanceList as addrInstance>
+          <tr>
+            <td>${addrInstance_index + 1}</td>
+            <td>${addrInstance['addr']}</td>
+            <td>${addrInstance['size']}</td>
+            <td>
+              <#list addrInstance['flags'] as clientType>
+                ${clientType}
+                <br/>
+              </#list>
+            </td>
+            <td>
+              <button type="button" class="btn btn-success" data-bs-target="#modal-${addrInstance_index}"
+                      data-bs-toggle="modal">
+                查看实例连接统计
+              </button>
+
+              <div id="modal-${addrInstance_index}" class="modal fade" tabindex="-1">
+                <div class="modal-dialog" style="width: 100%">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h4 class="modal-title">客户端 ${addrInstance['addr']} 连接信息</h4>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal"
+                              aria-hidden="true"></button>
+                    </div>
+
+                    <div class="modal-body">
+                      <div class="container-fluid">
+                        <div class="row">
+                          <!-- 控件开始 -->
+                          <div class="col-md-12">
+                            <table class="table table-bordered table-striped table-hover">
+                              <thead>
+                              <tr>
+                                <td>实例id</td>
+                                <td>实例</td>
+                                <td>连接数</td>
+                              </tr>
+                              </thead>
+                              <tbody>
+                              <#list addrInstance['instanceClientStats']?keys as key>
+                                <#assign instanceId = key>
+                                <tr>
+                                  <td>${instanceId}</td>
+                                  <td><a href="${request.contextPath}/admin/instance/index?instanceId=${instanceId}&tabTag=instance_clientList" target="_blank">${instanceMap?api.get(instanceId)}</a></td>
+                                  <td>${((addrInstance['instanceClientStats'])?api.get(instanceId))['count']}</td>
+                                </tr>
+                              </#list>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" data-bs-dismiss="modal" class="btn btn-secondary">Close</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </#list>
+        </tbody>
+      </table>
+      <!-- End Table with stripped rows -->
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+  function changeCondition(value) {
+    console.log('radio:'+value);
+    $('#condition').val(value);
+    $('#conditionFrom').submit();
+  }
+</script>

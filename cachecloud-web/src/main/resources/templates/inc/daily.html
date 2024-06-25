@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<script src="${request.contextPath}/assets/vendor/jquery/jquery-3.7.0.min.js"></script>
+<script src="${request.contextPath}/assets/vendor/bootstrap/js/bootstrap.js"></script>
+<script src="${request.contextPath}/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Google Font: Source Sans Pro -->
+<link rel="stylesheet" href="${request.contextPath}/assets/vendor/fonts/fonts-googleapis-source-sans-pro.css">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="${request.contextPath}/assets/plugins/fontawesome-free/css/all.min.css">
+<!-- Theme style -->
+<link rel="stylesheet" href="${request.contextPath}/assets/dist/css/adminlte.min.css">
+<!-- overlayScrollbars -->
+<link rel="stylesheet" href="${request.contextPath}/assets/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
+
+<link href="${request.contextPath}/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<link href="${request.contextPath}/assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+<link href="${request.contextPath}/assets/vendor/bootstrap-select/bootstrap-select.css" rel="stylesheet" />
+<head>
+    <title>CacheCloud值班电话</title>
+</head>
+<body class="hold-transition sidebar-mini layout-navbar-fixed">
+    <div class="wrapper">
+        <#include '/inc/head.html'>
+        <div class="content-wrapper ml-0">
+            <div class="content">
+                <div class="container">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">
+                                值班联系人:
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <div id="contact" class="page-body">
+                               <div class="well">
+                                    <#include '/inc/contact.html'>
+                               </div>
+                            </div>
+
+                            <div id="contactWechat" class="page-body">
+                               <h5>微信群：</h5>
+                               <div class="well">
+                                    <img width="200px" height="200px" src="http://photocdn.tv.sohu.com/img/cachecloud/weixin.jpg?time=<%=System.currentTimeMillis()%>"/>
+                               </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+	    </div>
+    </div>
+</body>
+</html>

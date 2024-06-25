@@ -1,0 +1,329 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="bi bi-tags-fill">工单处理汇总</i></h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="table-toolbar">
+                            <form class="row align-items-center" role="form" method="post" action="${request.contextPath}/manage/app/auditList"
+                                  id="search_form">
+                                <input name="tabId" id="tabId" value="${tabId!}" type="hidden"/>
+                                <label class="col-form-label col-auto">开始日期:</label>
+                                <div class="col-auto">
+                                    <input type="date" class="form-control" size="15" name="startDate" id="startDate"
+                                           value="${startDate!}"/>
+                                </div>
+                                <label class="col-form-label col-auto">结束日期:</label>
+                                <div class="col-auto">
+                                    <input type="date" class="form-control" size="15" name="endDate" id="endDate" value="${endDate!}"/>
+                                </div>
+                                <label class="col-form-label col-auto">处理人:</label>
+                                <div class="col-auto">
+                                    <select name="adminId" style="width: 150px" class="form-select">
+                                        <option value="" <#if !(adminId??)>selected="selected"</#if>>
+                                        所有
+                                        </option>
+                                        <#list userMap?keys as key>
+                                            <#assign  admin = userMap?api.get(key)>
+                                            <#if (admin.type==0)>
+                                                <option value="${admin.id!}"
+                                                <#if adminId?? && (adminId == admin.id)>selected</#if>>
+                                                【${admin.id!}】${admin.name!}&nbsp;${admin.chName!}
+                                                </option>
+                                            </#if>
+                                        </#list>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary col-auto">查询</button>
+                            </form>
+                        </div>
+                        <br/>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered table-hover">
+                                <tr>
+                                    <td><span style="font-weight:bold">工单总数</span></td>
+                                    <td>
+                                        ${(statusStatisMap['0']!0 + statusStatisMap['1']!0 + statusStatisMap['2']!0 + statusStatisMap['-1']!0)}
+                                    </td>
+                                    <td><span style="font-weight:bold">完成工单数</span></td>
+                                    <td>${statusStatisMap['1']!0}</td>
+                                    <td style="color:orange;"><span style="font-weight:bold">待处理工单数</span></td>
+                                    <td style="color:orange;">${(statusStatisMap['0']!0 + statusStatisMap['2']!0)}</td>
+                                    <td><span style="font-weight:bold">被驳回工单数</span></td>
+                                    <td>${statusStatisMap['-1']!0}</td>
+                                </tr>
+                                <tr>
+                                    <td><span style="font-weight:bold">申请应用</span></td>
+                                    <td>${typeStatisMap['0']!0}</td>
+                                    <td><span style="font-weight:bold">下线应用</span></td>
+                                    <td>${typeStatisMap['10']!0}</td>
+                                    <td><span style="font-weight:bold">键值分析</span></td>
+                                    <td>${typeStatisMap['6']!0}</td>
+                                    <td><span style="font-weight:bold">诊断应用</span></td>
+                                    <td>${typeStatisMap['8']!0}</td>
+                                </tr>
+                                <tr>
+                                    <td><span style="font-weight:bold">容量变更</span></td>
+                                    <td>${typeStatisMap['1']!0}</td>
+                                    <td><span style="font-weight:bold">配置修改</span></td>
+                                    <td>${(typeStatisMap['4']!0 + typeStatisMap['2']!0)}</td>
+                                    <td><span style="font-weight:bold">用户注册</span></td>
+                                    <td>${typeStatisMap['3']!0}</td>
+                                    <td><span style="font-weight:bold">应用数据迁移</span></td>
+                                    <td>${typeStatisMap['11']!0}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">应用审批列表</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="table-toolbar">
+                            <div class="col-md-12">
+                                <form class="row align-items-center" role="form" method="post" action="${request.contextPath}/manage/app/auditList">
+                                    <label class="col-form-label col-auto">
+                                        申请人:
+                                    </label>
+                                    <div class="col-md-2">
+                                        <select name="userId" class="selectpicker border rounded w-100"
+                                                data-live-search="true">
+                                            <option value="" <#if !(userId??)>selected="selected"</#if>>
+                                            所有
+                                            </option>
+                                            <#list userMap?keys as key>
+                                                <#assign user = userMap?api.get(key)>
+                                                <option value="${user.id!}"
+                                                <#if userId?? && (userId == user.id)>selected</#if>>
+                                                【${user.id!}】${user.name!}&nbsp;${user.chName!}
+                                                </option>
+                                            </#list>
+                                        </select>
+                                    </div>
+                                    <label class="col-form-label col-auto">
+                                        处理人:
+                                    </label>
+                                    <div class="col-md-2">
+                                        <select class="form-select w-100" name="operateId">
+                                            <option value=""
+                                            <#if !(operateId??)>selected="selected"</#if>>
+                                            所有
+                                            </option>
+                                            <#list userMap?keys as key>
+                                                <#assign admin = userMap?api.get(key)>
+                                                <#if (admin.type==0)>
+                                                    <option value="${admin.id!}"
+                                                    <#if operateId?? && (operateId == admin.id)>selected</#if>>
+                                                    【${admin.id!}】${admin.name!}&nbsp;${admin.chName!}
+                                                    </option>
+                                                </#if>
+                                            </#list>
+                                        </select>
+                                    </div>
+                                    <label class="col-form-label col-auto">
+                                        类型:
+                                    </label>
+                                    <div class="col-md-2">
+                                        <select class="form-select w-100" name="type">
+                                            <option value="" <#if !(type??)>selected="selected"</#if>>
+                                            所有类型
+                                            </option>
+                                            <#list appAuditTypeMap?keys as key>
+                                                <#assign auditType = appAuditTypeMap?api.get(key)>
+                                                <option value="${auditType.value!}"
+                                                <#if type?? && (type == auditType.value)>selected="selected"</#if>>
+                                                ${auditType.info!}
+                                                </option>
+                                            </#list>
+                                        </select>
+                                    </div>
+                                    <label class="col-form-label col-auto">
+                                        状态:
+                                    </label>
+                                    <div class="col-md-2">
+                                        <select class="form-select w-100" name="status">
+                                            <option value="0" <#if status?? && (status == 0)>selected="selected"</#if>>
+                                            待处理列表
+                                            </option>
+                                            <option value="2" <#if status?? && (status == 2)>selected="selected"</#if>>
+                                            已受理任务
+                                            </option>
+                                            <option value="1" <#if status?? && (status == 1)>selected="selected"</#if>>
+                                            通过列表
+                                            </option>
+                                            <option value="-1" <#if status?? && (status == -1)>selected="selected"</#if>>
+                                            驳回列表
+                                            </option>
+                                            <option value="4" <#if status?? && (status == 4)>selected="selected"</#if>>
+                                            所有状态
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-success col-auto">查询</button>
+                                </form>
+                            </div>
+                            <br/>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover table-sm" id="tableDataList">
+                                <thead class="table-light">
+                                <tr>
+                                    <th scope="col" width="6%">审批id</th>
+                                    <th scope="col" width="7%">appID</th>
+                                    <th scope="col" width="12%">应用名</th>
+                                    <th scope="col" width="9%">申请人</th>
+                                    <th scope="col" width="7%">申请类型</th>
+                                    <th scope="col" width="30%">申请描述</th>
+                                    <th scope="col" width="10%">申请时间</th>
+                                    <th scope="col" width="5%">审核状态</th>
+                                    <th scope="col" width="7%">处理人</th>
+                                    <th scope="col" width="7%">操作</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <#list list as item>
+                                    <tr>
+                                        <td width="6%">
+                                            ${item.id!}
+                                        </td>
+                                        <td width="7%">
+                                            <#if (item.type == 3)>
+                                                无
+                                            <#else>
+                                                <a target="_blank"
+                                                   href="${request.contextPath}/admin/app/index?appId=${item.appId!}">${item.appId!}</a>
+                                            </#if>
+                                        </td>
+                                        <td width="12%">
+                                            <#if (item.type == 3)>
+                                                无
+                                            <#else>
+                                                <#if item?? && item.appDesc??>
+                                                    ${item.appDesc.name!}
+                                                </#if>
+                                            </#if>
+                                        </td>
+                                        <td width="9%">${item.userName!}</td>
+                                        <td width="7%">${(appAuditTypeMap?api.get(item.type)).info!}</td>
+                                        <td width="30%">${item.info!}</td>
+                                        <td width="10%">${item.createTime!?string("yyyy-MM-dd HH:mm:ss")}</td>
+
+                                        <td width="5%">
+                                            <#if (item.status == 0)><font
+                                                    style="color: orange;">待审</font>
+                                            <#elseif (item.status == 1)><font
+                                                    style="color: green;">通过</font>
+                                            <#elseif (item.status == 2)><font
+                                                    style="color: cornflowerblue;">处理中</font>
+                                            <#elseif (item.status == -1)><font style="color: darkred;">驳回
+                                            </#if>
+                                        </td>
+                                        <td width="7%">
+                                            <#if (userMap?api.get(item.operateId))??>
+                                                ${(userMap?api.get(item.operateId)).chName!}
+                                            </#if>
+                                        </td>
+                                        <td width="7%" style="white-space: nowrap">
+                                            <!-- 任务-->
+                                            <#if (item.taskId > 0)>
+                                                <a target="_blank" class="btn btn-info btn-sm" href="${request.contextPath}/manage/task/flow?taskId=${item.taskId!}">查看任务</a>
+                                            </#if>
+                                            <!--驳回-->
+                                            <#if (item.status == 0)>
+                                                <a href="javascript:void(0);" class="btn btn-danger btn-sm" data-bs-target="#appRefuseModal${item.id!}"
+                                                   data-bs-toggle="modal">驳回</a>
+                                            </#if>
+
+                                            <!--处理-->
+                                            <#if (item.status == 2)>
+                                                <#assign auditUrl = "${request.contextPath}/manage/app/addAuditStatus?status=1&appAuditId=${item.id!}">
+                                                <a onclick="if(window.confirm('确认要通过该申请请求吗?')){return true;}else{return false;}"
+                                                   href="${auditUrl!}" class="btn btn-success btn-sm" >通过</a>
+                                                <#if (item.type == 12)>
+                                                    <a target="_blank" class="btn btn-info btn-sm"
+                                                       href="${request.contextPath}/import/app/init?importId=${item.param1!}">迁移进度</a>
+                                                </#if>
+                                            </#if>
+                                            &nbsp;
+                                            <#if (item.status == 0)>
+                                                <#if (item.type == 0)>
+                                                    <#assign auditDealUrl = "${request.contextPath}/manage/app/initAppDeploy?appAuditId=${item.id!}">
+                                                    <a target="_blank" href="${auditDealUrl!}" class="btn btn-warning btn-sm">审批处理</a>
+                                                <#elseif (item.type == 1)>
+                                                    <#assign auditDealUrl="${request.contextPath}/manage/app/initAppScaleApply?appAuditId=${item.id!}">
+                                                    <a target="_blank" href="${auditDealUrl!}" class="btn btn-warning btn-sm">审批处理</a>
+                                                <#elseif (item.type == 2)>
+                                                    <#assign auditDealUrl = "${request.contextPath}/manage/app/initAppConfigChange?appAuditId=${item.id!}">
+                                                    <a target="_blank" href="${auditDealUrl!}" class="btn btn-warning btn-sm">审批处理</a>
+
+                                                <#elseif (item.type == 3)>
+                                                    <a onclick="if(window.confirm('确认要通过该申请请求吗?')){return true;}else{return false;}"
+                                                       href="${request.contextPath}/manage/user/addAuditStatus?status=1&appAuditId=${item.id!}" class="btn btn-success btn-sm">通过</a>
+
+                                                <#elseif (item.type == 4)>
+                                                    <#assign auditDealUrl = "${request.contextPath}/manage/instance/initInstanceConfigChange?appAuditId=${item.id!}">
+                                                    <a target="_blank" href="${auditDealUrl!}" class="btn btn-warning btn-sm">审批处理</a>
+
+                                                <#elseif (item.type == 5)>
+                                                    <#assign auditDealUrl = "${request.contextPath}/manage/app/addAuditStatus?status=1&appAuditId=${item.id!}">
+                                                    <a onclick="if(window.confirm('确认要通过该申请请求吗?')){return true;}else{return false;}"
+                                                       href="${auditUrl!}" class="btn btn-success btn-sm">通过</a>
+
+                                                <#elseif (item.type == 6)>
+                                                    <a onclick="if(window.confirm('确认要处理该申请吗?')){return true;}else{return false;}"
+                                                       target="_blank"
+                                                       href="${request.contextPath}/manage/app/startKeyAnalysis?status=1&appId=${item.appDesc.appId!}&appAuditId=${item.id!}" class="btn btn-warning btn-sm">分析</a>
+
+                                                <#elseif (item.type == 7)>
+                                                    <#assign auditDealUrl = "${request.contextPath}/manage/app/addAuditStatus?status=2&appAuditId=${item.id!}&type=7&appId=${item.appId!}">
+                                                    <a target="_blank" href="${auditDealUrl!}" class="btn btn-warning btn-sm">审批处理</a>
+
+                                                <#elseif (item.type == 8)>
+                                                    <a onclick="if(window.confirm('确认要处理该申请吗?')){return true;}else{return false;}"
+                                                       target="_blank"
+                                                       href="${request.contextPath}/manage/app/addAuditStatus?status=2&appAuditId=${item.id!}&type=8" class="btn btn-warning btn-sm">诊断</a>
+
+                                                <#elseif (item.type == 10)>
+                                                    <a target="_blank"
+                                                       href="${request.contextPath}/manage/app/addAuditStatus?status=2&appAuditId=${item.id!}&type=10&appId=${item.appId!}" class="btn btn-danger btn-sm">下线</a>
+
+                                                <#elseif (item.type == 11)>
+                                                    <a target="_blank"
+                                                       href="${request.contextPath}/manage/app/addAuditStatus?status=2&appAuditId=${item.id!}&type=11&appId=${item.appId!}" class="btn btn-warning btn-sm">审批处理</a>
+
+                                                <#elseif (item.type == 12)>
+                                                    <a target="_blank"
+                                                       href="${request.contextPath}/manage/app/addAuditStatus?status=2&appAuditId=${item.id!}&type=12&appId=${item.appId!}" class="btn btn-warning btn-sm">审批处理</a>
+
+                                                <#elseif (item.type == 13)>
+                                                    <a target="_blank"
+                                                       href="${request.contextPath}/manage/app/addAuditStatus?status=2&appAuditId=${item.id!}&type=13&appId=${item.appId!}" class="btn btn-warning btn-sm">审批处理</a>
+                                                </#if>
+                                            </#if>
+                                        </td>
+                                    </tr>
+                                </#list>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<#list list as item>
+    <#include "/manage/appAudit/appAudit.html">
+</#list> 

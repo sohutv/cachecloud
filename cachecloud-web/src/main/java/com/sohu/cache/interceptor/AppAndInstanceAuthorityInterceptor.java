@@ -101,7 +101,7 @@ public class AppAndInstanceAuthorityInterceptor extends HandlerInterceptorAdapte
             // 没权限
             String path = session.getServletContext().getContextPath();
             try {
-                response.sendRedirect(path + "/resources/error/noPower.jsp?appId=" + appId);
+                response.sendRedirect(path + "/web/resource/noPower?appId=" + appId);
             } catch (IOException e) {
                 logger.error(e.getMessage(), e);
             }

@@ -1,0 +1,240 @@
+<script type="text/javascript">
+  function changeAppIdSelect(appId, instance_select) {
+    document.getElementById(instance_select).options.length = 0;
+    document.getElementById('appConfigKey').options.length = 0;
+    $('#appConfigKey').selectpicker('refresh');
+    $('#' + instance_select).selectpicker('destroy');
+    $('#' + instance_select).selectpicker();
+
+    $.post('${request.contextPath}/manage/app/tool/diagnostic/appInstances',
+            {
+              appId: appId,
+            },
+            function (data) {
+              var status = data.status;
+              if (status == 1) {
+                $('#' + instance_select).selectpicker('destroy');
+                var appInstanceList = data.appInstanceList;
+                $('#' + instance_select).append("<option value=''>" + "所有实例" + "</option>");
+                for (var i = 0; i < appInstanceList.length; i++) {
+                  var val = appInstanceList[i].id;
+                  var term = appInstanceList[i].hostPort + '（角色：' + appInstanceList[i].roleDesc + '）';
+                  $('#' + instance_select).append("<option value='" + val + "'>" + term + "</option>");
+                }
+
+                $('#' + instance_select).selectpicker();
+              } else {
+                console.log('data.status:' + status);
+              }
+            }
+    );
+  }
+  function changeInstanceSelect(instanceId, appConfigKey) {
+    console.log(instanceId);
+
+    var appId = $('#appConfig_appId').selectpicker('val');
+    if (appId == null || appId == '') {
+      alert("请选择应用");
+      $('#appConfig_appId').focus();
+      return false;
+    }
+
+    document.getElementById(appConfigKey).options.length = 0;
+    $('#' + appConfigKey).selectpicker('destroy');
+    $('#' + appConfigKey).selectpicker();
+
+    $.post('${request.contextPath}/admin/app/redisConfig',
+            {
+              appId: appId,
+              instanceId:  instanceId
+            },
+            function (data) {
+              var status = data.status;
+              if (status == 1) {
+                $('#' + appConfigKey).selectpicker('destroy');
+                var redisConfigMap = data.redisConfigMap;
+                for(var key in redisConfigMap){
+                  var item= '配置项：'+key+"  配置值："+redisConfigMap[key];
+                  $('#' + appConfigKey).append("<option value='" + key + "'>" + item + "</option>");
+                }
+                $('#' + appConfigKey).selectpicker();
+              } else {
+                console.log('data.status:' + status);
+              }
+            }
+    );
+  }
+  function appConfigChange() {
+    var appId = $('#appConfig_appId').selectpicker('val');
+    if (appId == null || appId == '') {
+      alert("请选择应用");
+      $('#appConfig_appId').focus();
+      return false;
+    }
+    var instanceId = $('#instance-select').selectpicker('val');
+    console.log("instanceId:" + instanceId);
+    if(instanceId == null){
+      alert("请选择实例");
+      $('#instance-select').focus();
+      return false;
+    }
+
+    var appConfigKey = document.getElementById("appConfigKey");
+    if (appConfigKey.value == "") {
+      alert("配置项不能为空");
+      appConfigKey.focus();
+      return false;
+    }
+
+    var appConfigValue = document.getElementById("appConfigValue");
+    if (appConfigValue.value == "") {
+      alert("配置值不能为空");
+      appConfigValue.focus();
+      return false;
+    }
+
+    var appConfigReason = document.getElementById("appConfigReason");
+    if (appConfigReason.value == "") {
+      alert("配置原因不能为空");
+      appConfigReason.focus();
+      return false;
+    }
+
+    if(!confirm("确认提交应用配置修改？")){
+      return ;
+    }
+
+    var appConfigChangeBtn = document.getElementById("appConfigChangeBtn");
+    appConfigChangeBtn.disabled = true;
+
+    var url;
+    var data;
+    if (instanceId == null || instanceId == '') {
+      url = '${request.contextPath}/admin/app/changeAppConfig';
+      data = {
+        appId: appId,
+        instanceId: instanceId,
+        appConfigKey: appConfigKey.value,
+        appConfigValue: appConfigValue.value,
+        appConfigReason: appConfigReason.value
+      };
+    } else {
+      url = '${request.contextPath}/admin/app/changeInstanceConfig';
+      data = {
+        appId: appId,
+        instanceId: instanceId,
+        instanceConfigKey: appConfigKey.value,
+        instanceConfigValue: appConfigValue.value,
+        instanceConfigReason: appConfigReason.value
+      };
+    }
+
+    $.post(
+            url,
+            data,
+            function (data) {
+              if (data == 1) {
+                $("#appConfigChangeInfo").html("<div class='alert alert-error' ><font color='green'><strong>Success!</strong>配置修改申请提交成功，即将跳转工单列表！</font><button class='btn-close' data-bs-dismiss='alert'></button></div>");
+                setTimeout("location.href = '${request.contextPath}/admin/app/jobs'", 1000);
+              } else {
+                appConfigChangeBtn.disabled = false;
+                $("#appConfigChangeInfo").html("<div class='alert alert-error' ><font color='red'><strong>Error!</strong>更新失败！<font><button class='btn-close' data-bs-dismiss='alert'></button></div>");
+              }
+            }
+    );
+  }
+</script>
+
+<div class="card-header">
+  <h4 class="card-title">
+    修改应用配置
+  </h4>
+</div>
+
+<div class="card-body">
+    <div class="row">
+      <div class="form-group row">
+        <label class="col-form-label col-md-2 offset-md-1">应用<font color='red'>(*)</font></label>
+        <div class="col-md-5">
+          <select id="appConfig_appId" name="appId" class="selectpicker show-tick col-md-12 border rounded"
+                  data-live-search="true" title="选择应用"
+                  onchange="changeAppIdSelect(this.value,'instance-select')">
+            <option value="">选择应用</option>
+            <#list appDescMap?keys as key>
+              <#assign appDesc = appDescMap?api.get(key)>
+              <#if (appDesc.status==2)>
+                <option value="${appDesc.appId}" title="${appDesc.appId} ${appDesc.name}" <#if (appId?? && appId == appDesc.appId)>selected="selected"</#if>>
+                    【${appDesc.appId}】&nbsp;名称：${appDesc.name}&nbsp;类型：${appDesc.typeDesc}&nbsp;版本：${appDesc.versionName}
+                </option>
+              </#if>
+            </#list>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-form-label col-md-2 offset-md-1">实例</label>
+        <div class="col-md-5">
+          <select id="instance-select" name="nodes"
+                  class="selectpicker col-md-12 border rounded"
+                  data-live-search="true" title="请选择实例 "data-size="8"
+                  onchange="changeInstanceSelect(this.value,'appConfigKey')">
+            <#if appInstanceList??>
+              <#list appInstanceList as instanceInfo>
+                <option value="${instanceInfo.id}" <#if (instanceId?? && instanceId == instanceInfo.id)>selected</#if>>
+                ${instanceInfo.hostPort}（角色：${instanceInfo.roleDesc})
+                </option>
+              </#list>
+            </#if>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-form-label col-md-2 offset-md-1">配置项<font color='red'>(*)</font></label>
+        <div class="col-md-5">
+          <select id="appConfigKey" name="appConfigKey"
+                  class="selectpicker col-md-12 border rounded"
+                  data-live-search="true" title="选择配置项" data-size="8">
+            <#list redisConfigMap?keys as key>
+              <option value="${appDesc.appId}">
+                配置项：${key} 配置值：+${redisConfigMap[key]};
+              </option>
+            </#list>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-form-label col-md-2 offset-md-1">新配置值<font color='red'>(*)</font></label>
+        <div class="col-md-5">
+          <input type="text" name="appConfigValue" id="appConfigValue"
+                 placeholder="填写新的配置值" class="form-control">
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label class="col-form-label col-md-2 offset-md-1">修改原因<font color='red'>(*)</font></label>
+        <div class="col-md-5">
+              <textarea name="appConfigReason" id="appConfigReason" placeholder="如：1.需要更多的连接数。"
+                        class="form-control"></textarea>
+        </div>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <div class="text-center">
+          <button id="appConfigChangeBtn" class="btn btn-danger" onclick="appConfigChange()">
+            <i class="bi bi-check"></i>
+            提交申请
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <div id="appConfigInfo" class="offset-md-3 col-md-9"></div>
+      </div>
+    </div>
+    <div id="appConfigChangeInfo"></div>
+
+</div>

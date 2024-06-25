@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>CacheCloud应用统计信息</title>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <#include '/inc/frontResources.html'>
+</head>
+
+<body class="hold-transition sidebar-mini layout-navbar-fixed">
+<div class="wrapper">
+  <#include '/inc/head.html'>
+  <div class="content-wrapper ml-0">
+    <div class="content">
+      <div class="container-fluid">
+        <div id="systemAlert">
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body">
+                <nav class="nav">
+                  <ul class="nav nav-tabs d-flex align-items-center" id="app_tabs">
+                    <li id="app_stat" class="nav-item" data-url="${request.contextPath}/admin/app/stat?appId=${appId!}&startDate=${startDate!}&endDate=${endDate!}">
+                      <a class="nav-link d-flex" href="?appId=${appId!}&tabTag=app_stat">应用统计信息</a>
+                    </li>
+                    <li id="app_topology" class="nav-item" data-url="${request.contextPath}/admin/app/topology?appId=${appId!}">
+                      <a class="nav-link d-flex" href="?appId=${appId!}&tabTag=app_topology">实例列表</a>
+                    </li>
+                    <li id="app_detail" class="nav-item" data-url="${request.contextPath}/admin/app/detail?appId=${appId!}">
+                      <a class="nav-link d-flex" href="?appId=${appId!}&tabTag=app_detail">应用详情</a>
+                    </li>
+                    <li id="app_clientList" class="nav-item" data-url="${request.contextPath}/admin/app/clientList?appId=${appId!}&condition=${condition!}">
+                      <a class="nav-link d-flex" href="?appId=${appId!}&tabTag=app_clientList">连接信息</a>
+                    </li>
+                    <li id="app_command_analysis" class="nav-item" data-url="${request.contextPath}/admin/app/commandAnalysis?appId=${appId!}&startDate=${startDate!}&endDate=${endDate!}&firstCommand=${firstCommand!}">
+                      <a class="nav-link d-flex" href="?appId=${appId!}&tabTag=app_command_analysis">命令曲线</a>
+                    </li>
+                    <li id="app_command" class="nav-item" data-url="${request.contextPath}/admin/app/command?appId=${appId!}">
+                      <a class="nav-link d-flex" href="?appId=${appId!}&tabTag=app_command">命令执行</a>
+                    </li>
+                    <li id="app_demo" class="nav-item" data-url="${request.contextPath}/wiki/access/client?entry=client">
+                      <a class="nav-link d-flex" href="?appId=${appId!}&tabTag=app_demo">接入代码</a>
+                    </li>
+                    <li id="app_latency" class="nav-item" data-url="${request.contextPath}/admin/app/latencyMonitor?appId=${appId}&searchDate=${searchDate!}">
+                      <a class="nav-link d-flex" href="?appId=${appId!}&tabTag=app_latency">延迟监控</a>
+                    </li>
+                    <li id="app_top_pic" class="nav-item" data-url="${request.contextPath}/admin/app/machineInstancesTopology?appId=${appId!}">
+                      <a class="nav-link d-flex" href="?appId=${appId!}&tabTag=app_top_pic">应用拓扑</a>
+                    </li>
+                    <li id="app_daily" class="nav-item" data-url="${request.contextPath}/admin/app/daily?appId=${appId}&dailyDate=${dailyDate!}">
+                      <a class="nav-link d-flex" href="?appId=${appId!}&tabTag=app_daily">日报统计</a>
+                    </li>
+                    <li id="app_key_analysis" class="nav-item" data-url="${request.contextPath}/admin/app/key?appId=${appId!}">
+                      <a class="nav-link d-flex" href="?appId=${appId!}&tabTag=app_key_analysis">键值分析</a>
+                    </li>
+                  </ul>
+                </nav>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-body">
+                <div class="tab-content">
+                  <div class="tab-pane active" id="app_statTab">
+                  </div>
+                  <div class="tab-pane" id="app_topologyTab">
+                  </div>
+                  <div class="tab-pane" id="app_detailTab">
+                  </div>
+                  <div class="tab-pane" id="app_clientListTab">
+                  </div>
+                  <div class="tab-pane" id="app_command_analysisTab">
+                  </div>
+                  <div class="tab-pane" id="app_commandTab">
+                  </div>
+                  <div class="tab-pane" id="app_demoTab">
+                  </div>
+                  <div class="tab-pane" id="app_latencyTab">
+                  </div>
+                  <div class="tab-pane" id="app_top_picTab">
+                  </div>
+                  <div class="tab-pane" id="app_dailyTab">
+                  </div>
+                  <div class="tab-pane" id="app_key_analysisTab">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <#include "/inc/footer.html">
+</div>
+<script type="text/javascript">
+  function showTab(tab) {
+    var url = $("#" + tab).attr("data-url");
+    if(url == null || url == undefined || url == ""){
+      return;
+    }
+    $.get($("#" + tab).attr("data-url"), function (result) {
+      $("#" + tab + "Tab").html(result);
+    });
+  }
+
+  function refreshActiveTab() {
+    var tab = getQueryString("tabTag");
+    if (tab) {
+      $("#" + tab + " a").addClass("active");
+      $("#" + tab + "Tab").addClass("active").siblings().removeClass("active");
+    } else {
+      tab = "app_stat";
+      $("#" + tab + " a").addClass("active");
+    }
+    console.log("tab:" + tab)
+    showTab(tab);
+    $("#tabs li a").tooltip({placement: "bottom"});
+  }
+
+  $(function () {
+    refreshActiveTab();
+  });
+
+  function getQueryString(name) {
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+    console.log("window.location.search: "+ window.location.search);
+    var r = window.location.search.substr(1).match(reg);
+    if (r != null) return unescape(r[2]);
+    return null;
+  }
+</script>
+</body>
+</html>

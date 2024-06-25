@@ -1,0 +1,45 @@
+<div class="col-md-12">
+  <div class="row">
+    <#if !(cpu??)>
+      no data
+    </#if>
+    <#if cpu?? && (cpu?size > 0)>
+      <#list cpu as item>
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <div id="container${item.name!}"
+                   style="max-width: 100%; min-width: 310px; height: 400px; margin: 0 auto">
+              </div>
+            </div>
+          </div>
+        </div>
+      </#list>
+    </#if>
+  </div>
+</div>
+
+<script type="text/javascript">
+  $(document).ready(function() {
+    initSubCpuChart();
+  });
+
+  function initSubCpuChart(){
+    <#if cpu?? && (cpu?size > 0)>
+      <#list cpu as item>
+        var options = getOptions("${item.name!}", "container${item.name!}");
+        options.subtitle.text = "max user:${item.maxUser!}% sys:${item.maxSys!}% wa:${item.maxWa!}% avg user:${item.avgUser!}% sys:${item.avgSys!}% wa:${item.avgWa!}%";
+        <#if item.userSeries??>
+          options.series.push(${item.userSeries.toJson()});
+        </#if>
+        <#if item.sysSeries??>
+          options.series.push(${item.sysSeries.toJson()});
+        </#if>
+        <#if item.waSeries??>
+          options.series.push(${item.waSeries.toJson()});
+        </#if>
+        new Highcharts.Chart(options);
+      </#list>
+    </#if>
+  }
+</script>

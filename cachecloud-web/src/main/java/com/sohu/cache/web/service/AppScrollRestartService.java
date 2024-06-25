@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @Author: zengyizhao
@@ -37,11 +38,11 @@ public interface AppScrollRestartService {
      * 根据用户信息，应用信息，重启请求信息，操作类型生成重启记录并保存
      * @param appUser
      * @param appDesc
-     * @param appRedisConfigVo
+     * @param paramObj
      * @param opertateType
      * @return
      */
-    long generateAndSaveConfigRestartRecord(AppUser appUser, AppDesc appDesc, AppRedisConfigVo appRedisConfigVo, Integer opertateType, List<InstanceInfo> pointedInstanceList);
+    long generateAndSaveConfigRestartRecord(AppUser appUser, AppDesc appDesc, Object paramObj, Integer opertateType, List<InstanceInfo> pointedInstanceList);
 
     /**
      * 保存重启记录
@@ -147,5 +148,41 @@ public interface AppScrollRestartService {
      * @return
      */
     Map<String,Object> handleConfig(AppUser appUser, AppDesc appDesc, List<InstanceInfo> instanceInfoList, AppRedisConfigVo appRedisConfigVo);
+
+    /**
+     * 判断应用是否正在滚动重启
+     * @param appId
+     * @return
+     */
+    boolean isAppOnScrollRestart(long appId);
+
+    /**
+     * 执行failover 并check重试
+     * @param retryTime
+     * @param slaveInstance
+     * @param appDesc
+     * @return
+     */
+    boolean failoverAndCheckIdempotent(int retryTime, InstanceInfo slaveInstance, AppDesc appDesc);
+
+    /**
+     * 执行failover并检查
+     * @param slaveInstance 必须包括masterHost & masterPort
+     * @param appDesc
+     * @return
+     */
+    Optional<String> clusterFailoverAndCheck(InstanceInfo slaveInstance, AppDesc appDesc);
+
+    /**
+     * 判断实例是否完成加载dump文件
+     * @param instanceInfo
+     */
+    boolean checkLoadFinish(InstanceInfo instanceInfo);
+
+    /**
+     * 判断实例是否准备完成
+     * @param instanceInfo
+     */
+    boolean checkSlaveReadyFinish(InstanceInfo instanceInfo);
 
 }

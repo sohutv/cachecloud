@@ -7,7 +7,7 @@
         expired_keys,evicted_keys,net_input_byte,net_output_byte,
         connected_clients,object_size,
         cpu_sys,cpu_user,cpu_sys_children,cpu_user_children,
-        modify_time,accumulation
+        modify_time,accumulation,used_disk
     </sql>
 
     <sql id="select_table">
@@ -48,7 +48,7 @@
         #{expiredKeys},#{evictedKeys},#{netInputByte},#{netOutputByte},
         #{connectedClients},#{objectSize},
         #{cpuSys},#{cpuUser},#{cpuSysChildren},#{cpuUserChildren},
-        #{modifyTime},1)
+        #{modifyTime},1,#{usedDisk})
         on duplicate key update
         hits = hits + #{hits},
         misses = misses + #{misses},
@@ -66,7 +66,8 @@
         cpu_sys_children = cpu_sys_children + #{cpuSysChildren},
         cpu_user_children = cpu_user_children + #{cpuUserChildren},
         modify_time = #{modifyTime},
-        accumulation = accumulation + 1
+        accumulation = accumulation + 1,
+        used_disk = used_disk + #{usedDisk}
     </insert>
 
     <insert id="mergeMinuteCommandStatus" parameterType="AppCommandStats">
@@ -87,7 +88,7 @@
         10),#{hits},#{misses},#{commandCount},#{usedMemory},#{usedMemoryRss},#{expiredKeys},
         #{evictedKeys},#{netInputByte},#{netOutputByte},#{connectedClients},#{objectSize},
         #{cpuSys},#{cpuUser},#{cpuSysChildren},#{cpuUserChildren},
-        #{modifyTime},1)
+        #{modifyTime},1,#{usedDisk})
         on duplicate key update
         hits = hits + #{hits},
         misses = misses + #{misses},
@@ -105,7 +106,8 @@
         cpu_sys_children = cpu_sys_children + #{cpuSysChildren},
         cpu_user_children = cpu_user_children + #{cpuUserChildren},
         modify_time = #{modifyTime},
-        accumulation = accumulation + 1
+        accumulation = accumulation + 1,
+        used_disk = used_disk + #{usedDisk}
     </insert>
 
     <insert id="mergeHourCommandStatus" parameterType="AppCommandStats">
@@ -136,6 +138,25 @@
         app_id = #{appId} and collect_time between #{beginTime} and #{endTime}
     </select>
 
+    <select id="getUsedMemoryMaxByTimeBetween" resultType="java.lang.Long">
+        select
+            max(used_memory)
+        from app_minute_statistics
+        where
+            app_id = #{appId} and collect_time between #{beginTime} and #{endTime}
+    </select>
+
+    <select id="getOneAppStatsByMinute" resultType="AppStats">
+        select
+        <include refid="app_minute_statistics_columns"/>
+        , create_time
+        from app_minute_statistics
+        where
+        app_id = #{appId}
+
+        and collect_time between #{beginTime} and #{endTime}
+        limit 0, 1
+    </select>
 
     <select id="gatherAppsStats" resultType="AppClientStatisticGather">
         select app_id,
@@ -145,7 +166,8 @@
         used_memory_rss,
         format(used_memory_rss/used_memory,2) as avg_mem_frag_ratio,
         max(cpu_sys)  as                     max_cpu_sys,
-        max(cpu_user) as                     max_cpu_user
+        max(cpu_user) as                     max_cpu_user,
+        used_disk
         from app_minute_statistics
         where modify_time between #{startTime} and #{endTime}
         group by app_id;
@@ -161,6 +183,13 @@
         app_id = #{appId} and collect_time between #{beginTime} and #{endTime}
     </select>
 
+    <select id="getAppHourStatsByTime" resultType="AppStats">
+        select
+        <include refid="app_minute_statistics_columns"/>
+        , create_time
+        from app_hour_statistics
+        where collect_time between #{beginTime} and #{endTime}
+    </select>
 
     <select id="getAppCommandStatsList" resultType="AppCommandStats">
         select
@@ -254,6 +283,16 @@
         group by command_name
     </select>
 
+    <!-- 获取应用命令调用总次数 -->
+    <select id="getAppCommandCount" resultType="java.lang.Long">
+        select
+            sum(command_count) as count
+        from app_minute_command_statistics
+        where
+            app_id = #{appId}
+            and collect_time between #{beginTime} and #{endTime}
+    </select>
+
     <!--查询一天中应用的命令执行次数的top-->
     <select id="getTopAppCommandStatsList" resultType="AppCommandStats">
         select
@@ -333,7 +372,9 @@
 	        avg(net_output_byte) as avgNetOutputByte,
 	        max(net_output_byte) as maxNetOutputByte,
 	        avg(object_size) as avgObjectSize,
-	        max(object_size) as maxObjectSize
+	        max(object_size) as maxObjectSize,
+            avg(used_disk) as avgUsedDisk,
+            max(used_disk) as maxUsedDisk
         from app_minute_statistics
         where app_id = #{appId} and collect_time between #{beginTime} and #{endTime}
     </select>

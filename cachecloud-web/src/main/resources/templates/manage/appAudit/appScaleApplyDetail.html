@@ -1,0 +1,44 @@
+<div class="row">
+  <div class="col-12">
+    <#include "appIntanceReferList.html">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title"><i class="bi bi-globe"></i>填写扩容配置</h4>
+      </div>
+      <div class="card-body">
+        <!-- BEGIN FORM-->
+        <form action="${request.contextPath}/manage/app/addAppScaleApply" method="post"
+              class="form-horizontal form-bordered form-row-stripped"
+              onsubmit="return checkAppScaleText();">
+          <div class="form-body">
+            <div class="form-group row">
+              <label class="col-form-label col-md-3 text-end">
+                扩容配置:<font color='red'>(*)</font>:
+              </label>
+              <div class="col-md-5">
+                  <textarea rows="1" name="appScaleText" id="appScaleText"
+                            placeholder="请输入扩容后单实例最大空间（填写数字即可，单位MB）"
+                            class="form-control"></textarea>
+              </div>
+            </div>
+            <input type="hidden" name="appId" value="${appId}">
+            <input type="hidden" name="appAuditId" value="${appAuditId}">
+
+            <div class="form-group row">
+              <div class="text-center">
+                <button type="submit" class="btn btn-success">
+                  <i class="bi bi-check"></i>
+                  确认
+                </button>
+                <#if (appDesc.type == 2) || (appDesc.type == 12)>
+                    <a class="btn btn-info ml-3" href="${request.contextPath}/manage/app/initHorizontalScaleApply?appAuditId=${appAuditId}" title="不推荐（需要迁移slot，操作较慢，对redis服务有一定影响，且一旦失败，回滚较困难。）"><del>水平扩容</del><font color="red">?</font></a>
+                </#if>
+              </div>
+            </div>
+          </div>
+        </form>
+        <!-- END FORM-->
+      </div>
+    </div>
+  </div>
+</div>

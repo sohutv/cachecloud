@@ -1,0 +1,185 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form class="row justify-content-end" role="form" method="post" action="${request.contextPath}/manage/app/stat/list" id="search_form">
+                    <input name="tabId" id="tabId" value="${tabId!}" type="hidden"/>
+                    <label for="searchDate" class="col-form-label col-auto text-end">查询日期</label>
+                    <div class="col-auto">
+                        <input class="form-control" type="date" size="15" name="searchDate" id="searchDate" value="${searchDate!}"/>
+                    </div>
+                    <button type="submit" class="btn btn-primary col-auto">查询</button> &nbsp;
+                    <button class="btn btn-primary col-auto" onclick="sendExpAppsStatDataEmail()">发送邮件</button>
+                </form>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">应用列表指标上报情况统计</h3>
+            </div>
+            <div class="card-body table-responsive">
+                <table class="table table-striped table-hover table-bordered table-sm" id="tableDataList">
+                    <thead>
+                    <tr>
+                        <th scope="col">appId</th>
+                        <th scope="col">应用名称</th>
+                        <th scope="col">是否测试</th>
+                        <th scope="col">延迟事件</th>
+                        <th scope="col">慢查询</th>
+                        <th scope="col">连接异常</th>
+                        <th scope="col">avg连接异常耗时(ms)</th>
+                        <th scope="col">命令超时</th>
+                        <th scope="col">avg命令超时耗时(ms)</th>
+                        <th scope="col">命令调用</th>
+                        <th scope="col">avg命令耗时(ms)</th>
+                        <th scope="col">server命令调用</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <#list list as machine>
+                        <tr>
+                            <td>
+                                <#assign app_id = machine.appId>
+                                <a target="_blank"
+                                   href="${request.contextPath}/manage/app/index?appId=${machine.appId!}">${machine.appId!}</a>
+                            </td>
+                            <td>
+                                <a target="_blank"
+                                   href="${request.contextPath}/admin/app/index?appId=${machine.appId!}">${machine.name!}</a>
+                            </td>
+                            <td>
+                                <#if (machine.isTest == 1)>测试
+                                    <#else>正式
+                                </#if>
+                            </td>
+                            <td>
+                                <a target="_blank" href="${request.contextPath}/admin/app/index?searchDate=${startDate!}&appId=${machine.appId!}&tabTag=app_latency">
+                                    <#if (appClientGatherStatMap?? && appClientGatherStatMap?api.get(app_id)?? && appClientGatherStatMap?api.get(app_id)['latency_count']??)>
+                                        <#assign latency_count = appClientGatherStatMap?api.get(app_id)['latency_count']>
+                                    <#else>
+                                        <#assign latency_count = 0>
+                                    </#if>
+                                    ${latency_count!0}
+                                </a>
+                            </td>
+                            <td>
+                                <a target="_blank" href="${request.contextPath}/admin/app/index?searchDate=${startDate!}&appId=${machine.appId!}&tabTag=app_latency">
+                                    <#if (appClientGatherStatMap?? && appClientGatherStatMap?api.get(app_id)?? && appClientGatherStatMap?api.get(app_id)['slow_log_count']??)>
+                                        <#assign slow_log_count = appClientGatherStatMap?api.get(app_id)['slow_log_count']>
+                                    <#else>
+                                        <#assign slow_log_count = 0>
+                                    </#if>
+                                    ${slow_log_count!0}
+                                </a>
+                            </td>
+                            <td>
+                                <a target="_blank"
+                                   href="${request.contextPath}/client/show/index?searchDate=${startDate!}&appId=${machine.appId!}&tabTag=app_client_exception_statistics">
+                                    <#if (appClientGatherStatMap?? && appClientGatherStatMap?api.get(app_id)?? && appClientGatherStatMap?api.get(app_id)['conn_exp_count']??)>
+                                        <#assign conn_exp_count = appClientGatherStatMap?api.get(app_id)['conn_exp_count']>
+                                    <#else>
+                                        <#assign conn_exp_count = 0>
+                                    </#if>
+                                    ${conn_exp_count!0}
+                                </a>
+                            </td>
+                            <td>
+                                <a target="_blank"
+                                   href="${request.contextPath}/client/show/index?searchDate=${startDate!}&appId=${machine.appId!}&tabTag=app_client_exception_statistics">
+                                    <#if (appClientGatherStatMap?? && appClientGatherStatMap?api.get(app_id)?? && appClientGatherStatMap?api.get(app_id)['avg_conn_exp_cost']??)>
+                                        <#assign avg_conn_exp_cost = appClientGatherStatMap?api.get(app_id)['avg_conn_exp_cost']>
+                                    <#else>
+                                        <#assign avg_conn_exp_cost = 0>
+                                    </#if>
+                                    ${avg_conn_exp_cost!0}
+                                </a>
+                            </td>
+                            <td>
+                                <a target="_blank"
+                                   href="${request.contextPath}/client/show/index?searchDate=${startDate!}&appId=${machine.appId!}&tabTag=app_client_exception_statistics">
+                                    <#if (appClientGatherStatMap?? && appClientGatherStatMap?api.get(app_id)?? && appClientGatherStatMap?api.get(app_id)['cmd_exp_count']??)>
+                                        <#assign cmd_exp_count = appClientGatherStatMap?api.get(app_id)['cmd_exp_count']>
+                                    <#else>
+                                        <#assign cmd_exp_count = 0>
+                                    </#if>
+                                    ${cmd_exp_count!0}
+                                </a>
+                            </td>
+                            <td>
+                                <a target="_blank"
+                                   href="${request.contextPath}/client/show/index?searchDate=${startDate!}&appId=${machine.appId!}&tabTag=app_client_exception_statistics">
+                                    <#if (appClientGatherStatMap?? && appClientGatherStatMap?api.get(app_id)?? && appClientGatherStatMap?api.get(app_id)['avg_cmd_exp_cost']??)>
+                                        <#assign avg_cmd_exp_cost = appClientGatherStatMap?api.get(app_id)['avg_cmd_exp_cost']>
+                                    <#else>
+                                        <#assign avg_cmd_exp_cost = 0>
+                                    </#if>
+                                    ${avg_cmd_exp_cost!0}
+                                </a>
+                            </td>
+                            <td>
+                                <a target="_blank"
+                                   href="${request.contextPath}/client/show/index?searchDate${startDate!}&appId=${machine.appId!}&tabTag=app_client_command_statistics">
+                                    <#if (appClientGatherStatMap?? && appClientGatherStatMap?api.get(app_id)?? && appClientGatherStatMap?api.get(app_id)['cmd_count']??)>
+                                        <#assign cmd_count = appClientGatherStatMap?api.get(app_id)['cmd_count']>
+                                    <#else>
+                                        <#assign cmd_count = 0>
+                                    </#if>
+                                    ${cmd_count!0}
+                                </a>
+                            </td>
+                            <td>
+                                <a target="_blank"
+                                   href="${request.contextPath}/client/show/index?searchDate${startDate!}&appId=${machine.appId!}&tabTag=app_client_command_statistics">
+                                    <#if (appClientGatherStatMap?? && appClientGatherStatMap?api.get(app_id)?? && appClientGatherStatMap?api.get(app_id)['avg_cmd_cost']??)>
+                                        <#assign avg_cmd_cost = appClientGatherStatMap?api.get(app_id)['avg_cmd_cost']>
+                                    <#else>
+                                        <#assign avg_cmd_cost = 0>
+                                    </#if>
+                                    ${avg_cmd_cost!0}
+                                </a>
+                            </td>
+                            <td>
+                                <#if (appClientGatherStatMap?? && appClientGatherStatMap?api.get(app_id)?? && appClientGatherStatMap?api.get(app_id)['cmd_count']??)>
+                                    <#assign server_cmd_count = appClientGatherStatMap?api.get(app_id)['server_cmd_count']>
+                                <#else>
+                                    <#assign server_cmd_count = 0>
+                                </#if>
+                                ${server_cmd_count!0}
+                            </td>
+                        </tr>
+                    </#list>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        var searchDate = $('#searchDate').val();
+        if (searchDate == null || searchDate == '') {
+            var time = new Date();
+            var day = ("0" + time.getDate()).slice(-2);
+            var month = ("0" + (time.getMonth() + 1)).slice(-2);
+            var today = time.getFullYear() + "-" + (month) + "-" + (day);
+            $('#searchDate').val(today);
+        }
+    })
+
+    //验证是数字
+    function testisNum(id) {
+        var value = document.getElementById(id).value;
+        if (value != "" && isNaN(value)) {
+            alert("请输入数字类型!");
+            document.getElementById(id).value = "";
+            document.getElementById(id).focus();
+        }
+    }
+
+    function sendExpAppsStatDataEmail() {
+        var searchDate = document.getElementById("searchDate").value;
+        $.get('${request.contextPath}/manage/app/tool/sendExpAppsStatDataEmail', {searchDate: searchDate});
+        alert("异常应用日报已发送，请查收")
+    }
+</script>

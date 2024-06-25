@@ -58,6 +58,11 @@ public interface AppAuditDao {
     public List<AppAudit> getAppAuditByCondition(@Param("appId") Long appId, @Param("type") Integer type);
 
     /**
+     * 通过appId，type, 和时间范围获取所有审批记录
+     */
+    public List<AppAudit> getAppAuditByTypeAndTimeRange(@Param("appId") Long appId, @Param("type") Integer type, @Param("startTime") Date startTime, @Param("endTime") Date endTime);
+
+    /**
      * @param id
      * @param taskId
      */

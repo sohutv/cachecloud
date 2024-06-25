@@ -1,0 +1,74 @@
+<!-- Navbar -->
+<nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <!-- Left navbar links -->
+    <ul class="navbar-nav">
+        <li class="nav-item">
+            <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+        </li>
+    </ul>
+
+    <!-- Right navbar links -->
+    <ul class="navbar-nav ml-auto">
+        <!-- Messages Dropdown Menu -->
+        <li class="nav-item dropdown">
+            <a class="nav-link" data-bs-toggle="dropdown" href="#">
+                <i class="bi bi-gear-fill"></i>
+                <span class="dropdown-toggle ps-2">
+                        <#if userInfo?? && userInfo.chName??>
+                            ${userInfo.chName!}
+                        </#if>
+                </span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
+                <li>
+                    <a target="_blank" class="dropdown-item d-flex align-items-center" href="${request.contextPath}/admin/app/list">
+                        <i class="bi bi-house"></i>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span>应用前台</span>
+                    </a>
+                </li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+
+                <li>
+                    <#if userInfo?? && userInfo.id??>
+                    <#assign userInfoId = userInfo.id!>
+                    <#else>
+                    <#assign userInfoId = ''>
+                </#if>
+                <a class="dropdown-item d-flex align-items-center" data-bs-target="#updateUserModal${userInfoId!}" data-bs-toggle="modal">
+                    <i class="bi bi-gear"></i>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span>修改资料</span>
+                </a>
+                </li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+
+                <li>
+                    <a class="dropdown-item d-flex align-items-center" href="${request.contextPath}/manage/logout">
+                        <i class="bi bi-box-arrow-right"></i>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span>注销</span>
+                    </a>
+                </li>
+
+            </ul><!-- End Profile Dropdown Items -->
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-widget="fullscreen" href="#" role="button">
+                <i class="fas fa-expand-arrows-alt"></i>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-widget="control-sidebar" data-controlsidebar-slide="true" href="#" role="button">
+                <i class="fas fa-th-large"></i>
+            </a>
+        </li>
+    </ul>
+</nav>
+<!-- /.navbar -->
+
+<#if userInfo??>
+    <#assign headUser = userInfo>
+</#if>
+<#include "/manage/user/updateUser.html">
