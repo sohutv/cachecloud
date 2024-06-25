@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: local-sohu
+    active: local
   main:
     allow-bean-definition-overriding: true
   mvc:
