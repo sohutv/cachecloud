@@ -40,7 +40,7 @@ spring:
       force: true
 cachecloud:
   primary:
-    driver: com.mysql.cj.jdbc.Driver
+    driverClassName: com.mysql.cj.jdbc.Driver
     validationQuery: select 1 from dual
     connectionTimeout: 60000
     idleTimeout: 600000

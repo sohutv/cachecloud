@@ -1762,7 +1762,7 @@ CREATE TABLE `app_import` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
----------------------------新增加的表---------------------------
+--  -------------------------新增加的表---------------------------
 --
 -- Table structure for table `app_biz`
 --

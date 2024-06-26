@@ -17,11 +17,11 @@ server:
 
 cachecloud:
   primary:
-    url: jdbc:mysql://127.0.0.1:3306/cachecloud_open?useUnicode=true&characterEncoding=UTF8&autoReconnect=true&connectTimeout=3000&socketTimeout=10000&serverTimezone=Asia/Shanghai
-    user: cachecloud-open
+    jdbcUrl: jdbc:mysql://127.0.0.1:3306/cachecloud_open?useUnicode=true&characterEncoding=UTF8&autoReconnect=true&connectTimeout=3000&socketTimeout=10000&serverTimezone=Asia/Shanghai
+    username: cachecloud-open
     password: cachecloud-open
-    initialPoolSize: 1
-    maxPoolSize: 3
+    minimumIdle: 1
+    maximumPoolSize: 3
   redis: #配置cachecloud-web需要的redis，用户存储任务流log
     enable: true #if config redis, suggest config true
     main:
