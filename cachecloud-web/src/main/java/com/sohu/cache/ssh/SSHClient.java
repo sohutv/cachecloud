@@ -1,6 +1,7 @@
 package com.sohu.cache.ssh;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.auth.password.PasswordIdentityProvider;
@@ -11,6 +12,7 @@ import org.apache.sshd.common.session.Session;
 import org.apache.sshd.common.util.security.SecurityUtils;
 
 import java.io.IOException;
+import java.nio.file.FileSystemException;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -23,6 +25,7 @@ import java.util.concurrent.TimeUnit;
  * @Auther: yongfeigao
  * @Date: 2023/10/23
  */
+@Slf4j
 @Data
 public class SSHClient {
 
@@ -62,9 +65,13 @@ public class SSHClient {
     }
 
     private void setAuthByKey(SshClient client) throws GeneralSecurityException, IOException {
-        KeyPairResourceLoader loader = SecurityUtils.getKeyPairResourceParser();
-        Collection<KeyPair> keys = loader.loadKeyPairs(null, Paths.get(privateKeyPath), null);
-        client.setKeyIdentityProvider(KeyIdentityProvider.wrapKeyPairs(keys));
+        try{
+            KeyPairResourceLoader loader = SecurityUtils.getKeyPairResourceParser();
+            Collection<KeyPair> keys = loader.loadKeyPairs(null, Paths.get(privateKeyPath), null);
+            client.setKeyIdentityProvider(KeyIdentityProvider.wrapKeyPairs(keys));
+        }catch (FileSystemException e){
+            log.error("setAuthByKey error, please check ssh type and key path and key. ", e);
+        }
     }
 
     /**
