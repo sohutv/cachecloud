@@ -20,13 +20,13 @@
 ### 一、准备war包	
 a.下载war包：
 
-[2.2版本 cachecloud-web.war](http://43.137.44.6/redis-ecs/cachecloud-web.war)
+[2.2版本 cachecloud-web.war]()
 
-[3.0版本 cachecloud-web.war](http://43.137.44.6/redis-ecs/3.0/cachecloud-web.war)
+[3.0版本 cachecloud-web.war]()
 
-[3.1版本 cachecloud-web.war](http://43.137.44.6/redis-ecs/3.1/cachecloud-web.war)
+[3.1版本 cachecloud-web.war]()
 
-[3.2版本 cachecloud-web.war](http://43.137.44.6/redis-ecs/3.2/cachecloud-web.war)
+[3.2版本 cachecloud-web.war]()
 
 b.也可以clone源码，自行打包：
 
