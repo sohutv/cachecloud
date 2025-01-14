@@ -20,13 +20,9 @@
 ### 一、准备war包	
 a.下载war包：
 
-[2.2版本 cachecloud-web.war]()
+[2.2版本 cachecloud-web.war](https://github.com/sohutv/cachecloud/releases/download/2.2/cachecloud-web.war)
 
-[3.0版本 cachecloud-web.war]()
-
-[3.1版本 cachecloud-web.war]()
-
-[3.2版本 cachecloud-web.war]()
+[3.2版本 cachecloud-web.war](https://github.com/sohutv/cachecloud/releases/download/3.2/cachecloud-web.war)
 
 b.也可以clone源码，自行打包：
 
