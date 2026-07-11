@@ -13,7 +13,7 @@
     <properties>
         <spring.boot.version>2.2.9.RELEASE</spring.boot.version>
         <spring.cloud.version>Hoxton.SR4</spring.cloud.version>
-        <logback.version>1.2.11</logback.version>
+        <logback.version>1.2.13</logback.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <quartz.version>2.2.1</quartz.version>
         <mysql.java.version>8.0.29</mysql.java.version>
