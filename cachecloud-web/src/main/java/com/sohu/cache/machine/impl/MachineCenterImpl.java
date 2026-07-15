@@ -57,6 +57,7 @@ import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import org.springframework.context.annotation.Lazy;
 
 /**
  * 机器接口的实现
@@ -76,6 +77,7 @@ public class MachineCenterImpl implements MachineCenter {
     @Autowired
     private MachineDao machineDao;
     @Autowired
+    @Lazy
     private RedisCenter redisCenter;
     @Autowired
     private AppDao appDao;

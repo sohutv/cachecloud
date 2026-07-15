@@ -52,6 +52,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import org.springframework.context.annotation.Lazy;
 
 /**
  * @Author: zengyizhao
@@ -69,6 +70,7 @@ public class AppScrollRestartServiceImpl implements AppScrollRestartService {
     private InstanceConfigDao instanceConfigDao;
 
     @Autowired
+    @Lazy
     private RedisCenter redisCenter;
 
     @Autowired
